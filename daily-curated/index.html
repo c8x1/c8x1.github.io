@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日精选 | Daily Curated</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #fafafa; --card: #fff; --text: #1a1a1a; --muted: #666; --light: #999;
+            --accent: #2563eb; --border: #e5e5e5; --highlight: #fff3cd;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg); color: var(--text); line-height: 1.6;
+        }
+        .header {
+            background: var(--card); border-bottom: 1px solid var(--border);
+            padding: 1rem; position: sticky; top: 0; z-index: 100;
+        }
+        .header-content {
+            max-width: 800px; margin: 0 auto;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { font-size: 1.25rem; font-weight: 700; }
+        .logo span { color: var(--accent); }
+        .nav-date { color: var(--muted); font-size: 0.875rem; }
+        .container { max-width: 800px; margin: 0 auto; padding: 1rem; }
+        .date-section {
+            margin: 2rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent);
+        }
+        .date-section h2 {
+            font-size: 1.125rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+        .article-card {
+            background: var(--card); border-radius: 12px; padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border); margin-bottom: 1rem;
+        }
+        .article-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--accent); }
+        .article-meta { display: flex; gap: 1rem; font-size: 0.875rem; color: var(--muted); flex-wrap: wrap; margin-bottom: 0.75rem; }
+        .article-tag { background: #f3f4f6; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; }
+        .article-summary { font-size: 0.9375rem; color: var(--muted); }
+        .full-article { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+        .full-article h1 { font-size: 1.5rem; font-weight: 700; margin: 1.5rem 0 1rem; }
+        .full-article h2 { font-size: 1.25rem; font-weight: 600; margin: 1.25rem 0 0.75rem; color: var(--text); }
+        .full-article h3 { font-size: 1.1rem; font-weight: 600; margin: 1rem 0 0.5rem; }
+        .full-article p { margin-bottom: 1rem; line-height: 1.8; }
+        .full-article blockquote { border-left: 4px solid var(--accent); padding-left: 1rem; margin: 1rem 0; color: var(--muted); font-style: italic; }
+        .full-article hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+        .highlight { background: var(--highlight); padding: 2px 6px; border-radius: 3px; }
+        .intro-box {
+            background: #f8f9fa;
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--accent);
+        }
+        .book-list { counter-reset: book; }
+        .book-item {
+            margin: 1rem 0;
+            padding: 1rem 1rem 1rem 3rem;
+            background: #fafafa;
+            border-radius: 8px;
+            position: relative;
+        }
+        .book-item::before {
+            counter-increment: book;
+            content: counter(book);
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: var(--accent);
+            color: #fff;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .book-title { font-weight: bold; color: #1a1a1a; margin-bottom: 0.5rem; }
+        .toc { background: #f9fafb; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; }
+        .toc h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+        .toc a { color: var(--accent); text-decoration: none; display: block; padding: 0.25rem 0; }
+        .footer { text-align: center; padding: 2rem; color: var(--light); font-size: 0.875rem; margin-top: 2rem; border-top: 1px solid var(--border); }
+        @media (max-width: 640px) {
+            .container { padding: 0.75rem; }
+            .article-card { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">每日<span>精选</span></div>
+            <div class="nav-date">2025年2月25-26日 · 共5篇</div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- TOC -->
+        <div class="toc">
+            <h3>📚 本期目录</h3>
+            <a href="#day1">📅 2月25日（昨天）</a>
+            <a href="#article1-1" style="padding-left: 1rem;">1. 社会政治崩溃入门指南</a>
+            <a href="#article1-2" style="padding-left: 1rem;">2. 时间的暴政</a>
+            <a href="#article1-3" style="padding-left: 1rem;">3. 书评：像国家一样看</a>
+            <a href="#day2">📅 2月26日（今天）</a>
+            <a href="#article2-1" style="padding-left: 1rem;">4. 反科技经典：30本书</a>
+            <a href="#article2-2" style="padding-left: 1rem;">5. "女性，生命，自由"：叙利亚女性主义者的故事</a>
+        </div>
+
+        <!-- Day 1 -->
+        <div class="date-section" id="day1">
+            <h2>📅 2025年2月25日</h2>
+        </div>
+
+        <!-- Article 1 -->
+        <div class="article-card" id="article1-1">
+            <h2 class="article-title">社会政治崩溃入门指南</h2>
+            <div class="article-meta">
+                <span>Eli Dourado</span>
+                <span class="article-tag">社会学/经济学</span>
+            </div>            <div class="full-article">
+                <p><strong>作者</strong>: Eli Dourado<br><strong>来源</strong>: <a href="https://www.elidourado.com/p/collapse" target="_blank">https://www.elidourado.com/p/collapse</a></p>
+                <hr>
+                <h3>摘要</h3>
+                <p>本文探讨了社会政治崩溃的本质——为什么复杂社会会突然简化，以及这种现象在历史上反复出现的原因。作者通过考古学家 Joseph Tainter 的理论，分析了复杂性递减回报如何导致社会崩溃，并将这一框架应用于理解当代美国社会的挑战。</p>
+                
+                <h3>引言：崩溃是什么</h3>
+                <blockquote>"一个社会从不会死于'自然原因'，而总是死于自杀或谋杀——而且几乎总是前者。" —— D.C. Somervell</blockquote>
+                <p>在人类历史上，有许多次社会从相对较高的社会政治复杂程度迅速下降到低得多的水平——在短短几十年内。这就是我们所说的<strong>崩溃</strong>（collapse）。崩溃表现为：社会分化和经济专业化程度降低、中央控制减弱、行为控制减少、对艺术和纪念碑的投资减少、社会内部信息流通减少、资源共享和贸易减少、社会协调和组织程度降低、政治单位领土缩小。而且很多人可能会饿死，如果没有遭遇更暴力的结局的话。</p>
+                <p>崩溃曾降临于：西周王朝、印度河流域的哈拉帕文明、中世纪美索不达米亚的阿拔斯哈里发部分地区、古埃及王国、赫梯人、米诺斯人、迈锡尼人、西罗马帝国、奥尔梅克人、低地古典玛雅文明、墨西哥高地的特奥蒂瓦坎、蒙特阿尔班和图拉、秘鲁的瓦里和蒂亚瓦纳科、缅甸高地的克钦人、以及乌干达北部的伊克人。</p>
+                <p>崩溃发生的频率如此之高，以至于它不太可能是偶然事件，而是人类社会组织的普遍特征。并非每个社会最终都会突然崩溃；也许当一个社会确实崩溃时，是因为某些特定条件存在。这些条件是什么？我们能提出一个普遍解释吗？虽然这个问题作为纯社会科学问题很有趣，但我们都想知道：<strong>它可能发生在我们这里吗？</strong></p>
+                
+                <h3>关于崩溃的权威：Joseph Tainter</h3>
+                <p>讨论崩溃话题的<strong>最权威学者</strong>（GOAT - Greatest Of All Time）是考古学家 <strong>Joseph Tainter</strong>。他1988年的著作《复杂社会的崩溃》（<em>The Collapse of Complex Societies</em>）将历史和史前事实、对解释横截面差异的坚持、严谨的理论化（包括对边际分析的采纳）以及普遍出色的社会科学判断力编织在一起。这是一部杰作。</p>
+                
+                <h3>为什么是复杂性？</h3>
+                <p>如果我们想理解为什么社会有时会自发简化，我们首先必须对它们为何变得复杂有一个扎实的理论。无论从历史还是分析意义上，简单的人类社会都是先出现的。这些简单社会高度平等、非等级化。为什么它们会朝着更大的等级、分层、不平等和复杂性发展？</p>
+                <p>对此问题大致有两种观点。一种观点以<strong>阶级冲突</strong>为主导。国家反映基于分裂利益的统治和剥削。统治阶级出于贪婪和自私强制征服人口。马克思主义者不是这种观点的唯一支持者，但他们可能是最激烈的，将社会视为从事社会生产的工人与占有产出的精英之间的尖锐对立。</p>
+                <p>另一端是<strong>整合主义</strong>或<strong>功能主义</strong>观点，基于社会成员之间的共同利益。即使一个平等社会也会面临问题，而许多这些问题最容易通过创建某种等级和社会分工来解决。例如，有限的水资源可能需要创建和维护灌溉系统，包括动员和指导劳动力的需求。入侵威胁可能需要建立军事防御，包括指挥和控制系统。</p>
+                <p>Tainter 采取<strong>温和立场</strong>，倾向于整合主义但也包含阶级冲突的角色。社会中的复杂性确实存在以解决问题并为民众提供利益。然而，"精英的报酬并不总是与他们对社会的贡献相匹配，而且在整个历史中，精英相对于表现的过度报酬可能比相反情况更常见。"</p>
+
+                <h3>Tainter 的核心理论：复杂性递减回报</h3>
+                <p>那么什么能解释横截面差异呢？Tainter 发展了一个基于<strong>递减边际回报</strong>（diminishing marginal returns）的理论。递减边际回报在经济分析中无处不在，确实在生活中也是如此。山核桃派的第一口是绝妙的；第20口可能过于甜腻。同样的原则在无数领域运作。</p>
+                <p>社会增加复杂性以应对问题和压力。在美国背景下，这很容易理解。当药物不安全时，我们增加 FDA 审查的严格性。当联邦项目污染太严重时，我们通过《国家环境政策法》。当发生石油危机时，我们创建联邦能源部。恐怖袭击？国土安全部。金融危机？消费者金融保护局（CFPB）。</p>
+                <p>这种增加的复杂性会累积。随着它的累积，它需要资源——Tainter 强调能源和财政资源——来维持。通常，某一部分复杂性的资源需求需要更多复杂性，就像更高的税率需要投入新资源来进行合法化和强制一样。复杂性作为一个系统累积。起初，这种增加复杂性的成本效益比非常有利，边际收益很高。随着更多复杂性的增加，边际收益递减，然后归零，然后变为负数。</p>
+                <p>一个超过复杂性临界点的社会处于非常危险的境地。许多社会成员宁愿处于较低复杂性水平，尽管没有直接路径到达那里，因为复杂性本身表现为一个系统。正如 Tainter 所说，"当参与复杂社会的边际成本变得太高时，经济范围内的生产单位会增加对等级制度要求的抵制（被动或主动），或公开试图脱离。"</p>
+                <p>情况可能迅速失控。一个被过度征税的农民阶层可能对入侵者几乎不加抵抗。不断增加的成本可能使公共服务难以为继。越来越多的资源可能必须用于合法化和控制。经济衰弱。应对新挑战的能力或意愿消失。崩溃只差一个新问题。</p>
+                
+                <hr>
+                <p><strong>译者注</strong>: <br>1. <strong>Joseph Tainter</strong> - 美国考古学家，以研究社会崩溃理论闻名，代表作《复杂社会的崩溃》（1988）。<br>2. <strong>GOAT</strong> - "Greatest Of All Time" 的缩写，意为"史上最伟大的"。<br>3. <strong>边际回报</strong>（marginal returns）- 经济学概念，指每增加一单位投入所带来的额外产出。</p>
+            </div>
+        </div>
+
+        <!-- Article 2 -->
+        <div class="article-card" id="article1-2">
+            <h2 class="article-title">时间的暴政</h2>
+            <div class="article-meta">
+                <span>Joe Zadeh</span>
+                <span class="article-tag">哲学/文化</span>
+            </div>            <div class="full-article">
+                <p><strong>作者</strong>: Joe Zadeh<br><strong>来源</strong>: <a href="https://www.noemamag.com/the-tyranny-of-time/" target="_blank">https://www.noemamag.com/the-tyranny-of-time/</a></p>
+                <hr>
+                <h3>摘要</h3>
+                <p>时钟是一个有用的社会工具，但它也深具政治性。它让某些人受益，边缘化其他人，并让我们无法真正理解自己的身体和周围的世界。本文追溯了标准化时间的历史，从修道院的钟声到原子钟，揭示了时钟如何从一个协调工具变成了支配我们生活的无形权威。</p>
+                
+                <h3>引子：一个试图炸毁时间的人</h3>
+                <p>1894年2月15日，一个潮湿阴沉的下午，一名男子穿过东伦敦的格林威治公园。他叫马夏尔·布尔丹（Martial Bourdin）——法国人，26岁，梳着油光发亮的黑发，留着小胡子。他沿着蜿蜒的小路走向皇家天文台，那里在十年前已被确立为全球标准化时钟时间——格林威治标准时间（GMT）——以及大英帝国的象征和科学中心。布尔丹左手拿着一个炸弹：一个棕色纸袋，里面装着装满炸药的金属盒。当他接近目标时，他用一瓶硫酸启动了它。但就在他面对天文台站立时，炸弹在他手中爆炸了。</p>
+                <p>爆炸声尖锐到足以引起里面两名工作人员的注意。他们冲出来，看到一名公园管理员和一些男学生正朝地上一个蜷缩的身影跑去。布尔丹呻吟着尖叫，双腿粉碎，一只手臂被炸飞，肚子上有个洞。当被抬往附近医院时，他对自己的身份和动机只字未提，30分钟后在那里死去。</p>
+                <p>据说，布尔丹试图炸毁时钟时间，作为一种象征性的革命行为，或者天真地以为这可能会扰乱全球时间的测量。他不是这一时期唯一攻击时钟的人：在巴黎，叛乱者同时摧毁了全市的公共时钟；在孟买，抗议者用枪击碎了著名的克劳福德市场时钟。</p>
+                <p>在世界各地，人们对时间感到愤怒。</p>
+                
+                <h3>时钟的入侵</h3>
+                <p>现在看来，摧毁时钟似乎很离奇。当代社会对时间着迷——它是英语中使用最多的名词。自从带表盘和指针的时钟首次出现在教堂塔楼和市政厅上以来，我们就一直在将它们拉近：进入我们的工作场所和学校、我们的家、我们的手腕，最后进入我们每天盯着看数小时的手机、笔记本电脑和电视屏幕。</p>
+                <p>我们用时钟上的时间来规训我们的生活。我们的工作和工资由它决定，通常我们的"自由时间"也被它严格管理。广义上说，甚至我们的身体功能也由时钟调节：我们通常在适当的时钟时间吃饭，而不是在饿的时候；在适当的时钟时间睡觉，而不是在累的时候；我们对闹钟刺耳音调的重视程度，超过了对我们太阳系中心太阳明显升起的重视。在中午之前吃午餐会有一种奇怪的羞耻感，这证明了我们已经将时钟的逻辑内化到了何种程度。我们是"时间绑定"的动物，正如美国经济学家和社会理论家杰里米·里夫金（Jeremy Rifkin）在他1987年的著作《时间战争》（<em>Time Wars</em>）中所说。"我们对自我和世界的所有感知，都是通过我们想象、解释、使用和实施时间的方式来中介的。"</p>
+                <p>在 COVID-19 大流行期间，许多人报告说他们对时间的体验变得扭曲和怪异。被困在家里或异常过度劳作使日子感觉像小时，小时像分钟，而有些月份感觉无穷无尽，另一些则几乎不知不觉地过去了。似乎我们时钟中的时间和我们头脑中的时间已经分道扬镳。</p>
+                
+                <h3>时钟的政治性</h3>
+                <p>伯斯是越来越多哲学家、社会科学家、作家和艺术家中的一员，他们出于各种原因，主张我们需要紧急重新评估我们与时钟的关系。他们说，时钟并不测量时间；它<strong>产生</strong>时间。"协调时间是一个数学构造，而非对特定现象的测量，"伯斯在他的著作《时间的对象》（<em>Objects of Time</em>）中写道。那个数学构造几个世纪以来不仅由科学塑造，也由权力、宗教、资本主义和殖民主义塑造。时钟作为一个社会工具极其有用，帮助我们围绕我们关心的事物协调自己，但它也深具政治性。而且像任何政治事物一样，它让某些人受益，边缘化其他人，让我们无法真正理解正在发生的事情。</p>
+                <p>我们越将自己与时钟中的时间同步，我们就越与自己的身体和周围的世界失去同步。借用环保主义者比尔·麦基本（Bill McKibben）的术语，爱丁堡大学高级讲师、《时间与社会》（<em>Time & Society</em>）学术期刊编辑米歇尔·巴斯蒂安（Michelle Bastian）认为，时钟让我们对时间的本质产生了"致命的困惑"。在自然世界中，"小时"或"周"的运动并不重要。因此，大气中温室气体的积累、在地球上生活了数百万年的物种的突然灭绝、病毒的快速传播、我们土壤和水的污染——所有这一切的真正影响都超出了我们的理解范围，因为我们执着于一种与人类以外任何事物无关的时间和活动尺度。</p>
+                <p>在一个种族、性别和性取向等社会建构正受到挑战和解构的时代，时钟时间的真正本质不知何故逃脱了更广泛社会的注意。像金钱一样，时钟已被视为它本应只是代表的东西：<strong>时钟本身已成为时间</strong>。</p>
+                
+                <hr>
+                <p><strong>译者注</strong>: <br>1. <strong>格林威治标准时间（GMT）</strong> - 1884年国际子午线会议确立的全球时间标准。<br>2. <strong>马夏尔·布尔丹事件</strong> - 1894年格林威治公园爆炸事件，成为约瑟夫·康拉德小说《密探》的灵感来源。<br>3. <strong>Jeremy Rifkin</strong> - 美国经济学家、作家，以研究技术、经济和社会趋势闻名。</p>
+            </div>
+        </div>
+
+        <!-- Article 3 -->
+        <div class="article-card" id="article1-3">
+            <h2 class="article-title">书评：像国家一样看</h2>
+            <div class="article-meta">
+                <span>Scott Alexander</span>
+                <span class="article-tag">政治学/书评</span>
+            </div>            <div class="full-article">
+                <p><strong>作者</strong>: Scott Alexander<br><strong>来源</strong>: <a href="https://slatestarcodex.com/2017/03/16/book-review-seeing-like-a-state/" target="_blank">https://slatestarcodex.com/2017/03/16/book-review-seeing-like-a-state/</a></p>
+                <hr>
+                <h3>摘要</h3>
+                <p>James C. Scott 的《像国家一样看》（<em>Seeing Like A State</em>）是一部探讨国家如何通过"简化"社会来实现控制的开创性著作。本文是 Scott Alexander 对该书的精彩书评，通过多个历史案例揭示了"高级现代主义"（High Modernism）如何导致灾难性后果——从普鲁士的科学林业到巴西利亚的城市规划。核心洞见：国家为了征税和控制，将复杂的社会现实强行纳入简单的、可测量的框架，结果往往是生态崩溃、经济灾难和人道主义危机。</p>
+                
+                <h3>一、这本书是什么</h3>
+                <p>《像国家一样看》是 G.K. Chesterton 如果进入经济史而非文学界会写的那本书。既然他没有，James Scott 不得不在一个世纪后写它。等待是值得的。</p>
+                <p>Scott 以18世纪普鲁士的"科学林业"故事开始。启蒙理性主义者注意到农民只是像傻瓜一样砍倒森林里碰巧生长的任何树木。他们想出了一个更好的主意：清除所有森林，代之以种植完全相同的挪威云杉（单位时间木材产量最高的树），以均匀间隔的矩形网格排列。然后有一天你可以拿着斧头走进去，一小时砍倒无数棵树，拥有你永远用不完的木材。</p>
+                <p>这进行得很糟糕。贫瘠的生态系统无法支持维持周围农民村庄的野生动物和药草，他们遭受了经济崩溃。无穷无尽的相同树木行是植物病害和森林火灾的完美温床。维持土壤的复杂生态过程停止运作，所以一代人之后，挪威云杉长得矮小营养不良。然而不知何故，所有参与者都得到了晋升，"科学林业"传播到欧洲和世界各地。</p>
+                <p>这种模式在历史上以可疑的规律性重复，不仅在生物系统中，也在社会系统中。</p>
+                
+                <h3>二、四个失败的模式</h3>
+                
+                <p><strong>1. 城市规划</strong></p>
+                <p>自然有机演化的城市往往是黑暗小巷、小商店和拥挤街道的密集混合体。现代科学理性主义者想出了一个更好的主意：均匀间隔的矩形网格，由宽阔林荫道分隔的相同巨型野兽派公寓楼，一切都仔细划分成区域。然而不知何故，每当这些新的理性城市建成时，人们讨厌它们，尽一切可能搬到更有机的郊区。而且，不知何故，城市规划师得到了晋升，变得出名，并将他们破坏性的技术传播到世界各地。</p>
+                
+                <p><strong>2. 集体农业</strong></p>
+                <p>古老有机演化的农民村庄往往是复杂的混乱，每个人都在形状不规则的狭小地块上同时试图种植五十种不同的作物。现代科学理性主义者想出了一个更好的主意：巨型集体机械化农场，种植专门培育的高产作物，以（跟我一起说）<strong>均匀间隔的矩形网格</strong>排列。然而不知何故，这些巨型集体农场的每亩产量低于旧的传统方法，无论它们在哪里出现，饥荒和大规模饥饿都随之而来。而且，不知何故，政府继续推动更"现代"的方法，无论是苏联的社会主义集体农庄、美国的大型农业公司，还是第三世界 sprawling 的香蕉种植园。</p>
+                
+                <p><strong>3. 非洲重新安置</strong></p>
+                <p>许多东非土著的传统生活方式是游牧的，在复杂的丛林地形中进行刀耕火种农业，遵循令人眼花缭乱的各种临时规则。非洲政府（殖民地和独立的）中的现代科学理性主义者想出了一个更好的主意——将土著重新安置到村庄，在那里他们可以有现代便利设施如学校、水井、电力，以及<strong>均匀间隔的矩形网格</strong>。然而不知何故，这些村庄不断失败：他们的作物死亡，他们的经济崩溃，他们的土著居民消失回丛林。而且，不知何故，非洲政府不断试图把土著带回来让他们留下，即使他们必须模糊村庄和集中营之间的界限才能做到。</p>
+                
+                <h3>三、为什么这些计划失败了？</h3>
+                <p>为什么所有这些计划都失败了？更重要的是，为什么它们被庆祝、奖励和继续，即使它们失败的事实变得太明显而无法忽视？Scott 给出了一个两部分答案。</p>
+                
+                <p><strong>高级现代主义（High Modernism）</strong></p>
+                <p>故事的<strong>第一部分</strong>是<strong>高级现代主义</strong>，一种伪装成科学哲学的美学品味。高级现代主义者声称要找出最高效、最高科技的做事方式，但他们大多数人几乎不懂相关数学或科学，基本上只是通过把东西放在<strong>均匀间隔的矩形网格</strong>中来角色扮演理性。</p>
+                <p>但高级现代主义者是服务于更深层的动机的棋子：<strong>中央集权国家希望世界"可读化"</strong>（legible），即以易于监控和控制的方式安排。一片完整的森林可能比均匀间隔的挪威云杉网格更有生产力，但它更难立法规定规则，或评估税收。</p>
+                <p>国家宣扬高级现代主义者关于更大利益的陈词滥调作为掩护，以便实施他们无论如何都想实施的极权主义计划。由此产生的实验通常按现代主义者的人道主义目标是失败的，但按国家的指挥控制目标却是巨大的成功。于是我们逐渐从混乱但充满精细隐藏秩序的体系，过渡到几乎无法运作但非常容易征税的体系。</p>
+                
+                <h3>四、核心洞见</h3>
+                
+                <p><strong>可读性 vs. 功能性</strong></p>
+                <p>Scott 的核心论点是：<strong>国家为了控制而追求"可读性"，但这种可读性往往以牺牲功能性为代价</strong>。</p>
+                <p>- 复杂的森林生态系统对农民有用，但对征税者"不可读"<br>
+- 有机演化的城市对居民宜居，但对规划者"不可读"<br>
+- 传统的农业知识对产量有效，但对官僚"不可读"</p>
+                
+                <p><strong>米提斯（Métis）的丧失</strong></p>
+                <p>Scott 强调<strong>米提斯</strong>（métis，实践知识/地方知识）的重要性——那些无法被编码成简单规则但在特定情境下极其有效的知识。当国家用简单的、通用的规则取代复杂的、情境化的实践时，灾难往往随之而来。</p>
+                
+                <h3>五、结语</h3>
+                <p>《像国家一样看》是一部改变思维方式的著作。它让我们看到，那些看似"理性"和"科学"的计划背后，往往隐藏着对控制的渴望和对复杂现实的傲慢忽视。在一个越来越依赖数据、指标和算法的时代，Scott 的警告比以往任何时候都更加重要：<strong>当我们为了可读性而简化世界时，我们可能正在摧毁那些使世界运转的复杂秩序</strong>。</p>
+                <p>正如 Scott Alexander 所说，这本书是"G.K. Chesterton 如果进入经济史会写的那本书"——充满了对官僚理性的深刻怀疑，以及对人类实践智慧的尊重。</p>
+                
+                <hr>
+                <p><strong>译者注</strong>: <br>1. <strong>James C. Scott</strong> - 美国政治学家、人类学家，耶鲁大学斯特林教授。<br>2. <strong>Legibility（可读性）</strong> - Scott 的核心概念，指国家将复杂社会现实转化为简单、可测量、可控制形式的能力。<br>3. <strong>Métis</strong> - 希腊语，指实践智慧、地方知识、无法被正式化的技能性知识。<br>4. <strong>High Modernism</strong> - Scott 的术语，指20世纪初一种将科学理性应用于社会工程的意识形态。</p>
+            </div>
+        </div>
+
+        <!-- Day 2 -->
+        <div class="date-section" id="day2">
+            <h2>📅 2025年2月26日</h2>
+        </div>
+
+        <!-- Article 4 -->
+        <div class="article-card" id="article2-1">
+            <h2 class="article-title">反科技经典：30本书</h2>
+            <div class="article-meta">
+                <span>Ted Gioia</span>
+                <span class="article-tag">文化批评/阅读清单</span>
+            </div>            <div class="full-article">
+                <p><strong>作者</strong>: Ted Gioia<br><strong>来源</strong>: <a href="https://open.substack.com/pub/tedgioia/p/the-anti-tech-canon-30-books" target="_blank">https://open.substack.com/pub/tedgioia/p/the-anti-tech-canon-30-books</a></p>
+                <hr>
+
+                <div class="intro-box">
+                    <p>2024年，我感到迫切需要挑战一种新的教条——<span class="highlight">技术乐观主义</span>。这种意识形态告诉人们：闭嘴，继续刷手机。</p>
+                    <p>硅谷会为我们建造乌托邦。我们只需要每天24小时盯着那些小屏幕，下载所有应用，上传我们的私人信息。他们会搞定一切。</p>
+                    <p>那时，一些科技领袖开始分享"阅读清单"。但那些清单上大多是垃圾书籍——平庸的流行心理学、谄媚的科技大佬传记，以及像格拉德威尔那样的"大概念"写手炮制出来的注水文章。</p>
+                    <p>但仔细思考后，我发现这可能也有积极的一面。多年来，他们一直嘲笑人文学科——"去学编程"是他们的口头禅——这些"空心人"终于开始说"去读书"了。</p>
+                    <p><strong>这是智慧的开端。是的，他们确实需要书籍。但他们需要更好的书。</strong></p>
+                    <p>直说吧：你不会从科技CEO那里学到这些更好的书。他们中很多人非常聪明——我在硅谷待了25年，这是亲身经历。但现在的科技界需要注入人文主义思维和更广阔的文化视野。</p>
+                    <p>你需要走出科技回声室，才能找到这种更大的智慧。我说的是真正的东西——整体性的、治愈性的、有最深根基的东西。</p>
+                    <p style="text-align: center; font-size: 1.1rem; color: var(--accent); margin-top: 1rem;"><strong>没有应用程序能做到这一点。</strong></p>
+                </div>
+
+                <h3>30本反科技经典</h3>
+                <p>以下是30本来自硅谷回声室之外的书籍。它们从人文主义立场批判科技。目标不是摧毁或谴责技术。我们只是希望把它用于正途——为了用户的利益。</p>
+
+                <div class="book-list">
+                    <div class="book-item">
+                        <div class="book-title">《暴风雨》(The Tempest, 1611) - 威廉·莎士比亚</div>
+                        <p>在莎士比亚的最后一部戏剧中，他通过普洛斯彼罗这个角色提供了领导者和创新者的原型。普洛斯彼罗的巫术带来了巨大的力量，但也带来了责任。这个故事始于对知识的无拘无束的追求和对权力的攫取，最终却成为对想象力、和谐与和解的颂扬。这是一部非常有智慧的作品，应该在帕洛阿尔托的街角分发。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《弗兰肯斯坦》(Frankenstein, 1818) - 玛丽·雪莱</div>
+                        <p>弗兰肯斯坦博士是典型的科技创业者——在实验室里努力创造突破性原型。可惜他得去盗墓才能得到那些"比特和字节"。但只要目的正当，可以不择手段——嘿，他的1.0版本完全是个怪物。出版两百年后，《弗兰肯斯坦》仍然是我们理解技术官僚责任的最佳入门书，也是创新超越道德思考时我们付出的代价。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《浮士德》(Faust, 1808) - 歌德</div>
+                        <p>忘掉那些谄媚的科技传记，想想浮士德博士——他因为知识和进步而如此兴奋，以至于为此出卖了自己的灵魂。我真的以为会在福布斯亿万富翁榜单上看到他。可惜在IPO之前，事情就变糟了。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《哥特式的本质》(The Nature of Gothic, 1853) - 约翰·罗斯金</div>
+                        <p>罗斯金赞扬建造哥特式大教堂的技术——原因令人惊讶。他热爱哥特式世界观，因为它允许工人在成品中表达自己的创造力。这些工匠今天仍然通过每一个滴水嘴和卷曲装饰与我们对话。罗斯金提供了一种完全不同的组织和企业的概念化方式——从真正的人文立场出发。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《艰难时世》(Hard Times, 1854) - 查尔斯·狄更斯</div>
+                        <p>启蒙运动带来了快速工业化和其他经济利益，但代价可怕。那个时代的创新者很少担心童工、奴隶制和剥削性的工作条件。幸运的是，19世纪的人文主义者站出来反对这些 abuses。没有人比查尔斯·狄更斯发挥了更大的作用。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《瓦尔登湖》(Walden, 1854) - 亨利·梭罗</div>
+                        <p>当你终于去某个隐修处或静修地进行数字排毒时，这是你要带上的治愈之旅的书。梭罗整整两年放弃了智能手机。事实上，他放弃了所有技术，在瓦尔登湖追求沉思的自然生活。你今天仍然可以这样做，如果你有勇气的话。作为开始，也许可以尝试两周——或者两天，或者也许只是两个小时。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《魔山》(The Magic Mountain, 1924) - 托马斯·曼</div>
+                        <p>工程师汉斯·卡斯托普发现自己被迫痛苦地走出舒适区，来到阿尔卑斯山一家豪华的肺结核疗养院。在这里，他面对着整个20世纪现代主义的困境——而他所有的STEM公式和分析技能甚至无法开始理解它们的意义。没有哪部小说更有野心地展示了技术官僚世界观的局限性。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《艺术的非人化》(The Dehumanization of Art, 1925) - 何塞·奥尔特加·加塞特</div>
+                        <p>在一个技术驱动的世界里，艺术中的人文元素是令人尴尬的过去遗迹。至少有些人是这么认为的。如今，巨大的商业建立在用机器人取代艺术家的想法上。奥尔特加一个世纪前就与这种思维方式进行了斗争，他对非人化审美心态的分析现在诡异般地相关。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《美丽新世界》(Brave New World, 1932) - 奥尔德斯·赫胥黎</div>
+                        <p>想象一个人们被药物、科技驱动的娱乐、思想控制和强加的一致性所麻木的世界。这可能是所有科幻作品中最有预言性的一部。赫胥黎明白，你不需要士兵来强加暴政。只要让暴政足够上瘾和分散注意力，人们就会拥抱自己的堕落和征服。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《游戏的人》(Homo Ludens, 1938) - 约翰·赫伊津哈</div>
+                        <p>赫伊津哈是一位叛逆的历史学家。在《游戏的人》中，他坚持认为人类生活中最重要的成分是游戏性。他热爱仪式、节日、社区聚会，以及所有我们纯粹为了乐趣而不是金钱利益而做的事情。如果你正在寻找一种肯定生命的替代方案，来对抗当今企业指令中的贪婪功利主义，这本书就是为你准备的。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《1984》(1949) - 乔治·奥威尔</div>
+                        <p>我们对这本书不再感到震惊了。奥威尔对科技驱动的监控的描述，被残酷地用于威权领导服务，现在是我们日常生活的现实。具有讽刺意味的是，苹果最著名的电视广告正是警告人们这种危险。而现在苹果是"电幕"造成最大伤害的主要来源。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《扎根》(The Need for Roots, 1949) - 西蒙娜·薇依</div>
+                        <p>如果薇依今天还活着，她会警告我们，AI和应用将摧毁让人类在社区中蓬勃发展的丰富关系、亲和力和忠诚网络。她称这些为"根"——我们正在一个数百万人无根甚至被连根拔起的世界里艰难地学习失去根会发生什么。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《关于技术的问题》(1954) - 马丁·海德格尔</div>
+                        <p>这是你读过的对科技的最好的哲学批判。预先警告：海德格尔的散文密集而艰深。但当他描述科技如何想把一切都变成原材料，用于它对人类世界的重新构建时，你会被他的先见之明震惊。他写得好像一直在Meta和OpenAI的董事会会议上偷听。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《人的境况》(1958) - 汉娜·阿伦特</div>
+                        <p>这本书也感觉像是今天刚写的。在开篇段落中，阿伦特谈到科技人员想要建造宇宙飞船、创造虚拟现实、用思考机器统治社会。但她在1950年代就写下了这一切。她对当前的困境提供了敏锐的诊断，并提供了一种深刻细致的替代方式来思考人类状况。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《两种文化》(1959) & 《两种文化？》(1962) - C.P.斯诺 & F.R.利维斯</div>
+                        <p>F.R.利维斯和C.P.斯诺之间的争执是现代历史上最激烈的知识分子之战之一。辩论的主题？是科技与人文学科的相对价值。这两位思想家之间的激烈交锋现在比以往任何时候都更重要。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《沙丘》(Dune, 1965) - 弗兰克·赫伯特</div>
+                        <p>你最害怕硅谷的什么？反民主的权力集中？邪教般的行为？生态剥削和最终崩溃？服用改变思维药物的兴奋技术官僚做出重大决定？赫伯特在他的史诗小说中精彩地处理了所有这些主题。你甚至可以看到巨大的沙虫，做着与埃隆·马斯克的无聊公司完全相同的工作。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《仿生人会梦见电子羊吗？》(1968) - 菲利普·K·迪克</div>
+                        <p>当科技发展到你无法区分人类和机器时会发生什么？对于今天的大科技公司来说，这是他们的商业计划，但对于菲利普·K·迪克来说，这是反乌托邦。如果机器人真的接管了社会，这将是它们首先烧毁的书。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《心智生态学》(1972) - 格雷戈里·贝特森</div>
+                        <p>格雷戈里·贝特森是20世纪最广泛的知识分子之一。他的专长是技术、社会、心理学和环境之间的相互作用。我们今天需要一种心智生态学，尤其是在科技领导层中。这部宏大的作品充满了如何实现它的洞察。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《溪畔天问》(1974) - 安妮·迪拉德</div>
+                        <p>这是自梭罗《瓦尔登湖》以来关于自然生活的最好书籍——一个关于如何在没有数字界面的情况下，在与现实世界的具身、共情关系中蓬勃发展的感人叙述。即使你还没准备好锁上智能手机，你也应该为了写作的质量而读这本书。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《规训与惩罚》(1975) - 米歇尔·福柯</div>
+                        <p>福柯专门研究控制机构的隐藏历史——监狱、精神病院、医院等。他展示了它们如何假装以仁慈和服务运作，但实际上致力于最大化权力和集中权威。它们的工具是数据和监控。万维网正在演变成一种功利主义者的全景监狱，就像他在书中描述的那样。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《JR》(1975) - 威廉·加迪斯</div>
+                        <p>想象一下一个年轻人只用电话就创办了一个巨大的企业。我指的是《JR》中的11岁主人公。1975年这本书出版时，读者嘲笑这个不太可能的故事。他们当时不知道这一切都在我们的未来。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《拟像与模拟》(1981) - 让·鲍德里亚</div>
+                        <p>当所有现实都被边缘化，虚假的东西开始模仿其他虚假的东西时会发生什么？结果是超空洞世界——一种建立在虚无之上的虚假现实，没有起源或实际指涉。这不再只是博士生的时髦概念，它是当今《黑客帝国》式科技的驱动力。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《娱乐至死》(1985) - 尼尔·波兹曼</div>
+                        <p>这是有史以来对屏幕驱动文化最精辟的批判。波兹曼相信阅读和写作挑战我们的思维，培养我们的认知技能。但图像使它们麻木。他在电视中看到的危险已经被我们口袋里随身携带的小屏幕放大了百倍。这个从未活到使用智能手机的人，结果却是我们理解智能手机的最佳向导。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《别让我走》(2005) - 石黑一雄</div>
+                        <p>有时推动技术进步需要摧毁活生生的、有呼吸的人。而最可怕的是，当所有造成破坏的人只是微笑着假装"这很好"。诺贝尔奖得主石黑一雄认为这不好，而是在这部感人至深的小说中培养我们的同理心。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《主人与使者》(2009) - 伊恩·麦吉尔克里斯特</div>
+                        <p>麦吉尔克里斯特理解社会面临的风险，来自主导世界观中普遍存在的左脑对计算、控制和非人化的痴迷。这本书在十五年前出版时充满了洞察，但实际上它每年都变得更重要。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《科学的暴政》(2011) - 保罗·费耶阿本德</div>
+                        <p>在一个科学研究无法复制、科技公司追求看起来像 regress 的进步的时代，费耶阿本德完全知道他在说什么。这本书呼吁对科学采取更加多元主义的方法，并指出那种微妙的统治和控制意志，往往驱动着所谓的无私研究。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《倦怠社会》(2010) - 韩炳哲</div>
+                        <p>韩炳哲警告我们，多任务处理不是进步——这是野生动物在野外做的事情。这是处于生存模式的人的生活方式。而"你能做一切"的多任务处理咒语很快就会崩溃成"我什么都做不了"。如果你想了解无处不在的数字技术如何导致抑郁症、精神疾病和其他心理障碍的上升，你需要读这本书。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《创造自然》(2015) - 安德烈娅·伍尔夫</div>
+                        <p>当今我们思想领袖的最佳榜样是大约在1800年改变欧洲文化的浪漫主义运动。他们理解人类重要。自然世界重要。我们的心理和灵魂重要。猜猜看？在那些 dreamy-eyed 的浪漫主义者进行改革后，西方经济实际上增长得更快——因为整体性思维确实为几乎每个人产生了有益的结果。</p>
+                    </div>
+
+                    <div class="book-item">
+                        <div class="book-title">《诗歌作为生活的升级》(2024) - 查尔斯·泰勒</div>
+                        <p>如果世界转向诗歌——而不是应用和设备——来升级，会是什么样子？哲学家查尔斯·泰勒最近庆祝了他的93岁生日，所以这可能是他最后一部重要著作。他实际上认真对待艺术，将其作为充分实现生活的跳板。我宁愿选择这个，而不是聊天机器人。</p>
+                    </div>
+                </div>
+
+                <h3>结语</h3>
+                <p>这就是我的清单——30本来自我能找到的最智慧的人的开阔思维的书。</p>
+                <p>不要轻视它们。如果重要人物真的读了这些作品并认真对待它们，硅谷可能会开始震动。我说的不是里氏震级，而是更大的东西。</p>
+
+                <hr>
+                <p><strong>译者注</strong>: Ted Gioia 是一位著名的文化评论家、音乐史学家和作家。他曾任教于斯坦福大学，并在硅谷工作25年。他的Substack "The Honest Broker" 专注于文化批评和阅读推荐。这份书单体现了他对技术乐观主义的深刻反思，以及对人文学科价值的坚定捍卫。</p>
+            </div>
+        </div>
+
+        <!-- Article 5: Syrian Feminists -->
+        <div class="article-card" id="article2-2">
+            <h2 class="article-title">"女性，生命，自由"：在战争之地锻造新世界的叙利亚女性主义者</h2>
+            <div class="article-meta">
+                <span>Natalie Haynes</span>
+                <span class="article-tag">女性主义/中东政治</span>
+            </div>
+            <div class="full-article">
+                <p><strong>作者</strong>: Natalie Haynes<br><strong>来源</strong>: <a href="https://www.theguardian.com/world/2025/feb/09/woman-life-freedom-the-syrian-feminists-who-forged-a-new-world-in-a-land-of-war" target="_blank">https://www.theguardian.com/world/2025/feb/09/woman-life-freedom...</a></p>
+                <hr>
+                <h3>摘要</h3>
+                <p>在一个被冲突和厌女症撕裂的社会中，罗贾瓦（Rojava）自治地区拥有也许是世界上最完整的性别平等的政府。本文作者深入叙利亚东北部，讲述这些在战争中锻造新世界的女性主义者的故事。</p>
+                
+                <h3>舞台上的歌声</h3>
+                <p>"身为女性，"站在我面前舞台上的女人说，"并不意味着我只是来这里抚养孩子的。身为女性意味着我来这里是为了书写历史。女性可以说话。我们可以唱歌。没有人能让我们沉默。"周围爆发出一阵赞同的欢呼。</p>
+                
+                <p>我坐在叙利亚东北部城市哈塞克的一个巨大会议厅里。台上的女人是一位名叫米兹金·塔希尔（Mizgîn Tahir）的歌手，她留着卷曲的短发，穿着靴子和裙子。她举起麦克风唱了起来，她浑厚的声音在观众中流淌。唱完后，大厅里的女人们站起来，用右手比出和平手势，高呼"<em>jin jiyan azadi</em>"（女性，生命，自由）。</p>
+                
+                <h3>罗贾瓦：战争中的实验</h3>
+                <p>全世界的人们都看着叙利亚人庆祝残暴的阿萨德政权倒台。罗贾瓦的人们也在庆祝，他们欣喜地看到这个给他们带来如此多苦难的政府的终结。但罗贾瓦的情况与该国其他地区不同。</p>
+                
+                <p>早在2012年，当其他地方的起义被残酷镇压时，一场由库尔德人领导的叛乱接管了该地区的大部分地区。他们能够建立自己的行政机构，现在被称为北东叙利亚民主自治政府（Daanes）。尽管面临伊斯兰国的肆虐、土耳其的持续攻击以及国际社会的孤立，这个行政机构已经维持了10多年。</p>
+                
+                <h3>世界上最平等的政治结构</h3>
+                <p>这个行政机构的治理结构基于男女之间严格的平等权力分享。它建立了复杂的委员会和委员会网络，从社区层面到地区层面运作，每个机构都有男女联合主席。换句话说，这个行政机构可以说是<strong>世界上最平等的政治结构</strong>。</p>
+                
+                <p>"世界上大多数国家都建立在资本主义原则之上，"地方农业和经济委员会联合主席莱拉·萨罗克桑尖锐地说。"我们这里工作的原则是社会经济。我们问的是，你如何服务社会需求，而不仅仅是如何赚钱？"</p>
+                
+                <h3>女性之家：从基层开始的革命</h3>
+                <p>女性一直在有意识地从基层开始建设她们的革命。在卡米什利的"女性之家"（<em>mala jin</em>），经理巴希亚·穆拉德讲述她们的故事："第一批女性之家成立于2011年。有一天，政权来到中心说，你们必须关闭。我们拿起棍子把他们赶了出去。"</p>
+                
+                <p>她带着一丝幽默讲述她们早期的一次干预："我们听说有一个年轻女子被囚禁在她哥哥的房子里。她和另一位年长妇女敲了敲房子的门，说她们在找一个祈祷的地方。一旦进去，她们就问起那个年轻女子，并说服她哥哥让她们帮助她。我们改变了她的生活。他们让我们进去是因为他们认为：这些老太婆能造成什么伤害？<strong>但女性有力量。我老了，但我很凶猛。</strong>"</p>
+                
+                <h3>女性战士：YPJ的故事</h3>
+                <p>我们西方许多人都看过库尔德女兵的形象，她们梳着深色的辫子，手持卡拉什尼科夫步枪，在摧毁伊斯兰国的行动中发挥了如此重要的作用。2014年，这些女性部队YPJ承担了对抗世界上最厌女的力量的任务，并被认为在科巴尼市扭转了战局。</p>
+                
+                <p>歌手塔希尔充满激情地说："为什么没有人能让我沉默？因为YPJ支持我。"YPJ发言人鲁克森·穆罕默德说："正是因为女性在这里扮演着社会的先锋角色，他们才被派来攻击我们。我们击败伊斯兰国不仅是为了我们，也是为了人类和世界。"</p>
+                
+                <h3>金瓦尔村：只属于女性的村庄</h3>
+                <p>金瓦尔（Jinwar）是一个只有女性居住的村庄，现在是大约20户女性和儿童家庭的家园。在面包房建筑的墙上画着尼萨巴的画像，她是古代美索不达米亚的书写和谷物女神。女性们在这里种植草药和蔬菜，烤面包，制作传统草药。</p>
+                
+                <p>站在这个屋顶上，村庄看起来很小，几乎迷失在延伸到土耳其边境的平原中。在这片被蹂躏的土地上，它感觉像是一个充满希望的地方。在我下面，女性和孩子们正围着一小堆火聚集；她们在烤坚果和种子，在傍晚的光线中大笑。</p>
+                
+                <blockquote>"我们不会后退，我们不会失去我们的权利，我们将建立一个基于女性权利的叙利亚，我们点燃了一个新的火焰。" —— Shahrazad al-Jassem</blockquote>
+                
+                <p>在这柔和的金色光线中，我听着下面女性的笑声，全心全意地希望她们点燃的火焰能够持续下去。</p>
+                
+                <hr>
+                <p><strong>译者注</strong>: Natalie Haynes 是一位英国作家、记者和古典学者。本文发表于2025年2月9日《卫报》。罗贾瓦（Rojava）是叙利亚北部和东部的一个事实上的自治地区，主要由库尔德人居住。自2012年以来，该地区建立了一个基于民主联邦制和性别平等的自治政府，成为中东地区女性权利进步的重要实验场。</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>每日精选 · Daily Curated · 2025年2月25-26日</p>
+        <p style="margin-top: 0.5rem; font-size: 0.75rem;">用心翻译，传递思想</p>
+    </footer>
+</body>
+</html>
