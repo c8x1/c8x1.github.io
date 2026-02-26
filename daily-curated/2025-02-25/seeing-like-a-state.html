@@ -7,8 +7,168 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>tailwind.config={theme:{extend:{fontFamily:{serif:['Noto Serif SC','serif'],sans:['Inter','sans-serif']}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+        /* 音乐播放器样式 */
+        .music-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 12px 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 280px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .music-player.collapsed {
+            min-width: auto;
+            padding: 12px;
+        }
+        .music-player.collapsed .player-info,
+        .music-player.collapsed .progress-container,
+        .music-player.collapsed .volume-control {
+            display: none;
+        }
+        .player-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            flex-shrink: 0;
+        }
+        .player-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        .player-btn:active {
+            transform: scale(0.95);
+        }
+        .player-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .song-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1f2937;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .song-artist {
+            font-size: 11px;
+            color: #6b7280;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .progress-container {
+            width: 100%;
+            margin-top: 6px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s;
+        }
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+        .control-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .control-btn:hover {
+            background: #f3f4f6;
+            color: #3b82f6;
+        }
+        .toggle-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            border: none;
+            cursor: pointer;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            flex-shrink: 0;
+        }
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .volume-slider {
+            width: 60px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #e5e7eb;
+            border-radius: 2px;
+            outline: none;
+        }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #3b82f6;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        @media (max-width: 640px) {
+            .music-player {
+                left: 10px;
+                right: 10px;
+                bottom: 10px;
+                min-width: auto;
+            }
+        }
+    </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>.music-player{position:fixed;bottom:20px;right:20px;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-radius:16px;padding:12px 16px;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:1000;display:flex;align-items:center;gap:12px;min-width:280px;border:1px solid rgba(0,0,0,.05)}.music-player.collapsed{min-width:auto;padding:12px}.music-player.collapsed .player-info,.music-player.collapsed .progress-container,.music-player.collapsed .volume-control{display:none}.player-btn{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:white;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}.player-info{flex:1;min-width:0}.song-title{font-size:13px;font-weight:600;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.song-artist{font-size:11px;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.progress-container{width:100%;margin-top:6px}.progress-bar{width:100%;height:4px;background:#e5e7eb;border-radius:2px;cursor:pointer;position:relative}.progress-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#8b5cf6);border-radius:2px;width:0%}.time-display{display:flex;justify-content:space-between;font-size:10px;color:#9ca3af;margin-top:2px}.control-btn{width:28px;height:28px;border-radius:50%;background:transparent;border:none;cursor:pointer;color:#6b7280;display:flex;align-items:center;justify-content:center;flex-shrink:0}.toggle-btn{width:24px;height:24px;border-radius:50%;background:#f3f4f6;border:none;cursor:pointer;color:#6b7280;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}.volume-control{display:flex;align-items:center;gap:6px}.volume-slider{width:60px;height:4px;-webkit-appearance:none;appearance:none;background:#e5e7eb;border-radius:2px;outline:none}.volume-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:12px;background:#3b82f6;border-radius:50%;cursor:pointer}body{padding-bottom:100px}</style>
 </head>
-<body class="bg-gray-50 font-sans text-gray-800">
+<body class="bg-gray-50 font-sans text-gray-800" style="padding-bottom: 100px;">
     <nav class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
             <a href="/" class="font-serif text-lg font-bold text-gray-900">Noc's Blog</a>
@@ -170,5 +330,149 @@
             <p>&copy; 2025 Noc's Blog · 每日精选</p>
         </div>
     </footer>
+
+    <!-- 音乐播放器 -->
+    <div id="musicPlayer" class="music-player">
+        <button class="toggle-btn" onclick="togglePlayer()" title="收起/展开">
+            <i class="fas fa-chevron-down"></i>
+        </button>
+        <button id="playBtn" class="player-btn" onclick="togglePlay()">
+            <i class="fas fa-play"></i>
+        </button>
+        <div class="player-info">
+            <div class="song-title">背景音乐</div>
+            <div class="song-artist">阅读模式</div>
+            <div class="progress-container">
+                <div class="progress-bar" onclick="seek(event)">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+                <div class="time-display">
+                    <span id="currentTime">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
+            </div>
+        </div>
+        <div class="volume-control">
+            <button class="control-btn" onclick="toggleMute()">
+                <i id="volumeIcon" class="fas fa-volume-up"></i>
+            </button>
+            <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="50" onchange="setVolume(this.value)">
+        </div>
+        <button class="control-btn" onclick="nextTrack()" title="下一首">
+            <i class="fas fa-forward"></i>
+        </button>
+    </div>
+
+    <audio id="audioPlayer" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const audio = document.getElementById('audioPlayer');
+        const playBtn = document.getElementById('playBtn');
+        const progressFill = document.getElementById('progressFill');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeIcon = document.getElementById('volumeIcon');
+        const player = document.getElementById('musicPlayer');
+        let isPlaying = false;
+        let isCollapsed = false;
+        const savedState = localStorage.getItem('musicPlayerState');
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            if (state.isPlaying) {
+                audio.play().then(() => {
+                    isPlaying = true;
+                    updatePlayButton();
+                }).catch(() => {});
+            }
+            audio.volume = state.volume || 0.5;
+            volumeSlider.value = (state.volume || 0.5) * 100;
+        }
+        function togglePlay() {
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+            } else {
+                audio.play();
+                isPlaying = true;
+            }
+            updatePlayButton();
+            saveState();
+        }
+        function updatePlayButton() {
+            playBtn.innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+        }
+        function togglePlayer() {
+            isCollapsed = !isCollapsed;
+            player.classList.toggle('collapsed', isCollapsed);
+            const icon = player.querySelector('.toggle-btn i');
+            icon.className = isCollapsed ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+        }
+        function seek(event) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            const percent = (event.clientX - rect.left) / rect.width;
+            audio.currentTime = percent * audio.duration;
+        }
+        function setVolume(value) {
+            audio.volume = value / 100;
+            updateVolumeIcon();
+            saveState();
+        }
+        function toggleMute() {
+            if (audio.volume > 0) {
+                audio.dataset.prevVolume = audio.volume;
+                audio.volume = 0;
+                volumeSlider.value = 0;
+            } else {
+                audio.volume = audio.dataset.prevVolume || 0.5;
+                volumeSlider.value = (audio.dataset.prevVolume || 0.5) * 100;
+            }
+            updateVolumeIcon();
+            saveState();
+        }
+        function updateVolumeIcon() {
+            if (audio.volume === 0) {
+                volumeIcon.className = 'fas fa-volume-mute';
+            } else if (audio.volume < 0.5) {
+                volumeIcon.className = 'fas fa-volume-down';
+            } else {
+                volumeIcon.className = 'fas fa-volume-up';
+            }
+        }
+        function nextTrack() {
+            audio.currentTime = 0;
+            if (!isPlaying) {
+                togglePlay();
+            }
+        }
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        function saveState() {
+            localStorage.setItem('musicPlayerState', JSON.stringify({
+                isPlaying: isPlaying,
+                volume: audio.volume
+            }));
+        }
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progressFill.style.width = percent + '%';
+                currentTimeEl.textContent = formatTime(audio.currentTime);
+                durationEl.textContent = formatTime(audio.duration);
+            }
+        });
+        audio.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = formatTime(audio.duration);
+        });
+        document.addEventListener('visibilitychange', saveState);
+        window.addEventListener('beforeunload', saveState);
+    </script>
+<div id="musicPlayer" class="music-player"><button class="toggle-btn" onclick="togglePlayer()"><i class="fas fa-chevron-down"></i></button><button id="playBtn" class="player-btn" onclick="togglePlay()"><i class="fas fa-play"></i></button><div class="player-info"><div class="song-title">背景音乐</div><div class="song-artist">阅读模式</div><div class="progress-container"><div class="progress-bar" onclick="seek(event)"><div id="progressFill" class="progress-fill"></div></div><div class="time-display"><span id="currentTime">0:00</span><span id="duration">0:00</span></div></div></div><div class="volume-control"><button class="control-btn" onclick="toggleMute()"><i id="volumeIcon" class="fas fa-volume-up"></i></button><input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="50" onchange="setVolume(this.value)"></div><button class="control-btn" onclick="nextTrack()"><i class="fas fa-forward"></i></button></div><audio id="audioPlayer" loop><source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg"></audio><script>const a=document.getElementById("audioPlayer"),p=document.getElementById("playBtn"),f=document.getElementById("progressFill"),c=document.getElementById("currentTime"),d=document.getElementById("duration"),v=document.getElementById("volumeSlider"),m=document.getElementById("volumeIcon"),x=document.getElementById("musicPlayer");let o=!1,l=!1,s=localStorage.getItem("musicPlayerState");if(s){let e=JSON.parse(s);e.isPlaying&&a.play().then(()=>{o=!0,u()}).catch(()=>{}),a.volume=e.volume||.5,v.value=100*(e.volume||.5)}function togglePlay(){o?(a.pause(),o=!1):(a.play(),o=!0),u(),save()}function u(){p.innerHTML=o?"<i class='fas fa-pause'></i>":"<i class='fas fa-play'></i>"}function togglePlayer(){l=!l,x.classList.toggle("collapsed",l),x.querySelector(".toggle-btn i").className=l?"fas fa-chevron-up":"fas fa-chevron-down"}function seek(e){let t=e.currentTarget.getBoundingClientRect();a.currentTime=(e.clientX-t.left)/t.width*a.duration}function setVolume(e){a.volume=e/100,i(),save()}function toggleMute(){a.volume>0?(a.dataset.prevVolume=a.volume,a.volume=0,v.value=0):(a.volume=a.dataset.prevVolume||.5,v.value=100*(a.dataset.prevVolume||.5)),i(),save()}function i(){m.className=0===a.volume?"fas fa-volume-mute":a.volume<.5?"fas fa-volume-down":"fas fa-volume-up"}function nextTrack(){a.currentTime=0,o||togglePlay()}function t(e){return isNaN(e)?"0:00":Math.floor(e/60)+":"+Math.floor(e%60).toString().padStart(2,"0")}function save(){localStorage.setItem("musicPlayerState",JSON.stringify({isPlaying:o,volume:a.volume}))}a.addEventListener("timeupdate",()=>{a.duration&&(f.style.width=a.currentTime/a.duration*100+"%",c.textContent=t(a.currentTime),d.textContent=t(a.duration))});a.addEventListener("loadedmetadata",()=>{d.textContent=t(a.duration)});document.addEventListener("visibilitychange",save);window.addEventListener("beforeunload",save);</script>
 </body>
 </html>
