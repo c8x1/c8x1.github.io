@@ -196,6 +196,14 @@
             }
         }
     </style>
+<link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
+<style>
+.aplayer .aplayer-lrc p { display: none; font-size: 12px; font-weight: 700; line-height: 16px !important; }
+.aplayer .aplayer-lrc p.aplayer-lrc-current { display: none; font-size: 15px; color: #42b983; }
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body { left: -66px !important; }
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover { left: 0px !important; }
+body { padding-bottom: 80px; }
+</style>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 pb-24">
     <nav class="bg-white shadow-sm sticky top-0 z-50">
@@ -316,177 +324,24 @@
     </footer>
 
     <!-- 音乐播放器 -->
-    <div id="musicPlayer" class="music-player">
-        <button class="toggle-btn" onclick="togglePlayer()" title="收起/展开">
-            <i class="fas fa-chevron-down"></i>
-        </button>
-        
-        <button id="playBtn" class="player-btn" onclick="togglePlay()">
-            <i class="fas fa-play"></i>
-        </button>
-        
-        <div class="player-info">
-            <div class="song-title">背景音乐</div>
-            <div class="song-artist">阅读模式</div>
-            <div class="progress-container">
-                <div class="progress-bar" onclick="seek(event)">
-                    <div id="progressFill" class="progress-fill"></div>
-                </div>
-                <div class="time-display">
-                    <span id="currentTime">0:00</span>
-                    <span id="duration">0:00</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="volume-control">
-            <button class="control-btn" onclick="toggleMute()">
-                <i id="volumeIcon" class="fas fa-volume-up"></i>
-            </button>
-            <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="50" onchange="setVolume(this.value)">
-        </div>
-        
-        <button class="control-btn" onclick="nextTrack()" title="下一首">
-            <i class="fas fa-forward"></i>
-        </button>
-    </div>
-
-    <!-- 音频元素 -->
-    <audio id="audioPlayer" loop>
-        <!-- 默认使用一个轻音乐，用户可以替换为自己的音乐文件 -->
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-    </audio>
-
-    <script>
-        const audio = document.getElementById('audioPlayer');
-        const playBtn = document.getElementById('playBtn');
-        const progressFill = document.getElementById('progressFill');
-        const currentTimeEl = document.getElementById('currentTime');
-        const durationEl = document.getElementById('duration');
-        const volumeSlider = document.getElementById('volumeSlider');
-        const volumeIcon = document.getElementById('volumeIcon');
-        const player = document.getElementById('musicPlayer');
-        
-        let isPlaying = false;
-        let isCollapsed = false;
-        
-        // 从localStorage读取播放状态
-        const savedState = localStorage.getItem('musicPlayerState');
-        if (savedState) {
-            const state = JSON.parse(savedState);
-            if (state.isPlaying) {
-                audio.play().then(() => {
-                    isPlaying = true;
-                    updatePlayButton();
-                }).catch(() => {
-                    // 自动播放被阻止，等待用户交互
-                });
-            }
-            audio.volume = state.volume || 0.5;
-            volumeSlider.value = (state.volume || 0.5) * 100;
-        }
-        
-        function togglePlay() {
-            if (isPlaying) {
-                audio.pause();
-                isPlaying = false;
-            } else {
-                audio.play();
-                isPlaying = true;
-            }
-            updatePlayButton();
-            saveState();
-        }
-        
-        function updatePlayButton() {
-            playBtn.innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
-        }
-        
-        function togglePlayer() {
-            isCollapsed = !isCollapsed;
-            player.classList.toggle('collapsed', isCollapsed);
-            const icon = player.querySelector('.toggle-btn i');
-            icon.className = isCollapsed ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
-        }
-        
-        function seek(event) {
-            const rect = event.currentTarget.getBoundingClientRect();
-            const percent = (event.clientX - rect.left) / rect.width;
-            audio.currentTime = percent * audio.duration;
-        }
-        
-        function setVolume(value) {
-            audio.volume = value / 100;
-            updateVolumeIcon();
-            saveState();
-        }
-        
-        function toggleMute() {
-            if (audio.volume > 0) {
-                audio.dataset.prevVolume = audio.volume;
-                audio.volume = 0;
-                volumeSlider.value = 0;
-            } else {
-                audio.volume = audio.dataset.prevVolume || 0.5;
-                volumeSlider.value = (audio.dataset.prevVolume || 0.5) * 100;
-            }
-            updateVolumeIcon();
-            saveState();
-        }
-        
-        function updateVolumeIcon() {
-            if (audio.volume === 0) {
-                volumeIcon.className = 'fas fa-volume-mute';
-            } else if (audio.volume < 0.5) {
-                volumeIcon.className = 'fas fa-volume-down';
-            } else {
-                volumeIcon.className = 'fas fa-volume-up';
-            }
-        }
-        
-        function nextTrack() {
-            // 这里可以添加播放列表逻辑
-            // 目前只是重新加载当前音频
-            audio.currentTime = 0;
-            if (!isPlaying) {
-                togglePlay();
-            }
-        }
-        
-        function formatTime(seconds) {
-            if (isNaN(seconds)) return '0:00';
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
-        }
-        
-        function saveState() {
-            localStorage.setItem('musicPlayerState', JSON.stringify({
-                isPlaying: isPlaying,
-                volume: audio.volume
-            }));
-        }
-        
-        // 更新进度条
-        audio.addEventListener('timeupdate', () => {
-            if (audio.duration) {
-                const percent = (audio.currentTime / audio.duration) * 100;
-                progressFill.style.width = percent + '%';
-                currentTimeEl.textContent = formatTime(audio.currentTime);
-                durationEl.textContent = formatTime(audio.duration);
-            }
-        });
-        
-        // 音频加载完成
-        audio.addEventListener('loadedmetadata', () => {
-            durationEl.textContent = formatTime(audio.duration);
-        });
-        
-        // 页面可见性变化时保存状态
-        document.addEventListener('visibilitychange', saveState);
-        
-        // 页面卸载时保存状态
-        window.addEventListener('beforeunload', saveState);
-    </script>
+    
+<div class="row">
+    <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
+               server="netease"
+               type="playlist"
+               id="8561735623"
+               fixed='true'
+               autoplay='false'
+               theme='#42b983'
+               loop='all'
+               order='random'
+               preload='auto'
+               volume='0.7'
+               list-folded='true'
+    >
+    </meting-js>
+</div>
+<script src="/libs/aplayer/APlayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
 </body>
 </html>
