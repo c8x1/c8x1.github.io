@@ -1,0 +1,118 @@
+<!-- 文章页模板使用说明 -->
+<!-- 
+  使用方法：
+  1. 复制此模板
+  2. 替换 {{TITLE}}, {{SUBTITLE}}, {{AUTHOR}}, {{SOURCE}}, {{DATE}}, {{CATEGORIES}}, {{CONTENT}} 等变量
+  3. 保留共用样式和脚本引用
+-->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}} | 每日精选</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['Noto Serif SC', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .aplayer .aplayer-lrc p { display: none; }
+        .aplayer .aplayer-lrc p.aplayer-lrc-current { display: none; }
+        .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body { left: -66px !important; }
+        .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover { left: 0px !important; }
+        body { padding-bottom: 80px; }
+        
+        /* 深色模式 */
+        @media (prefers-color-scheme: dark) {
+            body { background-color: #0f0f23 !important; color: #e4e4e7 !important; }
+            .bg-gray-50 { background-color: #0f0f23 !important; }
+            .bg-white { background-color: #1a1a2e !important; }
+            .bg-gray-100 { background-color: #16213e !important; }
+            .text-gray-800 { color: #e4e4e7 !important; }
+            .text-gray-700 { color: #d4d4d8 !important; }
+            .text-gray-600 { color: #a1a1aa !important; }
+            .text-gray-500 { color: #71717a !important; }
+            .border-gray-100 { border-color: #2d3748 !important; }
+            article { background-color: #1a1a2e !important; }
+            nav { background-color: #1a1a2e !important; border-bottom: 1px solid #2d3748 !important; }
+            .prose { color: #d4d4d8 !important; }
+            .prose h1, .prose h2, .prose h3 { color: #fafafa !important; }
+            .prose p { color: #d4d4d8 !important; }
+            .prose blockquote { border-left-color: #3b82f6 !important; background-color: #16213e !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+    <!-- 导航 -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
+            <a href="/" class="font-serif text-lg font-bold text-gray-900">Noc's Blog</a>
+            <div class="flex items-center space-x-4 text-sm">
+                <a href="/daily-curated/" class="text-blue-600 font-medium">每日精选</a>
+                <a href="/archives" class="text-gray-600">归档</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 文章内容 -->
+    <article class="max-w-3xl mx-auto px-4 py-10 bg-white min-h-screen">
+        <header class="mb-8">
+            <div class="flex items-center space-x-2 mb-3">
+                <!-- 分类标签 -->
+                {{CATEGORIES}}
+            </div>
+            <h1 class="font-serif text-2xl md:text-3xl font-bold text-gray-900 mb-2 leading-tight">{{TITLE}}</h1>
+            <p class="text-lg text-gray-500 italic mb-3">{{SUBTITLE}}</p>
+            <div class="flex items-center text-sm text-gray-500">
+                <span>{{AUTHOR}}</span>
+                <span class="mx-2">·</span>
+                <span>{{DATE}}</span>
+                <span class="mx-2">·</span>
+                <a href="{{ORIGINAL_URL}}" target="_blank" class="text-blue-600 hover:underline">原文</a>
+            </div>
+        </header>
+
+        <div class="prose prose-lg max-w-none font-serif text-gray-700">
+            {{CONTENT}}
+        </div>
+    </article>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-100 py-6">
+        <div class="max-w-3xl mx-auto px-4 text-center text-sm text-gray-500">
+            <p>&copy; 2025 Noc's Blog · 每日精选</p>
+        </div>
+    </footer>
+
+    <!-- 播放器 -->
+    <div class="row">
+        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
+                   server="netease"
+                   type="playlist"
+                   id="8561735623"
+                   fixed='true'
+                   autoplay='false'
+                   theme='#42b983'
+                   loop='all'
+                   order='random'
+                   preload='auto'
+                   volume='0.7'
+                   list-folded='true'>
+        </meting-js>
+    </div>
+    <script src="/libs/aplayer/APlayer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+</body>
+</html>
