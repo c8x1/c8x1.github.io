@@ -3,16 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="每日精选 - 高质量英文长文翻译">
     <title>每日精选 | Daily Curated</title>
-    <link rel="icon" type="image/png" href="/favicon.png">
-    
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
@@ -20,223 +14,192 @@
                     fontFamily: {
                         serif: ['Noto Serif SC', 'serif'],
                         sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: '#1e40af',
-                        secondary: '#64748b',
-                        accent: '#f59e0b',
                     }
                 }
             }
         }
     </script>
-    
+    <link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
     <style>
-        .article-card {
-            transition: all 0.3s ease;
-        }
-        .article-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        .tag {
-            transition: all 0.2s;
-        }
-        .tag:hover {
-            transform: scale(1.05);
-        }
-        .nav-link {
-            position: relative;
-        }
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -4px;
-            left: 0;
-            background-color: #1e40af;
-            transition: width 0.3s;
-        }
-        .nav-link:hover::after {
-            width: 100%;
+        .aplayer .aplayer-lrc p { display: none; font-size: 12px; font-weight: 700; line-height: 16px !important; }
+        .aplayer .aplayer-lrc p.aplayer-lrc-current { display: none; font-size: 15px; color: #42b983; }
+        .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body { left: -66px !important; }
+        .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover { left: 0px !important; }
+        body { padding-bottom: 80px; }
+        
+        /* 加载状态 */
+        .loading { text-align: center; padding: 3rem; color: #6b7280; }
+        .error { text-align: center; padding: 3rem; color: #dc2626; }
+        
+        /* 深色模式支持 */
+        @media (prefers-color-scheme: dark) {
+            body { background-color: #0f0f23 !important; color: #e4e4e7 !important; }
+            .bg-gray-50 { background-color: #0f0f23 !important; }
+            .bg-white { background-color: #1a1a2e !important; }
+            .bg-gray-100 { background-color: #16213e !important; }
+            .text-gray-800 { color: #e4e4e7 !important; }
+            .text-gray-600 { color: #a1a1aa !important; }
+            .text-gray-500 { color: #71717a !important; }
+            .text-gray-900 { color: #fafafa !important; }
+            .border-gray-100 { border-color: #2d3748 !important; }
+            .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.5) !important; }
+            nav { background-color: #1a1a2e !important; border-bottom: 1px solid #2d3748 !important; }
         }
     </style>
 </head>
-<body class="bg-gray-50 font-sans text-gray-800">
-    <!-- Navigation -->
+<body class="bg-gray-50 font-sans text-gray-800 pb-24">
     <nav class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/" class="flex items-center space-x-3">
-                        <img src="/medias/logo.png" class="h-8 w-8 rounded-full" alt="Logo">
-                        <span class="font-serif text-xl font-bold text-gray-900">Noc's Blog</span>
-                    </a>
-                </div>
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="/daily-curated/" class="nav-link text-primary font-medium">每日精选</a>
-                    <a href="/archives" class="nav-link text-gray-600 hover:text-gray-900">归档</a>
-                    <a href="/about" class="nav-link text-gray-600 hover:text-gray-900">关于</a>
-                </div>
-                <div class="md:hidden flex items-center">
-                    <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="text-gray-600">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <!-- Mobile menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
-            <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="/daily-curated/" class="block px-3 py-2 text-primary font-medium">每日精选</a>
-                <a href="/archives" class="block px-3 py-2 text-gray-600">归档</a>
-                <a href="/about" class="block px-3 py-2 text-gray-600">关于</a>
+        <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="/" class="font-serif text-xl font-bold text-gray-900">Noc's Blog</a>
+            <div class="flex items-center space-x-6">
+                <a href="/daily-curated/" class="text-blue-600 font-medium">每日精选</a>
+                <a href="/archives" class="text-gray-600 hover:text-gray-900">归档</a>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <div class="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-            <div class="text-center">
-                <h1 class="font-serif text-4xl md:text-6xl font-bold mb-6">每日精选</h1>
-                <p class="text-xl md:text-2xl text-blue-100 mb-4">Daily Curated</p>
-                <p class="text-lg text-blue-200 max-w-2xl mx-auto mb-8">
-                    高质量英文长文翻译，涵盖科技、文化、哲学、社会学等领域。
-                    <br>每天精选1-2篇，用心翻译，传递思想。
-                </p>
-                <a href="/daily-curated/" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-full text-blue-700 bg-white hover:bg-blue-50 transition-colors">
-                    开始阅读
-                    <svg class="ml-2 -mr-1 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                    </svg>
-                </a>
-            </div>
+    <div class="bg-gradient-to-br from-blue-600 to-indigo-800 text-white py-12">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h1 class="font-serif text-3xl font-bold mb-2">每日精选</h1>
+            <p class="text-blue-100">高质量英文长文翻译 · 每天1-2篇</p>
         </div>
     </div>
 
-    <!-- Latest Articles Preview -->
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div class="flex items-center justify-between mb-8">
-            <h2 class="font-serif text-2xl md:text-3xl font-bold text-gray-900">最新文章</h2>
-            <a href="/daily-curated/" class="text-primary hover:text-blue-700 font-medium flex items-center">
-                查看全部
-                <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-            </a>
+    <div class="max-w-4xl mx-auto px-4 py-12">
+        <!-- 加载状态 -->
+        <div id="loading" class="loading">
+            <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+            <p>加载文章中...</p>
         </div>
-
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Article 1 -->
-            <article class="article-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="p-6">
-                    <div class="flex items-center space-x-2 mb-3">
-                        <span class="tag px-3 py-1 bg-pink-100 text-pink-700 text-xs font-medium rounded-full">女性主义</span>
-                        <span class="text-gray-400 text-sm">2025-02-26</span>
-                    </div>
-                    <h3 class="font-serif text-lg font-bold text-gray-900 mb-2 line-clamp-2">
-                        "女性，生命，自由"：在战争之地锻造新世界的叙利亚女性主义者
-                    </h3>
-                    <p class="text-gray-600 text-sm line-clamp-3 mb-4">
-                        在一个被冲突和厌女症撕裂的社会中，罗贾瓦自治地区拥有也许是世界上最完整的性别平等的政府...
-                    </p>
-                    <a href="/daily-curated/#article2-2" class="text-primary hover:text-blue-700 font-medium text-sm">阅读全文 →</a>
-                </div>
-            </article>
-
-            <!-- Article 2 -->
-            <article class="article-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="p-6">
-                    <div class="flex items-center space-x-2 mb-3">
-                        <span class="tag px-3 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">文化批评</span>
-                        <span class="text-gray-400 text-sm">2025-02-26</span>
-                    </div>
-                    <h3 class="font-serif text-lg font-bold text-gray-900 mb-2 line-clamp-2">
-                        反科技经典：30本书
-                    </h3>
-                    <p class="text-gray-600 text-sm line-clamp-3 mb-4">
-                        来自硅谷回声室之外的30本人文经典，从莎士比亚到韩炳哲，重新审视技术与人性的关系...
-                    </p>
-                    <a href="/daily-curated/#article2-1" class="text-primary hover:text-blue-700 font-medium text-sm">阅读全文 →</a>
-                </div>
-            </article>
-
-            <!-- Article 3 -->
-            <article class="article-card bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="p-6">
-                    <div class="flex items-center space-x-2 mb-3">
-                        <span class="tag px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">政治学</span>
-                        <span class="text-gray-400 text-sm">2025-02-25</span>
-                    </div>
-                    <h3 class="font-serif text-lg font-bold text-gray-900 mb-2 line-clamp-2">
-                        书评：像国家一样看
-                    </h3>
-                    <p class="text-gray-600 text-sm line-clamp-3 mb-4">
-                        James C. Scott 开创性著作的精彩书评，揭示"高级现代主义"如何导致灾难性后果...
-                    </p>
-                    <a href="/daily-curated/#article1-3" class="text-primary hover:text-blue-700 font-medium text-sm">阅读全文 →</a>
-                </div>
-            </article>
+        
+        <!-- 错误状态 -->
+        <div id="error" class="error hidden">
+            <i class="fas fa-exclamation-circle text-2xl mb-2"></i>
+            <p>加载失败，请刷新页面重试</p>
         </div>
+        
+        <!-- 文章列表容器 -->
+        <div id="article-list" class="space-y-4 hidden"></div>
     </div>
 
-    <!-- Features -->
-    <div class="bg-white border-t border-gray-200">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div class="grid md:grid-cols-3 gap-8 text-center">
-                <div>
-                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                        </svg>
-                    </div>
-                    <h3 class="font-bold text-gray-900 mb-2">精选文章</h3>
-                    <p class="text-gray-600 text-sm">每天精选1-2篇高质量英文长文，涵盖多个领域</p>
-                </div>
-                <div>
-                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
-                        </svg>
-                    </div>
-                    <h3 class="font-bold text-gray-900 mb-2">专业翻译</h3>
-                    <p class="text-gray-600 text-sm">用心翻译，保持原文深度与风格，传递思想精髓</p>
-                </div>
-                <div>
-                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
-                    <h3 class="font-bold text-gray-900 mb-2">移动优先</h3>
-                    <p class="text-gray-600 text-sm">完美适配手机端，随时随地享受阅读</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-400 py-12">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <span class="font-serif text-xl font-bold text-white">Noc's Blog</span>
-                    <p class="text-sm mt-1">知识分享，生活随笔</p>
-                </div>
-                <div class="flex space-x-6">
-                    <a href="/daily-curated/" class="hover:text-white transition-colors">每日精选</a>
-                    <a href="/archives" class="hover:text-white transition-colors">归档</a>
-                    <a href="/about" class="hover:text-white transition-colors">关于</a>
-                </div>
-            </div>
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
-                <p>&copy; 2025 Noc's Blog. All rights reserved.</p>
-            </div>
+    <footer class="bg-gray-100 py-6">
+        <div class="max-w-4xl mx-auto px-4 text-center text-sm text-gray-500">
+            <p>&copy; 2025 Noc's Blog · 每日精选</p>
         </div>
     </footer>
+
+    <!-- 音乐播放器 -->
+    <div class="row">
+        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
+                   server="netease"
+                   type="playlist"
+                   id="8561735623"
+                   fixed='true'
+                   autoplay='false'
+                   theme='#42b983'
+                   loop='all'
+                   order='random'
+                   preload='auto'
+                   volume='0.7'
+                   list-folded='true'>
+        </meting-js>
+    </div>
+    <script src="/libs/aplayer/APlayer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+
+    <!-- 动态渲染脚本 -->
+    <script>
+        // 按日期分组文章
+        function groupByDate(articles) {
+            const groups = {};
+            articles.forEach(article => {
+                if (!groups[article.date]) {
+                    groups[article.date] = [];
+                }
+                groups[article.date].push(article);
+            });
+            // 按日期倒序
+            return Object.keys(groups).sort().reverse().map(date => ({
+                date,
+                articles: groups[date]
+            }));
+        }
+
+        // 格式化日期
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+        }
+
+        // 渲染标签
+        function renderTags(categories) {
+            const colors = {
+                '社会学': 'blue',
+                '经济学': 'blue',
+                '政治学': 'green',
+                '书评': 'green',
+                '哲学': 'orange',
+                '文化': 'orange',
+                '女性主义': 'pink',
+                '中东政治': 'pink',
+                '文化批评': 'purple',
+                '阅读清单': 'purple'
+            };
+            return categories.map(cat => {
+                const color = colors[cat] || 'gray';
+                return `<span class="px-2 py-0.5 bg-${color}-100 text-${color}-700 text-xs rounded">${cat}</span>`;
+            }).join('');
+        }
+
+        // 渲染文章列表
+        function renderArticles(data) {
+            const container = document.getElementById('article-list');
+            const groups = groupByDate(data.articles);
+            
+            container.innerHTML = groups.map(group => `
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="text-sm text-gray-400 mb-3">${formatDate(group.date)}</div>
+                    <div class="space-y-4">
+                        ${group.articles.map((article, index) => `
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        ${renderTags(article.category)}
+                                    </div>
+                                    <h3 class="font-serif text-lg font-bold">
+                                        <a href="/${article.file}" class="hover:text-blue-600">${article.title}</a>
+                                    </h3>
+                                    <div class="text-sm text-gray-500 mt-1">${article.author} · ${article.source}</div>
+                                    ${article.summary ? `<div class="text-sm text-gray-400 mt-1 line-clamp-1">${article.summary}</div>` : ''}
+                                </div>
+                                <a href="/${article.file}" class="ml-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 whitespace-nowrap">阅读</a>
+                            </div>
+                            ${index < group.articles.length - 1 ? '<hr class="border-gray-100">' : ''}
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('loading').classList.add('hidden');
+            container.classList.remove('hidden');
+        }
+
+        // 加载文章数据
+        async function loadArticles() {
+            try {
+                const response = await fetch('articles.json');
+                if (!response.ok) throw new Error('Failed to load');
+                const data = await response.json();
+                renderArticles(data);
+            } catch (error) {
+                console.error('Error loading articles:', error);
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('error').classList.remove('hidden');
+            }
+        }
+
+        // 初始化
+        loadArticles();
+    </script>
 </body>
 </html>
