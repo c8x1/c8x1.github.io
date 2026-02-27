@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>反科技经典：30本书 (The Anti-Tech Canon: 30 Books) | 每日精选</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>tailwind.config={theme:{extend:{fontFamily:{serif:['Noto Serif SC','serif'],sans:['Inter','sans-serif']}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+        /* 音乐播放器样式 */
+        .music-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 12px 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 280px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .music-player.collapsed {
+            min-width: auto;
+            padding: 12px;
+        }
+        .music-player.collapsed .player-info,
+        .music-player.collapsed .progress-container,
+        .music-player.collapsed .volume-control {
+            display: none;
+        }
+        .player-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            flex-shrink: 0;
+        }
+        .player-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        .player-btn:active {
+            transform: scale(0.95);
+        }
+        .player-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .song-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1f2937;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .song-artist {
+            font-size: 11px;
+            color: #6b7280;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .progress-container {
+            width: 100%;
+            margin-top: 6px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s;
+        }
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+        .control-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .control-btn:hover {
+            background: #f3f4f6;
+            color: #3b82f6;
+        }
+        .toggle-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            border: none;
+            cursor: pointer;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            flex-shrink: 0;
+        }
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .volume-slider {
+            width: 60px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #e5e7eb;
+            border-radius: 2px;
+            outline: none;
+        }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #3b82f6;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        @media (max-width: 640px) {
+            .music-player {
+                left: 10px;
+                right: 10px;
+                bottom: 10px;
+                min-width: auto;
+            }
+        }
+    </style>
+<link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
+<style>
+.aplayer .aplayer-lrc p { display: none; font-size: 12px; font-weight: 700; line-height: 16px !important; }
+.aplayer .aplayer-lrc p.aplayer-lrc-current { display: none; font-size: 15px; color: #42b983; }
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body { left: -66px !important; }
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover { left: 0px !important; }
+body { padding-bottom: 80px; }
+</style>
+
+<style>
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #0f0f23 !important;
+        color: #e4e4e7 !important;
+    }
+    .bg-gray-50 { background-color: #0f0f23 !important; }
+    .bg-white { background-color: #1a1a2e !important; }
+    .bg-gray-100 { background-color: #16213e !important; }
+    .bg-gray-900 { background-color: #0a0a1a !important; }
+    .text-gray-800 { color: #e4e4e7 !important; }
+    .text-gray-700 { color: #d4d4d8 !important; }
+    .text-gray-600 { color: #a1a1aa !important; }
+    .text-gray-500 { color: #71717a !important; }
+    .text-gray-900 { color: #fafafa !important; }
+    .border-gray-100 { border-color: #2d3748 !important; }
+    .border-gray-200 { border-color: #374151 !important; }
+    .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.5) !important; }
+    article { background-color: #1a1a2e !important; }
+    nav { background-color: #1a1a2e !important; border-bottom: 1px solid #2d3748 !important; }
+    .prose { color: #d4d4d8 !important; }
+    .prose h1, .prose h2, .prose h3 { color: #fafafa !important; }
+    .prose p { color: #d4d4d8 !important; }
+    .prose blockquote { border-left-color: #3b82f6 !important; background-color: #16213e !important; }
+    .bg-blue-50 { background-color: #1e3a5f !important; }
+    .bg-green-50 { background-color: #1e3a3f !important; }
+    .bg-purple-50 { background-color: #2d1b4e !important; }
+    .bg-orange-50 { background-color: #3d2817 !important; }
+    .bg-pink-50 { background-color: #3d1f2f !important; }
+    .bg-red-50 { background-color: #3d1f1f !important; }
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+    .music-player { left: 10px !important; right: 10px !important; bottom: 10px !important; }
+}
+</style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800" style="padding-bottom: 100px;">
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
+            <a href="/" class="font-serif text-lg font-bold text-gray-900">Noc's Blog</a>
+            <div class="flex items-center space-x-4 text-sm">
+                <a href="/daily-curated/" class="text-blue-600 font-medium">每日精选</a>
+                <a href="/archives" class="text-gray-600">归档</a>
+            </div>
+        </div>
+    </nav>
+
+    <article class="max-w-3xl mx-auto px-4 py-10 bg-white min-h-screen">
+        <header class="mb-8">
+            <div class="flex items-center space-x-2 mb-3">
+                <span class="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded">文化批评</span>
+                <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">阅读清单</span>
+            </div>
+            <h1 class="font-serif text-2xl md:text-3xl font-bold text-gray-900 mb-2 leading-tight">反科技经典：30本书</h1>
+            <p class="text-lg text-gray-500 italic mb-3">The Anti-Tech Canon: 30 Books</p>
+            <div class="flex items-center text-sm text-gray-500">
+                <span>Ted Gioia</span>
+                <span class="mx-2">·</span>
+                <span>2025年2月26日</span>
+                <span class="mx-2">·</span>
+                <a href="https://open.substack.com/pub/tedgioia/p/the-anti-tech-canon-30-books" target="_blank" class="text-blue-600 hover:underline">原文</a>
+            </div>        </header>
+
+        <div class="prose prose-lg max-w-none font-serif text-gray-700">
+            <!-- 引言 -->
+            <div class="bg-purple-50 border-l-4 border-purple-400 p-4 mb-8">
+                <p class="italic text-gray-600 m-0">2024年，我感到迫切需要挑战一种新的教条——技术乐观主义。这种意识形态告诉人们：闭嘴，继续刷手机。</p>
+            </div>
+
+            <p class="mb-4">硅谷会为我们建造乌托邦。我们只需要每天24小时盯着那些小屏幕，下载所有应用，上传我们的私人信息。他们会搞定一切。</p>
+
+            <p class="mb-4">那时，一些科技领袖开始分享"阅读清单"。但那些清单上大多是垃圾书籍——平庸的流行心理学、谄媚的科技大佬传记，以及像格拉德威尔那样的"大概念"写手炮制出来的注水文章。</p>
+
+            <p class="mb-4">但仔细思考后，我发现这可能也有积极的一面。多年来，他们一直嘲笑人文学科——"去学编程"是他们的口头禅——这些"空心人"终于开始说"去读书"了。</p>
+
+            <p class="mb-4"><strong>这是智慧的开端。是的，他们确实需要书籍。但他们需要更好的书。</strong></p>
+
+            <p class="mb-6">直说吧：你不会从科技CEO那里学到这些更好的书。他们中很多人非常聪明——我在硅谷待了25年，这是亲身经历。但现在的科技界需要注入人文主义思维和更广阔的文化视野。</p>
+
+            <div class="bg-gray-100 p-4 rounded-lg text-center my-8">
+                <p class="text-xl font-bold text-purple-700 m-0">没有应用程序能做到这一点。</p>
+            </div>
+
+            <h2 class="text-2xl font-bold text-gray-900 mt-12 mb-6">30本反科技经典</h2>
+
+            <p class="mb-6">以下是30本来自硅谷回声室之外的书籍。它们从人文主义立场批判科技。目标不是摧毁或谴责技术。我们只是希望把它用于正途——为了用户的利益。</p>
+
+            <!-- 书籍列表 -->
+            <div class="space-y-6">
+                <!-- 1 -->
+                <div class="bg-gray-50 p-5 rounded-lg border-l-4 border-purple-400">
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">1. 《暴风雨》<span class="text-gray-500 font-normal"> (The Tempest, 1611)</span> - 威廉·莎士比亚</h3>
+                    <p class="text-gray-700 m-0">在莎士比亚的最后一部戏剧中，他通过普洛斯彼罗这个角色提供了领导者和创新者的原型。普洛斯彼罗的巫术带来了巨大的力量，但也带来了责任。这个故事始于对知识的无拘无束的追求和对权力的攫取，最终却成为对想象力、和谐与和解的颂扬。这是一部非常有智慧的作品，应该在帕洛阿尔托的街角分发。</p>
+                </div>
+
+                <!-- 2 -->
+                <div class="bg-gray-50 p-5 rounded-lg border-l-4 border-purple-400">
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">2. 《弗兰肯斯坦》<span class="text-gray-500 font-normal"> (Frankenstein, 1818)</span> - 玛丽·雪莱</h3>
+                    <p class="text-gray-700 m-0">弗兰肯斯坦博士是典型的科技创业者——在实验室里努力创造突破性原型，一块一块地拼凑起来。可惜他得去盗墓才能得到那些"比特和字节"。但只要目的正当，可以不择手段——嘿，他的1.0版本完全是个怪物。出版两百年后，《弗兰肯斯坦》仍然是我们理解技术官僚责任的最佳入门书，也是创新超越道德思考时我们付出的代价。</p>
+                </div>
+
+                <!-- 3 -->
+                <div class="bg-gray-50 p-5 rounded-lg border-l-4 border-purple-400">
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">3. 《浮士德》<span class="text-gray-500 font-normal"> (Faust, 1808)</span> - 歌德</h3>
+                    <p class="text-gray-700 m-0">忘掉那些谄媚的科技传记，想想浮士德博士——他因为知识和进步而如此兴奋，以至于为此出卖了自己的灵魂。我真的以为会在福布斯亿万富翁榜单上看到他。可惜在IPO之前，事情就变糟了。</p>
+                </div>
+
+                <!-- 4 -->
+                <div class="bg-gray-50 p-5 rounded-lg border-l-4 border-purple-400">
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">4. 《哥特式的本质》<span class="text-gray-500 font-normal"> (The Nature of Gothic, 1853)</span> - 约翰·罗斯金</h3>
+                    <p class="text-gray-700 m-0">罗斯金赞扬建造哥特式大教堂的技术——原因令人惊讶。他热爱哥特式世界观，因为它允许工人在成品中表达自己的创造力。这些工匠今天仍然通过每一个滴水嘴和卷曲装饰与我们对话。罗斯金提供了一种完全不同的组织和企业的概念化方式——从真正的人文立场出发。七年后，罗斯金出版了《至此为止》(Unto This Last)，从关怀、伦理的角度对经济进行了类似的批判。</p>
+                </div>
+
+                <!-- 5 -->
+                <div class="bg-gray-50 p-5 rounded-lg border-l-4 border-purple-400">
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">5. 《艰难时世》<span class="text-gray-500 font-normal"> (Hard Times, 1854)</span> - 查尔斯·狄更斯</h3>
+                    <p class="text-gray-700 m-0">启蒙运动（1650-1800）带来了快速工业化和其他经济利益，但代价可怕。那个时代的创新者很少担心童工、奴隶制和剥削性的工作条件。幸运的是，19世纪的人文主义者站出来反对这些 abuses。没有人比查尔斯·狄更斯发挥了更大的作用。他的全部作品都怀着对同情改革的渴望——但起点是他1854年的小说《艰难时世》。</p>
+                </div>
+
+                <!-- 6 -->
+                <div class="bg-gray-50 p-5 rounded-lg border-l-4 border-purple-400">
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">6. 《瓦尔登湖》<span class="text-gray-500 font-normal"> (Walden, 1854)</span> - 亨利·梭罗</h3>
+                    <p class="text-gray-700 m-0">当你终于去某个隐修处或静修地进行数字排毒时，这是你要带上的治愈之旅的书。梭罗整整两年放弃了智能手机。事实上，他放弃了所有技术，在瓦尔登湖追求沉思的自然生活。你今天仍然可以这样做，如果你有勇气的话。作为开始，也许可以尝试两周——或者两天，或者也许只是两个小时。</p>
+                </div>
+
+                <!-- 7 -->
+                <div class="bg-gray-50 p-5 rounded-lg border-l-4 border-purple-400">
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">7. 《魔山》<span class="text-gray-500 font-normal"> (The Magic Mountain, 1924)</span> - 托马斯·曼</h3>
+                    <p class="text-gray-700 m-0">工程师汉斯·卡斯托普发现自己被迫痛苦地走出舒适区，作为访客（后来是病人）来到阿尔卑斯山一家豪华的肺结核疗养院。在这里，他面对着思想和情感潮流的 tumult——整个20世纪现代主义的困境——而他所有的STEM公式和分析技能甚至无法开始理解它们的意义。没有哪部小说更有野心地展示了技术官僚世界观的局限性和盲点。曼把小说背景设在达沃斯——现在世界经济论坛的首选会议地点——这一事实为这部已经多层次的作品增添了进一步的讽刺意味。</p>
+                </div>
+
+                <!-- 8 -->
+                <div class="bg-gray-50 p-5 rounded-lg border-l-4 border-purple-400">
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">8. 《艺术的非人化》<span class="text-gray-500 font-normal"> (The Dehumanization of Art, 1925)</span> - 何塞·奥尔特加·加塞特</h3>
+                    <p class="text-gray-700 m-0">在一个技术驱动的世界里，艺术中的人文元素是令人尴尬的过去遗迹。至少有些人是这么认为的。如今，巨大的商业建立在用机器人取代艺术家的想法上。奥尔特加一个世纪前就与这种思维方式进行了斗争，他对非人化审美心态的分析现在诡异般地相关。</p>
+                </div>
+
+                <!-- 9 -->
+                <div class="bg-gray-50 p-5 rounded-lg border-l-4 border-purple-400">
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">9. 《美丽新世界》<span class="text-gray-500 font-normal"> (Brave New World, 1932)</span> - 奥尔德斯·赫胥黎</h3>
+                    <p class="text-gray-700 m-0">想象一个人们被药物、科技驱动的娱乐、思想控制和强加的一致性所麻木的世界。不，我说的不是谷歌的高管套房——我在共鸣赫胥黎的《美丽新世界》，这部93年前从他的精神孵化器中孵化的作品。这可能是所有科幻作品中最有预言性的一部。赫胥黎明白，你不需要士兵来强加暴政。只要让暴政足够上瘾和分散注意力，人们就会拥抱自己的堕落和征服。</p>
+                </div>
+
+                <!-- 10 -->
+                <div class="bg-gray-50 p-5 rounded-lg border-l-4 border-purple-400">
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">10. 《游戏的人》<span class="text-gray-500 font-normal"> (Homo Ludens, 1938)</span> - 约翰·赫伊津哈</h3>
+                    <p class="text-gray-700 m-0">赫伊津哈是一位叛逆的历史学家，颠覆了他那个时代的群体思维。（我也喜欢他的《中世纪的衰落》一书，展示了即使在文艺复兴之前，欧洲就已经存在丰富的人文主义社会。）在《游戏的人》中，他同样具有挑衅性——坚持认为人类生活中最重要的成分是游戏性。赫伊津哈热爱仪式、节日、社区聚会，以及所有我们纯粹为了乐趣而不是金钱利益而做的事情。互联网和科技界不久前也拥抱了这些同样的自由奔放的价值观，但后来一切都变了。</p>
+                </div>
+
+                <!-- 11-30 简化展示 -->
+                <div class="bg-gray-50 p-5 rounded-lg border-l-4 border-purple-400">
+                    <h3 class="font-bold text-lg text-gray-900 mb-3">11-30. 更多经典</h3>
+                    <div class="grid md:grid-cols-2 gap-3 text-sm">
+                        <div><strong>11.《1984》</strong> (1949) - 乔治·奥威尔</div>
+                        <div><strong>12.《扎根》</strong> (1949) - 西蒙娜·薇依</div>
+                        <div><strong>13.《关于技术的问题》</strong> (1954) - 马丁·海德格尔</div>
+                        <div><strong>14.《人的境况》</strong> (1958) - 汉娜·阿伦特</div>
+                        <div><strong>15.《两种文化》</strong> (1959) - C.P.斯诺 & F.R.利维斯</div>
+                        <div><strong>16.《沙丘》</strong> (1965) - 弗兰克·赫伯特</div>
+                        <div><strong>17.《仿生人会梦见电子羊吗？》</strong> (1968) - 菲利普·K·迪克</div>
+                        <div><strong>18.《心智生态学》</strong> (1972) - 格雷戈里·贝特森</div>
+                        <div><strong>19.《溪畔天问》</strong> (1974) - 安妮·迪拉德</div>
+                        <div><strong>20.《规训与惩罚》</strong> (1975) - 米歇尔·福柯</div>
+                        <div><strong>21.《JR》</strong> (1975) - 威廉·加迪斯</div>
+                        <div><strong>22.《拟像与模拟》</strong> (1981) - 让·鲍德里亚</div>
+                        <div><strong>23.《娱乐至死》</strong> (1985) - 尼尔·波兹曼</div>
+                        <div><strong>24.《别让我走》</strong> (2005) - 石黑一雄</div>
+                        <div><strong>25.《主人与使者》</strong> (2009) - 伊恩·麦吉尔克里斯特</div>
+                        <div><strong>26.《科学的暴政》</strong> (2011) - 保罗·费耶阿本德</div>
+                        <div><strong>27.《倦怠社会》</strong> (2010) - 韩炳哲</div>
+                        <div><strong>28.《创造自然》</strong> (2015) - 安德烈娅·伍尔夫</div>
+                        <div><strong>29.《我们为何如此》</strong> (2014) - 文森特·德贡布</div>
+                        <div><strong>30.《诗歌作为生活的升级》</strong> (2024) - 查尔斯·泰勒</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 结语 -->
+            <div class="mt-12 p-6 bg-purple-50 rounded-lg">
+                <h3 class="font-bold text-lg text-gray-900 mb-3">结语</h3>
+                <p class="m-0">这就是我的清单——30本来自我能找到的最智慧的人的开阔思维的书。不要轻视它们。如果重要人物真的读了这些作品并认真对待它们，硅谷可能会开始震动。我说的不是里氏震级，而是更大的东西。</p>
+            </div>
+
+            <!-- 译者注 -->
+            <div class="mt-8 text-sm text-gray-500 border-t pt-6">
+                <p><strong>译者注</strong>：Ted Gioia 是一位著名的文化评论家、音乐史学家和作家。他曾任教于斯坦福大学，并在硅谷工作25年。他的Substack "The Honest Broker" 专注于文化批评和阅读推荐。这份书单体现了他对技术乐观主义的深刻反思，以及对人文学科价值的坚定捍卫。</p>
+            </div>
+        </div>
+
+        <div class="mt-12 pt-6 border-t flex justify-between items-center">
+            <a href="/daily-curated/2025-02-26/syrian-feminists.html" class="text-gray-600 hover:text-gray-900 text-sm">← 上一篇</a>
+            <a href="/daily-curated/2025-02-25/seeing-like-a-state.html" class="text-blue-600 hover:text-blue-800 text-sm">下一篇 →</a>
+        </div>
+    </article>
+
+    <footer class="bg-gray-100 py-6">
+        <div class="max-w-3xl mx-auto px-4 text-center text-sm text-gray-500">
+            <p>&copy; 2025 Noc's Blog · 每日精选</p>
+        </div>
+    </footer>
+
+    <!-- 音乐播放器 -->
+    
+<div class="row">
+    <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
+               server="netease"
+               type="playlist"
+               id="8561735623"
+               fixed='true'
+               autoplay='false'
+               theme='#42b983'
+               loop='all'
+               order='random'
+               preload='auto'
+               volume='0.7'
+               list-folded='true'
+    >
+    </meting-js>
+</div>
+<script src="/libs/aplayer/APlayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+</body>
+</html>

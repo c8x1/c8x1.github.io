@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>书评：像国家一样看 (Book Review: Seeing Like A State) | 每日精选</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>tailwind.config={theme:{extend:{fontFamily:{serif:['Noto Serif SC','serif'],sans:['Inter','sans-serif']}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+        /* 音乐播放器样式 */
+        .music-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 12px 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 280px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .music-player.collapsed {
+            min-width: auto;
+            padding: 12px;
+        }
+        .music-player.collapsed .player-info,
+        .music-player.collapsed .progress-container,
+        .music-player.collapsed .volume-control {
+            display: none;
+        }
+        .player-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            flex-shrink: 0;
+        }
+        .player-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        .player-btn:active {
+            transform: scale(0.95);
+        }
+        .player-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .song-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1f2937;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .song-artist {
+            font-size: 11px;
+            color: #6b7280;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .progress-container {
+            width: 100%;
+            margin-top: 6px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s;
+        }
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+        .control-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .control-btn:hover {
+            background: #f3f4f6;
+            color: #3b82f6;
+        }
+        .toggle-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            border: none;
+            cursor: pointer;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            flex-shrink: 0;
+        }
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .volume-slider {
+            width: 60px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #e5e7eb;
+            border-radius: 2px;
+            outline: none;
+        }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #3b82f6;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        @media (max-width: 640px) {
+            .music-player {
+                left: 10px;
+                right: 10px;
+                bottom: 10px;
+                min-width: auto;
+            }
+        }
+    </style>
+<link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
+<style>
+.aplayer .aplayer-lrc p { display: none; font-size: 12px; font-weight: 700; line-height: 16px !important; }
+.aplayer .aplayer-lrc p.aplayer-lrc-current { display: none; font-size: 15px; color: #42b983; }
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body { left: -66px !important; }
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover { left: 0px !important; }
+body { padding-bottom: 80px; }
+</style>
+
+<style>
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #0f0f23 !important;
+        color: #e4e4e7 !important;
+    }
+    .bg-gray-50 { background-color: #0f0f23 !important; }
+    .bg-white { background-color: #1a1a2e !important; }
+    .bg-gray-100 { background-color: #16213e !important; }
+    .bg-gray-900 { background-color: #0a0a1a !important; }
+    .text-gray-800 { color: #e4e4e7 !important; }
+    .text-gray-700 { color: #d4d4d8 !important; }
+    .text-gray-600 { color: #a1a1aa !important; }
+    .text-gray-500 { color: #71717a !important; }
+    .text-gray-900 { color: #fafafa !important; }
+    .border-gray-100 { border-color: #2d3748 !important; }
+    .border-gray-200 { border-color: #374151 !important; }
+    .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.5) !important; }
+    article { background-color: #1a1a2e !important; }
+    nav { background-color: #1a1a2e !important; border-bottom: 1px solid #2d3748 !important; }
+    .prose { color: #d4d4d8 !important; }
+    .prose h1, .prose h2, .prose h3 { color: #fafafa !important; }
+    .prose p { color: #d4d4d8 !important; }
+    .prose blockquote { border-left-color: #3b82f6 !important; background-color: #16213e !important; }
+    .bg-blue-50 { background-color: #1e3a5f !important; }
+    .bg-green-50 { background-color: #1e3a3f !important; }
+    .bg-purple-50 { background-color: #2d1b4e !important; }
+    .bg-orange-50 { background-color: #3d2817 !important; }
+    .bg-pink-50 { background-color: #3d1f2f !important; }
+    .bg-red-50 { background-color: #3d1f1f !important; }
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+    .music-player { left: 10px !important; right: 10px !important; bottom: 10px !important; }
+}
+</style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800" style="padding-bottom: 100px;">
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
+            <a href="/" class="font-serif text-lg font-bold text-gray-900">Noc's Blog</a>
+            <div class="flex items-center space-x-4 text-sm">
+                <a href="/daily-curated/" class="text-blue-600 font-medium">每日精选</a>
+                <a href="/archives" class="text-gray-600">归档</a>
+            </div>
+        </div>
+    </nav>
+
+    <article class="max-w-3xl mx-auto px-4 py-10 bg-white min-h-screen">
+        <header class="mb-8">
+            <div class="flex items-center space-x-2 mb-3">
+                <span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">政治学</span>
+                <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">书评</span>
+            </div>
+            <h1 class="font-serif text-2xl md:text-3xl font-bold text-gray-900 mb-2 leading-tight">书评：像国家一样看</h1>
+            <p class="text-lg text-gray-500 italic mb-3">Book Review: Seeing Like A State</p>
+            <div class="flex items-center text-sm text-gray-500">
+                <span>Scott Alexander</span>
+                <span class="mx-2">·</span>
+                <span>2025年2月25日</span>
+                <span class="mx-2">·</span>
+                <a href="https://slatestarcodex.com/2017/03/16/book-review-seeing-like-a-state/" target="_blank" class="text-blue-600 hover:underline">原文</a>
+            </div>
+        </header>
+
+        <!-- Book Cover Image -->
+        <div class="mb-8 bg-gray-100 p-6 rounded-lg text-center">
+            <div class="inline-block bg-white p-4 rounded shadow-md">
+                <div class="w-32 h-48 bg-green-800 rounded flex items-center justify-center text-white font-serif">
+                    <div class="text-center p-2">
+                        <div class="text-xs mb-1">SEEING LIKE</div>
+                        <div class="text-lg font-bold mb-1">A STATE</div>
+                        <div class="text-xs">James C. Scott</div>
+                    </div>
+                </div>
+            </div>
+            <p class="text-sm text-gray-500 mt-4">James C. Scott 的《像国家一样看》(1998) 是政治人类学领域的经典著作</p>
+        </div>
+
+        <div class="prose prose-lg max-w-none font-serif text-gray-700">
+            <p class="lead text-lg text-gray-600 mb-6 border-l-4 border-green-400 pl-4 italic">《像国家一样看》是 G.K. Chesterton 如果进入经济史而不是文学会写的那本书。既然他没有，James Scott 不得不在一个世纪后写下它。等待是值得的。</p>
+
+            <h2 class="text-xl font-bold text-gray-900 mt-8 mb-4">I. 科学林业的寓言</h2>
+            <p class="mb-4">Scott 以18世纪普鲁士的"科学林业"故事开始。启蒙理性主义者注意到农民只是像傻瓜一样砍倒森林里碰巧生长的任何树木。他们想出了一个更好的主意：清除所有森林，代之以种植完全相同的挪威云杉（单位时间木材产量最高的树），以<strong>均匀间隔的矩形网格</strong>排列。然后有一天你可以拿着斧头走进去，一小时砍倒无数棵树，拥有你永远用不完的木材。</p>
+
+            <p class="mb-4">这进行得很糟糕。贫瘠的生态系统无法支持维持周围农民村庄的野生动物和药草，他们遭受了经济崩溃。无穷无尽的相同树木行是植物病害和森林火灾的完美温床。维持土壤的复杂生态过程停止运作，所以一代人之后，挪威云杉长得矮小营养不良。然而不知何故，所有参与者都得到了晋升，"科学林业"传播到欧洲和世界各地。</p>
+
+            <p class="mb-4">这种模式在历史上以可疑的规律性重复，不仅在生物系统中，也在社会系统中。</p>
+
+            <h3 class="text-lg font-bold text-gray-800 mt-6 mb-3">四个失败的模式</h3>
+
+            <p class="mb-4"><strong>1. 城市规划</strong>：自然有机演化的城市往往是黑暗小巷、小商店和拥挤街道的密集混合体。现代科学理性主义者想出了一个更好的主意：均匀间隔的矩形网格，由宽阔林荫道分隔的相同巨型野兽派公寓楼，一切都仔细划分成区域。然而不知何故，每当这些新的理性城市建成时，人们讨厌它们，尽一切可能搬到更有机的郊区。而且，不知何故，城市规划师得到了晋升，变得出名，并将他们破坏性的技术传播到世界各地。</p>
+
+            <p class="mb-4"><strong>2. 集体农业</strong>：古老有机演化的农民村庄往往是复杂的混乱，每个人都在形状不规则的狭小地块上同时试图种植五十种不同的作物。现代科学理性主义者想出了一个更好的主意：巨型集体机械化农场，种植专门培育的高产作物，以（跟我一起说）<strong>均匀间隔的矩形网格</strong>排列。然而不知何故，这些巨型集体农场的每亩产量低于旧的传统方法，无论它们在哪里出现，饥荒和大规模饥饿都随之而来。而且，不知何故，政府继续推动更"现代"的方法，无论是苏联的社会主义集体农庄、美国的大型农业公司，还是第三世界 sprawling 的香蕉种植园。</p>
+
+            <p class="mb-4"><strong>3. 非洲重新安置</strong>：许多东非土著的传统生活方式是游牧的，在复杂的丛林地形中进行刀耕火种农业，遵循令人眼花缭乱的各种临时规则。非洲政府（殖民地和独立的）中的现代科学理性主义者想出了一个更好的主意——将土著重新安置到村庄，在那里他们可以有现代便利设施如学校、水井、电力，以及<strong>均匀间隔的矩形网格</strong>。然而不知何故，这些村庄不断失败：他们的作物死亡，他们的经济崩溃，他们的土著居民消失回丛林。而且，不知何故，非洲政府不断试图把土著带回来让他们留下，即使他们必须模糊村庄和集中营之间的界限才能做到。</p>
+
+            <h2 class="text-xl font-bold text-gray-900 mt-8 mb-4">II. 前现代国家的税收困难</h2>
+            <p class="mb-4">假设你是前现代国王，也许是中世纪统治法国的某个路易。你想向人们征税以筹集资金用于十字军东征或类似的事情。实际上你王国里的每个人都是农民，所有农民生产的都是粮食，所以你要用粮食征税。应该不难，对吧？你只要测量每个人生产多少品脱粮食，然后……</p>
+
+            <blockquote class="border-l-4 border-green-400 pl-4 py-2 my-4 bg-green-50 italic text-sm">18世纪巴黎的品脱相当于0.93升，而在 Seine-en-Montane 是1.99升，在 Precy-sous-Thil 更是惊人的3.33升。Aune（用于测量布匹的长度单位）因材料而异（例如，丝绸的单位比亚麻的小），在法国至少有17种不同的 aune。</blockquote>
+
+            <p class="mb-4">好吧，这很愚蠢。给每个人统一大小的篮子，告诉他们篮子是新的计量单位。</p>
+
+            <blockquote class="border-l-4 border-green-400 pl-4 py-2 my-4 bg-green-50 italic text-sm">近代早期欧洲几乎到处都有关于篮子如何因磨损、膨胀、编织技巧、湿度、边缘厚度等而调整的微观政治。在一些地区，当地 bushel 和其他计量单位的标准以金属形式保存，由值得信赖的官员保管，或者 literally 刻在教堂或市政厅的石头上。这还没完。粮食应该如何倾倒（从肩高，这会稍微压实，还是从腰高？）、可以有多湿、容器是否可以摇晃压实，以及最后，如果满了应该如何平整，这些都是长期激烈争议的主题。</blockquote>
+
+            <p class="mb-4">也许你不应该征粮食税。也许你应该征土地税。毕竟，是土地生产粮食。只要弄清楚每个人拥有多少土地，你就可以从那里计算某种适当的税。</p>
+
+            <blockquote class="border-l-4 border-green-400 pl-4 py-2 my-4 bg-green-50 italic text-sm">一个假设的传统土地保有实践案例可能有助于证明将这些实践同化到现代地籍图（适合税收评估的土地测量）的裸骨方案是多么困难……让我们想象一个社区，家庭在主要生长季节对农田有使用权。然而，只能种植某些作物，每七年使用权土地根据每个家庭的大小和健全成年人的数量在居民家庭之间分配。在主季作物收获后，所有农田恢复为公共土地，任何家庭都可以拾穗、放牧家禽和牲畜，甚至种植快速成熟的旱季作物。放牧权延伸到所有当地家庭，但可以放牧的动物数量根据家庭规模限制，特别是在饲料稀缺的干旱年份。不使用放牧权的家庭可以将它们给其他村民，但不能给外人。每个人都有权为正常家庭需求收集柴火，村里的铁匠和面包师获得更大的分配。禁止从村林地商业销售。</blockquote>
+
+            <p class="mb-4">你知道什么吗？我就把你所有人都登记为拥有十。十块地。大家都同意吗？酷。我们说每人十块地，然后继续去下一个村庄。</p>
+
+            <p class="mb-4">故事的寓意是：<strong>前现代国家有效征税的能力非常有限</strong>。除了上面提到的问题——非标准化计量、非标准化产权、非标准化个人姓名——我们还可以添加其他一些问题。此时国家语言是一个残酷的虚构；当地方言可能彼此差异如同西班牙语和葡萄牙语，所以村民甚至可能无法理解税收员。最糟糕的是，法国直到17世纪才有普查，所以甚至不清楚有多少人或村庄。</p>
+
+            <p class="mb-4">因此，从一开始，国王就有动机使国家"可读化"——即组织和索引良好，以便容易了解每个人的一切并征收/复核税收。同样从一开始，贵族就有动机阻挠国王，以免他们失业。而普通民众，他们认为任何使国家更容易征税和干涉他们事务的事情都是坏消息，通常也会抵制。</p>
+
+            <h2 class="text-xl font-bold text-gray-900 mt-8 mb-4">III. 姓氏与语言的标准化</h2>
+            <p class="mb-4">Scott 描述了姓氏的传播。农民不喜欢永久姓氏。他们自己的系统对他们来说相当合理：面包师约翰是 John Baker，铁匠约翰是 John Smith，住在山下的约翰是 John Underhill，个子很矮的约翰是 John Short。同一个人可能在不同情境下是 John Smith 和 John Underhill，取决于他作为铁匠或原籍的身份哪个更重要。</p>
+
+            <p class="mb-4">但政府坚持给每个人一个单一的永久姓名，对村庄来说是唯一的，并追踪谁与谁是同一家人。抵制很激烈：</p>
+
+            <blockquote class="border-l-4 border-green-400 pl-4 py-2 my-4 bg-green-50 italic text-sm">我们拥有的证据表明，任何类型的第二姓氏随着与国家财政触及范围的距离增加而变得稀少。虽然在佛罗伦萨三分之一的家庭申报了第二姓氏，但在二级城镇下降到五分之一，在乡村下降到十分之一。直到17世纪，姓氏才在托斯卡纳最偏远和最贫穷的地区——那些与官府接触最少的地区——固化下来……国家命名实践，如国家测绘实践，不可避免地（原文如此）与税收（劳役、兵役、粮食、收入）相关，因此引起民众抵制。</blockquote>
+
+            <p class="mb-4">欧洲开始殖民其他大陆时，同样的问题再次出现。他们再次遇到命名系统他们认为不清楚且不适合税收的人口。但由于殖民国家比中世纪相对薄弱的封建君主制对其臣民有更多控制，他们能够一次性解决这个问题，有时滑稽地：</p>
+
+            <blockquote class="border-l-4 border-green-400 pl-4 py-2 my-4 bg-green-50 italic text-sm">这一点在西班牙统治下的菲律宾得到了最好的说明。菲律宾人在1849年11月21日的法令中被指示采用永久的西班牙姓氏……每个地方官员被给予足够其管辖区的姓氏供应，"注意按字母顺序分配"。在实践中，每个城镇从按字母顺序排列的[目录]中获得若干页，产生整个城镇姓氏以同一字母开头的现象。在过去150年几乎没有移民的情况下，这种行政练习的痕迹在景观上仍然清晰可见。</blockquote>
+
+            <h2 class="text-xl font-bold text-gray-900 mt-8 mb-4">IV. 高级现代主义与城市规划的失败</h2>
+            
+            <p class="mb-4"><strong>高级现代主义</strong>是一种伪装成科学哲学的美学品味。Scott 将其定义为：</p>
+
+            <blockquote class="border-l-4 border-green-400 pl-4 py-2 my-4 bg-green-50 italic text-sm">一种强烈的，甚至可以说肌肉发达的，关于科学和技术进步、生产扩张、人类需求日益满足、征服自然（包括人类本性）的自信，最重要的是，与对自然法则的科学理解相称的社会秩序的理性设计。</blockquote>
+
+            <p class="mb-4">最坏的是<strong>勒·柯布西耶</strong>（Le Corbusier），法国艺术家/知识分子/建筑师。苏联人请他提出重新设计莫斯科的计划。他提出了一个：把所有人都赶出去，推平整个城市，按照理性原则从头重新设计。例如，不使用别人的非理性测量系统，他们将使用勒·柯布西耶自己发明的新测量系统，称为 Modulor，结合了法国人的平均身高和黄金比例。</p>
+
+            <p class="mb-4">苏联人决定放弃：这个计划对斯大林来说太过极端和破坏现有制度。勒·柯布西耶不死心，把图表上的"莫斯科"改成"巴黎"，然后提交给法国政府（也被拒绝了）。他的一些设计最终变成了印度的昌迪加尔。</p>
+
+            <p class="mb-4">Scott 用<strong>巴西利亚</strong>作为例子。巴西想要开发其中部几乎空旷的地区，决定在荒野中建设一个新首都。他们聘请了勒·柯布西耶的三个学生，最著名的是奥斯卡·尼迈耶，为他们建造一个完美的科学理性城市。条件再好不过了。土地已经是原始的，所以不需要先推平巴黎。没有碍事的山脉或森林。可用预算达数百亿。建筑师们迎接挑战，为他们建造了世界上最伟大的高级现代主义城市。</p>
+
+            <p class="mb-4">然而，建成二十年后，这座城市50万居民的容量只住满了一半。不是位置问题——郊区带的人口几乎达到一百万。人们想住在巴西利亚附近。他们只是不想住在尼迈耶和柯布西耶主义者建造的部分。</p>
+
+            <blockquote class="border-l-4 border-green-400 pl-4 py-2 my-4 bg-green-50 italic text-sm">大多数从其他城市搬到巴西利亚的人都惊讶地发现"这是一个没有人群的城市。"人们抱怨巴西利亚缺乏街道生活的喧嚣，没有繁忙的街角和长长的店面立面来为人行道上的行人注入活力。对他们来说，几乎就像巴西利亚的创始人不是规划了一座城市，而是实际上计划阻止一座城市。他们最常说的方式是巴西利亚"缺乏街角"，意思是它缺乏密集社区的复杂交叉路口，包括住宅和公共咖啡馆和餐馆，有休闲、工作和购物的地方。</blockquote>
+
+            <h2 class="text-xl font-bold text-gray-900 mt-8 mb-4">V. 农业集体化的失败</h2>
+            <p class="mb-4">美国版本仅仅是闹剧：托马斯·坎贝尔1918年在蒙大拿州的"农场"是一个工业农场。摩根大通帮助从公众筹集了200万美元。蒙大拿农业公司是一个9.5万英亩的巨型小麦农场，其中大部分是从四个美洲原住民部落租赁的。坎贝尔宣称农业大约90%是工程，只有10%是农业，他尽可能标准化他的运营。他种植小麦和亚麻，这两种耐寒作物在种植和收获之间几乎不需要任何照料。</p>
+
+            <p class="mb-4">但苏联版本是悲剧。苏联没有筹集一些资金开始一个大农场然后发现它行不通，而是连根拔起数百万农民，强迫他们进入集体农场，然后看着数百万人因作物歉收而饿死。发生了什么？</p>
+
+            <p class="mb-4">Scott 真正关注的是上面那个说法，即农业"90%是工程，只有10%是农业"。他说这些大农场都失败了——尽管资金更充足、技术更先进、能够获得顶级农业科学家的智慧——正是因为这个说法是错误的。小农民可能不太了解农业科学，但他们非常了解农业。他们的知识是直觉的和地方的——例如，在特定气候或土壤中该做什么。有时是代代相传的，其他时候是通过长时间的试错确定的。</p>
+
+            <p class="mb-4">他以坦桑尼亚为例，小农民在同一块地里同时种植几十种不同的作物，看起来一片混乱。西方殖民者试图说服他们——通常通过武力——改为一次只种一种东西，以获得效率、标准化和劳动分工的优势。在同一块地里只种一种作物是农业科学101。但这在困难的坦桑尼亚环境中证明是一个坏主意：</p>
+
+            <blockquote class="border-l-4 border-green-400 pl-4 py-2 my-4 bg-green-50 italic text-sm">多层的多作物种植对产量和土壤保护有一些明显优势。"上层"作物为"下层"作物遮荫，后者被选择为能够在地面较低温度和较高湿度下茁壮成长。降雨不是直接到达地面，而是作为细雾被吸收，对土壤结构的破坏较小，侵蚀较少。较高的作物通常为较低作物提供有用的防风林。最后，在混合或轮作中，作物全年都在田里，保持土壤在一起，减少太阳、风和雨的影响，特别是在脆弱的土地上。即使多作物种植在即时产量方面不占优势，它在可持续性和长期生产方面也有很多值得推荐之处。</blockquote>
+
+            <h2 class="text-xl font-bold text-gray-900 mt-8 mb-4">VI. 米提斯：实践知识的丧失</h2>
+            <p class="mb-4">Scott 将公民对城市设计的实地超经验知识，以及农民对农业的知识，总结为<strong>米提斯</strong>（metis），一个希腊术语，意思是"实践智慧"。</p>
+
+            <p class="mb-4">米提斯是：</p>
+            <ul class="list-disc pl-6 mb-4 space-y-2">
+                <li><strong>地方性的</strong>：知道在<em>这个</em>特定气候中什么有效</li>
+                <li><strong>隐性的</strong>：无法被编码成简单规则</li>
+                <li><strong>经验性的</strong>：通过试错和长期实践获得</li>
+                <li><strong>适应性的</strong>：能够应对意外情况</li>
+            </ul>
+
+            <p class="mb-4">当国家用简单的、通用的规则取代复杂的、情境化的实践时，灾难往往随之而来。这不是因为国家是邪恶的，而是因为<strong>可读性</strong>（legibility）——使事物易于监控和控制——往往与<strong>功能性</strong>相冲突。</p>
+
+            <h2 class="text-xl font-bold text-gray-900 mt-8 mb-4">VII. 结论与启示</h2>
+            <p class="mb-4">Scott 基本上承认他堆高了牌来反对高级现代主义和可读性。他承认旧的有机宜居城市预期寿命只有四十岁，因为没有人得到任何光线或新鲜空气，他们都挤在一起没有下水道，所以每个人都死于霍乱。他承认农业生产力增加了大约一千倍，绿色革命拯救了数百万生命，这可能与科学农业方法和矩形网格有关。他承认有一个地方领主不能随意改变的计量单位是相当方便的。</p>
+
+            <p class="mb-4">Scott 最终说的是，他并不反对可读性和现代主义本身，但他想将它们呈现为国家失败的鸡尾酒中的成分。你需要四种东西的组合才能得到像苏联集体农场（或他另一个最喜欢的例子，坦桑尼亚的强制村庄定居）这样的灾难：</p>
+
+            <ol class="list-decimal pl-6 mb-4 space-y-2">
+                <li>一个被激励为其人口和领土寻求更大可读性的政府</li>
+                <li>一种高级现代主义意识形态</li>
+                <li>威权主义</li>
+                <li>一个"被征服的公民社会"，如革命后的俄罗斯，或欧洲人接管后的殖民地</li>
+            </ol>
+
+            <p class="mb-4">他的理论可能是，中央集权的政府和公民社会之间的来回允许科学进步被顺利实施，而不是以导致灾难的方式碾压所有人。也许很大一部分是增量与突然的区别：西方农业做得好，因为它能够增量地添加进步并观察它们如何运作，但当你把整个大厦扔给坦桑尼亚时，它崩溃了。</p>
+
+            <p class="mb-4">总的来说，我确实喜欢这本书。我不太确定我从它的论点中得到了什么，但也许这是恰当的。《像国家一样看》的安排有点像它描述的史前森林和村庄；不是特别有条理，不是真正有明确的预定目标，但充满了有趣的东西， lovely 地度过一段时间。</p>
+
+            <div class="mt-8 text-sm text-gray-500 border-t pt-6">
+                <p><strong>关于作者</strong>：James C. Scott 是美国政治学家、人类学家，耶鲁大学斯特林教授。他的研究关注国家权力、抵抗和农民政治。</p>
+            </div>
+        </div>
+
+        <div class="mt-12 pt-6 border-t flex justify-between items-center">
+            <a href="/daily-curated/2025-02-26/anti-tech-canon.html" class="text-gray-600 hover:text-gray-900 text-sm">← 上一篇</a>
+            <a href="/daily-curated/2025-02-25/tyranny-of-time.html" class="text-blue-600 hover:text-blue-800 text-sm">下一篇 →</a>
+        </div>
+    </article>
+
+    <footer class="bg-gray-100 py-6">
+        <div class="max-w-3xl mx-auto px-4 text-center text-sm text-gray-500">
+            <p>&copy; 2025 Noc's Blog · 每日精选</p>
+        </div>
+    </footer>
+
+    <!-- 音乐播放器 -->
+    
+<div class="row">
+    <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
+               server="netease"
+               type="playlist"
+               id="8561735623"
+               fixed='true'
+               autoplay='false'
+               theme='#42b983'
+               loop='all'
+               order='random'
+               preload='auto'
+               volume='0.7'
+               list-folded='true'
+    >
+    </meting-js>
+</div>
+<script src="/libs/aplayer/APlayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+</body>
+</html>
