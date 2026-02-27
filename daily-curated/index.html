@@ -19,230 +19,45 @@
             }
         }
     </script>
+    <link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
     <style>
-        /* 音乐播放器样式 */
-        .music-player {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 12px 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            min-width: 280px;
-            border: 1px solid rgba(0,0,0,0.05);
-        }
+        .aplayer .aplayer-lrc p { display: none; font-size: 12px; font-weight: 700; line-height: 16px !important; }
+        .aplayer .aplayer-lrc p.aplayer-lrc-current { display: none; font-size: 15px; color: #42b983; }
+        .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body { left: -66px !important; }
+        .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover { left: 0px !important; }
+        body { padding-bottom: 80px; }
         
-        .music-player.collapsed {
-            min-width: auto;
-            padding: 12px;
-        }
+        /* 加载状态 */
+        .loading { text-align: center; padding: 3rem; color: #6b7280; }
+        .error { text-align: center; padding: 3rem; color: #dc2626; }
         
-        .music-player.collapsed .player-info,
-        .music-player.collapsed .progress-container,
-        .music-player.collapsed .volume-control {
-            display: none;
-        }
+        /* 深色模式支持 */
+        .dark body { background-color: #0f0f23 !important; color: #e4e4e7 !important; }
+        .dark .bg-gray-50 { background-color: #0f0f23 !important; }
+        .dark .bg-white { background-color: #1a1a2e !important; }
+        .dark .bg-gray-100 { background-color: #16213e !important; }
+        .dark .text-gray-800 { color: #e4e4e7 !important; }
+        .dark .text-gray-600 { color: #a1a1aa !important; }
+        .dark .text-gray-500 { color: #71717a !important; }
+        .dark .text-gray-900 { color: #fafafa !important; }
+        .dark .border-gray-100 { border-color: #2d3748 !important; }
+        .dark .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.5) !important; }
+        .dark nav { background-color: #1a1a2e !important; border-bottom: 1px solid #2d3748 !important; }
         
-        .player-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-            flex-shrink: 0;
-        }
-        
-        .player-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-        }
-        
-        .player-btn:active {
-            transform: scale(0.95);
-        }
-        
-        .player-info {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .song-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: #1f2937;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .song-artist {
-            font-size: 11px;
-            color: #6b7280;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .progress-container {
-            width: 100%;
-            margin-top: 6px;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: #e5e7eb;
-            border-radius: 2px;
-            cursor: pointer;
-            position: relative;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-            border-radius: 2px;
-            width: 0%;
-            transition: width 0.1s;
-        }
-        
-        .time-display {
-            display: flex;
-            justify-content: space-between;
-            font-size: 10px;
-            color: #9ca3af;
-            margin-top: 2px;
-        }
-        
-        .control-btn {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            color: #6b7280;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-        
-        .control-btn:hover {
-            background: #f3f4f6;
-            color: #3b82f6;
-        }
-        
-        .toggle-btn {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #f3f4f6;
-            border: none;
-            cursor: pointer;
-            color: #6b7280;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            flex-shrink: 0;
-        }
-        
-        .volume-control {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .volume-slider {
-            width: 60px;
-            height: 4px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: #e5e7eb;
-            border-radius: 2px;
-            outline: none;
-        }
-        
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 12px;
-            height: 12px;
-            background: #3b82f6;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        
-        /* 移动端适配 */
-        @media (max-width: 640px) {
-            .music-player {
-                left: 10px;
-                right: 10px;
-                bottom: 10px;
-                min-width: auto;
-            }
+        @media (prefers-color-scheme: dark) {
+            body:not(.light) { background-color: #0f0f23 !important; color: #e4e4e7 !important; }
+            body:not(.light) .bg-gray-50 { background-color: #0f0f23 !important; }
+            body:not(.light) .bg-white { background-color: #1a1a2e !important; }
+            body:not(.light) .bg-gray-100 { background-color: #16213e !important; }
+            body:not(.light) .text-gray-800 { color: #e4e4e7 !important; }
+            body:not(.light) .text-gray-600 { color: #a1a1aa !important; }
+            body:not(.light) .text-gray-500 { color: #71717a !important; }
+            body:not(.light) .text-gray-900 { color: #fafafa !important; }
+            body:not(.light) .border-gray-100 { border-color: #2d3748 !important; }
+            body:not(.light) .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.5) !important; }
+            body:not(.light) nav { background-color: #1a1a2e !important; border-bottom: 1px solid #2d3748 !important; }
         }
     </style>
-<link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
-<style>
-.aplayer .aplayer-lrc p { display: none; font-size: 12px; font-weight: 700; line-height: 16px !important; }
-.aplayer .aplayer-lrc p.aplayer-lrc-current { display: none; font-size: 15px; color: #42b983; }
-.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body { left: -66px !important; }
-.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover { left: 0px !important; }
-body { padding-bottom: 80px; }
-</style>
-
-<style>
-/* 深色模式支持 */
-@media (prefers-color-scheme: dark) {
-    body {
-        background-color: #0f0f23 !important;
-        color: #e4e4e7 !important;
-    }
-    .bg-gray-50 { background-color: #0f0f23 !important; }
-    .bg-white { background-color: #1a1a2e !important; }
-    .bg-gray-100 { background-color: #16213e !important; }
-    .bg-gray-900 { background-color: #0a0a1a !important; }
-    .text-gray-800 { color: #e4e4e7 !important; }
-    .text-gray-700 { color: #d4d4d8 !important; }
-    .text-gray-600 { color: #a1a1aa !important; }
-    .text-gray-500 { color: #71717a !important; }
-    .text-gray-900 { color: #fafafa !important; }
-    .border-gray-100 { border-color: #2d3748 !important; }
-    .border-gray-200 { border-color: #374151 !important; }
-    .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.5) !important; }
-    article { background-color: #1a1a2e !important; }
-    nav { background-color: #1a1a2e !important; border-bottom: 1px solid #2d3748 !important; }
-    .prose { color: #d4d4d8 !important; }
-    .prose h1, .prose h2, .prose h3 { color: #fafafa !important; }
-    .prose p { color: #d4d4d8 !important; }
-    .prose blockquote { border-left-color: #3b82f6 !important; background-color: #16213e !important; }
-    .bg-blue-50 { background-color: #1e3a5f !important; }
-    .bg-green-50 { background-color: #1e3a3f !important; }
-    .bg-purple-50 { background-color: #2d1b4e !important; }
-    .bg-orange-50 { background-color: #3d2817 !important; }
-    .bg-pink-50 { background-color: #3d1f2f !important; }
-    .bg-red-50 { background-color: #3d1f1f !important; }
-}
-
-/* 移动端优化 */
-@media (max-width: 768px) {
-    .music-player { left: 10px !important; right: 10px !important; bottom: 10px !important; }
-}
-</style>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 pb-24">
     <nav class="bg-white shadow-sm sticky top-0 z-50">
@@ -251,6 +66,9 @@ body { padding-bottom: 80px; }
             <div class="flex items-center space-x-6">
                 <a href="/daily-curated/" class="text-blue-600 font-medium">每日精选</a>
                 <a href="/archives" class="text-gray-600 hover:text-gray-900">归档</a>
+                <button id="theme-toggle" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors" title="切换主题">
+                    <i class="fas fa-moon text-gray-600"></i>
+                </button>
             </div>
         </div>
     </nav>
@@ -263,97 +81,20 @@ body { padding-bottom: 80px; }
     </div>
 
     <div class="max-w-4xl mx-auto px-4 py-12">
-        <!-- 文章列表 - 只显示标题和元信息 -->
-        <div class="space-y-4">
-            <!-- 2025-02-26 -->
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <div class="text-sm text-gray-400 mb-3">2025年2月26日</div>
-                <div class="space-y-4">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <div class="flex items-center space-x-2 mb-2">
-                                <span class="px-2 py-0.5 bg-pink-100 text-pink-700 text-xs rounded">女性主义</span>
-                                <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">中东政治</span>
-                            </div>
-                            <h3 class="font-serif text-lg font-bold">
-                                <a href="/daily-curated/2025-02-26/syrian-feminists.html" class="hover:text-blue-600">"女性，生命，自由"：在战争之地锻造新世界的叙利亚女性主义者</a>
-                            </h3>
-                            <div class="text-sm text-gray-500 mt-1">Natalie Haynes · The Guardian</div>
-                        </div>
-                        <a href="/daily-curated/2025-02-26/syrian-feminists.html" class="ml-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 whitespace-nowrap">阅读</a>
-                    </div>
-
-                    <hr class="border-gray-100">
-
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <div class="flex items-center space-x-2 mb-2">
-                                <span class="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded">文化批评</span>
-                                <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">阅读清单</span>
-                            </div>
-                            <h3 class="font-serif text-lg font-bold">
-                                <a href="/daily-curated/2025-02-26/anti-tech-canon.html" class="hover:text-blue-600">反科技经典：30本书</a>
-                            </h3>
-                            <div class="text-sm text-gray-500 mt-1">Ted Gioia · The Honest Broker</div>
-                        </div>
-                        <a href="/daily-curated/2025-02-26/anti-tech-canon.html" class="ml-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 whitespace-nowrap">阅读</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 2025-02-25 -->
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <div class="text-sm text-gray-400 mb-3">2025年2月25日</div>
-                
-                <div class="space-y-4">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <div class="flex items-center space-x-2 mb-2">
-                                <span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">政治学</span>
-                                <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">书评</span>
-                            </div>
-                            <h3 class="font-serif text-lg font-bold">
-                                <a href="/daily-curated/2025-02-25/seeing-like-a-state.html" class="hover:text-blue-600">书评：像国家一样看</a>
-                            </h3>
-                            <div class="text-sm text-gray-500 mt-1">Scott Alexander · Slate Star Codex</div>
-                        </div>
-                        <a href="/daily-curated/2025-02-25/seeing-like-a-state.html" class="ml-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 whitespace-nowrap">阅读</a>
-                    </div>
-
-                    <hr class="border-gray-100">
-
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <div class="flex items-center space-x-2 mb-2">
-                                <span class="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded">哲学</span>
-                                <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">文化</span>
-                            </div>
-                            <h3 class="font-serif text-lg font-bold">
-                                <a href="/daily-curated/2025-02-25/tyranny-of-time.html" class="hover:text-blue-600">时间的暴政</a>
-                            </h3>
-                            <div class="text-sm text-gray-500 mt-1">Joe Zadeh · Noema Magazine</div>
-                        </div>
-                        <a href="/daily-curated/2025-02-25/tyranny-of-time.html" class="ml-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 whitespace-nowrap">阅读</a>
-                    </div>
-
-                    <hr class="border-gray-100">
-
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <div class="flex items-center space-x-2 mb-2">
-                                <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">社会学</span>
-                                <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">经济学</span>
-                            </div>
-                            <h3 class="font-serif text-lg font-bold">
-                                <a href="/daily-curated/2025-02-25/collapse.html" class="hover:text-blue-600">社会政治崩溃入门指南</a>
-                            </h3>
-                            <div class="text-sm text-gray-500 mt-1">Eli Dourado · elidourado.com</div>
-                        </div>
-                        <a href="/daily-curated/2025-02-25/collapse.html" class="ml-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 whitespace-nowrap">阅读</a>
-                    </div>
-                </div>
-            </div>
+        <!-- 加载状态 -->
+        <div id="loading" class="loading">
+            <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+            <p>加载文章中...</p>
         </div>
+        
+        <!-- 错误状态 -->
+        <div id="error" class="error hidden">
+            <i class="fas fa-exclamation-circle text-2xl mb-2"></i>
+            <p>加载失败，请刷新页面重试</p>
+        </div>
+        
+        <!-- 文章列表容器 -->
+        <div id="article-list" class="space-y-4 hidden"></div>
     </div>
 
     <footer class="bg-gray-100 py-6">
@@ -363,24 +104,134 @@ body { padding-bottom: 80px; }
     </footer>
 
     <!-- 音乐播放器 -->
-    
-<div class="row">
-    <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
-               server="netease"
-               type="playlist"
-               id="8561735623"
-               fixed='true'
-               autoplay='false'
-               theme='#42b983'
-               loop='all'
-               order='random'
-               preload='auto'
-               volume='0.7'
-               list-folded='true'
-    >
-    </meting-js>
-</div>
-<script src="/libs/aplayer/APlayer.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+    <div class="row">
+        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
+                   server="netease"
+                   type="playlist"
+                   id="8561735623"
+                   fixed='true'
+                   autoplay='false'
+                   theme='#42b983'
+                   loop='all'
+                   order='random'
+                   preload='auto'
+                   volume='0.7'
+                   list-folded='true'>
+        </meting-js>
+    </div>
+    <script src="/libs/aplayer/APlayer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+
+    <!-- 动态渲染脚本 -->
+    <script>
+        // 按日期分组文章
+        function groupByDate(articles) {
+            const groups = {};
+            articles.forEach(article => {
+                if (!groups[article.date]) {
+                    groups[article.date] = [];
+                }
+                groups[article.date].push(article);
+            });
+            // 按日期倒序
+            return Object.keys(groups).sort().reverse().map(date => ({
+                date,
+                articles: groups[date]
+            }));
+        }
+
+        // 格式化日期
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+        }
+
+        // 渲染标签
+        function renderTags(categories) {
+            const colors = {
+                '社会学': 'blue',
+                '经济学': 'blue',
+                '政治学': 'green',
+                '书评': 'green',
+                '哲学': 'orange',
+                '文化': 'orange',
+                '女性主义': 'pink',
+                '中东政治': 'pink',
+                '文化批评': 'purple',
+                '阅读清单': 'purple'
+            };
+            return categories.map(cat => {
+                const color = colors[cat] || 'gray';
+                return `<span class="px-2 py-0.5 bg-${color}-100 text-${color}-700 text-xs rounded">${cat}</span>`;
+            }).join('');
+        }
+
+        // 渲染文章列表
+        function renderArticles(data) {
+            const container = document.getElementById('article-list');
+            const groups = groupByDate(data.articles);
+            
+            container.innerHTML = groups.map(group => `
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="text-sm text-gray-400 mb-3">${formatDate(group.date)}</div>
+                    <div class="space-y-4">
+                        ${group.articles.map((article, index) => `
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        ${renderTags(article.category)}
+                                    </div>
+                                    <h3 class="font-serif text-lg font-bold">
+                                        <a href="/${article.file}" class="hover:text-blue-600">${article.title}</a>
+                                    </h3>
+                                    <div class="text-sm text-gray-500 mt-1">${article.author} · ${article.source}</div>
+                                    ${article.summary ? `<div class="text-sm text-gray-400 mt-1 line-clamp-1">${article.summary}</div>` : ''}
+                                </div>
+                                <a href="/${article.file}" class="ml-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 whitespace-nowrap">阅读</a>
+                            </div>
+                            ${index < group.articles.length - 1 ? '<hr class="border-gray-100">' : ''}
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('loading').classList.add('hidden');
+            container.classList.remove('hidden');
+        }
+
+        // 加载文章数据
+        async function loadArticles() {
+            try {
+                const response = await fetch('articles.json');
+                if (!response.ok) throw new Error('Failed to load');
+                const data = await response.json();
+                renderArticles(data);
+            } catch (error) {
+                console.error('Error loading articles:', error);
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('error').classList.remove('hidden');
+            }
+        }
+
+        // 初始化
+        loadArticles();
+
+        // 主题切换功能
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = themeToggle.querySelector('i');
+        
+        // 检查本地存储的主题设置
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            themeIcon.className = 'fas fa-sun text-yellow-500';
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            themeIcon.className = isDark ? 'fas fa-sun text-yellow-500' : 'fas fa-moon text-gray-600';
+        });
+    </script>
 </body>
 </html>
