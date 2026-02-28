@@ -4,173 +4,289 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>每日精选 | Daily Curated</title>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --bg: #fafafa; --card: #fff; --text: #1a1a1a; --muted: #666; --light: #999;
-            --accent: #2563eb; --border: #e5e5e5;
+            --primary: #1a1a1a;
+            --secondary: #666;
+            --accent: #c9a96e;
+            --bg: #fafafa;
+            --card-bg: #fff;
+            --border: #e5e5e5;
         }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: var(--bg); color: var(--text); line-height: 1.6;
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg);
+            color: var(--primary);
+            line-height: 1.8;
         }
-        .header {
-            background: var(--card); border-bottom: 1px solid var(--border);
-            padding: 1rem; position: sticky; top: 0; z-index: 100;
+        
+        header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 2rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
         .header-content {
-            max-width: 800px; margin: 0 auto;
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .logo { font-size: 1.25rem; font-weight: 700; }
-        .logo span { color: var(--accent); }
-        .container { max-width: 800px; margin: 0 auto; padding: 1rem; }
-        .article-list { display: flex; flex-direction: column; gap: 1rem; }
+        
+        .logo {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .logo span {
+            color: var(--accent);
+        }
+        
+        .tagline {
+            font-size: 0.9rem;
+            color: var(--secondary);
+            margin-top: 0.25rem;
+        }
+        
+        .date {
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+        
+        main {
+            padding: 3rem 0;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 3rem;
+        }
+        
+        .hero h1 {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .hero p {
+            color: var(--secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .articles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        
         .article-card {
-            background: var(--card); border-radius: 12px; padding: 1.25rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer;
-            border: 1px solid var(--border); transition: all 0.2s;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
         }
-        .article-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .article-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem; }
-        .article-meta { display: flex; gap: 1rem; font-size: 0.875rem; color: var(--muted); flex-wrap: wrap; }
-        .article-tag { background: #f3f4f6; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; }
-        .article-summary { margin-top: 0.75rem; font-size: 0.9375rem; color: var(--muted); }
-        .article-view { display: none; background: var(--card); border-radius: 12px; }
-        .article-view.active { display: block; }
-        .article-header { padding: 1.5rem; border-bottom: 1px solid var(--border); }
-        .back-btn { color: var(--accent); cursor: pointer; margin-bottom: 1rem; display: inline-flex; align-items: center; gap: 0.5rem; }
-        .article-view-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; }
-        .article-content { padding: 1.5rem; }
-        .markdown-body { font-size: 1.0625rem; line-height: 1.8; }
-        .markdown-body h1 { font-size: 1.75rem; font-weight: 700; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border); }
-        .markdown-body h2 { font-size: 1.375rem; font-weight: 600; margin: 1.75rem 0 0.875rem; }
-        .markdown-body h3 { font-size: 1.125rem; font-weight: 600; margin: 1.5rem 0 0.75rem; }
-        .markdown-body p { margin-bottom: 1.25rem; }
-        .markdown-body blockquote { border-left: 4px solid var(--accent); padding-left: 1rem; margin: 1.5rem 0; color: var(--muted); font-style: italic; }
-        .markdown-body ul, .markdown-body ol { margin: 1rem 0; padding-left: 1.5rem; }
-        .markdown-body li { margin-bottom: 0.5rem; }
-        .markdown-body code { background: #f3f4f6; padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace; }
-        .markdown-body hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
-        .markdown-body a { color: var(--accent); text-decoration: none; }
-        .loading { text-align: center; padding: 3rem; color: var(--muted); }
-        .error { text-align: center; padding: 3rem; color: #dc2626; }
-        .footer { text-align: center; padding: 2rem; color: var(--light); font-size: 0.875rem; }
-        @media (max-width: 640px) {
-            .container { padding: 0.75rem; }
-            .article-card { padding: 1rem; }
-            .article-view-title { font-size: 1.25rem; }
-            .article-header, .article-content { padding: 1rem; }
+        
+        .article-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+        
+        .article-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+        
+        .article-content {
+            padding: 1.5rem;
+        }
+        
+        .article-category {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .article-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 0.75rem;
+        }
+        
+        .article-excerpt {
+            color: var(--secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .article-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--secondary);
+        }
+        
+        footer {
+            background: var(--primary);
+            color: #999;
+            padding: 2rem 0;
+            margin-top: 4rem;
+            text-align: center;
+        }
+        
+        footer p {
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .articles-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero h1 {
+                font-size: 1.8rem;
+            }
         }
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">每日<span>精选</span></div>
-            <div style="color: var(--muted); font-size: 0.875rem;" id="current-date"></div>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div>
+                    <div class="logo">每日<span>精选</span></div>
+                    <div class="tagline">Daily Curated — 高质量英文文章中文翻译</div>
+                </div>
+                <div class="date" id="current-date"></div>
+            </div>
         </div>
     </header>
-
-    <main class="container">
-        <div id="loading" class="loading">加载中...</div>
-        <div id="list-view" class="article-list" style="display: none;"></div>
-        <div id="article-view" class="article-view">
-            <div class="article-header">
-                <div class="back-btn" onclick="showList()">← 返回列表</div>
-                <h1 class="article-view-title" id="view-title"></h1>
-                <div style="color: var(--muted);" id="view-meta"></div>
+    
+    <main>
+        <div class="container">
+            <div class="hero">
+                <h1>今日精选文章</h1>
+                <p>每天精选3篇高质量英文长文，涵盖科技、商业、文化、哲学等领域，为您呈现深度思考与独特视角。</p>
             </div>
-            <div class="article-content">
-                <div class="markdown-body" id="view-content"></div>
+            
+            <div class="articles-grid" id="articles-container">
+                <!-- Articles will be loaded here -->
             </div>
         </div>
     </main>
-
-    <footer class="footer">
-        <p>每日精选 · Daily Curated</p>
-        <p style="margin-top: 0.5rem; font-size: 0.75rem;">用心翻译，传递思想</p>
-    </footer>
-
-<script>
-let articles = [];
-
-// 设置当前日期
-document.getElementById('current-date').textContent = new Date().toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'long'
-});
-
-// 加载文章列表
-async function loadArticles() {
-    try {
-        const response = await fetch('articles.json');
-        if (!response.ok) throw new Error('加载失败');
-        articles = await response.json();
-        renderList();
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('list-view').style.display = 'flex';
-    } catch (error) {
-        document.getElementById('loading').innerHTML = `
-            <div class="error">
-                <p>加载文章列表失败</p>
-                <p style="font-size: 0.875rem; margin-top: 0.5rem;">${error.message}</p>
-            </div>
-        `;
-    }
-}
-
-// 渲染文章列表
-function renderList() {
-    const listView = document.getElementById('list-view');
-    listView.innerHTML = articles.map((a, i) => `
-        <div class="article-card" onclick="showArticle(${i})">
-            <h2 class="article-title">${a.title}</h2>
-            <div class="article-meta">
-                <span>${a.author}</span>
-                <span class="article-tag">${a.category}</span>
-                <span>${a.date}</span>
-            </div>
-            <p class="article-summary">${a.summary}</p>
+    
+    <footer>
+        <div class="container">
+            <p>© 2026 Daily Curated | 每日精选</p>
+            <p style="margin-top: 0.5rem; font-size: 0.8rem;">Curated with ❤️ for curious minds</p>
         </div>
-    `).join('');
-}
-
-// 显示文章详情
-async function showArticle(index) {
-    const a = articles[index];
-    document.getElementById('view-title').textContent = a.title;
-    document.getElementById('view-meta').innerHTML = `${a.author} · ${a.date}`;
+    </footer>
     
-    try {
-        const response = await fetch(a.file);
-        if (!response.ok) throw new Error('加载文章内容失败');
-        const content = await response.text();
-        document.getElementById('view-content').innerHTML = marked.parse(content);
-    } catch (error) {
-        document.getElementById('view-content').innerHTML = `
-            <div class="error">
-                <p>${error.message}</p>
-                <p style="font-size: 0.875rem; margin-top: 0.5rem;">文件: ${a.file}</p>
-            </div>
-        `;
-    }
-    
-    document.getElementById('list-view').style.display = 'none';
-    document.getElementById('article-view').classList.add('active');
-    window.scrollTo(0, 0);
-}
-
-// 返回列表
-function showList() {
-    document.getElementById('list-view').style.display = 'flex';
-    document.getElementById('article-view').classList.remove('active');
-    window.scrollTo(0, 0);
-}
-
-// 初始化
-loadArticles();
-</script>
+    <script>
+        // Set current date
+        const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('zh-CN', dateOptions);
+        
+        // Article data
+        const articles = [
+            {
+                id: 'article-1',
+                category: '心理学 · 科学哲学',
+                title: '世上没有精神病患者',
+                excerpt: '几乎所有你认为关于精神病的常识都已被彻底证伪。为什么这个僵尸般的概念还在苟延残喘？',
+                author: 'Rasmus Rosenberg Larsen',
+                date: '2026年2月27日',
+                readTime: '24分钟',
+                icon: '🧠'
+            },
+            {
+                id: 'article-2',
+                category: '哲学 · 美好生活',
+                title: '六秒的拥抱',
+                excerpt: '从艺术到宗教再到性，工具化已经抽空了事物的内在价值。但生活不仅仅是物质利益。',
+                author: 'Julian Baggini',
+                date: '2026年2月24日',
+                readTime: '26分钟',
+                icon: '🤗'
+            },
+            {
+                id: 'article-3',
+                category: '技术 · 自我认知',
+                title: '书籍与屏幕',
+                excerpt: '你无法专注不是你的错。这是一个设计问题，而答案不是抛弃屏幕时间。',
+                author: 'Carlo Iacono',
+                date: '2026年2月19日',
+                readTime: '23分钟',
+                icon: '📱'
+            }
+        ];
+        
+        // Render articles
+        const container = document.getElementById('articles-container');
+        articles.forEach(article => {
+            const card = document.createElement('a');
+            card.className = 'article-card';
+            card.href = `articles/${article.id}.html`;
+            card.innerHTML = `
+                <div class="article-image">${article.icon}</div>
+                <div class="article-content">
+                    <div class="article-category">${article.category}</div>
+                    <h2 class="article-title">${article.title}</h2>
+                    <p class="article-excerpt">${article.excerpt}</p>
+                    <div class="article-meta">
+                        <span>${article.author}</span>
+                        <span>${article.readTime}</span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    </script>
 </body>
 </html>
