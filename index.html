@@ -44,6 +44,11 @@
         .dark .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.5) !important; }
         .dark nav { background-color: #1a1a2e !important; border-bottom: 1px solid #2d3748 !important; }
         
+        /* 网易云播放器适配 */
+        .dark iframe[src*="music.163.com"] {
+            filter: invert(0.9) hue-rotate(180deg);
+        }
+        
         @media (prefers-color-scheme: dark) {
             body:not(.light) { background-color: #0f0f23 !important; color: #e4e4e7 !important; }
             body:not(.light) .bg-gray-50 { background-color: #0f0f23 !important; }
@@ -101,24 +106,18 @@
         </div>
     </footer>
 
-    <!-- 音乐播放器 -->
-    <div class="row">
-        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
-                   server="netease"
-                   type="playlist"
-                   id="8561735623"
-                   fixed='true'
-                   autoplay='false'
-                   theme='#42b983'
-                   loop='all'
-                   order='random'
-                   preload='auto'
-                   volume='0.7'
-                   list-folded='true'>
-        </meting-js>
+    <!-- 网易云音乐官方嵌入播放器 -->
+    <div style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: #fff;">
+        <iframe 
+            frameborder="no" 
+            border="0" 
+            marginwidth="0" 
+            marginheight="0" 
+            width="100%" 
+            height="86" 
+            src="//music.163.com/outchain/player?type=0&id=8561735623&auto=0&height=66">
+        </iframe>
     </div>
-    <script src="/libs/aplayer/APlayer.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
 
     <!-- 动态渲染脚本 -->
     <script>
