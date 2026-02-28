@@ -26,6 +26,22 @@
         .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover { left: 0px !important; }
         body { padding-bottom: 80px; }
         
+                .dark body { background-color: #0f0f23 !important; color: #e4e4e7 !important; }
+        .dark .bg-gray-50 { background-color: #0f0f23 !important; }
+        .dark .bg-white { background-color: #1a1a2e !important; }
+        .dark .bg-gray-100 { background-color: #16213e !important; }
+        .dark .text-gray-800 { color: #e4e4e7 !important; }
+        .dark .text-gray-700 { color: #d4d4d8 !important; }
+        .dark .text-gray-600 { color: #a1a1aa !important; }
+        .dark .text-gray-500 { color: #71717a !important; }
+        .dark .border-gray-100 { border-color: #2d3748 !important; }
+        .dark article { background-color: #1a1a2e !important; }
+        .dark nav { background-color: #1a1a2e !important; border-bottom: 1px solid #2d3748 !important; }
+        .dark .prose { color: #d4d4d8 !important; }
+        .dark .prose h1, .dark .prose h2, .dark .prose h3 { color: #fafafa !important; }
+        .dark .prose p { color: #d4d4d8 !important; }
+        .dark .prose blockquote { border-left-color: #3b82f6 !important; background-color: #16213e !important; }
+        
         @media (prefers-color-scheme: dark) {
             body { background-color: #0f0f23 !important; color: #e4e4e7 !important; }
             .bg-gray-50 { background-color: #0f0f23 !important; }
@@ -44,14 +60,16 @@
             .prose blockquote { border-left-color: #3b82f6 !important; background-color: #16213e !important; }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50 font-sans text-gray-800">
     <nav class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
             <a href="/" class="font-serif text-lg font-bold text-gray-900">每日精选</a>
             <div class="flex items-center space-x-4 text-sm">
-                
-                
+                <button id="theme-toggle" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors" title="切换主题">
+                    <i class="fas fa-moon text-gray-600"></i>
+                </button>
             </div>
         </div>
     </nav>
@@ -174,5 +192,24 @@
     </div>
     <script src="/libs/aplayer/APlayer.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+
+    <!-- 主题切换脚本 -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = themeToggle.querySelector('i');
+        
+        // 检查本地存储的主题设置
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            themeIcon.className = 'fas fa-sun text-yellow-500';
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            themeIcon.className = isDark ? 'fas fa-sun text-yellow-500' : 'fas fa-moon text-gray-600';
+        });
+    </script>
 </body>
 </html>
