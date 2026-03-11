@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026年最佳开源视觉语言模型指南 | Cognitive Chaos</title>
+    <meta name="description" content="深入介绍开源多模态模型：GLM-4.6V、Gemma 3、Qwen3-VL、DeepSeek-OCR等，助力开发者和企业选择合适VLM">
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="/assets/css/article.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b',
+                        accent: '#06b6d4'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+    <!-- 阅读进度条 -->
+    <div class="fixed top-0 left-0 w-full h-1 bg-gray-200 dark:bg-gray-700 z-50">
+        <div id="reading-progress" class="h-full bg-gradient-to-r from-blue-500 to-cyan-400 w-0 transition-all duration-100"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="fixed top-1 left-0 w-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="/" class="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                <i class="fas fa-brain mr-2"></i>Cognitive Chaos
+            </a>
+            <div class="flex items-center gap-4">
+                <button id="theme-toggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:block text-yellow-400"></i>
+                </button>
+                <a href="/archive.html" class="text-sm hover:text-blue-500 transition-colors">归档</a>
+                <a href="/about.html" class="text-sm hover:text-blue-500 transition-colors">关于</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 文章主体 -->
+    <main class="pt-20 pb-16">
+        <article class="max-w-4xl mx-auto px-4">
+            <!-- 文章头部 -->
+            <header class="mb-12 text-center">
+                <div class="flex flex-wrap justify-center gap-2 mb-4">
+                    <span class="px-3 py-1 text-xs rounded-full bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300">多模态AI</span>
+                    <span class="px-3 py-1 text-xs rounded-full bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-300">视觉语言模型</span>
+                    <span class="px-3 py-1 text-xs rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300">开源</span>
+                </div>
+                <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
+                    2026年最佳开源视觉语言模型指南
+                </h1>
+                <p class="text-lg text-gray-600 dark:text-gray-400 italic mb-6">
+                    The Best Open-Source Vision Language Models in 2026
+                </p>
+                <div class="flex flex-wrap justify-center items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                    <span><i class="far fa-user mr-1"></i>BentoML Team</span>
+                    <span><i class="far fa-calendar mr-1"></i>2026-03-12</span>
+                    <span><i class="far fa-clock mr-1"></i>阅读时间：约 20 分钟</span>
+                    <span><i class="fas fa-tag mr-1"></i>VLM, OCR, MoE, Multimodal</span>
+                </div>
+                <div class="mt-4 text-xs text-gray-400">
+                    原文：<a href="https://www.bentoml.com/blog/multimodal-ai-a-guide-to-open-source-vision-language-models" target="_blank" class="hover:text-blue-500 underline">bentoml.com - The Best Open-Source Vision Language Models</a>
+                </div>
+            </header>
+
+            <!-- 文章内容 -->
+            <div class="prose prose-lg dark:prose-invert max-w-none article-content">
+                <p class="lead text-xl text-gray-600 dark:text-gray-300 leading-relaxed mb-8">
+                    在过去一年中，多模态AI从流行语变成了基线。模型不再止步于文本；它们现在可以解读图像、音频、视频，甚至用户界面，将感知与推理融合。最新一波从Qwen3-VL到GLM-4.6V的开源模型，将开源多模态能力推向了曾经由GPT-5和Gemini-2.5-Pro等专有系统主导的新领域。
+                </p>
+
+                <p>与闭源API相比，开源模型仍然是寻求控制、隐私和定制化的开发者和企业的首选。它们允许团队直接微调、自托管并将多模态能力集成到他们的产品中，而无需供应商锁定。</p>
+
+                <p>在本文中，我们将介绍当今最流行的开源多模态模型。由于多模态AI的世界广阔，我们将专注于视觉语言模型（VLMs）。这些模型旨在理解和处理视觉和文本信息。同时，我们将探索关于VLM的一些常见问题。</p>
+
+                <h2>GLM-4.6V</h2>
+
+                <p>GLM-4.6V是由智谱AI（Z.ai）团队开发的最新开源多模态模型，该团队也是GLM系列大语言模型的幕后推手。它具有原生多模态工具使用、更强的视觉推理能力和128K上下文窗口。</p>
+
+                <p>两个版本可供选择：</p>
+
+                <ul>
+                    <li><strong>GLM-4.6V (106B)</strong>：适用于云端和高性能推理</li>
+                    <li><strong>GLM-4.6V-Flash (9B)</strong>：适用于本地或对延迟敏感的部署</li>
+                </ul>
+
+                <p>与早期GLM版本相比，GLM-4.6V打通了感知、推理和行动之间的闭环。它是构建需要多模态理解和现实世界任务执行的视觉智能体的理想选择。</p>
+
+                <h3>关键特性</h3>
+
+                <ul>
+                    <li><strong>原生多模态工具调用：</strong>GLM-4.6V引入端到端视觉驱动工具使用。图像、UI截图、文档页面和视觉片段可以直接作为工具参数提供，无需先转换为文本。模型还可以解读工具返回的视觉输出，如图表、搜索结果和网页快照，并将它们纳入推理步骤。与纯文本工具流程相比，这减少了信息损失并降低了系统复杂性。</li>
+                    <li><strong>前端复制和UI交互：</strong>针对前端任务优化，GLM-4.6V可以将UI截图转换为像素级精确的干净HTML/CSS/JS。用户可以在生成的页面上高亮区域并提供自然语言指令，如「把这个卡片改成深蓝色」，模型会更新相应的代码。</li>
+                    <li><strong>长上下文多模态理解：</strong>凭借128K上下文窗口，GLM-4.6V可以处理高信息密度输入，如多文档财务报告、研究论文、200页演示文稿和数小时视频。</li>
+                </ul>
+
+                <h3>注意事项</h3>
+
+                <ul>
+                    <li><strong>语言支持有限：</strong>目前，该模型仅提供英语和中文双语支持。</li>
+                    <li><strong>偶尔重复：</strong>处理高度复杂的提示时，模型可能过度解释或重复短语。这是GLM-4.5V等先前版本中的已知问题。</li>
+                </ul>
+
+                <h2>Gemma 3</h2>
+
+                <p>Gemma 3是Google开发的轻量级、最先进的开放模型系列，基于Gemini 2.0背后的相同研究构建。它支持高级文本、图像和短视频理解，在跨任务和语言的推理方面具有强大能力。</p>
+
+                <p>提供1B、4B、12B和27B尺寸，Gemma 3为从笔记本电脑到云集群的各种硬件提供灵活性。凭借128K token上下文窗口（1B为32K），它可以处理长形式输入以应对更复杂的任务。</p>
+
+                <h3>关键特性</h3>
+
+                <ul>
+                    <li><strong>多语言支持：</strong>在涵盖140多种语言的数据上预训练，Gemma 3开箱即用地支持35多种广泛使用的语言。</li>
+                    <li><strong>便携且高效：</strong>小尺寸使Gemma 3成为在笔记本电脑、台式机和边缘设备等受限环境中部署的理想选择。它还带有官方量化版本，在保持强大性能的同时降低资源需求。</li>
+                    <li><strong>智能体工作流：</strong>Gemma 3支持函数调用和结构化输出，实现自动化并集成到复杂应用流程中。</li>
+                </ul>
+
+                <h3>注意事项</h3>
+
+                <ul>
+                    <li><strong>视频理解有限：</strong>虽然支持一些视觉推理（特别是短视频/图像），但Gemma 3似乎不支持长形式或音视频分析。</li>
+                    <li><strong>图像输入仅标准化：</strong>图像被调整为896×896并编码为256个token。这可能限制细粒度图像理解或与非标分辨率/宽高比的工作。</li>
+                </ul>
+
+                <h2>Qwen3-VL</h2>
+
+                <p>Qwen3-VL是阿里巴巴Qwen系列的最新、最强大的VLM，相比其前身Qwen2.5-VL实现了重大飞跃。它在多模态推理、智能体能力和长上下文理解方面提供了更强的表现。</p>
+
+                <p>目前两个主要版本可用：Qwen3-VL-235B-A22B和Qwen3-VL-30B-A3B。两者都提供指令和思维变体，以及用于高效推理的官方FP8版本。</p>
+
+                <p>旗舰版Qwen3-VL-235B-A22B-Instruct在多模态基准测试中可与顶级专有模型如Gemini-2.5-Pro和GPT-5相媲美，涵盖一般问答、2D/3D grounding、视频理解、OCR和文档理解。在纯文本任务中，它在MMLU、AIME25和LiveBench1125等领先基准上的表现与DeepSeek-V3-0324和Claude-Opus-4等前沿模型相当或超越。</p>
+
+                <h3>关键特性</h3>
+
+                <ul>
+                    <li><strong>视觉智能体能力：</strong>Qwen3-VL可以操作图形界面（PC/移动端），识别UI元素，理解功能，并通过工具调用执行现实世界任务。这意味着你可以用它通过单一视觉界面完成重复性任务，如CRM更新、报告生成和软件配置。</li>
+                    <li><strong>增强多语言OCR：</strong>该模型支持32种语言的OCR，包括希腊语、希伯来语、印地语、罗马尼亚语和泰语。它能够阅读低光、模糊或倾斜图像中的文本，并准确解析复杂文档、表单和布局。</li>
+                    <li><strong>高级视频理解：</strong>凭借256K token原生上下文窗口（可扩展至1M），Qwen3-VL可以处理整本书或数小时视频，并支持秒级索引。它在长序列中保持精确回忆，能够逐帧描述视觉内容并回答详细问题。</li>
+                </ul>
+
+                <h2>DeepSeek-OCR</h2>
+
+                <p>DeepSeek-OCR是DeepSeek最新的开源VLM，通过一个称为「语境光学压缩」（Contexts Optical Compression）的概念重新定义了光学字符识别。核心原理如下：</p>
+
+                <ul>
+                    <li>将图像编码为紧凑、高密度的视觉token</li>
+                    <li>使用语言模型将这些token解码回文本</li>
+                </ul>
+
+                <p>为什么这很重要？LLM在处理长文本序列时面临计算限制。包含密集文档文本的单个图像可以使用比原始数字文本少得多的token表示相同信息。通过将文字转换为图像，DeepSeek-OCR利用视觉编码大幅降低token数量和计算成本。</p>
+
+                <p>在实践中，该模型可以在10倍以下的压缩比下保持97%的OCR准确率，实现高达20倍的视觉语境压缩。在OmniDocBench等基准测试中，它以显著更少的视觉token超越了GOT-OCR2.0和MinerU2.0。它还提供卓越的速度，在单个A100-40G GPU上使用vLLM达到近2,500 token/秒。</p>
+
+                <h3>关键特性</h3>
+
+                <ul>
+                    <li><strong>双组件架构：</strong>该模型结合了一个轻量级DeepEncoder用于高分辨率图像输入和一个DeepSeek-3B-MoE-A570M解码器。编码器在繁重输入下最小化激活，同时保持视觉token数量可控。</li>
+                    <li><strong>深度解析：</strong>DeepSeek-OCR远远超越传统OCR。它能够进行布局分析、表格提取、图表解析、化学式识别，甚至几何重建。例如，在深度解析模式下，它可以识别研究论文中的化学结构并将其转换为SMILES格式，或从教科书中重现平面几何图形。</li>
+                    <li><strong>多语言识别：</strong>DeepSeek-OCR支持近100种语言，具有布局和非布局输出模式。它是大规模PDF和多语言文档处理的理想选择。</li>
+                    <li><strong>通用视觉理解：</strong>DeepSeek-OCR保留了图像描述、grounding和目标检测能力。然而，由于研究人员没有使用监督微调（SFT），DeepSeek-OCR不是一个聊天机器人。它的一些高级视觉能力需要显式完成提示来激活。</li>
+                </ul>
+
+                <h2>Molmo</h2>
+
+                <p>Molmo是Allen Institute for AI开发的开源VLM系列。提供1B、7B和72B参数版本，Molmo模型在其类别中提供最先进的性能。根据基准测试，它们可以与GPT-4V、Gemini 1.5 Pro和Claude 3.5 Sonnet等专有模型相媲美。</p>
+
+                <p>Molmo性能的关键在于其独特的训练数据<strong>PixMo</strong>。这个高度策划的数据集由100万个图像-文本对组成，包括两种主要类型的数据：</p>
+
+                <ul>
+                    <li>用于多模态预训练的密集字幕数据</li>
+                    <li>用于启用各种用户交互的监督微调数据，如问答、文档阅读，甚至指向图像中的对象</li>
+                </ul>
+
+                <p>有趣的是，Molmo研究人员使用了一种创新的数据收集方法：<strong>要求标注员在60到90秒内提供图像的语音描述</strong>。具体来说，这些详细描述包括所有可见内容，甚至对象之间的空间定位和关系。结果显示，标注员比传统方法（写下来）更高效地提供了详细字幕。总体而言，他们从50个高级主题中采样，为712k图像收集了高质量的音频描述。</p>
+
+                <h3>关键特性</h3>
+
+                <ul>
+                    <li><strong>最先进的性能：</strong>Molmo的72B模型在学术基准测试中超越了Gemini 1.5 Pro和Claude 3.5 Sonnet等专有模型。即使是较小的7B和1B模型在几项任务中也能与GPT-4V相媲美。</li>
+                    <li><strong>指向能力：</strong>Molmo可以「指向」图像中的一个或多个视觉元素。指向提供了基于图像像素的自然解释。Molmo研究人员相信，未来指向将成为VLM与智能体之间的重要沟通渠道。例如，网页智能体可以向VLM查询特定对象的位置。</li>
+                    <li><strong>开放架构：</strong>原始开发者承诺发布创建Molmo所使用的所有工件，包括PixMo数据集、训练代码、评估和中间检查点。这为从头开始构建高性能多模态系统提供了新标准，并促进了可重复性。</li>
+                </ul>
+
+                <h3>注意事项</h3>
+
+                <ul>
+                    <li><strong>透明图像：</strong>Molmo可能难以处理透明图像。建议在使用模型处理之前为图像添加白色或深色背景。</li>
+                    <li><strong>广播错误：</strong>如果在处理图像时遇到广播错误，请确保图像为RGB格式。</li>
+                </ul>
+
+                <h2>Pixtral</h2>
+
+                <p>Pixtral是Mistral开发的120亿参数开源模型，标志着该公司首次涉足多模态能力。Pixtral旨在理解图像和文本，以Apache 2.0许可证开源发布。</p>
+
+                <p>作为一个指令调优模型，Pixtral在大型交错图像和文本文档数据集上预训练。因此，它能够进行多轮、多图像对话。与以前的开源模型不同，Pixtral在擅长多模态任务的同时保持了出色的文本基准性能。</p>
+
+                <h3>关键特性</h3>
+
+                <ul>
+                    <li><strong>出色的指令遵循能力：</strong>基准测试结果表明，Pixtral 12B在指令遵循任务中显著优于其他开源多模态模型如Qwen2-VL 7B、LLaVa-OneVision 7B和Phi-3.5 Vision。Mistral创建了新的基准<em>MM-IF-Eval</em>和<em>MM-MT-Bench</em>来进一步评估多模态上下文中的性能，Pixtral在其中也表现出色。这些基准预计将在不久的将来开源供社区使用。</li>
+                    <li><strong>多图像处理：</strong>Pixtral可以在单个输入中处理多张图像，以其原生分辨率处理。该模型支持128,000 token的上下文窗口，可以摄取各种尺寸和宽高比的图像。</li>
+                </ul>
+
+                <h3>注意事项</h3>
+
+                <ul>
+                    <li><strong>缺乏审核机制：</strong>目前，Pixtral不包含任何内置审核功能。这意味着它可能不适用于需要受控输出的场景。</li>
+                </ul>
+
+                <h2>常见问题解答</h2>
+
+                <h3>我真的需要VLM吗？</h3>
+
+                <p>这可能是你首先应该问自己的问题。同时，考虑你的应用需要处理的数据类型。如果你的用例只需要文本，LLM通常就足够了。然而，如果你需要同时分析文本和图像，VLM是一个合理的选择。</p>
+
+                <p>如果你选择VLM，请注意某些模型可能会牺牲其纯文本性能以在多模态任务中表现出色。这就是为什么一些模型开发者强调他们的新模型，如NVLM和Pixtral，不会为多模态能力牺牲文本性能。</p>
+
+                <p>对于其他模态，请注意不同模型可能专注于特定领域，如文档处理和音频分析。这些更适合超越文本和图像的多模态场景。</p>
+
+                <h3>部署VLM时应该考虑什么？</h3>
+
+                <p>考虑以下因素以确保最佳性能和可用性：</p>
+
+                <h4>基础设施需求</h4>
+
+                <p>VLM通常因其大尺寸而需要大量计算资源。上述顶级开源模型可以达到超过700亿参数。这意味着你需要高性能GPU来运行它们，特别是对于实时应用。</p>
+
+                <p>如果你正在寻找简化这一过程的解决方案，可以尝试BentoCloud。它将尖端AI基础设施无缝集成到企业的私有云环境中。其云无关方法允许AI团队选择具有最具竞争力GPU费率的云区域。当BentoCloud承担基础设施负担时，你可以专注于用VLM构建核心功能。</p>
+
+                <h4>多模态处理</h4>
+
+                <p>并非所有模型服务和部署框架都设计用于处理多模态输入，如文本、图像和视频。要充分利用VLM的潜力，请确保你的服务和部署框架能够同时容纳和处理多种数据类型。</p>
+
+                <p>BentoML支持广泛的数据类型，如文本、图像、音频和文档。你可以轻松将其与现有ML工作流集成，无需为处理多模态输入定制流程。</p>
+
+                <h4>快速扩展</h4>
+
+                <p>VLM通常用于要求苛刻的应用，如：</p>
+
+                <ul>
+                    <li><strong>实时图像字幕：</strong>用于大规模媒体平台</li>
+                    <li><strong>视觉搜索：</strong>在电商中，用户上传图像以查找相似产品</li>
+                    <li><strong>视觉问答：</strong>在客户支持或教育工具中</li>
+                </ul>
+
+                <p>在这些用例中，流量可能基于用户行为不可预测地激增。这意味着你的部署框架应该支持高峰时段的快速扩展。BentoML提供易于使用的构建块来创建可扩展API，允许你在BentoCloud上部署和运行任何VLM。其自动扩展功能确保你只需为使用的资源付费。</p>
+
+                <h3>如何解读VLM提供商提到的基准测试？</h3>
+
+                <p>每个基准测试都有特定目的，可以突出模型的不同能力。以下是VLM的五个流行基准：</p>
+
+                <ul>
+                    <li><strong>MMMU：</strong>评估多模态模型在需要大学水平学科知识和推理的高级任务中的表现。它包含来自艺术与设计、商业、科学、健康与医学、人文与社会科学、技术与工程六个学科的11.5K道大学考试、测验和教科书题目。</li>
+                    <li><strong>MMBench：</strong>是一个全面基准，评估模型在各种多模态任务应用中的表现。它包含超过<strong>3,000</strong>道选择题，涵盖20种不同的能力维度，如目标定位、空间推理和社交互动。每个能力维度至少包含125道题目，确保对模型视觉语言能力的平衡评估。</li>
+                    <li><strong>ChartQA：</strong>测试模型从各种类型的图表（如柱状图、折线图和饼图）中提取相关信息并回答有关数据问题的能力。它评估趋势分析、数据比较和基于视觉表示的数值推理等技能。</li>
+                    <li><strong>DocVQA：</strong>专注于理解包含文本和视觉元素的复杂文档，如表单、收据、图表和嵌入文档中的图示。</li>
+                    <li><strong>MathVista：</strong>评估模型在数学推理和问题解决领域的表现。它呈现结合视觉元素（如几何图形、图表或图示）与文本描述和问题的问题。</li>
+                </ul>
+
+                <p>需要注意的是，你应该始终谨慎对待基准测试。它们很重要，但绝不是为你的用例选择正确模型的唯一参考。</p>
+
+                <h2>结语</h2>
+
+                <p>在过去一年中，我们看到了一波强大的开源VLM涌现。这是巧合，还是LLM正在朝着多模态能力发展成为一种趋势？现在下定论可能还为时过早。不变的是需要强大的解决方案来快速、安全地将这些模型大规模部署到生产中。</p>
+
+                <h3>模型选择总结</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>模型</th>
+                            <th>最佳适用</th>
+                            <th>参数规模</th>
+                            <th>上下文窗口</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>GLM-4.6V</td>
+                            <td>视觉智能体、前端开发</td>
+                            <td>9B / 106B</td>
+                            <td>128K</td>
+                        </tr>
+                        <tr>
+                            <td>Gemma 3</td>
+                            <td>边缘设备、多语言</td>
+                            <td>1B-27B</td>
+                            <td>128K (1B: 32K)</td>
+                        </tr>
+                        <tr>
+                            <td>Qwen3-VL</td>
+                            <td>视频理解、OCR、UI操作</td>
+                            <td>30B / 235B (MoE)</td>
+                            <td>256K-1M</td>
+                        </tr>
+                        <tr>
+                            <td>DeepSeek-OCR</td>
+                            <td>文档解析、大规模OCR</td>
+                            <td>3B (MoE)</td>
+                            <td>标准</td>
+                        </tr>
+                        <tr>
+                            <td>Molmo</td>
+                            <td>指向能力、开放研究</td>
+                            <td>1B / 7B / 72B</td>
+                            <td>标准</td>
+                        </tr>
+                        <tr>
+                            <td>Pixtral</td>
+                            <td>多图像处理、指令遵循</td>
+                            <td>12B</td>
+                            <td>128K</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p>随着开源VLM生态系统的快速发展，开发者和企业现在有了前所未有的选择。无论你是需要强大的多模态推理、高效的边缘部署，还是专业的文档处理能力，总有一款开源模型能够满足你的需求。关键是根据你的具体用例、资源约束和性能要求来选择合适的模型。</p>
+            </div>
+
+            <!-- 文章导航 -->
+            <nav class="mt-16 pt-8 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex flex-col md:flex-row justify-between gap-4">
+                    <a href="hegelian-reasoning-synthesis-2026.html" class="flex items-center gap-2 text-gray-500 hover:text-blue-500 transition-colors">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>上一篇</span>
+                    </a>
+                    <a href="/archive.html" class="flex items-center gap-2 text-gray-500 hover:text-blue-500 transition-colors">
+                        <i class="fas fa-list"></i>
+                        <span>文章列表</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-2 text-gray-500 hover:text-blue-500 transition-colors opacity-50 cursor-not-allowed">
+                        <span>下一篇</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </nav>
+
+            <!-- 标签 -->
+            <div class="mt-8 flex flex-wrap gap-2">
+                <span class="text-sm text-gray-500">标签：</span>
+                <span class="px-3 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">VLM</span>
+                <span class="px-3 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">Multimodal</span>
+                <span class="px-3 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">OCR</span>
+                <span class="px-3 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">MoE</span>
+                <span class="px-3 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">开源AI</span>
+            </div>
+        </article>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-8">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <p class="text-gray-500 dark:text-gray-400 text-sm">
+                © 2026 Cognitive Chaos. 探索认知科学的边界。
+            </p>
+            <div class="mt-4 flex justify-center gap-4">
+                <a href="#" class="text-gray-400 hover:text-blue-500 transition-colors"><i class="fab fa-github"></i></a>
+                <a href="#" class="text-gray-400 hover:text-blue-500 transition-colors"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="text-gray-400 hover:text-blue-500 transition-colors"><i class="fas fa-rss"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 脚本 -->
+    <script>
+        // 主题切换
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        
+        // 检查本地存储或系统偏好
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        } else {
+            html.classList.remove('dark');
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.theme = html.classList.contains('dark') ? 'dark' : 'light';
+        });
+
+        // 阅读进度条
+        const progressBar = document.getElementById('reading-progress');
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            progressBar.style.width = scrolled + '%';
+        });
+    </script>
+</body>
+</html>
