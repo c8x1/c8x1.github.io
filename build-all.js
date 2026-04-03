@@ -244,7 +244,7 @@ function main() {
   
   console.log(`\n🎉 完成！共生成 ${count} 个页面`);
   console.log('\n📦 部署命令：');
-  console.log('cd dist && git init && git add . && git commit -m "optimize: rebuild" && git push -f git@github.com:c8x1/c8x1.github.io.git master');
+  console.log('cd dist && git init && git add . && git commit -m "optimize: rebuild" && git push git@github.com:c8x1/c8x1.github.io.git master');
 }
 
 main();

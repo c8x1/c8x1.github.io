@@ -185,16 +185,15 @@ initSearch(data.articles);
             return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        function renderArticles(data) {
-            let allArticles = [];
-let todayDate = '';
+        let allArticles = [];
+        let todayDate = '';
 
-function getTodayStr() {
-    const now = new Date();
-    return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
-}
+        function getTodayStr() {
+            const now = new Date();
+            return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+        }
 
-function renderArticles(data, forceMode) {
+        function renderArticles(data, forceMode) {
     allArticles = data.articles;
     todayDate = getTodayStr();
     applyFilter(forceMode || 'today');
