@@ -28,7 +28,7 @@
         }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <link rel="stylesheet" href="./assets/css/main.css?v=20260318">
+    <link rel="stylesheet" href="./assets/css/main.css">
     <script>
         (function() {
             const theme = localStorage.getItem('theme');
@@ -86,6 +86,12 @@
     </header>
 
     <main class="flex-1 max-w-4xl mx-auto w-full px-4 py-10">
+        
+        <div id="filter-bar" class="flex items-center gap-3 mb-8 hidden">
+            <button id="filter-today" class="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white transition-colors">今日最新</button>
+            <button id="filter-all" class="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">查看全部</button>
+            <span id="filter-count" class="text-sm text-gray-400 ml-1"></span>
+        </div>
         <div id="loading" class="text-center py-12">
             <div class="inline-block w-10 h-10 border-3 border-gray-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
             <p class="text-gray-500">加载文章中...</p>
@@ -109,7 +115,7 @@
     <div id="aplayer"></div>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
     <script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
-    <script src="./assets/js/main.js?v=20260318"></script>
+    <script src="./assets/js/main.js"></script>
     <script>
     (function() {
         'use strict';
@@ -129,7 +135,11 @@
                 if (!response.ok) throw new Error('Failed to load');
                 const data = await response.json();
                 renderArticles(data);
-                initSearch(data.articles);
+                document.getElementById('filter-bar').classList.remove('hidden');
+                
+                document.getElementById('filter-today').addEventListener('click', function(){ applyFilter('today'); });
+                document.getElementById('filter-all').addEventListener('click', function(){ applyFilter('all'); });
+initSearch(data.articles);
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('loading').classList.add('hidden');
@@ -176,39 +186,77 @@
         }
 
         function renderArticles(data) {
-            const container = document.getElementById('article-list');
-            const groups = groupByDate(data.articles);
-            
-            if (groups.length === 0) {
-                container.innerHTML = '<p class="text-center text-gray-500 py-12">暂无文章</p>';
-            } else {
-                let html = '';
-                groups.forEach(group => {
-                    html += '<div class="bg-white dark:bg-[#1a1a2e] rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">';
-                    html += '<div class="px-5 py-3 bg-gray-50 dark:bg-[#16213e] border-b border-gray-200 dark:border-gray-800 text-sm text-gray-500 dark:text-gray-400 font-medium">' + formatDate(group.date) + '</div>';
-                    html += '<div class="divide-y divide-gray-100 dark:divide-gray-800">';
-                    group.articles.forEach(article => {
-                        html += '<article class="p-5 hover:bg-gray-50 dark:hover:bg-[#252542] transition-colors">';
-                        html += '<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">';
-                        html += '<div class="flex-1 min-w-0">';
-                        html += '<div class="flex flex-wrap gap-2 mb-2">' + renderTags(article.category) + '</div>';
-                        html += '<h2 class="font-serif text-lg font-semibold text-gray-900 dark:text-white mb-1">';
-                        html += '<a href="./' + article.file + '" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">' + escapeHtml(article.title) + '</a>';
-                        html += '</h2>';
-                        if (article.subtitle) html += '<p class="text-sm text-gray-500 dark:text-gray-400 italic mb-2">' + escapeHtml(article.subtitle) + '</p>';
-                        html += '<p class="text-sm text-gray-500 dark:text-gray-400">' + escapeHtml(article.author || '未知作者') + ' · ' + escapeHtml(article.source || '未知来源') + '</p>';
-                        if (article.summary) html += '<p class="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">' + escapeHtml(article.summary) + '</p>';
-                        html += '</div>';
-                        html += '<a href="./' + article.file + '" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap">阅读</a>';
-                        html += '</div></article>';
-                    });
-                    html += '</div></div>';
-                });
-                container.innerHTML = html;
-            }
-            document.getElementById('loading').classList.add('hidden');
-            container.classList.remove('hidden');
+            let allArticles = [];
+let todayDate = '';
+
+function getTodayStr() {
+    const now = new Date();
+    return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+}
+
+function renderArticles(data, forceMode) {
+    allArticles = data.articles;
+    todayDate = getTodayStr();
+    applyFilter(forceMode || 'today');
+}
+
+function applyFilter(mode) {
+    const container = document.getElementById('article-list');
+    const filterTodayBtn = document.getElementById('filter-today');
+    const filterAllBtn = document.getElementById('filter-all');
+    const filterCount = document.getElementById('filter-count');
+
+    let groups;
+    if (mode === 'today') {
+        const todayArticles = allArticles.filter(a => a.date === todayDate);
+        groups = todayArticles.length > 0 ? [{ date: todayDate, articles: todayArticles }] : [];
+        if (filterCount) filterCount.textContent = '（共 ' + todayArticles.length + ' 篇）';
+    } else {
+        groups = groupByDate(allArticles);
+        if (filterCount) filterCount.textContent = '（共 ' + allArticles.length + ' 篇）';
+    }
+
+    if (filterTodayBtn && filterAllBtn) {
+        if (mode === 'today') {
+            filterTodayBtn.className = 'px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white transition-colors';
+            filterAllBtn.className = 'px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors';
+        } else {
+            filterTodayBtn.className = 'px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors';
+            filterAllBtn.className = 'px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white transition-colors';
         }
+    }
+
+    if (groups.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-500 py-12">今日暂无新文章</p>';
+    } else {
+        let html = '';
+        groups.forEach(group => {
+            html += '<div class="bg-white dark:bg-[#1a1a2e] rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">';
+            html += '<div class="px-5 py-3 bg-gray-50 dark:bg-[#16213e] border-b border-gray-200 dark:border-gray-800 text-sm text-gray-500 dark:text-gray-400 font-medium">' + formatDate(group.date) + '</div>';
+            html += '<div class="divide-y divide-gray-100 dark:divide-gray-800">';
+            group.articles.forEach(article => {
+                const filePath = ((article.file || '#').replace(/^\.\.\//, ''));
+                html += '<article class="p-5 hover:bg-gray-50 dark:hover:bg-[#252542] transition-colors">';
+                html += '<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">';
+                html += '<div class="flex-1 min-w-0">';
+                html += '<div class="flex flex-wrap gap-2 mb-2">' + renderTags(article.category) + '</div>';
+                html += '<h2 class="font-serif text-lg font-semibold text-gray-900 dark:text-white mb-1">';
+                html += '<a href="./' + filePath + '" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">' + escapeHtml(article.title) + '</a>';
+                html += '</h2>';
+                if (article.subtitle) html += '<p class="text-sm text-gray-500 dark:text-gray-400 italic mb-2">' + escapeHtml(article.subtitle) + '</p>';
+                html += '<p class="text-sm text-gray-500 dark:text-gray-400">' + escapeHtml(article.author || '未知作者') + ' · ' + escapeHtml(article.source || '未知来源') + '</p>';
+                if (article.summary) html += '<p class="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">' + escapeHtml(article.summary) + '</p>';
+                html += '</div>';
+                html += '<a href="./' + filePath + '" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap">阅读</a>';
+                html += '</div></article>';
+            });
+            html += '</div></div>';
+        });
+        container.innerHTML = html;
+    }
+    document.getElementById('loading').classList.add('hidden');
+    container.classList.remove('hidden');
+}
 
         function initSearch(articles) {
             const searchToggle = document.getElementById('search-toggle');
