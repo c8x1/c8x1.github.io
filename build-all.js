@@ -74,9 +74,35 @@ function generateArticle(article, allArticles) {
     </div>
   ` : '';
 
-  const placeholderContent = article.summary 
-    ? `<p>${escapeHtml(article.summary)}</p><p><em>（正文内容待从原文迁移）</em></p>`
-    : '<p><em>（正文内容待从原文迁移）</em></p>';
+  // 构建正文内容：优先用 content_cn + content_en，其次用 summary
+  const hasContent = article.content_cn || article.content_en;
+  const content_cn = article.content_cn || article.summary || '';
+  const content_en = article.content_en || '';
+
+  function para(text) {
+    if (!text) return '';
+    return text.split('\n\n').map(block => {
+      const b = block.trim();
+      if (!b) return '';
+      if (b.startsWith('* ') || b.startsWith('- ')) {
+        const items = b.split('\n').filter(l => l.startsWith('* ')||l.startsWith('- '))
+          .map(l => `<li>${escapeHtml(l.replace(/^[*-] /,''))}</li>`).join('');
+        return `<ul>${items}</ul>`;
+      }
+      return `<p>${escapeHtml(b).replace(/\n/g,'<br>')}</p>`;
+    }).join('');
+  }
+
+  let articleBody = '';
+  if (content_en) {
+    articleBody = `<div><h2>English Original</h2><div>${para(content_en)}</div></div>`;
+  }
+  if (content_cn) {
+    articleBody += `<div><h2>中文原文</h2><div>${para(content_cn)}</div></div>`;
+  }
+  if (!articleBody) {
+    articleBody = `<p>${escapeHtml(article.summary || '')}</p>`;
+  }
 
   return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -153,7 +179,7 @@ function generateArticle(article, allArticles) {
         </header>
 
         <div class="article-content" itemprop="articleBody">
-            ${placeholderContent}
+            ${articleBody}
         </div>
 
         ${originalLink}
@@ -229,6 +255,10 @@ function main() {
   let count = 0;
   
   for (const article of articles) {
+    if (!article.file || typeof article.file !== 'string') {
+      console.warn(`  ⚠ Skipping article without valid file path: ${article.title || article.id || article}`);
+      continue;
+    }
     const outputPath = path.join(DIST_DIR, article.file);
     const dir = path.dirname(outputPath);
     
