@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>历史归档 | c8x1 · Daily Curated</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #020617;
+            --card-bg: #0f172a;
+            --border: #1e293b;
+            --text: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-blue: #3b82f6;
+            --accent-green: #22c55e;
+            --accent-cyan: #06b6d4;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: var(--text); line-height: 1.8; }
+        a { text-decoration: none; color: inherit; }
+
+        /* Header */
+        header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .logo span {
+            color: var(--accent-blue);
+            font-weight: 400;
+        }
+        .header-date {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 3rem 0 2rem 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 3rem;
+        }
+        .hero h1 {
+            font-size: 2rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        /* Trending Compact Grid */
+        .trending-compact-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+        .trending-compact {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.55rem 0.85rem;
+            transition: border-color 0.2s;
+            color: inherit;
+            text-decoration: none;
+            overflow: hidden;
+            min-width: 0;
+        }
+        .trending-compact:hover {
+            border-color: var(--accent-green);
+        }
+        .tc-rank {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            flex-shrink: 0;
+            width: 18px;
+            text-align: center;
+        }
+        .tc-info {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+        .tc-repo {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .tc-desc {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .tc-stats {
+            display: flex;
+            gap: 0.6rem;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+        .tc-stats .today {
+            color: var(--accent-green);
+        }
+
+        /* Monthly grouping */
+        .month-header {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 2.5rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .month-header:first-child {
+            margin-top: 0;
+        }
+
+        /* Day block */
+        .day-block {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .day-date {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .day-count {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+        .day-section-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin: 0.75rem 0 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        /* Archive article (simplified) */
+        .archive-articles {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .archive-article {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.4rem 0;
+            text-decoration: none;
+            color: inherit;
+        }
+        .archive-article:hover .archive-article-title {
+            color: var(--accent-blue);
+        }
+        .archive-article-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .archive-article-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .archive-article-title {
+            font-size: 0.85rem;
+            color: var(--text);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .archive-article-meta {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        /* Load more button */
+        .load-more-container {
+            text-align: center;
+            margin: 2.5rem 0;
+        }
+        .load-more {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 0.6rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-family: 'Noto Sans SC', sans-serif;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .load-more:hover {
+            border-color: var(--accent-blue);
+            color: var(--text);
+        }
+
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            padding: 2rem 0;
+            text-align: center;
+            margin-top: 4rem;
+        }
+        footer p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .trending-compact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 767px) {
+            .container { padding: 0 1rem; }
+            .hero h1 { font-size: 1.4rem; }
+            .trending-compact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">c8x1<span> &middot; Daily Curated</span></a>
+                <div class="header-date" id="current-date"></div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <div class="hero">
+                <h1>历史归档</h1>
+            </div>
+            <div id="archive-container"></div>
+            <div class="load-more-container" id="load-more-container" style="display:none;">
+                <button class="load-more" id="load-more">加载更多</button>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 c8x1 &middot; Daily Curated</p>
+        </div>
+    </footer>
+    <script>
+var BATCH_SIZE = 30;
+var allDates = [];
+var loadedIndex = 0;
+var container = document.getElementById('archive-container');
+
+// Date display
+var dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+document.getElementById('current-date').textContent = new Date().toLocaleDateString('zh-CN', dateOptions);
+
+function formatDateCN(dateStr) {
+    var parts = dateStr.split('-');
+    return parseInt(parts[1]) + '月' + parseInt(parts[2]) + '日';
+}
+
+function getMonthKey(dateStr) {
+    return dateStr.substring(0, 7);
+}
+
+function formatMonthCN(monthKey) {
+    var parts = monthKey.split('-');
+    return parts[0] + '年' + parseInt(parts[1]) + '月';
+}
+
+function renderDay(data) {
+    var block = document.createElement('div');
+    block.className = 'day-block';
+
+    // Date header
+    var dateDiv = document.createElement('div');
+    dateDiv.className = 'day-date';
+    var countParts = [];
+    if (data.trending && data.trending.length) countParts.push(data.trending.length + ' trending');
+    if (data.articles && data.articles.length) countParts.push(data.articles.length + ' 篇文章');
+    dateDiv.innerHTML = formatDateCN(data.date) + ' <span class="day-count">(' + countParts.join(', ') + ')</span>';
+    block.appendChild(dateDiv);
+
+    // Trending section
+    if (data.trending && data.trending.length) {
+        var tLabel = document.createElement('div');
+        tLabel.className = 'day-section-label';
+        tLabel.textContent = '🔥 Trending';
+        block.appendChild(tLabel);
+
+        var tGrid = document.createElement('div');
+        tGrid.className = 'trending-compact-grid';
+        data.trending.forEach(function(item) {
+            var card = document.createElement('a');
+            card.className = 'trending-compact';
+            card.href = item.url || ('https://github.com/' + item.repo);
+            card.target = '_blank';
+            card.innerHTML =
+                '<span class="tc-rank">' + (item.rank || '') + '</span>' +
+                '<div class="tc-info">' +
+                    '<div class="tc-repo">' + item.repo + '</div>' +
+                    '<div class="tc-desc">' + item.desc + '</div>' +
+                '</div>' +
+                '<div class="tc-stats">' +
+                    '<span>&#9733; ' + item.stars + '</span>' +
+                    '<span class="today">+' + item.todayStars + '</span>' +
+                '</div>';
+            tGrid.appendChild(card);
+        });
+        block.appendChild(tGrid);
+    }
+
+    // Articles section
+    if (data.articles && data.articles.length) {
+        var aLabel = document.createElement('div');
+        aLabel.className = 'day-section-label';
+        aLabel.textContent = '📰 文章';
+        block.appendChild(aLabel);
+
+        var aDiv = document.createElement('div');
+        aDiv.className = 'archive-articles';
+        data.articles.forEach(function(article) {
+            var card = document.createElement('a');
+            card.className = 'archive-article';
+            card.href = article.url || ('articles/' + article.id + '.html');
+            card.innerHTML =
+                '<span class="archive-article-icon">' + (article.icon || '📄') + '</span>' +
+                '<div class="archive-article-info">' +
+                    '<div class="archive-article-title">' + article.title + '</div>' +
+                    '<div class="archive-article-meta">' + article.category + ' · ' + article.author + '</div>' +
+                '</div>';
+            aDiv.appendChild(card);
+        });
+        block.appendChild(aDiv);
+    }
+
+    return block;
+}
+
+function loadBatch() {
+    var batch = allDates.slice(loadedIndex, loadedIndex + BATCH_SIZE);
+    if (batch.length === 0) {
+        document.getElementById('load-more-container').style.display = 'none';
+        return;
+    }
+
+    var loadingDiv = document.createElement('div');
+    loadingDiv.className = 'loading';
+    loadingDiv.textContent = '加载中...';
+    container.appendChild(loadingDiv);
+
+    var promises = batch.map(function(dateStr) {
+        return fetch('data/' + dateStr + '.json').then(function(r) { return r.json(); });
+    });
+
+    Promise.all(promises).then(function(results) {
+        container.removeChild(loadingDiv);
+
+        // Group by month
+        var currentMonth = null;
+        results.forEach(function(data) {
+            var monthKey = getMonthKey(data.date);
+            if (monthKey !== currentMonth) {
+                var monthHeader = document.createElement('div');
+                monthHeader.className = 'month-header';
+                monthHeader.textContent = formatMonthCN(monthKey);
+                container.appendChild(monthHeader);
+                currentMonth = monthKey;
+            }
+            container.appendChild(renderDay(data));
+        });
+
+        loadedIndex += batch.length;
+        document.getElementById('load-more-container').style.display =
+            loadedIndex < allDates.length ? 'block' : 'none';
+    }).catch(function(err) {
+        container.removeChild(loadingDiv);
+        console.error('Failed to load archive data:', err);
+    });
+}
+
+// Initialize
+fetch('data/index.json')
+    .then(function(r) { return r.json(); })
+    .then(function(dates) {
+        allDates = dates;
+        loadBatch();
+    })
+    .catch(function(err) {
+        container.innerHTML = '<div class="loading">暂无归档数据</div>';
+    });
+
+document.getElementById('load-more').addEventListener('click', loadBatch);
+    </script>
+</body>
+</html>
