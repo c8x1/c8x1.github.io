@@ -7,162 +7,569 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #1a1a1a;
-            --secondary: #666;
-            --accent: #c9a96e;
-            --bg: #fafafa;
-            --card-bg: #fff;
-            --border: #e5e5e5;
+            --bg: #020617;
+            --card-bg: #0f172a;
+            --border: #1e293b;
+            --text: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-blue: #3b82f6;
+            --accent-green: #22c55e;
+            --accent-cyan: #06b6d4;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: var(--primary); line-height: 1.8; }
-        header { background: var(--card-bg); border-bottom: 1px solid var(--border); padding: 1rem 0; position: sticky; top: 0; z-index: 100; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
-        .header-content { display: flex; justify-content: space-between; align-items: center; }
-        .header-left { display: flex; align-items: center; gap: 2rem; }
-        .logo { font-family: 'Noto Serif SC', serif; font-size: 1.5rem; font-weight: 700; color: var(--primary); text-decoration: none; }
-        .logo span { color: var(--accent); }
-        .tagline { font-size: 0.85rem; color: var(--secondary); margin-top: 0.2rem; }
-        .header-right { display: flex; align-items: center; gap: 1.2rem; }
-        .date { font-size: 0.9rem; color: var(--secondary); }
-        .nav-link { font-size: 0.9rem; color: var(--secondary); text-decoration: none; padding: 0.4rem 0.8rem; border-radius: 6px; transition: all 0.2s; cursor: pointer; background: none; border: 1px solid transparent; font-family: inherit; }
-        .nav-link:hover { color: var(--primary); background: #f0f0f0; border-color: var(--border); }
-        .nav-link.active { color: var(--accent); border-color: var(--accent); }
-        .projects-panel { display: none; background: var(--card-bg); border-bottom: 1px solid var(--border); }
-        .projects-panel.open { display: block; }
-        .projects-grid { max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; }
-        .project-card { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; border: 1px solid var(--border); border-radius: 10px; text-decoration: none; color: inherit; transition: all 0.2s; }
-        .project-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-        .project-icon { flex-shrink: 0; width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
-        .project-info h3 { font-size: 0.95rem; font-weight: 600; line-height: 1.3; }
-        .project-info p { font-size: 0.8rem; color: var(--secondary); margin-top: 0.25rem; line-height: 1.4; }
-        .project-tag { display: inline-block; font-size: 0.7rem; color: var(--accent); border: 1px solid var(--accent); padding: 0.1rem 0.5rem; border-radius: 4px; margin-top: 0.4rem; }
-        main { padding: 3rem 0; }
-        .hero { text-align: center; padding: 3rem 0; border-bottom: 1px solid var(--border); margin-bottom: 3rem; }
-        .hero h1 { font-family: 'Noto Serif SC', serif; font-size: 2.5rem; font-weight: 600; margin-bottom: 1rem; }
-        .hero p { color: var(--secondary); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
-        .articles-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; }
-        .article-card { background: var(--card-bg); border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
-        .article-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
-        .article-image { width: 100%; height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; }
-        .article-content { padding: 1.5rem; }
-        .article-category { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); font-weight: 600; margin-bottom: 0.5rem; }
-        .article-title { font-family: 'Noto Serif SC', serif; font-size: 1.25rem; font-weight: 600; line-height: 1.4; margin-bottom: 0.75rem; }
-        .article-excerpt { color: var(--secondary); font-size: 0.95rem; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        .article-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--secondary); }
-        footer { background: var(--primary); color: #999; padding: 2rem 0; margin-top: 4rem; text-align: center; }
-        footer p { font-size: 0.9rem; }
-        @media (max-width: 768px) {
-            .articles-grid { grid-template-columns: 1fr; }
-            .hero h1 { font-size: 1.8rem; }
-            .header-left { gap: 1rem; }
-            .tagline { display: none; }
-            .projects-grid { grid-template-columns: 1fr; }
+        body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: var(--text); line-height: 1.8; }
+        a { text-decoration: none; color: inherit; }
+
+        /* Header */
+        header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .logo span {
+            color: var(--accent-blue);
+            font-weight: 400;
+        }
+        .header-date {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 3rem 0 2rem 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 3rem;
+        }
+        .hero h1 {
+            font-size: 2rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+        .hero h1 .times {
+            color: var(--accent-blue);
+            margin: 0 0.3em;
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 3rem;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .section-link {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+        .section-link:hover {
+            color: var(--accent-blue);
+        }
+
+        /* Article Cards Grid */
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        /* Article Card */
+        .article-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: border-color 0.2s, transform 0.2s;
+            display: block;
+            color: inherit;
+        }
+        .article-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+        }
+        .article-icon-area {
+            height: 140px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+        .article-body {
+            padding: 1.25rem;
+        }
+        .article-category {
+            font-size: 0.75rem;
+            color: var(--accent-blue);
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .article-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+        }
+        .article-excerpt {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .article-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Trending Card */
+        .trending-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent-green);
+            border-radius: 8px;
+            padding: 1.25rem;
+            display: block;
+            color: inherit;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .trending-card:hover {
+            border-color: var(--accent-green);
+            transform: translateY(-2px);
+        }
+        .trending-repo {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin-bottom: 0.4rem;
+        }
+        .trending-desc {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 0.75rem;
+        }
+        .trending-stats {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .trending-stats .stars {
+            color: var(--text-secondary);
+        }
+        .trending-stats .lang {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .trending-stats .lang-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .trending-today {
+            font-size: 0.8rem;
+            color: var(--accent-green);
+            margin-top: 0.5rem;
+        }
+        .trending-placeholder {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        /* Trending Featured Grid (top 3) */
+        .trending-featured-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Trending Compact Grid (remaining) */
+        .trending-compact-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+
+        /* Compact Card */
+        .trending-compact {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.55rem 0.85rem;
+            transition: border-color 0.2s;
+            color: inherit;
+            text-decoration: none;
+            overflow: hidden;
+            min-width: 0;
+        }
+        .trending-compact:hover {
+            border-color: var(--accent-green);
+        }
+        .tc-rank {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            flex-shrink: 0;
+            width: 18px;
+            text-align: center;
+        }
+        .tc-info {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+        .tc-repo {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .tc-desc {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .tc-stats {
+            display: flex;
+            gap: 0.6rem;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+        .tc-stats .today {
+            color: var(--accent-green);
+        }
+
+        /* Project Card */
+        .project-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent-cyan);
+            border-radius: 8px;
+            padding: 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .project-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-2px);
+        }
+        .project-icon {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+        .project-info h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            line-height: 1.3;
+            margin-bottom: 0.25rem;
+        }
+        .project-info p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+        .project-tag {
+            display: inline-block;
+            font-size: 0.7rem;
+            color: var(--accent-cyan);
+            border: 1px solid var(--accent-cyan);
+            padding: 0.1rem 0.5rem;
+            border-radius: 4px;
+            margin-top: 0.4rem;
+            margin-right: 0.3rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            padding: 2rem 0;
+            text-align: center;
+            margin-top: 4rem;
+        }
+        footer p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .grid-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .trending-featured-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .trending-compact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 767px) {
+            .grid-4 {
+                grid-template-columns: 1fr;
+            }
+            .trending-featured-grid {
+                grid-template-columns: 1fr;
+            }
+            .trending-compact-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero h1 {
+                font-size: 1.4rem;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Header -->
     <header>
         <div class="container">
             <div class="header-content">
-                <div class="header-left">
-                    <a href="/" class="logo">每日<span>精选</span></a>
-                    <div class="tagline">Daily Curated</div>
-                </div>
-                <div class="header-right">
-                    <button class="nav-link" id="btn-projects" onclick="toggleProjects()">&#128218; 项目</button>
-                    <div class="date" id="current-date"></div>
-                </div>
+                <a href="/" class="logo">c8x1<span> &middot; Daily Curated</span></a>
+                <div class="header-date" id="current-date"></div>
             </div>
         </div>
     </header>
 
-    <div class="projects-panel" id="projects-panel">
-        <div class="projects-grid">
-            <a class="project-card" href="https://c8x1.github.io/smartglasses-study/" target="_blank">
-                <div class="project-icon" style="background:#1a1e2e;">&#128083;</div>
-                <div class="project-info">
-                    <h3>14天嵌入式AI智能眼镜速成</h3>
-                    <p>基于 OpenSourceSmartGlasses，由浅入深拆解 ESP32 + FreeRTOS + LVGL 全栈开发</p>
-                    <span class="project-tag">ESP32</span>
-                    <span class="project-tag">FreeRTOS</span>
-                    <span class="project-tag">音频</span>
-                </div>
-            </a>
-            <a class="project-card" href="https://c8x1.github.io/embedded-dev/" target="_blank">
-                <div class="project-icon" style="background:#1a2e1a;">&#128295;</div>
-                <div class="project-info">
-                    <h3>嵌入式开发速成</h3>
-                    <p>音频工程师的嵌入式开发入门路线图</p>
-                    <span class="project-tag">嵌入式</span>
-                    <span class="project-tag">入门</span>
-                </div>
-            </a>
-            <a class="project-card" href="https://c8x1.github.io/embedded-quick-learning-site/" target="_blank">
-                <div class="project-icon" style="background:#2e1a1a;">&#9889;</div>
-                <div class="project-info">
-                    <h3>嵌入式快速学习站</h3>
-                    <p>嵌入式系统快速学习静态站点</p>
-                    <span class="project-tag">学习站</span>
-                </div>
-            </a>
-            <a class="project-card" href="https://c8x1.github.io/cortex-m-audio-learning/" target="_blank">
-                <div class="project-icon" style="background:#1a1a2e;">&#127911;</div>
-                <div class="project-info">
-                    <h3>Cortex-M 音频嵌入式学习</h3>
-                    <p>7 阶段 · 10 个开源项目源码走读 — 从架构基础到音频 DSP 全栈</p>
-                    <span class="project-tag">Cortex-M</span>
-                    <span class="project-tag">音频 DSP</span>
-                    <span class="project-tag">BLE</span>
-                </div>
-            </a>
-            <a class="project-card" href="https://github.com/c8x1" target="_blank" style="align-items:center;justify-content:center;text-align:center;">
-                <div class="project-info">
-                    <h3>查看全部项目 &#8594;</h3>
-                    <p>github.com/c8x1</p>
-                </div>
-            </a>
-        </div>
-    </div>
-
+    <!-- Main Content -->
     <main>
         <div class="container">
+            <!-- Hero -->
             <div class="hero">
-                <h1>今日精选文章</h1>
-                <p>每天精选高质量英文长文，涵盖科技、商业、文化、哲学等领域，为您呈现深度思考与独特视角。</p>
+                <h1>每日精选<span class="times">&times;</span>开源趋势<span class="times">&times;</span>技术学习</h1>
             </div>
-            <div class="articles-grid" id="articles-container"></div>
+
+            <!-- Section 1: GitHub Trending -->
+            <section class="section">
+                <div class="section-header">
+                    <h2 class="section-title">&#128293; GitHub Trending</h2>
+                    <a href="https://github.com/trending" target="_blank" class="section-link">github.com/trending &rarr;</a>
+                </div>
+                <div class="trending-featured-grid" id="trending-featured"></div>
+                <div class="trending-compact-grid" id="trending-compact"></div>
+            </section>
+
+            <!-- Section 2: Articles -->
+            <section class="section">
+                <div class="section-header">
+                    <h2 class="section-title">&#128240; 每日精选</h2>
+                    <a href="dist/" class="section-link">查看全部归档 &rarr;</a>
+                </div>
+                <div class="grid-4" id="articles-container"></div>
+            </section>
+
+            <!-- Section 3: 能力提升计划 -->
+            <section class="section">
+                <div class="section-header">
+                    <h2 class="section-title">&#127919; 能力提升计划</h2>
+                    <a href="https://github.com/c8x1" target="_blank" class="section-link">github.com/c8x1 &rarr;</a>
+                </div>
+                <div class="grid-4">
+                    <a class="project-card" href="https://c8x1.github.io/smartglasses-study/" target="_blank">
+                        <div class="project-icon" style="background:#1a1e2e;">&#128083;</div>
+                        <div class="project-info">
+                            <h3>智能眼镜速成</h3>
+                            <p>基于 OpenSourceSmartGlasses，由浅入深拆解 ESP32 + FreeRTOS + LVGL 全栈开发</p>
+                            <span class="project-tag">ESP32</span>
+                            <span class="project-tag">FreeRTOS</span>
+                            <span class="project-tag">音频</span>
+                        </div>
+                    </a>
+                    <a class="project-card" href="https://c8x1.github.io/embedded-dev/" target="_blank">
+                        <div class="project-icon" style="background:#1a2e1a;">&#128295;</div>
+                        <div class="project-info">
+                            <h3>嵌入式开发速成</h3>
+                            <p>音频工程师的嵌入式开发入门路线图</p>
+                            <span class="project-tag">嵌入式</span>
+                            <span class="project-tag">入门</span>
+                        </div>
+                    </a>
+                    <a class="project-card" href="https://c8x1.github.io/embedded-quick-learning-site/" target="_blank">
+                        <div class="project-icon" style="background:#2e1a1a;">&#9889;</div>
+                        <div class="project-info">
+                            <h3>嵌入式快速学习站</h3>
+                            <p>嵌入式系统快速学习静态站点</p>
+                            <span class="project-tag">学习站</span>
+                        </div>
+                    </a>
+                    <a class="project-card" href="https://c8x1.github.io/cortex-m-audio-learning/" target="_blank">
+                        <div class="project-icon" style="background:#1a1a2e;">&#127911;</div>
+                        <div class="project-info">
+                            <h3>Cortex-M 音频学习</h3>
+                            <p>7 阶段 &middot; 10 个开源项目源码走读 &mdash; 从架构基础到音频 DSP 全栈</p>
+                            <span class="project-tag">Cortex-M</span>
+                            <span class="project-tag">音频 DSP</span>
+                            <span class="project-tag">BLE</span>
+                        </div>
+                    </a>
+                </div>
+            </section>
         </div>
     </main>
 
+    <!-- Footer -->
     <footer>
         <div class="container">
-            <p>&#169; 2026 Daily Curated</p>
+            <p>&copy; 2026 c8x1 &middot; Daily Curated</p>
         </div>
     </footer>
 
     <script>
-        function toggleProjects() {
-            document.getElementById('projects-panel').classList.toggle('open');
-            document.getElementById('btn-projects').classList.toggle('active');
-        }
-        var dateOptions = { year:'numeric', month:'long', day:'numeric', weekday:'long' };
+        // Date display
+        var dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
         document.getElementById('current-date').textContent = new Date().toLocaleDateString('zh-CN', dateOptions);
 
+        // Articles
         var articles = [
-            { id:'philosophy-eats-ai', category:'哲学 · 人工智能', title:'哲学吞噬AI', excerpt:'要让AI创造可持续的商业价值，领导者必须批判性地思考决定AI开发、训练和部署的深层哲学基础。', author:'Michael Schrage', date:'2026年3月2日', readTime:'12分钟', icon:'&#129504;' },
-            { id:'article-1', category:'心理学', title:'世上没有精神病患者', excerpt:'几乎所有你认为关于精神病的常识都已被彻底证伪。', author:'Rasmus Rosenberg Larsen', date:'2026年2月27日', readTime:'24分钟', icon:'&#129504;' },
-            { id:'article-2', category:'哲学', title:'六秒的拥抱', excerpt:'从艺术到宗教再到性，工具化已经抽空了事物的内在价值。', author:'Julian Baggini', date:'2026年2月24日', readTime:'26分钟', icon:'&#129303;' },
-            { id:'article-3', category:'技术', title:'书籍与屏幕', excerpt:'你无法专注不是你的错。这是一个设计问题。', author:'Carlo Iacono', date:'2026年2月19日', readTime:'23分钟', icon:'&#128241;' }
+            { id:'philosophy-eats-ai', category:'哲学 · 人工智能', title:'哲学吞噬AI', excerpt:'要让AI创造可持续的商业价值，领导者必须批判性地思考决定AI开发、训练和部署的深层哲学基础。', author:'Michael Schrage', date:'2026年3月2日', readTime:'12分钟', icon:'🧠' },
+            { id:'article-1', category:'心理学', title:'世上没有精神病患者', excerpt:'几乎所有你认为关于精神病的常识都已被彻底证伪。', author:'Rasmus Rosenberg Larsen', date:'2026年2月27日', readTime:'24分钟', icon:'🧠' },
+            { id:'article-2', category:'哲学', title:'六秒的拥抱', excerpt:'从艺术到宗教再到性，工具化已经抽空了事物的内在价值。', author:'Julian Baggini', date:'2026年2月24日', readTime:'26分钟', icon:'🤔' },
+            { id:'article-3', category:'技术', title:'书籍与屏幕', excerpt:'你无法专注不是你的错。这是一个设计问题。', author:'Carlo Iacono', date:'2026年2月19日', readTime:'23分钟', icon:'📱' }
         ];
 
-        var container = document.getElementById('articles-container');
+        var articlesContainer = document.getElementById('articles-container');
         articles.forEach(function(article) {
             var card = document.createElement('a');
             card.className = 'article-card';
             card.href = 'articles/' + article.id + '.html';
-            card.innerHTML = '<div class="article-image">' + article.icon + '</div><div class="article-content"><div class="article-category">' + article.category + '</div><h2 class="article-title">' + article.title + '</h2><p class="article-excerpt">' + article.excerpt + '</p><div class="article-meta"><span>' + article.author + '</span><span>' + article.readTime + '</span></div></div>';
-            container.appendChild(card);
+            card.innerHTML =
+                '<div class="article-icon-area">' + article.icon + '</div>' +
+                '<div class="article-body">' +
+                    '<div class="article-category">' + article.category + '</div>' +
+                    '<h3 class="article-title">' + article.title + '</h3>' +
+                    '<p class="article-excerpt">' + article.excerpt + '</p>' +
+                    '<div class="article-meta">' +
+                        '<span>' + article.author + ' · ' + article.date + '</span>' +
+                        '<span>' + article.readTime + '</span>' +
+                    '</div>' +
+                '</div>';
+            articlesContainer.appendChild(card);
+        });
+
+        // Trending
+        var trending = [
+            { repo: 'tinyhumansai/openhuman', desc: '桌面端 AI 助手平台：Memory Tree + SQLite 记忆系统，一键 OAuth 连接 118+ 服务（Gmail/Notion/Slack），自动同步数据并压缩成可搜索的知识图谱', stars: '3.0k', lang: 'Rust', langColor: '#dea584', todayStars: '+1,014' },
+            { repo: 'rohitg00/agentmemory', desc: 'AI 编程代理的持久化记忆引擎（MCP 服务器），自动捕获工具调用，经去重/压缩/向量化后建立四层记忆体系，跨会话保持上下文', stars: '6.1k', lang: 'TypeScript', langColor: '#3178c6', todayStars: '+1,048' },
+            { repo: 'CloakHQ/CloakBrowser', desc: '反检测 Chromium 浏览器：在 C++ 源码层面打 49 个指纹补丁，通过 Cloudflare/FingerprintJS 等 30+ 检测，可直接替换 Playwright', stars: '8.1k', lang: 'Python', langColor: '#3572A5', todayStars: '+1,606' },
+            { repo: 'apernet/hysteria', desc: '基于 QUIC 协议的抗审查代理，流量伪装成标准 HTTP/3，Salamander 混淆层 + 自定义拥塞控制，高丢包环境下性能远超 TCP 代理', stars: '20.3k', lang: 'Go', langColor: '#00ADD8', todayStars: '+51' },
+            { repo: 'mattpocock/skills', desc: 'Matt Pocock 的 AI 编程 Agent 技能包——TDD 循环、需求质问、架构改善等 prompt 模板，一条命令安装到 Claude Code / Cursor / Codex 等 50+ Agent', stars: '76.5k', lang: 'Shell', langColor: '#89e051', todayStars: '+3,867' },
+            { repo: 'anonfaded/FadCam', desc: 'Android 开源多媒体录制套件：后台视频录制 + 行车记录仪 + 屏幕录制标注 + 局域网串流 + 远程相机控制，fMP4 格式断电不丢数据', stars: '2.3k', lang: 'Java', langColor: '#b07219', todayStars: '+116' },
+            { repo: 'millionco/react-doctor', desc: 'React 代码健康度扫描器，一条命令输出 0-100 评分，覆盖 state/effects/性能/安全/可访问性/死代码六个维度，可集成到 AI Agent 和 CI', stars: '8.8k', lang: 'TypeScript', langColor: '#3178c6', todayStars: '+788' },
+            { repo: 'rasbt/LLMs-from-scratch', desc: '纯 PyTorch 从零实现 GPT——手写 BPE 分词、多头注意力、Transformer Block、预训练/微调全流程，Manning 同名书籍配套代码', stars: '93.9k', lang: 'Jupyter', langColor: '#DA5B0B', todayStars: '+772' },
+            { repo: 'datawhalechina/hello-agents', desc: '中文 AI Agent 从零构建教程：16 章覆盖 ReAct/Tool Use/MCP 协议/Agentic RL/多 Agent 协作，附自建 HelloAgents 框架和完整案例', stars: '48.4k', lang: 'Python', langColor: '#3572A5', todayStars: '+599' },
+            { repo: 'yikart/AiToEarn', desc: 'AI 驱动的多平台内容变现自动化：Agent 自动创作（视频/图片）→ 一键发布 12 个社交平台 → LLM 自动互动 → CPS/CPM 变现结算', stars: '12.0k', lang: 'TypeScript', langColor: '#3178c6', todayStars: '+1,282' },
+            { repo: 'HKUDS/AI-Trader', desc: '港大开源的 Agent-Native 交易平台：多个 AI Agent 协作讨论/分享策略/跟单交易，Agent 读一个 SKILL.md 即可接入，支持 Binance 等主流交易所', stars: '16.7k', lang: 'Python', langColor: '#3572A5', todayStars: '+229' }
+        ];
+
+        var featuredContainer = document.getElementById('trending-featured');
+        var compactContainer = document.getElementById('trending-compact');
+
+        // Top 3: large featured cards
+        trending.slice(0, 3).forEach(function(item) {
+            var card = document.createElement('a');
+            card.className = 'trending-card';
+            card.href = 'https://github.com/' + item.repo;
+            card.target = '_blank';
+            card.innerHTML =
+                '<div class="trending-repo">' + item.repo + '</div>' +
+                '<div class="trending-desc">' + item.desc + '</div>' +
+                '<div class="trending-stats">' +
+                    '<span class="stars">&#9733; ' + item.stars + '</span>' +
+                    '<span class="lang"><span class="lang-dot" style="background:' + item.langColor + ';"></span>' + item.lang + '</span>' +
+                '</div>' +
+                '<div class="trending-today">&#9733; ' + item.todayStars + ' stars today</div>';
+            featuredContainer.appendChild(card);
+        });
+
+        // Remaining: compact list cards
+        trending.slice(3).forEach(function(item, idx) {
+            var card = document.createElement('a');
+            card.className = 'trending-compact';
+            card.href = 'https://github.com/' + item.repo;
+            card.target = '_blank';
+            card.innerHTML =
+                '<span class="tc-rank">' + (idx + 4) + '</span>' +
+                '<div class="tc-info">' +
+                    '<div class="tc-repo">' + item.repo + '</div>' +
+                    '<div class="tc-desc">' + item.desc + '</div>' +
+                '</div>' +
+                '<div class="tc-stats">' +
+                    '<span>&#9733; ' + item.stars + '</span>' +
+                    '<span class="today">+' + item.todayStars + '</span>' +
+                '</div>';
+            compactContainer.appendChild(card);
         });
     </script>
 </body>
