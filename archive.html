@@ -243,6 +243,30 @@
             font-size: 0.9rem;
         }
 
+        /* Tab switcher */
+        .tab-bar {
+            display: flex;
+            gap: 0;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 0.75rem 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Noto Sans SC', sans-serif;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .tab-btn:hover { color: var(--text-secondary); }
+        .tab-btn.active { color: #fff; border-bottom-color: var(--accent-blue); }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
         /* Footer */
         footer {
             background: var(--card-bg);
@@ -285,9 +309,21 @@
             <div class="hero">
                 <h1>历史归档</h1>
             </div>
-            <div id="archive-container"></div>
-            <div class="load-more-container" id="load-more-container" style="display:none;">
-                <button class="load-more" id="load-more">加载更多</button>
+            <div class="tab-bar">
+                <button class="tab-btn active" data-tab="trending">🔥 GitHub Trending</button>
+                <button class="tab-btn" data-tab="articles">📰 每日精选</button>
+            </div>
+            <div class="tab-panel active" id="panel-trending">
+                <div id="trending-container"></div>
+                <div class="load-more-container" id="trending-load-more-container" style="display:none;">
+                    <button class="load-more" id="trending-load-more">加载更多</button>
+                </div>
+            </div>
+            <div class="tab-panel" id="panel-articles">
+                <div id="articles-container"></div>
+                <div class="load-more-container" id="articles-load-more-container" style="display:none;">
+                    <button class="load-more" id="articles-load-more">加载更多</button>
+                </div>
             </div>
         </div>
     </main>
@@ -299,12 +335,22 @@
     <script>
 var BATCH_SIZE = 30;
 var allDates = [];
-var loadedIndex = 0;
-var container = document.getElementById('archive-container');
+
+// State per tab
+var state = {
+    trending: { loadedIndex: 0, container: null, loadMoreContainer: null },
+    articles: { loadedIndex: 0, container: null, loadMoreContainer: null }
+};
 
 // Date display
 var dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
 document.getElementById('current-date').textContent = new Date().toLocaleDateString('zh-CN', dateOptions);
+
+// Resolve containers
+state.trending.container = document.getElementById('trending-container');
+state.trending.loadMoreContainer = document.getElementById('trending-load-more-container');
+state.articles.container = document.getElementById('articles-container');
+state.articles.loadMoreContainer = document.getElementById('articles-load-more-container');
 
 function formatDateCN(dateStr) {
     var parts = dateStr.split('-');
@@ -320,129 +366,169 @@ function formatMonthCN(monthKey) {
     return parts[0] + '年' + parseInt(parts[1]) + '月';
 }
 
-function renderDay(data) {
+// --- Render: Trending day block ---
+function renderTrendingDay(data) {
+    if (!data.trending || !data.trending.length) return null;
+
     var block = document.createElement('div');
     block.className = 'day-block';
 
-    // Date header
     var dateDiv = document.createElement('div');
     dateDiv.className = 'day-date';
-    var countParts = [];
-    if (data.trending && data.trending.length) countParts.push(data.trending.length + ' trending');
-    if (data.articles && data.articles.length) countParts.push(data.articles.length + ' 篇文章');
-    dateDiv.innerHTML = formatDateCN(data.date) + ' <span class="day-count">(' + countParts.join(', ') + ')</span>';
+    dateDiv.innerHTML = formatDateCN(data.date) + ' <span class="day-count">(' + data.trending.length + ' trending)</span>';
     block.appendChild(dateDiv);
 
-    // Trending section
-    if (data.trending && data.trending.length) {
-        var tLabel = document.createElement('div');
-        tLabel.className = 'day-section-label';
-        tLabel.textContent = '🔥 Trending';
-        block.appendChild(tLabel);
-
-        var tGrid = document.createElement('div');
-        tGrid.className = 'trending-compact-grid';
-        data.trending.forEach(function(item) {
-            var card = document.createElement('a');
-            card.className = 'trending-compact';
-            card.href = item.url || ('https://github.com/' + item.repo);
-            card.target = '_blank';
-            card.innerHTML =
-                '<span class="tc-rank">' + (item.rank || '') + '</span>' +
-                '<div class="tc-info">' +
-                    '<div class="tc-repo">' + item.repo + '</div>' +
-                    '<div class="tc-desc">' + item.desc + '</div>' +
-                '</div>' +
-                '<div class="tc-stats">' +
-                    '<span>&#9733; ' + item.stars + '</span>' +
-                    '<span class="today">+' + item.todayStars + '</span>' +
-                '</div>';
-            tGrid.appendChild(card);
-        });
-        block.appendChild(tGrid);
-    }
-
-    // Articles section
-    if (data.articles && data.articles.length) {
-        var aLabel = document.createElement('div');
-        aLabel.className = 'day-section-label';
-        aLabel.textContent = '📰 文章';
-        block.appendChild(aLabel);
-
-        var aDiv = document.createElement('div');
-        aDiv.className = 'archive-articles';
-        data.articles.forEach(function(article) {
-            var card = document.createElement('a');
-            card.className = 'archive-article';
-            card.href = article.url || ('articles/' + article.id + '.html');
-            card.innerHTML =
-                '<span class="archive-article-icon">' + (article.icon || '📄') + '</span>' +
-                '<div class="archive-article-info">' +
-                    '<div class="archive-article-title">' + article.title + '</div>' +
-                    '<div class="archive-article-meta">' + article.category + ' · ' + article.author + '</div>' +
-                '</div>';
-            aDiv.appendChild(card);
-        });
-        block.appendChild(aDiv);
-    }
-
+    var grid = document.createElement('div');
+    grid.className = 'trending-compact-grid';
+    data.trending.forEach(function(item) {
+        var card = document.createElement('a');
+        card.className = 'trending-compact';
+        card.href = item.url || ('https://github.com/' + item.repo);
+        card.target = '_blank';
+        card.innerHTML =
+            '<span class="tc-rank">' + (item.rank || '') + '</span>' +
+            '<div class="tc-info">' +
+                '<div class="tc-repo">' + item.repo + '</div>' +
+                '<div class="tc-desc">' + item.desc + '</div>' +
+            '</div>' +
+            '<div class="tc-stats">' +
+                '<span>&#9733; ' + item.stars + '</span>' +
+                '<span class="today">+' + item.todayStars + '</span>' +
+            '</div>';
+        grid.appendChild(card);
+    });
+    block.appendChild(grid);
     return block;
 }
 
-function loadBatch() {
-    var batch = allDates.slice(loadedIndex, loadedIndex + BATCH_SIZE);
+// --- Render: Articles day block ---
+function renderArticlesDay(data) {
+    if (!data.articles || !data.articles.length) return null;
+
+    var block = document.createElement('div');
+    block.className = 'day-block';
+
+    var dateDiv = document.createElement('div');
+    dateDiv.className = 'day-date';
+    dateDiv.innerHTML = formatDateCN(data.date) + ' <span class="day-count">(' + data.articles.length + ' 篇文章)</span>';
+    block.appendChild(dateDiv);
+
+    var aDiv = document.createElement('div');
+    aDiv.className = 'archive-articles';
+    data.articles.forEach(function(article) {
+        var card = document.createElement('a');
+        card.className = 'archive-article';
+        card.href = article.url || ('articles/' + article.id + '.html');
+        card.innerHTML =
+            '<span class="archive-article-icon">' + (article.icon || '📄') + '</span>' +
+            '<div class="archive-article-info">' +
+                '<div class="archive-article-title">' + article.title + '</div>' +
+                '<div class="archive-article-meta">' + article.category + ' · ' + article.author + '</div>' +
+            '</div>';
+        aDiv.appendChild(card);
+    });
+    block.appendChild(aDiv);
+    return block;
+}
+
+// --- Load batch for a specific tab ---
+function loadBatch(tab) {
+    var s = state[tab];
+    var batch = allDates.slice(s.loadedIndex, s.loadedIndex + BATCH_SIZE);
     if (batch.length === 0) {
-        document.getElementById('load-more-container').style.display = 'none';
+        s.loadMoreContainer.style.display = 'none';
         return;
     }
 
     var loadingDiv = document.createElement('div');
     loadingDiv.className = 'loading';
     loadingDiv.textContent = '加载中...';
-    container.appendChild(loadingDiv);
+    s.container.appendChild(loadingDiv);
 
     var promises = batch.map(function(dateStr) {
         return fetch('data/' + dateStr + '.json').then(function(r) { return r.json(); });
     });
 
     Promise.all(promises).then(function(results) {
-        container.removeChild(loadingDiv);
+        s.container.removeChild(loadingDiv);
 
-        // Group by month
+        var renderFn = tab === 'trending' ? renderTrendingDay : renderArticlesDay;
         var currentMonth = null;
+
+        // Check if container already has month headers to find the last one
+        var lastMonth = null;
+        var existing = s.container.querySelectorAll('.month-header');
+        if (existing.length) {
+            lastMonth = existing[existing.length - 1].getAttribute('data-month');
+        }
+
         results.forEach(function(data) {
             var monthKey = getMonthKey(data.date);
-            if (monthKey !== currentMonth) {
+            if (monthKey !== (currentMonth || lastMonth)) {
                 var monthHeader = document.createElement('div');
                 monthHeader.className = 'month-header';
+                monthHeader.setAttribute('data-month', monthKey);
                 monthHeader.textContent = formatMonthCN(monthKey);
-                container.appendChild(monthHeader);
-                currentMonth = monthKey;
+                s.container.appendChild(monthHeader);
             }
-            container.appendChild(renderDay(data));
+            currentMonth = monthKey;
+
+            var block = renderFn(data);
+            if (block) s.container.appendChild(block);
         });
 
-        loadedIndex += batch.length;
-        document.getElementById('load-more-container').style.display =
-            loadedIndex < allDates.length ? 'block' : 'none';
+        s.loadedIndex += batch.length;
+        s.loadMoreContainer.style.display =
+            s.loadedIndex < allDates.length ? 'block' : 'none';
     }).catch(function(err) {
-        container.removeChild(loadingDiv);
+        s.container.removeChild(loadingDiv);
         console.error('Failed to load archive data:', err);
     });
 }
 
-// Initialize
+// --- Tab switching ---
+var tabBtns = document.querySelectorAll('.tab-btn');
+tabBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        tabBtns.forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+
+        var tab = btn.getAttribute('data-tab');
+        document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+        document.getElementById('panel-' + tab).classList.add('active');
+
+        // Lazy load: if not yet loaded, trigger first batch
+        var s = state[tab];
+        if (s.loadedIndex === 0) {
+            loadBatch(tab);
+        }
+    });
+});
+
+// --- Hash-based tab activation ---
+function activateTabFromHash() {
+    var hash = window.location.hash.replace('#', '');
+    if (hash === 'articles') {
+        tabBtns[1].click();
+    } else {
+        tabBtns[0].click();
+    }
+}
+
+// --- Initialize ---
 fetch('data/index.json')
     .then(function(r) { return r.json(); })
     .then(function(dates) {
         allDates = dates;
-        loadBatch();
+        activateTabFromHash();
     })
     .catch(function(err) {
-        container.innerHTML = '<div class="loading">暂无归档数据</div>';
+        state.trending.container.innerHTML = '<div class="loading">暂无归档数据</div>';
     });
 
-document.getElementById('load-more').addEventListener('click', loadBatch);
+document.getElementById('trending-load-more').addEventListener('click', function() { loadBatch('trending'); });
+document.getElementById('articles-load-more').addEventListener('click', function() { loadBatch('articles'); });
+window.addEventListener('hashchange', activateTabFromHash);
     </script>
 </body>
 </html>
