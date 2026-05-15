@@ -1,0 +1,96 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate article pages
+        run: node build-all.js
+
+      - name: Generate RSS feed
+        run: |
+          if [ ! -f feed.xml ]; then
+            node -e '
+            const fs = require("fs");
+            const path = require("path");
+
+            const articlesPath = path.join("dist", "articles.json");
+            if (!fs.existsSync(articlesPath)) {
+              console.log("No dist/articles.json found, skipping feed generation.");
+              process.exit(0);
+            }
+
+            const data = JSON.parse(fs.readFileSync(articlesPath, "utf-8"));
+            const articles = data.articles || [];
+
+            const items = articles.slice(0, 50).map(a => {
+              const title = (a.title || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+              const link = a.originalUrl || "";
+              const desc = (a.summary || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+              const date = a.date ? new Date(a.date).toUTCString() : "";
+              return "    <item>\n" +
+                     "      <title>" + title + "</title>\n" +
+                     (link ? "      <link>" + link + "</link>\n" : "") +
+                     (desc ? "      <description>" + desc + "</description>\n" : "") +
+                     (date ? "      <pubDate>" + date + "</pubDate>\n" : "") +
+                     "    </item>";
+            }).join("\n");
+
+            const feed = [
+              "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+              "<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\">",
+              "  <channel>",
+              "    <title>Noc Daily</title>",
+              "    <link>https://c8x1.github.io</link>",
+              "    <description>Daily curated articles</description>",
+              "    <language>zh-CN</language>",
+              "    <atom:link href=\"https://c8x1.github.io/feed.xml\" rel=\"self\" type=\"application/rss+xml\"/>",
+              items,
+              "  </channel>",
+              "</rss>"
+            ].join("\n") + "\n";
+
+            fs.writeFileSync("feed.xml", feed, "utf-8");
+            console.log("Generated feed.xml with " + Math.min(articles.length, 50) + " items.");
+            '
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

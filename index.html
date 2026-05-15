@@ -4,594 +4,265 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>每日精选 | Daily Curated</title>
+    <link rel="alternate" type="application/rss+xml" title="每日精选 RSS" href="/feed.xml">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        :root {
-            --bg: #020617;
-            --card-bg: #0f172a;
-            --border: #1e293b;
-            --text: #e2e8f0;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --accent-blue: #3b82f6;
-            --accent-green: #22c55e;
-            --accent-cyan: #06b6d4;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: var(--text); line-height: 1.8; }
-        a { text-decoration: none; color: inherit; }
-
-        /* Header */
-        header {
-            background: var(--card-bg);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .logo {
-            font-family: 'Noto Serif SC', serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #fff;
-        }
-        .logo span {
-            color: var(--accent-blue);
-            font-weight: 400;
-        }
-        .header-date {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        /* Hero */
-        .hero {
-            text-align: center;
-            padding: 3rem 0 2rem 0;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 3rem;
-        }
-        .hero h1 {
-            font-size: 2rem;
-            font-weight: 500;
-            color: var(--text);
-        }
-        .hero h1 .times {
-            color: var(--accent-blue);
-            margin: 0 0.3em;
-        }
-
-        /* Sections */
-        .section {
-            margin-bottom: 3rem;
-        }
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-        .section-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .section-link {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            transition: color 0.2s;
-        }
-        .section-link:hover {
-            color: var(--accent-blue);
-        }
-
-        /* Article Cards Grid */
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-        }
-
-        /* Article Card */
-        .article-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            overflow: hidden;
-            transition: border-color 0.2s, transform 0.2s;
-            display: block;
-            color: inherit;
-        }
-        .article-card:hover {
-            border-color: var(--accent-blue);
-            transform: translateY(-2px);
-        }
-        .article-icon-area {
-            height: 140px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-        }
-        .article-body {
-            padding: 1.25rem;
-        }
-        .article-category {
-            font-size: 0.75rem;
-            color: var(--accent-blue);
-            font-weight: 600;
-            margin-bottom: 0.4rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .article-title {
-            font-family: 'Noto Serif SC', serif;
-            font-size: 1.15rem;
-            font-weight: 600;
-            line-height: 1.4;
-            margin-bottom: 0.5rem;
-        }
-        .article-excerpt {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.6;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            margin-bottom: 1rem;
-        }
-        .article-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        /* Trending Card */
-        .trending-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-left: 3px solid var(--accent-green);
-            border-radius: 8px;
-            padding: 1.25rem;
-            display: block;
-            color: inherit;
-            transition: border-color 0.2s, transform 0.2s;
-        }
-        .trending-card:hover {
-            border-color: var(--accent-green);
-            transform: translateY(-2px);
-        }
-        .trending-repo {
-            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--accent-blue);
-            margin-bottom: 0.4rem;
-        }
-        .trending-desc {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            line-height: 1.5;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            margin-bottom: 0.75rem;
-        }
-        .trending-stats {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-        .trending-stats .stars {
-            color: var(--text-secondary);
-        }
-        .trending-stats .lang {
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-        .trending-stats .lang-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        .trending-today {
-            font-size: 0.8rem;
-            color: var(--accent-green);
-            margin-top: 0.5rem;
-        }
-        .trending-placeholder {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 0.5rem;
-            font-style: italic;
-        }
-
-        /* Trending Featured Grid (top 3) */
-        .trending-featured-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.2rem;
-            margin-bottom: 1rem;
-        }
-
-        /* Trending Compact Grid (remaining) */
-        .trending-compact-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.5rem;
-        }
-
-        /* Compact Card */
-        .trending-compact {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 0.55rem 0.85rem;
-            transition: border-color 0.2s;
-            color: inherit;
-            text-decoration: none;
-            overflow: hidden;
-            min-width: 0;
-        }
-        .trending-compact:hover {
-            border-color: var(--accent-green);
-        }
-        .tc-rank {
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: var(--accent-green);
-            flex-shrink: 0;
-            width: 18px;
-            text-align: center;
-        }
-        .tc-info {
-            flex: 1;
-            min-width: 0;
-            overflow: hidden;
-        }
-        .tc-repo {
-            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .tc-desc {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .tc-stats {
-            display: flex;
-            gap: 0.6rem;
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            flex-shrink: 0;
-        }
-        .tc-stats .today {
-            color: var(--accent-green);
-        }
-
-        /* Project Card */
-        .project-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-left: 3px solid var(--accent-cyan);
-            border-radius: 8px;
-            padding: 1.25rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            transition: border-color 0.2s, transform 0.2s;
-        }
-        .project-card:hover {
-            border-color: var(--accent-cyan);
-            transform: translateY(-2px);
-        }
-        .project-icon {
-            flex-shrink: 0;
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-        }
-        .project-info h3 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            line-height: 1.3;
-            margin-bottom: 0.25rem;
-        }
-        .project-info p {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            line-height: 1.4;
-        }
-        .project-tag {
-            display: inline-block;
-            font-size: 0.7rem;
-            color: var(--accent-cyan);
-            border: 1px solid var(--accent-cyan);
-            padding: 0.1rem 0.5rem;
-            border-radius: 4px;
-            margin-top: 0.4rem;
-            margin-right: 0.3rem;
-        }
-
-        /* Footer */
-        footer {
-            background: var(--card-bg);
-            border-top: 1px solid var(--border);
-            padding: 2rem 0;
-            text-align: center;
-            margin-top: 4rem;
-        }
-        footer p {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        /* Responsive */
-        @media (min-width: 768px) and (max-width: 1023px) {
-            .grid-4 {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .trending-featured-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .trending-compact-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        @media (max-width: 767px) {
-            .grid-4 {
-                grid-template-columns: 1fr;
-            }
-            .trending-featured-grid {
-                grid-template-columns: 1fr;
-            }
-            .trending-compact-grid {
-                grid-template-columns: 1fr;
-            }
-            .hero h1 {
-                font-size: 1.4rem;
-            }
-        }
+        :root { --bg:#020617; --card-bg:#0f172a; --border:#1e293b; --text:#e2e8f0; --text-secondary:#94a3b8; --text-muted:#64748b; --accent-blue:#3b82f6; --accent-green:#22c55e; --accent-cyan:#06b6d4; }
+        [data-theme="light"] { --bg:#f8fafc; --card-bg:#ffffff; --border:#e2e8f0; --text:#1e293b; --text-secondary:#475569; --text-muted:#94a3b8; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Noto Sans SC',sans-serif; background:var(--bg); color:var(--text); line-height:1.8; }
+        a { text-decoration:none; color:inherit; }
+        header { background:var(--card-bg); border-bottom:1px solid var(--border); padding:1rem 0; position:sticky; top:0; z-index:100; }
+        .container { max-width:1200px; margin:0 auto; padding:0 2rem; }
+        .header-content { display:flex; justify-content:space-between; align-items:center; }
+        .logo { font-family:'Noto Serif SC',serif; font-size:1.5rem; font-weight:700; color:var(--text); }
+        .logo span { color:var(--accent-blue); font-weight:400; }
+        .header-right { display:flex; align-items:center; gap:1rem; }
+        .header-date { font-size:0.9rem; color:var(--text-secondary); }
+        .theme-toggle { background:none; border:1px solid var(--border); color:var(--text-secondary); cursor:pointer; width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1rem; transition:all .2s; }
+        .theme-toggle:hover { border-color:var(--accent-blue); color:var(--accent-blue); }
+        .hero { text-align:center; padding:3rem 0 2rem 0; border-bottom:1px solid var(--border); margin-bottom:2rem; }
+        .hero h1 { font-size:2rem; font-weight:500; color:var(--text); margin-bottom:0.5rem; }
+        .hero h1 .times { color:var(--accent-blue); margin:0 .3em; }
+        .hero-stats { font-size:.95rem; color:var(--text-muted); margin-top:.5rem; }
+        .hero-stats strong { color:var(--accent-blue); }
+        .search-bar { position:relative; max-width:560px; margin:0 auto 2rem auto; }
+        .search-bar input { width:100%; padding:.75rem 1rem .75rem 2.8rem; background:var(--card-bg); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:.95rem; font-family:inherit; outline:none; transition:border-color .2s; }
+        .search-bar input::placeholder { color:var(--text-muted); }
+        .search-bar input:focus { border-color:var(--accent-blue); }
+        .search-bar .search-icon { position:absolute; left:1rem; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:.9rem; pointer-events:none; }
+        .category-filter { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:1.5rem; }
+        .filter-btn { padding:.35rem .9rem; background:var(--card-bg); border:1px solid var(--border); border-radius:6px; color:var(--text-secondary); font-size:.8rem; font-family:inherit; cursor:pointer; transition:all .2s; }
+        .filter-btn:hover { border-color:var(--accent-blue); color:var(--accent-blue); }
+        .filter-btn.active { background:var(--accent-blue); border-color:var(--accent-blue); color:#fff; }
+        .section { margin-bottom:3rem; }
+        .section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; }
+        .section-title { font-size:1.3rem; font-weight:600; display:flex; align-items:center; gap:.5rem; }
+        .section-link { font-size:.85rem; color:var(--text-muted); transition:color .2s; }
+        .section-link:hover { color:var(--accent-blue); }
+        .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:1.5rem; }
+        .article-card { background:var(--card-bg); border:1px solid var(--border); border-radius:10px; overflow:hidden; transition:border-color .2s,transform .2s; display:block; color:inherit; }
+        .article-card:hover { border-color:var(--accent-blue); transform:translateY(-2px); }
+        .article-icon-area { height:140px; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); display:flex; align-items:center; justify-content:center; font-size:3rem; }
+        .article-body { padding:1.25rem; }
+        .article-category { font-size:.75rem; color:var(--accent-blue); font-weight:600; margin-bottom:.4rem; text-transform:uppercase; letter-spacing:.5px; }
+        .article-title { font-family:'Noto Serif SC',serif; font-size:1.15rem; font-weight:600; line-height:1.4; margin-bottom:.5rem; }
+        .article-excerpt { color:var(--text-secondary); font-size:.9rem; line-height:1.6; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:1rem; }
+        .article-meta { display:flex; justify-content:space-between; align-items:center; font-size:.8rem; color:var(--text-muted); }
+        .no-results { grid-column:1/-1; text-align:center; padding:3rem 1rem; color:var(--text-muted); font-size:.95rem; }
+        .trending-card { background:var(--card-bg); border:1px solid var(--border); border-left:3px solid var(--accent-green); border-radius:8px; padding:1.25rem; display:block; color:inherit; transition:border-color .2s,transform .2s; }
+        .trending-card:hover { border-color:var(--accent-green); transform:translateY(-2px); }
+        .trending-repo { font-family:'SF Mono','Fira Code','Consolas',monospace; font-size:.95rem; font-weight:600; color:var(--accent-blue); margin-bottom:.4rem; }
+        .trending-desc { color:var(--text-secondary); font-size:.85rem; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:.75rem; }
+        .trending-stats { display:flex; align-items:center; gap:1rem; font-size:.8rem; color:var(--text-muted); }
+        .trending-stats .stars { color:var(--text-secondary); }
+        .trending-stats .lang { display:flex; align-items:center; gap:.3rem; }
+        .trending-stats .lang-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+        .trending-today { font-size:.8rem; color:var(--accent-green); margin-top:.5rem; }
+        .trending-featured-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem; margin-bottom:1rem; }
+        .trending-compact-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:.5rem; }
+        .trending-compact { display:flex; align-items:center; gap:.6rem; background:var(--card-bg); border:1px solid var(--border); border-radius:6px; padding:.55rem .85rem; transition:border-color .2s; color:inherit; text-decoration:none; overflow:hidden; min-width:0; }
+        .trending-compact:hover { border-color:var(--accent-green); }
+        .tc-rank { font-size:.8rem; font-weight:700; color:var(--accent-green); flex-shrink:0; width:18px; text-align:center; }
+        .tc-info { flex:1; min-width:0; overflow:hidden; }
+        .tc-repo { font-family:'SF Mono','Fira Code','Consolas',monospace; font-size:.8rem; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .tc-desc { font-size:.7rem; color:var(--text-muted); line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+        .tc-stats { display:flex; gap:.6rem; font-size:.7rem; color:var(--text-muted); flex-shrink:0; }
+        .tc-stats .today { color:var(--accent-green); }
+        .project-card { background:var(--card-bg); border:1px solid var(--border); border-left:3px solid var(--accent-cyan); border-radius:8px; padding:1.25rem; display:flex; align-items:flex-start; gap:1rem; transition:border-color .2s,transform .2s; }
+        .project-card:hover { border-color:var(--accent-cyan); transform:translateY(-2px); }
+        .project-icon { flex-shrink:0; width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
+        .project-info h3 { font-size:.95rem; font-weight:600; line-height:1.3; margin-bottom:.25rem; }
+        .project-info p { font-size:.8rem; color:var(--text-secondary); line-height:1.4; }
+        .project-tag { display:inline-block; font-size:.7rem; color:var(--accent-cyan); border:1px solid var(--accent-cyan); padding:.1rem .5rem; border-radius:4px; margin-top:.4rem; margin-right:.3rem; }
+        footer { background:var(--card-bg); border-top:1px solid var(--border); padding:2rem 0; text-align:center; margin-top:4rem; }
+        .footer-links { display:flex; justify-content:center; gap:1.5rem; margin-bottom:.75rem; font-size:.85rem; }
+        .footer-links a { color:var(--text-muted); transition:color .2s; }
+        .footer-links a:hover { color:var(--accent-blue); }
+        footer p { font-size:.8rem; color:var(--text-muted); }
+        @media (min-width:768px) and (max-width:1023px) { .grid-4{grid-template-columns:repeat(2,1fr)} .trending-featured-grid{grid-template-columns:repeat(2,1fr)} .trending-compact-grid{grid-template-columns:1fr} }
+        @media (max-width:767px) { .grid-4{grid-template-columns:1fr} .trending-featured-grid{grid-template-columns:1fr} .trending-compact-grid{grid-template-columns:1fr} .hero h1{font-size:1.4rem} .header-date{display:none} }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container">
-            <div class="header-content">
-                <a href="/" class="logo">c8x1<span> &middot; Daily Curated</span></a>
-                <div class="header-date" id="current-date"></div>
+    <header><div class="container"><div class="header-content">
+        <a href="/" class="logo">c8x1<span> &middot; Daily Curated</span></a>
+        <div class="header-right">
+            <div class="header-date" id="current-date"></div>
+            <button class="theme-toggle" id="theme-toggle" aria-label="切换主题"><i class="fas fa-moon" id="theme-icon"></i></button>
+        </div>
+    </div></div></header>
+
+    <main><div class="container">
+        <div class="hero">
+            <h1>每日精选<span class="times">&times;</span>开源趋势<span class="times">&times;</span>技术学习</h1>
+            <p class="hero-stats">已收录 <strong id="article-count">0</strong> 篇精选文章</p>
+        </div>
+        <div class="search-bar">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="search-input" placeholder="搜索文章标题、摘要、分类...">
+        </div>
+
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">&#128293; GitHub Trending</h2>
+                <a href="archive.html#trending" class="section-link">查看全部归档 &rarr;</a>
             </div>
-        </div>
-    </header>
+            <div class="trending-featured-grid" id="trending-featured"></div>
+            <div class="trending-compact-grid" id="trending-compact"></div>
+        </section>
 
-    <!-- Main Content -->
-    <main>
-        <div class="container">
-            <!-- Hero -->
-            <div class="hero">
-                <h1>每日精选<span class="times">&times;</span>开源趋势<span class="times">&times;</span>技术学习</h1>
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">&#128240; 每日精选</h2>
+                <a href="archive.html#articles" class="section-link">查看全部归档 &rarr;</a>
             </div>
+            <div class="category-filter" id="category-filter"></div>
+            <div class="grid-4" id="articles-container"></div>
+        </section>
 
-            <!-- Section 1: GitHub Trending -->
-            <section class="section">
-                <div class="section-header">
-                    <h2 class="section-title">&#128293; GitHub Trending</h2>
-                    <a href="archive.html#trending" class="section-link">查看全部归档 &rarr;</a>
-                </div>
-                <div class="trending-featured-grid" id="trending-featured"></div>
-                <div class="trending-compact-grid" id="trending-compact"></div>
-            </section>
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">&#127919; 能力提升计划</h2>
+                <a href="https://github.com/c8x1" target="_blank" class="section-link">github.com/c8x1 &rarr;</a>
+            </div>
+            <div class="grid-4">
+                <a class="project-card" href="https://c8x1.github.io/smartglasses-study/" target="_blank">
+                    <div class="project-icon" style="background:#1a1e2e">&#128083;</div>
+                    <div class="project-info"><h3>智能眼镜速成</h3><p>基于 OpenSourceSmartGlasses，由浅入深拆解 ESP32 + FreeRTOS + LVGL 全栈开发</p><span class="project-tag">ESP32</span><span class="project-tag">FreeRTOS</span><span class="project-tag">音频</span></div></a>
+                <a class="project-card" href="https://c8x1.github.io/embedded-dev/" target="_blank">
+                    <div class="project-icon" style="background:#1a2e1a">&#128295;</div>
+                    <div class="project-info"><h3>嵌入式开发速成</h3><p>音频工程师的嵌入式开发入门路线图</p><span class="project-tag">嵌入式</span><span class="project-tag">入门</span></div></a>
+                <a class="project-card" href="https://c8x1.github.io/embedded-quick-learning-site/" target="_blank">
+                    <div class="project-icon" style="background:#2e1a1a">&#9889;</div>
+                    <div class="project-info"><h3>嵌入式快速学习站</h3><p>嵌入式系统快速学习静态站点</p><span class="project-tag">学习站</span></div></a>
+                <a class="project-card" href="https://c8x1.github.io/cortex-m-audio-learning/" target="_blank">
+                    <div class="project-icon" style="background:#1a1a2e">&#127911;</div>
+                    <div class="project-info"><h3>Cortex-M 音频学习</h3><p>7 阶段 &middot; 10 个开源项目源码走读 &mdash; 从架构基础到音频 DSP 全栈</p><span class="project-tag">Cortex-M</span><span class="project-tag">音频 DSP</span><span class="project-tag">BLE</span></div></a>
+            </div>
+        </section>
+    </div></main>
 
-            <!-- Section 2: Articles -->
-            <section class="section">
-                <div class="section-header">
-                    <h2 class="section-title">&#128240; 每日精选</h2>
-                    <a href="archive.html#articles" class="section-link">查看全部归档 &rarr;</a>
-                </div>
-                <div class="grid-4" id="articles-container"></div>
-            </section>
-
-            <!-- Section 3: 能力提升计划 -->
-            <section class="section">
-                <div class="section-header">
-                    <h2 class="section-title">&#127919; 能力提升计划</h2>
-                    <a href="https://github.com/c8x1" target="_blank" class="section-link">github.com/c8x1 &rarr;</a>
-                </div>
-                <div class="grid-4">
-                    <a class="project-card" href="https://c8x1.github.io/smartglasses-study/" target="_blank">
-                        <div class="project-icon" style="background:#1a1e2e;">&#128083;</div>
-                        <div class="project-info">
-                            <h3>智能眼镜速成</h3>
-                            <p>基于 OpenSourceSmartGlasses，由浅入深拆解 ESP32 + FreeRTOS + LVGL 全栈开发</p>
-                            <span class="project-tag">ESP32</span>
-                            <span class="project-tag">FreeRTOS</span>
-                            <span class="project-tag">音频</span>
-                        </div>
-                    </a>
-                    <a class="project-card" href="https://c8x1.github.io/embedded-dev/" target="_blank">
-                        <div class="project-icon" style="background:#1a2e1a;">&#128295;</div>
-                        <div class="project-info">
-                            <h3>嵌入式开发速成</h3>
-                            <p>音频工程师的嵌入式开发入门路线图</p>
-                            <span class="project-tag">嵌入式</span>
-                            <span class="project-tag">入门</span>
-                        </div>
-                    </a>
-                    <a class="project-card" href="https://c8x1.github.io/embedded-quick-learning-site/" target="_blank">
-                        <div class="project-icon" style="background:#2e1a1a;">&#9889;</div>
-                        <div class="project-info">
-                            <h3>嵌入式快速学习站</h3>
-                            <p>嵌入式系统快速学习静态站点</p>
-                            <span class="project-tag">学习站</span>
-                        </div>
-                    </a>
-                    <a class="project-card" href="https://c8x1.github.io/cortex-m-audio-learning/" target="_blank">
-                        <div class="project-icon" style="background:#1a1a2e;">&#127911;</div>
-                        <div class="project-info">
-                            <h3>Cortex-M 音频学习</h3>
-                            <p>7 阶段 &middot; 10 个开源项目源码走读 &mdash; 从架构基础到音频 DSP 全栈</p>
-                            <span class="project-tag">Cortex-M</span>
-                            <span class="project-tag">音频 DSP</span>
-                            <span class="project-tag">BLE</span>
-                        </div>
-                    </a>
-                </div>
-            </section>
+    <footer><div class="container">
+        <div class="footer-links">
+            <a href="/feed.xml"><i class="fas fa-rss"></i> RSS</a>
+            <a href="https://github.com/c8x1" target="_blank"><i class="fab fa-github"></i> GitHub</a>
         </div>
-    </main>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <p>&copy; 2026 c8x1 &middot; Daily Curated</p>
-        </div>
-    </footer>
+        <p>&copy; 2026 c8x1 &middot; Daily Curated &middot; Powered by GitHub Pages</p>
+    </div></footer>
 
     <script>
-// Date display
-var dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-document.getElementById('current-date').textContent = new Date().toLocaleDateString('zh-CN', dateOptions);
+/* Theme Toggle */
+(function(){
+    var stored=localStorage.getItem('theme'),prefersDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
+    var isDark=stored?stored==='dark':prefersDark,html=document.documentElement,icon=document.getElementById('theme-icon');
+    function apply(d){if(d){html.removeAttribute('data-theme');icon.className='fas fa-moon'}else{html.setAttribute('data-theme','light');icon.className='fas fa-sun'}}
+    apply(isDark);
+    document.getElementById('theme-toggle').onclick=function(){isDark=!isDark;localStorage.setItem('theme',isDark?'dark':'light');apply(isDark)};
+})();
 
-// --- Render functions ---
+/* Date */
+document.getElementById('current-date').textContent=new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
 
-function renderTrending(items) {
-    var featuredContainer = document.getElementById('trending-featured');
-    var compactContainer = document.getElementById('trending-compact');
-    featuredContainer.innerHTML = '';
-    compactContainer.innerHTML = '';
+/* State */
+var allArticles=[],activeCategory='all',searchQuery='';
+var categoryMap={
+    'AI':['AI','AI Agent','AI伦理','AI前沿','AI安全','AI年度回顾','AI影响','AI智能体','AI研究','AI编程','AI芯片','AI代理','LLM','Agent','人工智能','大模型','大语言模型','多模态AI','推理模型','视觉语言模型','神经符号AI','自主AI','边缘AI','混合架构'],
+    '技术':['技术','技术前沿','技术趋势','技术对比','技术批判','技术突破','前沿科技','工程','工程实践','开发者工具','编程辅助','系统架构','架构设计','芯片架构','硬件','边缘计算','行业分析','数字化转型','工具评测','智能制造','工业4.0'],
+    '科学':['科学','科学研究','AI for Science','量子计算','神经科学','神经形态计算','生物计算','DNA存储','机器学习','机器人','机器人学','具身智能','空间智能','世界模型','联邦学习','自主系统'],
+    '哲学':['哲学','伦理学','道德哲学','心灵哲学','意识研究','存在主义','技术哲学','尼采哲学','康德哲学','斯多葛主义','道家思想','日本哲学','时间哲学','自由哲学','后人类主义','生命意义'],
+    '社会':['数字社会','社会批判','数字生活','数字时代','注意力','职业思考','生活意义','商业趋势','企业应用','2026趋势','未来学'],
+    '健康':['健康']
+};
+var catIcons={'AI':'\uD83E\uDD16','技术':'\uD83D\uDD27','科学':'\uD83D\uDD2C','哲学':'\uD83E\uDDD8','社会':'\uD83C\uDF0D','健康':'\u2764\uFE0F'};
 
-    // Top 3: featured cards
-    items.slice(0, 3).forEach(function(item) {
-        var card = document.createElement('a');
-        card.className = 'trending-card';
-        card.href = item.url || ('https://github.com/' + item.repo);
-        card.target = '_blank';
-        card.innerHTML =
-            '<div class="trending-repo">' + item.repo + '</div>' +
-            '<div class="trending-desc">' + item.desc + '</div>' +
-            '<div class="trending-stats">' +
-                '<span class="stars">&#9733; ' + item.stars + '</span>' +
-                '<span class="lang"><span class="lang-dot" style="background:' + item.langColor + ';"></span>' + item.lang + '</span>' +
-            '</div>' +
-            '<div class="trending-today">&#9733; ' + item.todayStars + ' stars today</div>';
-        featuredContainer.appendChild(card);
+function getBroadCat(cats){if(!cats)return'';for(var b in categoryMap)for(var i=0;i<cats.length;i++)if(categoryMap[b].indexOf(cats[i])!==-1)return b;return''}
+
+/* Render Trending */
+function renderTrending(items){
+    var f=document.getElementById('trending-featured'),c=document.getElementById('trending-compact');
+    f.innerHTML='';c.innerHTML='';
+    items.slice(0,3).forEach(function(it){
+        var a=document.createElement('a');a.className='trending-card';a.href=it.url||('https://github.com/'+it.repo);a.target='_blank';
+        a.innerHTML='<div class="trending-repo">'+it.repo+'</div><div class="trending-desc">'+it.desc+'</div><div class="trending-stats"><span class="stars">&#9733; '+it.stars+'</span><span class="lang"><span class="lang-dot" style="background:'+it.langColor+'"></span>'+it.lang+'</span></div><div class="trending-today">&#9733; '+it.todayStars+' stars today</div>';
+        f.appendChild(a);
     });
-
-    // Remaining: compact cards
-    items.slice(3).forEach(function(item, idx) {
-        var rank = item.rank || (idx + 4);
-        var card = document.createElement('a');
-        card.className = 'trending-compact';
-        card.href = item.url || ('https://github.com/' + item.repo);
-        card.target = '_blank';
-        card.innerHTML =
-            '<span class="tc-rank">' + rank + '</span>' +
-            '<div class="tc-info">' +
-                '<div class="tc-repo">' + item.repo + '</div>' +
-                '<div class="tc-desc">' + item.desc + '</div>' +
-            '</div>' +
-            '<div class="tc-stats">' +
-                '<span>&#9733; ' + item.stars + '</span>' +
-                '<span class="today">+' + item.todayStars + '</span>' +
-            '</div>';
-        compactContainer.appendChild(card);
+    items.slice(3).forEach(function(it,idx){
+        var rank=it.rank||(idx+4),a=document.createElement('a');a.className='trending-compact';a.href=it.url||('https://github.com/'+it.repo);a.target='_blank';
+        a.innerHTML='<span class="tc-rank">'+rank+'</span><div class="tc-info"><div class="tc-repo">'+it.repo+'</div><div class="tc-desc">'+it.desc+'</div></div><div class="tc-stats"><span>&#9733; '+it.stars+'</span><span class="today">+'+it.todayStars+'</span></div>';
+        c.appendChild(a);
     });
 }
 
-function renderArticles(items) {
-    var container = document.getElementById('articles-container');
-    container.innerHTML = '';
-    items.forEach(function(article) {
-        var card = document.createElement('a');
-        card.className = 'article-card';
-        card.href = article.url || ('articles/' + article.id + '.html');
-        card.innerHTML =
-            '<div class="article-icon-area">' + article.icon + '</div>' +
-            '<div class="article-body">' +
-                '<div class="article-category">' + article.category + '</div>' +
-                '<h3 class="article-title">' + article.title + '</h3>' +
-                '<p class="article-excerpt">' + article.excerpt + '</p>' +
-                '<div class="article-meta">' +
-                    '<span>' + article.author + ' · ' + article.date + '</span>' +
-                    '<span>' + article.readTime + '</span>' +
-                '</div>' +
-            '</div>';
-        container.appendChild(card);
+/* Render Articles */
+function renderArticles(items){
+    var con=document.getElementById('articles-container');con.innerHTML='';
+    if(!items.length){con.innerHTML='<div class="no-results">没有找到匹配的文章</div>';return}
+    items.forEach(function(a){
+        var pc=a.categoryDisplay||(a.category&&a.category[0])||'';
+        var icon=a.icon||catIcons[pc]||catIcons[getBroadCat(a.category)]||'\uD83D\uDCD6';
+        var url=a.url||('articles/'+a.id+'.html');
+        var exc=a.excerpt||a.summary||'';
+        var rt=a.readTime||(a.stats?a.stats.readTime+' 分钟':'');
+        var card=document.createElement('a');card.className='article-card';card.href=url;
+        card.innerHTML='<div class="article-icon-area">'+icon+'</div><div class="article-body"><div class="article-category">'+pc+'</div><h3 class="article-title">'+a.title+'</h3><p class="article-excerpt">'+exc+'</p><div class="article-meta"><span>'+(a.author||'')+(a.date?' \u00B7 '+a.date:'')+'</span>'+(rt?'<span>'+rt+'</span>':'')+'</div></div>';
+        con.appendChild(card);
     });
 }
 
-// --- Fallback data (offline / first load) ---
-var defaultTrending = [
-    { repo: 'tinyhumansai/openhuman', desc: '桌面端 AI 助手平台：Memory Tree + SQLite 记忆系统，一键 OAuth 连接 118+ 服务（Gmail/Notion/Slack），自动同步数据并压缩成可搜索的知识图谱', stars: '3.0k', lang: 'Rust', langColor: '#dea584', todayStars: '+1,014' },
-    { repo: 'rohitg00/agentmemory', desc: 'AI 编程代理的持久化记忆引擎（MCP 服务器），自动捕获工具调用，经去重/压缩/向量化后建立四层记忆体系，跨会话保持上下文', stars: '6.1k', lang: 'TypeScript', langColor: '#3178c6', todayStars: '+1,048' },
-    { repo: 'CloakHQ/CloakBrowser', desc: '反检测 Chromium 浏览器：在 C++ 源码层面打 49 个指纹补丁，通过 Cloudflare/FingerprintJS 等 30+ 检测，可直接替换 Playwright', stars: '8.1k', lang: 'Python', langColor: '#3572A5', todayStars: '+1,606' },
-    { repo: 'apernet/hysteria', desc: '基于 QUIC 协议的抗审查代理，流量伪装成标准 HTTP/3，Salamander 混淆层 + 自定义拥塞控制，高丢包环境下性能远超 TCP 代理', stars: '20.3k', lang: 'Go', langColor: '#00ADD8', todayStars: '+51' },
-    { repo: 'mattpocock/skills', desc: 'Matt Pocock 的 AI 编程 Agent 技能包——TDD 循环、需求质问、架构改善等 prompt 模板，一条命令安装到 Claude Code / Cursor / Codex 等 50+ Agent', stars: '76.5k', lang: 'Shell', langColor: '#89e051', todayStars: '+3,867' },
-    { repo: 'anonfaded/FadCam', desc: 'Android 开源多媒体录制套件：后台视频录制 + 行车记录仪 + 屏幕录制标注 + 局域网串流 + 远程相机控制，fMP4 格式断电不丢数据', stars: '2.3k', lang: 'Java', langColor: '#b07219', todayStars: '+116' },
-    { repo: 'millionco/react-doctor', desc: 'React 代码健康度扫描器，一条命令输出 0-100 评分，覆盖 state/effects/性能/安全/可访问性/死代码六个维度，可集成到 AI Agent 和 CI', stars: '8.8k', lang: 'TypeScript', langColor: '#3178c6', todayStars: '+788' },
-    { repo: 'rasbt/LLMs-from-scratch', desc: '纯 PyTorch 从零实现 GPT——手写 BPE 分词、多头注意力、Transformer Block、预训练/微调全流程，Manning 同名书籍配套代码', stars: '93.9k', lang: 'Jupyter', langColor: '#DA5B0B', todayStars: '+772' },
-    { repo: 'datawhalechina/hello-agents', desc: '中文 AI Agent 从零构建教程：16 章覆盖 ReAct/Tool Use/MCP 协议/Agentic RL/多 Agent 协作，附自建 HelloAgents 框架和完整案例', stars: '48.4k', lang: 'Python', langColor: '#3572A5', todayStars: '+599' },
-    { repo: 'yikart/AiToEarn', desc: 'AI 驱动的多平台内容变现自动化：Agent 自动创作（视频/图片）→ 一键发布 12 个社交平台 → LLM 自动互动 → CPS/CPM 变现结算', stars: '12.0k', lang: 'TypeScript', langColor: '#3178c6', todayStars: '+1,282' },
-    { repo: 'HKUDS/AI-Trader', desc: '港大开源的 Agent-Native 交易平台：多个 AI Agent 协作讨论/分享策略/跟单交易，Agent 读一个 SKILL.md 即可接入，支持 Binance 等主流交易所', stars: '16.7k', lang: 'Python', langColor: '#3572A5', todayStars: '+229' }
-];
-
-var defaultArticles = [
-    { id:'philosophy-eats-ai', category:'哲学 · 人工智能', title:'哲学吞噬AI', excerpt:'要让AI创造可持续的商业价值，领导者必须批判性地思考决定AI开发、训练和部署的深层哲学基础。', author:'Michael Schrage', date:'2026年3月2日', readTime:'12分钟', icon:'🧠' },
-    { id:'article-1', category:'心理学', title:'世上没有精神病患者', excerpt:'几乎所有你认为关于精神病的常识都已被彻底证伪。', author:'Rasmus Rosenberg Larsen', date:'2026年2月27日', readTime:'24分钟', icon:'🧠' },
-    { id:'article-2', category:'哲学', title:'六秒的拥抱', excerpt:'从艺术到宗教再到性，工具化已经抽空了事物的内在价值。', author:'Julian Baggini', date:'2026年2月24日', readTime:'26分钟', icon:'🤔' },
-    { id:'article-3', category:'技术', title:'书籍与屏幕', excerpt:'你无法专注不是你的错。这是一个设计问题。', author:'Carlo Iacono', date:'2026年2月19日', readTime:'23分钟', icon:'📱' }
-];
-
-// --- Load data ---
-fetch('data/latest.json')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-        renderTrending(data.trending);
-        renderArticles(data.articles);
-    })
-    .catch(function() {
-        renderTrending(defaultTrending);
-        renderArticles(defaultArticles);
+/* Category Filter */
+function buildCategoryFilter(){
+    var con=document.getElementById('category-filter');con.innerHTML='';
+    var btns=[{key:'all',label:'全部'}];
+    for(var b in categoryMap)btns.push({key:b,label:b});
+    btns.forEach(function(b){
+        var btn=document.createElement('button');btn.className='filter-btn'+(b.key===activeCategory?' active':'');btn.textContent=b.label;
+        btn.onclick=function(){activeCategory=b.key;document.querySelectorAll('.filter-btn').forEach(function(el){el.classList.remove('active')});btn.classList.add('active');applyFilters()};
+        con.appendChild(btn);
     });
+}
+
+/* Filter */
+function applyFilters(){
+    var f=allArticles;
+    if(activeCategory!=='all'){var sc=categoryMap[activeCategory]||[];f=f.filter(function(a){var c=a.category||[];for(var i=0;i<c.length;i++)if(sc.indexOf(c[i])!==-1)return true;return false})}
+    if(searchQuery){var q=searchQuery.toLowerCase();f=f.filter(function(a){return(a.title||'').toLowerCase().indexOf(q)!==-1||(a.summary||'').toLowerCase().indexOf(q)!==-1||(a.excerpt||'').toLowerCase().indexOf(q)!==-1||(a.category||[]).join(' ').toLowerCase().indexOf(q)!==-1})}
+    renderArticles(f);
+}
+
+document.getElementById('search-input').oninput=function(e){searchQuery=e.target.value.trim();applyFilters()};
+
+/* Fallback */
+var defaultTrending=[
+    {repo:'tinyhumansai/openhuman',desc:'桌面端 AI 助手平台：Memory Tree + SQLite 记忆系统',stars:'3.0k',lang:'Rust',langColor:'#dea584',todayStars:'+1,014'},
+    {repo:'rohitg00/agentmemory',desc:'AI 编程代理的持久化记忆引擎',stars:'6.1k',lang:'TypeScript',langColor:'#3178c6',todayStars:'+1,048'},
+    {repo:'CloakHQ/CloakBrowser',desc:'反检测 Chromium 浏览器',stars:'8.1k',lang:'Python',langColor:'#3572A5',todayStars:'+1,606'},
+    {repo:'apernet/hysteria',desc:'基于 QUIC 协议的抗审查代理',stars:'20.3k',lang:'Go',langColor:'#00ADD8',todayStars:'+51'},
+    {repo:'mattpocock/skills',desc:'AI 编程 Agent 技能包',stars:'76.5k',lang:'Shell',langColor:'#89e051',todayStars:'+3,867'},
+    {repo:'anonfaded/FadCam',desc:'Android 开源多媒体录制套件',stars:'2.3k',lang:'Java',langColor:'#b07219',todayStars:'+116'},
+    {repo:'millionco/react-doctor',desc:'React 代码健康度扫描器',stars:'8.8k',lang:'TypeScript',langColor:'#3178c6',todayStars:'+788'},
+    {repo:'rasbt/LLMs-from-scratch',desc:'纯 PyTorch 从零实现 GPT',stars:'93.9k',lang:'Jupyter',langColor:'#DA5B0B',todayStars:'+772'}
+];
+var defaultArticles=[
+    {id:'philosophy-eats-ai',category:['AI','哲学'],title:'哲学吞噬AI',summary:'要让AI创造可持续的商业价值，领导者必须批判性地思考决定AI开发、训练和部署的深层哲学基础。',author:'Michael Schrage',date:'2026-03-02',readTime:'12分钟',icon:'\uD83E\uDDE0'},
+    {id:'article-1',category:['心理学'],title:'世上没有精神病患者',summary:'几乎所有你认为关于精神病的常识都已被彻底证伪。',author:'Rasmus Rosenberg Larsen',date:'2026-02-27',readTime:'24分钟',icon:'\uD83E\uDDE0'},
+    {id:'article-2',category:['哲学'],title:'六秒的拥抱',summary:'从艺术到宗教再到性，工具化已经抽空了事物的内在价值。',author:'Julian Baggini',date:'2026-02-24',readTime:'26分钟',icon:'\uD83E\uDD14'},
+    {id:'article-3',category:['技术'],title:'书籍与屏幕',summary:'你无法专注不是你的错。这是一个设计问题。',author:'Carlo Iacono',date:'2026-02-19',readTime:'23分钟',icon:'\uD83D\uDCF1'}
+];
+
+/* Load data */
+function onDataLoaded(articles){
+    if(articles&&articles.length){allArticles=articles;document.getElementById('article-count').textContent=allArticles.length;buildCategoryFilter();applyFilters()}
+}
+
+fetch('data/latest.json').then(function(r){return r.json()}).then(function(latest){
+    renderTrending(latest.trending);
+    fetch('articles.json').then(function(r){return r.json()}).then(function(data){
+        var arts=(data.articles||[]).map(function(a){a.categoryDisplay=a.subtitle||(a.category&&a.category[0])||'';return a});
+        onDataLoaded(arts);
+    }).catch(function(){onDataLoaded(latest.articles||[])});
+}).catch(function(){renderTrending(defaultTrending);onDataLoaded(defaultArticles)});
     </script>
 </body>
 </html>
