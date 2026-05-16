@@ -17,6 +17,14 @@
             --accent-green: #22c55e;
             --accent-cyan: #06b6d4;
         }
+        [data-theme="light"] {
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: var(--text); line-height: 1.8; }
         a { text-decoration: none; color: inherit; }
@@ -32,9 +40,11 @@
         }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
         .header-content { display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-family: 'Noto Serif SC', serif; font-size: 1.5rem; font-weight: 700; color: #fff; }
+        .logo { font-family: 'Noto Serif SC', serif; font-size: 1.5rem; font-weight: 700; color: var(--text); }
         .logo span { color: var(--accent-blue); font-weight: 400; }
         .header-date { font-size: 0.9rem; color: var(--text-secondary); }
+        .theme-toggle { background: none; border: 1px solid var(--border); color: var(--text-secondary); cursor: pointer; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all .2s; }
+        .theme-toggle:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
 
         /* Hero */
         .hero { text-align: center; padding: 3rem 0 2rem 0; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
@@ -81,7 +91,7 @@
         .tab-bar { display: flex; gap: 0; margin-bottom: 2rem; border-bottom: 1px solid var(--border); }
         .tab-btn { background: none; border: none; border-bottom: 2px solid transparent; padding: 0.75rem 1.5rem; color: var(--text-muted); font-size: 0.95rem; font-weight: 500; cursor: pointer; font-family: 'Noto Sans SC', sans-serif; transition: color 0.2s, border-color 0.2s; }
         .tab-btn:hover { color: var(--text-secondary); }
-        .tab-btn.active { color: #fff; border-bottom-color: var(--accent-blue); }
+        .tab-btn.active { color: var(--text); border-bottom-color: var(--accent-blue); }
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
 
@@ -107,7 +117,7 @@
             transition: all 0.2s;
         }
         .cat-btn:hover { border-color: var(--accent-blue); color: var(--text); }
-        .cat-btn.active { background: var(--accent-blue); border-color: var(--accent-blue); color: #fff; }
+        .cat-btn.active { background: var(--accent-blue); border-color: var(--accent-blue); color: #fff !important; }
         .articles-count { font-size: 0.8rem; color: var(--text-muted); margin-left: auto; }
 
         .articles-grid {
@@ -143,7 +153,7 @@
             cursor: pointer; font-family: 'Noto Sans SC', sans-serif; transition: all 0.2s; min-width: 36px; text-align: center;
         }
         .page-btn:hover { border-color: var(--accent-blue); color: var(--text); }
-        .page-btn.active { background: var(--accent-blue); border-color: var(--accent-blue); color: #fff; }
+        .page-btn.active { background: var(--accent-blue); border-color: var(--accent-blue); color: #fff !important; }
         .page-btn.disabled { opacity: 0.3; cursor: default; pointer-events: none; }
         .page-ellipsis { color: var(--text-muted); padding: 0 0.3rem; font-size: 0.85rem; }
 
@@ -172,7 +182,10 @@
         <div class="container">
             <div class="header-content">
                 <a href="index.html" class="logo">c8x1<span> &middot; Daily Curated</span></a>
-                <div class="header-date" id="current-date"></div>
+                <div style="display:flex;align-items:center;gap:1rem;">
+                    <div class="header-date" id="current-date"></div>
+                    <button class="theme-toggle" id="theme-toggle" aria-label="切换主题"><i class="fas fa-moon" id="theme-icon"></i></button>
+                </div>
             </div>
         </div>
     </header>
@@ -476,6 +489,15 @@ fetch('data/index.json')
 
 document.getElementById('trending-load-more').addEventListener('click', loadTrendingMonth);
 window.addEventListener('hashchange', activateTabFromHash);
+
+// === Theme toggle ===
+(function(){
+    var stored=localStorage.getItem('theme'),prefersDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
+    var isDark=stored?stored==='dark':prefersDark,html=document.documentElement,icon=document.getElementById('theme-icon');
+    function apply(d){if(d){html.removeAttribute('data-theme');icon.className='fas fa-moon'}else{html.setAttribute('data-theme','light');icon.className='fas fa-sun'}}
+    apply(isDark);
+    document.getElementById('theme-toggle').onclick=function(){isDark=!isDark;localStorage.setItem('theme',isDark?'dark':'light');apply(isDark)};
+})();
     </script>
 </body>
 </html>
