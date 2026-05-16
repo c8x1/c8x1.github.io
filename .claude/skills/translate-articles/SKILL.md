@@ -159,7 +159,7 @@ cd ~/Workspace/trySth/c8x1.github.io && node build-all.js
 build-all.js 会自动：
 - 为所有文章生成 HTML 页面（含新增的 2 篇）
 - 更新 feed.xml 和 sitemap.xml
-- 首页和归档页无需修改（客户端 JS 自动从 articles.json 读取最新数据）
+- 首页和归档页无需修改（客户端 JS 已按日期降序排序，新文章自动出现在最前面）
 
 ### 归档第六步：Git 提交并推送
 

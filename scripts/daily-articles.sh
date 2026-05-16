@@ -27,7 +27,9 @@ echo "[$(date '+%Y-%m-%d %H:%M:%S')] 开始每日文章归档..." | tee "$LOG_FI
 cd "$PROJECT_DIR"
 
 # 先同步远端（trending cron 7:03 可能已推送 data/ 改动）
+git stash -q 2>/dev/null || true
 git pull --rebase origin master 2>&1 | tee -a "$LOG_FILE" || true
+git stash pop -q 2>/dev/null || true
 
 # 使用 claude -p 非交互模式执行归档
 # --allowedTools: 预授权所需工具，避免交互确认
