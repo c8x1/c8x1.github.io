@@ -44,7 +44,7 @@ const ARTICLE_SCRIPT = `
   var bt=document.getElementById('back-to-top'),tk2=false;
   function tg(){bt.classList.toggle('visible',(window.scrollY||document.documentElement.scrollTop)>300);tk2=false;}
   if(bt){window.addEventListener('scroll',function(){if(!tk2){requestAnimationFrame(tg);tk2=true;}},{passive:true});bt.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});}
-  document.querySelectorAll('.theme-toggle').forEach(function(b){b.addEventListener('click',function(){var d=document.documentElement.classList.toggle('dark');localStorage.setItem('theme',d?'dark':'light');});});
+
 })();`;
 
 function articleHead(a) {
@@ -61,7 +61,7 @@ function articleHead(a) {
 <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{serif:['Noto Serif SC','serif'],sans:['Inter','sans-serif']}}}}<\/script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="stylesheet" href="/assets/css/main.css"><link rel="stylesheet" href="/assets/css/article.css">
-<script>(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark');})();<\/script>
+<script>(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark');document.documentElement.setAttribute('data-theme','dark');}})();<\/script>
 </head>`;
 }
 
