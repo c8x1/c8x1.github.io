@@ -417,7 +417,7 @@ function renderArticles() {
 }
 
 function initArticlesTab(data) {
-    allArticles = data.articles || [];
+    allArticles = (data.articles || []).sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
     // Build category filter buttons
     var cats = getTopCategories(allArticles);
     var container = document.getElementById('cat-filters');

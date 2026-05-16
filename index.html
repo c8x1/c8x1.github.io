@@ -211,6 +211,7 @@ fetch('data/latest.json').then(function(r){return r.json()}).then(function(lates
     renderTrending(latest.trending);
     fetch('articles.json').then(function(r){return r.json()}).then(function(data){
         var arts=(data.articles||[]).map(function(a){a.categoryDisplay=a.subtitle||(a.category&&a.category[0])||'';return a});
+        arts.sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
         document.getElementById('article-count').textContent=arts.length;
         renderArticles(arts);
     }).catch(function(){document.getElementById('article-count').textContent=latest.articles?latest.articles.length:0;renderArticles(latest.articles||[])});
