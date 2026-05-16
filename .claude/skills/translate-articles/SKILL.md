@@ -102,6 +102,7 @@ Agent({ model: "sonnet", description: "Translate 2 articles EN->CN",
 - 人名、地名、专有名词第一次出现时标注英文原文，如：笛卡尔（René Descartes）
 - 不要添加开头/结尾说明
 - 不要添加 markdown 代码围栏
+- **中文引号必须使用「」（U+300C/U+300D），绝对不要使用 ""（ASCII 双引号）或 ""（弯引号），否则会破坏 JSON 格式**
 
 输出 ONLY valid JSON（无 markdown 围栏，无解释）:
 [
@@ -164,10 +165,14 @@ build-all.js 会自动：
 
 ```bash
 cd ~/Workspace/trySth/c8x1.github.io
+# articles/ 为新文章目录，-u 暂存 build-all.js 重新生成的旧文章页面（导航链接更新）
 git add articles.json articles/ feed.xml sitemap.xml
+git add -u '*.html'
 git commit -m "archive: YYYY-MM-DD +2 articles (category1, category2)"
 # 先同步远端（trending cron 可能已推送 data/ 改动）
+git stash -q || true
 git pull --rebase origin master
+git stash pop -q 2>/dev/null || true
 git push origin master
 ```
 
