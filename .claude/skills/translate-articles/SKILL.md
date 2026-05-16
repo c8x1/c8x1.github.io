@@ -1,6 +1,6 @@
 ---
 name: translate-articles
-description: "Translate and align bilingual CN/EN paragraphs for blog articles. Use 'archive' keyword for non-interactive daily pipeline: fetch 2 English philosophy/classics articles, translate to Chinese, generate bilingual pages, update homepage, and git push. Also use for fixing paragraph alignment, re-translating, or any bilingual content work on c8x1.github.io."
+description: "Translate and align bilingual CN/EN paragraphs for blog articles. Use 'archive' keyword for non-interactive daily pipeline: fetch 2 English philosophy/classics articles + generate 1 AI parable (Amanda Askell prompt technique), translate to Chinese, generate bilingual pages, update homepage, and git push. Also use for fixing paragraph alignment, re-translating, or any bilingual content work on c8x1.github.io."
 argument-hint: "[archive] [scan] [article indices] — e.g. 'archive' or '0,2,4'"
 allowed-tools:
   - WebSearch
@@ -35,7 +35,9 @@ user-invocable: true
 
 归档模式是**非交互式**的：不需要用户确认，自动完成搜索 → 翻译 → 生成 → 推送全流程。
 
-目标：每天获取 2 篇英文哲学/经典文章 → 翻译为中文 → 生成双语页面 → git push。
+目标：每天获取 2 篇英文哲学/经典文章 + 生成 1 篇 AI 寓言 → 翻译为中文 → 生成双语页面 → git push。
+
+每天共 3 篇新文章：2 篇翻译 + 1 篇寓言。
 
 ### 归档第一步：搜索英文文章
 
@@ -118,6 +120,99 @@ Agent({ model: "sonnet", description: "Translate 2 articles EN->CN",
 translations 数组长度必须与输入段落数完全一致。仔细数。` })
 ```
 
+### 归档第三步半：生成 AI 寓言（第 3 篇文章）
+
+与翻译 Agent **并行**执行（两个 Agent 同时跑）。
+
+使用 Amanda Askell 的寓言提示技巧，用 sonnet Agent 生成第 3 篇原创寓言文章：
+
+1. 从以下概念池中选一个**尚未用过**的概念（检查 articles.json 中已有 tags）：
+
+```
+概念池（哲学/科学/AI/经济学/心理学）：
+1. the alignment problem (AI对齐)
+2. Nash equilibrium (纳什均衡)
+3. tragedy of the commons (公地悲剧)
+4. the butterfly effect (蝴蝶效应)
+5. the Chinese room argument (中文房间论证)
+6. Gödel's incompleteness theorem (哥德尔不完备定理)
+7. the trolley problem (电车难题)
+8. emergence (涌现)
+9. the experience machine (体验机器)
+10. philosophical zombies (哲学僵尸)
+11. Pascal's wager (帕斯卡赌注)
+12. the Ship of Theseus (忒修斯之船)
+13. the Veil of Ignorance (无知之幕)
+14. information asymmetry (信息不对称)
+15. the halting problem (停机问题)
+16. natural selection (自然选择)
+17. the Prisoner's Dilemma (囚徒困境)
+18. qualia (感受质)
+19. the Sorites paradox (谷堆悖论)
+20. the simulation hypothesis (模拟假说)
+```
+
+2. 使用 Amanda Askell 原始 prompt 格式生成寓言：
+
+```
+Agent({ model: "sonnet", description: "Generate parable article for [concept]",
+  prompt: `Write a parable that fully explains [concept] but indirectly, the way good parables do. Only at the very end should it become clear what the concept was. Then write a plain explanation.
+
+等你写完上面的英文 parable + plain explanation 后：
+
+1. 为整个文章起一个英文标题（不要直接提及概念名称）
+2. 为每个段落提供中文翻译
+3. 将所有内容组织为 JSON
+
+JSON 格式（纯 JSON，无 markdown 围栏，用 Write 工具写入 /tmp/parable_article.json）:
+{
+  "title_en": "英文标题",
+  "title_cn": "中文标题",
+  "paragraphs": [
+    {"en": "英文段落1", "cn": "中文翻译1"},
+    ...
+  ]
+}
+
+翻译规则:
+- 中文翻译自然流畅
+- 人名、专有名词第一次出现时标注英文原文
+- 中文引号必须使用「」（U+300C/U+300D），绝对不要使用 "" 或 ""
+- EN 和 CN 段落数量必须完全一致
+- 去掉 --- 分隔线和 "Plain Explanation" 标题等结构性段落
+
+重要：必须用 Write 工具把 JSON 写入 /tmp/parable_article.json。` })
+```
+
+3. 读取 `/tmp/parable_article.json`，构建寓言 article 对象：
+
+```json
+{
+  "id": "slug-from-en-title",
+  "title": "中文标题",
+  "subtitle": "",
+  "author": "AI Parable (inspired by Amanda Askell)",
+  "source": "每日精选",
+  "date": "YYYY-MM-DD",
+  "category": ["寓言故事"],
+  "tags": ["概念标签1", "概念标签2", "Amanda Askell"],
+  "summary": "中文摘要（取第一段翻译前150字）",
+  "file": "articles/YYYY-MM-DD-slug.html",
+  "originalUrl": "",
+  "stats": { "wordCount": EN字数, "readTime": Math.max(1, EN字数/300) },
+  "content_cn": "...",
+  "content_en": "...",
+  "paragraphs": [{"cn": "...", "en": "..."}, ...]
+}
+```
+
+注意事项：
+- 过滤掉结构性行（如 `---`、`Plain Explanation` 等纯标记段落）
+- category 固定为 `["寓言故事"]`
+- author 固定为 `"AI Parable (inspired by Amanda Askell)"`
+- source 固定为 `"每日精选"`
+- originalUrl 为空字符串（非抓取文章）
+
 ### 归档第四步：构建 article 对象并追加到 articles.json
 
 定义 **`SITE_DIR`** = `~/Workspace/trySth/c8x1.github.io`
@@ -150,8 +245,8 @@ translations 数组长度必须与输入段落数完全一致。仔细数。` })
 
 slug 生成规则：取英文标题，去掉特殊字符，空格转连字符，截断 60 字符。
 
-3. 追加 2 篇新文章到 `data.articles` 数组末尾
-4. 更新 `data.meta.totalArticles` += 2
+3. 追加 3 篇新文章（2 篇翻译 + 1 篇寓言）到 `data.articles` 数组末尾
+4. 更新 `data.meta.totalArticles` += 3
 5. 更新 `data.meta.updated` = 当天日期
 6. 用 Write 写回 articles.json
 
@@ -162,7 +257,7 @@ cd ~/Workspace/trySth/c8x1.github.io && node build-all.js
 ```
 
 build-all.js 会自动：
-- 为所有文章生成 HTML 页面（含新增的 2 篇）
+- 为所有文章生成 HTML 页面（含新增的 3 篇）
 - 更新 feed.xml 和 sitemap.xml
 - 首页和归档页无需修改（客户端 JS 已按日期降序排序，新文章自动出现在最前面）
 
@@ -173,7 +268,7 @@ cd ~/Workspace/trySth/c8x1.github.io
 # articles/ 为新文章目录，-u 暂存 build-all.js 重新生成的旧文章页面（导航链接更新）
 git add articles.json articles/ feed.xml sitemap.xml
 git add -u '*.html'
-git commit -m "archive: YYYY-MM-DD +2 articles (category1, category2)"
+git commit -m "archive: YYYY-MM-DD +3 articles (category1, category2, 寓言故事)"
 # 先同步远端（trending cron 可能已推送 data/ 改动）
 git stash -q || true
 git pull --rebase origin master
@@ -194,17 +289,19 @@ cd ~/Workspace/trySth/c8x1.github.io && https_proxy=http://127.0.0.1:7897 http_p
 [归档完成]
 
 日期: YYYY-MM-DD
-新增: 2 articles
+新增: 3 articles (2 翻译 + 1 寓言)
 总计: N articles
 
 文章:
   1. 中文标题1 (哲学) — Aeon
   2. 中文标题2 (科学哲学) — The Atlantic
+  3. 寓言标题 (寓言故事) — AI Parable
 
 文件:
   articles.json ✓
   articles/YYYY-MM-DD-slug1.html ✓
   articles/YYYY-MM-DD-slug2.html ✓
+  articles/YYYY-MM-DD-slug3.html ✓
   feed.xml ✓
   sitemap.xml ✓
 
@@ -218,6 +315,7 @@ Git: 已提交并推送到 origin/master
 | WebSearch 无结果 | 换关键词重试一次 |
 | 文章页面获取失败 | 跳过该文章，搜索替代 |
 | 翻译 Agent 失败 | 单独重试该文章一次 |
+| 寓言 Agent 失败 | 重试一次，换概念再试 |
 | articles.json 读取/写入失败 | 中止，报错 |
 | build-all.js 失败 | 报错但继续 git 提交已修改的文件 |
 | git push 失败 | 代理重试一次 |
