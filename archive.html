@@ -135,6 +135,18 @@
         .article-card-source { margin-left: auto; }
         .no-results { text-align: center; padding: 3rem; color: var(--text-muted); font-size: 0.95rem; }
 
+        /* Pagination */
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 0.4rem; margin: 2rem 0 1rem; }
+        .page-btn {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px;
+            padding: 0.4rem 0.8rem; font-size: 0.85rem; color: var(--text-secondary);
+            cursor: pointer; font-family: 'Noto Sans SC', sans-serif; transition: all 0.2s; min-width: 36px; text-align: center;
+        }
+        .page-btn:hover { border-color: var(--accent-blue); color: var(--text); }
+        .page-btn.active { background: var(--accent-blue); border-color: var(--accent-blue); color: #fff; }
+        .page-btn.disabled { opacity: 0.3; cursor: default; pointer-events: none; }
+        .page-ellipsis { color: var(--text-muted); padding: 0 0.3rem; font-size: 0.85rem; }
+
         /* Footer */
         footer { background: var(--card-bg); border-top: 1px solid var(--border); padding: 2rem 0; text-align: center; margin-top: 4rem; }
         footer p { font-size: 0.9rem; color: var(--text-muted); }
@@ -186,6 +198,7 @@
                     <span class="articles-count" id="articles-count"></span>
                 </div>
                 <div class="articles-grid" id="articles-grid"></div>
+                <div class="pagination" id="pagination"></div>
             </div>
         </div>
     </main>
@@ -271,6 +284,8 @@ function loadTrendingMonth() {
 var allArticles = [];
 var activeCategory = null;
 var searchQuery = '';
+var currentPage = 1;
+var PAGE_SIZE = 24;
 
 function getTopCategories(articles) {
     var counts = {};
@@ -278,7 +293,7 @@ function getTopCategories(articles) {
     return Object.entries(counts).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 10).map(function(e) { return e[0]; });
 }
 
-function renderArticles() {
+function getFilteredArticles() {
     var filtered = allArticles;
     if (activeCategory) {
         filtered = filtered.filter(function(a) { return (a.category || []).indexOf(activeCategory) !== -1; });
@@ -292,29 +307,100 @@ function renderArticles() {
                    (a.category || []).join(' ').toLowerCase().indexOf(q) !== -1;
         });
     }
+    return filtered;
+}
+
+function renderArticleCard(a) {
+    var card = document.createElement('a');
+    card.className = 'article-card';
+    card.href = a.file || ('articles/' + a.id + '.html');
+    var tags = (a.category || []).slice(0, 2).map(function(c) {
+        return '<span class="article-card-tag">' + esc(c) + '</span>';
+    }).join('');
+    card.innerHTML =
+        '<div class="article-card-title">' + esc(a.title) + '</div>' +
+        '<div class="article-card-meta">' +
+            tags +
+            '<span>' + esc(a.author) + '</span>' +
+            '<span class="article-card-source">' + esc(a.source) + '</span>' +
+        '</div>';
+    return card;
+}
+
+function renderPagination(totalItems) {
+    var totalPages = Math.ceil(totalItems / PAGE_SIZE);
+    var container = document.getElementById('pagination');
+    container.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    // Prev
+    var prev = document.createElement('button');
+    prev.className = 'page-btn' + (currentPage === 1 ? ' disabled' : '');
+    prev.innerHTML = '&larr;';
+    prev.addEventListener('click', function() { if (currentPage > 1) { currentPage--; renderArticles(); } });
+    container.appendChild(prev);
+
+    // Page numbers with ellipsis
+    var pages = [];
+    if (totalPages <= 7) {
+        for (var i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+        pages.push(1);
+        if (currentPage > 3) pages.push('...');
+        var start = Math.max(2, currentPage - 1);
+        var end = Math.min(totalPages - 1, currentPage + 1);
+        for (var j = start; j <= end; j++) pages.push(j);
+        if (currentPage < totalPages - 2) pages.push('...');
+        pages.push(totalPages);
+    }
+
+    pages.forEach(function(p) {
+        if (p === '...') {
+            var span = document.createElement('span');
+            span.className = 'page-ellipsis';
+            span.textContent = '...';
+            container.appendChild(span);
+        } else {
+            var btn = document.createElement('button');
+            btn.className = 'page-btn' + (p === currentPage ? ' active' : '');
+            btn.textContent = p;
+            btn.addEventListener('click', (function(page) { return function() { currentPage = page; renderArticles(); }; })(p));
+            container.appendChild(btn);
+        }
+    });
+
+    // Next
+    var next = document.createElement('button');
+    next.className = 'page-btn' + (currentPage === totalPages ? ' disabled' : '');
+    next.innerHTML = '&rarr;';
+    next.addEventListener('click', function() { if (currentPage < totalPages) { currentPage++; renderArticles(); } });
+    container.appendChild(next);
+}
+
+function renderArticles() {
+    var filtered = getFilteredArticles();
+    var totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+    if (currentPage > totalPages) currentPage = totalPages || 1;
+
+    var start = (currentPage - 1) * PAGE_SIZE;
+    var pageItems = filtered.slice(start, start + PAGE_SIZE);
+
     var grid = document.getElementById('articles-grid');
     grid.innerHTML = '';
     document.getElementById('articles-count').textContent = filtered.length + ' / ' + allArticles.length + ' \u7BC7';
+
     if (!filtered.length) {
         grid.innerHTML = '<div class="no-results">\u6CA1\u6709\u5339\u914D\u7684\u6587\u7AE0</div>';
+        document.getElementById('pagination').innerHTML = '';
         return;
     }
-    filtered.forEach(function(a) {
-        var card = document.createElement('a');
-        card.className = 'article-card';
-        card.href = a.file || ('articles/' + a.id + '.html');
-        var tags = (a.category || []).slice(0, 2).map(function(c) {
-            return '<span class="article-card-tag">' + esc(c) + '</span>';
-        }).join('');
-        card.innerHTML =
-            '<div class="article-card-title">' + esc(a.title) + '</div>' +
-            '<div class="article-card-meta">' +
-                tags +
-                '<span>' + esc(a.author) + '</span>' +
-                '<span class="article-card-source">' + esc(a.source) + '</span>' +
-            '</div>';
-        grid.appendChild(card);
-    });
+
+    pageItems.forEach(function(a) { grid.appendChild(renderArticleCard(a)); });
+    renderPagination(filtered.length);
+
+    // Scroll to top of grid on page change
+    var toolbar = document.getElementById('articles-toolbar');
+    if (toolbar.scrollIntoView) toolbar.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function initArticlesTab(data) {
