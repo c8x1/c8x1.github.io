@@ -12,12 +12,28 @@ const TAG_COLORS = {'\u54f2\u5b66':'blue','\u4eba\u5de5\u667a\u80fd':'blue','\u5
 function fmtDate(d) { if(!d)return''; const dt=new Date(d); return `${dt.getFullYear()}\u5e74${dt.getMonth()+1}\u6708${dt.getDate()}\u65e5`; }
 function fmtRfc(d) { return d ? new Date(d).toUTCString() : ''; }
 
+function wrapPara(text) {
+  if (!text || !text.trim()) return '';
+  const t = text.trim();
+  if (t.startsWith('* ') || t.startsWith('- '))
+    return '<ul>' + t.split('\n').filter(l => l.startsWith('* ') || l.startsWith('- ')).map(l => `<li>${esc(l.replace(/^[*-] /, ''))}</li>`).join('') + '</ul>';
+  return `<p>${esc(t).replace(/\n/g, '<br>')}</p>`;
+}
+
 function makeBody(a) {
-  const para = t => (t||'').split('\n\n').map(b => { b=b.trim(); if(!b)return''; if(b.startsWith('* ')||b.startsWith('- '))return'<ul>'+b.split('\n').filter(l=>l.startsWith('* ')||l.startsWith('- ')).map(l=>`<li>${esc(l.replace(/^[*-] /,''))}</li>`).join('')+'</ul>'; return`<p>${esc(b).replace(/\n/g,'<br>')}</p>`; }).join('');
-  let body = '';
-  if(a.content_en) body = `<div><h2>English Original</h2><div>${para(a.content_en)}</div></div>`;
-  if(a.content_cn) body += `<div><h2>\u4e2d\u6587\u539f\u6587</h2><div>${para(a.content_cn)}</div></div>`;
-  return body || `<p>${esc(a.summary||'')}</p>`;
+  const paragraphs = a.paragraphs || [];
+  if (!paragraphs.length) {
+    const cnParas = (a.content_cn || '').split('\n\n').filter(p => p.trim());
+    if (!cnParas.length) return `<p>${esc(a.summary || '')}</p>`;
+    return cnParas.map(p => wrapPara(p)).join('');
+  }
+  const hasEn = paragraphs.some(p => (p.en || '').trim().length > 0);
+  let pairs = '';
+  for (const p of paragraphs) {
+    pairs += `<div class="para-pair"><div class="para-cn">${wrapPara(p.cn)}</div><div class="para-en">${hasEn ? wrapPara(p.en) : ''}</div></div>`;
+  }
+  const toggleBtn = hasEn ? `<button class="bilingual-toggle" id="bilingual-toggle" onclick="(function(){var c=document.getElementById('bilingual-container');var b=document.getElementById('bilingual-toggle');var a=c.closest('.article-container');if(c.classList.contains('show-en')){c.classList.remove('show-en');a.classList.remove('bilingual-wide');b.textContent='\u5c55\u5f00\u82f1\u6587\u5bf9\u7167 \u2194';}else{c.classList.add('show-en');a.classList.add('bilingual-wide');b.textContent='\u6536\u8d77\u82f1\u6587 \u2715';}})()">\u5c55\u5f00\u82f1\u6587\u5bf9\u7167 \u2194</button>` : '';
+  return `<div class="bilingual-wrapper">${toggleBtn}<div class="bilingual-container${hasEn ? '' : ' cn-only'}" id="bilingual-container">${pairs}</div></div>`;
 }
 
 const ARTICLE_SCRIPT = `
