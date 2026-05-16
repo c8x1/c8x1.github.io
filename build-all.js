@@ -61,7 +61,7 @@ function articleHead(a) {
 <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{serif:['Noto Serif SC','serif'],sans:['Inter','sans-serif']}}}}<\/script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="stylesheet" href="/assets/css/main.css"><link rel="stylesheet" href="/assets/css/article.css">
-<script>(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark');document.documentElement.setAttribute('data-theme','dark');}})();<\/script>
+<script>(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark');document.documentElement.setAttribute('data-theme','dark');}else if(t==='light'){document.documentElement.setAttribute('data-theme','light');}})();<\/script>
 </head>`;
 }
 
