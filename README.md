@@ -66,3 +66,46 @@ c8x1.github.io/
 python3 -m http.server 8000
 # 访问 http://localhost:8000
 ```
+
+## 新机器部署
+
+在一台新电脑上 clone 后，3 步设置每日自动归档：
+
+### 1. 安装依赖
+
+```bash
+# Node.js (via nvm)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+nvm install --lts
+
+# Claude Code CLI
+npm install -g @anthropic-ai/claude-code
+claude auth login   # 或设置 ANTHROPIC_API_KEY 环境变量
+```
+
+### 2. Clone 并验证
+
+```bash
+git clone git@github.com:c8x1/c8x1.github.io.git
+cd c8x1.github.io
+
+# 验证脚本能找到依赖
+bash scripts/daily-articles.sh   # 手动跑一次
+```
+
+脚本会自动检测：
+- **Node.js** — 从 PATH 或 `~/.nvm/versions/node/` 查找
+- **claude CLI** — 从 PATH 查找
+- **代理** — 默认 `http://127.0.0.1:7897`，可通过环境变量 `https_proxy` 覆盖，设 `NO_PROXY=1` 禁用
+
+### 3. 设置 Cron
+
+```bash
+# 编辑 crontab
+crontab -e
+
+# 每天早上 7:20 执行归档（按需调整时间）
+20 7 * * * /bin/bash /path/to/c8x1.github.io/scripts/daily-articles.sh
+```
+
+日志输出到 `logs/articles-YYYY-MM-DD.log`。
