@@ -1,202 +1,68 @@
-# 每日精选 - 优化版部署包
+# 每日精选 | Daily Curated
 
-## 📦 文件结构
+每天精选高质量英文文章，翻译为中文，搭配 AI 生成哲学寓言。
+
+## 网站内容
+
+**每日精选**是一个中英双语阅读平台，每天更新 3 篇文章：
+
+- **2 篇翻译文章** — 从 Aeon、The Atlantic、The Guardian 等来源精选哲学、科技、人文类深度文章，全文翻译为中文，支持中英对照阅读
+- **1 篇 AI 寓言** — 使用 Amanda Askell 的寓言提示技巧，将哲学/科学概念写成引人入胜的故事，末尾揭晓概念
+
+目前收录 81 篇文章，涵盖哲学、人工智能、技术趋势、伦理学、量子计算等话题。
+
+**访问地址**: [c8x1.github.io](https://c8x1.github.io)
+
+## 技术架构
+
+- **静态站点** — GitHub Pages 托管，无后端服务
+- **构建工具** — `build-all.js` 从 `articles.json` 生成所有文章页面、RSS feed、sitemap
+- **每日归档** — Claude Code cron 任务（`scripts/daily-articles.sh`）每天自动执行：搜索文章 → 翻译 → 生成页面 → git push
+- **寓言队列** — `admin.html` 管理界面通过 GitHub Contents API 管理寓言概念队列
+- **双语布局** — 每篇文章支持中英对照显示，点击按钮切换
+
+## 文件结构
 
 ```
-dist/
-├── index.html                    # 首页（已优化）
-├── articles.json                 # 文章数据（路径已统一为日期格式）
-├── sitemap.xml                   # 站点地图
-├── robots.txt                    # 爬虫规则
-├── assets/
-│   ├── css/
-│   │   ├── main.css             # 共享样式（461行）
-│   │   └── article.css          # 文章页样式（381行）
-│   └── js/
-│       └── main.js              # 共享脚本（342行）
-├── 2025-02-25/                  # 文章按日期分组
-│   ├── collapse.html            # 待迁移
-│   ├── seeing-like-a-state.html # 待迁移
-│   └── tyranny-of-time.html     # 待迁移
-├── 2025-02-26/
-│   ├── syrian-feminists.html    # 待迁移
-│   └── anti-tech-canon.html     # 待迁移
-├── 2025-02-27/
-│   ├── kerala.html              # 待迁移
-│   ├── sovereign-individual.html# 待迁移
-│   └── ningen-ethics.html       # 待迁移
-├── 2025-02-28/
-│   ├── how-to-start-a-startup.html  # ✅ 示例已完成
-│   ├── cosmos-year-end-2025.html    # 待迁移
-│   └── ai-change-human-nature.html  # 待迁移
-├── 2025-03-01/
-│   ├── article-1.html           # 待迁移
-│   ├── article-2.html           # 待迁移
-│   └── article-3.html           # 待迁移
-├── 2025-03-02/
-│   ├── article-1.html           # 待迁移
-│   └── article-2.html           # 待迁移
-└── 2025-03-03/
-    └── philosophy-eats-ai.html  # 待迁移
+c8x1.github.io/
+├── index.html              # 首页（显示最新 4 篇文章）
+├── archive.html            # 归档页（全文搜索 + 分页浏览）
+├── admin.html              # 寓言概念队列管理
+├── build-all.js            # 静态站点生成器
+├── articles.json           # 文章数据源（构建用，1.7MB）
+├── articles-index.json     # 轻量索引（前端加载，70KB）
+├── parable-queue.json      # 寓言概念队列（FIFO）
+├── feed.xml / sitemap.xml  # SEO 文件
+├── articles/               # 文章 HTML 页面
+│   └── 2026/
+│       ├── 02/             # 按年/月组织
+│       ├── 03/
+│       ├── 04/
+│       └── 05/
+├── assets/                 # 共享样式和脚本
+│   ├── css/main.css
+│   ├── css/article.css
+│   └── js/main.js
+├── data/                   # Trending 数据（cron 生成）
+├── scripts/                # 工具脚本
+│   ├── daily-articles.sh   # Cron bridge
+│   └── build-monthly.js    # 月度数据生成
+└── .claude/skills/         # Claude Code 技能定义
+    └── translate-articles/ # 翻译和归档自动化
 ```
 
-## ✨ 优化内容
+### 关键文件说明
 
-### 已完成
-- ✅ 首页完全重写，新增搜索功能
-- ✅ 共享 CSS 提取（消除重复）
-- ✅ 共享 JS 模块（主题切换、进度条、返回顶部）
-- ✅ 深色模式 FOUC 防护
-- ✅ SEO 文件生成（sitemap.xml, robots.txt）
-- ✅ 文章页模板标准化
-- ✅ 路径统一为 `/{日期}/{文章名}.html` 格式
-- ✅ 示例文章页（how-to-start-a-startup.html）
+| 文件 | 用途 |
+|------|------|
+| `articles.json` | 全量文章数据（含段落、翻译），仅构建时使用 |
+| `articles-index.json` | 轻量索引（标题、摘要、分类），前端加载 |
+| `parable-queue.json` | 寓言概念队列：`queue`（待生成）+ `used`（已用过） |
+| `build-all.js` | 读取 articles.json → 生成 HTML + RSS + sitemap |
 
-### 待完成（需手动迁移文章）
-- ⏳ 剩余 17 篇文章内容迁移
-
-## 🚀 部署方法
-
-### 方法 1：直接部署（推荐）
+## 本地预览
 
 ```bash
-# 进入 dist 目录
-cd dist
-
-# 初始化 git
-git init
-git add .
-git commit -m "optimize: rebuild site with new structure"
-
-# 推送到 GitHub Pages（替换为你的仓库）
-git push -f git@github.com:c8x1/c8x1.github.io.git master
-```
-
-### 方法 2：使用 GitHub Actions 自动部署
-
-创建 `.github/workflows/deploy.yml`：
-
-```yaml
-name: Deploy to GitHub Pages
-
-on:
-  push:
-    branches: [ main ]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-```
-
-## 📝 文章迁移指南
-
-### 格式对照
-
-**原文结构：**
-```html
-<!DOCTYPE html>
-<html>
-<head>...原版样式...</head>
-<body>
-  <header>...</header>
-  <main>
-    <div class="article-content">
-      <p>正文内容...</p>
-    </div>
-  </main>
-  <footer>...</footer>
-</body>
-</html>
-```
-
-**新结构：**
-```html
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <!-- 使用共享样式 -->
-  <link rel="stylesheet" href="/assets/css/main.css">
-  <link rel="stylesheet" href="/assets/css/article.css">
-  <script src="/assets/js/main.js"></script>
-</head>
-<body>
-  <nav>...标准化导航...</nav>
-  <article>
-    <header>...文章元数据...</header>
-    <div class="article-content">
-      <p>保留原正文内容...</p>
-    </div>
-  </article>
-  <nav>...上一篇/下一篇...</nav>
-  <footer>...标准化页脚...</footer>
-</body>
-</html>
-```
-
-### 迁移步骤
-
-1. **复制模板**：从 `2025-02-28/how-to-start-a-startup.html` 复制
-2. **修改元数据**：
-   - 标题、副标题
-   - 作者、来源
-   - 日期、阅读时间
-   - 分类标签
-3. **替换正文**：从原 HTML 中提取 `.article-content` 或 `main` 内容
-4. **更新导航链接**：修改上一篇/下一篇链接
-5. **测试**：本地打开检查样式和深色模式
-
-### 批量迁移脚本（可选）
-
-如需批量迁移，可使用以下 Node.js 脚本逻辑：
-
-```javascript
-const articles = require('./articles.json').articles;
-
-// 遍历每篇文章
-for (const article of articles) {
-  // 1. 读取原文 HTML
-  // 2. 提取正文内容
-  // 3. 填充到新模板
-  // 4. 写入到对应日期目录
-}
-```
-
-## 🔧 本地预览
-
-```bash
-# 使用 Python 简单服务器
-cd dist
 python3 -m http.server 8000
-
-# 或使用 Node.js
-npx serve .
-
 # 访问 http://localhost:8000
 ```
-
-## 📊 性能对比
-
-| 指标 | 优化前 | 优化后 | 提升 |
-|------|--------|--------|------|
-| 首页大小 | ~25KB | ~13KB | 48% |
-| CSS 重复 | 3+ 份 | 1 份 | 消除 |
-| JS 重复 | 3+ 份 | 1 份 | 消除 |
-| 加载请求 | 20+ | 6 | 70% |
-| SEO | 基础 | 完整 | +++ |
-
-## 🐛 已知问题
-
-1. **文章内容待迁移**：17 篇文章需要按新格式重新排版
-2. **音乐播放器**：原音乐文件较大，建议改为按需加载
-3. **图片懒加载**：需要给文章图片添加 `data-src` 属性
-
-## 📮 反馈
-
-如有问题，请通过 GitHub Issues 反馈。

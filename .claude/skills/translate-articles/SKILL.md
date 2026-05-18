@@ -208,7 +208,7 @@ JSON 格式（纯 JSON，无 markdown 围栏，用 Write 工具写入 /tmp/parab
   "category": ["寓言故事"],
   "tags": ["概念英文名 或 中文概念名", "Amanda Askell"],
   "summary": "中文摘要（取第一段翻译前150字）",
-  "file": "articles/YYYY-MM-DD-slug.html",
+  "file": "articles/YYYY/MM/YYYY-MM-DD-slug.html",
   "originalUrl": "",
   "stats": { "wordCount": EN字数, "readTime": Math.max(1, EN字数/300) },
   "content_cn": "...",
@@ -242,7 +242,7 @@ JSON 格式（纯 JSON，无 markdown 围栏，用 Write 工具写入 /tmp/parab
   "category": ["哲学"],
   "tags": [],
   "summary": "中文摘要（取第一段翻译前150字）",
-  "file": "articles/YYYY-MM-DD-slug.html",
+  "file": "articles/YYYY/MM/YYYY-MM-DD-slug.html",
   "originalUrl": "https://...",
   "stats": { "wordCount": EN字数, "readTime": Math.max(1, EN字数/300) },
   "content_cn": "中文段落1\n\n中文段落2...",
@@ -276,7 +276,7 @@ build-all.js 会自动：
 
 ```bash
 cd ~/Workspace/trySth/c8x1.github.io
-# articles/ 为新文章目录，-u 暂存 build-all.js 重新生成的旧文章页面（导航链接更新）
+# articles/ 按年/月组织（articles/YYYY/MM/），-u 暂存 build-all.js 重新生成的旧页面
 git add articles.json articles-index.json articles/ feed.xml sitemap.xml parable-queue.json
 git add -u '*.html'
 git commit -m "archive: YYYY-MM-DD +3 articles (category1, category2, 寓言故事)"
@@ -450,8 +450,8 @@ node build-all.js
 | `admin.html` | 寓言概念管理页面，通过 GitHub Contents API 管理队列 |
 | `build-all.js` | 静态站点生成器，`makeBody()` 渲染双语布局 |
 | `assets/css/article.css` | `.para-pair` flex 布局、切换样式、响应式 |
-| `index.html` | 首页（手动维护，客户端 JS 读 articles.json 显示最新 4 篇） |
-| `archive.html` | 归档页（手动维护，客户端 JS 全文搜索 + 分页） |
+| `index.html` | 首页（客户端 JS 读 articles-index.json 显示最新 4 篇） |
+| `archive.html` | 归档页（客户端 JS 读 articles-index.json，全文搜索 + 分页） |
 | `scripts/daily-articles.sh` | Cron bridge 脚本（7:20 AM 自动执行归档模式） |
 
 ## 常见问题
