@@ -45,10 +45,12 @@ c8x1.github.io/
 │   └── js/main.js
 ├── data/                   # Trending 数据（cron 生成）
 ├── scripts/                # 工具脚本
-│   ├── daily-articles.sh   # Cron bridge
+│   ├── daily-articles.sh   # 文章归档 cron
+│   ├── daily-trending.sh   # GitHub Trending 归档 cron
 │   └── build-monthly.js    # 月度数据生成
 └── .claude/skills/         # Claude Code 技能定义
-    └── translate-articles/ # 翻译和归档自动化
+    ├── translate-articles/ # 翻译和文章归档自动化
+    └── github-trending/    # GitHub Trending 归档自动化
 ```
 
 ### 关键文件说明
@@ -69,7 +71,7 @@ python3 -m http.server 8000
 
 ## 新机器部署
 
-在一台新电脑上 clone 后，3 步设置每日自动归档：
+在一台新电脑上 clone 后，3 步设置每日自动归档（文章 + GitHub Trending）：
 
 ### 1. 安装依赖
 
@@ -90,7 +92,8 @@ git clone git@github.com:c8x1/c8x1.github.io.git
 cd c8x1.github.io
 
 # 验证脚本能找到依赖
-bash scripts/daily-articles.sh   # 手动跑一次
+bash scripts/daily-trending.sh   # 手动跑一次 trending
+bash scripts/daily-articles.sh   # 手动跑一次文章归档
 ```
 
 脚本会自动检测：
@@ -104,8 +107,11 @@ bash scripts/daily-articles.sh   # 手动跑一次
 # 编辑 crontab
 crontab -e
 
-# 每天早上 7:20 执行归档（按需调整时间）
+# 每天早上 7:03 执行 GitHub Trending 归档
+3 7 * * * /bin/bash /path/to/c8x1.github.io/scripts/daily-trending.sh
+
+# 每天早上 7:20 执行文章归档
 20 7 * * * /bin/bash /path/to/c8x1.github.io/scripts/daily-articles.sh
 ```
 
-日志输出到 `logs/articles-YYYY-MM-DD.log`。
+日志分别输出到 `logs/trending-YYYY-MM-DD.log` 和 `logs/articles-YYYY-MM-DD.log`。
