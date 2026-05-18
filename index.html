@@ -160,18 +160,20 @@
 /* Date */
 document.getElementById('current-date').textContent=new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
 
+function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
 /* Render Trending */
 function renderTrending(items){
     var f=document.getElementById('trending-featured'),c=document.getElementById('trending-compact');
     f.innerHTML='';c.innerHTML='';
     items.slice(0,3).forEach(function(it){
         var a=document.createElement('a');a.className='trending-card';a.href=it.url||('https://github.com/'+it.repo);a.target='_blank';
-        a.innerHTML='<div class="trending-repo">'+it.repo+'</div><div class="trending-desc">'+it.desc+'</div><div class="trending-stats"><span class="stars">&#9733; '+it.stars+'</span><span class="lang"><span class="lang-dot" style="background:'+it.langColor+'"></span>'+it.lang+'</span></div><div class="trending-today">&#9733; '+it.todayStars+' stars today</div>';
+        a.innerHTML='<div class="trending-repo">'+esc(it.repo)+'</div><div class="trending-desc">'+esc(it.desc)+'</div><div class="trending-stats"><span class="stars">&#9733; '+esc(it.stars)+'</span><span class="lang"><span class="lang-dot" style="background:'+esc(it.langColor)+'"></span>'+esc(it.lang)+'</span></div><div class="trending-today">&#9733; '+esc(it.todayStars)+' stars today</div>';
         f.appendChild(a);
     });
     items.slice(3).forEach(function(it,idx){
         var rank=it.rank||(idx+4),a=document.createElement('a');a.className='trending-compact';a.href=it.url||('https://github.com/'+it.repo);a.target='_blank';
-        a.innerHTML='<span class="tc-rank">'+rank+'</span><div class="tc-info"><div class="tc-repo">'+it.repo+'</div><div class="tc-desc">'+it.desc+'</div></div><div class="tc-stats"><span>&#9733; '+it.stars+'</span><span class="today">+'+it.todayStars+'</span></div>';
+        a.innerHTML='<span class="tc-rank">'+rank+'</span><div class="tc-info"><div class="tc-repo">'+esc(it.repo)+'</div><div class="tc-desc">'+esc(it.desc)+'</div></div><div class="tc-stats"><span>&#9733; '+esc(it.stars)+'</span><span class="today">+'+esc(it.todayStars)+'</span></div>';
         c.appendChild(a);
     });
 }
@@ -185,7 +187,7 @@ function renderArticles(items){
         var exc=a.excerpt||a.summary||'';
         var rt=a.readTime||(a.stats?a.stats.readTime+' \u5206\u949f':'');
         var card=document.createElement('a');card.className='article-card';card.href=url;
-        card.innerHTML='<div class="article-icon-area">'+(a.icon||'\uD83D\uDCD6')+'</div><div class="article-body"><div class="article-category">'+pc+'</div><h3 class="article-title">'+a.title+'</h3><p class="article-excerpt">'+exc+'</p><div class="article-meta"><span>'+(a.author||'')+(a.date?' \u00B7 '+a.date:'')+'</span>'+(rt?'<span>'+rt+'</span>':'')+'</div></div>';
+        card.innerHTML='<div class="article-icon-area">'+(a.icon||'\uD83D\uDCD6')+'</div><div class="article-body"><div class="article-category">'+esc(pc)+'</div><h3 class="article-title">'+esc(a.title)+'</h3><p class="article-excerpt">'+esc(exc)+'</p><div class="article-meta"><span>'+esc(a.author||'')+(a.date?' \u00B7 '+esc(a.date):'')+'</span>'+(rt?'<span>'+esc(rt)+'</span>':'')+'</div></div>';
         con.appendChild(card);
     });
 }
@@ -209,7 +211,7 @@ var defaultArticles=[
 /* Load data */
 fetch('data/latest.json').then(function(r){return r.json()}).then(function(latest){
     renderTrending(latest.trending);
-    fetch('articles.json').then(function(r){return r.json()}).then(function(data){
+    fetch('articles-index.json').then(function(r){return r.json()}).then(function(data){
         var arts=(data.articles||[]).map(function(a){a.categoryDisplay=a.subtitle||(a.category&&a.category[0])||'';return a});
         arts.sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
         document.getElementById('article-count').textContent=arts.length;

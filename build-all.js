@@ -144,7 +144,8 @@ function main() {
   console.log('Ensuring root-level assets...');
   ensureRootAssets();
 
-  const articles = JSON.parse(fs.readFileSync(path.join(ROOT_DIR,'articles.json'),'utf-8')).articles;
+  const data = JSON.parse(fs.readFileSync(path.join(ROOT_DIR,'articles.json'),'utf-8'));
+  const articles = data.articles;
 
   console.log('\nGenerating article pages...');
   let count = 0;
@@ -161,7 +162,14 @@ function main() {
   console.log('  feed.xml');
   fs.writeFileSync(path.join(ROOT_DIR,'sitemap.xml'), generateSitemap(articles), 'utf-8');
   console.log('  sitemap.xml');
-  console.log(`\n=== Done: ${count} articles, feed.xml, sitemap.xml ===`);
+
+  const indexData = {
+    meta: { title: data.meta.title, description: data.meta.description, version: data.meta.version, updated: data.meta.updated, totalArticles: data.meta.totalArticles },
+    articles: articles.map(a => ({ id: a.id, title: a.title, subtitle: a.subtitle || '', author: a.author, source: a.source, date: a.date, category: a.category, tags: a.tags, summary: a.summary, file: a.file, stats: a.stats }))
+  };
+  fs.writeFileSync(path.join(ROOT_DIR,'articles-index.json'), JSON.stringify(indexData, null, 2), 'utf-8');
+  console.log('  articles-index.json');
+  console.log(`\n=== Done: ${count} pages, feed.xml, sitemap.xml, articles-index.json ===`);
 }
 
 main();

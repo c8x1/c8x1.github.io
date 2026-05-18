@@ -277,7 +277,7 @@ build-all.js 会自动：
 ```bash
 cd ~/Workspace/trySth/c8x1.github.io
 # articles/ 为新文章目录，-u 暂存 build-all.js 重新生成的旧文章页面（导航链接更新）
-git add articles.json articles/ feed.xml sitemap.xml parable-queue.json
+git add articles.json articles-index.json articles/ feed.xml sitemap.xml parable-queue.json
 git add -u '*.html'
 git commit -m "archive: YYYY-MM-DD +3 articles (category1, category2, 寓言故事)"
 # 先同步远端（trending cron 可能已推送 data/ 改动）

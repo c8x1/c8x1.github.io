@@ -261,7 +261,7 @@ function renderPool() {
           ${esc(c.en)}
           <div class="cn">${esc(c.cn)}</div>
         </div>
-        ${!isUsed ? `<button class="add-btn" onclick="addFromPool('${esc(c.en)}','${esc(c.cn)}')">+</button>` : ''}
+        ${!isUsed ? `<button class="add-btn" data-en="${esc(c.en)}" data-cn="${esc(c.cn)}">+</button>` : ''}
       </div>`;
   }).join('');
 }
@@ -344,6 +344,15 @@ async function saveToGitHub() {
   }
   btn.textContent = '保存到 GitHub';
 }
+
+// Pool delegation
+document.getElementById('pool-grid').addEventListener('click', function(e) {
+  const btn = e.target.closest('.add-btn');
+  if (!btn) return;
+  const en = btn.getAttribute('data-en');
+  const cn = btn.getAttribute('data-cn');
+  addFromPool(en, cn);
+});
 
 // Enter key support
 document.getElementById('pat-input').addEventListener('keydown', e => { if (e.key === 'Enter') unlock(); });
