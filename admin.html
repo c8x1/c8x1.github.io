@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>寓言管理 | 每日精选</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --bg:#020617; --card-bg:#0f172a; --border:#1e293b; --text:#e2e8f0; --text-s:#94a3b8; --text-m:#64748b; --blue:#3b82f6; --green:#22c55e; --orange:#f59e0b; --red:#ef4444; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter','Noto Serif SC',sans-serif; background:var(--bg); color:var(--text); line-height:1.7; min-height:100vh; }
+a { color:var(--blue); text-decoration:none; }
+
+/* Gate */
+#gate { display:flex; align-items:center; justify-content:center; min-height:100vh; }
+.gate-box { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:2.5rem; max-width:420px; width:90%; }
+.gate-box h2 { font-family:'Noto Serif SC',serif; font-size:1.3rem; margin-bottom:1.5rem; }
+.gate-box label { display:block; font-size:.85rem; color:var(--text-s); margin-bottom:.4rem; }
+.gate-box input { width:100%; padding:.65rem .85rem; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.9rem; margin-bottom:1rem; outline:none; }
+.gate-box input:focus { border-color:var(--blue); }
+.gate-box button { width:100%; padding:.7rem; background:var(--blue); color:#fff; border:none; border-radius:8px; font-size:.9rem; cursor:pointer; transition:opacity .2s; }
+.gate-box button:hover { opacity:.85; }
+.gate-box .hint { font-size:.78rem; color:var(--text-m); margin-top:1rem; line-height:1.5; }
+.gate-error { color:var(--red); font-size:.85rem; margin-top:.5rem; display:none; }
+
+/* App */
+#app { display:none; max-width:720px; margin:0 auto; padding:1.5rem; }
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; padding-bottom:1rem; border-bottom:1px solid var(--border); }
+header h1 { font-family:'Noto Serif SC',serif; font-size:1.3rem; }
+header .links { display:flex; gap:1rem; align-items:center; }
+header .links a { font-size:.85rem; color:var(--text-s); }
+header .links a:hover { color:var(--text); }
+
+.section { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:1.5rem; margin-bottom:1.5rem; }
+.section h3 { font-size:1rem; margin-bottom:1rem; display:flex; align-items:center; gap:.5rem; }
+.section h3 .badge { font-size:.7rem; background:var(--blue); color:#fff; padding:.15rem .5rem; border-radius:99px; }
+
+/* Queue */
+.queue-list { list-style:none; }
+.queue-item { display:flex; align-items:center; gap:.75rem; padding:.7rem .85rem; background:var(--bg); border:1px solid var(--border); border-radius:8px; margin-bottom:.5rem; transition:border-color .2s; }
+.queue-item:hover { border-color:var(--blue); }
+.queue-item .num { font-size:.75rem; color:var(--text-m); min-width:1.5rem; text-align:center; }
+.queue-item .concept { flex:1; }
+.queue-item .concept .en { font-size:.9rem; }
+.queue-item .concept .cn { font-size:.78rem; color:var(--text-s); }
+.queue-item .actions { display:flex; gap:.35rem; }
+.queue-item .actions button { width:28px; height:28px; border:1px solid var(--border); background:var(--card-bg); color:var(--text-s); border-radius:6px; cursor:pointer; font-size:.75rem; display:flex; align-items:center; justify-content:center; }
+.queue-item .actions button:hover { border-color:var(--blue); color:var(--text); }
+.queue-item .actions button.del:hover { border-color:var(--red); color:var(--red); }
+.empty-queue { text-align:center; padding:2rem; color:var(--text-m); font-size:.9rem; }
+
+/* Add form */
+.add-row { display:flex; gap:.5rem; margin-bottom:1rem; }
+.add-row input { flex:1; padding:.6rem .8rem; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.85rem; outline:none; }
+.add-row input:focus { border-color:var(--blue); }
+.add-row input.cn-input { max-width:160px; }
+.add-row button { padding:.6rem 1.2rem; background:var(--green); color:#fff; border:none; border-radius:8px; font-size:.85rem; cursor:pointer; white-space:nowrap; }
+.add-row button:hover { opacity:.85; }
+
+/* Pool */
+.pool-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:.5rem; }
+.pool-item { display:flex; align-items:center; gap:.5rem; padding:.5rem .75rem; background:var(--bg); border:1px solid var(--border); border-radius:8px; font-size:.82rem; }
+.pool-item.used { opacity:.45; }
+.pool-item .dot { width:8px; height:8px; border-radius:50%; background:var(--green); flex-shrink:0; }
+.pool-item.used .dot { background:var(--text-m); }
+.pool-item .name { flex:1; }
+.pool-item .name .cn { color:var(--text-s); font-size:.75rem; }
+.pool-item .add-btn { background:none; border:1px solid var(--border); color:var(--text-s); font-size:.7rem; padding:.15rem .4rem; border-radius:4px; cursor:pointer; }
+.pool-item .add-btn:hover { border-color:var(--blue); color:var(--blue); }
+.pool-item.used .add-btn { display:none; }
+
+/* Save */
+.save-bar { display:flex; justify-content:space-between; align-items:center; }
+.save-btn { padding:.7rem 2rem; background:var(--blue); color:#fff; border:none; border-radius:8px; font-size:.9rem; cursor:pointer; transition:opacity .2s; }
+.save-btn:hover { opacity:.85; }
+.save-btn:disabled { opacity:.4; cursor:not-allowed; }
+.save-status { font-size:.85rem; color:var(--text-s); }
+.save-status.ok { color:var(--green); }
+.save-status.err { color:var(--red); }
+
+@media(max-width:600px) {
+  .add-row { flex-wrap:wrap; }
+  .add-row input, .add-row input.cn-input { max-width:100%; }
+  .pool-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Auth Gate -->
+<div id="gate">
+  <div class="gate-box">
+    <h2>寓言概念管理</h2>
+    <label for="pat-input">GitHub Personal Access Token</label>
+    <input type="password" id="pat-input" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+    <button onclick="unlock()">进入管理</button>
+    <div class="gate-error" id="gate-error">Token 无效或没有 repo 权限</div>
+    <div class="hint">
+      需要 <code>repo</code> 权限的 GitHub PAT。<br>
+      Token 仅保存在浏览器 localStorage 中，不会发送到任何第三方。
+    </div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div id="app">
+  <header>
+    <h1>寓言概念管理</h1>
+    <div class="links">
+      <a href="/">← 返回首页</a>
+      <a href="#" onclick="logout()">退出</a>
+    </div>
+  </header>
+
+  <!-- Queue -->
+  <div class="section">
+    <h3>待生成队列 <span class="badge" id="queue-count">0</span></h3>
+    <ul class="queue-list" id="queue-list"></ul>
+    <div class="empty-queue" id="empty-queue">队列为空 — cron 将从概念池随机选取</div>
+    <div class="add-row" style="margin-top:1rem;">
+      <input id="add-en" placeholder="英文概念名 (e.g. qualia)">
+      <input id="add-cn" class="cn-input" placeholder="中文名 (可选)">
+      <button onclick="addToQueue()">添加</button>
+    </div>
+  </div>
+
+  <!-- Pool -->
+  <div class="section">
+    <h3>概念池 <span class="badge" id="pool-stats"></span></h3>
+    <div class="pool-grid" id="pool-grid"></div>
+  </div>
+
+  <!-- Save -->
+  <div class="section">
+    <div class="save-bar">
+      <button class="save-btn" id="save-btn" onclick="saveToGitHub()">保存到 GitHub</button>
+      <span class="save-status" id="save-status"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+const REPO = 'c8x1/c8x1.github.io';
+const FILE = 'parable-queue.json';
+const CONCEPTS = [
+  {en:'the alignment problem',cn:'AI对齐'},
+  {en:'Nash equilibrium',cn:'纳什均衡'},
+  {en:'tragedy of the commons',cn:'公地悲剧'},
+  {en:'the butterfly effect',cn:'蝴蝶效应'},
+  {en:'the Chinese room argument',cn:'中文房间论证'},
+  {en:"Gödel's incompleteness theorem",cn:'哥德尔不完备定理'},
+  {en:'the trolley problem',cn:'电车难题'},
+  {en:'emergence',cn:'涌现'},
+  {en:'the experience machine',cn:'体验机器'},
+  {en:'philosophical zombies',cn:'哲学僵尸'},
+  {en:"Pascal's wager",cn:'帕斯卡赌注'},
+  {en:'the Ship of Theseus',cn:'忒修斯之船'},
+  {en:'the Veil of Ignorance',cn:'无知之幕'},
+  {en:'information asymmetry',cn:'信息不对称'},
+  {en:'the halting problem',cn:'停机问题'},
+  {en:'natural selection',cn:'自然选择'},
+  {en:"the Prisoner's Dilemma",cn:'囚徒困境'},
+  {en:'qualia',cn:'感受质'},
+  {en:'the Sorites paradox',cn:'谷堆悖论'},
+  {en:'the simulation hypothesis',cn:'模拟假说'}
+];
+
+let token = localStorage.getItem('gh_pat') || '';
+let data = { queue: [], used: [] };
+let sha = '';
+
+// Auth
+async function unlock() {
+  const input = document.getElementById('pat-input');
+  const t = input.value.trim();
+  if (!t) return;
+  try {
+    const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE}`, {
+      headers: { Authorization: `token ${t}`, Accept: 'application/vnd.github.v3+json' }
+    });
+    if (!r.ok) throw new Error(r.status);
+    token = t;
+    localStorage.setItem('gh_pat', token);
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    const json = await r.json();
+    sha = json.sha;
+    data = JSON.parse(atob(json.content));
+    render();
+  } catch(e) {
+    document.getElementById('gate-error').style.display = 'block';
+  }
+}
+
+function logout() {
+  localStorage.removeItem('gh_pat');
+  token = '';
+  location.reload();
+}
+
+// Check saved token on load
+(async function() {
+  if (!token) return;
+  try {
+    const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE}`, {
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+    });
+    if (!r.ok) { token = ''; localStorage.removeItem('gh_pat'); return; }
+    const json = await r.json();
+    sha = json.sha;
+    data = JSON.parse(atob(json.content));
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    render();
+  } catch(e) {}
+})();
+
+// Render
+function render() {
+  renderQueue();
+  renderPool();
+}
+
+function renderQueue() {
+  const list = document.getElementById('queue-list');
+  const empty = document.getElementById('empty-queue');
+  document.getElementById('queue-count').textContent = data.queue.length;
+  if (!data.queue.length) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  list.innerHTML = data.queue.map((item, i) => `
+    <li class="queue-item">
+      <span class="num">${i+1}</span>
+      <div class="concept">
+        <div class="en">${esc(item.concept)}</div>
+        ${item.concept_cn ? `<div class="cn">${esc(item.concept_cn)}</div>` : ''}
+      </div>
+      <div class="actions">
+        ${i > 0 ? `<button onclick="moveQueue(${i},-1)" title="上移">↑</button>` : ''}
+        ${i < data.queue.length-1 ? `<button onclick="moveQueue(${i},1)" title="下移">↓</button>` : ''}
+        <button class="del" onclick="removeQueue(${i})" title="移除">✕</button>
+      </div>
+    </li>
+  `).join('');
+}
+
+function renderPool() {
+  const grid = document.getElementById('pool-grid');
+  const usedSet = new Set(data.used.map(u => u.toLowerCase()));
+  const available = CONCEPTS.length - CONCEPTS.filter(c => usedSet.has(c.en.toLowerCase())).length;
+  document.getElementById('pool-stats').textContent = `${available}/${CONCEPTS.length} 可用`;
+  grid.innerHTML = CONCEPTS.map(c => {
+    const isUsed = usedSet.has(c.en.toLowerCase());
+    return `
+      <div class="pool-item${isUsed ? ' used' : ''}">
+        <span class="dot"></span>
+        <div class="name">
+          ${esc(c.en)}
+          <div class="cn">${esc(c.cn)}</div>
+        </div>
+        ${!isUsed ? `<button class="add-btn" onclick="addFromPool('${esc(c.en)}','${esc(c.cn)}')">+</button>` : ''}
+      </div>`;
+  }).join('');
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// Queue ops
+function addToQueue() {
+  const enInput = document.getElementById('add-en');
+  const cnInput = document.getElementById('add-cn');
+  const en = enInput.value.trim();
+  if (!en) return;
+  data.queue.push({ concept: en, concept_cn: cnInput.value.trim() });
+  enInput.value = '';
+  cnInput.value = '';
+  renderQueue();
+  markDirty();
+}
+
+function addFromPool(en, cn) {
+  if (data.queue.some(q => q.concept.toLowerCase() === en.toLowerCase())) return;
+  data.queue.push({ concept: en, concept_cn: cn });
+  renderQueue();
+  markDirty();
+}
+
+function removeQueue(i) {
+  data.queue.splice(i, 1);
+  renderQueue();
+  markDirty();
+}
+
+function moveQueue(i, dir) {
+  const j = i + dir;
+  if (j < 0 || j >= data.queue.length) return;
+  [data.queue[i], data.queue[j]] = [data.queue[j], data.queue[i]];
+  renderQueue();
+  markDirty();
+}
+
+function markDirty() {
+  document.getElementById('save-btn').disabled = false;
+  document.getElementById('save-status').textContent = '未保存';
+  document.getElementById('save-status').className = 'save-status';
+}
+
+// Save
+async function saveToGitHub() {
+  const btn = document.getElementById('save-btn');
+  const status = document.getElementById('save-status');
+  btn.disabled = true;
+  btn.textContent = '保存中...';
+  status.textContent = '';
+  status.className = 'save-status';
+  try {
+    // Re-fetch SHA in case cron updated it
+    const head = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE}`, {
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+    });
+    if (head.ok) sha = (await head.json()).sha;
+
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+    const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE}`, {
+      method: 'PUT',
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: `update parable queue (${data.queue.length} queued)`, content, sha })
+    });
+    if (!r.ok) {
+      const err = await r.json();
+      throw new Error(err.message || r.status);
+    }
+    const result = await r.json();
+    sha = result.content.sha;
+    status.textContent = '已保存';
+    status.className = 'save-status ok';
+  } catch(e) {
+    status.textContent = '保存失败: ' + e.message;
+    status.className = 'save-status err';
+    btn.disabled = false;
+  }
+  btn.textContent = '保存到 GitHub';
+}
+
+// Enter key support
+document.getElementById('pat-input').addEventListener('keydown', e => { if (e.key === 'Enter') unlock(); });
+document.getElementById('add-en').addEventListener('keydown', e => { if (e.key === 'Enter') addToQueue(); });
+document.getElementById('add-cn').addEventListener('keydown', e => { if (e.key === 'Enter') addToQueue(); });
+</script>
+</body>
+</html>

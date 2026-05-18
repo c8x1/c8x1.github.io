@@ -126,7 +126,18 @@ translations 数组长度必须与输入段落数完全一致。仔细数。` })
 
 使用 Amanda Askell 的寓言提示技巧，用 sonnet Agent 生成第 3 篇原创寓言文章：
 
-1. 从以下概念池中选一个**尚未用过**的概念（检查 articles.json 中已有 tags）：
+1. **选择概念**（队列优先，随机兜底）：
+
+   **先读 `$SITE_DIR/parable-queue.json`**：
+   - 如果 `queue` 数组非空 → 取第一个元素作为本次概念（`concept` + `concept_cn`）
+   - 用完后从 `queue` 中移除该元素，将 `concept` 追加到 `used` 数组
+   - 用 Write 写回 `parable-queue.json`
+   - **跳过下面的随机选择逻辑，直接用队列概念进入第 2 步**
+
+   **如果 `queue` 为空或文件不存在** → 从以下概念池中选一个**尚未用过**的概念：
+   - 检查 `parable-queue.json` 的 `used` 数组 + articles.json 中已有 tags
+   - 排除所有已用过的概念，从剩余中随机选取
+   - 选中后，将概念名追加到 `parable-queue.json` 的 `used` 数组（如文件存在）
 
 ```
 概念池（哲学/科学/AI/经济学/心理学）：
@@ -195,7 +206,7 @@ JSON 格式（纯 JSON，无 markdown 围栏，用 Write 工具写入 /tmp/parab
   "source": "每日精选",
   "date": "YYYY-MM-DD",
   "category": ["寓言故事"],
-  "tags": ["概念标签1", "概念标签2", "Amanda Askell"],
+  "tags": ["概念英文名 或 中文概念名", "Amanda Askell"],
   "summary": "中文摘要（取第一段翻译前150字）",
   "file": "articles/YYYY-MM-DD-slug.html",
   "originalUrl": "",
@@ -266,7 +277,7 @@ build-all.js 会自动：
 ```bash
 cd ~/Workspace/trySth/c8x1.github.io
 # articles/ 为新文章目录，-u 暂存 build-all.js 重新生成的旧文章页面（导航链接更新）
-git add articles.json articles/ feed.xml sitemap.xml
+git add articles.json articles/ feed.xml sitemap.xml parable-queue.json
 git add -u '*.html'
 git commit -m "archive: YYYY-MM-DD +3 articles (category1, category2, 寓言故事)"
 # 先同步远端（trending cron 可能已推送 data/ 改动）
@@ -435,6 +446,8 @@ node build-all.js
 | 文件 | 用途 |
 |------|------|
 | `articles.json` | 数据源，每篇文章有 `paragraphs: [{cn, en}]` |
+| `parable-queue.json` | 寓言概念队列（FIFO），`queue` 待生成 + `used` 已用，为空时回退到随机选取 |
+| `admin.html` | 寓言概念管理页面，通过 GitHub Contents API 管理队列 |
 | `build-all.js` | 静态站点生成器，`makeBody()` 渲染双语布局 |
 | `assets/css/article.css` | `.para-pair` flex 布局、切换样式、响应式 |
 | `index.html` | 首页（手动维护，客户端 JS 读 articles.json 显示最新 4 篇） |
