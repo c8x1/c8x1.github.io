@@ -224,6 +224,34 @@
 
   .card:hover::before { opacity: 1; }
 
+  .card[data-href] { cursor: pointer; }
+
+  .source-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    padding: 3px 10px;
+    border-radius: 5px;
+    font-size: 0.72em;
+    background: rgba(108,92,231,0.12);
+    color: var(--accent2);
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .source-link:hover {
+    background: rgba(108,92,231,0.25);
+  }
+
+  .ranking-item[data-href] { cursor: pointer; }
+  .ranking-item .source-link {
+    font-size: 0.72em;
+    margin-top: 8px;
+    display: inline-flex;
+  }
+
   .card-header {
     display: flex;
     justify-content: space-between;
@@ -592,8 +620,8 @@
   <div class="subtitle">从 Multi-Agent TTS 到跨领域启发：Agent 架构如何重塑音频系统的设计范式</div>
   <div class="meta">
     <span>&#128197; 2024-2026</span>
-    <span>&#128270; 3 线并行调研</span>
-    <span>&#128218; 40+ 项创新发现</span>
+    <span>&#128270; 5 线并行调研</span>
+    <span>&#128218; 60+ 项创新发现</span>
     <span>&#127911; Audio &times; Agent</span>
   </div>
 </div>
@@ -605,6 +633,10 @@
     <button class="nav-btn" onclick="scrollToSection('audio-agents')">音频 Agent 创新</button>
     <button class="nav-btn" onclick="scrollToSection('s2s-models')">端到端 S2S</button>
     <button class="nav-btn" onclick="scrollToSection('voice-frameworks')">语音 Agent 框架</button>
+    <button class="nav-btn" onclick="scrollToSection('harness-agents')">编排型 Agent</button>
+    <button class="nav-btn" onclick="scrollToSection('daw-mcp')">DAW + MCP</button>
+    <button class="nav-btn" onclick="scrollToSection('rag-audio')">RAG + 音频</button>
+    <button class="nav-btn" onclick="scrollToSection('benchmarks')">评估基准</button>
     <button class="nav-btn" onclick="scrollToSection('cross-domain')">跨领域启发</button>
     <button class="nav-btn" onclick="scrollToSection('memory-arch')">Memory 架构</button>
     <button class="nav-btn" onclick="scrollToSection('ranking')">TOP 10 排行</button>
@@ -639,8 +671,12 @@
         <div class="stat-label">语音 Agent 框架与平台</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value">10</div>
-        <div class="stat-label">跨领域可迁移 Agent 模式</div>
+        <div class="stat-value">8</div>
+        <div class="stat-label">零训练编排型音频 Agent</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">4+</div>
+        <div class="stat-label">Ableton MCP 竞品实现</div>
       </div>
     </div>
   </div>
@@ -1007,6 +1043,454 @@
           <tr><td><strong>Cartesia Sonic</strong></td><td>SSM 而非 Transformer</td><td>超低延迟 TTS (~100ms)，状态空间模型</td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Section: Harness-Heavy Audio Agents -->
+  <div id="harness-agents" class="section">
+    <div class="section-header">
+      <div class="section-tag tag-audio">Part 4</div>
+      <div class="section-title">编排型音频 Agent 系统</div>
+      <div class="section-desc">Harness-Heavy, Model-Light —— 智能来自编排而非模型训练，零微调的多 Agent 协作系统</div>
+    </div>
+
+    <div class="key-insight">
+      <h4>核心范式</h4>
+      <p>这些系统的共同特点：<strong>不训练任何模型</strong>，将现有音频模型作为工具，通过 Agent 编排、角色分工、自纠错循环实现智能。智能来自"怎么组合"而非"模型多大"。</p>
+    </div>
+
+    <div class="card-grid">
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">AudioGenie</div>
+          <div class="card-badge">Training-Free SOTA</div>
+        </div>
+        <div class="card-body">
+          <p><strong>双层多 Agent：</strong>生成团队（探索多条生成路径）+ 监督团队（评估选择最佳输出）。每个音频事件触发<strong>思维树（ToT）推理</strong>，多路径并行生成后由 Supervisor 评分筛选。</p>
+          <p>在 8 个任务 9 个指标上达到 SOTA，<strong>全程零训练</strong>。后续 AudioGenie-Reasoner 扩展到粗到细的深度推理。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag highlight">ToT 推理</span>
+          <span class="tag green">零训练</span>
+          <span class="tag">8 任务 SOTA</span>
+          <span class="tag">2025.05</span>
+          <span class="tag">arXiv:2505.22053</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">ComposerX / CoComposer</div>
+          <div class="card-badge">Multi-Agent Music</div>
+        </div>
+        <div class="card-body">
+          <p>多个 GPT-4 Agent 各自承担<strong>旋律、和声、节奏、编曲</strong>等音乐角色，协作创作复调符号音乐。Agent 通过结构化提示交换音乐贡献。</p>
+          <p>CoComposer 扩展到多轨多角色协商生成——Agent 间通过<strong>谈判解决音乐冲突</strong>（声部交叉、频率遮蔽）。多 Agent 分解显著优于单 Agent。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag highlight">角色化音乐 Agent</span>
+          <span class="tag green">零训练</span>
+          <span class="tag">复调创作</span>
+          <span class="tag">2024-2025</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">LVAS-Agent</div>
+          <div class="card-badge">EMNLP 2025</div>
+        </div>
+        <div class="card-body">
+          <p><strong>模拟专业配音工作流</strong>的四阶段 Agent 协作：场景分割 Agent &rarr; 脚本生成 Agent &rarr; 音频设计 Agent &rarr; 音频合成 Agent。各 Agent 协调维护<strong>跨场景一致性</strong>。</p>
+          <p>解决短视频方法无法处理的长片音频一致性问题。是"dubbing team as agents"的完整实现。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag highlight">专业工作流模拟</span>
+          <span class="tag green">跨场景一致性</span>
+          <span class="tag">EMNLP 2025</span>
+          <span class="tag">arXiv:2503.10719</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Dopamine Audiobook</div>
+          <div class="card-badge">Emotion-Driven</div>
+        </div>
+        <div class="card-body">
+          <p>零训练多 Agent 有声书系统。对每个句子：Agent 生成<strong>情感描述</strong> &rarr; 自适应选择 TTS 模型 &rarr; 合成带情感的语音 &rarr; 添加情景音效 &rarr; 组装。MLLM 作为中央编排器。</p>
+          <p>关键创新：逐句情感描述驱动 TTS 选择，不同情感用不同 TTS 引擎——<strong>编排创造了质量</strong>。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag highlight">逐句情感编排</span>
+          <span class="tag green">零训练</span>
+          <span class="tag">自适应 TTS 选择</span>
+          <span class="tag">2025.04</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Sonora</div>
+          <div class="card-badge">CHI 2025 (MIT + MSR)</div>
+        </div>
+        <div class="card-body">
+          <p><strong>人机共创 3D 音频世界。</strong>用户用自然语言描述想要的声音场景，Agent 解释意图、检索声音、空间定位、实时渲染声景。迭代式共创循环。</p>
+          <p>不只是被动声景——<strong>交互式、对话式的声景设计</strong>。研究了对抗焦虑和认知负荷的治疗效果。CHI 2025 发表，已被引 6 次。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag highlight">3D 声景共创</span>
+          <span class="tag green">治疗应用</span>
+          <span class="tag">CHI 2025</span>
+          <span class="tag">MIT + Microsoft Research</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">MAGNET</div>
+          <div class="card-badge">NeurIPS 2025</div>
+        </div>
+        <div class="card-body">
+          <p>模型无关的检索增强多 Agent 框架，Agent 跨多个长视频执行<strong>时间、因果、多跳检索</strong>。音频和视觉线索被协作检索和推理。</p>
+          <p>比基线提升高达 89% 和 65%。证明多 Agent 分解使<strong>单 Agent 无法完成的跨视频音视觉推理</strong>成为可能。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag highlight">跨视频推理</span>
+          <span class="tag">NeurIPS 2025</span>
+          <span class="tag">KAUST</span>
+          <span class="tag">arXiv:2506.07016</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">IBM 递归式长音频生成</div>
+          <div class="card-badge">Self-Correcting</div>
+        </div>
+        <div class="card-body">
+          <p><strong>自动评分 Agent + 递归重生</strong>循环：Agent 生成音频 &rarr; 自评分（对比目标质量档案） &rarr; 检测质量问题 &rarr; 带改进说明的递归重新生成。</p>
+          <p>这是自纠错音频生成的典型案例——<strong>系统通过检测自身质量失败并自主修复</strong>来提升输出，而非训练更好的模型。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag highlight">自纠错循环</span>
+          <span class="tag orange">递归重生</span>
+          <span class="tag">IBM Dpubs 2026</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">多 Agent 沉浸式有声书</div>
+          <div class="card-badge">Spatial Audio + Neural TTS</div>
+        </div>
+        <div class="card-body">
+          <p>多 Agent AI 框架：Agent 分别负责<strong>角色识别、音色分配、空间定位、叙述节奏、声音设计</strong>。不同 Agent 专注于不同制作角色。</p>
+          <p>将<strong>空间音频定位与神经叙述结合</strong>——角色获得独特音色并被置于 3D 空间中。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag highlight">空间音频 + 多角色</span>
+          <span class="tag">3D 定位</span>
+          <span class="tag">2025.05</span>
+          <span class="tag">arXiv:2505.04885</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Summary Table -->
+    <h3 style="margin-top:40px; margin-bottom:16px; color:var(--text2);">编排型 Agent 系统全景对比</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>系统</th>
+            <th>多 Agent?</th>
+            <th>零训练?</th>
+            <th>编排机制</th>
+            <th>编列的工具</th>
+            <th>时间</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>AudioGenie</strong></td><td>&#10003; 双层</td><td>&#10003;</td><td>ToT 推理 + Supervisor</td><td>MusicGen, AudioLDM, LLM</td><td>2025.05</td></tr>
+          <tr><td><strong>ComposerX</strong></td><td>&#10003; 角色化</td><td>&#10003;</td><td>GPT-4 角色协作</td><td>GPT-4 per 音乐角色</td><td>2024.04</td></tr>
+          <tr><td><strong>LVAS-Agent</strong></td><td>&#10003; 4 角色</td><td>&#10003;</td><td>专业配音流程模拟</td><td>TTS, SFX, 视频分析</td><td>2025.03</td></tr>
+          <tr><td><strong>Dopamine</strong></td><td>&#10003; 情感+TTS+SFX</td><td>&#10003;</td><td>MLLM 逐句情感编排</td><td>多 TTS 引擎, SFX 模型</td><td>2025.04</td></tr>
+          <tr><td><strong>Sonora</strong></td><td>单 Agent 循环</td><td>&#10003;</td><td>自然语言声景共创</td><td>音频生成, 空间渲染</td><td>CHI 2025</td></tr>
+          <tr><td><strong>MAGNET</strong></td><td>&#10003; 模型无关</td><td>&#10003;</td><td>检索 + 推理 Agent 协作</td><td>跨视频检索引擎</td><td>NeurIPS 2025</td></tr>
+          <tr><td><strong>IBM 递归</strong></td><td>&#10003; 评分+生成</td><td>&#10003;</td><td>自动评分 + 递归重生</td><td>TTS, 质量评估模型</td><td>2026</td></tr>
+          <tr><td><strong>Immersive Audiobook</strong></td><td>&#10003; 5 角色</td><td>&#10003;</td><td>角色/音色/空间/节奏/音效</td><td>Neural TTS, 空间音频</td><td>2025.05</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Section: DAW + MCP -->
+  <div id="daw-mcp" class="section">
+    <div class="section-header">
+      <div class="section-tag tag-cross">Part 5</div>
+      <div class="section-title">DAW 集成与 MCP 生态</div>
+      <div class="section-desc">LLM 通过 MCP 直接控制 DAW、FFmpeg、音乐库——现有工具即 Agent 工具</div>
+    </div>
+
+    <div class="card-grid">
+
+      <div class="card card-wide">
+        <div class="card-header">
+          <div class="card-title">Ableton MCP 生态（4+ 竞品实现）</div>
+          <div class="card-badge">生态爆发</div>
+        </div>
+        <div class="card-body">
+          <p>MCP (Model Context Protocol) 将 LLM 连接到 Ableton Live，用自然语言控制 DAW：<strong>LLM 是大脑，DAW 是双手</strong>。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag highlight">MCP 协议</span>
+          <span class="tag green">零训练</span>
+          <span class="tag">自然语言 &rarr; DAW</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">AbletonMCP (ahujasid)</div>
+          <div class="card-badge">Original</div>
+        </div>
+        <div class="card-body">
+          <p>第一个 Ableton MCP Server。通过 Ableton 的 Python Remote Script API 连接 Claude。可创建轨道、添加 Clip、调整混音参数、控制走带、操作设备。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag highlight">Python API</span>
+          <span class="tag">Claude &rarr; Ableton</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Producer Pal</div>
+          <div class="card-badge">Max for Live</div>
+        </div>
+        <div class="card-body">
+          <p>直接作为<strong>Max for Live 设备</strong>运行在 Ableton 内部。通过 Node for Max 暴露 20+ MCP 工具。支持 Claude、Gemini、ChatGPT、Ollama、LM Studio——<strong>任何 MCP 兼容客户端</strong>。LLM 从丰富描述自动选择工具。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag highlight">20+ MCP 工具</span>
+          <span class="tag green">多 LLM 后端</span>
+          <span class="tag">DAW 内原生运行</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">ableton-copilot-mcp</div>
+          <div class="card-badge">JavaScript</div>
+        </div>
+        <div class="card-body">
+          <p>基于 <strong>ableton-js</strong> 的 JS 版 MCP Server。支持 Arrangement View 操作、歌曲管理、添加音符、加载设备、管理 Clip。npm 包直接安装。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag">JavaScript</span>
+          <span class="tag">ableton-js</span>
+          <span class="tag">npm 安装</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Ableton MCP (OSC)</div>
+          <div class="card-badge">OSC Protocol</div>
+        </div>
+        <div class="card-body">
+          <p>使用 <strong>OSC (Open Sound Control)</strong> 而非 Python API 发送命令。架构不同于其他 Python 版本，理论上可适配任何 OSC 目标（如 Reaper）。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag">OSC 协议</span>
+          <span class="tag">跨 DAW 潜力</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">DAWZY</div>
+          <div class="card-badge">NeurIPS 2025 Workshop</div>
+        </div>
+        <div class="card-body">
+          <p>可解释 AI 助手直接集成在 DAW 界面内。提供<strong>自然语言控制以减少 GUI 微操</strong>。用户输入文字命令控制 DAW，保持 Human-in-the-Loop。"AI for Music" Workshop 发表。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag highlight">Human-in-the-Loop</span>
+          <span class="tag">可解释 AI</span>
+          <span class="tag">NeurIPS 2025</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">K.G. Studio ("Cursor for DAW")</div>
+          <div class="card-badge">Concept</div>
+        </div>
+        <div class="card-body">
+          <p>轻量浏览器 DAW + 内置 AI 音乐助手，灵感来自 Cursor 编辑器的 AI 副驾驶范式。探索<strong>如何将 AI 原生嵌入 DAW 工作流</strong>。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag highlight">Cursor 范式迁移</span>
+          <span class="tag">AI-Native DAW</span>
+        </div>
+      </div>
+
+    </div>
+
+    <h3 style="margin-top:40px; margin-bottom:16px; color:var(--text2);">MCP 工具生态</h3>
+    <div class="card-grid">
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">FFmpeg MCP Servers</div>
+          <div class="card-badge">60+ Tools</div>
+        </div>
+        <div class="card-body">
+          <p>将 FFmpeg 全部音频/视频处理能力暴露为 LLM 可调用的工具。包括：裁剪、格式转换、音频提取、滤波、编码、流处理。一个社区项目提供 <strong>60+ FFmpeg 工具</strong>。</p>
+          <p>MCP 模式将 FFmpeg 的 CLI 复杂性转化为<strong>自然语言可控的工具</strong>。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag highlight">60+ 工具</span>
+          <span class="tag">格式转换</span>
+          <span class="tag">音频处理</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Epidemic Sound MCP</div>
+          <div class="card-badge">First Music Library MCP</div>
+        </div>
+        <div class="card-body">
+          <p><strong>首个提供 MCP 服务器的大型音乐库。</strong>AI Agent 可以编程搜索、发现和授权音乐，作为自动化生产工作流的一部分。Agent 能根据画面内容动态匹配配乐。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag highlight">音乐库 API</span>
+          <span class="tag green">自动授权</span>
+          <span class="tag">2025 Beta</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">MCP 音频分析工具包</div>
+          <div class="card-badge">Analysis Pipeline</div>
+        </div>
+        <div class="card-body">
+          <p>MCP 驱动的工具包：LLM Agent 接受音频文件，编排多个分析工具——转录、情感分析、摘要、命名实体识别。<strong>MCP 可组合性的示范。</strong></p>
+        </div>
+        <div class="card-footer">
+          <span class="tag highlight">多工具组合</span>
+          <span class="tag">转录 + NLP</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="key-insight">
+      <h4>关键空白</h4>
+      <p>目前<strong>没有</strong> VST/AU 插件主机的 MCP 封装、没有 SoX/Pedalboard 的 MCP Server、没有 Logic Pro/Reaper/FL Studio/Pro Tools 的成熟 MCP。"LLM 选择并配置音频效果链"这个用例在商业端已有（iZotope, LANDR, RoEx），但<strong>开源端尚为空白</strong>——这是一个机会。</p>
+    </div>
+  </div>
+
+  <!-- Section: RAG + Audio -->
+  <div id="rag-audio" class="section">
+    <div class="section-header">
+      <div class="section-tag tag-arch">Part 6</div>
+      <div class="section-title">RAG + 音频生成</div>
+      <div class="section-desc">检索增强生成范式在音频领域的最新应用</div>
+    </div>
+
+    <div class="card-grid">
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">WavRAG</div>
+          <div class="card-badge">ACL 2025</div>
+        </div>
+        <div class="card-body">
+          <p><strong>首个原生音频 RAG 框架。</strong>完全绕过 ASR——直接对原始音频进行嵌入检索。将音频和文本整合到统一知识表示中。</p>
+          <p>比 ASR-Text RAG 管道<strong>快 10 倍</strong>，检索性能相当。消除了 ASR 转录带来的误差传播。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag highlight">原生音频 RAG</span>
+          <span class="tag green">10x 加速</span>
+          <span class="tag">ACL 2025</span>
+          <span class="tag">arXiv:2502.14727</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">检索增强文本到音乐生成</div>
+          <div class="card-badge">NeurIPS 2025</div>
+        </div>
+        <div class="card-body">
+          <p>给定文本提示 &rarr; 检索最相似的 k 个音乐描述 &rarr; 提取音乐特征 &rarr; 同时基于提示和检索结果条件化音乐生成。</p>
+          <p>证明<strong>检索相似音乐描述显著提升生成质量，无需重新训练生成模型</strong>——又一个"编排创造质量"的案例。</p>
+        </div>
+        <div class="card-footer">
+          <span class="tag highlight">RAG 改善生成</span>
+          <span class="tag green">零重训练</span>
+          <span class="tag">ACL 2024 + NeurIPS 2025</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Section: Benchmarks -->
+  <div id="benchmarks" class="section">
+    <div class="section-header">
+      <div class="section-tag tag-arch">Part 7</div>
+      <div class="section-title">音频 Agent 评估基准</div>
+      <div class="section-desc">如何评判音频 Agent 的能力——现有基准与关键缺口</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>基准</th>
+            <th>维度</th>
+            <th>规模</th>
+            <th>覆盖</th>
+            <th>发表</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>MMAU / MMAU-Pro</strong></td>
+            <td>专家级知识 + 复杂推理</td>
+            <td>49 任务 / 5,305 标注</td>
+            <td>语音 + 环境声 + 音乐 + 空间音频 + STEM</td>
+            <td>ICLR 2025 / AAAI</td>
+          </tr>
+          <tr>
+            <td><strong>AIR-Bench</strong></td>
+            <td>首个生成式音频评估</td>
+            <td>Foundation: 19 任务 ~19k &middot; Chat: 生成式</td>
+            <td>语音 + 环境声 + 音乐</td>
+            <td>ACL 2024</td>
+          </tr>
+          <tr>
+            <td><strong>AudioBench</strong></td>
+            <td>通用音频 LLM 评估</td>
+            <td>MMAU 测试集 + 多选题</td>
+            <td>语音 + 音频 + 音乐</td>
+            <td>2024-2025</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="key-insight">
+      <h4>关键缺口</h4>
+      <p>现有基准全部聚焦于<strong>音频感知/理解能力</strong>——即模型"能不能听懂"。但<strong>没有一个基准评估 Agent 控制音频生产工具的能力</strong>——即"能不能干活"。这类似于 NLP 领域从 MMLU（知识评估）到 SWE-Bench（工程能力评估）的演变——音频领域亟需自己的"SWE-Bench"。</p>
     </div>
   </div>
 
@@ -1640,7 +2124,7 @@
 <!-- Footer -->
 <div class="footer">
   <p>音频领域 Agent 范式创新调研报告 &middot; 2025.05</p>
-  <p style="margin-top:8px;">基于 3 线并行 Agent 调研，覆盖 40+ 项创新发现，跨越音频 AI、Coding Agent、Gaming AI、Creative AI、Robotics、科学发现等 7 个领域</p>
+  <p style="margin-top:8px;">基于 5 线并行 Agent 调研，覆盖 60+ 项创新发现，跨越音频 AI、编排型 Agent、DAW/MCP 生态、Coding Agent、Gaming AI、Creative AI、Robotics、科学发现等领域</p>
   <p style="margin-top:8px; color:var(--accent2);">AI-assisted research &middot; All references verified from public sources</p>
 </div>
 
@@ -1679,6 +2163,137 @@ window.addEventListener('scroll', () => {
   navBtns.forEach(b => {
     b.classList.remove('active');
     if (b.getAttribute('onclick')?.includes(current)) b.classList.add('active');
+  });
+});
+
+// Card source links & click-to-open
+const cardSources = {
+  // Part 1: Audio Agent Innovations
+  'CompanionCast': 'https://arxiv.org/abs/2512.10918',
+  'Multi-Agent 长视频音频合成': 'https://aclanthology.org/2025.emnlp-main.1133.pdf',
+  'AudioGPT': 'https://arxiv.org/abs/2304.12995',
+  'Audio-Agent': 'https://arxiv.org/abs/2410.03335',
+  'AudioToolAgent': 'https://arxiv.org/abs/2510.02995',
+  'ElevenLabs ElevenAgents': 'https://elevenlabs.io/conversational-ai',
+  // Part 2: S2S Models
+  'Moshi (Kyutai Labs)': 'https://github.com/kyutai-labs/moshi',
+  'Sesame CSM': 'https://github.com/SesameAILabs/csm',
+  'Hertz-dev (Standard Intelligence)': 'https://huggingface.co/si-pbc/hertz-dev',
+  'OpenAI Realtime API': 'https://developers.openai.com/api/docs/guides/realtime',
+  // Part 3: Voice Frameworks
+  'LiveKit Agents': 'https://github.com/livekit/agents',
+  'Pipecat': 'https://github.com/pipecat-ai/pipecat',
+  'TEN Framework': 'https://github.com/TEN-framework/ten_framework',
+  // Part 4: Harness Agents
+  'AudioGenie': 'https://arxiv.org/abs/2505.22053',
+  'ComposerX / CoComposer': 'https://arxiv.org/abs/2404.18081',
+  'LVAS-Agent': 'https://arxiv.org/abs/2503.10719',
+  'Dopamine Audiobook': 'https://arxiv.org/abs/2504.11002',
+  'Sonora': 'https://dl.acm.org/doi/10.1145/3706598.3713316',
+  'MAGNET': 'https://arxiv.org/abs/2506.07016',
+  'IBM 递归式长音频生成': 'https://www.tdcommons.org/cgi/viewcontent.cgi?article=11495&context=dpubs_series',
+  '多 Agent 沉浸式有声书': 'https://arxiv.org/abs/2505.04885',
+  // Part 5: DAW + MCP
+  'AbletonMCP (ahujasid)': 'https://github.com/ahujasid/ableton-mcp',
+  'Producer Pal': 'https://github.com/adamjmurray/producer-pal',
+  'ableton-copilot-mcp': 'https://github.com/xiaolaa2/ableton-copilot-mcp',
+  'Ableton MCP (OSC)': 'https://claudemarketplaces.com/mcp/simon-kansara/ableton-live-mcp-server',
+  'DAWZY': 'https://arxiv.org/abs/2512.03289',
+  'K.G. Studio ("Cursor for DAW")': 'https://ai.gopubby.com/exploring-what-cursor-for-a-daw-could-look-like-532e2df36791',
+  'FFmpeg MCP Servers': 'https://github.com/misbahsy/video-audio-mcp',
+  'Epidemic Sound MCP': 'https://www.epidemicsound.com/blog/mcp-server/',
+  'MCP 音频分析工具包': 'https://blog.dailydoseofds.com/p/hands-on-build-an-mcp-powered-audio',
+  // Part 6: RAG
+  'WavRAG': 'https://arxiv.org/abs/2502.14727',
+  '检索增强文本到音乐生成': 'https://aclanthology.org/2024.nlp4musa-1.6.pdf',
+  // Part 5: Cross-Domain Inspirations
+  'ReAct 循环 (Reason+Act+Observe)': 'https://www.cognition.ai/blog/devin-2-2',
+  'Agent-DAW Interface (ADI)': 'https://github.com/princeton-nlp/SWE-agent',
+  'Memory Stream + Reflection': 'https://arxiv.org/abs/2304.03442',
+  '锦标赛式辩论 (Tournament Debate)': 'https://research.google/blog/accelerating-scientific-breakthroughs-with-an-ai-co-scientist/',
+  'Asset Memory Management': 'https://arxiv.org/abs/2508.18781',
+  'SOP 角色化虚拟工作室': 'https://github.com/FoundationAgents/MetaGPT',
+  '集中-分布混合控制': 'https://arxiv.org/abs/2505.05108',
+  'EXHYTE 探索循环': 'https://pmc.ncbi.nlm.nih.gov/articles/PMC12776506/',
+  '对话式群智协作': 'https://microsoft.github.io/autogen/',
+  '涌现式生成音乐': 'https://arxiv.org/abs/2505.05108',
+  // Part 5: Memory
+  'Letta (MemGPT) —— 三层记忆架构': 'https://github.com/letta-ai/letta',
+  'Mem0': 'https://github.com/mem0ai/mem0',
+  '记忆检索机制演进': 'https://vectorize.io/articles/best-ai-agent-memory-systems',
+  '多层音频记忆系统设计': 'https://www.letta.com/blog/agent-memory',
+  // Part 8: Future
+  '方向 1：音频 Agent 操作系统': 'https://docs.langchain.com/oss/python/langgraph/overview',
+  '方向 2：涌现式音乐创作系统': 'https://arxiv.org/abs/2304.03442',
+  '方向 3：记忆驱动的音频个性化引擎': 'https://www.letta.com/blog/memory-blocks',
+  '方向 4：实时交互式音频 Agent': 'https://arxiv.org/abs/2410.00037',
+  '方向 5：对抗式音频质量保证': 'https://research.google/blog/accelerating-scientific-breakthroughs-with-an-ai-co-scientist/',
+  '方向 6：多角色一致性的长篇音频 Agent': 'https://arxiv.org/abs/2508.18781',
+};
+
+// Ranking item sources
+const rankingSources = [
+  'https://research.google/blog/accelerating-scientific-breakthroughs-with-an-ai-co-scientist/',
+  'https://github.com/letta-ai/letta',
+  'https://arxiv.org/abs/2508.18781',
+  'https://github.com/FoundationAgents/MetaGPT',
+  'https://arxiv.org/abs/2304.03442',
+  'https://github.com/princeton-nlp/SWE-agent',
+  'https://www.cognition.ai/blog/devin-2-2',
+  'https://arxiv.org/abs/2505.05108',
+  'https://docs.langchain.com/oss/python/langgraph/overview',
+  'https://pmc.ncbi.nlm.nih.gov/articles/PMC12776506/',
+];
+
+document.querySelectorAll('.card').forEach(card => {
+  const titleEl = card.querySelector('.card-title');
+  if (!titleEl) return;
+  const title = titleEl.textContent.trim();
+  const url = cardSources[title];
+  if (!url) return;
+
+  card.dataset.href = url;
+
+  const footer = card.querySelector('.card-footer');
+  if (footer) {
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.className = 'source-link';
+    link.innerHTML = '&#8599; 查看来源';
+    link.addEventListener('click', e => e.stopPropagation());
+    footer.appendChild(link);
+  }
+
+  card.addEventListener('click', e => {
+    if (e.target.closest('a')) return;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  });
+});
+
+// Ranking items
+document.querySelectorAll('.ranking-item').forEach((item, idx) => {
+  const url = rankingSources[idx];
+  if (!url) return;
+
+  item.dataset.href = url;
+
+  const content = item.querySelector('.ranking-content');
+  if (content) {
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.className = 'source-link';
+    link.innerHTML = '&#8599; 查看来源';
+    link.addEventListener('click', e => e.stopPropagation());
+    content.appendChild(link);
+  }
+
+  item.addEventListener('click', e => {
+    if (e.target.closest('a')) return;
+    window.open(url, '_blank', 'noopener,noreferrer');
   });
 });
 </script>
