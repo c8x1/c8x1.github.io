@@ -1,0 +1,4284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>音频交互与前端理解技术全景 — 2025-2026 业界最新进展</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #161923;
+    --bg3: #1e2233;
+    --card: #1a1f30;
+    --border: #2a3050;
+    --accent: #6c8cff;
+    --accent2: #a78bfa;
+    --accent3: #38bdf8;
+    --green: #34d399;
+    --orange: #fb923c;
+    --red: #f87171;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, #0f1117 0%, #1a1040 40%, #0c2340 100%);
+    padding: 80px 40px 60px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(108,140,255,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(167,139,250,0.06) 0%, transparent 50%);
+    animation: heroGlow 20s ease-in-out infinite;
+  }
+  @keyframes heroGlow {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-3%, 2%); }
+  }
+  .hero h1 {
+    font-size: 2.4em;
+    font-weight: 800;
+    background: linear-gradient(135deg, #6c8cff, #a78bfa, #38bdf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .hero .subtitle {
+    font-size: 1.15em;
+    color: var(--text2);
+    max-width: 700px;
+    margin: 0 auto 30px;
+    position: relative;
+  }
+  .hero .meta {
+    display: inline-flex;
+    gap: 24px;
+    color: var(--text3);
+    font-size: 0.9em;
+    position: relative;
+  }
+  .hero .meta span { display: flex; align-items: center; gap: 6px; }
+
+  /* Nav */
+  .nav-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15,17,23,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: flex;
+    gap: 4px;
+    padding: 8px 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  nav::-webkit-scrollbar { display: none; }
+  nav a {
+    color: var(--text2);
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.88em;
+    white-space: nowrap;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+  nav a:hover, nav a.active {
+    background: var(--bg3);
+    color: var(--accent);
+  }
+
+  /* Main layout */
+  .container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  main { padding: 40px 0 80px; }
+
+  /* Sections */
+  .section {
+    margin-bottom: 60px;
+    scroll-margin-top: 60px;
+  }
+  .section-title {
+    font-size: 1.6em;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-title .icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1em;
+    flex-shrink: 0;
+  }
+  .section-desc {
+    color: var(--text2);
+    margin-bottom: 28px;
+    font-size: 0.95em;
+    max-width: 800px;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 20px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card h3 {
+    font-size: 1.15em;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card h3 .badge {
+    font-size: 0.7em;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .badge-open { background: rgba(52,211,153,0.15); color: var(--green); }
+  .badge-closed { background: rgba(248,113,113,0.15); color: var(--red); }
+  .badge-api { background: rgba(251,146,60,0.15); color: var(--orange); }
+  .badge-new { background: rgba(108,140,255,0.15); color: var(--accent); }
+  .badge-sota { background: rgba(167,139,250,0.15); color: var(--accent2); }
+
+  .card p { color: var(--text2); margin-bottom: 10px; font-size: 0.92em; }
+  .card ul { padding-left: 18px; color: var(--text2); font-size: 0.92em; }
+  .card li { margin-bottom: 4px; }
+
+  /* Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88em;
+    margin: 12px 0;
+  }
+  th {
+    background: var(--bg3);
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--accent);
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+  }
+  tr:hover td { background: rgba(108,140,255,0.04); }
+  .highlight { color: var(--green); font-weight: 600; }
+  .dim { color: var(--text3); }
+
+  /* Tags */
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .tag {
+    font-size: 0.75em;
+    padding: 3px 10px;
+    border-radius: 6px;
+    background: var(--bg3);
+    color: var(--text2);
+    border: 1px solid var(--border);
+  }
+
+  /* KPI boxes */
+  .kpi-row { display: flex; gap: 16px; margin: 20px 0; flex-wrap: wrap; }
+  .kpi {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 22px;
+    flex: 1;
+    min-width: 160px;
+    text-align: center;
+  }
+  .kpi .value {
+    font-size: 1.8em;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .kpi .label { color: var(--text3); font-size: 0.85em; margin-top: 4px; }
+
+  /* Timeline */
+  .timeline { position: relative; padding-left: 30px; margin: 20px 0; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2));
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 24px;
+    padding-left: 20px;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  .timeline-item .date {
+    font-size: 0.8em;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .timeline-item .event { color: var(--text2); font-size: 0.92em; margin-top: 4px; }
+
+  /* Comparison bar */
+  .compare-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 6px 0;
+  }
+  .compare-bar .name {
+    width: 140px;
+    font-size: 0.85em;
+    color: var(--text2);
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .compare-bar .bar-bg {
+    flex: 1;
+    height: 22px;
+    background: var(--bg3);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .compare-bar .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.8s ease;
+  }
+  .compare-bar .val {
+    font-size: 0.82em;
+    color: var(--text3);
+    width: 55px;
+    flex-shrink: 0;
+  }
+
+  /* Arch diagram */
+  .arch-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 20px;
+    margin: 16px 0;
+    flex-wrap: wrap;
+  }
+  .arch-box {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 0.88em;
+    font-weight: 500;
+    color: var(--text);
+    text-align: center;
+  }
+  .arch-arrow { color: var(--accent); font-size: 1.2em; }
+
+  /* Sources */
+  .sources {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .sources a {
+    color: var(--accent3);
+    text-decoration: none;
+    font-size: 0.82em;
+    display: inline-block;
+    margin-right: 12px;
+    margin-bottom: 4px;
+  }
+  .sources a:hover { text-decoration: underline; }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text3);
+    font-size: 0.85em;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero { padding: 50px 20px 40px; }
+    .hero h1 { font-size: 1.6em; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .kpi-row { flex-direction: column; }
+    nav { padding: 8px 12px; }
+  }
+
+  /* Collapsible */
+  details {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background: var(--card);
+  }
+  details summary {
+    padding: 14px 20px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  details summary::before { content: '▸'; color: var(--accent); transition: transform 0.2s; }
+  details[open] summary::before { transform: rotate(90deg); }
+  details .detail-content { padding: 0 20px 16px; color: var(--text2); font-size: 0.92em; }
+
+  /* Chart placeholder */
+  .chart-placeholder {
+    background: var(--bg2);
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    color: var(--text3);
+    margin: 16px 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<header class="hero">
+  <h1>音频交互与前端理解技术全景</h1>
+  <p class="subtitle">Full-Duplex VAD / Universal Encoder / ASR SOTA / Audio LLM / TTS / Edge Deployment — 技术维度深度调研</p>
+  <div class="meta">
+    <span>📅 2025-2026</span>
+    <span>🔍 5 个并行 Agent 调研</span>
+    <span>📊 100+ 项技术/模型</span>
+  </div>
+</header>
+
+<!-- Navigation -->
+<div class="nav-wrap">
+<nav>
+  <a href="#overview">总览</a>
+  <a href="#asr">ASR SOTA</a>
+  <a href="#vad">VAD & 全双工</a>
+  <a href="#encoder">Audio Encoder</a>
+  <a href="#audiollm">Audio LLM</a>
+  <a href="#tts">TTS</a>
+  <a href="#enhancement">语音增强</a>
+  <a href="#edge">边缘部署</a>
+  <a href="#codec">Audio Codec</a>
+  <a href="#token">Token量化</a>
+  <a href="#agent">Audio Agent</a>
+  <a href="#security">安全防御</a>
+  <a href="#frameworks">开源框架</a>
+  <a href="#trends">趋势展望</a>
+</nav>
+</div>
+
+<div class="container">
+<main>
+
+<!-- PLACEHOLDER SECTIONS - will be filled by parallel agents -->
+
+<div class="section" id="overview">
+
+  <h2 class="section-title">
+    <span class="icon" style="background:#6c8cff;">&#x1F4CA;</span>
+    总览：音频交互技术架构演进
+  </h2>
+  <p class="section-desc">
+    从级联 Pipeline 到流式处理，再到原生端到端 Speech-to-Speech（S2S），音频交互技术在过去两年经历了三代架构演进。本节梳理关键指标、架构路线与里程碑事件。
+  </p>
+
+  <!-- KPI Highlights -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="value">300+</div>
+      <div class="label">Google Chirp 3 覆盖语言数</div>
+    </div>
+    <div class="kpi">
+      <div class="value">~200ms</div>
+      <div class="label">全双工 S2S 模型最低延迟 (Moshi)</div>
+    </div>
+    <div class="kpi">
+      <div class="value">82M</div>
+      <div class="label">Kokoro TTS 达到高质量的最小参数量</div>
+    </div>
+  </div>
+
+  <!-- Architecture Evolution Diagram -->
+  <div class="card">
+    <h3>架构演进：三条路线</h3>
+    <p>从级联到流式再到端到端，延迟逐步逼近人类对话反应时间（~200ms）。</p>
+
+    <!-- Route 1: Cascaded Pipeline -->
+    <div style="margin-bottom:24px;">
+      <div style="font-size:0.9em;font-weight:600;color:var(--orange);margin-bottom:8px;">路线一：级联 Pipeline &mdash; 延迟 1.5&ndash;3s</div>
+      <div class="arch-flow">
+        <div class="arch-box">Audio</div>
+        <span class="arch-arrow">&rarr;</span>
+        <div class="arch-box">STT</div>
+        <span class="arch-arrow">&rarr;</span>
+        <div class="arch-box">LLM</div>
+        <span class="arch-arrow">&rarr;</span>
+        <div class="arch-box">TTS</div>
+        <span class="arch-arrow">&rarr;</span>
+        <div class="arch-box">Audio</div>
+      </div>
+    </div>
+
+    <!-- Route 2: Streaming Pipeline -->
+    <div style="margin-bottom:24px;">
+      <div style="font-size:0.9em;font-weight:600;color:var(--accent3);margin-bottom:8px;">路线二：流式 Pipeline &mdash; 延迟 500&ndash;800ms</div>
+      <div class="arch-flow">
+        <div class="arch-box">Streaming STT</div>
+        <span class="arch-arrow">&rarr;</span>
+        <div class="arch-box">Streaming LLM</div>
+        <span class="arch-arrow">&rarr;</span>
+        <div class="arch-box">Streaming TTS</div>
+      </div>
+    </div>
+
+    <!-- Route 3: Native S2S -->
+    <div>
+      <div style="font-size:0.9em;font-weight:600;color:var(--green);margin-bottom:8px;">路线三：原生 S2S &mdash; 延迟 200&ndash;800ms</div>
+      <div class="arch-flow">
+        <div class="arch-box" style="border-color:var(--green);padding:14px 28px;">
+          End-to-End Speech Model
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeline: 2024-2026 Milestones -->
+  <div class="card">
+    <h3>关键里程碑 (2024&ndash;2026)</h3>
+    <p>语音交互领域的重大发布与突破事件时间线。</p>
+
+    <div class="timeline">
+
+      <div class="timeline-item">
+        <div class="date">2024.10</div>
+        <div class="event">Kyutai Moshi 发布 &mdash; 首个开源全双工语音 LLM</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="date">2024.11</div>
+        <div class="event">OpenAI Whisper Large-v3 发布</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="date">2025.01</div>
+        <div class="event">Qwen3-ASR 发布，中文 ASR 新 SOTA</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="date">2025.03</div>
+        <div class="event">F5-TTS (ACL 2025) 发布</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="date">2025.05</div>
+        <div class="event">NVIDIA PersonaPlex-7B 开源全双工 S2S</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="date">2025.08</div>
+        <div class="event">Google Chirp 3 发布，300+ 语言</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="date">2025.08</div>
+        <div class="event">OpenAI Realtime API GA</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="date">2025.09</div>
+        <div class="event">Sherpa-ONNX Swift 原生集成</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="date">2025.10</div>
+        <div class="event">Pipecat Smart Turn v3 语义端点检测</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="date">2026.01</div>
+        <div class="event">NVIDIA PersonaPlex-7B-v1 开源</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="date">2026.04</div>
+        <div class="event">ByteDance Seeduplex &mdash; 首个商业化全双工 S2S 部署</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="date">2026.05</div>
+        <div class="event">Silero VAD v5 发布，速度提升 3x</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- Section 2: ASR SOTA 模型                                      -->
+<!-- ============================================================ -->
+
+<div class="section" id="asr">
+
+  <h2 class="section-title">
+    <span class="icon" style="background:#a78bfa;">&#x1F399;</span>
+    ASR SOTA 模型
+  </h2>
+  <p class="section-desc">
+    2025&ndash;2026 年 ASR（自动语音识别）领域进入多极竞争格局：Qwen3-ASR 在中文/多语言基准刷新 SOTA，NVIDIA Parakeet 在英文 Leaderboard 领先，SenseVoice 在边缘端表现突出，Whisper 生态依然最成熟。
+  </p>
+
+  <!-- Comprehensive Comparison Table -->
+  <div class="card">
+    <h3>ASR 模型综合对比</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>模型</th>
+          <th>参数量</th>
+          <th>开源</th>
+          <th>License</th>
+          <th>语言数</th>
+          <th>英文 WER</th>
+          <th>中文 WER</th>
+          <th>边缘部署</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Whisper-large-v3</td>
+          <td>1,550M</td>
+          <td>&#x2705;</td>
+          <td>MIT</td>
+          <td>99</td>
+          <td>~2.7%</td>
+          <td>~5&ndash;8%</td>
+          <td>量化后可行</td>
+        </tr>
+        <tr>
+          <td>Whisper-large-v3-turbo</td>
+          <td>~800M</td>
+          <td>&#x2705;</td>
+          <td>MIT</td>
+          <td>99</td>
+          <td>~3&ndash;4%</td>
+          <td>~6&ndash;9%</td>
+          <td>较好</td>
+        </tr>
+        <tr>
+          <td>SeamlessM4T v2</td>
+          <td>大模型</td>
+          <td>&#x2705;</td>
+          <td>CC BY-NC</td>
+          <td>100</td>
+          <td>中等</td>
+          <td>中等</td>
+          <td>困难</td>
+        </tr>
+        <tr>
+          <td>Google Chirp 3</td>
+          <td>2,000M</td>
+          <td>&#x274C;</td>
+          <td>API Only</td>
+          <td>300+</td>
+          <td>~2%</td>
+          <td>N/A</td>
+          <td>不支持</td>
+        </tr>
+        <tr>
+          <td>SenseVoice-Small</td>
+          <td>~234M</td>
+          <td>&#x2705;</td>
+          <td>Apache 2.0</td>
+          <td>50+</td>
+          <td>竞争</td>
+          <td>优势</td>
+          <td class="highlight">优秀</td>
+        </tr>
+        <tr>
+          <td>Qwen3-ASR-1.7B</td>
+          <td>1,700M</td>
+          <td>&#x2705;</td>
+          <td>Apache 2.0</td>
+          <td>52</td>
+          <td class="highlight">1.63%</td>
+          <td class="highlight">2.71%</td>
+          <td>需 GPU</td>
+        </tr>
+        <tr>
+          <td>Qwen3-ASR-0.6B</td>
+          <td>600M</td>
+          <td>&#x2705;</td>
+          <td>Apache 2.0</td>
+          <td>52</td>
+          <td>2.11%</td>
+          <td>3.15%</td>
+          <td>可行</td>
+        </tr>
+        <tr>
+          <td>Parakeet-TDT-0.6B</td>
+          <td>600M</td>
+          <td>&#x2705;</td>
+          <td>CC BY 4.0</td>
+          <td>25</td>
+          <td>1.93%</td>
+          <td>N/A</td>
+          <td>可行</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SOTA Model Cards -->
+  <div class="grid-2">
+
+    <div class="card">
+      <h3>
+        Qwen3-ASR
+        <span class="badge badge-sota">SOTA</span>
+        <span class="badge badge-new">2025.01</span>
+      </h3>
+      <p>
+        基于 Qwen3-Omni 架构，支持 52 种语言/方言，统一 Streaming/Offline 推理模式。在中文及方言基准测试中大幅领先 Whisper，成为多语言 ASR 新标杆。开源 Apache 2.0 协议，社区活跃。
+      </p>
+      <div class="tags">
+        <span class="tag">Apache 2.0</span>
+        <span class="tag">52 语言</span>
+        <span class="tag">Streaming</span>
+        <span class="tag">1.7B / 0.6B</span>
+      </div>
+      <div class="sources">
+        <a href="https://github.com/QwenLM/Qwen3-ASR" target="_blank">GitHub: QwenLM/Qwen3-ASR</a>
+        <a href="https://qwen.ai/blog" target="_blank">qwen.ai/blog</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>
+        NVIDIA Parakeet-TDT-0.6B
+        <span class="badge badge-open">Open</span>
+      </h3>
+      <p>
+        FastConformer + TDT (Token-and-Duration Transducer) 架构，HuggingFace ASR Leaderboard 平均 WER 6.34%，英文表现优异。CC BY 4.0 商业友好协议，适合企业级部署。
+      </p>
+      <div class="tags">
+        <span class="tag">CC BY 4.0</span>
+        <span class="tag">600M</span>
+        <span class="tag">FastConformer</span>
+        <span class="tag">Leaderboard #1</span>
+      </div>
+      <div class="sources">
+        <a href="https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3" target="_blank">HuggingFace: parakeet-tdt-0.6b-v3</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>
+        SenseVoice-Small
+        <span class="badge badge-open">Open</span>
+        <span class="tag" style="font-size:0.7em;padding:2px 8px;border-radius:6px;background:rgba(52,211,153,0.15);color:var(--green);">Edge-friendly</span>
+      </h3>
+      <p>
+        仅 234M 参数，Non-autoregressive 架构，10 秒音频仅需 70ms 推理，比 Whisper 快 15 倍。支持 ASR + LID（语言识别）+ SER（情感识别）+ AED（音频事件检测）多任务。边缘部署首选。
+      </p>
+      <div class="tags">
+        <span class="tag">Apache 2.0</span>
+        <span class="tag">234M</span>
+        <span class="tag">Non-AR</span>
+        <span class="tag">多任务</span>
+      </div>
+      <div class="sources">
+        <a href="https://github.com/FunAudioLLM/SenseVoice" target="_blank">GitHub: FunAudioLLM/SenseVoice</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>
+        Whisper-large-v3
+        <span class="badge badge-open">Open</span>
+        <span class="badge badge-sota">Ecosystem</span>
+      </h3>
+      <p>
+        依然是最成熟的多语言 ASR 生态，社区工具链最完善：faster-whisper（CTranslate2 加速）、whisper.cpp（C++ 推理）、WhisperKit（Apple Silicon 原生）。99 种语言覆盖，MIT 协议，生产环境验证充分。
+      </p>
+      <div class="tags">
+        <span class="tag">MIT</span>
+        <span class="tag">1,550M</span>
+        <span class="tag">99 语言</span>
+        <span class="tag">whisper.cpp</span>
+        <span class="tag">WhisperKit</span>
+      </div>
+      <div class="sources">
+        <a href="https://github.com/openai/whisper" target="_blank">GitHub: openai/whisper</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- WER Comparison Bar Chart: LibriSpeech test-clean -->
+  <div class="card">
+    <h3>LibriSpeech test-clean WER 对比</h3>
+    <p>越短越好（绿色条代表更低 WER），基准为 LibriSpeech test-clean 子集。</p>
+
+    <!-- GPT-4o Transcribe: 1.39% -->
+    <div class="compare-bar">
+      <div class="name">GPT-4o Transcribe</div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:31%;background:#34d399;"></div>
+      </div>
+      <div class="val">1.39%</div>
+    </div>
+
+    <!-- Qwen3-ASR-1.7B: 1.63% -->
+    <div class="compare-bar">
+      <div class="name">Qwen3-ASR-1.7B</div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:37%;background:#34d399;"></div>
+      </div>
+      <div class="val">1.63%</div>
+    </div>
+
+    <!-- Parakeet-TDT: 1.93% -->
+    <div class="compare-bar">
+      <div class="name">Parakeet-TDT</div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:43%;background:#34d399;"></div>
+      </div>
+      <div class="val">1.93%</div>
+    </div>
+
+    <!-- Qwen3-ASR-0.6B: 2.11% -->
+    <div class="compare-bar">
+      <div class="name">Qwen3-ASR-0.6B</div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:47%;background:#34d399;"></div>
+      </div>
+      <div class="val">2.11%</div>
+    </div>
+
+    <!-- Whisper-large-v3: 2.89% -->
+    <div class="compare-bar">
+      <div class="name">Whisper-large-v3</div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:64%;background:#34d399;"></div>
+      </div>
+      <div class="val">2.89%</div>
+    </div>
+
+    <!-- SenseVoice: ~3% -->
+    <div class="compare-bar">
+      <div class="name">SenseVoice</div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:67%;background:#34d399;opacity:0.7;"></div>
+      </div>
+      <div class="val">~3%</div>
+    </div>
+
+    <p style="margin-top:12px;font-size:0.8em;color:var(--text3);">
+      * GPT-4o Transcribe 为 API 服务，非开源。SenseVoice WER 为估计值。条形宽度基于相对比例计算（以 ~4.5% 为满宽参考）。
+    </p>
+  </div>
+
+</div>
+<div class="section" id="asr">
+
+  <h2 class="section-title">
+    <span class="icon" style="background:#a78bfa;">&#x1F399;</span>
+    ASR SOTA 模型
+  </h2>
+  <p class="section-desc">
+    2025&ndash;2026 年 ASR（自动语音识别）领域进入多极竞争格局：Qwen3-ASR 在中文/多语言基准刷新 SOTA，NVIDIA Parakeet 在英文 Leaderboard 领先，SenseVoice 在边缘端表现突出，Whisper 生态依然最成熟。
+  </p>
+
+  <!-- Comprehensive Comparison Table -->
+  <div class="card">
+    <h3>ASR 模型综合对比</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>模型</th>
+          <th>参数量</th>
+          <th>开源</th>
+          <th>License</th>
+          <th>语言数</th>
+          <th>英文 WER</th>
+          <th>中文 WER</th>
+          <th>边缘部署</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Whisper-large-v3</td>
+          <td>1,550M</td>
+          <td>&#x2705;</td>
+          <td>MIT</td>
+          <td>99</td>
+          <td>~2.7%</td>
+          <td>~5&ndash;8%</td>
+          <td>量化后可行</td>
+        </tr>
+        <tr>
+          <td>Whisper-large-v3-turbo</td>
+          <td>~800M</td>
+          <td>&#x2705;</td>
+          <td>MIT</td>
+          <td>99</td>
+          <td>~3&ndash;4%</td>
+          <td>~6&ndash;9%</td>
+          <td>较好</td>
+        </tr>
+        <tr>
+          <td>SeamlessM4T v2</td>
+          <td>大模型</td>
+          <td>&#x2705;</td>
+          <td>CC BY-NC</td>
+          <td>100</td>
+          <td>中等</td>
+          <td>中等</td>
+          <td>困难</td>
+        </tr>
+        <tr>
+          <td>Google Chirp 3</td>
+          <td>2,000M</td>
+          <td>&#x274C;</td>
+          <td>API Only</td>
+          <td>300+</td>
+          <td>~2%</td>
+          <td>N/A</td>
+          <td>不支持</td>
+        </tr>
+        <tr>
+          <td>SenseVoice-Small</td>
+          <td>~234M</td>
+          <td>&#x2705;</td>
+          <td>Apache 2.0</td>
+          <td>50+</td>
+          <td>竞争</td>
+          <td>优势</td>
+          <td class="highlight">优秀</td>
+        </tr>
+        <tr>
+          <td>Qwen3-ASR-1.7B</td>
+          <td>1,700M</td>
+          <td>&#x2705;</td>
+          <td>Apache 2.0</td>
+          <td>52</td>
+          <td class="highlight">1.63%</td>
+          <td class="highlight">2.71%</td>
+          <td>需 GPU</td>
+        </tr>
+        <tr>
+          <td>Qwen3-ASR-0.6B</td>
+          <td>600M</td>
+          <td>&#x2705;</td>
+          <td>Apache 2.0</td>
+          <td>52</td>
+          <td>2.11%</td>
+          <td>3.15%</td>
+          <td>可行</td>
+        </tr>
+        <tr>
+          <td>Parakeet-TDT-0.6B</td>
+          <td>600M</td>
+          <td>&#x2705;</td>
+          <td>CC BY 4.0</td>
+          <td>25</td>
+          <td>1.93%</td>
+          <td>N/A</td>
+          <td>可行</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SOTA Model Cards -->
+  <div class="grid-2">
+
+    <div class="card">
+      <h3>
+        Qwen3-ASR
+        <span class="badge badge-sota">SOTA</span>
+        <span class="badge badge-new">2025.01</span>
+      </h3>
+      <p>
+        基于 Qwen3-Omni 架构，支持 52 种语言/方言，统一 Streaming/Offline 推理模式。在中文及方言基准测试中大幅领先 Whisper，成为多语言 ASR 新标杆。开源 Apache 2.0 协议，社区活跃。
+      </p>
+      <div class="tags">
+        <span class="tag">Apache 2.0</span>
+        <span class="tag">52 语言</span>
+        <span class="tag">Streaming</span>
+        <span class="tag">1.7B / 0.6B</span>
+      </div>
+      <div class="sources">
+        <a href="https://github.com/QwenLM/Qwen3-ASR" target="_blank">GitHub: QwenLM/Qwen3-ASR</a>
+        <a href="https://qwen.ai/blog" target="_blank">qwen.ai/blog</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>
+        NVIDIA Parakeet-TDT-0.6B
+        <span class="badge badge-open">Open</span>
+      </h3>
+      <p>
+        FastConformer + TDT (Token-and-Duration Transducer) 架构，HuggingFace ASR Leaderboard 平均 WER 6.34%，英文表现优异。CC BY 4.0 商业友好协议，适合企业级部署。
+      </p>
+      <div class="tags">
+        <span class="tag">CC BY 4.0</span>
+        <span class="tag">600M</span>
+        <span class="tag">FastConformer</span>
+        <span class="tag">Leaderboard #1</span>
+      </div>
+      <div class="sources">
+        <a href="https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3" target="_blank">HuggingFace: parakeet-tdt-0.6b-v3</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>
+        SenseVoice-Small
+        <span class="badge badge-open">Open</span>
+        <span class="tag" style="font-size:0.7em;padding:2px 8px;border-radius:6px;background:rgba(52,211,153,0.15);color:var(--green);">Edge-friendly</span>
+      </h3>
+      <p>
+        仅 234M 参数，Non-autoregressive 架构，10 秒音频仅需 70ms 推理，比 Whisper 快 15 倍。支持 ASR + LID（语言识别）+ SER（情感识别）+ AED（音频事件检测）多任务。边缘部署首选。
+      </p>
+      <div class="tags">
+        <span class="tag">Apache 2.0</span>
+        <span class="tag">234M</span>
+        <span class="tag">Non-AR</span>
+        <span class="tag">多任务</span>
+      </div>
+      <div class="sources">
+        <a href="https://github.com/FunAudioLLM/SenseVoice" target="_blank">GitHub: FunAudioLLM/SenseVoice</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>
+        Whisper-large-v3
+        <span class="badge badge-open">Open</span>
+        <span class="badge badge-sota">Ecosystem</span>
+      </h3>
+      <p>
+        依然是最成熟的多语言 ASR 生态，社区工具链最完善：faster-whisper（CTranslate2 加速）、whisper.cpp（C++ 推理）、WhisperKit（Apple Silicon 原生）。99 种语言覆盖，MIT 协议，生产环境验证充分。
+      </p>
+      <div class="tags">
+        <span class="tag">MIT</span>
+        <span class="tag">1,550M</span>
+        <span class="tag">99 语言</span>
+        <span class="tag">whisper.cpp</span>
+        <span class="tag">WhisperKit</span>
+      </div>
+      <div class="sources">
+        <a href="https://github.com/openai/whisper" target="_blank">GitHub: openai/whisper</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- WER Comparison Bar Chart: LibriSpeech test-clean -->
+  <div class="card">
+    <h3>LibriSpeech test-clean WER 对比</h3>
+    <p>越短越好（绿色条代表更低 WER），基准为 LibriSpeech test-clean 子集。</p>
+
+    <!-- GPT-4o Transcribe: 1.39% -->
+    <div class="compare-bar">
+      <div class="name">GPT-4o Transcribe</div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:31%;background:#34d399;"></div>
+      </div>
+      <div class="val">1.39%</div>
+    </div>
+
+    <!-- Qwen3-ASR-1.7B: 1.63% -->
+    <div class="compare-bar">
+      <div class="name">Qwen3-ASR-1.7B</div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:37%;background:#34d399;"></div>
+      </div>
+      <div class="val">1.63%</div>
+    </div>
+
+    <!-- Parakeet-TDT: 1.93% -->
+    <div class="compare-bar">
+      <div class="name">Parakeet-TDT</div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:43%;background:#34d399;"></div>
+      </div>
+      <div class="val">1.93%</div>
+    </div>
+
+    <!-- Qwen3-ASR-0.6B: 2.11% -->
+    <div class="compare-bar">
+      <div class="name">Qwen3-ASR-0.6B</div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:47%;background:#34d399;"></div>
+      </div>
+      <div class="val">2.11%</div>
+    </div>
+
+    <!-- Whisper-large-v3: 2.89% -->
+    <div class="compare-bar">
+      <div class="name">Whisper-large-v3</div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:64%;background:#34d399;"></div>
+      </div>
+      <div class="val">2.89%</div>
+    </div>
+
+    <!-- SenseVoice: ~3% -->
+    <div class="compare-bar">
+      <div class="name">SenseVoice</div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:67%;background:#34d399;opacity:0.7;"></div>
+      </div>
+      <div class="val">~3%</div>
+    </div>
+
+    <p style="margin-top:12px;font-size:0.8em;color:var(--text3);">
+      * GPT-4o Transcribe 为 API 服务，非开源。SenseVoice WER 为估计值。条形宽度基于相对比例计算（以 ~4.5% 为满宽参考）。
+    </p>
+  </div>
+
+</div>
+<div class="section" id="vad">
+  <h2 class="section-title">
+    <span class="icon" style="background:#38bdf8;">📡</span>
+    VAD &amp; 全双工交互
+  </h2>
+  <p class="section-desc">
+    从基于静默的简单 VAD 到语义级 End-of-Turn 检测，再到原生全双工 Speech-to-Speech 系统——实时语音交互的底层技术栈正在被彻底重写。
+  </p>
+
+  <!-- 1. 全双工系统对比表 -->
+  <div class="card">
+    <h3>🔊 全双工语音交互系统对比</h3>
+    <p>2025年全双工 S2S 系统从实验室走向产品，原生全双工架构（同时听+说）成为核心竞争方向。</p>
+    <table>
+      <thead>
+        <tr>
+          <th>系统</th>
+          <th>架构</th>
+          <th>延迟</th>
+          <th>开源</th>
+          <th>核心创新</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>OpenAI gpt-realtime-2</strong></td>
+          <td>原生 S2S</td>
+          <td>~600-800ms</td>
+          <td>❌</td>
+          <td>GPT-5级推理+语音，70+语言实时翻译</td>
+        </tr>
+        <tr>
+          <td><strong>Google Gemini Live</strong></td>
+          <td>原生 S2S</td>
+          <td>~800ms</td>
+          <td>❌ API</td>
+          <td>30 HD音色/24语言，内置VAD+tool calling</td>
+        </tr>
+        <tr>
+          <td><strong>Kyutai Moshi</strong></td>
+          <td>原生全双工 S2S</td>
+          <td class="highlight">~160-200ms</td>
+          <td><span class="badge badge-open">开源</span></td>
+          <td>首个开源全双工语音LLM，Mimi codec 1.1kbps</td>
+        </tr>
+        <tr>
+          <td><strong>NVIDIA PersonaPlex-7B</strong></td>
+          <td>原生全双工 S2S</td>
+          <td>~200ms</td>
+          <td><span class="badge badge-open">开源</span></td>
+          <td>persona 控制，文本+音频音色提示</td>
+        </tr>
+        <tr>
+          <td><strong>ByteDance Seeduplex</strong></td>
+          <td>原生全双工 S2S</td>
+          <td class="dim">未公开</td>
+          <td>❌</td>
+          <td>高精度干扰抑制，自适应端点检测</td>
+        </tr>
+        <tr>
+          <td><strong>Hume EVI 3</strong></td>
+          <td>全双工+情感</td>
+          <td class="dim">未公开</td>
+          <td>部分</td>
+          <td>实时情感识别与语音交互融合</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 2. VAD 技术进展 -->
+  <div class="card">
+    <h3>🎯 VAD 技术进展</h3>
+    <p><strong>Silero VAD v5</strong>：速度提升 3x，支持 6000+ 语言，30ms chunk 在单线程 CPU 上 &lt;1ms 处理完成，ONNX 部署，已成为业界最广泛使用的轻量 VAD 方案。</p>
+    <div class="sources">
+      <a href="https://github.com/snakers4/silero-vad" target="_blank">github.com/snakers4/silero-vad</a>
+    </div>
+
+    <h3 style="margin-top:20px;">Neural VAD vs 传统 VAD 对比</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>指标</th>
+          <th>WebRTC VAD</th>
+          <th>Silero VAD</th>
+          <th>Cobra VAD</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>AUC 排名</td>
+          <td class="dim">最低</td>
+          <td>中等</td>
+          <td class="highlight">最高</td>
+        </tr>
+        <tr>
+          <td>误报率</td>
+          <td class="dim">高（噪声环境）</td>
+          <td>低</td>
+          <td class="highlight">最低</td>
+        </tr>
+        <tr>
+          <td>速度</td>
+          <td class="highlight">极快</td>
+          <td>快</td>
+          <td>快</td>
+        </tr>
+        <tr>
+          <td>模型大小</td>
+          <td>~158KB</td>
+          <td>MB 级</td>
+          <td>较大</td>
+        </tr>
+        <tr>
+          <td>噪声鲁棒性</td>
+          <td class="dim">差</td>
+          <td>好</td>
+          <td class="highlight">好</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 3. End-of-Turn 检测 -->
+  <div class="card">
+    <h3>🔚 End-of-Turn 检测 — 2025「Turn Detection 年」</h3>
+    <p>2025年被称为<strong>"Turn Detection 年"</strong>，核心技术路径从简单的静默时长检测转向<strong>语义级 EoT 预测</strong>。</p>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div>
+        <h3 style="font-size:1em;">Pipecat Smart Turn v3</h3>
+        <p>原生音频模型（非文本），完全开源（open source + data + training），直接从音频信号判断说话者是否完成发言，无需先转文字再判断。</p>
+      </div>
+      <div>
+        <h3 style="font-size:1em;">Speechmatics Semantic Turn Detection</h3>
+        <p>使用 SLM（Small Language Model）进行语义级 turn 检测，结合语义理解判断发言是否完整。</p>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <h3 style="font-size:1em;">LiveKit Transformer EoT</h3>
+      <p>Transformer 架构改进 end-of-turn 检测，在实时语音管道中直接部署。</p>
+    </div>
+
+    <div class="kpi-row" style="margin-top:20px;">
+      <div class="kpi">
+        <div class="value">~70%</div>
+        <div class="label">纯 VAD EoT 准确率</div>
+      </div>
+      <div class="kpi">
+        <div class="value" style="background:linear-gradient(135deg, #34d399, #38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">~90%+</div>
+        <div class="label">语义模型 EoT 准确率</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. WebRTC vs WebSocket -->
+  <div class="card">
+    <h3>🔌 WebRTC vs WebSocket 对比</h3>
+    <p>实时语音 AI 系统的传输层选型：WebRTC 专为实时音视频设计，WebSocket 更适合控制信令和文本场景。</p>
+    <table>
+      <thead>
+        <tr>
+          <th>特性</th>
+          <th>WebRTC</th>
+          <th>WebSocket</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>传输层</td>
+          <td>UDP (RTP)</td>
+          <td>TCP</td>
+        </tr>
+        <tr>
+          <td>延迟</td>
+          <td class="highlight">~150ms</td>
+          <td>~200ms</td>
+        </tr>
+        <tr>
+          <td>Jitter Buffer</td>
+          <td class="highlight">内建自适应</td>
+          <td class="dim">需手动实现</td>
+        </tr>
+        <tr>
+          <td>Echo Cancellation</td>
+          <td class="highlight">原生支持</td>
+          <td class="dim">需手动实现</td>
+        </tr>
+        <tr>
+          <td>加密</td>
+          <td class="highlight">SRTP 强制</td>
+          <td>WSS 可选</td>
+        </tr>
+        <tr>
+          <td>适用场景</td>
+          <td>实时语音 AI</td>
+          <td>控制信令/文本</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 5. Neural Audio Codec 对比表 -->
+  <div class="card">
+    <h3>🎵 Neural Audio Codec 对比</h3>
+    <p>Neural codec 是全双工 S2S 系统的基石——将音频压缩为离散 token 供 LLM 处理。</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Codec</th>
+          <th>开发者</th>
+          <th>比特率</th>
+          <th>特点</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Mimi</strong></td>
+          <td>Kyutai</td>
+          <td class="highlight">1.1 kbps</td>
+          <td>12.5Hz frame rate，专为全双工 S2S 设计</td>
+        </tr>
+        <tr>
+          <td><strong>DualCodec</strong></td>
+          <td>学术研究</td>
+          <td>低</td>
+          <td>双流编码，语义增强</td>
+        </tr>
+        <tr>
+          <td><strong>Opus</strong></td>
+          <td>IETF</td>
+          <td>6-510 kbps</td>
+          <td>WebRTC 标准 codec，自适应比特率</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ==================== Section 2: 通用 Audio Encoder & 自监督预训练 ==================== -->
+
+<div class="section" id="encoder">
+  <h2 class="section-title">
+    <span class="icon" style="background:#34d399;">🧠</span>
+    通用 Audio Encoder &amp; 自监督预训练
+  </h2>
+  <p class="section-desc">
+    从 Wav2Vec 2.0 到 USAD，自监督语音预训练经历了从单模态到跨模态、从通用到领域专精的演进。Neural codec 和可学习前端也在重新定义音频表征的边界。
+  </p>
+
+  <!-- 1. Neural Audio Codec 进化 -->
+  <div class="card">
+    <h3>🔬 Neural Audio Codec 进化</h3>
+    <p>Neural codec 从音频压缩工具演变为语音 AI 生态的基础设施，支撑 TTS、音乐生成、语音增强等多个下游任务。</p>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div>
+        <h3 style="font-size:1em;">EnCodec <span class="badge badge-sota">Meta</span></h3>
+        <p>AudioCraft 生态核心 codec，支撑 MusicGen 和 AudioGen 生成。基于残差向量量化（RVQ），多种比特率可选。</p>
+      </div>
+      <div>
+        <h3 style="font-size:1em;">SoundStream <span class="badge badge-sota">Google</span></h3>
+        <p>首个在智能手机 CPU 上实时运行的 neural codec，已用于 NotebookLM 播客生成。开创了 neural codec + 生成模型的技术路线。</p>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div>
+        <h3 style="font-size:1em;">DAC <span class="badge badge-new">Descript</span></h3>
+        <p>44.1kHz 以 ~90x 压缩率编码为 8kbps tokens，改进的 RVQ + snake activation，显著提升音频重建质量。</p>
+      </div>
+      <div>
+        <h3 style="font-size:1em;">DACe <span class="badge badge-new">2025</span></h3>
+        <p>DAC 增强高保真版本，进一步提升 codec 的音频还原质量，适用于对音质要求更高的场景。</p>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <h3 style="font-size:1em;">SpectroStream <span class="badge badge-new">2025</span></h3>
+      <p>新一代 neural codec，支持 full-band 48kHz，在保持低延迟的同时实现高保真音频编解码。</p>
+    </div>
+
+    <div class="sources">
+      <a href="https://ai.meta.com/resources/models-and-libraries/audiocraft" target="_blank">ai.meta.com/resources/models-and-libraries/audiocraft</a>
+      <a href="https://arxiv.org/pdf/2508.05207" target="_blank">arxiv.org/pdf/2508.05207</a>
+    </div>
+  </div>
+
+  <!-- 2. 自监督语音模型进化路线 -->
+  <div class="card">
+    <h3>📈 自监督语音模型进化路线</h3>
+    <p>从 contrastive learning 到跨模态统一框架，自监督语音预训练的范式不断演进。</p>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="date">Wav2Vec 2.0</div>
+        <div class="event"><strong>基础模型</strong> — Masked prediction + contrastive learning + quantization，开创了自监督语音预训练的主流范式。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">HuBERT</div>
+        <div class="event"><strong>简化训练</strong> — 用 clustered hidden units 的 masked prediction 替代 contrastive loss，训练更稳定，性能更强。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">WavLM</div>
+        <div class="event"><strong>鲁棒性提升</strong> — 加入 denoising + speaker discrimination 多任务，在噪声环境下的表现显著提升。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">Data2Vec (Meta)</div>
+        <div class="event"><strong>跨模态统一</strong> — 跨模态（语音/视觉/文本）统一自监督框架，同一个架构处理不同模态。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">BEATs (Microsoft, ICML 2023)</div>
+        <div class="event"><strong>BERT 风格音频预训练</strong> — 将 NLP 中成功的 BERT 模式引入音频领域，迭代式 tokenizer + masked prediction。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">OpenBEATs (2025)</div>
+        <div class="event"><strong>完全开源扩展</strong> — 完全开源多领域 BEATs 扩展，覆盖 25 个 benchmark，支持语音、音乐、环境音。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">USAD (MIT CSAIL, 2025)</div>
+        <div class="event"><strong>统一 encoder</strong> — 多领域 SSL 蒸馏为统一 encoder，一个模型覆盖语音、音乐、环境声等多领域。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">UniWav (ICLR 2025)</div>
+        <div class="event"><strong>统一预训练框架</strong> — 统一多种语音任务（ASR、SV、SD 等）的预训练框架，减少任务特定微调需求。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 边缘端音频特征提取 -->
+  <div class="card">
+    <h3>⚡ 边缘端音频特征提取</h3>
+    <p>在 MCU 等资源受限设备上，特征提取的计算效率直接决定系统能否实时运行。</p>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div>
+        <h3 style="font-size:1em;">MFCC / Mel-filterbank</h3>
+        <p>仍是 edge 端主流选择，计算量最小，硬件加速友好，几乎所有 DSP 库都原生支持。</p>
+      </div>
+      <div>
+        <h3 style="font-size:1em;">SincNet</h3>
+        <p>参数化 band-pass filters，可学习，适合 MCU 部署。直接从波形学习 filterbank 参数。</p>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div>
+        <h3 style="font-size:1em;">LEAF (Google)</h3>
+        <p>全可学习前端，Gabor filters + Gaussian pooling，端到端优化特征提取。</p>
+      </div>
+      <div>
+        <h3 style="font-size:1em;">Faster LEAF</h3>
+        <p>仅 3% 计算量即达 LEAF 精度，大幅降低可学习前端的部署门槛。</p>
+      </div>
+    </div>
+
+    <div style="margin-top:16px; padding:14px 18px; background:var(--bg2); border-radius:10px; border-left:3px solid var(--orange);">
+      <strong style="color:var(--orange);">重要发现</strong>
+      <span style="color:var(--text2);">：可学习前端在多数场景下<strong style="color:var(--text);">不能一致性地超越</strong>固定 mel-filterbank baseline。在资源受限的 edge 端，mel-filterbank 仍是性价比最高的选择。</span>
+    </div>
+  </div>
+
+  <!-- 4. Speaker Diarization -->
+  <div class="card">
+    <h3>👥 Speaker Diarization</h3>
+    <p>说话人日志（"who spoke when"）在会议、播客、客服等场景中是核心上游组件。</p>
+
+    <div class="grid-3" style="margin-top:16px;">
+      <div style="padding:16px; background:var(--bg2); border-radius:10px; border:1px solid var(--border);">
+        <h3 style="font-size:1em;">Pyannote 3.1</h3>
+        <p>最主流开源 diarization 工具，DER 约 10%。基于 segmentation + clustering 流水线，社区生态完善。</p>
+      </div>
+      <div style="padding:16px; background:var(--bg2); border-radius:10px; border:1px solid var(--border);">
+        <h3 style="font-size:1em;">SpeakerLM</h3>
+        <p>使用 LM 进行端到端 diarization 的创新方法，将说话人识别和日志统一为序列建模任务。</p>
+      </div>
+      <div style="padding:16px; background:var(--bg2); border-radius:10px; border:1px solid var(--border);">
+        <h3 style="font-size:1em;">Meta SVoice (2020)</h3>
+        <p>单麦分离 <strong>5 个同时说话人</strong>，突破了传统方法的说话人数量上限，在鸡尾酒会场景下表现优异。</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="section" id="encoder">
+  <h2 class="section-title">
+    <span class="icon" style="background:#34d399;">🧠</span>
+    通用 Audio Encoder &amp; 自监督预训练
+  </h2>
+  <p class="section-desc">
+    从 Wav2Vec 2.0 到 USAD，自监督语音预训练经历了从单模态到跨模态、从通用到领域专精的演进。Neural codec 和可学习前端也在重新定义音频表征的边界。
+  </p>
+
+  <!-- 1. Neural Audio Codec 进化 -->
+  <div class="card">
+    <h3>🔬 Neural Audio Codec 进化</h3>
+    <p>Neural codec 从音频压缩工具演变为语音 AI 生态的基础设施，支撑 TTS、音乐生成、语音增强等多个下游任务。</p>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div>
+        <h3 style="font-size:1em;">EnCodec <span class="badge badge-sota">Meta</span></h3>
+        <p>AudioCraft 生态核心 codec，支撑 MusicGen 和 AudioGen 生成。基于残差向量量化（RVQ），多种比特率可选。</p>
+      </div>
+      <div>
+        <h3 style="font-size:1em;">SoundStream <span class="badge badge-sota">Google</span></h3>
+        <p>首个在智能手机 CPU 上实时运行的 neural codec，已用于 NotebookLM 播客生成。开创了 neural codec + 生成模型的技术路线。</p>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div>
+        <h3 style="font-size:1em;">DAC <span class="badge badge-new">Descript</span></h3>
+        <p>44.1kHz 以 ~90x 压缩率编码为 8kbps tokens，改进的 RVQ + snake activation，显著提升音频重建质量。</p>
+      </div>
+      <div>
+        <h3 style="font-size:1em;">DACe <span class="badge badge-new">2025</span></h3>
+        <p>DAC 增强高保真版本，进一步提升 codec 的音频还原质量，适用于对音质要求更高的场景。</p>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <h3 style="font-size:1em;">SpectroStream <span class="badge badge-new">2025</span></h3>
+      <p>新一代 neural codec，支持 full-band 48kHz，在保持低延迟的同时实现高保真音频编解码。</p>
+    </div>
+
+    <div class="sources">
+      <a href="https://ai.meta.com/resources/models-and-libraries/audiocraft" target="_blank">ai.meta.com/resources/models-and-libraries/audiocraft</a>
+      <a href="https://arxiv.org/pdf/2508.05207" target="_blank">arxiv.org/pdf/2508.05207</a>
+    </div>
+  </div>
+
+  <!-- 2. 自监督语音模型进化路线 -->
+  <div class="card">
+    <h3>📈 自监督语音模型进化路线</h3>
+    <p>从 contrastive learning 到跨模态统一框架，自监督语音预训练的范式不断演进。</p>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="date">Wav2Vec 2.0</div>
+        <div class="event"><strong>基础模型</strong> — Masked prediction + contrastive learning + quantization，开创了自监督语音预训练的主流范式。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">HuBERT</div>
+        <div class="event"><strong>简化训练</strong> — 用 clustered hidden units 的 masked prediction 替代 contrastive loss，训练更稳定，性能更强。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">WavLM</div>
+        <div class="event"><strong>鲁棒性提升</strong> — 加入 denoising + speaker discrimination 多任务，在噪声环境下的表现显著提升。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">Data2Vec (Meta)</div>
+        <div class="event"><strong>跨模态统一</strong> — 跨模态（语音/视觉/文本）统一自监督框架，同一个架构处理不同模态。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">BEATs (Microsoft, ICML 2023)</div>
+        <div class="event"><strong>BERT 风格音频预训练</strong> — 将 NLP 中成功的 BERT 模式引入音频领域，迭代式 tokenizer + masked prediction。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">OpenBEATs (2025)</div>
+        <div class="event"><strong>完全开源扩展</strong> — 完全开源多领域 BEATs 扩展，覆盖 25 个 benchmark，支持语音、音乐、环境音。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">USAD (MIT CSAIL, 2025)</div>
+        <div class="event"><strong>统一 encoder</strong> — 多领域 SSL 蒸馏为统一 encoder，一个模型覆盖语音、音乐、环境声等多领域。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">UniWav (ICLR 2025)</div>
+        <div class="event"><strong>统一预训练框架</strong> — 统一多种语音任务（ASR、SV、SD 等）的预训练框架，减少任务特定微调需求。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 边缘端音频特征提取 -->
+  <div class="card">
+    <h3>⚡ 边缘端音频特征提取</h3>
+    <p>在 MCU 等资源受限设备上，特征提取的计算效率直接决定系统能否实时运行。</p>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div>
+        <h3 style="font-size:1em;">MFCC / Mel-filterbank</h3>
+        <p>仍是 edge 端主流选择，计算量最小，硬件加速友好，几乎所有 DSP 库都原生支持。</p>
+      </div>
+      <div>
+        <h3 style="font-size:1em;">SincNet</h3>
+        <p>参数化 band-pass filters，可学习，适合 MCU 部署。直接从波形学习 filterbank 参数。</p>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div>
+        <h3 style="font-size:1em;">LEAF (Google)</h3>
+        <p>全可学习前端，Gabor filters + Gaussian pooling，端到端优化特征提取。</p>
+      </div>
+      <div>
+        <h3 style="font-size:1em;">Faster LEAF</h3>
+        <p>仅 3% 计算量即达 LEAF 精度，大幅降低可学习前端的部署门槛。</p>
+      </div>
+    </div>
+
+    <div style="margin-top:16px; padding:14px 18px; background:var(--bg2); border-radius:10px; border-left:3px solid var(--orange);">
+      <strong style="color:var(--orange);">重要发现</strong>
+      <span style="color:var(--text2);">：可学习前端在多数场景下<strong style="color:var(--text);">不能一致性地超越</strong>固定 mel-filterbank baseline。在资源受限的 edge 端，mel-filterbank 仍是性价比最高的选择。</span>
+    </div>
+  </div>
+
+  <!-- 4. Speaker Diarization -->
+  <div class="card">
+    <h3>👥 Speaker Diarization</h3>
+    <p>说话人日志（"who spoke when"）在会议、播客、客服等场景中是核心上游组件。</p>
+
+    <div class="grid-3" style="margin-top:16px;">
+      <div style="padding:16px; background:var(--bg2); border-radius:10px; border:1px solid var(--border);">
+        <h3 style="font-size:1em;">Pyannote 3.1</h3>
+        <p>最主流开源 diarization 工具，DER 约 10%。基于 segmentation + clustering 流水线，社区生态完善。</p>
+      </div>
+      <div style="padding:16px; background:var(--bg2); border-radius:10px; border:1px solid var(--border);">
+        <h3 style="font-size:1em;">SpeakerLM</h3>
+        <p>使用 LM 进行端到端 diarization 的创新方法，将说话人识别和日志统一为序列建模任务。</p>
+      </div>
+      <div style="padding:16px; background:var(--bg2); border-radius:10px; border:1px solid var(--border);">
+        <h3 style="font-size:1em;">Meta SVoice (2020)</h3>
+        <p>单麦分离 <strong>5 个同时说话人</strong>，突破了传统方法的说话人数量上限，在鸡尾酒会场景下表现优异。</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="section" id="audiollm">
+  <h2 class="section-title">
+    <span class="icon" style="background:#fb923c">🧠</span>
+    Audio Language Model — 音频+LLM融合
+  </h2>
+  <p class="section-desc">Audio Language Model 将音频理解与生成能力直接嵌入大语言模型，实现原生 speech-to-speech 交互。2025年，全双工对话、原生音频推理、音频 tokenization 技术取得多项突破。</p>
+
+  <!-- 1. 模型对比表 -->
+  <div class="card">
+    <h3>📊 Audio Language Model 对比</h3>
+    <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>模型</th>
+          <th>组织</th>
+          <th>核心能力</th>
+          <th>关键特点</th>
+          <th>音频延迟</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Qwen2.5-Omni</strong></td>
+          <td>阿里巴巴</td>
+          <td>文本+图像+音频+视频全模态</td>
+          <td>7B参数端到端多模态感知</td>
+          <td class="dim">-</td>
+        </tr>
+        <tr>
+          <td><strong>SALMONN-omni</strong></td>
+          <td>ByteDance / 清华</td>
+          <td>全双工人机对话</td>
+          <td>首个独立speech LLM实现全双工 <span class="badge badge-new">NeurIPS 2025</span></td>
+          <td class="highlight">低</td>
+        </tr>
+        <tr>
+          <td><strong>AudioPaLM</strong></td>
+          <td>Google</td>
+          <td>语音识别+生成+翻译</td>
+          <td>融合PaLM-2+AudioLM，超越Whisper v2</td>
+          <td class="dim">-</td>
+        </tr>
+        <tr>
+          <td><strong>Gemini 2.5 Pro</strong></td>
+          <td>Google</td>
+          <td>多模态理解+推理</td>
+          <td>原生音频输入，speech reasoning超越GPT-4o</td>
+          <td>~3.87s</td>
+        </tr>
+        <tr>
+          <td><strong>GPT-4o Audio</strong></td>
+          <td>OpenAI</td>
+          <td>原生音频I/O</td>
+          <td>232ms平均音频响应，接近人类对话</td>
+          <td class="highlight">~320ms</td>
+        </tr>
+        <tr>
+          <td><strong>Pengi</strong></td>
+          <td>Microsoft</td>
+          <td>统一音频任务</td>
+          <td>所有音频任务统一为text-generation</td>
+          <td class="dim">-</td>
+        </tr>
+        <tr>
+          <td><strong>CLAP</strong></td>
+          <td>开源</td>
+          <td>音频-文本对齐</td>
+          <td>Contrastive Language-Audio Pretraining</td>
+          <td class="dim">-</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- 2. 关键技术突破 cards -->
+  <div class="grid-2">
+    <div class="card">
+      <h3>
+        🔬 SALMONN-omni <span class="badge badge-sota">NeurIPS 2025</span>
+      </h3>
+      <p>不将 audio codec 注入 token vocabulary，而是以独立 speech LLM 实现全双工对话。这是2025年音频语言模型的重要里程碑 —— 首个无需文本中间表示即可实现听+说并行处理的 speech LLM。</p>
+      <p>该方法打破了传统"音频→文本→音频"的级联限制，让模型在语音交互中具备打断、重叠说话等类人对话能力。</p>
+      <div class="sources">
+        <a href="https://github.com/bytedance/SALMONN" target="_blank">GitHub: bytedance/SALMONN</a>
+        <a href="https://neurips.cc/virtual/2025/poster/119430" target="_blank">NeurIPS 2025 Poster</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>
+        ⚡ GPT-4o Realtime API <span class="badge badge-api">API</span>
+      </h3>
+      <p>从传统级联架构（Audio → STT → LLM → TTS → Audio）向原生 speech-to-speech 架构转变。模型直接"用音频思考"，保留语调、情感、环境音等丰富的语音信息。</p>
+      <p>这一架构转变意味着音频不再只是文本的载体，而是模型的原生思维媒介，大幅提升了对话的自然度和响应速度。</p>
+      <div class="sources">
+        <a href="https://developers.openai.com/api/docs/guides/realtime" target="_blank">OpenAI Realtime API Docs</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔊 Audio Tokenization 技术</h3>
+    <p>音频 tokenization 是 Audio LLM 的核心基础设施。多种方案竞相发展：</p>
+    <div class="tags">
+      <span class="tag">Mimi (Kyutai)</span>
+      <span class="tag">DualCodec</span>
+      <span class="tag">ALMTokenizer</span>
+      <span class="tag">LLM-Codec</span>
+      <span class="tag">EnCodec (Meta)</span>
+      <span class="tag">SoundStream</span>
+    </div>
+    <p>Neural codec 可在 <strong>3kbps</strong> 下实现可接受音质，而传统 MP3 需要约 <strong>128kbps</strong> —— 压缩效率提升约 40 倍。这使得将音频作为 LLM token 输入成为可能，是语音大模型的基石技术。</p>
+    <div class="sources">
+      <a href="https://kyutai.org/codec-explainer" target="_blank">Kyutai Codec Explainer</a>
+    </div>
+  </div>
+
+  <!-- 3. 延迟对比条形图 -->
+  <div class="card">
+    <h3>⏱️ Voice-to-Voice 延迟对比</h3>
+    <p>各平台端到端语音对话延迟（越短越接近人类自然对话节奏）：</p>
+
+    <div class="compare-bar">
+      <span class="name">Moshi</span>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:10%;background:#34d399"></div>
+      </div>
+      <span class="val">200ms</span>
+    </div>
+
+    <div class="compare-bar">
+      <span class="name">PersonaPlex</span>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:10%;background:#34d399"></div>
+      </div>
+      <span class="val">200ms</span>
+    </div>
+
+    <div class="compare-bar">
+      <span class="name">GPT-4o Audio</span>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:16%;background:#6c8cff"></div>
+      </div>
+      <span class="val">320ms</span>
+    </div>
+
+    <div class="compare-bar">
+      <span class="name">OpenAI Realtime</span>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:30%;background:#6c8cff"></div>
+      </div>
+      <span class="val">600ms</span>
+    </div>
+
+    <div class="compare-bar">
+      <span class="name">Gemini Live</span>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:40%;background:#fb923c"></div>
+      </div>
+      <span class="val">800ms</span>
+    </div>
+
+    <div class="compare-bar">
+      <span class="name">级联 Pipeline</span>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:100%;background:#f87171"></div>
+      </div>
+      <span class="val">2000ms</span>
+    </div>
+
+    <p style="margin-top:14px;font-size:0.82em;color:var(--text3)">* 条形图以级联 Pipeline (2000ms) 为 100% 基准。Moshi/PersonaPlex 已接近人类对话延迟 (~200ms)。原生 speech-to-speech 架构相比传统级联架构可降低 6-10x 延迟。</p>
+  </div>
+</div>
+
+<!-- ============================== -->
+<!-- Section: TTS & 语音生成 SOTA    -->
+<!-- ============================== -->
+
+<div class="section" id="tts">
+  <h2 class="section-title">
+    <span class="icon" style="background:#f472b6">🎙️</span>
+    TTS & 语音生成 SOTA
+  </h2>
+  <p class="section-desc">2025年 TTS 领域迎来爆发：非自回归架构（DiT / Flow Matching）成为主流，极小模型实现高质量合成，开源生态（尤其中国团队贡献）全面开花。</p>
+
+  <!-- 1. TTS 模型对比表 -->
+  <div class="card">
+    <h3>📊 TTS 模型 SOTA 对比</h3>
+    <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>模型</th>
+          <th>参数量</th>
+          <th>架构</th>
+          <th>开源</th>
+          <th>核心特点</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>F5-TTS</strong></td>
+          <td>~335M</td>
+          <td>Flow Matching + DiT</td>
+          <td><span class="badge badge-open">Open</span> <span class="badge badge-sota">ACL 2025</span></td>
+          <td>零样本语音克隆，非自回归</td>
+        </tr>
+        <tr>
+          <td><strong>CosyVoice 3</strong></td>
+          <td>LLM-based</td>
+          <td>LLM</td>
+          <td><span class="badge badge-open">Open</span></td>
+          <td>零样本多语种，content/speaker/prosody 三项 SOTA</td>
+        </tr>
+        <tr>
+          <td><strong>Fish Speech S2 Pro</strong></td>
+          <td class="dim">-</td>
+          <td>DualAR Transformer</td>
+          <td><span class="badge badge-open">Open</span></td>
+          <td>80+ 语种，100万+ 小时训练，4GB VRAM 推理</td>
+        </tr>
+        <tr>
+          <td><strong>ChatTTS</strong></td>
+          <td>300M</td>
+          <td class="dim">-</td>
+          <td><span class="badge badge-open">Open</span></td>
+          <td>专为对话场景设计，10万小时中英文</td>
+        </tr>
+        <tr>
+          <td><strong>Kokoro</strong></td>
+          <td>82M</td>
+          <td class="dim">-</td>
+          <td><span class="badge badge-open">Open</span> Apache 2.0</td>
+          <td>轻量级新秀，96x 实时速度</td>
+        </tr>
+        <tr>
+          <td><strong>Spark-TTS</strong></td>
+          <td class="dim">-</td>
+          <td>Qwen 2.5 + BiCodec</td>
+          <td><span class="badge badge-open">Open</span></td>
+          <td>零样本克隆 + 粗细粒度说话人控制</td>
+        </tr>
+        <tr>
+          <td><strong>Sesame CSM-1B</strong></td>
+          <td>~1B</td>
+          <td>双自回归 Transformer</td>
+          <td><span class="badge badge-open">Open</span> Apache 2.0</td>
+          <td>RVQ tokens，跨越恐怖谷 (MOS 4.3/5)</td>
+        </tr>
+        <tr>
+          <td><strong>ElevenLabs v3</strong></td>
+          <td class="dim">-</td>
+          <td class="dim">-</td>
+          <td><span class="badge badge-closed">Closed</span></td>
+          <td>70+ 语种，情感控制，多说话人</td>
+        </tr>
+        <tr>
+          <td><strong>OpenAI TTS</strong></td>
+          <td class="dim">-</td>
+          <td>原生 S2S</td>
+          <td><span class="badge badge-closed">Closed</span></td>
+          <td>gpt-4o-audio 直接音频生成</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- 2. 关键突破 cards -->
+  <div class="grid-3">
+    <div class="card">
+      <h3>🔀 DiT/Flow-Matching 成为 TTS 主流</h3>
+      <p>F5-TTS、Spark-TTS、CosyVoice 3 均采用类似范式 —— 非自回归架构实现高质量 + 快速推理。这一趋势标志着 TTS 从自回归模型（如 VALL-E 系列）向扩散/流匹配模型的范式转移。</p>
+      <div class="tags">
+        <span class="tag">F5-TTS</span>
+        <span class="tag">Spark-TTS</span>
+        <span class="tag">CosyVoice 3</span>
+        <span class="tag">Flow Matching</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>💎 极小模型高质量</h3>
+      <p><strong>Kokoro</strong> 仅 82M 参数即达到媲美大模型的 TTS 质量，推理速度达 <strong>96x 实时</strong>。这证明参数量不再是 TTS 质量的瓶颈 —— 架构设计和训练数据质量同样关键。</p>
+      <p>对边缘部署和实时场景而言，这意味着高质量语音合成可以在消费级硬件上流畅运行。</p>
+    </div>
+
+    <div class="card">
+      <h3>🌍 开源 TTS 生态爆发</h3>
+      <p>中国团队贡献尤为突出：CosyVoice（阿里）、Fish Speech、ChatTTS、Spark-TTS 等多个模型均支持零样本语音克隆，且全部开源。</p>
+      <p>开源模型在质量和功能上已逐步逼近甚至部分超越商业方案（如 ElevenLabs），降低了语音 AI 的开发门槛。</p>
+    </div>
+  </div>
+
+  <!-- 3. Voice Cloning & Conversion card -->
+  <div class="card">
+    <h3>🎭 Voice Cloning & Conversion</h3>
+    <p>语音克隆与转换技术在2025年持续演进，开源方案成熟度大幅提升：</p>
+    <div class="grid-2" style="margin-top:12px">
+      <div>
+        <h4 style="font-size:0.95em;margin-bottom:6px;color:var(--accent)">🔧 开源方案</h4>
+        <ul>
+          <li><strong>RVC</strong> — 2025年仍是最流行的开源语音转换方案，社区活跃，模型生态丰富</li>
+          <li><strong>So-VITS-SVC</strong> — 在音乐/歌唱场景表现更优，适合歌声转换与虚拟歌手制作</li>
+          <li><strong>Chatterbox</strong> (Resemble AI) — voice cloning 质量已可匹配 ElevenLabs，开源可用</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-size:0.95em;margin-bottom:6px;color:var(--accent)">📈 技术趋势</h4>
+        <ul>
+          <li>零样本克隆成为标配 —— 仅需 3-10 秒参考音频</li>
+          <li>说话人控制粒度从粗到细：语种 → 音色 → 情感 → 韵律</li>
+          <li>跨语种克隆能力增强（如 Fish Speech 80+ 语种）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="section" id="tts">
+  <h2 class="section-title">
+    <span class="icon" style="background:#f472b6">🎙️</span>
+    TTS & 语音生成 SOTA
+  </h2>
+  <p class="section-desc">2025年 TTS 领域迎来爆发：非自回归架构（DiT / Flow Matching）成为主流，极小模型实现高质量合成，开源生态（尤其中国团队贡献）全面开花。</p>
+
+  <!-- 1. TTS 模型对比表 -->
+  <div class="card">
+    <h3>📊 TTS 模型 SOTA 对比</h3>
+    <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>模型</th>
+          <th>参数量</th>
+          <th>架构</th>
+          <th>开源</th>
+          <th>核心特点</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>F5-TTS</strong></td>
+          <td>~335M</td>
+          <td>Flow Matching + DiT</td>
+          <td><span class="badge badge-open">Open</span> <span class="badge badge-sota">ACL 2025</span></td>
+          <td>零样本语音克隆，非自回归</td>
+        </tr>
+        <tr>
+          <td><strong>CosyVoice 3</strong></td>
+          <td>LLM-based</td>
+          <td>LLM</td>
+          <td><span class="badge badge-open">Open</span></td>
+          <td>零样本多语种，content/speaker/prosody 三项 SOTA</td>
+        </tr>
+        <tr>
+          <td><strong>Fish Speech S2 Pro</strong></td>
+          <td class="dim">-</td>
+          <td>DualAR Transformer</td>
+          <td><span class="badge badge-open">Open</span></td>
+          <td>80+ 语种，100万+ 小时训练，4GB VRAM 推理</td>
+        </tr>
+        <tr>
+          <td><strong>ChatTTS</strong></td>
+          <td>300M</td>
+          <td class="dim">-</td>
+          <td><span class="badge badge-open">Open</span></td>
+          <td>专为对话场景设计，10万小时中英文</td>
+        </tr>
+        <tr>
+          <td><strong>Kokoro</strong></td>
+          <td>82M</td>
+          <td class="dim">-</td>
+          <td><span class="badge badge-open">Open</span> Apache 2.0</td>
+          <td>轻量级新秀，96x 实时速度</td>
+        </tr>
+        <tr>
+          <td><strong>Spark-TTS</strong></td>
+          <td class="dim">-</td>
+          <td>Qwen 2.5 + BiCodec</td>
+          <td><span class="badge badge-open">Open</span></td>
+          <td>零样本克隆 + 粗细粒度说话人控制</td>
+        </tr>
+        <tr>
+          <td><strong>Sesame CSM-1B</strong></td>
+          <td>~1B</td>
+          <td>双自回归 Transformer</td>
+          <td><span class="badge badge-open">Open</span> Apache 2.0</td>
+          <td>RVQ tokens，跨越恐怖谷 (MOS 4.3/5)</td>
+        </tr>
+        <tr>
+          <td><strong>ElevenLabs v3</strong></td>
+          <td class="dim">-</td>
+          <td class="dim">-</td>
+          <td><span class="badge badge-closed">Closed</span></td>
+          <td>70+ 语种，情感控制，多说话人</td>
+        </tr>
+        <tr>
+          <td><strong>OpenAI TTS</strong></td>
+          <td class="dim">-</td>
+          <td>原生 S2S</td>
+          <td><span class="badge badge-closed">Closed</span></td>
+          <td>gpt-4o-audio 直接音频生成</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- 2. 关键突破 cards -->
+  <div class="grid-3">
+    <div class="card">
+      <h3>🔀 DiT/Flow-Matching 成为 TTS 主流</h3>
+      <p>F5-TTS、Spark-TTS、CosyVoice 3 均采用类似范式 —— 非自回归架构实现高质量 + 快速推理。这一趋势标志着 TTS 从自回归模型（如 VALL-E 系列）向扩散/流匹配模型的范式转移。</p>
+      <div class="tags">
+        <span class="tag">F5-TTS</span>
+        <span class="tag">Spark-TTS</span>
+        <span class="tag">CosyVoice 3</span>
+        <span class="tag">Flow Matching</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>💎 极小模型高质量</h3>
+      <p><strong>Kokoro</strong> 仅 82M 参数即达到媲美大模型的 TTS 质量，推理速度达 <strong>96x 实时</strong>。这证明参数量不再是 TTS 质量的瓶颈 —— 架构设计和训练数据质量同样关键。</p>
+      <p>对边缘部署和实时场景而言，这意味着高质量语音合成可以在消费级硬件上流畅运行。</p>
+    </div>
+
+    <div class="card">
+      <h3>🌍 开源 TTS 生态爆发</h3>
+      <p>中国团队贡献尤为突出：CosyVoice（阿里）、Fish Speech、ChatTTS、Spark-TTS 等多个模型均支持零样本语音克隆，且全部开源。</p>
+      <p>开源模型在质量和功能上已逐步逼近甚至部分超越商业方案（如 ElevenLabs），降低了语音 AI 的开发门槛。</p>
+    </div>
+  </div>
+
+  <!-- 3. Voice Cloning & Conversion card -->
+  <div class="card">
+    <h3>🎭 Voice Cloning & Conversion</h3>
+    <p>语音克隆与转换技术在2025年持续演进，开源方案成熟度大幅提升：</p>
+    <div class="grid-2" style="margin-top:12px">
+      <div>
+        <h4 style="font-size:0.95em;margin-bottom:6px;color:var(--accent)">🔧 开源方案</h4>
+        <ul>
+          <li><strong>RVC</strong> — 2025年仍是最流行的开源语音转换方案，社区活跃，模型生态丰富</li>
+          <li><strong>So-VITS-SVC</strong> — 在音乐/歌唱场景表现更优，适合歌声转换与虚拟歌手制作</li>
+          <li><strong>Chatterbox</strong> (Resemble AI) — voice cloning 质量已可匹配 ElevenLabs，开源可用</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-size:0.95em;margin-bottom:6px;color:var(--accent)">📈 技术趋势</h4>
+        <ul>
+          <li>零样本克隆成为标配 —— 仅需 3-10 秒参考音频</li>
+          <li>说话人控制粒度从粗到细：语种 → 音色 → 情感 → 韵律</li>
+          <li>跨语种克隆能力增强（如 Fish Speech 80+ 语种）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="section" id="enhancement">
+
+  <div class="section-title">
+    <span class="icon" style="background:rgba(251,191,36,0.15);color:#fbbf24;">&#127876;</span>
+    语音增强与分离
+  </div>
+  <p class="section-desc">
+    实时降噪、说话人分离、音频超分辨率与语音理解 — 从传统DSP到深度学习的全链路技术栈。2025年核心趋势是全频带实时处理与通用工具包生态成熟。
+  </p>
+
+  <!-- Card 1: 实时噪声抑制 -->
+  <div class="card">
+    <h3>
+      实时噪声抑制 (Real-time Noise Suppression)
+      <span class="badge badge-sota">SOTA</span>
+    </h3>
+    <p>从WebRTC内置降噪到深度学习实时方案，语音增强在消费级硬件上已实现毫秒级延迟的显著降噪效果。</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>模型/方案</th>
+          <th>架构特点</th>
+          <th>延迟</th>
+          <th>部署场景</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>DeepFilterNet</strong></td>
+          <td>两阶段架构：feature extraction + deep filtering，低复杂度深度学习降噪，专为CPU/消费级硬件实时运行设计。DeepFilterNet3进一步改进频带建模与自适应滤波</td>
+          <td class="highlight">~5ms</td>
+          <td>CPU实时，开源可商用</td>
+        </tr>
+        <tr>
+          <td><strong>RNNoise</strong></td>
+          <td>Jean-Marc Valin（Opus codec作者）开发，结合传统DSP（bark-scale频带分析）与RNN，超低延迟设计。广泛集成于WebRTC、Zoom、OBS等</td>
+          <td class="highlight">~1ms</td>
+          <td>WebRTC / 视频会议 / 直播</td>
+        </tr>
+        <tr>
+          <td><strong>Interspeech 2025 新方案</strong></td>
+          <td>基于GAN + stochastic regeneration的全频带（48kHz）实时语音增强，在保持语音自然度的同时实现更强的噪声抑制</td>
+          <td class="dim">实时可部署</td>
+          <td>全频带音频处理</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tags">
+      <span class="tag">DeepFilterNet</span>
+      <span class="tag">RNNoise</span>
+      <span class="tag">GAN-based SE</span>
+      <span class="tag">全频带</span>
+      <span class="tag">超低延迟</span>
+    </div>
+  </div>
+
+  <!-- Card 2: Speech Separation -->
+  <div class="card">
+    <h3>
+      Speech Separation (语音分离)
+      <span class="badge badge-new">2025</span>
+    </h3>
+    <p>从"鸡尾酒会问题"到实用化方案，2025年单麦多说话人分离取得重大突破，通用工具包降低了技术门槛。</p>
+    <ul>
+      <li><strong>TF-GridNet</strong> — 该领域核心架构，整合时频域全带（fullband）与子带（subband）建模，成为多项SOTA方法的基础backbone</li>
+      <li><strong>TS-TFGridNet</strong>（DCASE 2025）— 扩展TF-GridNet到label-queried target sound extraction，支持基于文本描述的指定声源提取</li>
+      <li><strong>Meta SVoice 单麦分离模型 (2020, 2025有SAM Audio后续)</strong> — 单麦克风分离5个同时说话人，超越先前SOTA，标志着非侵入式语音分离进入新阶段</li>
+      <li><strong>ClearerVoice-Studio</strong>（阿里达摩院）— 开源AI语音处理工具包，集成SOTA预训练模型，覆盖语音分离、增强、去混响等任务，降低工业应用门槛</li>
+    </ul>
+
+    <div class="tags">
+      <span class="tag">TF-GridNet</span>
+      <span class="tag">TS-TFGridNet</span>
+      <span class="tag">DCASE 2025</span>
+      <span class="tag">ClearerVoice-Studio</span>
+      <span class="tag">单麦多说话人</span>
+    </div>
+  </div>
+
+  <!-- Card 3: Audio Super-Resolution -->
+  <div class="card">
+    <h3>
+      Audio Super-Resolution (音频超分辨率)
+      <span class="badge badge-new">2025</span>
+    </h3>
+    <p>从低采样率重建高保真音频，2025年生成模型将音频超分辨率推向任意采样率映射的新范式。</p>
+    <ul>
+      <li><strong>AudioLBM</strong>（NeurIPS 2025）— Latent Bridge Models，在潜空间建立输入-输出的bridge，支持任意输入-输出采样率组合，无需固定上采样倍率</li>
+      <li><strong>SFSRNet</strong> — 首次将super-resolution思想引入audio source separation任务，通过高频重建提升分离质量</li>
+      <li><strong>Diffusion-based模型</strong> — 基于扩散模型的方案同时用于speech enhancement与dereverberation，通过迭代去噪实现高质量语音恢复</li>
+    </ul>
+
+    <div class="tags">
+      <span class="tag">AudioLBM</span>
+      <span class="tag">Latent Bridge</span>
+      <span class="tag">SFSRNet</span>
+      <span class="tag">Diffusion SE</span>
+      <span class="tag">任意采样率</span>
+    </div>
+  </div>
+
+  <!-- Card 4: 语音理解技术 -->
+  <div class="card">
+    <h3>
+      语音理解技术 (Speech Understanding)
+      <span class="badge badge-sota">SOTA</span>
+    </h3>
+    <p>说话人识别、情感分析、场景分类与声音事件检测构成语音理解的完整技术栈，2025年在端到端融合与多任务学习上持续演进。</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>任务</th>
+          <th>SOTA方案</th>
+          <th>关键指标</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Speaker Diarization</strong></td>
+          <td>Pyannote 3.1仍是SOTA；SpeakerLM用语言模型做端到端diarization，探索"谁在什么时候说了什么"的统一建模</td>
+          <td>DER ~10%</td>
+        </tr>
+        <tr>
+          <td><strong>情感识别 (SER)</strong></td>
+          <td>Wav2Vec2 / HuBERT在IEMOCAP上达78-83% WA；INTERSPEECH 2025挑战赛建立8类情感SOTA基准</td>
+          <td>WA 78-83%</td>
+        </tr>
+        <tr>
+          <td><strong>音频场景分类</strong></td>
+          <td>DCASE 2025 Challenge是顶级benchmark，推动真实场景下的鲁棒分类研究</td>
+          <td class="dim">年度benchmark</td>
+        </tr>
+        <tr>
+          <td><strong>声音事件检测 (SED)</strong></td>
+          <td>Sound Event Localization and Detection发表于Nature 2025，将空间定位与事件识别统一建模</td>
+          <td class="highlight">Nature 2025</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tags">
+      <span class="tag">Pyannote 3.1</span>
+      <span class="tag">SpeakerLM</span>
+      <span class="tag">Wav2Vec2</span>
+      <span class="tag">HuBERT</span>
+      <span class="tag">DCASE 2025</span>
+      <span class="tag">Nature 2025</span>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ============================================ -->
+<!-- Section: 边缘/端侧部署 (edge)                 -->
+<!-- ============================================ -->
+
+<div class="section" id="edge">
+
+  <div class="section-title">
+    <span class="icon" style="background:rgba(34,211,238,0.15);color:#22d3ee;">&#9889;</span>
+    边缘/端侧部署
+  </div>
+  <p class="section-desc">
+    从云端到端侧的迁移 — 量化、编译优化与专用框架让语音AI在手机、穿戴设备甚至MCU上实时运行。2025年端侧部署框架生态日趋成熟。
+  </p>
+
+  <!-- Card 1: 端侧框架对比 (grid-3) -->
+  <div class="card">
+    <h3>端侧语音框架对比</h3>
+    <p>三大端侧部署方案覆盖不同生态：开源通用框架、高性能C++推理、与平台深度集成方案。</p>
+
+    <div class="grid-3">
+
+      <!-- Sherpa-ONNX -->
+      <div class="card" style="margin-bottom:0;">
+        <h3>
+          <span style="color:var(--green);">&#9881;</span>
+          Sherpa-ONNX
+          <span class="badge badge-open">开源</span>
+        </h3>
+        <p>最活跃的开源端侧语音框架（k2-fsa团队维护），2025年持续高频迭代。</p>
+        <ul>
+          <li>2025新增Swift绑定、Go绑定</li>
+          <li>多语言CTC模型支持</li>
+          <li>已在AMD Ryzen AI验证生产部署</li>
+          <li>支持iOS/Android及可穿戴设备</li>
+        </ul>
+        <div class="tags">
+          <span class="tag">ONNX Runtime</span>
+          <span class="tag">跨平台</span>
+          <span class="tag">多语言</span>
+        </div>
+        <p style="font-size:0.8em;color:var(--text3);">Sources: github.com/k2-fsa/sherpa-onnx</p>
+      </div>
+
+      <!-- whisper.cpp -->
+      <div class="card" style="margin-bottom:0;">
+        <h3>
+          <span style="color:var(--accent);">&#128196;</span>
+          whisper.cpp
+          <span class="badge badge-open">开源</span>
+        </h3>
+        <p>纯C/C++移植Whisper，零外部依赖，极致便携性。</p>
+        <ul>
+          <li>支持AVX / ARM NEON / Metal / CUDA / Vulkan</li>
+          <li>GGML量化格式：Q4_0, Q5_1, Q8_0</li>
+          <li>Tiny量化模型文件仅~39MB，运行时约273MB RAM</li>
+          <li>单文件可集成，嵌入式友好</li>
+        </ul>
+        <div class="tags">
+          <span class="tag">零依赖</span>
+          <span class="tag">GGML</span>
+          <span class="tag">多后端</span>
+        </div>
+        <p style="font-size:0.8em;color:var(--text3);">Sources: github.com/ggerganov/whisper.cpp</p>
+      </div>
+
+      <!-- Apple端侧ML -->
+      <div class="card" style="margin-bottom:0;">
+        <h3>
+          <span style="color:var(--text);">&#63743;</span>
+          Apple 端侧ML
+          <span class="badge badge-api">平台</span>
+        </h3>
+        <p>WWDC 2025发布Foundation Models框架，深度整合端侧AI能力。</p>
+        <ul>
+          <li>Foundation Models框架：多模态基础模型（文本/音频/视觉）</li>
+          <li>Live Translation via AirPods — 实时翻译通过AirPods交付</li>
+          <li>Apple Silicon ANE加速</li>
+          <li>隐私优先的on-device处理</li>
+        </ul>
+        <div class="tags">
+          <span class="tag">WWDC 2025</span>
+          <span class="tag">多模态</span>
+          <span class="tag">AirPods</span>
+        </div>
+        <p style="font-size:0.8em;color:var(--text3);">Sources: developer.apple.com/videos/play/wwdc2025/286</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Card 2: 量化部署技术 -->
+  <div class="card">
+    <h3>
+      量化部署技术 (Quantization for Deployment)
+      <span class="badge badge-new">2025</span>
+    </h3>
+    <p>量化是端侧部署的核心使能技术，将FP32模型压缩至INT8/INT4，在精度损失可控的前提下大幅降低内存占用和推理延迟。</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>量化方案</th>
+          <th>原理</th>
+          <th>适用框架</th>
+          <th>典型压缩比</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>PTQ (Post-Training Quantization)</strong></td>
+          <td>FP32 &rarr; INT8/INT4，无需重新训练，通过校准数据集确定量化参数</td>
+          <td>通用，兼容各框架</td>
+          <td class="highlight">4-8x</td>
+        </tr>
+        <tr>
+          <td><strong>GGML量化</strong></td>
+          <td>Q4_0 / Q5_1 / Q8_0等量化级别，专为whisper.cpp优化的存储与推理格式</td>
+          <td>whisper.cpp / llama.cpp</td>
+          <td class="highlight">4-8x</td>
+        </tr>
+        <tr>
+          <td><strong>ONNX动态/静态量化</strong></td>
+          <td>动态量化运行时确定scale，静态量化离线校准；用于Sherpa-ONNX等框架的生产部署</td>
+          <td>Sherpa-ONNX / ONNX Runtime</td>
+          <td>2-4x</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top:20px;">硬件加速生态</h3>
+    <div class="grid-2">
+      <div>
+        <table>
+          <thead>
+            <tr><th>硬件平台</th><th>AI加速单元</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Qualcomm Snapdragon</td><td>Hexagon DSP / HTA</td></tr>
+            <tr><td>Apple Silicon</td><td>Apple Neural Engine (ANE)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <table>
+          <thead>
+            <tr><th>硬件平台</th><th>AI加速单元</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>AMD Ryzen AI</td><td>XDNA NPU</td></tr>
+            <tr><td>Intel Core Ultra</td><td>OpenVINO + NPU</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 3: TinyML音频 -->
+  <div class="card">
+    <h3>
+      TinyML 音频 (Tiny Audio ML)
+      <span class="badge badge-new">2025</span>
+    </h3>
+    <p>在极低资源微控制器上实现音频智能，Cortex-M系列是主力部署平台，2025年研究焦点向端侧学习与系统级优化演进。</p>
+
+    <div class="grid-2">
+      <div>
+        <ul>
+          <li><strong>Keyword Spotting (KWS)</strong> — 可在30KB RAM内构建有效模型，是TinyML最成熟的音频应用</li>
+          <li><strong>Cortex-M4/M7</strong> — 主流部署目标，具备DSP指令与FPU，支持MFCC特征提取与轻量推理</li>
+        </ul>
+      </div>
+      <div>
+        <ul>
+          <li><strong>On-device Learning</strong> — 新兴方向：在设备端进行个性化适配（如用户自定义唤醒词），无需云端回传</li>
+          <li><strong>系统级优化</strong> — 2025研究热点：端到端优化涵盖音频前端 + 特征提取 + 模型推理的完整pipeline</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tags">
+      <span class="tag">Keyword Spotting</span>
+      <span class="tag">Cortex-M4</span>
+      <span class="tag">Cortex-M7</span>
+      <span class="tag">30KB RAM</span>
+      <span class="tag">On-device Learning</span>
+    </div>
+  </div>
+
+  <!-- Card 4: 延迟优化策略 -->
+  <div class="card">
+    <h3>
+      延迟优化策略 (Latency Optimization)
+    </h3>
+    <p>端侧语音系统的用户体验直接取决于延迟，以下是各关键环节的2025年目标延迟与实际表现。</p>
+
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="value">&lt;800ms</div>
+        <div class="label">级联Pipeline目标延迟<br>(ASR + NLU + TTS)</div>
+      </div>
+      <div class="kpi">
+        <div class="value">~200ms</div>
+        <div class="label">全双工S2S模型延迟<br>(Speech-to-Speech)</div>
+      </div>
+      <div class="kpi">
+        <div class="value">&lt;1ms</div>
+        <div class="label">Silero VAD<br>(每30ms chunk处理时间)</div>
+      </div>
+      <div class="kpi">
+        <div class="value">40-150ms</div>
+        <div class="label">实时TTS<br>(Time-to-First-Audio)</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>优化维度</th>
+          <th>策略</th>
+          <th>效果</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>模型压缩</strong></td>
+          <td>量化 (INT8/INT4)、知识蒸馏、剪枝</td>
+          <td>内存降4-8x，推理提速2-4x</td>
+        </tr>
+        <tr>
+          <td><strong>流式架构</strong></td>
+          <td>chunked processing、因果卷积、流式注意力</td>
+          <td>延迟从句子级降至chunk级</td>
+        </tr>
+        <tr>
+          <td><strong>Speculative Decoding</strong></td>
+          <td>小模型草拟 + 大模型验证，用于ASR/TTS</td>
+          <td class="highlight">吞吐提升2-3x</td>
+        </tr>
+        <tr>
+          <td><strong>硬件加速</strong></td>
+          <td>NPU/DSP/ANE专用算子，算子融合</td>
+          <td>特定层加速5-10x</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tags">
+      <span class="tag">量化</span>
+      <span class="tag">流式处理</span>
+      <span class="tag">Speculative Decoding</span>
+      <span class="tag">NPU加速</span>
+      <span class="tag">TTFA优化</span>
+    </div>
+  </div>
+
+</div>
+<div class="section" id="edge">
+
+  <div class="section-title">
+    <span class="icon" style="background:rgba(34,211,238,0.15);color:#22d3ee;">&#9889;</span>
+    边缘/端侧部署
+  </div>
+  <p class="section-desc">
+    从云端到端侧的迁移 — 量化、编译优化与专用框架让语音AI在手机、穿戴设备甚至MCU上实时运行。2025年端侧部署框架生态日趋成熟。
+  </p>
+
+  <!-- Card 1: 端侧框架对比 (grid-3) -->
+  <div class="card">
+    <h3>端侧语音框架对比</h3>
+    <p>三大端侧部署方案覆盖不同生态：开源通用框架、高性能C++推理、与平台深度集成方案。</p>
+
+    <div class="grid-3">
+
+      <!-- Sherpa-ONNX -->
+      <div class="card" style="margin-bottom:0;">
+        <h3>
+          <span style="color:var(--green);">&#9881;</span>
+          Sherpa-ONNX
+          <span class="badge badge-open">开源</span>
+        </h3>
+        <p>最活跃的开源端侧语音框架（k2-fsa团队维护），2025年持续高频迭代。</p>
+        <ul>
+          <li>2025新增Swift绑定、Go绑定</li>
+          <li>多语言CTC模型支持</li>
+          <li>已在AMD Ryzen AI验证生产部署</li>
+          <li>支持iOS/Android及可穿戴设备</li>
+        </ul>
+        <div class="tags">
+          <span class="tag">ONNX Runtime</span>
+          <span class="tag">跨平台</span>
+          <span class="tag">多语言</span>
+        </div>
+        <p style="font-size:0.8em;color:var(--text3);">Sources: github.com/k2-fsa/sherpa-onnx</p>
+      </div>
+
+      <!-- whisper.cpp -->
+      <div class="card" style="margin-bottom:0;">
+        <h3>
+          <span style="color:var(--accent);">&#128196;</span>
+          whisper.cpp
+          <span class="badge badge-open">开源</span>
+        </h3>
+        <p>纯C/C++移植Whisper，零外部依赖，极致便携性。</p>
+        <ul>
+          <li>支持AVX / ARM NEON / Metal / CUDA / Vulkan</li>
+          <li>GGML量化格式：Q4_0, Q5_1, Q8_0</li>
+          <li>Tiny量化模型文件仅~39MB，运行时约273MB RAM</li>
+          <li>单文件可集成，嵌入式友好</li>
+        </ul>
+        <div class="tags">
+          <span class="tag">零依赖</span>
+          <span class="tag">GGML</span>
+          <span class="tag">多后端</span>
+        </div>
+        <p style="font-size:0.8em;color:var(--text3);">Sources: github.com/ggerganov/whisper.cpp</p>
+      </div>
+
+      <!-- Apple端侧ML -->
+      <div class="card" style="margin-bottom:0;">
+        <h3>
+          <span style="color:var(--text);">&#63743;</span>
+          Apple 端侧ML
+          <span class="badge badge-api">平台</span>
+        </h3>
+        <p>WWDC 2025发布Foundation Models框架，深度整合端侧AI能力。</p>
+        <ul>
+          <li>Foundation Models框架：多模态基础模型（文本/音频/视觉）</li>
+          <li>Live Translation via AirPods — 实时翻译通过AirPods交付</li>
+          <li>Apple Silicon ANE加速</li>
+          <li>隐私优先的on-device处理</li>
+        </ul>
+        <div class="tags">
+          <span class="tag">WWDC 2025</span>
+          <span class="tag">多模态</span>
+          <span class="tag">AirPods</span>
+        </div>
+        <p style="font-size:0.8em;color:var(--text3);">Sources: developer.apple.com/videos/play/wwdc2025/286</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Card 2: 量化部署技术 -->
+  <div class="card">
+    <h3>
+      量化部署技术 (Quantization for Deployment)
+      <span class="badge badge-new">2025</span>
+    </h3>
+    <p>量化是端侧部署的核心使能技术，将FP32模型压缩至INT8/INT4，在精度损失可控的前提下大幅降低内存占用和推理延迟。</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>量化方案</th>
+          <th>原理</th>
+          <th>适用框架</th>
+          <th>典型压缩比</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>PTQ (Post-Training Quantization)</strong></td>
+          <td>FP32 &rarr; INT8/INT4，无需重新训练，通过校准数据集确定量化参数</td>
+          <td>通用，兼容各框架</td>
+          <td class="highlight">4-8x</td>
+        </tr>
+        <tr>
+          <td><strong>GGML量化</strong></td>
+          <td>Q4_0 / Q5_1 / Q8_0等量化级别，专为whisper.cpp优化的存储与推理格式</td>
+          <td>whisper.cpp / llama.cpp</td>
+          <td class="highlight">4-8x</td>
+        </tr>
+        <tr>
+          <td><strong>ONNX动态/静态量化</strong></td>
+          <td>动态量化运行时确定scale，静态量化离线校准；用于Sherpa-ONNX等框架的生产部署</td>
+          <td>Sherpa-ONNX / ONNX Runtime</td>
+          <td>2-4x</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top:20px;">硬件加速生态</h3>
+    <div class="grid-2">
+      <div>
+        <table>
+          <thead>
+            <tr><th>硬件平台</th><th>AI加速单元</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Qualcomm Snapdragon</td><td>Hexagon DSP / HTA</td></tr>
+            <tr><td>Apple Silicon</td><td>Apple Neural Engine (ANE)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <table>
+          <thead>
+            <tr><th>硬件平台</th><th>AI加速单元</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>AMD Ryzen AI</td><td>XDNA NPU</td></tr>
+            <tr><td>Intel Core Ultra</td><td>OpenVINO + NPU</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 3: TinyML音频 -->
+  <div class="card">
+    <h3>
+      TinyML 音频 (Tiny Audio ML)
+      <span class="badge badge-new">2025</span>
+    </h3>
+    <p>在极低资源微控制器上实现音频智能，Cortex-M系列是主力部署平台，2025年研究焦点向端侧学习与系统级优化演进。</p>
+
+    <div class="grid-2">
+      <div>
+        <ul>
+          <li><strong>Keyword Spotting (KWS)</strong> — 可在30KB RAM内构建有效模型，是TinyML最成熟的音频应用</li>
+          <li><strong>Cortex-M4/M7</strong> — 主流部署目标，具备DSP指令与FPU，支持MFCC特征提取与轻量推理</li>
+        </ul>
+      </div>
+      <div>
+        <ul>
+          <li><strong>On-device Learning</strong> — 新兴方向：在设备端进行个性化适配（如用户自定义唤醒词），无需云端回传</li>
+          <li><strong>系统级优化</strong> — 2025研究热点：端到端优化涵盖音频前端 + 特征提取 + 模型推理的完整pipeline</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tags">
+      <span class="tag">Keyword Spotting</span>
+      <span class="tag">Cortex-M4</span>
+      <span class="tag">Cortex-M7</span>
+      <span class="tag">30KB RAM</span>
+      <span class="tag">On-device Learning</span>
+    </div>
+  </div>
+
+  <!-- Card 4: 延迟优化策略 -->
+  <div class="card">
+    <h3>
+      延迟优化策略 (Latency Optimization)
+    </h3>
+    <p>端侧语音系统的用户体验直接取决于延迟，以下是各关键环节的2025年目标延迟与实际表现。</p>
+
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="value">&lt;800ms</div>
+        <div class="label">级联Pipeline目标延迟<br>(ASR + NLU + TTS)</div>
+      </div>
+      <div class="kpi">
+        <div class="value">~200ms</div>
+        <div class="label">全双工S2S模型延迟<br>(Speech-to-Speech)</div>
+      </div>
+      <div class="kpi">
+        <div class="value">&lt;1ms</div>
+        <div class="label">Silero VAD<br>(每30ms chunk处理时间)</div>
+      </div>
+      <div class="kpi">
+        <div class="value">40-150ms</div>
+        <div class="label">实时TTS<br>(Time-to-First-Audio)</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>优化维度</th>
+          <th>策略</th>
+          <th>效果</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>模型压缩</strong></td>
+          <td>量化 (INT8/INT4)、知识蒸馏、剪枝</td>
+          <td>内存降4-8x，推理提速2-4x</td>
+        </tr>
+        <tr>
+          <td><strong>流式架构</strong></td>
+          <td>chunked processing、因果卷积、流式注意力</td>
+          <td>延迟从句子级降至chunk级</td>
+        </tr>
+        <tr>
+          <td><strong>Speculative Decoding</strong></td>
+          <td>小模型草拟 + 大模型验证，用于ASR/TTS</td>
+          <td class="highlight">吞吐提升2-3x</td>
+        </tr>
+        <tr>
+          <td><strong>硬件加速</strong></td>
+          <td>NPU/DSP/ANE专用算子，算子融合</td>
+          <td>特定层加速5-10x</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tags">
+      <span class="tag">量化</span>
+      <span class="tag">流式处理</span>
+      <span class="tag">Speculative Decoding</span>
+      <span class="tag">NPU加速</span>
+      <span class="tag">TTFA优化</span>
+    </div>
+  </div>
+
+</div>
+<div class="section" id="codec">
+
+  <h2 class="section-title">
+    <span class="icon" style="background:#f59e0b;">&#x1F3B5;</span>
+    Neural Audio Codec 深度对比
+  </h2>
+  <p class="section-desc">
+    Neural Audio Codec 是语音/音频大模型的"分词器"——将连续波形压缩为离散 token。从 SoundStream 到 FocalCodec，比特率压缩了约 20 倍，语义增强从无到架构级内建。本节对比 10 个主流/前沿 Codec 的量化方法、比特率、语义能力与适用场景。
+  </p>
+
+  <!-- 1. Comprehensive Comparison Table -->
+  <div class="card">
+    <h3>综合对比表 <span class="badge badge-sota">核心</span></h3>
+    <p>横跨 2021&ndash;2025 年的 10 个代表性 Neural Audio Codec，覆盖量化范式、比特率范围、语义增强方式与开源状态。</p>
+
+    <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>Codec</th>
+          <th>机构</th>
+          <th>量化方法</th>
+          <th>Codebook 数</th>
+          <th>比特率</th>
+          <th>帧率</th>
+          <th>采样率</th>
+          <th>语义增强</th>
+          <th>开源</th>
+          <th>主要用途</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>SoundStream</strong></td>
+          <td>Google 2021</td>
+          <td>RVQ</td>
+          <td>可变</td>
+          <td>3&ndash;18 kbps</td>
+          <td>~300 Hz</td>
+          <td>24 kHz</td>
+          <td>无</td>
+          <td>&#x274C;</td>
+          <td>通用压缩</td>
+        </tr>
+        <tr>
+          <td><strong>EnCodec</strong></td>
+          <td>Meta 2022</td>
+          <td>RVQ</td>
+          <td>8 / 32</td>
+          <td>1.5&ndash;24 kbps</td>
+          <td>75 Hz</td>
+          <td>24 / 48 kHz</td>
+          <td>无</td>
+          <td>&#x2705; MIT</td>
+          <td>通用基准</td>
+        </tr>
+        <tr>
+          <td><strong>DAC</strong></td>
+          <td>Descript 2023</td>
+          <td>改进 RVQ</td>
+          <td>9</td>
+          <td>8 kbps</td>
+          <td>~86 Hz</td>
+          <td>44.1 kHz</td>
+          <td>无</td>
+          <td>&#x2705; MIT</td>
+          <td>通用音频</td>
+        </tr>
+        <tr>
+          <td><strong>Mimi</strong></td>
+          <td>Kyutai 2024</td>
+          <td>RVQ</td>
+          <td>8</td>
+          <td>1.1 kbps</td>
+          <td>12.5 Hz</td>
+          <td>24 kHz</td>
+          <td>WavLM 蒸馏</td>
+          <td>&#x2705; Apache 2.0</td>
+          <td>S2S 实时</td>
+        </tr>
+        <tr>
+          <td><strong>WavTokenizer</strong></td>
+          <td>浙大+阿里 2024</td>
+          <td>Single VQ</td>
+          <td>1</td>
+          <td>0.48&ndash;0.9 kbps</td>
+          <td>40&ndash;75 Hz</td>
+          <td>24 kHz</td>
+          <td>Attention 内建</td>
+          <td>&#x2705;</td>
+          <td>Audio LLM</td>
+        </tr>
+        <tr>
+          <td><strong>SpeechTokenizer</strong></td>
+          <td>复旦 2023</td>
+          <td>RVQ</td>
+          <td>8</td>
+          <td>4&ndash;8 kbps</td>
+          <td>50 Hz</td>
+          <td>16 kHz</td>
+          <td>HuBERT 蒸馏</td>
+          <td>&#x2705;</td>
+          <td>Speech LLM</td>
+        </tr>
+        <tr>
+          <td><strong>DualCodec</strong></td>
+          <td>2025</td>
+          <td>RVQ</td>
+          <td>&mdash;</td>
+          <td>低</td>
+          <td>12.5 / 25 Hz</td>
+          <td>24 kHz</td>
+          <td>双流 SSL</td>
+          <td>&#x2705;</td>
+          <td>语音生成</td>
+        </tr>
+        <tr>
+          <td><strong>X-Codec-2</strong></td>
+          <td>HKUST 2025</td>
+          <td>FSQ</td>
+          <td>1</td>
+          <td>&mdash;</td>
+          <td>25&ndash;50 Hz</td>
+          <td>24 kHz</td>
+          <td>内建</td>
+          <td>&#x2705;</td>
+          <td>Audio LLM</td>
+        </tr>
+        <tr>
+          <td><strong>FocalCodec</strong></td>
+          <td>Mila 2025</td>
+          <td>Binary VQ</td>
+          <td>1</td>
+          <td>0.16&ndash;1.5 kbps</td>
+          <td>&mdash;</td>
+          <td>&mdash;</td>
+          <td>无</td>
+          <td>&mdash;</td>
+          <td>极低比特率</td>
+        </tr>
+        <tr>
+          <td><strong>FlowDec</strong></td>
+          <td>Meta 2025</td>
+          <td>Flow</td>
+          <td>&mdash;</td>
+          <td>&mdash;</td>
+          <td>&mdash;</td>
+          <td>48 kHz</td>
+          <td>无</td>
+          <td>&#x2705;</td>
+          <td>高保真</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- 2. Quantization Methods Comparison -->
+  <div class="card">
+    <h3>量化方法对比 <span class="badge badge-new">范式</span></h3>
+    <p>不同的量化方法决定了 Codec 的压缩效率、训练稳定性和对 LLM 建模的友好程度。</p>
+
+    <div class="grid-2">
+
+      <div class="card" style="border-left:3px solid #6c8cff;">
+        <h3>RVQ &mdash; Residual Vector Quantization</h3>
+        <p>迭代量化残差：第一个 codebook 捕获粗粒度特征，后续 codebook 逐层精细化残差。比特率可通过 codebook 数量灵活控制。</p>
+        <ul>
+          <li>优势：精细比特率控制，压缩质量可控</li>
+          <li>劣势：Codebook collapse 问题（部分码字不被使用）</li>
+          <li>代表：EnCodec, DAC, Mimi, SpeechTokenizer, DualCodec</li>
+        </ul>
+      </div>
+
+      <div class="card" style="border-left:3px solid #34d399;">
+        <h3>FSQ &mdash; Finite Scalar Quantization</h3>
+        <p>每个维度独立量化为有限集合中的值，无需 codebook lookup。bit 级鲁棒性优越，训练更稳定。</p>
+        <ul>
+          <li>优势：无 codebook collapse，bit 级鲁棒性</li>
+          <li>劣势：表达上限受维度数约束</li>
+          <li>代表：X-Codec-2, NeuCodec</li>
+        </ul>
+      </div>
+
+      <div class="card" style="border-left:3px solid #a78bfa;">
+        <h3>Single VQ &mdash; 单 Codebook 量化</h3>
+        <p>使用单个大 codebook（如 4096 entries），极大简化 LLM 建模——LLM 只需在一个离散空间上建模。</p>
+        <ul>
+          <li>优势：LLM 架构极简，无需 inter-codebook 建模</li>
+          <li>劣势：信息瓶颈更紧，重建质量受限</li>
+          <li>代表：WavTokenizer</li>
+        </ul>
+      </div>
+
+      <div class="card" style="border-left:3px solid #f59e0b;">
+        <h3>Binary VQ &mdash; 二进制量化</h3>
+        <p>极致压缩路线：使用单个 binary codebook，每个 token 仅 1 bit 信息量。适合超低比特率场景。</p>
+        <ul>
+          <li>优势：理论压缩极限</li>
+          <li>劣势：重建保真度有限</li>
+          <li>代表：FocalCodec</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 3. Bitrate Compression Trend -->
+  <div class="card">
+    <h3>比特率压缩趋势 <span class="badge badge-sota">里程碑</span></h3>
+    <p>从 2021 年 SoundStream 的 3 kbps 到 2025 年 FocalCodec 的 0.16 kbps，比特率压缩近 20 倍，核心驱动力：更高效的量化方法 + 更低帧率 + 语义先验注入。</p>
+
+    <div class="timeline">
+
+      <div class="timeline-item">
+        <div class="date">2021 &mdash; SoundStream</div>
+        <div class="event"><strong>3 kbps</strong> &mdash; 开创 Neural Codec 范式，RVQ 量化，~300 Hz 帧率，首次证明神经网络可超越 Opus/AMR</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="date">2022 &mdash; EnCodec</div>
+        <div class="event"><strong>1.5 kbps</strong> &mdash; Meta 开源基准，8 codebook RVQ + discriminator 改进，帧率降至 75 Hz</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="date">2024 &mdash; Mimi</div>
+        <div class="event"><strong>1.1 kbps</strong> &mdash; 帧率骤降至 12.5 Hz，WavLM 语义蒸馏，为 S2S 实时对话优化（Kyutai Moshi 底层 Codec）</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="date">2024 &mdash; WavTokenizer</div>
+        <div class="event"><strong>0.48 kbps</strong> &mdash; 单 codebook 突破，Attention 内建语义，Vocos 解码器，Audio LLM 建模极简</div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="date">2025 &mdash; FocalCodec</div>
+        <div class="event"><strong>0.16 kbps</strong> &mdash; 极致压缩，Binary VQ 单 codebook，Mila 提出，理论压缩极限探索</div>
+      </div>
+
+    </div>
+
+    <!-- Visual compression bar -->
+    <div style="margin-top:16px;">
+      <div class="compare-bar">
+        <div class="name">SoundStream</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:100%;background:linear-gradient(90deg,#6c8cff,#a78bfa);"></div></div>
+        <div class="val">3.0 kbps</div>
+      </div>
+      <div class="compare-bar">
+        <div class="name">EnCodec</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:50%;background:linear-gradient(90deg,#6c8cff,#a78bfa);"></div></div>
+        <div class="val">1.5 kbps</div>
+      </div>
+      <div class="compare-bar">
+        <div class="name">Mimi</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:36.7%;background:linear-gradient(90deg,#38bdf8,#34d399);"></div></div>
+        <div class="val">1.1 kbps</div>
+      </div>
+      <div class="compare-bar">
+        <div class="name">WavTokenizer</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:16%;background:linear-gradient(90deg,#34d399,#a78bfa);"></div></div>
+        <div class="val">0.48 kbps</div>
+      </div>
+      <div class="compare-bar">
+        <div class="name">FocalCodec</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:5.3%;background:linear-gradient(90deg,#f59e0b,#fb923c);"></div></div>
+        <div class="val">0.16 kbps</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Semantic Enhancement Three Stages -->
+  <div class="card">
+    <h3>语义增强三阶段演进 <span class="badge badge-new">关键洞察</span></h3>
+    <p>Neural Codec 的核心演进不在压缩率，而在"语义信息"的引入方式——从纯声学到蒸馏注入再到架构级集成。</p>
+
+    <div class="grid-3">
+
+      <div class="card" style="border-top:3px solid var(--text3);">
+        <h3>第一代 (2021&ndash;2022)<br><span style="font-size:0.8em;color:var(--text3);">纯声学编解码</span></h3>
+        <p>纯重建目标，无语义信息。Codec 只负责将波形压缩为 token 并还原，token 空间与语义空间无对齐。</p>
+        <ul>
+          <li><strong>SoundStream</strong> &mdash; RVQ 纯声学</li>
+          <li><strong>EnCodec</strong> &mdash; RVQ + 多尺度 discriminator</li>
+        </ul>
+        <div class="tags">
+          <span class="tag">无语义对齐</span>
+          <span class="tag">纯重建 MSE/Mel</span>
+        </div>
+      </div>
+
+      <div class="card" style="border-top:3px solid #38bdf8;">
+        <h3>第二代 (2023&ndash;2024)<br><span style="font-size:0.8em;color:var(--text3);">Distillation 注入语义</span></h3>
+        <p>将预训练 SSL 模型（HuBERT, WavLM）的语义信息蒸馏到 RVQ 的第一层 codebook，使第一层 token 具备语义表征能力。</p>
+        <ul>
+          <li><strong>SpeechTokenizer</strong> &mdash; HuBERT → RVQ-1 蒸馏</li>
+          <li><strong>Mimi</strong> &mdash; WavLM → RVQ-1 蒸馏</li>
+          <li><strong>X-Codec</strong> &mdash; HuBERT 拼接到编码空间</li>
+        </ul>
+        <div class="tags">
+          <span class="tag">蒸馏损失</span>
+          <span class="tag">RVQ-1 语义化</span>
+          <span class="tag">语义-声学解耦</span>
+        </div>
+      </div>
+
+      <div class="card" style="border-top:3px solid #34d399;">
+        <h3>第三代 (2025)<br><span style="font-size:0.8em;color:var(--text3);">架构级语义集成</span></h3>
+        <p>语义不再是"外挂"的蒸馏目标，而是内建到 Codec 架构本身——独立语义流、attention 机制或新量化范式自带语义。</p>
+        <ul>
+          <li><strong>DualCodec</strong> &mdash; 独立 SSL 编码流 + 声学流双流架构</li>
+          <li><strong>WavTokenizer</strong> &mdash; Attention 内建语义捕获</li>
+          <li><strong>X-Codec-2</strong> &mdash; FSQ 量化本身具备语义表达力</li>
+        </ul>
+        <div class="tags">
+          <span class="tag">架构内建</span>
+          <span class="tag">无外部蒸馏</span>
+          <span class="tag">端到端语义</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 5. Selection Guide -->
+  <div class="card">
+    <h3>选型建议 <span class="badge badge-api">决策</span></h3>
+    <p>根据应用场景选择最适合的 Neural Audio Codec。</p>
+
+    <div class="grid-2">
+
+      <div class="card" style="border-left:3px solid #34d399;">
+        <h3>&#x1F4DE; 实时 S2S 对话</h3>
+        <div class="tags">
+          <span class="tag" style="background:rgba(52,211,153,0.15);color:var(--green);border-color:rgba(52,211,153,0.3);">推荐</span>
+          <span class="tag">Mimi</span>
+        </div>
+        <ul>
+          <li>12.5 Hz 帧率 + 80 ms 算法延迟，天然适合流式</li>
+          <li>WavLM 蒸馏保证 RVQ-1 具备语义理解能力</li>
+          <li>Kyutai Moshi 实测全双工延迟 &lt; 200 ms</li>
+          <li>Apache 2.0 开源，可商用</li>
+        </ul>
+      </div>
+
+      <div class="card" style="border-left:3px solid #a78bfa;">
+        <h3>&#x1F9E0; Audio LLM Tokenizer</h3>
+        <div class="tags">
+          <span class="tag" style="background:rgba(167,139,250,0.15);color:var(--accent2);border-color:rgba(167,139,250,0.3);">推荐</span>
+          <span class="tag">WavTokenizer</span>
+          <span class="tag">X-Codec-2</span>
+        </div>
+        <ul>
+          <li>单 codebook 架构，LLM 直接在单个 token 空间建模</li>
+          <li>无需处理多 codebook 依赖关系，训练/推理更简单</li>
+          <li>WavTokenizer: 0.48 kbps 极低比特率 + Vocos 快速解码</li>
+          <li>X-Codec-2: FSQ 量化无 collapse，语义内建</li>
+        </ul>
+      </div>
+
+      <div class="card" style="border-left:3px solid #38bdf8;">
+        <h3>&#x1F50D; 语音理解 + 生成统一</h3>
+        <div class="tags">
+          <span class="tag" style="background:rgba(56,189,248,0.15);color:var(--accent3);border-color:rgba(56,189,248,0.3);">推荐</span>
+          <span class="tag">SpeechTokenizer</span>
+          <span class="tag">DualCodec</span>
+        </div>
+        <ul>
+          <li>语义-声学解耦：第一层 token 承载语义理解，其余层承载声学细节</li>
+          <li>SpeechTokenizer: HuBERT 蒸馏 + 8 层 RVQ 解耦</li>
+          <li>DualCodec: 独立 SSL 流 + 声学流，更彻底的双路架构</li>
+          <li>适合同时做 ASR/理解 + TTS/合成的统一模型</li>
+        </ul>
+      </div>
+
+      <div class="card" style="border-left:3px solid #f59e0b;">
+        <h3>&#x1F3B6; 高保真压缩</h3>
+        <div class="tags">
+          <span class="tag" style="background:rgba(245,158,11,0.15);color:#f59e0b;border-color:rgba(245,158,11,0.3);">推荐</span>
+          <span class="tag">DAC</span>
+          <span class="tag">FlowDec</span>
+        </div>
+        <ul>
+          <li>48 kHz 全频带采样率，覆盖人类听觉全范围</li>
+          <li>DAC: 改进 RVQ + 44.1 kHz，MIT 开源通用音频基准</li>
+          <li>FlowDec: Flow-based 解码替代 VAE，更高保真度</li>
+          <li>适合音乐/音效等专业音频场景</li>
+        </ul>
+      </div>
+
+      <div class="card" style="border-left:3px solid #6c8cff;">
+        <h3>&#x2699;&#xFE0F; 快速实验 / 工具箱</h3>
+        <div class="tags">
+          <span class="tag" style="background:rgba(108,140,255,0.15);color:var(--accent);border-color:rgba(108,140,255,0.3);">推荐</span>
+          <span class="tag">FunCodec</span>
+        </div>
+        <ul>
+          <li>可配置的 Codec 工具箱，支持多种量化方案快速实验</li>
+          <li>适合研究场景：快速验证新量化方法 / 架构变体</li>
+          <li>基于 EnCodec 架构，API 兼容，上手成本低</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Sources -->
+  <div class="card">
+    <div class="sources">
+      <strong style="color:var(--text);font-size:0.9em;">References</strong><br>
+      <a href="https://arxiv.org/abs/2210.13438" target="_blank">EnCodec (Meta 2022)</a>
+      <a href="https://arxiv.org/abs/2306.06546" target="_blank">SpeechTokenizer (复旦 2023)</a>
+      <a href="https://arxiv.org/abs/2410.00037" target="_blank">WavTokenizer (浙大+阿里 2024)</a>
+      <a href="https://arxiv.org/abs/2408.16532" target="_blank">Mimi / Kyutai Moshi (2024)</a>
+      <a href="https://arxiv.org/abs/2505.13000" target="_blank">X-Codec-2 (HKUST 2025)</a>
+      <a href="https://kyutai.org/codec-explainer" target="_blank">Kyutai Codec Explainer</a>
+    </div>
+  </div>
+
+</div>
+
+<div class="section" id="token">
+
+  <h2 class="section-title">
+    <span class="icon" style="background:#ec4899;">&#x1F3B5;</span>
+    Audio Token 量化与 LLM Tokenization 策略
+  </h2>
+  <p class="section-desc">
+    从多 codebook RVQ 到单 codebook WavTokenizer，从连续特征到离散 token，音频编码与 LLM tokenization 的选择直接决定了下游模型的效率与质量。本节深度对比量化方法、tokenization 策略及 token rate 对 LLM 的影响。
+  </p>
+
+  <!-- 1. 量化方法深度对比表 -->
+  <div class="card">
+    <h3>量化方法深度对比</h3>
+    <p>四种主流音频量化方法的机制、优缺点与代表性 Codec。</p>
+    <table>
+      <thead>
+        <tr>
+          <th>方法</th>
+          <th>机制</th>
+          <th>优点</th>
+          <th>缺点</th>
+          <th>代表 Codec</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>RVQ</strong></td>
+          <td>迭代量化残差，学习 codebook</td>
+          <td>精细比特率控制，rate-distortion 强</td>
+          <td>codebook collapse，对 bit 错误敏感</td>
+          <td>EnCodec, DAC, Mimi</td>
+        </tr>
+        <tr>
+          <td><strong>FSQ</strong></td>
+          <td>每维度独立量化到有限整数</td>
+          <td>无 codebook，训练简单，bit 级鲁棒性</td>
+          <td>多级残差下衰减</td>
+          <td>X-Codec-2, NeuCodec</td>
+        </tr>
+        <tr>
+          <td><strong>LFQ</strong></td>
+          <td>每维度量化到二/三值</td>
+          <td>最简结构，内存低</td>
+          <td>超低比特率 rate-distortion 略弱</td>
+          <td>Mimi (部分), MusicLM</td>
+        </tr>
+        <tr>
+          <td><strong>Single VQ</strong></td>
+          <td>单个大 codebook (4096)</td>
+          <td>简化下游 LLM 架构</td>
+          <td>需大 codebook 保证质量</td>
+          <td>WavTokenizer</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 2. 核心趋势 cards (grid-2) -->
+  <div class="grid-2" style="margin-bottom:20px;">
+
+    <!-- Single-Codebook 崛起 -->
+    <div class="card">
+      <h3>Single-Codebook 崛起 <span class="badge badge-sota">趋势</span></h3>
+      <p>WavTokenizer (ICLR 2025) 仅用 1 个 codebook 在 40 tok/s 下超越低比特率 DAC。UniCodec (ACL 2025) 进一步改进单 codebook 方案。</p>
+      <p>LLM 序列长度从 600+ tok/s 降到 40 tok/s，<span class="highlight">225x 效率提升</span>，使实时语音 LLM 推理成为可能。</p>
+      <div class="tags">
+        <span class="tag">WavTokenizer</span>
+        <span class="tag">UniCodec</span>
+        <span class="tag">ICLR 2025</span>
+      </div>
+    </div>
+
+    <!-- Semantic-Acoustic 混合 -->
+    <div class="card">
+      <h3>Semantic-Acoustic 混合 <span class="badge badge-new">架构</span></h3>
+      <p>最新方案倾向于语义 Token 做内容规划 + 声学 Token 做高保真合成。SpeechTokenizer 将第一层 codebook 训练为语义特征，其余层保留声学信息。</p>
+      <p>DualCodec 进一步强化语义-声学分离，为 Audio LLM 提供更结构化的中间表示。</p>
+      <div class="tags">
+        <span class="tag">SpeechTokenizer</span>
+        <span class="tag">DualCodec</span>
+        <span class="tag">语义-声学分离</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 3. Audio LLM Tokenization 策略对比表 -->
+  <div class="card">
+    <h3>Audio LLM Tokenization 策略对比</h3>
+    <p>主流 Audio LLM 如何将音频编码并输入大语言模型。</p>
+    <table>
+      <thead>
+        <tr>
+          <th>模型</th>
+          <th>音频输入方式</th>
+          <th>Token 类型</th>
+          <th>特殊设计</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Whisper</strong></td>
+          <td>Log-Mel Spectrogram</td>
+          <td>连续特征</td>
+          <td>无需离散化，直接 encoder 输出</td>
+        </tr>
+        <tr>
+          <td><strong>SALMONN</strong></td>
+          <td>Whisper + BEATS 双编码器</td>
+          <td>连续 &rarr; Q-Former 压缩</td>
+          <td>双编码器融合</td>
+        </tr>
+        <tr>
+          <td><strong>SALMONN-omni</strong></td>
+          <td>独立 speech LLM</td>
+          <td>无 codec 注入</td>
+          <td>NeurIPS 2025，首个无 codec 全双工</td>
+        </tr>
+        <tr>
+          <td><strong>Qwen2.5-Omni</strong></td>
+          <td>Thinker-Talker 双模块</td>
+          <td>离散 token</td>
+          <td>Thinker 负责理解，Talker 负责生成</td>
+        </tr>
+        <tr>
+          <td><strong>Moshi</strong></td>
+          <td>Mimi multi-stream token</td>
+          <td>离散 RVQ token</td>
+          <td>全双工，音频 + 文本交错</td>
+        </tr>
+        <tr>
+          <td><strong>AudioPaLM</strong></td>
+          <td>AudioLM token</td>
+          <td>离散 token</td>
+          <td>与 PaLM-2 文本 token 共享 vocabulary</td>
+        </tr>
+        <tr>
+          <td><strong>GPT-4o Audio</strong></td>
+          <td>端到端（细节未公开）</td>
+          <td>确认使用离散 token</td>
+          <td>原生 S2S，232ms 延迟</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4. 连续 vs 离散 Token 对比 card -->
+  <div class="card">
+    <h3>连续 vs 离散 Token 对比</h3>
+
+    <div class="grid-2">
+      <div>
+        <h4 style="font-size:0.95em;color:var(--accent3);margin-bottom:8px;">连续 Token（如 Whisper encoder 输出）</h4>
+        <ul>
+          <li>保留更丰富的声学信息，信息无损</li>
+          <li>需额外 adapter 层与 LLM 对齐（如 Q-Former、线性投影）</li>
+          <li>计算量较大，无法直接复用 LLM embedding 层</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-size:0.95em;color:var(--green);margin-bottom:8px;">离散 Token（如 EnCodec / Mimi 输出）</h4>
+        <ul>
+          <li>可直接接入 LLM embedding 层，复用标准 transformer 架构</li>
+          <li>量化损失不可避免，高频细节可能丢失</li>
+          <li>天然支持与文本 token 交错，便于多模态融合</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding:12px 16px;background:var(--bg3);border-radius:8px;border-left:3px solid var(--accent2);">
+      <strong style="color:var(--accent2);">SALMONN-omni 证明：</strong>
+      <span style="color:var(--text2);font-size:0.92em;">不使用 codec 的全双工语音 LLM 也是可行的（连续特征路径），为 Audio LLM 架构提供了除离散 token 外的替代方案。</span>
+    </div>
+  </div>
+
+  <!-- 5. Token Rate 对 LLM 效率的影响 (compare-bar) -->
+  <div class="card">
+    <h3>Token Rate 对 LLM 效率的影响</h3>
+    <p>每秒音频产生的 token 数量，直接决定 LLM 的序列长度与推理成本。越低越高效（绿色为最佳）。</p>
+
+    <!-- EnCodec 8cb: 600 tok/s -->
+    <div class="compare-bar">
+      <span class="name">EnCodec 8cb</span>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:66.7%;background:#f87171;"></div>
+      </div>
+      <span class="val">600 tok/s</span>
+    </div>
+
+    <!-- DAC 9cb: 900 tok/s -->
+    <div class="compare-bar">
+      <span class="name">DAC 9cb</span>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:100%;background:#f87171;"></div>
+      </div>
+      <span class="val">900 tok/s</span>
+    </div>
+
+    <!-- EnCodec 1cb: 75 tok/s -->
+    <div class="compare-bar">
+      <span class="name">EnCodec 1cb</span>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:8.3%;background:#fb923c;"></div>
+      </div>
+      <span class="val">75 tok/s</span>
+    </div>
+
+    <!-- SpeechTokenizer: 400 tok/s -->
+    <div class="compare-bar">
+      <span class="name">SpeechTokenizer</span>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:44.4%;background:#fb923c;"></div>
+      </div>
+      <span class="val">400 tok/s</span>
+    </div>
+
+    <!-- Mimi 8cb: 100 tok/s -->
+    <div class="compare-bar">
+      <span class="name">Mimi 8cb</span>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:11.1%;background:#38bdf8;"></div>
+      </div>
+      <span class="val">100 tok/s</span>
+    </div>
+
+    <!-- WavTokenizer: 40 tok/s -->
+    <div class="compare-bar">
+      <span class="name">WavTokenizer</span>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:4.4%;background:#34d399;"></div>
+      </div>
+      <span class="val" style="color:#34d399;font-weight:600;">40 tok/s</span>
+    </div>
+
+    <div class="sources">
+      <a href="https://arxiv.org/abs/2408.16532" target="_blank">arXiv:2408.16532 (WavTokenizer)</a>
+      <a href="https://arxiv.org/abs/2308.16692" target="_blank">arXiv:2308.16692 (EnCodec)</a>
+      <a href="https://arxiv.org/abs/2505.13000" target="_blank">arXiv:2505.13000</a>
+      <a href="https://arxiv.org/abs/2505.17060" target="_blank">arXiv:2505.17060</a>
+      <a href="https://neurips.cc/virtual/2025/poster/119430" target="_blank">NeurIPS 2025 #119430 (SALMONN-omni)</a>
+    </div>
+  </div>
+
+</div>
+
+<div class="section" id="agent">
+
+  <h2 class="section-title">
+    <span class="icon" style="background:#10b981;">&#x1F916;</span>
+    Audio-Native Agent &mdash; 语音原生智能体
+  </h2>
+  <p class="section-desc">
+    从级联 Pipeline 到 Audio-Native 端到端模型，Voice Agent 在 2025 年完成范式跃迁：语音不再只是 I/O 通道，而是智能体原生感知-推理-行动闭环的核心模态。
+  </p>
+
+  <!-- 1. Architecture Evolution Diagram -->
+  <div class="card">
+    <h3>架构演进：从级联到 Audio-Native Agent</h3>
+    <p>三代架构的延迟与能力跃迁，2025-2026 年进入 Agent 原生时代。</p>
+
+    <!-- Gen 1: Cascaded 2023 -->
+    <div style="margin-bottom:28px;">
+      <div style="font-size:0.9em;font-weight:600;color:var(--red);margin-bottom:8px;">第一代：传统级联 (2023) &mdash; 延迟 2&ndash;5s</div>
+      <div class="arch-flow">
+        <div class="arch-box">ASR</div>
+        <span class="arch-arrow">&rarr;</span>
+        <div class="arch-box">LLM</div>
+        <span class="arch-arrow">&rarr;</span>
+        <div class="arch-box">TTS</div>
+      </div>
+      <p style="text-align:center;font-size:0.82em;color:var(--text3);">顺序处理，信息损失大，延迟叠加</p>
+    </div>
+
+    <!-- Gen 2: Optimized Cascade 2024 -->
+    <div style="margin-bottom:28px;">
+      <div style="font-size:0.9em;font-weight:600;color:var(--orange);margin-bottom:8px;">第二代：优化级联 (2024) &mdash; 延迟 800ms&ndash;2s</div>
+      <div class="arch-flow">
+        <div class="arch-box">Streaming ASR</div>
+        <span class="arch-arrow">&rarr;</span>
+        <div class="arch-box">Streaming LLM</div>
+        <span class="arch-arrow">&rarr;</span>
+        <div class="arch-box">Streaming TTS</div>
+      </div>
+      <p style="text-align:center;font-size:0.82em;color:var(--text3);">各环节流式化，延迟显著降低但仍为级联</p>
+    </div>
+
+    <!-- Gen 3: Audio-Native 2025-2026 -->
+    <div>
+      <div style="font-size:0.9em;font-weight:600;color:var(--green);margin-bottom:8px;">第三代：Audio-Native Agent (2025&ndash;2026) &mdash; 延迟 ~250ms</div>
+      <div class="arch-flow">
+        <div class="arch-box" style="border-color:var(--green);padding:12px 22px;">End-to-End Audio Model</div>
+        <span class="arch-arrow">+</span>
+        <div class="arch-box">Tool Use</div>
+        <span class="arch-arrow">+</span>
+        <div class="arch-box">Memory</div>
+        <span class="arch-arrow">+</span>
+        <div class="arch-box">RAG</div>
+      </div>
+      <p style="text-align:center;font-size:0.82em;color:var(--text3);">语音原生推理 + 工具调用 + 记忆 + 检索增强，逼近人类对话延迟</p>
+    </div>
+  </div>
+
+  <!-- 2. Platform Comparison Table -->
+  <div class="card">
+    <h3>三大平台 &amp; 开源方案对比</h3>
+    <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>平台</th>
+          <th>核心能力</th>
+          <th>Tool Use</th>
+          <th>延迟</th>
+          <th>开源</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>OpenAI gpt-realtime</strong></td>
+          <td>S2S + 推理</td>
+          <td>Function Calling (session 配置)</td>
+          <td>~600ms</td>
+          <td><span class="badge badge-closed">Closed</span></td>
+        </tr>
+        <tr>
+          <td><strong>Gemini Live API</strong></td>
+          <td>多模态 S2S</td>
+          <td>Function Calling + Web Search</td>
+          <td>~800ms</td>
+          <td><span class="badge badge-api">API</span></td>
+        </tr>
+        <tr>
+          <td><strong>Moshi (Kyutai)</strong></td>
+          <td>全双工 S2S</td>
+          <td>基础</td>
+          <td class="highlight">~200ms</td>
+          <td><span class="badge badge-open">Open</span> Apache 2.0</td>
+        </tr>
+        <tr>
+          <td><strong>Ultravox (Fixie AI)</strong></td>
+          <td>Audio-Native LLM</td>
+          <td>可扩展</td>
+          <td class="highlight">低</td>
+          <td><span class="badge badge-open">Open</span></td>
+        </tr>
+        <tr>
+          <td><strong>PersonaPlex (NVIDIA)</strong></td>
+          <td>全双工 + Persona</td>
+          <td>可扩展</td>
+          <td class="highlight">~200ms</td>
+          <td><span class="badge badge-open">Open</span> NVIDIA OML</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="sources">
+      <a href="https://developers.openai.com" target="_blank">developers.openai.com</a>
+      <a href="https://ai.google.dev/gemini-api/docs/live-api" target="_blank">ai.google.dev/gemini-api/docs/live-api</a>
+      <a href="https://github.com/kyutai-labs/moshi" target="_blank">github.com/kyutai-labs/moshi</a>
+      <a href="https://github.com/fixie-ai/ultravox" target="_blank">github.com/fixie-ai/ultravox</a>
+    </div>
+  </div>
+
+  <!-- 3. Voice Agent Framework Comparison (grid-3) -->
+  <h3 style="margin-bottom:16px;">Voice Agent 框架对比</h3>
+  <div class="grid-3">
+
+    <div class="card">
+      <h3>
+        LiveKit Agents
+        <span class="badge badge-new">v1.0</span>
+      </h3>
+      <p>OpenAI ChatGPT 底层框架，生产级语音 Agent 基础设施。</p>
+      <ul>
+        <li>WebRTC + Python / Node.js</li>
+        <li>Plugin 式架构，灵活组合 STT/LLM/TTS</li>
+        <li>2025 年 4 月发布 1.0 正式版</li>
+      </ul>
+      <div class="tags">
+        <span class="tag">WebRTC</span>
+        <span class="tag">Python</span>
+        <span class="tag">Node.js</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>
+        Pipecat
+        <span class="badge badge-sota">活跃</span>
+      </h3>
+      <p>Python 语音 Agent 框架，40+ AI 服务集成，社区活跃。</p>
+      <ul>
+        <li>40+ AI 服务集成</li>
+        <li>NVIDIA NIM + Amazon Bedrock 集成</li>
+        <li>Smart Turn 语义端点检测 (v3)</li>
+      </ul>
+      <div class="tags">
+        <span class="tag">Python</span>
+        <span class="tag">NVIDIA NIM</span>
+        <span class="tag">Bedrock</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>
+        Vapi
+        <span class="badge badge-api">托管</span>
+      </h3>
+      <p>托管低代码语音 Agent 平台，面向快速部署场景。</p>
+      <ul>
+        <li>低代码配置，快速上线</li>
+        <li>Function Calling + Webhook 集成</li>
+        <li>BYOT 电话集成 (Bring Your Own Telephony)</li>
+      </ul>
+      <div class="tags">
+        <span class="tag">低代码</span>
+        <span class="tag">电话集成</span>
+        <span class="tag">Webhook</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 4. Voice RAG Breakthrough -->
+  <div class="card">
+    <h3>Voice RAG 突破 &mdash; VoiceAgentRAG (Salesforce AI Research)</h3>
+    <p>首个面向 Voice Agent 的 RAG 优化方案，Dual-Agent Memory Router 实现检索延迟数量级提升。</p>
+    <ul>
+      <li><strong>Dual-Agent Memory Router</strong>：双层路由架构，精准匹配检索策略</li>
+      <li><strong>检索加速 316x</strong>：从 110ms 降至 0.35ms</li>
+      <li><strong>缓存命中率 75%</strong>：高频知识复用显著降低推理开销</li>
+      <li><strong>开源</strong>：<code>github.com/SalesforceAIResearch/VoiceAgentRAG</code></li>
+    </ul>
+    <div class="kpi-row" style="margin-top:16px;">
+      <div class="kpi">
+        <div class="value">316x</div>
+        <div class="label">检索加速倍数</div>
+      </div>
+      <div class="kpi">
+        <div class="value">0.35ms</div>
+        <div class="label">优化后检索延迟</div>
+      </div>
+      <div class="kpi">
+        <div class="value">75%</div>
+        <div class="label">缓存命中率</div>
+      </div>
+    </div>
+
+    <div class="sources">
+      <a href="https://arxiv.org/abs/2603.02206" target="_blank">arxiv.org/abs/2603.02206</a>
+      <a href="https://github.com/SalesforceAIResearch/VoiceAgentRAG" target="_blank">github.com/SalesforceAIResearch/VoiceAgentRAG</a>
+    </div>
+  </div>
+
+  <!-- 5. Agent Loop Architecture -->
+  <div class="card">
+    <h3>Agent Loop 架构 &mdash; LLM + Memory + Planning + Tool Use</h3>
+    <p>Voice Agent 的核心执行循环：感知、推理、行动、观察、回应，形成持续进化的闭环。</p>
+
+    <!-- Agent Loop Flow -->
+    <div style="margin-bottom:20px;">
+      <div class="arch-flow" style="flex-wrap:wrap;gap:6px;">
+        <div class="arch-box" style="border-color:#38bdf8;">Perceive 感知</div>
+        <span class="arch-arrow">&rarr;</span>
+        <div class="arch-box" style="border-color:#a78bfa;">Reason 推理</div>
+        <span class="arch-arrow">&rarr;</span>
+        <div class="arch-box" style="border-color:#f472b6;">Act 行动/工具调用</div>
+        <span class="arch-arrow">&rarr;</span>
+        <div class="arch-box" style="border-color:#fb923c;">Observe 观察</div>
+        <span class="arch-arrow">&rarr;</span>
+        <div class="arch-box" style="border-color:#10b981;">Respond 回应</div>
+        <span class="arch-arrow" style="font-size:0.9em;">&circlearrowright;</span>
+      </div>
+    </div>
+
+    <!-- Memory Hierarchy -->
+    <div style="margin-top:16px;">
+      <div style="font-size:0.95em;font-weight:600;color:var(--text);margin-bottom:10px;">Memory 分层架构</div>
+      <ul>
+        <li><strong>Short-term</strong>（短期记忆）：当前对话上下文，session 内实时维护</li>
+        <li><strong>Long-term</strong>（长期记忆）：用户偏好、历史行为，存储于向量数据库</li>
+        <li><strong>Episodic</strong>（场景记忆）：特定场景/会话的关键事件摘要，支持跨会话复用</li>
+      </ul>
+    </div>
+
+    <div class="sources">
+      <a href="https://arxiv.org/abs/2603.05413" target="_blank">arxiv.org/abs/2603.05413</a>
+    </div>
+  </div>
+
+</div>
+
+<div class="section" id="security">
+
+  <h2 class="section-title">
+    <span class="icon" style="background:#ef4444;">&#x1F6E1;</span>
+    音频安全与 Deepfake 防御
+  </h2>
+  <p class="section-desc">
+    语音克隆与 deepfake 技术的爆发式增长催生了反欺骗、音频水印、说话人验证与隐私保护的全面军备竞赛。2024-2025 年，SSL 前端成为 anti-spoofing 新范式，音频水印进入神经网络时代，全球监管框架加速成型。
+  </p>
+
+  <!-- 1. Anti-Spoofing -->
+  <div class="card">
+    <h3>
+      反欺骗技术
+      <span class="badge badge-sota">SOTA</span>
+    </h3>
+    <p>对抗语音合成 (TTS)、语音转换 (VC) 与录音重放攻击的核心防线，2024 年起 SSL 模型成为 anti-spoofing 的通用前端。</p>
+    <ul>
+      <li><strong>ASVspoof 5 (2024, Interspeech)</strong> &mdash; 最新一轮国际挑战赛，顶级系统统一采用 WavLM / HuBERT / wav2vec 2.0 前端 + AASIST 架构，SSL 特征全面超越传统 MFQC/i-vector 方案</li>
+      <li><strong>AASIST2</strong> &mdash; 在 VoiceWukong benchmark 上取得最佳表现，EER 13.50%，成为 deepfake 检测新标杆</li>
+      <li><strong>趋势</strong> &mdash; SSL 模型 (WavLM, HuBERT, wav2vec 2.0) 成为 anti-spoofing 的通用前端，显著提升对未知攻击类型的泛化能力</li>
+    </ul>
+    <div class="tags">
+      <span class="tag">ASVspoof 5</span>
+      <span class="tag">AASIST2</span>
+      <span class="tag">WavLM</span>
+      <span class="tag">HuBERT</span>
+      <span class="tag">wav2vec 2.0</span>
+    </div>
+    <div class="sources">
+      <a href="https://asvspoof.org" target="_blank">asvspoof.org</a>
+      <a href="https://usenix.org" target="_blank">VoiceWukong (USENIX)</a>
+    </div>
+  </div>
+
+  <!-- 2. Audio Watermarking -->
+  <div class="card">
+    <h3>
+      音频水印
+      <span class="badge badge-new">2025</span>
+    </h3>
+    <p>为 AI 生成音频嵌入不可见标识，实现溯源与 deepfake 检测。神经网络水印正从研究走向部署。</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>方法</th>
+          <th>特点</th>
+          <th>来源</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>AudioSeal</strong> (Meta)</td>
+          <td>首个 localized detection 音频水印，1% FPR 时达到 <span class="highlight">100% TPR</span></td>
+          <td>Meta AI</td>
+        </tr>
+        <tr>
+          <td><strong>XAttnMark</strong></td>
+          <td>Cross-Attention 机制，兼顾鲁棒性与音质保持</td>
+          <td>ICML 2025</td>
+        </tr>
+        <tr>
+          <td><strong>WavMark</strong></td>
+          <td>神经音频水印框架，支持多比特信息嵌入</td>
+          <td>Meta Research</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><strong>关键挑战：</strong>Overwriting attack (覆写攻击) 是当前最大威胁；神经网络变换 (如语音增强、格式转换) 下鲁棒性仍然有限。</p>
+
+    <div class="sources">
+      <a href="https://ai.meta.com/research/publications/proactive-detection-of-voice-cloning" target="_blank">Meta: Proactive Detection of Voice Cloning</a>
+      <a href="https://icml.cc/virtual/2025/poster/43452" target="_blank">XAttnMark @ ICML 2025</a>
+    </div>
+  </div>
+
+  <!-- 3. Speaker Verification SOTA -->
+  <div class="card">
+    <h3>
+      说话人验证 SOTA
+      <span class="badge badge-sota">SOTA</span>
+    </h3>
+    <p>说话人验证 (SV) 是语音安全的基础能力，近年 SSL 嵌入与 Conformer 架构推动 EER 持续下降。</p>
+    <ul>
+      <li><strong>ECAPA-TDNN</strong> &mdash; 经典基线，VoxCeleb1 EER <span class="highlight">0.87%</span>，至今仍是许多系统的核心组件</li>
+      <li><strong>Whisper-based SV</strong> (arXiv 2025.03) &mdash; 利用预训练 Whisper 的判别性嵌入做说话人验证，探索 foundation model 在 SV 中的迁移能力</li>
+      <li><strong>当前 SOTA 范围</strong> &mdash; VoxCeleb 标准评测 EER 已进入 <span class="highlight">1.5&ndash;1.8%</span> 区间，多系统接近实用阈值</li>
+    </ul>
+    <div class="tags">
+      <span class="tag">ECAPA-TDNN</span>
+      <span class="tag">Whisper SV</span>
+      <span class="tag">VoxCeleb</span>
+      <span class="tag">EER 0.87%</span>
+    </div>
+  </div>
+
+  <!-- 4. Privacy Protection -->
+  <div class="card">
+    <h3>
+      隐私保护
+      <span class="badge badge-open">Open</span>
+    </h3>
+    <p>语音数据高度敏感，联邦学习、差分隐私与语音匿名化成为三大技术路线。</p>
+    <ul>
+      <li><strong>Apple (NeurIPS 2025)</strong> &mdash; 首个 ASR 联邦学习 + 差分隐私 benchmark，开源 <code>github.com/apple/ml-pfl4asr</code>，为隐私保护 ASR 建立标准化评估框架</li>
+      <li><strong>端侧处理</strong> &mdash; Apple Conformer 在可穿戴设备上实现 5.26x 实时速度 (0.19 RTF)，使完全本地 ASR 成为可能</li>
+      <li><strong>Voice Privacy Challenge 2024</strong> &mdash; 语音匿名化挑战赛，核心目标：保护说话人身份隐私的同时保留情感和语言内容</li>
+    </ul>
+    <div class="tags">
+      <span class="tag">Federated Learning</span>
+      <span class="tag">Differential Privacy</span>
+      <span class="tag">Voice Anonymization</span>
+      <span class="tag">On-device ASR</span>
+    </div>
+    <div class="sources">
+      <a href="https://github.com/apple/ml-pfl4asr" target="_blank">GitHub: apple/ml-pfl4asr</a>
+    </div>
+  </div>
+
+  <!-- 5. Global Regulatory Landscape -->
+  <div class="grid-3">
+
+    <div class="card">
+      <h3>
+        EU AI Act
+        <span class="badge badge-api">Regulation</span>
+      </h3>
+      <ul>
+        <li><strong>Article 50</strong> 要求 AI 生成内容必须嵌入可检测水印 + deepfake 披露义务</li>
+        <li>2025 年 8 月 GPAI (通用目的 AI) 规则正式生效</li>
+        <li>对音频 deepfake 生成者施加透明度与合规义务</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>
+        美国
+        <span class="badge badge-api">Regulation</span>
+      </h3>
+      <ul>
+        <li>无联邦综合法，采用州级立法碎片化推进</li>
+        <li><span class="highlight">47 州</span> 已有 deepfake 相关法律 (2025 年新增 64 条)</li>
+        <li>NO FAKES Act 重新审议，拟建立联邦级声音肖像权保护</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>
+        中国
+        <span class="badge badge-api">Regulation</span>
+      </h3>
+      <ul>
+        <li>《深度合成管理规定》2023 年施行，要求 AI 生成内容标识</li>
+        <li>2025 年 9 月 AI 内容标注新规生效</li>
+        <li>50+ 项 AI 国家标准制定中，覆盖安全、评估与治理</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- KPI Highlights -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="value">0.87%</div>
+      <div class="label">VoxCeleb 说话人验证最佳 EER</div>
+    </div>
+    <div class="kpi">
+      <div class="value">316x</div>
+      <div class="label">VoiceAgentRAG 检索加速倍数</div>
+    </div>
+    <div class="kpi">
+      <div class="value">47州</div>
+      <div class="label">美国已有 deepfake 立法的州数</div>
+    </div>
+  </div>
+
+  <div class="sources">
+    <a href="https://asvspoof.org" target="_blank">asvspoof.org</a>
+    <a href="https://ai.meta.com/research/publications/proactive-detection-of-voice-cloning" target="_blank">Meta AI: Proactive Detection of Voice Cloning</a>
+    <a href="https://github.com/apple/ml-pfl4asr" target="_blank">GitHub: apple/ml-pfl4asr</a>
+    <a href="https://usenix.org" target="_blank">VoiceWukong (USENIX)</a>
+    <a href="https://icml.cc/virtual/2025/poster/43452" target="_blank">XAttnMark @ ICML 2025</a>
+  </div>
+
+</div>
+
+<div class="section" id="frameworks">
+
+  <h2 class="section-title">
+    <span class="icon" style="background: #c084fc;">🧩</span>
+    开源 Voice AI 框架与产品生态
+  </h2>
+  <p class="section-desc">从 WebRTC SFU 到 Pipeline 编排，从开源框架到商业产品——Voice AI 的完整生态图谱。</p>
+
+  <!-- 开源框架对比表 -->
+  <div class="card">
+    <h3>开源 Voice AI 框架对比</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>框架</th>
+          <th>类型</th>
+          <th>核心功能</th>
+          <th>Transport</th>
+          <th>开源协议</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>LiveKit Agents</strong></td>
+          <td>WebRTC SFU + AI Agent</td>
+          <td>多进程架构，零拷贝音频，自定义二进制 IPC</td>
+          <td>WebRTC</td>
+          <td><span class="badge badge-open">Apache 2.0</span></td>
+        </tr>
+        <tr>
+          <td><strong>Pipecat</strong></td>
+          <td>Pipeline 编排</td>
+          <td>STT → LLM → TTS pipeline，Smart Turn 端点检测</td>
+          <td>WebSocket / WebRTC / LiveKit</td>
+          <td><span class="badge badge-open">MIT</span></td>
+        </tr>
+        <tr>
+          <td><strong>Vocode</strong></td>
+          <td>Voice Agent</td>
+          <td>开发工具 + 编排</td>
+          <td>多种</td>
+          <td><span class="badge badge-open">Apache 2.0</span></td>
+        </tr>
+        <tr>
+          <td><strong>Ultravox</strong></td>
+          <td>SLM</td>
+          <td>合并 STT + LLM 为单模型，open-weight</td>
+          <td class="dim">—</td>
+          <td><span class="badge badge-sota">开放权重</span></td>
+        </tr>
+        <tr>
+          <td><strong>TEN Framework</strong></td>
+          <td>Agent 平台</td>
+          <td>实时 AI agent 开发框架</td>
+          <td class="dim">—</td>
+          <td><span class="badge badge-open">Apache 2.0</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 主要 Voice AI 产品 -->
+  <h3 style="font-size:1.2em; margin-bottom:16px; color:var(--text);">主要 Voice AI 产品</h3>
+  <div class="grid-2">
+
+    <div class="card">
+      <h3>OpenAI Advanced Voice Mode <span class="badge badge-closed">闭源</span></h3>
+      <p>基于 gpt-realtime-2 模型，将 GPT-5 级推理能力融入语音交互，实现低延迟、高自然度的实时对话。</p>
+    </div>
+
+    <div class="card">
+      <h3>Google Gemini Live <span class="badge badge-api">API</span></h3>
+      <p>支持 30 种 HD 音色、24 种语言，内置 VAD + tool calling，提供完整的语音 AI 开发接口。</p>
+    </div>
+
+    <div class="card">
+      <h3>Amazon Alexa+ <span class="badge badge-closed">闭源</span></h3>
+      <p>生成式 AI 全面升级，多层 echo cancellation，更强的对话理解与多轮交互能力。</p>
+    </div>
+
+    <div class="card">
+      <h3>Apple Siri + Apple Intelligence <span class="badge badge-closed">闭源</span></h3>
+      <p>大模型能力集成延期至 2026 春，计划集成 Google Gemini 作为补充，设备端+云端混合架构。</p>
+    </div>
+
+    <div class="card">
+      <h3>Microsoft Copilot Voice <span class="badge badge-closed">闭源</span></h3>
+      <p>Ignite 2025 发布 agents 能力，支持语音驱动的多步骤任务执行与企业级集成。</p>
+    </div>
+
+    <div class="card">
+      <h3>Sesame CSM <span class="badge badge-open">开源</span></h3>
+      <p>跨越恐怖谷的对话语音模型，实现了高度自然的语音生成，Apache 2.0 协议开源。</p>
+    </div>
+
+    <div class="card">
+      <h3>MiniMax Speech-02 <span class="badge badge-api">API</span></h3>
+      <p>300+ 音色，中文语音 AI 领先，支持多情感、多风格的语音合成。</p>
+    </div>
+
+    <div class="card">
+      <h3>iFlytek Spark Desk <span class="badge badge-api">API</span></h3>
+      <p>科大讯飞出品，中文语音交互领先，深厚的语音技术积累与行业场景覆盖。</p>
+    </div>
+
+    <div class="card">
+      <h3>ByteDance Doubao <span class="badge badge-closed">闭源</span></h3>
+      <p>Seeduplex 全双工语音交互，通过豆包 App 大规模部署，日活用户数千万级。</p>
+    </div>
+
+  </div>
+
+  <!-- 商业化平台 -->
+  <h3 style="font-size:1.2em; margin: 28px 0 16px; color:var(--text);">商业化 Voice AI 平台</h3>
+  <div class="grid-2">
+
+    <div class="card">
+      <h3>Vapi <span class="badge badge-api">平台</span></h3>
+      <p>商业化 Voice Agent 平台，提供端到端的语音 AI agent 构建与部署服务，支持电话系统集成。</p>
+    </div>
+
+    <div class="card">
+      <h3>Retell <span class="badge badge-api">平台</span></h3>
+      <p>语音 AI agent 服务，专注于低延迟对话体验，提供 turnkey 方案降低开发门槛。</p>
+    </div>
+
+    <div class="card">
+      <h3>Cloudflare Edge Inference <span class="badge badge-api">平台</span></h3>
+      <p>边缘推理 + WebSocket，全球 300+ 城市节点部署，显著降低语音 AI 的网络延迟。</p>
+    </div>
+
+    <div class="card">
+      <h3>Amazon Nova Sonic <span class="badge badge-api">平台</span></h3>
+      <p>AWS 托管的统一 speech-to-speech 服务，原生 WebRTC 集成，简化云端语音 AI 部署。</p>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- Section: 趋势展望与核心洞察 -->
+<div class="section" id="trends">
+
+  <h2 class="section-title">
+    <span class="icon" style="background: #f87171;">🔮</span>
+    趋势展望与核心洞察
+  </h2>
+  <p class="section-desc">从级联 Pipeline 到原生 Speech-to-Speech，从云端到端侧——Voice AI 正在经历范式转移。</p>
+
+  <!-- 六大趋势 -->
+  <h3 style="font-size:1.2em; margin-bottom:16px; color:var(--text);">2025-2026 六大趋势</h3>
+
+  <div class="card" style="border-left: 3px solid #c084fc;">
+    <h3><span style="background:#c084fc; color:#fff; border-radius:50%; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:0.85em; flex-shrink:0;">1</span> 原生 Speech-to-Speech 取代级联 Pipeline</h3>
+    <p>OpenAI Realtime API 引领，Sesame CSM、Moshi、PersonaPlex 跟进。<strong>2025 年是从"伪全双工"到"真全双工"的转折年</strong>。延迟从 1.5-3s 压缩到 200ms 级别。</p>
+    <div class="tags">
+      <span class="tag">Realtime API</span>
+      <span class="tag">Sesame CSM</span>
+      <span class="tag">Moshi</span>
+      <span class="tag">PersonaPlex</span>
+      <span class="tag">全双工</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-left: 3px solid #38bdf8;">
+    <h3><span style="background:#38bdf8; color:#fff; border-radius:50%; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:0.85em; flex-shrink:0;">2</span> Audio-Native LLM 兴起</h3>
+    <p>GPT-4o Audio、Gemini 2.5 Flash Native Audio、GLM-4-Voice 等模型<strong>直接处理音频 token</strong>，不再依赖 STT/TTS 中间转换。SALMONN-omni 以独立 speech LLM 实现全双工。</p>
+    <div class="tags">
+      <span class="tag">GPT-4o Audio</span>
+      <span class="tag">Gemini 2.5 Flash</span>
+      <span class="tag">GLM-4-Voice</span>
+      <span class="tag">SALMONN-omni</span>
+      <span class="tag">Audio Token</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-left: 3px solid #34d399;">
+    <h3><span style="background:#34d399; color:#0f1117; border-radius:50%; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:0.85em; flex-shrink:0;">3</span> DiT / Flow-Matching 成为 TTS 主流架构</h3>
+    <p>F5-TTS (ACL 2025)、Spark-TTS、CosyVoice 3 均采用。非自回归架构实现<strong>高质量 + 快速推理</strong>。82M 参数 (Kokoro) 达到大模型级别质量。</p>
+    <div class="tags">
+      <span class="tag">F5-TTS</span>
+      <span class="tag">Spark-TTS</span>
+      <span class="tag">CosyVoice 3</span>
+      <span class="tag">Kokoro 82M</span>
+      <span class="tag">Flow Matching</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-left: 3px solid #fb923c;">
+    <h3><span style="background:#fb923c; color:#0f1117; border-radius:50%; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:0.85em; flex-shrink:0;">4</span> 语义级 Turn Detection 替代静默检测</h3>
+    <p>Pipecat Smart Turn v3、Speechmatics SLM-based detection 从纯 VAD 的 ~70% 准确率提升到 <strong>~90%+</strong>。<strong>2025 年被称为"Turn Detection 年"</strong>。</p>
+    <div class="tags">
+      <span class="tag">Smart Turn v3</span>
+      <span class="tag">Speechmatics</span>
+      <span class="tag">SLM-based</span>
+      <span class="tag">语义 VAD</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-left: 3px solid #a78bfa;">
+    <h3><span style="background:#a78bfa; color:#fff; border-radius:50%; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:0.85em; flex-shrink:0;">5</span> 端侧部署日趋成熟</h3>
+    <p>Sherpa-ONNX 覆盖全平台 (10 种编程语言)，whisper.cpp 量化模型 <strong>40MB RAM</strong> 可运行，AMD Ryzen AI 已验证生产级部署。<strong>端侧 VAD + 云端 ASR/TTS 的 hybrid 架构成为主流</strong>。</p>
+    <div class="tags">
+      <span class="tag">Sherpa-ONNX</span>
+      <span class="tag">whisper.cpp</span>
+      <span class="tag">Ryzen AI</span>
+      <span class="tag">Hybrid 架构</span>
+      <span class="tag">量化部署</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-left: 3px solid #f87171;">
+    <h3><span style="background:#f87171; color:#fff; border-radius:50%; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:0.85em; flex-shrink:0;">6</span> 开源音频 AI 生态爆发</h3>
+    <p><strong>中国团队贡献突出</strong>：Qwen3-ASR、SenseVoice、CosyVoice、Fish Speech、ChatTTS、Spark-TTS。多个 Apache 2.0 协议模型达到 SOTA 水平。</p>
+    <div class="tags">
+      <span class="tag">Qwen3-ASR</span>
+      <span class="tag">SenseVoice</span>
+      <span class="tag">CosyVoice</span>
+      <span class="tag">Fish Speech</span>
+      <span class="tag">ChatTTS</span>
+      <span class="tag">Spark-TTS</span>
+      <span class="tag">Apache 2.0</span>
+    </div>
+  </div>
+
+  <!-- 市场数据 -->
+  <div class="card">
+    <h3>Voice AI 市场数据</h3>
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="value">$2.54B</div>
+        <div class="label">2025 年 Voice AI Agent 市场规模</div>
+      </div>
+      <div class="kpi">
+        <div class="value">39%</div>
+        <div class="label">复合年增长率 (CAGR)</div>
+      </div>
+      <div class="kpi">
+        <div class="value">300+</div>
+        <div class="label">Google Chirp 覆盖语言数</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 对嵌入式音频开发的启示 -->
+  <div class="card">
+    <h3>对嵌入式音频开发的启示</h3>
+    <p>以下是 Voice AI 领域进展对 Cortex-M 级嵌入式音频开发的直接参考价值：</p>
+    <ul>
+      <li><strong>RNNoise 和 DeepFilterNet</strong> 的低复杂度设计可直接参考 Cortex-M 部署</li>
+      <li><strong>ONNX / TFLite 量化 pipeline</strong> 适用于 MCU 级部署</li>
+      <li><strong>Sherpa-ONNX 的嵌入式构建指南</strong> 提供直接可用技术路线</li>
+      <li><strong>端侧 VAD + 云端 ASR/TTS</strong> 的 hybrid 架构可能是最优解</li>
+      <li><strong>SincNet 等可学习前端</strong> 值得在 MCU 上实验</li>
+      <li><strong>30KB 级 KWS</strong> 已成熟，可参考 TinyML 最佳实践</li>
+    </ul>
+  </div>
+
+  <!-- 来源汇总 -->
+  <div class="card">
+    <h3>数据来源汇总</h3>
+    <p>本报告数据主要来自以下渠道：</p>
+    <ul>
+      <li><strong>学术论文</strong> — arXiv、NeurIPS / ICML / ACL / Interspeech 论文</li>
+      <li><strong>开源项目</strong> — GitHub 开源仓库与文档</li>
+      <li><strong>官方博客</strong> — OpenAI / Google / Meta / NVIDIA / Alibaba 官方技术博客</li>
+      <li><strong>模型卡片</strong> — Hugging Face 模型卡片与技术报告</li>
+      <li><strong>行业分析</strong> — 行业分析报告与市场数据</li>
+    </ul>
+  </div>
+
+</div>
+<div class="section" id="trends">
+
+  <h2 class="section-title">
+    <span class="icon" style="background: #f87171;">🔮</span>
+    趋势展望与核心洞察
+  </h2>
+  <p class="section-desc">从级联 Pipeline 到原生 Speech-to-Speech，从云端到端侧——Voice AI 正在经历范式转移。</p>
+
+  <!-- 六大趋势 -->
+  <h3 style="font-size:1.2em; margin-bottom:16px; color:var(--text);">2025-2026 六大趋势</h3>
+
+  <div class="card" style="border-left: 3px solid #c084fc;">
+    <h3><span style="background:#c084fc; color:#fff; border-radius:50%; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:0.85em; flex-shrink:0;">1</span> 原生 Speech-to-Speech 取代级联 Pipeline</h3>
+    <p>OpenAI Realtime API 引领，Sesame CSM、Moshi、PersonaPlex 跟进。<strong>2025 年是从"伪全双工"到"真全双工"的转折年</strong>。延迟从 1.5-3s 压缩到 200ms 级别。</p>
+    <div class="tags">
+      <span class="tag">Realtime API</span>
+      <span class="tag">Sesame CSM</span>
+      <span class="tag">Moshi</span>
+      <span class="tag">PersonaPlex</span>
+      <span class="tag">全双工</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-left: 3px solid #38bdf8;">
+    <h3><span style="background:#38bdf8; color:#fff; border-radius:50%; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:0.85em; flex-shrink:0;">2</span> Audio-Native LLM 兴起</h3>
+    <p>GPT-4o Audio、Gemini 2.5 Flash Native Audio、GLM-4-Voice 等模型<strong>直接处理音频 token</strong>，不再依赖 STT/TTS 中间转换。SALMONN-omni 以独立 speech LLM 实现全双工。</p>
+    <div class="tags">
+      <span class="tag">GPT-4o Audio</span>
+      <span class="tag">Gemini 2.5 Flash</span>
+      <span class="tag">GLM-4-Voice</span>
+      <span class="tag">SALMONN-omni</span>
+      <span class="tag">Audio Token</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-left: 3px solid #34d399;">
+    <h3><span style="background:#34d399; color:#0f1117; border-radius:50%; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:0.85em; flex-shrink:0;">3</span> DiT / Flow-Matching 成为 TTS 主流架构</h3>
+    <p>F5-TTS (ACL 2025)、Spark-TTS、CosyVoice 3 均采用。非自回归架构实现<strong>高质量 + 快速推理</strong>。82M 参数 (Kokoro) 达到大模型级别质量。</p>
+    <div class="tags">
+      <span class="tag">F5-TTS</span>
+      <span class="tag">Spark-TTS</span>
+      <span class="tag">CosyVoice 3</span>
+      <span class="tag">Kokoro 82M</span>
+      <span class="tag">Flow Matching</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-left: 3px solid #fb923c;">
+    <h3><span style="background:#fb923c; color:#0f1117; border-radius:50%; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:0.85em; flex-shrink:0;">4</span> 语义级 Turn Detection 替代静默检测</h3>
+    <p>Pipecat Smart Turn v3、Speechmatics SLM-based detection 从纯 VAD 的 ~70% 准确率提升到 <strong>~90%+</strong>。<strong>2025 年被称为"Turn Detection 年"</strong>。</p>
+    <div class="tags">
+      <span class="tag">Smart Turn v3</span>
+      <span class="tag">Speechmatics</span>
+      <span class="tag">SLM-based</span>
+      <span class="tag">语义 VAD</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-left: 3px solid #a78bfa;">
+    <h3><span style="background:#a78bfa; color:#fff; border-radius:50%; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:0.85em; flex-shrink:0;">5</span> 端侧部署日趋成熟</h3>
+    <p>Sherpa-ONNX 覆盖全平台 (10 种编程语言)，whisper.cpp 量化模型 <strong>40MB RAM</strong> 可运行，AMD Ryzen AI 已验证生产级部署。<strong>端侧 VAD + 云端 ASR/TTS 的 hybrid 架构成为主流</strong>。</p>
+    <div class="tags">
+      <span class="tag">Sherpa-ONNX</span>
+      <span class="tag">whisper.cpp</span>
+      <span class="tag">Ryzen AI</span>
+      <span class="tag">Hybrid 架构</span>
+      <span class="tag">量化部署</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-left: 3px solid #f87171;">
+    <h3><span style="background:#f87171; color:#fff; border-radius:50%; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:0.85em; flex-shrink:0;">6</span> 开源音频 AI 生态爆发</h3>
+    <p><strong>中国团队贡献突出</strong>：Qwen3-ASR、SenseVoice、CosyVoice、Fish Speech、ChatTTS、Spark-TTS。多个 Apache 2.0 协议模型达到 SOTA 水平。</p>
+    <div class="tags">
+      <span class="tag">Qwen3-ASR</span>
+      <span class="tag">SenseVoice</span>
+      <span class="tag">CosyVoice</span>
+      <span class="tag">Fish Speech</span>
+      <span class="tag">ChatTTS</span>
+      <span class="tag">Spark-TTS</span>
+      <span class="tag">Apache 2.0</span>
+    </div>
+  </div>
+
+  <!-- 市场数据 -->
+  <div class="card">
+    <h3>Voice AI 市场数据</h3>
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="value">$2.54B</div>
+        <div class="label">2025 年 Voice AI Agent 市场规模</div>
+      </div>
+      <div class="kpi">
+        <div class="value">39%</div>
+        <div class="label">复合年增长率 (CAGR)</div>
+      </div>
+      <div class="kpi">
+        <div class="value">300+</div>
+        <div class="label">Google Chirp 覆盖语言数</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 对嵌入式音频开发的启示 -->
+  <div class="card">
+    <h3>对嵌入式音频开发的启示</h3>
+    <p>以下是 Voice AI 领域进展对 Cortex-M 级嵌入式音频开发的直接参考价值：</p>
+    <ul>
+      <li><strong>RNNoise 和 DeepFilterNet</strong> 的低复杂度设计可直接参考 Cortex-M 部署</li>
+      <li><strong>ONNX / TFLite 量化 pipeline</strong> 适用于 MCU 级部署</li>
+      <li><strong>Sherpa-ONNX 的嵌入式构建指南</strong> 提供直接可用技术路线</li>
+      <li><strong>端侧 VAD + 云端 ASR/TTS</strong> 的 hybrid 架构可能是最优解</li>
+      <li><strong>SincNet 等可学习前端</strong> 值得在 MCU 上实验</li>
+      <li><strong>30KB 级 KWS</strong> 已成熟，可参考 TinyML 最佳实践</li>
+    </ul>
+  </div>
+
+  <!-- 来源汇总 -->
+  <div class="card">
+    <h3>数据来源汇总</h3>
+    <p>本报告数据主要来自以下渠道：</p>
+    <ul>
+      <li><strong>学术论文</strong> — arXiv、NeurIPS / ICML / ACL / Interspeech 论文</li>
+      <li><strong>开源项目</strong> — GitHub 开源仓库与文档</li>
+      <li><strong>官方博客</strong> — OpenAI / Google / Meta / NVIDIA / Alibaba 官方技术博客</li>
+      <li><strong>模型卡片</strong> — Hugging Face 模型卡片与技术报告</li>
+      <li><strong>行业分析</strong> — 行业分析报告与市场数据</li>
+    </ul>
+  </div>
+
+</div>
+
+</main>
+
+<footer>
+  <p>音频交互与前端理解技术调研报告 — 2025年5月 — 由 Claude Deep Research Agent Team 生成</p>
+  <p style="margin-top:6px;color:var(--text3)">数据来源：arXiv、GitHub、官方博客、Hugging Face、技术论文、行业报告</p>
+</footer>
+</div>
+
+</body>
+</html>

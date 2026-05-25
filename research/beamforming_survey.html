@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>音频波束增强算法 SOTA 综述</title>
+<style>
+/* ===== Reset & Base ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0e17;--bg2:#111827;--bg3:#1a2234;--bg4:#243049;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --accent:#38bdf8;--accent2:#818cf8;--accent3:#34d399;
+  --warn:#fbbf24;--danger:#f87171;--pink:#f472b6;
+  --border:#1e293b;--radius:12px;--radius-sm:8px;
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --mono:'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;
+}
+html{scroll-behavior:smooth;font-size:15px}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.65;overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg3);padding:2px 6px;border-radius:4px}
+
+/* ===== Layout ===== */
+.container{max-width:1280px;margin:0 auto;padding:0 24px}
+
+/* ===== Hero ===== */
+.hero{
+  position:relative;padding:80px 0 60px;
+  background:linear-gradient(135deg,#0a0e17 0%,#0f1a2e 40%,#162040 100%);
+  border-bottom:1px solid var(--border);overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;top:-50%;right:-20%;width:600px;height:600px;
+  background:radial-gradient(circle,rgba(56,189,248,.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero::after{
+  content:'';position:absolute;bottom:-40%;left:-10%;width:500px;height:500px;
+  background:radial-gradient(circle,rgba(129,140,248,.06) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero h1{font-size:2.6rem;font-weight:800;letter-spacing:-.02em;margin-bottom:12px;
+  background:linear-gradient(135deg,#e2e8f0,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero .subtitle{font-size:1.1rem;color:var(--text2);margin-bottom:32px;max-width:700px}
+.hero .meta{display:flex;gap:24px;flex-wrap:wrap;font-size:.85rem;color:var(--text3)}
+.hero .meta span{display:flex;align-items:center;gap:6px}
+
+/* ===== Stats Row ===== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-top:32px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center}
+.stat-card .num{font-size:2rem;font-weight:800;color:var(--accent)}
+.stat-card .label{font-size:.8rem;color:var(--text3);margin-top:4px}
+.stat-card:nth-child(2) .num{color:var(--accent2)}
+.stat-card:nth-child(3) .num{color:var(--accent3)}
+.stat-card:nth-child(4) .num{color:var(--warn)}
+.stat-card:nth-child(5) .num{color:var(--pink)}
+
+/* ===== Nav ===== */
+.nav{position:sticky;top:0;z-index:100;background:rgba(10,14,23,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-inner{display:flex;gap:4px;padding:8px 0;overflow-x:auto;scrollbar-width:none}
+.nav-inner::-webkit-scrollbar{display:none}
+.nav-btn{
+  padding:10px 18px;border:none;background:transparent;color:var(--text3);
+  font-size:.88rem;font-weight:600;border-radius:var(--radius-sm);cursor:pointer;
+  white-space:nowrap;transition:all .2s;
+}
+.nav-btn:hover{color:var(--text);background:var(--bg3)}
+.nav-btn.active{color:var(--accent);background:rgba(56,189,248,.1)}
+
+/* ===== Sections ===== */
+.section{display:none;padding:48px 0;animation:fadeIn .3s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.section-title{font-size:1.6rem;font-weight:700;margin-bottom:8px}
+.section-desc{color:var(--text2);margin-bottom:32px;max-width:700px}
+
+/* ===== Cards Grid ===== */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:20px}
+.card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:24px;transition:all .25s;position:relative;overflow:hidden;
+}
+.card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--shadow)}
+.card .tag{
+  display:inline-block;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  padding:3px 10px;border-radius:20px;margin-bottom:12px;
+}
+.tag-trad{background:rgba(56,189,248,.15);color:var(--accent)}
+.tag-ai{background:rgba(129,140,248,.15);color:var(--accent2)}
+.tag-hybrid{background:rgba(52,211,153,.15);color:var(--accent3)}
+.tag-embedded{background:rgba(251,191,36,.15);color:var(--warn)}
+.tag-diffusion{background:rgba(244,114,182,.15);color:var(--pink)}
+.tag-attn{background:rgba(167,139,250,.15);color:#a78bfa}
+
+.card h3{font-size:1.1rem;margin-bottom:8px}
+.card p{font-size:.88rem;color:var(--text2);line-height:1.6}
+.card .year{position:absolute;top:16px;right:20px;font-size:.75rem;color:var(--text3);font-family:var(--mono)}
+
+/* ===== Spec Table (inside cards) ===== */
+.spec{width:100%;border-collapse:collapse;margin-top:12px;font-size:.82rem}
+.spec td{padding:5px 0;border-bottom:1px solid var(--border)}
+.spec td:first-child{color:var(--text3);width:40%;font-family:var(--mono);font-size:.78rem}
+.spec td:last-child{color:var(--text);font-weight:500}
+.spec tr:last-child td{border-bottom:none}
+
+/* ===== Expandable Card ===== */
+.expand-btn{
+  display:inline-flex;align-items:center;gap:4px;margin-top:12px;
+  background:none;border:none;color:var(--accent);font-size:.82rem;cursor:pointer;
+  font-weight:600;
+}
+.expand-btn:hover{text-decoration:underline}
+.expand-btn::after{content:'▸';transition:transform .2s}
+.expand-btn.open::after{transform:rotate(90deg)}
+.expand-content{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.expand-content.show{display:block;animation:fadeIn .2s ease}
+
+/* ===== Comparison Table ===== */
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+.table-wrap table{width:100%;border-collapse:collapse;font-size:.85rem}
+.table-wrap th{
+  background:var(--bg3);padding:12px 16px;text-align:left;font-weight:700;
+  color:var(--text2);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;
+  position:sticky;top:0;white-space:nowrap;
+}
+.table-wrap td{padding:10px 16px;border-top:1px solid var(--border);white-space:nowrap}
+.table-wrap tr:hover td{background:rgba(56,189,248,.04)}
+.table-wrap .metric{font-family:var(--mono);font-weight:600;color:var(--accent)}
+.table-wrap .good{color:var(--accent3)}
+.table-wrap .mid{color:var(--warn)}
+.table-wrap .bad{color:var(--danger)}
+
+/* ===== Bar Chart ===== */
+.chart{margin:24px 0}
+.chart-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.chart-label{width:120px;text-align:right;font-size:.82rem;color:var(--text2);flex-shrink:0}
+.chart-bar-wrap{flex:1;height:28px;background:var(--bg3);border-radius:6px;overflow:hidden;position:relative}
+.chart-bar{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:10px;
+  font-size:.75rem;font-weight:600;color:#fff;transition:width .8s cubic-bezier(.22,1,.36,1);min-width:fit-content}
+.chart-bar.c1{background:linear-gradient(90deg,#0ea5e9,#38bdf8)}
+.chart-bar.c2{background:linear-gradient(90deg,#6366f1,#818cf8)}
+.chart-bar.c3{background:linear-gradient(90deg,#10b981,#34d399)}
+.chart-bar.c4{background:linear-gradient(90deg,#f59e0b,#fbbf24);color:#1a1a1a}
+.chart-bar.c5{background:linear-gradient(90deg,#ec4899,#f472b6)}
+.chart-val{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:.75rem;color:var(--text3);font-family:var(--mono)}
+
+/* ===== Timeline ===== */
+.timeline{position:relative;padding-left:32px}
+.timeline::before{content:'';position:absolute;left:12px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--accent),var(--accent2),var(--accent3))}
+.tl-item{position:relative;margin-bottom:28px}
+.tl-item::before{
+  content:'';position:absolute;left:-24px;top:6px;width:12px;height:12px;
+  border-radius:50%;border:2px solid var(--accent);background:var(--bg);
+}
+.tl-item:nth-child(even)::before{border-color:var(--accent2)}
+.tl-item:nth-child(3n)::before{border-color:var(--accent3)}
+.tl-year{font-size:.78rem;color:var(--accent);font-weight:700;font-family:var(--mono)}
+.tl-title{font-size:1rem;font-weight:600;margin:2px 0}
+.tl-desc{font-size:.85rem;color:var(--text2)}
+
+/* ===== Platform Cards ===== */
+.platforms{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.platform{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px;text-align:center;position:relative;
+}
+.platform.highlight{border-color:var(--accent3);box-shadow:0 0 20px rgba(52,211,153,.1)}
+.platform .plat-name{font-weight:700;font-size:1rem;margin-bottom:4px}
+.platform .plat-chip{font-size:.75rem;color:var(--text3);font-family:var(--mono)}
+.platform .plat-stats{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left}
+.platform .plat-stats .s{font-size:.75rem}
+.platform .plat-stats .s .v{font-size:.9rem;font-weight:700;color:var(--accent);display:block}
+.platform .best{position:absolute;top:-1px;right:16px;background:var(--accent3);color:#0a0e17;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:0 0 6px 6px}
+
+/* ===== Tabs inside section ===== */
+.sub-tabs{display:flex;gap:4px;margin-bottom:24px;flex-wrap:wrap}
+.sub-tab{padding:8px 16px;border:1px solid var(--border);background:transparent;color:var(--text3);
+  border-radius:var(--radius-sm);cursor:pointer;font-size:.82rem;font-weight:600;transition:all .2s}
+.sub-tab:hover{color:var(--text);border-color:var(--text3)}
+.sub-tab.active{background:rgba(56,189,248,.1);border-color:var(--accent);color:var(--accent)}
+.sub-panel{display:none}.sub-panel.active{display:block;animation:fadeIn .2s ease}
+
+/* ===== Footer ===== */
+.footer{text-align:center;padding:40px 0;border-top:1px solid var(--border);color:var(--text3);font-size:.82rem}
+
+/* ===== Responsive ===== */
+@media(max-width:768px){
+  .hero h1{font-size:1.8rem}
+  .cards{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .platforms{grid-template-columns:1fr 1fr}
+}
+@media(max-width:480px){
+  .stats{grid-template-columns:1fr 1fr}
+  .platforms{grid-template-columns:1fr}
+}
+
+/* ===== Tooltip ===== */
+.tip{position:relative;cursor:help;border-bottom:1px dashed var(--text3)}
+.tip:hover::after{
+  content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:var(--bg4);color:var(--text);padding:6px 12px;border-radius:6px;font-size:.78rem;
+  white-space:nowrap;z-index:10;box-shadow:var(--shadow);pointer-events:none;
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="container">
+    <h1>音频波束增强算法 SOTA 综述</h1>
+    <p class="subtitle">State-of-the-Art Survey: Traditional &amp; AI-Based Beamforming Enhancement for Audio/Speech &mdash; 2020&ndash;2026</p>
+    <div class="meta">
+      <span>📅 2020 – 2026</span>
+      <span>📖 43+ 参考文献</span>
+      <span>🏗️ 7+ 关键架构</span>
+      <span>⚡ 嵌入式部署分析</span>
+    </div>
+    <div class="stats">
+      <div class="stat-card"><div class="num">6</div><div class="label">传统算法类别</div></div>
+      <div class="stat-card"><div class="num">7</div><div class="label">AI 方法类别</div></div>
+      <div class="stat-card"><div class="num">7</div><div class="label">关键网络架构</div></div>
+      <div class="stat-card"><div class="num">6</div><div class="label">嵌入式平台</div></div>
+      <div class="stat-card"><div class="num">43+</div><div class="label">参考文献</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== NAV ===== -->
+<nav class="nav"><div class="container">
+  <div class="nav-inner">
+    <button class="nav-btn active" data-tab="overview">概览</button>
+    <button class="nav-btn" data-tab="traditional">传统方法</button>
+    <button class="nav-btn" data-tab="ai">AI 方法</button>
+    <button class="nav-btn" data-tab="arch">架构详解</button>
+    <button class="nav-btn" data-tab="compare">对比分析</button>
+    <button class="nav-btn" data-tab="bench">Benchmark</button>
+    <button class="nav-btn" data-tab="embedded">嵌入式部署</button>
+    <button class="nav-btn" data-tab="timeline">时间线</button>
+    <button class="nav-btn" data-tab="resources">资源</button>
+  </div>
+</div></nav>
+
+<main class="container">
+
+<!-- ===== OVERVIEW ===== -->
+<section id="overview" class="section active">
+  <h2 class="section-title">研究概览</h2>
+  <p class="section-desc">麦克风阵列波束成形技术的三代演进与核心研究问题</p>
+
+  <div class="cards" style="margin-bottom:36px">
+    <div class="card">
+      <span class="tag tag-trad">第一代</span>
+      <h3>经典信号处理时代</h3>
+      <p><strong>1970s – 2010s</strong></p>
+      <p style="margin-top:8px">MVDR、LCMV、GSC、MWF 等基于统计信号处理的优化框架。数学严谨，可解释性强，但依赖精确的模型假设。</p>
+      <div style="margin-top:12px">
+        <table class="spec">
+          <tr><td>可解释性</td><td>高（数学公式）</td></tr>
+          <tr><td>训练数据</td><td>无需</td></tr>
+          <tr><td>实时延迟</td><td>&lt; 20 ms</td></tr>
+          <tr><td>嵌入式部署</td><td>成熟</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <span class="tag tag-hybrid">第二代</span>
+      <h3>神经-传统融合时代</h3>
+      <p><strong>2016 – 2022</strong></p>
+      <p style="margin-top:8px">DNN 预测 mask / 协方差矩阵，驱动传统波束成形器。保留数学保证，获得数据驱动鲁棒性。当前工程最佳折中。</p>
+      <div style="margin-top:12px">
+        <table class="spec">
+          <tr><td>可解释性</td><td>中（部分可检查）</td></tr>
+          <tr><td>训练数据</td><td>中等（paired）</td></tr>
+          <tr><td>实时延迟</td><td>5 – 50 ms</td></tr>
+          <tr><td>嵌入式部署</td><td>前沿 (DATE 2026)</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <span class="tag tag-ai">第三代</span>
+      <h3>端到端神经波束成形</h3>
+      <p><strong>2020 – 至今</strong></p>
+      <p style="margin-top:8px">完全可学习的波束成形网络、扩散模型等生成方法。理论性能最高，但域外泛化差，计算量大。</p>
+      <div style="margin-top:12px">
+        <table class="spec">
+          <tr><td>可解释性</td><td>低（黑箱）</td></tr>
+          <tr><td>训练数据</td><td>大量</td></tr>
+          <tr><td>实时延迟</td><td>5 – 100 ms</td></tr>
+          <tr><td>嵌入式部署</td><td>困难</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="font-size:1.1rem;margin-bottom:16px">三代方法关键维度对比</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>维度</th><th>传统信号处理</th><th>混合 (DNN+传统)</th><th>端到端神经</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>可解释性</td><td class="good">●●● 高</td><td class="mid">●●○ 中</td><td class="bad">●○○ 低</td></tr>
+        <tr><td>鲁棒性</td><td class="bad">依赖精确假设</td><td class="good">数据驱动鲁棒</td><td class="mid">域外泛化差</td></tr>
+        <tr><td>性能上限</td><td class="mid">受 mask/SCM 限制</td><td class="good">当前最佳折中</td><td class="good">理论最高</td></tr>
+        <tr><td>计算量</td><td class="good">低</td><td class="mid">中</td><td class="bad">高</td></tr>
+        <tr><td>实时可行</td><td class="good">&lt; 20 ms</td><td class="good">5 – 50 ms</td><td class="mid">部分可行</td></tr>
+        <tr><td>嵌入式部署</td><td class="good">成熟</td><td class="mid">前沿</td><td class="bad">困难</td></tr>
+        <tr><td>训练数据需求</td><td class="good">无</td><td class="mid">中等</td><td class="bad">大量</td></tr>
+        <tr><td>多说话人</td><td class="bad">困难</td><td class="mid">PIT / mask</td><td class="good">端到端分离</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== TRADITIONAL ===== -->
+<section id="traditional" class="section">
+  <h2 class="section-title">传统波束增强算法</h2>
+  <p class="section-desc">6 类经典信号处理方法及其 2020–2026 最新改进</p>
+
+  <div class="sub-tabs">
+    <button class="sub-tab active" data-sub="mvdr">MVDR</button>
+    <button class="sub-tab" data-sub="gev">GEV</button>
+    <button class="sub-tab" data-sub="gsc">LCMV/GSC</button>
+    <button class="sub-tab" data-sub="mwf">MWF</button>
+    <button class="sub-tab" data-sub="super">超指向性</button>
+    <button class="sub-tab" data-sub="trad-perf">性能总览</button>
+  </div>
+
+  <div id="sub-mvdr" class="sub-panel active">
+    <div class="cards">
+      <div class="card">
+        <span class="tag tag-trad">MVDR</span><span class="year">2022</span>
+        <h3>紧凑噪声协方差模型</h3>
+        <p>利用噪声场的低秩结构减少参数估计量</p>
+        <table class="spec"><tr><td>WER 改进</td><td>5–10% (CHiME-4)</td></tr><tr><td>发表</td><td>IEEE/ACM TASLP 2022</td></tr></table>
+      </div>
+      <div class="card">
+        <span class="tag tag-trad">MVDR</span><span class="year">2023</span>
+        <h3>协方差重构 MVDR</h3>
+        <p>重构排除目标信号的干扰+噪声协方差矩阵</p>
+        <table class="spec"><tr><td>输出 SNR 提升</td><td>1.5–3 dB</td></tr><tr><td>发表</td><td>Applied Acoustics 2023</td></tr></table>
+      </div>
+      <div class="card">
+        <span class="tag tag-trad">MVDR</span><span class="year">2023</span>
+        <h3>后向校正+全加载 MVDR</h3>
+        <p>联合导向矢量后向校正和对角加载</p>
+        <table class="spec"><tr><td>改进</td><td>导向矢量失配鲁棒性</td></tr><tr><td>发表</td><td>Applied Sciences 2023</td></tr></table>
+      </div>
+      <div class="card">
+        <span class="tag tag-trad">MVDR</span><span class="year">2022</span>
+        <h3>帧级 MVDR 无 DNN</h3>
+        <p>递归协方差估计实现低延迟，无需神经网络</p>
+        <table class="spec"><tr><td>延迟</td><td>&lt; 20 ms</td></tr><tr><td>发表</td><td>Telecom Paris 2022</td></tr></table>
+      </div>
+    </div>
+    <div style="margin-top:20px;padding:16px;background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border)">
+      <strong style="color:var(--warn)">⚠ 局限性</strong>
+      <ul style="margin-top:8px;padding-left:20px;color:var(--text2);font-size:.88rem">
+        <li>协方差重构假设干扰区域可识别——目标与干扰空间接近时失效</li>
+        <li>高混响（RT60 &gt; 0.8s）下 rank-1 假设崩溃</li>
+        <li>在线处理中，短观测窗口导致协方差估计不稳定</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="sub-gev" class="sub-panel">
+    <div class="cards">
+      <div class="card">
+        <span class="tag tag-trad">GEV</span><span class="year">2016</span>
+        <h3>NN-GEV (奠基工作)</h3>
+        <p>Heymann &amp; Drude: NN 预测 mask → CPSD 矩阵 → GEV 波束成形</p>
+      </div>
+      <div class="card">
+        <span class="tag tag-trad">GEV</span><span class="year">2019</span>
+        <h3>无监督 mask 训练</h3>
+        <p>Drude: 消除对 clean reference 的依赖</p>
+      </div>
+      <div class="card">
+        <span class="tag tag-trad">GEV</span><span class="year">2023</span>
+        <h3>干扰泄漏后置滤波</h3>
+        <p>PESQ 提升 0.1–0.3</p>
+      </div>
+    </div>
+    <div style="margin-top:20px;padding:16px;background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border)">
+      <p style="color:var(--text2);font-size:.88rem">
+        <strong style="color:var(--accent)">性能:</strong> CHiME-3/4 上 NN-GEV pipeline 实现 WER 降低 20–40%（相对），比同条件 MVDR 降低 5–15%。
+      </p>
+    </div>
+  </div>
+
+  <div id="sub-gsc" class="sub-panel">
+    <div class="cards">
+      <div class="card">
+        <span class="tag tag-trad">GSC</span><span class="year">2021</span>
+        <h3>软约束 GSC</h3>
+        <p>用软约束替代阻塞矩阵的硬零约束</p>
+        <table class="spec"><tr><td>目标失真降低</td><td>30–50%</td></tr><tr><td>SNR 提升</td><td>2–4 dB</td></tr></table>
+      </div>
+      <div class="card">
+        <span class="tag tag-trad">GSC</span><span class="year">2026</span>
+        <h3>时域 ROI-GSC</h3>
+        <p>Cohen &amp; Gannot: 完全时域 GSC，避免频域伪影</p>
+        <table class="spec"><tr><td>发表</td><td>ICASSP 2026 提交</td></tr></table>
+      </div>
+    </div>
+  </div>
+
+  <div id="sub-mwf" class="sub-panel">
+    <div class="cards">
+      <div class="card">
+        <span class="tag tag-trad">MWF</span><span class="year">2018</span>
+        <h3>Rank-1 约束 MWF</h3>
+        <p>约束语音协方差矩阵为 rank-1，稳定滤波器计算</p>
+        <table class="spec"><tr><td>WER</td><td>9.0% → 5.6% (CHiME-4)</td></tr></table>
+      </div>
+      <div class="card">
+        <span class="tag tag-trad">MWF</span><span class="year">2022</span>
+        <h3>卷积加权 MWF</h3>
+        <p>多抽头卷积滤波器联合去混响和降噪</p>
+        <table class="spec"><tr><td>WER 改进</td><td>相对 15–20%</td></tr></table>
+      </div>
+      <div class="card">
+        <span class="tag tag-trad">MWF</span><span class="year">2023</span>
+        <h3>低延迟在线 PMWF</h3>
+        <p>自适应遗忘因子的递归协方差估计</p>
+        <table class="spec"><tr><td>延迟</td><td>32 ms</td></tr><tr><td>PESQ 偏差</td><td>&lt; 0.1</td></tr></table>
+      </div>
+    </div>
+  </div>
+
+  <div id="sub-super" class="sub-panel">
+    <div class="cards">
+      <div class="card">
+        <span class="tag tag-trad">Superdirective</span><span class="year">2025</span>
+        <h3>拓扑优化超指向性</h3>
+        <p>联合优化麦克风位置和波束成形权重</p>
+      </div>
+      <div class="card">
+        <span class="tag tag-trad">Superdirective</span><span class="year">2020</span>
+        <h3>双耳异相超指向性</h3>
+        <p>优化左右耳麦克风相位关系保 ITD 线索</p>
+      </div>
+      <div class="card">
+        <span class="tag tag-trad">Superdirective</span><span class="year">2025</span>
+        <h3>圆形阵列超指向性</h3>
+        <p>全 360° 转向无方向退化</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="sub-trad-perf" class="sub-panel">
+    <h3 style="margin-bottom:16px">传统方法性能总览</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>算法</th><th>SNR 提升</th><th>PESQ 提升</th><th>WER 降低</th><th>延迟</th><th>实时</th></tr></thead>
+        <tbody>
+          <tr><td>鲁棒 MVDR (协方差重构)</td><td class="metric">3–6 dB</td><td>+0.3–0.5</td><td>20–30%</td><td>20–40 ms</td><td class="good">✓</td></tr>
+          <tr><td>GEV + 后置滤波</td><td class="metric">5–10 dB</td><td>+0.4–0.7</td><td>25–40%</td><td>30–50 ms</td><td class="good">✓</td></tr>
+          <tr><td>GSC (软约束)</td><td class="metric">2–5 dB</td><td>+0.2–0.4</td><td>15–25%</td><td>10–20 ms</td><td class="good">✓</td></tr>
+          <tr><td>参数化 MWF (rank-1)</td><td class="metric">4–8 dB</td><td>+0.3–0.6</td><td>30–38%</td><td>30–60 ms</td><td class="good">✓</td></tr>
+          <tr><td>超指向性 (WNG 约束)</td><td class="metric">5–9.5 dB</td><td>+0.2–0.4</td><td>N/A</td><td>&lt; 5 ms</td><td class="good">✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== AI METHODS ===== -->
+<section id="ai" class="section">
+  <h2 class="section-title">AI / 深度学习方法</h2>
+  <p class="section-desc">7 类 AI 方法的核心架构与关键突破</p>
+
+  <div class="sub-tabs">
+    <button class="sub-tab active" data-sub="ai-mask">Mask-Based</button>
+    <button class="sub-tab" data-sub="ai-e2e">端到端</button>
+    <button class="sub-tab" data-sub="ai-scm">SCM 估计</button>
+    <button class="sub-tab" data-sub="ai-attn">Attention</button>
+    <button class="sub-tab" data-sub="ai-ssl">自监督</button>
+    <button class="sub-tab" data-sub="ai-diff">扩散模型</button>
+  </div>
+
+  <div id="sub-ai-mask" class="sub-panel active">
+    <p style="color:var(--text2);margin-bottom:20px;font-size:.9rem">
+      最成熟的混合范式：DNN 预测时频 mask → 协方差矩阵 → MVDR/GEV 波束成形。相比纯传统方法有 2–4 dB SDR 提升。
+    </p>
+    <div class="cards">
+      <div class="card"><span class="tag tag-hybrid">Mask+BF</span><span class="year">2016</span><h3>NN-GEV 奠基</h3><p>Heymann &amp; Drude: BLSTM mask → GEV，PESQ 显著提升</p></div>
+      <div class="card"><span class="tag tag-hybrid">Mask+BF</span><span class="year">2017</span><h3>迭代 MVDR</h3><p>Mask → BF → refined mask → better BF，SDR ~12–14 dB</p></div>
+      <div class="card"><span class="tag tag-hybrid">Mask+BF</span><span class="year">2022</span><h3>AttentionPIT</h3><p>软注意力替代硬 PIT 排列，SI-SNRi ~18–20 dB</p></div>
+      <div class="card"><span class="tag tag-hybrid">Mask+BF</span><span class="year">2023</span><h3>DNN 直接参数估计</h3><p>DNN 直接预测导向矢量和噪声 SCM，绕过显式 mask</p></div>
+    </div>
+  </div>
+
+  <div id="sub-ai-e2e" class="sub-panel">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>架构</th><th>年份</th><th>核心思想</th><th>SI-SNRi</th><th>参数量</th></tr></thead>
+        <tbody>
+          <tr><td><strong>FaSNet</strong></td><td>2019</td><td>时域端到端 filter-and-sum</td><td class="metric">~13 dB</td><td>~2M</td></tr>
+          <tr><td><strong>iFaSNet</strong></td><td>2021</td><td>隐式 filter-and-sum</td><td class="metric">~16–18 dB</td><td>~2.5M</td></tr>
+          <tr><td><strong>EaBNet</strong></td><td>2021</td><td>嵌入模块+波束成形模块</td><td class="metric">PESQ +0.3–0.5</td><td>~3M</td></tr>
+          <tr><td><strong>TaylorBM</strong></td><td>2023</td><td>Taylor 展开启发 beam-space 字典学习</td><td class="metric">进一步提升</td><td>~3M</td></tr>
+          <tr><td><strong>统一全神经 BF</strong></td><td>2022</td><td>统一时域和频域</td><td class="metric">SDR 15–18 dB</td><td>Varies</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="sub-ai-scm" class="sub-panel">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>方法</th><th>年份</th><th>创新</th></tr></thead>
+        <tbody>
+          <tr><td>谱+空间特征 mask</td><td>2020</td><td>融合 IPD/ILD 跨通道 + 频谱特征</td></tr>
+          <tr><td>改进语音 SCM</td><td>2023</td><td>PSD+RTF 参数化，在线估计</td></tr>
+          <tr><td>混响 SCM 估计</td><td>2020</td><td>选择混响主导的 T-F bin 估计 SCM</td></tr>
+          <tr><td>方向保持 MIMO SE</td><td>2025</td><td>全盲方向保持，NN 估计噪声 SCM</td></tr>
+          <tr><td>SCM 重构</td><td>2026</td><td>混响多源环境 SCM 重构 (ICASSP)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:16px;padding:12px 16px;background:var(--bg2);border-radius:var(--radius);border-left:3px solid var(--accent2);font-size:.88rem;color:var(--text2)">
+      <strong>关键发现:</strong> DNN 估计的 SCM 在低 SNR 和高混响下一致优于解析 SCM，谱-空间特征融合额外贡献 1–2 dB SDR。
+    </div>
+  </div>
+
+  <div id="sub-ai-attn" class="sub-panel">
+    <div class="cards">
+      <div class="card">
+        <span class="tag tag-attn">Attention</span><span class="year">2023</span>
+        <h3>TF-GridNet</h3>
+        <p>3 路径: 全频带 + 子频带 + 自注意力 | SI-SNRi 23.5 dB</p>
+      </div>
+      <div class="card">
+        <span class="tag tag-attn">Attention</span><span class="year">2024</span>
+        <h3>MossFormer2</h3>
+        <p>卷积增强注意力 + 无 RNN 递归 | ~50M params</p>
+      </div>
+      <div class="card">
+        <span class="tag tag-attn">Attention</span><span class="year">2024</span>
+        <h3>CADB-Conformer</h3>
+        <p>通道感知双分支 Conformer</p>
+      </div>
+      <div class="card">
+        <span class="tag tag-attn">Attention</span><span class="year">2024</span>
+        <h3>几何鲁棒注意力 BF</h3>
+        <p>阵列几何和移动说话人鲁棒</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="sub-ai-ssl" class="sub-panel">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>工作</th><th>年份</th><th>创新</th></tr></thead>
+        <tbody>
+          <tr><td>SSL 嵌入增强 SE</td><td>2022</td><td>wav2vec 2.0 / HuBERT / WavLM 嵌入作为 SE 特征</td></tr>
+          <tr><td>多通道 SSL 神经转录器</td><td>2024</td><td>wav2vec 2.0 预训练扩展到多通道</td></tr>
+          <tr><td>端到端 ASR+去混响+BF+SSL</td><td>2022</td><td>WPE+BF+SSL 端到端训练</td></tr>
+          <tr><td>Meta 无 BF 多通道 SE</td><td>2022</td><td>绕过传统 BF，学习空间表征</td></tr>
+          <tr><td>CHiME-7 UDASE</td><td>2023</td><td>无监督域自适应，无需 paired 数据</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="sub-ai-diff" class="sub-panel">
+    <div class="cards">
+      <div class="card">
+        <span class="tag tag-diffusion">Diffusion</span><span class="year">2022</span>
+        <h3>SGMSE</h3>
+        <p>复数 STFT 域分数扩散 | SI-SDR 15.1 dB | 3.56M</p>
+        <table class="spec"><tr><td>感知质量</td><td>优于判别方法</td></tr><tr><td>采样</td><td>Predictor-Corrector</td></tr></table>
+      </div>
+      <div class="card">
+        <span class="tag tag-diffusion">Diffusion</span><span class="year">2025</span>
+        <h3>AMDM-SE</h3>
+        <p>首个原生多通道扩散 SE | 注意力多通道扩散</p>
+      </div>
+      <div class="card">
+        <span class="tag tag-diffusion">Diffusion</span><span class="year">2024</span>
+        <h3>两阶段 BF+扩散</h3>
+        <p>神经波束成形 → 扩散 refinement | 空间滤波+生成先验互补</p>
+      </div>
+      <div class="card">
+        <span class="tag tag-diffusion">Diffusion</span><span class="year">2025</span>
+        <h3>图引导时空扩散</h3>
+        <p>GNN 建模麦克风空间关系 | 融合 MVDR 空间先验</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ARCHITECTURE ===== -->
+<section id="arch" class="section">
+  <h2 class="section-title">关键架构详解</h2>
+  <p class="section-desc">7 个代表性模型的精确架构规格、训练参数与性能数据</p>
+
+  <div class="cards">
+    <!-- TF-GridNet -->
+    <div class="card">
+      <span class="tag tag-attn">Attention</span><span class="year">TASLP 2023</span>
+      <h3>TF-GridNet</h3>
+      <p>Yi Luo, Zhuo Chen, Takuya Yoshioka (Microsoft)</p>
+      <table class="spec">
+        <tr><td>Block 数 B</td><td>6</td></tr>
+        <tr><td>嵌入维度 D</td><td>64</td></tr>
+        <tr><td>BLSTM hidden H</td><td>256</td></tr>
+        <tr><td>注意力头 L</td><td>4</td></tr>
+        <tr><td>卷积核 I / 步幅 J</td><td>8 / 1</td></tr>
+        <tr><td>每 block 模块</td><td>全频带→子频带→自注意力</td></tr>
+        <tr><td>训练</td><td>Adam, lr=0.001</td></tr>
+      </table>
+      <button class="expand-btn" onclick="toggleExpand(this)">Benchmark 详情</button>
+      <div class="expand-content">
+        <table class="spec">
+          <tr><td>WSJ0-2mix SI-SNRi</td><td class="good" style="font-size:1rem">23.5 dB</td></tr>
+          <tr><td>MC 变体 SMS-WSJ SDR</td><td>~14–16 dB</td></tr>
+          <tr><td>GitHub</td><td>espnet/espnet (9,842★)</td></tr>
+          <tr><td>DOI</td><td>10.1109/TASLP.2023.3248151</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- DCCRN -->
+    <div class="card">
+      <span class="tag tag-ai">CNN+LSTM</span><span class="year">Interspeech 2020</span>
+      <h3>DCCRN</h3>
+      <p>Hu et al. (Northwest University) — DNS 2020 冠军</p>
+      <table class="spec">
+        <tr><td>参数量</td><td>3.7M</td></tr>
+        <tr><td>Encoder</td><td>6 层复数卷积 {16,32,64,128,256,256}</td></tr>
+        <tr><td>LSTM</td><td>2 层复数 LSTM, hidden=256</td></tr>
+        <tr><td>Dense</td><td>FC 1280 units</td></tr>
+        <tr><td>Decoder</td><td>镜像 encoder + skip connections</td></tr>
+        <tr><td>卷积核 / 步幅</td><td>(5,2) / (2,1)</td></tr>
+        <tr><td>损失</td><td>Complex MSE + SI-SNR</td></tr>
+      </table>
+      <button class="expand-btn" onclick="toggleExpand(this)">Benchmark 详情</button>
+      <div class="expand-content">
+        <table class="spec">
+          <tr><td>PESQ (VoiceBank-DEMAND)</td><td class="good" style="font-size:1rem">3.266</td></tr>
+          <tr><td>CSIG / CBAK / COVL</td><td>4.344 / 3.862 / 3.927</td></tr>
+          <tr><td>DNS Challenge 2020</td><td class="good">1st (real-time), 2nd (non-RT)</td></tr>
+          <tr><td>GitHub</td><td>huyanxin/DeepComplexCRN (478★)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- EaBNet -->
+    <div class="card">
+      <span class="tag tag-ai">End-to-End</span><span class="year">ICASSP 2022</span>
+      <h3>EaBNet</h3>
+      <p>Li et al. (Chinese Academy of Sciences)</p>
+      <table class="spec">
+        <tr><td>嵌入模块 (EM)</td><td>U2-Net (嵌套 U 形)</td></tr>
+        <tr><td>瓶颈 S-TCN</td><td>3 × 6 S-TCM, kernel=5</td></tr>
+        <tr><td>Dilation 模式</td><td>{1,2,4,8,16,32}</td></tr>
+        <tr><td>R-BF 模块</td><td>2 层单向 LSTM, hidden=64</td></tr>
+        <tr><td>训练</td><td>Adam, lr=5e-4, batch=8, 60 epochs</td></tr>
+      </table>
+      <button class="expand-btn" onclick="toggleExpand(this)">Benchmark 详情</button>
+      <div class="expand-content">
+        <table class="spec">
+          <tr><td></td><td><strong>EaBNet</strong></td><td><strong>+ PostNet</strong></td></tr>
+          <tr><td>PESQ</td><td class="good">3.52</td><td class="good" style="font-size:1rem">3.63</td></tr>
+          <tr><td>ESTOI</td><td>85.91%</td><td>87.06%</td></tr>
+          <tr><td>SDR</td><td>16.72 dB</td><td>17.12 dB</td></tr>
+          <tr><td>参数量</td><td>2.84M</td><td>8.78M</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- BSRNN -->
+    <div class="card">
+      <span class="tag tag-ai">Band-Split</span><span class="year">TASLP 2023</span>
+      <h3>BSRNN</h3>
+      <p>Yi Luo, Jianwei Yu (Microsoft / Western University)</p>
+      <table class="spec">
+        <tr><td>核心</td><td>频谱按带宽分割为子频带</td></tr>
+        <tr><td>处理</td><td>每子频带独立 RNN + 全频带聚合</td></tr>
+        <tr><td>SE 扩展</td><td>&lt;8kHz 双向, &gt;8kHz 单向</td></tr>
+        <tr><td>训练 (SE)</td><td>Adam, lr=0.001, MR+adversarial loss</td></tr>
+        <tr><td>Discriminator</td><td>MetricGAN + Multi-Resolution STFT</td></tr>
+      </table>
+      <button class="expand-btn" onclick="toggleExpand(this)">Benchmark 详情</button>
+      <div class="expand-content">
+        <table class="spec">
+          <tr><td>MUSDB18 SDR</td><td class="good">8.24 dB</td></tr>
+          <tr><td>MUSDB18 (semi-sup)</td><td class="good" style="font-size:1rem">8.97 dB</td></tr>
+          <tr><td>DNS-2020</td><td>SOTA ranking</td></tr>
+          <tr><td>DNS-2023</td><td>Top 3 finish</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- SGMSE -->
+    <div class="card">
+      <span class="tag tag-diffusion">Diffusion</span><span class="year">Interspeech 2022</span>
+      <h3>SGMSE / SGMSE+</h3>
+      <p>Lemercier et al. (Universität Hamburg)</p>
+      <table class="spec">
+        <tr><td>Score 网络</td><td>Modified DCUNet</td></tr>
+        <tr><td>参数量</td><td>3.56M</td></tr>
+        <tr><td>前向 SDE</td><td>Ornstein-Uhlenbeck 过程</td></tr>
+        <tr><td>采样</td><td>Predictor-Corrector</td></tr>
+        <tr><td>训练</td><td>Adam, lr=1e-4, batch=32, 325 ep</td></tr>
+        <tr><td>EMA decay</td><td>0.999</td></tr>
+      </table>
+      <button class="expand-btn" onclick="toggleExpand(this)">Benchmark 详情</button>
+      <div class="expand-content">
+        <table class="spec">
+          <tr><td>SI-SDR (VoiceBank-DEMAND)</td><td class="good" style="font-size:1rem">15.1 dB</td></tr>
+          <tr><td>SI-SIR</td><td>24.9 dB</td></tr>
+          <tr><td>SI-SAR</td><td>15.7 dB</td></tr>
+          <tr><td>感知质量</td><td>PESQ/DNSMOS 优于判别方法</td></tr>
+          <tr><td>GitHub</td><td>sp-uhh/sgmse (752★)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- FullSubNet+ -->
+    <div class="card">
+      <span class="tag tag-ai">Full+Sub</span><span class="year">ICASSP 2022</span>
+      <h3>FullSubNet+</h3>
+      <p>Chen et al. (Tsinghua / CUHK)</p>
+      <table class="spec">
+        <tr><td>输入</td><td>复数频谱 (mag+real+imag)</td></tr>
+        <tr><td>全频带 hidden</td><td>512</td></tr>
+        <tr><td>子频带 hidden</td><td>384</td></tr>
+        <tr><td>MulCA 卷积核</td><td>[3, 5, 10]</td></tr>
+        <tr><td>训练</td><td>Adam lr=0.001, batch=18, MSE</td></tr>
+        <tr><td>SNR 训练范围</td><td>[-5, 20] dB</td></tr>
+      </table>
+      <button class="expand-btn" onclick="toggleExpand(this)">Benchmark 详情</button>
+      <div class="expand-content">
+        <table class="spec">
+          <tr><td></td><td><strong>无注意力</strong></td><td><strong>FullSubNet+</strong></td></tr>
+          <tr><td>NB-PESQ</td><td>3.586</td><td class="good">3.592</td></tr>
+          <tr><td>SI-SDR</td><td>18.504 dB</td><td class="good">18.569 dB</td></tr>
+          <tr><td>CSIG</td><td>4.058</td><td class="good">4.075</td></tr>
+          <tr><td>评估</td><td colspan="2">DNS Challenge SOTA</td></tr>
+          <tr><td>GitHub</td><td colspan="2">RookieJunChen/FullSubNet-plus (294★)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- MVDR-Emb U-Net -->
+    <div class="card">
+      <span class="tag tag-hybrid">Hybrid</span><span class="year">ICASSP 2024</span>
+      <h3>MVDR-Embedded U-Net</h3>
+      <p>Lee et al. (Samsung Research America)</p>
+      <table class="spec">
+        <tr><td>骨干</td><td>U-Net encoder-decoder</td></tr>
+        <tr><td>关键模块</td><td>Intra-MVDR 嵌入 U-Net 内部</td></tr>
+        <tr><td>策略</td><td>MVDR 作为可微分中间层</td></tr>
+        <tr><td>发表</td><td>ICASSP 2024, Seoul</td></tr>
+        <tr><td>数据状态</td><td style="color:var(--warn)">⚠ 付费墙，精确数据不可获取</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== COMPARISON ===== -->
+<section id="compare" class="section">
+  <h2 class="section-title">对比分析</h2>
+  <p class="section-desc">跨架构性能对比与训练超参对比</p>
+
+  <h3 style="margin-bottom:16px">架构概览对比</h3>
+  <div class="table-wrap" style="margin-bottom:36px">
+    <table>
+      <thead>
+        <tr><th>模型</th><th>年份</th><th>域</th><th>参数量</th><th>多通道</th><th>核心创新</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>DCCRN</strong></td><td>2020</td><td>复数 T-F</td><td class="metric">3.7M</td><td>扩展</td><td>复值 CNN+LSTM</td></tr>
+        <tr><td><strong>FullSubNet+</strong></td><td>2022</td><td>复数 T-F</td><td class="metric">~5M</td><td>Yes</td><td>全/子频带+通道注意力</td></tr>
+        <tr><td><strong>TF-GridNet</strong></td><td>2023</td><td>复数 T-F</td><td class="metric">~5–8M</td><td>Yes</td><td>3 路径建模</td></tr>
+        <tr><td><strong>BSRNN</strong></td><td>2023</td><td>T-F 子频带</td><td class="metric">~3–5M</td><td>扩展中</td><td>Band-split RNN</td></tr>
+        <tr><td><strong>EaBNet</strong></td><td>2022</td><td>T-F</td><td class="metric">2.84M / 8.78M</td><td>Yes</td><td>全神经帧级 BF</td></tr>
+        <tr><td><strong>SGMSE</strong></td><td>2022</td><td>复数 T-F</td><td class="metric">3.56M</td><td>扩展中</td><td>分数扩散 (OU)</td></tr>
+        <tr><td><strong>MVDR-U-Net</strong></td><td>2024</td><td>T-F</td><td class="metric">—</td><td>Yes</td><td>U-Net 内嵌 MVDR</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="margin-bottom:16px">训练超参对比</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>模型</th><th>Optimizer</th><th>LR</th><th>Batch</th><th>Epochs</th><th>Loss</th></tr></thead>
+      <tbody>
+        <tr><td>DCCRN</td><td>Adam</td><td>—</td><td>—</td><td>—</td><td>SI-SDR</td></tr>
+        <tr><td>TF-GridNet</td><td>Adam</td><td class="metric">0.001</td><td>—</td><td>—</td><td>Multi-scale reconstruction</td></tr>
+        <tr><td>BSRNN (SE)</td><td>Adam</td><td class="metric">0.001</td><td>—</td><td>—</td><td>MR loss + adversarial</td></tr>
+        <tr><td>EaBNet</td><td>Adam</td><td class="metric">5e-4</td><td>8</td><td>60</td><td>SI-SDR + STFT</td></tr>
+        <tr><td>FullSubNet+</td><td>Adam</td><td class="metric">0.001</td><td>18</td><td>9999</td><td>MSE</td></tr>
+        <tr><td>SGMSE</td><td>Adam</td><td class="metric">1e-4</td><td>32</td><td>325</td><td>Denoising score matching</td></tr>
+        <tr><td>MVDR-U-Net</td><td colspan="5" style="color:var(--text3)">— (closed access)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== BENCHMARK ===== -->
+<section id="bench" class="section">
+  <h2 class="section-title">Benchmark 性能</h2>
+  <p class="section-desc">按数据集划分的精确性能数据</p>
+
+  <div class="sub-tabs">
+    <button class="sub-tab active" data-sub="bm-vbd">VoiceBank-DEMAND</button>
+    <button class="sub-tab" data-sub="bm-wsj">WSJ0-2mix</button>
+    <button class="sub-tab" data-sub="bm-dns">DNS Challenge</button>
+    <button class="sub-tab" data-sub="bm-chime">CHiME</button>
+  </div>
+
+  <div id="sub-bm-vbd" class="sub-panel active">
+    <h3 style="margin-bottom:8px">VoiceBank-DEMAND</h3>
+    <p style="color:var(--text2);font-size:.85rem;margin-bottom:20px">单通道语音增强经典 benchmark</p>
+    <div class="chart">
+      <div class="chart-row">
+        <div class="chart-label">PESQ</div>
+        <div class="chart-bar-wrap">
+          <div class="chart-bar c2" style="width:72.6%">3.63</div>
+          <span class="chart-val">EaBNet+PostNet</span>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-label">PESQ</div>
+        <div class="chart-bar-wrap">
+          <div class="chart-bar c2" style="width:70.4%">3.52</div>
+          <span class="chart-val">EaBNet</span>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-label">PESQ</div>
+        <div class="chart-bar-wrap">
+          <div class="chart-bar c1" style="width:65.3%">3.266</div>
+          <span class="chart-val">DCCRN</span>
+        </div>
+      </div>
+    </div>
+    <div class="chart" style="margin-top:32px">
+      <h4 style="margin-bottom:12px;color:var(--text2)">SDR / SI-SDR (dB)</h4>
+      <div class="chart-row">
+        <div class="chart-label">SDR</div>
+        <div class="chart-bar-wrap">
+          <div class="chart-bar c3" style="width:68.5%">17.12</div>
+          <span class="chart-val">EaBNet+PostNet</span>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-label">SDR</div>
+        <div class="chart-bar-wrap">
+          <div class="chart-bar c3" style="width:66.9%">16.72</div>
+          <span class="chart-val">EaBNet</span>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-label">SI-SDR</div>
+        <div class="chart-bar-wrap">
+          <div class="chart-bar c5" style="width:60.4%">15.1</div>
+          <span class="chart-val">SGMSE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sub-bm-wsj" class="sub-panel">
+    <h3 style="margin-bottom:8px">WSJ0-2mix</h3>
+    <p style="color:var(--text2);font-size:.85rem;margin-bottom:20px">语音分离 benchmark (SI-SNRi dB)</p>
+    <div class="chart">
+      <div class="chart-row">
+        <div class="chart-label">TF-GridNet</div>
+        <div class="chart-bar-wrap">
+          <div class="chart-bar c1" style="width:84%">23.5 dB</div>
+        </div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-label">Iter. MVDR</div>
+        <div class="chart-bar-wrap">
+          <div class="chart-bar c2" style="width:52%">~14 dB</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sub-bm-dns" class="sub-panel">
+    <h3 style="margin-bottom:8px">DNS Challenge</h3>
+    <p style="color:var(--text2);font-size:.85rem;margin-bottom:20px">DNS Challenge 竞赛成绩</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>模型</th><th>竞赛</th><th>成绩</th></tr></thead>
+        <tbody>
+          <tr><td>DCCRN</td><td>DNS 2020</td><td class="good">1st place (real-time), 2nd (non-RT)</td></tr>
+          <tr><td>FullSubNet+</td><td>DNS 2022</td><td class="good">SOTA (PESQ, SI-SDR)</td></tr>
+          <tr><td>BSRNN SE</td><td>DNS-2020</td><td class="good">SOTA ranking</td></tr>
+          <tr><td>BSRNN SE</td><td>DNS-2023</td><td class="mid">Top 3 finish</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="sub-bm-chime" class="sub-panel">
+    <h3 style="margin-bottom:8px">CHiME Challenge</h3>
+    <p style="color:var(--text2);font-size:.85rem;margin-bottom:20px">多通道 ASR WER 对比</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>基准</th><th>最佳传统</th><th>最佳混合</th><th>最佳端到端</th></tr></thead>
+        <tbody>
+          <tr><td>CHiME-4 WER</td><td>~6–8% (MVDR+WF)</td><td class="good">~4–5% (NN-MVDR)</td><td>~4–6% (E2E BF)</td></tr>
+          <tr><td>WSJ0-2mix SI-SNRi</td><td>N/A</td><td>~12–14 dB</td><td class="good">~22–24 dB</td></tr>
+          <tr><td>DNS PESQ</td><td>N/A</td><td>~3.0–3.2</td><td class="good">~3.2–3.5</td></tr>
+          <tr><td>延迟</td><td class="good">&lt; 20 ms</td><td class="good">5–50 ms</td><td class="mid">5–100 ms</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== EMBEDDED ===== -->
+<section id="embedded" class="section">
+  <h2 class="section-title">嵌入式部署</h2>
+  <p class="section-desc">边缘平台上的波束成形实现与量化策略</p>
+
+  <h3 style="margin-bottom:16px">平台对比</h3>
+  <div class="platforms">
+    <div class="platform">
+      <div class="plat-name">TinyLSTM</div>
+      <div class="plat-chip">MCU</div>
+      <div class="plat-stats">
+        <div class="s"><span class="v">0.33M</span>参数</div>
+        <div class="s"><span class="v">4.26 ms</span>延迟</div>
+        <div class="s"><span class="v">0.14</span>GMAC/J</div>
+        <div class="s"><span class="v">1-ch</span>通道</div>
+      </div>
+    </div>
+    <div class="platform">
+      <div class="plat-name">RNNoise</div>
+      <div class="plat-chip">MCU</div>
+      <div class="plat-stats">
+        <div class="s"><span class="v">0.21M</span>参数</div>
+        <div class="s"><span class="v">3.28 ms</span>延迟</div>
+        <div class="s"><span class="v">1.84</span>GMAC/J</div>
+        <div class="s"><span class="v">1-ch</span>通道</div>
+      </div>
+    </div>
+    <div class="platform">
+      <div class="plat-name">GRU256-GAP9</div>
+      <div class="plat-chip">MCU (GAP9)</div>
+      <div class="plat-stats">
+        <div class="s"><span class="v">0.98M</span>参数</div>
+        <div class="s"><span class="v">1.70 ms</span>延迟</div>
+        <div class="s"><span class="v">17.46</span>GMAC/J</div>
+        <div class="s"><span class="v">1-ch</span>通道</div>
+      </div>
+    </div>
+    <div class="platform highlight">
+      <div class="best">SOTA 2026</div>
+      <div class="plat-name">Bompani-GAP9</div>
+      <div class="plat-chip">MCU (GAP9, RISC-V)</div>
+      <div class="plat-stats">
+        <div class="s"><span class="v">0.20M</span>参数</div>
+        <div class="s"><span class="v">3.8 ms</span>延迟</div>
+        <div class="s"><span class="v" style="color:var(--accent3)">20.20</span>GMAC/J</div>
+        <div class="s"><span class="v" style="color:var(--accent3)">6-ch</span>通道</div>
+      </div>
+    </div>
+    <div class="platform">
+      <div class="plat-name">GoogleEars</div>
+      <div class="plat-chip">TPU</div>
+      <div class="plat-stats">
+        <div class="s"><span class="v">2.9M</span>参数</div>
+        <div class="s"><span class="v" style="color:var(--accent3)">5 ms</span>延迟</div>
+        <div class="s"><span class="v">—</span>GMAC/J</div>
+        <div class="s"><span class="v">6-ch</span>通道</div>
+      </div>
+    </div>
+    <div class="platform">
+      <div class="plat-name">NeuralAids</div>
+      <div class="plat-chip">ASIC</div>
+      <div class="plat-stats">
+        <div class="s"><span class="v">—</span>参数</div>
+        <div class="s"><span class="v">RT</span>延迟</div>
+        <div class="s"><span class="v">1.8</span>TOPS</div>
+        <div class="s"><span class="v">multi</span>通道</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:32px;padding:20px;background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border)">
+    <h3 style="margin-bottom:12px">Bompani-GAP9 详细规格 (DATE 2026 SOTA)</h3>
+    <table class="spec" style="max-width:500px">
+      <tr><td>平台</td><td>GAP9 SoC (RISC-V, 9 核, 370 MHz, NE16)</td></tr>
+      <tr><td>量化策略</td><td>混合精度: int8 (CNN) + float32 (MVDR)</td></tr>
+      <tr><td>端到端延迟</td><td>19 ms</td></tr>
+      <tr><td>采样率</td><td>8 kHz</td></tr>
+      <tr><td>通道数</td><td>6-ch</td></tr>
+      <tr><td>电池寿命</td><td>16 h (100 mAh)</td></tr>
+    </table>
+  </div>
+
+  <div style="margin-top:24px;padding:16px;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.2);border-radius:var(--radius)">
+    <h3 style="color:var(--accent);margin-bottom:8px">Cortex-M 级部署建议</h3>
+    <div class="table-wrap" style="border:none">
+      <table>
+        <thead><tr><th>优先级</th><th>推荐方案</th><th>理由</th></tr></thead>
+        <tbody>
+          <tr><td class="good"><strong>首选</strong></td><td>Mask-based MVDR 混合方案</td><td>数学保证+可解释+~0.2M 参数在 GAP9 上 19ms</td></tr>
+          <tr><td class="mid"><strong>备选</strong></td><td>轻量端到端 (EaBNet/DCCRN)</td><td>~3–4M 参数可通过量化部署到高端 MCU</td></tr>
+          <tr><td style="color:var(--accent2)"><strong>关注</strong></td><td>BSRNN 语音增强</td><td>子频带处理天然适合嵌入式并行</td></tr>
+          <tr><td style="color:var(--text3)"><strong>长期</strong></td><td>多通道扩散+BF 两阶段</td><td>空间滤波+生成 refinement，但计算量需降低</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TIMELINE ===== -->
+<section id="timeline" class="section">
+  <h2 class="section-title">技术演进时间线</h2>
+  <p class="section-desc">1972–2026 关键里程碑</p>
+
+  <div class="timeline">
+    <div class="tl-item"><div class="tl-year">1972</div><div class="tl-title">Frost 波束成形器</div><div class="tl-desc">经典线性约束自适应波束成形奠基</div></div>
+    <div class="tl-item"><div class="tl-year">2016</div><div class="tl-title">NN-GEV (Heymann &amp; Drude)</div><div class="tl-desc">首个 NN mask 驱动 GEV 的神经-传统融合范式</div></div>
+    <div class="tl-item"><div class="tl-year">2017</div><div class="tl-title">Iterative MVDR</div><div class="tl-desc">迭代 mask→BF→refinement 循环优化</div></div>
+    <div class="tl-item"><div class="tl-year">2019</div><div class="tl-title">FaSNet</div><div class="tl-desc">首个时域端到端 filter-and-sum 神经波束成形</div></div>
+    <div class="tl-item"><div class="tl-year">2020</div><div class="tl-title">DCCRN — DNS Challenge 冠军</div><div class="tl-desc">复值 CNN+LSTM，3.7M 参数，PESQ 3.266</div></div>
+    <div class="tl-item"><div class="tl-year">2021</div><div class="tl-title">iFaSNet / EaBNet</div><div class="tl-desc">隐式 filter-and-sum / 统一 SE+BF 全神经框架</div></div>
+    <div class="tl-item"><div class="tl-year">2022</div><div class="tl-title">SGMSE / FullSubNet+ / GoogleEars</div><div class="tl-desc">分数扩散语音增强 / 通道注意力全子频带 / 5ms 延迟助听器 BF</div></div>
+    <div class="tl-item"><div class="tl-year">2023</div><div class="tl-title">TF-GridNet / BSRNN / SGMSE+</div><div class="tl-desc">3 路径注意力 SI-SNRi 23.5 dB / Band-split RNN / 联合降噪去混响扩散</div></div>
+    <div class="tl-item"><div class="tl-year">2024</div><div class="tl-title">MVDR-U-Net / CADB-Conformer / AMDM-SE</div><div class="tl-desc">MVDR 嵌入 U-Net / 通道感知 Conformer / 多通道扩散</div></div>
+    <div class="tl-item"><div class="tl-year">2025</div><div class="tl-title">图引导扩散 / NeuralAids ASIC</div><div class="tl-desc">GNN 建模麦克风空间关系 / 1.8 TOPS 语音 AI 加速器</div></div>
+    <div class="tl-item"><div class="tl-year">2026</div><div class="tl-title">GAP9 MCU 神经 BF / 时域 ROI-GSC</div><div class="tl-desc">0.2M 参数 6-ch 实时波束成形 / Cohen &amp; Gannot 时域 GSC</div></div>
+  </div>
+</section>
+
+<!-- ===== RESOURCES ===== -->
+<section id="resources" class="section">
+  <h2 class="section-title">开源资源与参考</h2>
+  <p class="section-desc">可复现的开源实现与精确发表信息</p>
+
+  <div class="sub-tabs">
+    <button class="sub-tab active" data-sub="res-code">开源实现</button>
+    <button class="sub-tab" data-sub="res-pubs">发表信息</button>
+  </div>
+
+  <div id="sub-res-code" class="sub-panel active">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>项目</th><th>地址</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>ESPnet (TF-GridNet)</td><td><a href="https://github.com/espnet/espnet" target="_blank">espnet/espnet</a></td><td>端到端语音处理工具包 (9,842★)</td></tr>
+          <tr><td>SGMSE</td><td><a href="https://github.com/sp-uhh/sgmse" target="_blank">sp-uhh/sgmse</a></td><td>分数扩散语音增强 (752★)</td></tr>
+          <tr><td>FullSubNet</td><td><a href="https://github.com/Audio-WestlakeU/FullSubNet" target="_blank">Audio-WestlakeU/FullSubNet</a></td><td>全/子频带网络 (603★)</td></tr>
+          <tr><td>DCCRN</td><td><a href="https://github.com/huyanxin/DeepComplexCRN" target="_blank">huyanxin/DeepComplexCRN</a></td><td>复值 CNN+LSTM (478★)</td></tr>
+          <tr><td>FullSubNet+</td><td><a href="https://github.com/RookieJunChen/FullSubNet-plus" target="_blank">RookieJunChen/FullSubNet-plus</a></td><td>通道注意力版 (294★)</td></tr>
+          <tr><td>EaBNet</td><td><a href="https://github.com/Andong-Li-speech/EaBNet" target="_blank">Andong-Li-speech/EaBNet</a></td><td>全神经波束成形器 (105★)</td></tr>
+          <tr><td>NN-GEV</td><td><a href="https://github.com/fgnt/nn-gev" target="_blank">fgnt/nn-gev</a></td><td>Heymann/Drude NN-GEV</td></tr>
+          <tr><td>BSRNN</td><td><a href="https://github.com/crlandsc/Music-Demixing-with-Band-Split-RNN" target="_blank">crlandsc/BSRNN</a></td><td>Band-Split RNN 非官方复现</td></tr>
+          <tr><td>H-GTCRN</td><td><a href="https://github.com/max1wz/h-gtcrn" target="_blank">max1wz/h-gtcrn</a></td><td>Samsung IVA+GTCRN 混合双通道</td></tr>
+          <tr><td>RNNoise</td><td><a href="https://github.com/xiph/rnnoise" target="_blank">xiph/rnnoise</a></td><td>经典混合 DSP/RNN 实时 SE</td></tr>
+          <tr><td>DTLN</td><td><a href="https://github.com/breizhn/DTLN" target="_blank">breizhn/DTLN</a></td><td>轻量实时降噪 (~370KB)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="sub-res-pubs" class="sub-panel">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>模型</th><th>会议/期刊</th><th>时间</th><th>DOI / arXiv</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>TF-GridNet</td><td>IEEE/ACM TASLP</td><td>2023</td><td><a href="https://doi.org/10.1109/TASLP.2023.3248151" target="_blank">10.1109/TASLP.2023.3248151</a></td></tr>
+          <tr><td>2</td><td>BSRNN</td><td>TASLP Vol.31</td><td>~May 2023</td><td><a href="https://doi.org/10.1109/TASLP.2023.3271145" target="_blank">10.1109/TASLP.2023.3271145</a></td></tr>
+          <tr><td>3</td><td>DCCRN</td><td>Interspeech 2020</td><td>Oct 2020</td><td><a href="https://doi.org/10.21437/Interspeech.2020-2537" target="_blank">10.21437/Interspeech.2020-2537</a></td></tr>
+          <tr><td>4</td><td>EaBNet</td><td>ICASSP 2022</td><td>May 2022</td><td><a href="https://arxiv.org/abs/2109.00265" target="_blank">arXiv:2109.00265</a></td></tr>
+          <tr><td>5</td><td>SGMSE</td><td>Interspeech 2022</td><td>Sep 2022</td><td><a href="https://doi.org/10.21437/Interspeech.2022-10653" target="_blank">10.21437/Interspeech.2022-10653</a></td></tr>
+          <tr><td>6</td><td>SGMSE+</td><td>TASLP Vol.31</td><td>2023</td><td><a href="https://doi.org/10.1109/TASLP.2023.3285241" target="_blank">10.1109/TASLP.2023.3285241</a></td></tr>
+          <tr><td>7</td><td>FullSubNet+</td><td>ICASSP 2022</td><td>May 2022</td><td><a href="https://doi.org/10.1109/ICASSP43922.2022.9747888" target="_blank">10.1109/ICASSP43922.2022.9747888</a></td></tr>
+          <tr><td>8</td><td>MVDR-U-Net</td><td>ICASSP 2024</td><td>Apr 2024</td><td><a href="https://doi.org/10.1109/ICASSP48485.2024.10448366" target="_blank">10.1109/ICASSP48485.2024.10448366</a></td></tr>
+          <tr><td>9</td><td>AMDM-SE</td><td>arXiv</td><td>Jan 2026</td><td><a href="https://arxiv.org/abs/2601.13140" target="_blank">arXiv:2601.13140</a></td></tr>
+          <tr><td>10</td><td>Bompani BF</td><td>DATE 2026</td><td>2026</td><td>ISBN: 979-8-3503-8785-4</td></tr>
+          <tr><td>11</td><td>NN-GEV</td><td>ICASSP 2016</td><td>Mar 2016</td><td><a href="https://doi.org/10.1109/ICASSP.2016.7471691" target="_blank">10.1109/ICASSP.2016.7471691</a></td></tr>
+          <tr><td>12</td><td>MossFormer2</td><td>ICASSP 2024</td><td>2024</td><td><a href="https://arxiv.org/abs/2312.11825" target="_blank">arXiv:2312.11825</a></td></tr>
+          <tr><td>13</td><td>GoogleEars</td><td>Interspeech 2022</td><td>2022</td><td><a href="https://research.google/pubs/listening-with-googlears-low-latency-neural-multiframe-beamforming-and-equalization-for-hearing-aids/" target="_blank">Google Research</a></td></tr>
+          <tr><td>14</td><td>NeuralAids</td><td>arXiv</td><td>2025</td><td><a href="https://arxiv.org/abs/2503.18698" target="_blank">arXiv:2503.18698</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <p>音频波束增强算法 SOTA 综述 &mdash; ARS Deep Research Pipeline v2.9.3</p>
+  <p style="margin-top:4px">生成日期：2026-05-19 | 43+ 参考文献 | 7 关键架构</p>
+</footer>
+
+<script>
+// ===== Tab Navigation =====
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  });
+});
+
+// ===== Sub-tab Navigation =====
+document.querySelectorAll('.sub-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const parent = btn.closest('.section');
+    parent.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+    parent.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    parent.querySelector('#sub-' + btn.dataset.sub).classList.add('active');
+  });
+});
+
+// ===== Expand Toggle =====
+function toggleExpand(el) {
+  el.classList.toggle('open');
+  const content = el.nextElementSibling;
+  content.classList.toggle('show');
+}
+
+// ===== Animate chart bars on section switch =====
+const observer = new MutationObserver(mutations => {
+  mutations.forEach(m => {
+    if (m.target.classList.contains('active')) {
+      m.target.querySelectorAll('.chart-bar').forEach(bar => {
+        const w = bar.style.width;
+        bar.style.width = '0';
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => { bar.style.width = w; });
+        });
+      });
+    }
+  });
+});
+document.querySelectorAll('.section').forEach(s => {
+  observer.observe(s, { attributes: true, attributeFilter: ['class'] });
+});
+</script>
+</body>
+</html>
