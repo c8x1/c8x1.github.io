@@ -245,6 +245,26 @@
     background: rgba(108,92,231,0.25);
   }
 
+  .source-link.detail-link {
+    background: rgba(0,184,148,0.15);
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  .source-link.detail-link:hover {
+    background: rgba(0,184,148,0.28);
+  }
+
+  .card[data-detail] {
+    cursor: pointer;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .card[data-detail]:hover {
+    border-color: rgba(0,184,148,0.4);
+    box-shadow: 0 0 20px rgba(0,184,148,0.08);
+  }
+
   .ranking-item[data-href] { cursor: pointer; }
   .ranking-item .source-link {
     font-size: 0.72em;
@@ -2245,30 +2265,83 @@ const rankingSources = [
   'https://pmc.ncbi.nlm.nih.gov/articles/PMC12776506/',
 ];
 
+// Detail pages mapping (card title -> detail HTML file)
+const detailPages = {
+  // DAW + MCP
+  'Ableton MCP 生态（4+ 竞品实现）': 'audio-details/daw-mcp-ableton-ecosystem.html',
+  'AbletonMCP (ahujasid)': 'audio-details/daw-mcp-abletonmcp-ahujasid.html',
+  'Producer Pal': 'audio-details/daw-mcp-producer-pal.html',
+  'ableton-copilot-mcp': 'audio-details/daw-mcp-ableton-copilot.html',
+  'Ableton MCP (OSC)': 'audio-details/daw-mcp-ableton-osc.html',
+  'DAWZY': 'audio-details/daw-mcp-dawzy.html',
+  'K.G. Studio ("Cursor for DAW")': 'audio-details/daw-mcp-kg-studio.html',
+  'FFmpeg MCP Servers': 'audio-details/daw-mcp-ffmpeg.html',
+  'Epidemic Sound MCP': 'audio-details/daw-mcp-epidemic.html',
+  'MCP 音频分析工具包': 'audio-details/daw-mcp-analysis-toolkit.html',
+  // Cross-Domain
+  'ReAct 循环 (Reason+Act+Observe)': 'audio-details/cross-react-loop.html',
+  'Agent-DAW Interface (ADI)': 'audio-details/cross-adi.html',
+  'Memory Stream + Reflection': 'audio-details/cross-memory-stream.html',
+  '锦标赛式辩论 (Tournament Debate)': 'audio-details/cross-tournament-debate.html',
+  'Asset Memory Management': 'audio-details/cross-asset-memory.html',
+  'SOP 角色化虚拟工作室': 'audio-details/cross-sop-studio.html',
+  '集中-分布混合控制': 'audio-details/cross-hybrid-control.html',
+  'EXHYTE 探索循环': 'audio-details/cross-exhyte.html',
+  '对话式群智协作': 'audio-details/cross-conversational-swarm.html',
+  '涌现式生成音乐': 'audio-details/cross-emergent-music.html',
+};
+
 document.querySelectorAll('.card').forEach(card => {
   const titleEl = card.querySelector('.card-title');
   if (!titleEl) return;
   const title = titleEl.textContent.trim();
   const url = cardSources[title];
-  if (!url) return;
+  const detailPage = detailPages[title];
+  if (!url && !detailPage) return;
 
-  card.dataset.href = url;
+  // Use detail page if available, otherwise fall back to source URL
+  const primaryTarget = detailPage || url;
+  if (detailPage) card.dataset.detail = 'true';
+
+  card.dataset.href = primaryTarget;
 
   const footer = card.querySelector('.card-footer');
   if (footer) {
-    const link = document.createElement('a');
-    link.href = url;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.className = 'source-link';
-    link.innerHTML = '&#8599; 查看来源';
-    link.addEventListener('click', e => e.stopPropagation());
-    footer.appendChild(link);
+    // Detail page link
+    const detailLink = document.createElement('a');
+    detailLink.href = detailPage || primaryTarget;
+    detailLink.target = '_blank';
+    detailLink.rel = 'noopener noreferrer';
+    detailLink.className = 'source-link detail-link';
+    detailLink.innerHTML = '&#128196; 深度解读';
+    detailLink.addEventListener('click', e => e.stopPropagation());
+    footer.appendChild(detailLink);
+
+    // Source link (if different from detail page)
+    if (url && detailPage) {
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.className = 'source-link';
+      link.innerHTML = '&#8599; 来源';
+      link.addEventListener('click', e => e.stopPropagation());
+      footer.appendChild(link);
+    } else if (!detailPage) {
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.className = 'source-link';
+      link.innerHTML = '&#8599; 查看来源';
+      link.addEventListener('click', e => e.stopPropagation());
+      footer.appendChild(link);
+    }
   }
 
   card.addEventListener('click', e => {
     if (e.target.closest('a')) return;
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.open(primaryTarget, '_blank', 'noopener,noreferrer');
   });
 });
 

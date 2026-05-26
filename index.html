@@ -42,6 +42,10 @@
         .trending-stats .lang { display:flex; align-items:center; gap:0.3rem; }
         .trending-stats .lang-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
         .trending-today { font-size:0.8rem; color:var(--accent-green); margin-top:0.5rem; }
+        .trending-toggle { display:block; width:100%; background:none; border:1px dashed var(--border); color:var(--text-muted); padding:0.5rem; border-radius:6px; cursor:pointer; font-size:0.82rem; font-family:'Noto Sans SC',sans-serif; transition:all .2s; margin-top:0.5rem; }
+        .trending-toggle:hover { border-color:var(--accent-green); color:var(--accent-green); }
+        .trending-collapse { display:none; }
+        .trending-collapse.open { display:block; }
         .trending-featured-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem; margin-bottom:1rem; }
         .trending-compact-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:0.5rem; }
         .trending-compact { display:flex; align-items:center; gap:0.6rem; background:var(--card-bg); border:1px solid var(--border); border-radius:6px; padding:0.55rem 0.85rem; transition:border-color .2s; color:inherit; text-decoration:none; overflow:hidden; min-width:0; }
@@ -115,7 +119,10 @@
                 <a href="archive.html#trending" class="section-link">查看全部归档 &rarr;</a>
             </div>
             <div class="trending-featured-grid" id="trending-featured"></div>
-            <div class="trending-compact-grid" id="trending-compact"></div>
+            <button class="trending-toggle" id="trending-toggle" style="display:none">&#9660; 展开更多</button>
+            <div class="trending-collapse" id="trending-collapse">
+                <div class="trending-compact-grid" id="trending-compact"></div>
+            </div>
         </section>
 
         <section class="section">
@@ -192,7 +199,16 @@ function renderTrending(items){
         a.innerHTML='<span class="tc-rank">'+rank+'</span><div class="tc-info"><div class="tc-repo">'+esc(it.repo)+'</div><div class="tc-desc">'+esc(it.desc)+'</div></div><div class="tc-stats"><span>&#9733; '+esc(it.stars)+'</span><span class="today">+'+esc(it.todayStars)+'</span></div>';
         c.appendChild(a);
     });
+    var rest=items.slice(3),toggle=document.getElementById('trending-toggle'),collapse=document.getElementById('trending-collapse');
+    if(rest.length){toggle.style.display='block';toggle.innerHTML='&#9660; 展开更多 ('+rest.length+')';collapse.classList.remove('open')}
+    else{toggle.style.display='none'}
 }
+
+/* Trending toggle */
+document.getElementById('trending-toggle').onclick=function(){
+    var col=document.getElementById('trending-collapse'),btn=this,open=col.classList.toggle('open');
+    btn.innerHTML=open?'&#9650; 收起':'&#9660; 展开更多';
+};
 
 /* Render only latest 4 articles */
 function renderArticles(items){
