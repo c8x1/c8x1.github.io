@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Target-Speaker VAD 技术调研报告</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #161922;
+    --surface2: #1e2233;
+    --border: #2a2f45;
+    --text: #e0e4f0;
+    --text-dim: #8890a8;
+    --accent: #6c8cff;
+    --accent2: #38bdf8;
+    --green: #34d399;
+    --orange: #fbbf24;
+    --red: #f87171;
+    --purple: #a78bfa;
+    --card-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, 'SF Pro Display', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #1a1e35 0%, #0f1117 50%, #111827 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 0 50px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(ellipse at 30% 50%, rgba(108,140,255,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 50%, rgba(56,189,248,0.06) 0%, transparent 50%);
+    animation: drift 20s ease-in-out infinite;
+  }
+  @keyframes drift {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-2%, 1%); }
+  }
+  .hero h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    position: relative;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+  .hero .subtitle {
+    font-size: 1rem;
+    color: var(--text-dim);
+    position: relative;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .hero .meta {
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    position: relative;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* TOC */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 32px;
+    margin-bottom: 40px;
+  }
+  .toc h2 { font-size: 1rem; color: var(--accent); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  .toc ol { padding-left: 20px; }
+  .toc li { margin: 6px 0; }
+  .toc a {
+    color: var(--text);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .toc a:hover { color: var(--accent); }
+
+  /* Section */
+  .section {
+    margin-bottom: 48px;
+    scroll-margin-top: 20px;
+  }
+  .section h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section h2 .num {
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .section h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent2);
+    margin: 28px 0 14px;
+  }
+  .section p, .section li {
+    color: var(--text);
+    font-size: 0.95rem;
+  }
+  .section ul, .section ol { padding-left: 22px; margin: 10px 0; }
+  .section li { margin: 4px 0; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 16px 0;
+    box-shadow: var(--card-shadow);
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--accent); }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .card-header h4 {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+  .badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-green { background: rgba(52,211,153,0.15); color: var(--green); }
+  .badge-orange { background: rgba(251,191,36,0.15); color: var(--orange); }
+  .badge-red { background: rgba(248,113,113,0.15); color: var(--red); }
+  .badge-purple { background: rgba(167,139,250,0.15); color: var(--purple); }
+  .badge-blue { background: rgba(108,140,255,0.15); color: var(--accent); }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin: 12px 0;
+  }
+  th {
+    background: var(--surface2);
+    color: var(--accent);
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:hover td { background: rgba(108,140,255,0.04); }
+
+  /* Stars */
+  .stars { color: var(--orange); letter-spacing: 1px; font-size: 0.95rem; }
+
+  /* Code block */
+  .code-block {
+    background: #0d0f18;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 14px 0;
+    font-family: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    overflow-x: auto;
+    color: #b8c0d8;
+  }
+  .code-block .comment { color: #5a6080; }
+  .code-block .keyword { color: var(--purple); }
+  .code-block .func { color: var(--accent2); }
+  .code-block .string { color: var(--green); }
+  .code-block .arrow { color: var(--orange); }
+
+  /* Architecture diagram */
+  .arch-flow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin: 16px 0;
+    justify-content: center;
+  }
+  .arch-node {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .arch-node.primary {
+    background: rgba(108,140,255,0.12);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .arch-node.success {
+    background: rgba(52,211,153,0.12);
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .arch-arrow {
+    color: var(--text-dim);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  /* Roadmap */
+  .roadmap {
+    display: grid;
+    gap: 20px;
+    margin: 20px 0;
+  }
+  .roadmap-step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .roadmap-step::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+  }
+  .roadmap-step:nth-child(1)::before { background: var(--accent); }
+  .roadmap-step:nth-child(2)::before { background: var(--accent2); }
+  .roadmap-step:nth-child(3)::before { background: var(--green); }
+  .roadmap-step .step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .roadmap-step .step-num {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    color: #fff;
+  }
+  .roadmap-step:nth-child(1) .step-num { background: var(--accent); }
+  .roadmap-step:nth-child(2) .step-num { background: var(--accent2); }
+  .roadmap-step:nth-child(3) .step-num { background: var(--green); }
+  .roadmap-step .step-title { font-weight: 600; font-size: 1rem; }
+  .roadmap-step .step-detail {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .roadmap-step .step-detail strong { color: var(--text); }
+
+  /* Link list */
+  .link-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .link-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--text);
+    font-size: 0.88rem;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .link-item:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .link-item .icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .link-item .label { font-weight: 500; }
+  .link-item .desc { font-size: 0.78rem; color: var(--text-dim); }
+
+  /* Highlight box */
+  .highlight-box {
+    background: rgba(108,140,255,0.08);
+    border: 1px solid rgba(108,140,255,0.2);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 16px 0;
+  }
+  .highlight-box.warn {
+    background: rgba(251,191,36,0.08);
+    border-color: rgba(251,191,36,0.2);
+  }
+  .highlight-box strong { color: var(--accent); }
+  .highlight-box.warn strong { color: var(--orange); }
+
+  /* Footnote */
+  .footnote {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 1.5rem; }
+    .container { padding: 24px 16px 60px; }
+    .arch-flow { flex-direction: column; }
+    .link-grid { grid-template-columns: 1fr; }
+    table { font-size: 0.82rem; }
+    th, td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Target-Speaker VAD 技术调研报告</h1>
+  <div class="subtitle">
+    主播佩戴麦克风场景下，如何区分主播语音与路人干扰 —— Personalized VAD / Target-Speaker VAD 全方位技术方案调研
+  </div>
+  <div class="meta">调研时间 2025-05-27 &nbsp;|&nbsp; 覆盖 2020–2025 年 12 篇核心论文 + 10 个开源项目 &nbsp;|&nbsp; 15+ 独立查询</div>
+</div>
+
+<div class="container">
+
+<!-- Context -->
+<div class="card" style="margin-bottom: 40px;">
+  <div class="card-header">
+    <h4>场景描述 & 痛点</h4>
+  </div>
+  <div style="display: grid; gap: 12px; font-size: 0.92rem;">
+    <div><strong style="color:var(--accent)">场景</strong>：直播场景，主播佩戴领夹麦/胸麦 (lavalier/bodypack mic)</div>
+    <div><strong style="color:var(--green)">目标</strong>：检测主播是否在说话（flag → 后续算法处理依据）</div>
+    <div><strong style="color:var(--red)">干扰</strong>：附近路人经过时的说话声被麦克风收入，不能误检</div>
+    <div><strong style="color:var(--orange)">当前痛点</strong>：使用 Silero VAD，主播语音与路人语音的 probability 差异太小，无法可靠阈值化</div>
+    <div><strong style="color:var(--purple)">约束</strong>：模型大小需与 Silero VAD (~2MB) 同级别，轻量可实时运行</div>
+  </div>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#s1">Personalized VAD / Target-Speaker VAD</a></li>
+    <li><a href="#s2">Lightweight Speaker Verification as VAD Prefilter</a></li>
+    <li><a href="#s3">Direction-of-Arrival (DOA) Based Approaches</a></li>
+    <li><a href="#s4">Multi-Channel / Binaural Approaches</a></li>
+    <li><a href="#s5">Audio Fingerprint / Voiceprint + VAD Pipeline</a></li>
+    <li><a href="#s6">Commercial / Open-Source Solutions</a></li>
+    <li><a href="#s7">TinyML / Edge-Optimized Speaker Models</a></li>
+    <li><a href="#s8">方案对比与推荐</a></li>
+  </ol>
+</div>
+
+<!-- Section 1 -->
+<div class="section" id="s1">
+  <h2><span class="num">1</span> Personalized VAD / Target-Speaker VAD</h2>
+
+  <div class="card">
+    <div class="card-header">
+      <h4>Google Personal VAD (Odyssey 2020)</h4>
+      <span class="badge badge-green">最直接相关</span>
+    </div>
+    <table>
+      <tr><th style="width:140px">论文</th><td>"Personal VAD: Speaker-Conditioned Voice Activity Detection"</td></tr>
+      <tr><th>作者</th><td>Shaojin Ding, Enno Hermann 等 (Google)</td></tr>
+      <tr><th>核心思路</th><td>在标准 VAD 基础上，使用目标说话人的 d-vector 对模型进行 conditioning，输出变为 <strong>3 分类</strong>：silence / non-target speech / target speech</td></tr>
+      <tr><th>模型架构</th><td>基于 RNN/GRU 的 frame-level 模型，输入 log-mel spectrogram + d-vector conditioning</td></tr>
+      <tr><th>模型大小</th><td>~150K–500K 参数（VAD 部分）；d-vector 提取为独立组件</td></tr>
+      <tr><th>开源</th><td>非官方实现：<a href="https://github.com/pirxus/personalVAD" style="color:var(--accent)">pirxus/personalVAD</a></td></tr>
+    </table>
+    <div class="highlight-box">
+      <strong>可行性：高</strong> — 架构简洁，模型轻量，可直接应用于直播场景。只需预录制几秒主播语音生成 d-vector。
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h4>TS-VAD (Interspeech 2020)</h4>
+      <span class="badge badge-blue">奠基论文</span>
+    </div>
+    <table>
+      <tr><th style="width:140px">论文</th><td>"Target-Speaker Voice Activity Detection: A Novel Approach for Multi-speaker Diarization"</td></tr>
+      <tr><th>核心思路</th><td>将每个说话人的 embedding 作为输入，用神经网络预测每帧每个说话人的 VAD 状态</td></tr>
+      <tr><th>局限</th><td>原始设计面向离线 diarization，需先聚类获取 speaker profiles，不太适合实时单目标场景</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h4>Noise-Robust TS-VAD via SSL + FiLM (AAU, 2025)</h4>
+      <span class="badge badge-purple">关键技术</span>
+    </div>
+    <table>
+      <tr><th style="width:140px">论文</th><td>"Noise-Robust Target-Speaker Voice Activity Detection Through Self-Supervised Pretraining"</td></tr>
+      <tr><th>arXiv</th><td><a href="https://arxiv.org/abs/2501.03184" style="color:var(--accent)">2501.03184</a></td></tr>
+      <tr><th>核心贡献</th><td>提出 DN-APC 自监督预训练框架；<strong>系统对比确认 FiLM conditioning 效果最优</strong></td></tr>
+      <tr><th>性能提升</th><td>seen 和 unseen noise 条件下均提升约 2%</td></tr>
+    </table>
+    <div class="highlight-box">
+      <strong>FiLM (Feature-wise Linear Modulation)</strong> 是目前 pVAD 领域效果最好的 conditioning 方法：
+      <div class="code-block">
+<span class="keyword">speaker_embedding</span> = encoder(enrollment_audio)  <span class="comment"># 256-dim</span>
+<span class="func">gamma, beta</span> = FiLM_layer(speaker_embedding)
+
+<span class="comment"># 对每个音频帧的中间特征进行调制</span>
+frame_feature = backbone(audio_frame)
+modulated = gamma * frame_feature + beta
+output = classifier(modulated)  <span class="comment"># 3-class: silence / non-target / target</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h4>pVAD Comparative Analysis (Apple Research, 2024)</h4>
+      <span class="badge badge-orange">必读综述</span>
+    </div>
+    <table>
+      <tr><th style="width:140px">arXiv</th><td><a href="https://arxiv.org/abs/2406.09443" style="color:var(--accent)">2406.09443</a></td></tr>
+      <tr><th>核心价值</th><td>系统比较多种 pVAD 变体，提出 frame-level/utterance-level 误差率、检测延迟、准确率等多维评估框架</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h4>Robust pVAD for Domain Mismatch (Interspeech 2025)</h4>
+      <span class="badge badge-green">最新进展</span>
+    </div>
+    <table>
+      <tr><th style="width:140px">核心方法</th><td>结合 embedding-free processing + dynamic enrollment 技术</td></tr>
+      <tr><th>解决的问题</th><td>训练/部署 domain mismatch 和 false acceptance — <strong>正是直播场景的核心痛点</strong></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- Section 2 -->
+<div class="section" id="s2">
+  <h2><span class="num">2</span> Lightweight Speaker Verification as VAD Prefilter</h2>
+
+  <div class="card">
+    <div class="card-header">
+      <h4>Resemblyzer</h4>
+      <span class="badge badge-green">原型验证首选</span>
+    </div>
+    <table>
+      <tr><th style="width:140px">仓库</th><td><a href="https://github.com/resemble-ai/Resemblyzer" style="color:var(--accent)">resemble-ai/Resemblyzer</a></td></tr>
+      <tr><th>核心</th><td>基于 d-vector 的 speaker embedding 提取，输出 256 维 embedding</td></tr>
+      <tr><th>模型大小</th><td>~15 MB（偏大，但适合快速验证）</td></tr>
+      <tr><th>开源</th><td>MIT License</td></tr>
+      <tr><th>优点</th><td>接口极简，几行代码即可提取 embedding</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h4>CAM++ (Alibaba DAMO)</h4>
+      <span class="badge badge-orange">速度精度兼顾</span>
+    </div>
+    <table>
+      <tr><th style="width:140px">仓库</th><td><a href="https://github.com/modelscope/3D-Speaker" style="color:var(--accent)">modelscope/3D-Speaker</a></td></tr>
+      <tr><th>Backbone</th><td>D-TDNN (Densely-connected Time Delay Neural Network)</td></tr>
+      <tr><th>参数量</th><td>~7.2M 参数，~27 MB</td></tr>
+      <tr><th>性能</th><td>比 ResNet34 和 ECAPA-TDNN 更快更准</td></tr>
+      <tr><th>量化后</th><td>INT8 ~7MB，再加剪枝 ~3-4MB，接近目标</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h4>Asymmetric Enroll-Verify Architecture</h4>
+      <span class="badge badge-green">推荐思路</span>
+    </div>
+    <div class="highlight-box">
+      <strong>核心思路</strong>：enrollment 时用服务端高精度大模型提取 voiceprint embedding，verification 时用极小模型做 cosine similarity。
+      <br><br>
+      <strong>非常适合直播场景</strong>：主播注册用服务端大模型，本地用极小模型实时验证。两阶段不对称，既保证 enrollment 质量又保证推理速度。
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h4>WeSpeaker (wenet-e2e)</h4>
+      <span class="badge badge-blue">部署链路最成熟</span>
+    </div>
+    <table>
+      <tr><th style="width:140px">仓库</th><td><a href="https://github.com/wenet-e2e/wespeaker" style="color:var(--accent)">wenet-e2e/wespeaker</a></td></tr>
+      <tr><th>支持模型</th><td>X-vector, ResNet34, ECAPA-TDNN, CAM++</td></tr>
+      <tr><th>ONNX 支持</th><td>完整，通过 <a href="https://github.com/k2-fsa/sherpa-onnx" style="color:var(--accent)">sherpa-onnx</a> 全平台部署</td></tr>
+      <tr><th>开源</th><td>Apache 2.0</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- Section 3 -->
+<div class="section" id="s3">
+  <h2><span class="num">3</span> Direction-of-Arrival (DOA) Based Approaches</h2>
+
+  <div class="highlight-box warn">
+    <strong>领夹麦的天然优势</strong>：主播语音来自近场 (~10-20cm)，路人语音来自远场 (~1-5m)。这种近/远场差异可作为 <strong>零成本辅助特征</strong>，但不能作为唯一判据。
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><th style="width:180px">特征</th><th>近场 (主播 ~10-20cm)</th><th>远场 (路人 ~1-5m)</th></tr>
+      <tr><td><strong>直达/混响比 (DRR)</strong></td><td style="color:var(--green)">高</td><td style="color:var(--red)">低</td></tr>
+      <tr><td><strong>Spectral Tilt</strong></td><td style="color:var(--green)">低频增强 (proximity effect)</td><td style="color:var(--text-dim)">正常衰减</td></tr>
+      <tr><td><strong>信噪比 (SNR)</strong></td><td style="color:var(--green)">高</td><td style="color:var(--red)">低</td></tr>
+      <tr><td><strong>Signal Energy</strong></td><td style="color:var(--green)">强</td><td style="color:var(--text-dim)">弱</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h4>相关论文</h4></div>
+    <ul style="font-size:0.9rem; padding-left:18px;">
+      <li>"Single-Channel Speaker Distance Estimation in Reverberant Environments" — 单通道即可估计距离</li>
+      <li>"Diminishing Domain Mismatch for DNN-Based Acoustic Distance Estimation" (IWAENC 2024) — CRNN 距离估计</li>
+      <li>DCASE 2024 Task 3 — SELD with Distance Estimation 标准化基准</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Section 4 -->
+<div class="section" id="s4">
+  <h2><span class="num">4</span> Multi-Channel / Binaural Approaches</h2>
+
+  <div class="card">
+    <div class="card-header">
+      <h4>CDUNet — Neural Directed Speech Enhancement (2024)</h4>
+      <span class="badge badge-orange">需双 mic</span>
+    </div>
+    <table>
+      <tr><th style="width:140px">arXiv</th><td><a href="https://arxiv.org/html/2412.18141v2" style="color:var(--accent)">2412.18141</a></td></tr>
+      <tr><th>方法</th><td>Causal-directed U-Net + beamforming，双麦克风阵列</td></tr>
+      <tr><th>适用条件</th><td>AirPods 等双 mic 可穿戴设备</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h4>Spatial Speech Detection for Binaural Hearing Aids (2022)</h4>
+    </div>
+    <table>
+      <tr><th style="width:140px">来源</th><td><a href="https://acta-acustica.edpsciences.org/articles/aacus/full_html/2022/01/aacus210024/aacus210024.html" style="color:var(--accent)">Acta Acustica</a></td></tr>
+      <tr><th>意义</th><td>双耳助听器场景与直播主播双 mic 场景类似，直接相关</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- Section 5 -->
+<div class="section" id="s5">
+  <h2><span class="num">5</span> Voiceprint + VAD 级联架构</h2>
+
+  <div class="arch-flow">
+    <div class="arch-node primary">Audio Stream</div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node">Silero VAD</div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node">Speech Segments</div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node primary">Speaker Embedding</div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node">Cosine Sim</div>
+    <div class="arch-arrow">&rarr;</div>
+    <div class="arch-node success">Target / Non-target</div>
+  </div>
+
+  <table>
+    <tr><th>组件</th><th>选项</th><th>大小</th><th>延迟</th></tr>
+    <tr><td>VAD</td><td>Silero VAD</td><td>~2 MB</td><td>~30ms</td></tr>
+    <tr><td rowspan="4">Speaker Embedding</td><td>TinySV</td><td><strong style="color:var(--green)">&lt;1 MB</strong></td><td>~50ms</td></tr>
+    <tr><td>Resemblyzer</td><td>~15 MB</td><td>~200ms</td></tr>
+    <tr><td>CAM++ (量化)</td><td>~7 MB</td><td>~100ms</td></tr>
+    <tr><td>WeSpeaker (ONNX)</td><td>~10 MB</td><td>~80ms</td></tr>
+    <tr><td>Scoring</td><td>Cosine Similarity</td><td>0</td><td>&lt;1ms</td></tr>
+  </table>
+
+  <div class="card">
+    <div class="card-header"><h4>优化策略</h4></div>
+    <ol style="font-size:0.9rem; padding-left:18px;">
+      <li><strong>VAD first, then SV</strong> — 先过滤非语音段，再做 speaker verification</li>
+      <li><strong>Sliding window</strong> — 固定窗口 (500ms–1s) 滑动提取 embedding</li>
+      <li><strong>Early rejection</strong> — VAD 概率过低直接跳过 SV</li>
+      <li><strong>Embedding caching</strong> — 缓存最近的 embedding 避免重复计算</li>
+      <li><strong>Temporal smoothing</strong> — 对连续帧的 cosine similarity 做平滑减少误判</li>
+    </ol>
+  </div>
+</div>
+
+<!-- Section 6 -->
+<div class="section" id="s6">
+  <h2><span class="num">6</span> Open-Source Solutions</h2>
+
+  <div class="link-grid">
+    <a class="link-item" href="https://github.com/snakers4/silero-vad">
+      <span class="icon">🎙️</span>
+      <div><div class="label">Silero VAD</div><div class="desc">轻量级 VAD，~2MB</div></div>
+    </a>
+    <a class="link-item" href="https://github.com/resemble-ai/Resemblyzer">
+      <span class="icon">🔊</span>
+      <div><div class="label">Resemblyzer</div><div class="desc">Speaker embedding, MIT</div></div>
+    </a>
+    <a class="link-item" href="https://github.com/wenet-e2e/wespeaker">
+      <span class="icon">🎯</span>
+      <div><div class="label">WeSpeaker</div><div class="desc">Speaker verification toolkit, ONNX</div></div>
+    </a>
+    <a class="link-item" href="https://github.com/modelscope/3D-Speaker">
+      <span class="icon">🏷️</span>
+      <div><div class="label">3D-Speaker (Alibaba)</div><div class="desc">CAM++ 等模型, 中文优化</div></div>
+    </a>
+    <a class="link-item" href="https://github.com/k2-fsa/sherpa-onnx">
+      <span class="icon">⚡</span>
+      <div><div class="label">sherpa-onnx</div><div class="desc">全平台 ONNX 部署</div></div>
+    </a>
+    <a class="link-item" href="https://github.com/pyannote/pyannote-audio">
+      <span class="icon">📊</span>
+      <div><div class="label">pyannote-audio</div><div class="desc">SOTA diarization pipeline</div></div>
+    </a>
+    <a class="link-item" href="https://github.com/NVIDIA/NeMo">
+      <span class="icon">🧠</span>
+      <div><div class="label">NVIDIA NeMo</div><div class="desc">TitaNet, MarbleNet VAD</div></div>
+    </a>
+    <a class="link-item" href="https://github.com/AI-Tech-Research-Lab/TinySV">
+      <span class="icon">🔬</span>
+      <div><div class="label">TinySV</div><div class="desc">TinyML speaker verification, &lt;1MB</div></div>
+    </a>
+    <a class="link-item" href="https://github.com/pirxus/personalVAD">
+      <span class="icon">👤</span>
+      <div><div class="label">personalVAD (非官方)</div><div class="desc">Google Personal VAD 复现</div></div>
+    </a>
+    <a class="link-item" href="https://speechbrain.github.io">
+      <span class="icon">🗣️</span>
+      <div><div class="label">SpeechBrain</div><div class="desc">语音处理 toolkit</div></div>
+    </a>
+  </div>
+</div>
+
+<!-- Section 7 -->
+<div class="section" id="s7">
+  <h2><span class="num">7</span> TinyML / Edge-Optimized Speaker Models</h2>
+
+  <div class="card">
+    <div class="card-header">
+      <h4>TinySV (2024)</h4>
+      <span class="badge badge-green">最符合约束</span>
+    </div>
+    <table>
+      <tr><th style="width:140px">arXiv</th><td><a href="https://arxiv.org/abs/2406.01655" style="color:var(--accent)">2406.01655</a></td></tr>
+      <tr><th>仓库</th><td><a href="https://github.com/AI-Tech-Research-Lab/TinySV" style="color:var(--accent)">AI-Tech-Research-Lab/TinySV</a></td></tr>
+      <tr><th>架构</th><td>两层级联：Keyword Spotting (KWS) + Adaptive Speaker Verification</td></tr>
+      <tr><th>目标设备</th><td>Arduino Nano 33 BLE 等极度资源受限 MCU</td></tr>
+      <tr><th>模型大小</th><td><strong style="color:var(--green)">&lt; 1 MB</strong></td></tr>
+      <tr><th>特点</th><td>支持 on-device learning，可在设备上更新 speaker model</td></tr>
+    </table>
+    <div class="highlight-box">
+      <strong>可行性：极高</strong> — 这是目前最接近 "Silero VAD 大小 + target speaker" 的方案。MCU 上都能跑，PC/手机端更无压力。
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h4>TinyCNN for ESP32 (2025)</h4>
+    </div>
+    <table>
+      <tr><th style="width:140px">方法</th><td>量化 CNN 部署在 ESP32 MCU 上</td></tr>
+      <tr><th>精度</th><td>98.58%（量化后）</td></tr>
+      <tr><th>性能</th><td>比原始模型快 53%，小 73%</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h4>量化策略参考</h4></div>
+    <table>
+      <tr><th>技术</th><th>压缩比</th><th>精度损失</th></tr>
+      <tr><td>INT8 量化</td><td>4x (float32 → int8)</td><td>&lt;1% EER 增加</td></tr>
+      <tr><td>INT4 量化</td><td>8x</td><td>1–3% EER 增加</td></tr>
+      <tr><td>知识蒸馏</td><td>2–10x</td><td>取决于教师模型</td></tr>
+      <tr><td>结构化剪枝</td><td>2–5x</td><td>可忽略</td></tr>
+    </table>
+    <p style="font-size:0.88rem; color:var(--text-dim); margin-top:8px;">
+      例：CAM++ (27MB) → INT8 ~7MB → 剪枝 ~3-4MB → 接近 2MB 目标
+    </p>
+  </div>
+</div>
+
+<!-- Section 8 -->
+<div class="section" id="s8">
+  <h2><span class="num">8</span> 方案对比与推荐</h2>
+
+  <h3>方案评分矩阵</h3>
+  <table>
+    <tr><th>方案</th><th>模型大小</th><th>实时性</th><th>精度</th><th>难度</th><th>综合</th></tr>
+    <tr>
+      <td>Silero VAD + TinySV 级联</td>
+      <td>~3 MB</td><td>高</td><td>中</td><td>低</td>
+      <td><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></td>
+    </tr>
+    <tr>
+      <td>Google Personal VAD (复现)</td>
+      <td>~2-5 MB</td><td>高</td><td>中高</td><td>中</td>
+      <td><span class="stars">&#9733;&#9733;&#9733;&#9733;</span></td>
+    </tr>
+    <tr>
+      <td>Personal VAD + FiLM conditioning</td>
+      <td>~5 MB</td><td>高</td><td>高</td><td>中高</td>
+      <td><span class="stars">&#9733;&#9733;&#9733;&#9733;</span></td>
+    </tr>
+    <tr>
+      <td>单通道近/远场分类器</td>
+      <td>&lt;1 MB</td><td>极高</td><td>中</td><td>低</td>
+      <td><span class="stars">&#9733;&#9733;&#9733;</span></td>
+    </tr>
+    <tr>
+      <td>Silero VAD + Resemblyzer 级联</td>
+      <td>~17 MB</td><td>高</td><td>中高</td><td>低</td>
+      <td><span class="stars">&#9733;&#9733;&#9733;</span></td>
+    </tr>
+    <tr>
+      <td>Silero VAD + CAM++ (量化)</td>
+      <td>~9 MB</td><td>中高</td><td>高</td><td>中</td>
+      <td><span class="stars">&#9733;&#9733;&#9733;</span></td>
+    </tr>
+    <tr>
+      <td>双 mic beamforming</td>
+      <td>N/A</td><td>高</td><td>高</td><td>高(需硬件)</td>
+      <td><span class="stars">&#9733;&#9733;&#9733;</span></td>
+    </tr>
+  </table>
+
+  <h3>推荐路线：三步走策略</h3>
+
+  <div class="roadmap">
+    <div class="roadmap-step">
+      <div class="step-header">
+        <span class="step-num">Phase 1</span>
+        <div class="step-title">快速验证 (1-2 天)</div>
+      </div>
+      <div class="arch-flow" style="margin:12px 0; background:transparent; border:none; padding:8px 0;">
+        <div class="arch-node">Audio</div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node primary">Silero VAD</div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node primary">Resemblyzer</div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node success">Cosine Sim</div>
+      </div>
+      <div class="step-detail">
+        <strong>模型总大小</strong>：~17 MB &nbsp;|&nbsp; <strong>目标</strong>：验证 cosine similarity 能否清晰区分主播 vs 路人
+        <br>接口极简，<a href="https://github.com/resemble-ai/Resemblyzer" style="color:var(--accent)">Resemblyzer</a> 几行代码即可集成
+      </div>
+    </div>
+
+    <div class="roadmap-step">
+      <div class="step-header">
+        <span class="step-num">Phase 2</span>
+        <div class="step-title">轻量级优化 (1 周)</div>
+      </div>
+      <div class="arch-flow" style="margin:12px 0; background:transparent; border:none; padding:8px 0;">
+        <div class="arch-node">Audio</div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node primary">Silero VAD</div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node primary">TinySV</div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node success">Target Flag</div>
+      </div>
+      <div class="step-detail">
+        <strong>模型总大小</strong>：~3 MB &nbsp;|&nbsp; <strong>延迟</strong>：&lt;50ms
+        <br>将 Resemblyzer 替换为 <a href="https://github.com/AI-Tech-Research-Lab/TinySV" style="color:var(--accent2)">TinySV</a>，支持 on-device learning enrollment
+        <br>参考 <a href="https://k2-fsa.github.io/sherpa/onnx/speaker-identification/apk.html" style="color:var(--accent2)">sherpa-onnx speaker ID</a> 部署方式
+      </div>
+    </div>
+
+    <div class="roadmap-step">
+      <div class="step-header">
+        <span class="step-num">Phase 3</span>
+        <div class="step-title">端到端 Personal VAD (2-4 周)</div>
+      </div>
+      <div class="step-detail">
+        <strong>架构</strong>：Google Personal VAD 论文架构 + FiLM Conditioning
+        <br><strong>Backbone</strong>：小型 GRU/TCN (&lt;500K 参数)
+        <br><strong>输出</strong>：3-class (silence / non-target speech / target speech)
+        <br><strong>训练数据</strong>：VoxCeleb2 (speaker diversity) + 噪声增强
+        <br><strong>预期</strong>：模型 ~2MB，目标说话人 F1 &gt; 0.90
+        <br><strong>额外</strong>：加入近场声学特征 (energy / spectral tilt / DRR) 作为辅助输入，几乎零计算成本
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Paper Index -->
+<div class="section">
+  <h2><span class="num">+</span> 核心论文索引</h2>
+  <table>
+    <tr><th>#</th><th>论文</th><th>年份</th><th>来源</th></tr>
+    <tr><td>1</td><td><a href="https://www.isca-archive.org/odyssey_2020/ding20_odyssey.pdf" style="color:var(--accent)">Personal VAD (Google)</a></td><td>2020</td><td>Odyssey</td></tr>
+    <tr><td>2</td><td>TS-VAD (原始)</td><td>2020</td><td>Interspeech</td></tr>
+    <tr><td>3</td><td><a href="https://www.isca-archive.org/interspeech_2022/wang22j_interspeech.pdf" style="color:var(--accent)">Online TS-VAD</a></td><td>2022</td><td>Interspeech</td></tr>
+    <tr><td>4</td><td><a href="https://arxiv.org/html/2303.00332v3" style="color:var(--accent)">CAM++ (Alibaba)</a></td><td>2023</td><td>arXiv</td></tr>
+    <tr><td>5</td><td><a href="https://arxiv.org/abs/2406.01655" style="color:var(--accent)">TinySV</a></td><td>2024</td><td>ACM</td></tr>
+    <tr><td>6</td><td><a href="https://arxiv.org/abs/2406.09443" style="color:var(--accent)">pVAD Comparative Analysis (Apple)</a></td><td>2024</td><td>arXiv</td></tr>
+    <tr><td>7</td><td><a href="https://arxiv.org/html/2412.18141v2" style="color:var(--accent)">CDUNet dual-mic</a></td><td>2024</td><td>arXiv</td></tr>
+    <tr><td>8</td><td><a href="https://arxiv.org/abs/2501.03184" style="color:var(--accent)">Noise-Robust TS-VAD + FiLM (AAU)</a></td><td>2025</td><td>arXiv</td></tr>
+    <tr><td>9</td><td><a href="https://www.isca-archive.org/interspeech_2025/lin25_interspeech.pdf" style="color:var(--accent)">Robust pVAD Domain Mismatch</a></td><td>2025</td><td>Interspeech</td></tr>
+    <tr><td>10</td><td>PET-TSVAD (Microsoft)</td><td>—</td><td>MS Research</td></tr>
+    <tr><td>11</td><td><a href="https://www.researchgate.net/publication/373248572" style="color:var(--accent)">SVVAD</a></td><td>2023</td><td>ResearchGate</td></tr>
+    <tr><td>12</td><td>MIMO-TSVAD (Duke)</td><td>2025</td><td>—</td></tr>
+  </table>
+</div>
+
+<div class="footnote">
+  TS-VAD Research Report &nbsp;|&nbsp; Generated 2025-05-27 &nbsp;|&nbsp; 12 papers + 10 open-source projects
+</div>
+
+</div>
+</body>
+</html>
