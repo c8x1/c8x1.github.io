@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>nRF5340 Audio 源码走读 — Cortex-M 音频学习</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link href="../css/custom.css" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { colors: { dark: { 900: '#020617', 800: '#0f172a', 700: '#1e293b', 600: '#334155' }}}}}</script>
+</head>
+<body class="bg-dark-900 text-slate-200 font-sans">
+
+  <aside id="sidebar" class="sidebar bg-dark-800 border-r border-dark-700">
+    <div class="p-4 border-b border-dark-700">
+      <a href="../index.html" class="text-lg font-bold text-white flex items-center gap-2"><span class="text-blue-400">⌘</span> Cortex-M 音频学习</a>
+      <div class="mt-2 progress-bar" data-progress-bar><div class="fill" style="width:0%"></div></div>
+      <p class="text-xs text-slate-500 mt-1">进度: <span data-progress-text>0/21</span></p>
+    </div>
+    <nav class="sidebar-nav py-2">
+      <div class="section-title">学习阶段</div>
+      <a href="../phase/1-architecture.html" data-nav-id="phase-1">一、Cortex-M 架构基础</a>
+      <a href="../phase/2-peripherals.html" data-nav-id="phase-2">二、外设与通信协议</a>
+      <a href="../phase/3-dma.html" data-nav-id="phase-3">三、DMA 数据引擎</a>
+      <a href="../phase/4-rtos.html" data-nav-id="phase-4">四、RTOS 实时操作系统</a>
+      <a href="../phase/5-dsp.html" data-nav-id="phase-5">五、音频 DSP</a>
+      <a href="../phase/6-system.html" data-nav-id="phase-6">六、系统级工程</a>
+      <div class="section-title mt-4">源码走读</div>
+      <a href="baremetal-guide.html" data-nav-id="proj-baremetal-guide">裸机编程指南</a>
+      <a href="baremetal.html" data-nav-id="proj-baremetal">cortexm/baremetal</a>
+      <a href="libopencm3.html" data-nav-id="proj-libopencm3">libopencm3</a>
+      <a href="infinitime.html" data-nav-id="proj-infinitime">InfiniTime</a>
+      <a href="zswatch.html" data-nav-id="proj-zswatch">ZSWatch</a>
+      <a href="libdaisy.html" data-nav-id="proj-libdaisy">libDaisy</a>
+      <a href="daisysp.html" data-nav-id="proj-daisysp">DaisySP</a>
+      <a href="mutable-plaits.html" data-nav-id="proj-plaits">Mutable Plaits</a>
+      <a href="teensy-audio.html" data-nav-id="proj-teensy">Teensy Audio</a>
+      <a href="nrf5340-audio.html" data-nav-id="proj-nrf5340" class="active">nRF5340 Audio</a>
+      <div class="section-title mt-4">专题</div>
+      <a href="openglass.html" data-nav-id="proj-openglass">omiGlass 智能眼镜</a>
+      <div class="section-title mt-4">参考</div>
+      <a href="../glossary.html">术语速查</a>
+      <a href="../resources.html">资源汇总</a>
+    </nav>
+  </aside>
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+  <header class="mobile-header lg:hidden fixed top-0 left-0 right-0 bg-dark-800 border-b border-dark-700 z-20 px-4 py-3 flex items-center gap-3">
+    <button id="sidebar-toggle" class="text-slate-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <span class="text-lg font-bold text-white">nRF5340 Audio 源码走读</span>
+  </header>
+
+  <main class="main-content">
+    <div class="max-w-6xl mx-auto px-6 py-12 lg:py-16">
+
+      <div class="fade-in mb-12">
+        <div class="flex flex-wrap gap-2 mb-3">
+          <span class="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded">阅读顺序 ⑩</span>
+          <span class="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded">BLE Audio</span>
+        </div>
+        <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">nRF5340 Audio 源码走读</h1>
+        <p class="text-lg text-slate-400 mb-4">Nordic 官方 BLE LE Audio 参考实现 — LC3 编解码 + 双核音频管线</p>
+        <div class="flex flex-wrap gap-3 text-sm">
+          <span class="bg-dark-800 px-3 py-1 rounded border border-dark-700">nRF5340 (M33 双核)</span>
+          <span class="bg-dark-800 px-3 py-1 rounded border border-dark-700">Zephyr RTOS</span>
+          <span class="bg-dark-800 px-3 py-1 rounded border border-dark-700">Nordic 官方</span>
+          <a href="https://github.com/nrfconnect/sdk-nrf" class="text-blue-400 hover:text-blue-300">GitHub →</a>
+        </div>
+      </div>
+
+      <!-- Dual Core Architecture -->
+      <section class="mb-12 fade-in">
+      <div class="ai-era-layout">
+        <div class="ai-era-main">
+
+        <h2 class="text-2xl font-bold text-white mb-4">双核架构</h2>
+        <p class="text-slate-300 mb-4">nRF5340 是双核 Cortex-M33：应用核跑应用逻辑 + 网络核跑 BLE 协议栈。两核通过 IPC（核间通信）传递音频数据。</p>
+
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700 mb-6">
+          <pre class="mermaid">
+graph TB
+    subgraph "Application Core (M33 @ 128MHz)"
+        APP["应用代码<br/>音频处理/UI"]
+        LC3_EN["LC3 编码器<br/>PCM → LC3"]
+        LC3_DE["LC3 解码器<br/>LC3 → PCM"]
+        DSP["音频 DSP<br/>EQ/降噪"]
+        I2S["I2S/PCM 外设<br/>Codec 接口"]
+    end
+    subgraph "Network Core (M33 @ 64MHz)"
+        BLE["BLE 协议栈<br/>SoftDevice"]
+        ISO["ISO 通道<br/>LE Audio 同步通道"]
+        RF["Radio<br/>2.4GHz 射频"]
+    end
+    subgraph "IPC 核间通信"
+        SHARED["共享内存<br/>音频数据交换"]
+    end
+    I2S -->|"PCM 音频"| DSP
+    DSP --> LC3_EN
+    LC3_EN -->|"编码数据"| SHARED
+    SHARED -->|"编码数据"| ISO
+    ISO --> RF
+    RF --> ISO
+    ISO -->|"接收数据"| SHARED
+    SHARED --> LC3_DE
+    LC3_DE --> DSP
+    DSP --> I2S
+          </pre>
+        </div>
+      </section>
+
+      <!-- Audio System -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">源码走读：audio_system.c — 音频管线</h2>
+
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">src/audio_system.c — 音频系统初始化与数据流</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">// nRF5340 Audio 的核心数据流
+
+// ① 音频系统初始化
+int audio_system_init(void) {
+    // 初始化 I2S/PCM 外设 — 连接外部 Codec
+    ret = i2s_slave_driver_init();
+    if (ret) return ret;
+
+    // 初始化 LC3 编解码器
+    ret = lc3_codec_init();
+    if (ret) return ret;
+
+    // 初始化 BLE ISO 通道
+    ret = ble_iso_init();
+    if (ret) return ret;
+
+    // ② 启动音频数据通路
+    ret = audio_datapath_start();
+    return ret;
+}
+
+// ③ 音频数据通路 — 从麦克风到 BLE 发送
+void audio_datapath_tx_handler(void) {
+    // 从 I2S DMA 获取麦克风 PCM 数据
+    int16_t pcm_buf[FRAME_SIZE];  // 例：48kHz × 10ms = 480 samples
+    i2s_rx_get(pcm_buf, FRAME_SIZE);
+
+    // ④ LC3 编码 — PCM → 压缩码流
+    // LC3 是 BLE LE Audio 的标准编解码器
+    // 48kHz × 10ms 帧 → 约 120 bytes（码率 ~96kbps）
+    uint8_t lc3_buf[LC3_FRAME_BYTES];
+    lc3_encoder_process(pcm_buf, lc3_buf);
+
+    // ⑤ 通过 IPC 发送到 Network Core
+    // 使用共享内存（nRF5340 的 Net/Core 共享 RAM 区域）
+    ipc_data_send(lc3_buf, LC3_FRAME_BYTES, ISO_CHANNEL_TX);
+
+    // Network Core 的 BLE ISO 通道会自动发送
+}
+
+// ⑥ BLE 接收数据通路 — 从 BLE 到扬声器
+void audio_datapath_rx_handler(uint8_t *iso_data, size_t len) {
+    // LC3 解码 — 压缩码流 → PCM
+    int16_t pcm_buf[FRAME_SIZE];
+    lc3_decoder_process(iso_data, len, pcm_buf);
+
+    // DSP 处理（EQ、音量等）
+    audio_post_process(pcm_buf, FRAME_SIZE);
+
+    // ⑦ 通过 I2S DMA 输出到 Codec
+    i2s_tx_put(pcm_buf, FRAME_SIZE);
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item">
+              <span class="ann-num">①</span>
+              <span><strong>模块化初始化</strong>：nRF5340 Audio 按功能模块初始化 — I2S、LC3、BLE ISO。每个模块独立，便于测试和替换。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">④</span>
+              <span><strong>LC3 编码器</strong>是 BLE LE Audio 的核心。它是 Opus 的继任者，专为低延迟蓝牙音频设计。48kHz × 10ms 帧压缩到 ~96kbps，延迟仅 7.5-20ms。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">⑤</span>
+              <span><strong>IPC 核间通信</strong>：应用核和网络核通过共享内存交换数据。nRF5340 有专门的 IPC 外设和共享 RAM 区域。数据交换零拷贝 — 两核直接操作同一块内存。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">⑦</span>
+              <span><strong>I2S DMA</strong>：和 libDaisy 类似的 Ping-Pong DMA 模式，但这里用 Zephyr 的 I2S 驱动 API 而不是直接操作寄存器。Zephyr 的驱动抽象隐藏了硬件细节。</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LE Audio Concepts -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">BLE LE Audio 关键概念</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-cyan-400 font-semibold mb-2">LE Audio 新特性</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• <strong>ISO 通道</strong>：同步数据通道，保证时序</li>
+              <li>• <strong>LC3 编解码</strong>：比 SBC 质量好 50%+ 同码率</li>
+              <li>• <strong>BIS/CIS</strong>：广播/单播音频流</li>
+              <li>• <strong>7.5ms 帧</strong>：比经典蓝牙延迟低 5-10 倍</li>
+            </ul>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-cyan-400 font-semibold mb-2">智能眼镜应用</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• CIS（单播）：耳机/眼镜 ↔ 手机</li>
+              <li>• BIS（广播）：共享音频流</li>
+              <li>• Auracast：公共场合音频广播</li>
+              <li>• 多流：同时传左耳 + 右耳</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout callout-tip mt-4">
+          <p class="text-sm text-slate-300"><strong class="text-green-400">为什么学这个？</strong>nRF5340 Audio 是 Nordic 官方的参考实现，代码质量高、文档完善。如果你做智能音频设备，大概率会用 Nordic 芯片 + Zephyr + BLE LE Audio。这个项目直接就是你未来的技术栈。</p>
+        </div>
+      
+        </div>
+        <div class="ai-era-sidebar">
+        <div class="ai-note ai-note-must">
+          <span class="ai-note-badge">逐行精读</span>
+          <h4>双核 IPC 零拷贝通信是核心</h4>
+          <p>应用核和网络核通过共享内存交换音频数据——这个零拷贝 IPC 模式是 nRF5340 音频系统的灵魂。理解完整管线你就掌握了 BLE Audio。</p>
+        </div>
+        <div class="ai-note ai-note-collab">
+          <span class="ai-note-badge">架构借鉴</span>
+          <h4>Zephyr + Nordic 的工业级方案</h4>
+          <p>nRF5340 Audio 是 Nordic 官方参考实现。如果你未来做 BLE 音频产品，Kconfig 配置、Devicetree overlay、电源管理策略直接可以复用。</p>
+        </div>
+        </div>
+      </div></section>
+
+      <!-- Key Lessons -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">学到了什么</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-green-400 font-semibold mb-2">产品级架构</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• 双核分工：应用核 + 协议栈核</li>
+              <li>• IPC 共享内存零拷贝通信</li>
+              <li>• Zephyr 驱动模型和 Kconfig</li>
+              <li>• LC3 编解码管线</li>
+            </ul>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-blue-400 font-semibold mb-2">与你未来的工作最相关</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• BLE LE Audio 是音频行业趋势</li>
+              <li>• nRF5340 是智能眼镜常见选择</li>
+              <li>• Zephyr + Nordic = 工业标准方案</li>
+              <li>• 双核架构应对复杂需求</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <div class="text-center py-8 border-t border-dark-700 fade-in">
+        <button data-complete-btn="proj-nrf5340" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-lg transition-colors">标记为已完成</button>
+        <p class="text-sm text-slate-500 mt-3">完成本项目走读后，进度将自动保存</p>
+        <div class="flex justify-center gap-4 mt-4">
+          <a href="teensy-audio.html" class="text-slate-400 hover:text-slate-300">← 上一个：Teensy Audio</a>
+          <a href="openglass.html" class="text-blue-400 hover:text-blue-300">下一个：omiGlass →</a>
+          <a href="../glossary.html" class="text-blue-400 hover:text-blue-300">术语速查 →</a>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="../js/nav.js"></script>
+  <script src="../js/progress.js"></script>
+  <script src="../js/code-walkthrough.js"></script>
+  <script>mermaid.initialize({ theme: 'dark', themeVariables: { fontSize: '14px' }});</script>
+</body>
+</html>

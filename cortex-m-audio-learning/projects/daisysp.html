@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DaisySP 源码走读 — Cortex-M 音频学习</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link href="../css/custom.css" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { colors: { dark: { 900: '#020617', 800: '#0f172a', 700: '#1e293b', 600: '#334155' }}}}}</script>
+</head>
+<body class="bg-dark-900 text-slate-200 font-sans">
+
+  <aside id="sidebar" class="sidebar bg-dark-800 border-r border-dark-700">
+    <div class="p-4 border-b border-dark-700">
+      <a href="../index.html" class="text-lg font-bold text-white flex items-center gap-2"><span class="text-blue-400">⌘</span> Cortex-M 音频学习</a>
+      <div class="mt-2 progress-bar" data-progress-bar><div class="fill" style="width:0%"></div></div>
+      <p class="text-xs text-slate-500 mt-1">进度: <span data-progress-text>0/21</span></p>
+    </div>
+    <nav class="sidebar-nav py-2">
+      <div class="section-title">学习阶段</div>
+      <a href="../phase/1-architecture.html" data-nav-id="phase-1">一、Cortex-M 架构基础</a>
+      <a href="../phase/2-peripherals.html" data-nav-id="phase-2">二、外设与通信协议</a>
+      <a href="../phase/3-dma.html" data-nav-id="phase-3">三、DMA 数据引擎</a>
+      <a href="../phase/4-rtos.html" data-nav-id="phase-4">四、RTOS 实时操作系统</a>
+      <a href="../phase/5-dsp.html" data-nav-id="phase-5">五、音频 DSP</a>
+      <a href="../phase/6-system.html" data-nav-id="phase-6">六、系统级工程</a>
+      <div class="section-title mt-4">源码走读</div>
+      <a href="baremetal-guide.html" data-nav-id="proj-baremetal-guide">裸机编程指南</a>
+      <a href="baremetal.html" data-nav-id="proj-baremetal">cortexm/baremetal</a>
+      <a href="libopencm3.html" data-nav-id="proj-libopencm3">libopencm3</a>
+      <a href="infinitime.html" data-nav-id="proj-infinitime">InfiniTime</a>
+      <a href="zswatch.html" data-nav-id="proj-zswatch">ZSWatch</a>
+      <a href="libdaisy.html" data-nav-id="proj-libdaisy">libDaisy</a>
+      <a href="daisysp.html" data-nav-id="proj-daisysp" class="active">DaisySP</a>
+      <a href="mutable-plaits.html" data-nav-id="proj-plaits">Mutable Plaits</a>
+      <a href="teensy-audio.html" data-nav-id="proj-teensy">Teensy Audio</a>
+      <a href="nrf5340-audio.html" data-nav-id="proj-nrf5340">nRF5340 Audio</a>
+      <div class="section-title mt-4">专题</div>
+      <a href="openglass.html" data-nav-id="proj-openglass">omiGlass 智能眼镜</a>
+      <div class="section-title mt-4">参考</div>
+      <a href="../glossary.html">术语速查</a>
+      <a href="../resources.html">资源汇总</a>
+    </nav>
+  </aside>
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+  <header class="mobile-header lg:hidden fixed top-0 left-0 right-0 bg-dark-800 border-b border-dark-700 z-20 px-4 py-3 flex items-center gap-3">
+    <button id="sidebar-toggle" class="text-slate-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <span class="text-lg font-bold text-white">DaisySP 源码走读</span>
+  </header>
+
+  <main class="main-content">
+    <div class="max-w-6xl mx-auto px-6 py-12 lg:py-16">
+
+      <div class="fade-in mb-12">
+        <div class="flex flex-wrap gap-2 mb-3">
+          <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">阅读顺序 ⑦</span>
+          <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">DSP</span>
+        </div>
+        <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">DaisySP 源码走读</h1>
+        <p class="text-lg text-slate-400 mb-4">模块化音频 DSP 库 — 振荡器、滤波器、效果器的 C++ 设计模式</p>
+        <div class="flex flex-wrap gap-3 text-sm">
+          <span class="bg-dark-800 px-3 py-1 rounded border border-dark-700">Cortex-M7</span>
+          <span class="bg-dark-800 px-3 py-1 rounded border border-dark-700">C++</span>
+          <span class="bg-dark-800 px-3 py-1 rounded border border-dark-700">Stars ★ 1300</span>
+          <a href="https://github.com/electro-smith/DaisySP" class="text-blue-400 hover:text-blue-300">GitHub →</a>
+        </div>
+      </div>
+
+      <!-- Design Pattern -->
+      <section class="mb-12 fade-in">
+      <div class="ai-era-layout">
+        <div class="ai-era-main">
+
+        <h2 class="text-2xl font-bold text-white mb-4">设计模式：Process() 单采样处理</h2>
+        <p class="text-slate-300 mb-4">DaisySP 的每个 DSP 模块都遵循统一接口：<code class="text-blue-400">Init()</code> 初始化 + <code class="text-blue-400">Process()</code> 处理单个采样。这个设计简洁优雅，便于组合。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">DaisySP 的统一 DSP 接口模式</span></div>
+          <div class="code-block">
+            <pre><code class="language-cpp">// DaisySP 的典型 DSP 模块结构
+class Oscillator {
+public:
+    // ① 初始化 — 设置采样率、波形类型
+    void Init(float sample_rate) {
+        sr_ = sample_rate;
+        phase_ = 0.0f;
+        freq_ = 440.0f;
+        // 预计算相位增量
+        phase_increment_ = freq_ / sr_;
+    }
+
+    // ② 设置参数 — 运行时可调
+    void SetFreq(float freq) {
+        freq_ = freq;
+        phase_increment_ = freq_ / sr_;
+    }
+
+    // ③ Process — 处理一个采样，返回一个采样
+    float Process() {
+        float out;
+        // 多项式逼近正弦波（比查表更快）
+        out = sinf(phase_ * 2.0f * PI_F);
+
+        // 更新相位
+        phase_ += phase_increment_;
+        // 相位回绕到 [0, 1)
+        if (phase_ >= 1.0f) phase_ -= 1.0f;
+
+        return out;
+    }
+
+private:
+    float sr_;
+    float phase_;
+    float freq_;
+    float phase_increment_;
+};
+
+// ④ 在音频回调中使用 — 模块组合
+void AudioCallback(float* in, float* out, size_t size) {
+    for (size_t i = 0; i < size; i += 2) {
+        // 振荡器 → 滤波器 → 输出
+        float sig = osc_.Process();          // 生成波形
+        sig = filter_.Process(sig);          // 滤波
+        sig *= 0.5f;                         // 音量
+
+        out[i]     = sig;  // 左
+        out[i + 1] = sig;  // 右
+    }
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item">
+              <span class="ann-num">①</span>
+              <span><strong>Init()</strong> 在启动时调用一次。传入采样率，预计算常量。这是嵌入式 DSP 的标准模式 — 预计算越多，Process() 越快。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">③</span>
+              <span><strong>Process() 返回一个 float</strong>。每个采样调用一次。在 48kHz 下，每秒调用 48000 次。必须尽量快 — 使用 FPU 的单周期浮点乘法。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">④</span>
+              <span><strong>模块组合</strong>像搭积木：Oscillator → Filter → 效果器 → 输出。每个模块独立、无状态依赖（除了内部 phase/state）。这种设计在嵌入式音频中非常流行。</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Moog Filter -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">源码走读：Moog 滤波器</h2>
+        <p class="text-slate-300 mb-4">Moog 梯形滤波器是经典模拟合成器滤波器的数字实现。DaisySP 的实现展示了如何在嵌入式 DSP 中平衡精度和性能。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">Source/Filters/moogladder.cpp — Moog 滤波器核心</span></div>
+          <div class="code-block">
+            <pre><code class="language-cpp">float MoogLadder::Process(float in) {
+    // ① 4 级梯形滤波器
+    float freq = freq_;  // 截止频率
+    float res  = res_;   // 谐振 (0~1)
+
+    // ② 频率归一化到 [0, 1] 范围
+    float f = 2.0f * freq / sample_rate_;
+    // 限制到 Nyquist 频率以下
+    f = f > 1.0f ? 1.0f : (f < 0.0f ? 0.0f : f);
+
+    // ③ 计算滤波器系数
+    // 使用 Stilson/Smith 的改进梯形拓扑
+    float k = 3.6f * res;  // 谐振增益
+    float p = f * (1.8f - 0.8f * f);  // 频率映射
+
+    // ④ 四级低通滤波级联
+    float t1 = (1.0f - p) * 1.386249f;
+    float t2 = 12.0f + t1 * t1;
+
+    // 级联处理
+    float x = in - k * d4_;             // 输入减去反馈
+    float a = d1_ + p * x;
+    d1_ = a - x * (p - 1.0f) / t2;     // ⑤ 第一级状态更新
+
+    float b = d2_ + p * d1_;
+    d2_ = b - d1_ * (p - 1.0f) / t2;   // 第二级
+
+    float c = d3_ + p * d2_;
+    d3_ = c - d2_ * (p - 1.0f) / t2;   // 第三级
+
+    float d = d4_ + p * d3_;
+    d4_ = d - d3_ * (p - 1.0f) / t2;   // ⑥ 第四级
+
+    // ⑦ 输出 = 四级级联结果
+    return d;
+}
+
+void MoogLadder::Init(float sample_rate) {
+    sample_rate_ = sample_rate;
+    freq_ = 1000.0f;    // 默认截止频率 1kHz
+    res_ = 0.0f;        // 默认无谐振
+    d1_ = d2_ = d3_ = d4_ = 0.0f;  // 清零状态
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item">
+              <span class="ann-num">①</span>
+              <span><strong>梯形拓扑</strong>：Moog 合成器的标志性声音来自 4 级低通级联 + 谐振反馈。这是模拟电路的数字仿真。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">②③</span>
+              <span><strong>频率归一化</strong>：截止频率从 Hz 转换为 [0,1] 归一化频率。f=1 对应 Nyquist 频率（采样率/2）。这是所有数字滤波器的标准做法。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">⑤⑥</span>
+              <span><strong>四级状态 (d1-d4)</strong>：每级保存一个内部状态（前一采样输出）。4 个 float = 16 bytes RAM — 非常轻量。这就是嵌入式 DSP 和桌面 DSP 的区别。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">⑦</span>
+              <span><strong>无除法运算</strong>：t2 预计算在循环外。嵌入式 DSP 中除法非常慢（12-20 周期），乘法只需 1 周期。DaisySP 处处体现了这种优化思维。</span>
+            </div>
+          </div>
+        </div>
+      
+        </div>
+        <div class="ai-era-sidebar">
+        <div class="ai-note ai-note-must">
+          <span class="ai-note-badge">逐行精读</span>
+          <h4>DSP 算法的定点/浮点处理值得深究</h4>
+          <p>DaisySP 的 Oscillator、Biquad、ADSR 实现展示了 Cortex-M 上高效 DSP 的写法——polyblep 抗混叠、状态变量滤波器拓扑。这些算法原理 AI 无法替你理解。</p>
+        </div>
+        <div class="ai-note ai-note-collab">
+          <span class="ai-note-badge">架构借鉴</span>
+          <h4>模块化音频处理链</h4>
+          <p>DaisySP 的 Process() 统一接口让 DSP 模块可以自由组合。你描述信号流图，AI 生成 Process chain 代码。</p>
+        </div>
+        </div>
+      </div></section>
+
+      <!-- Key Lessons -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">学到了什么</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-green-400 font-semibold mb-2">DSP 设计模式</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• Init() + Process() 接口统一</li>
+              <li>• 单采样处理 vs 块处理的选择</li>
+              <li>• 预计算常量放入 Init()</li>
+              <li>• 模块化组合（Osc→Filter→FX）</li>
+            </ul>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-blue-400 font-semibold mb-2">嵌入式优化技巧</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• 避免除法，用乘法替代</li>
+              <li>• 状态变量最小化（d1-d4 只有 16 bytes）</li>
+              <li>• 利用 FPU 单周期浮点运算</li>
+              <li>• 频率归一化到 [0,1] 范围</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <div class="text-center py-8 border-t border-dark-700 fade-in">
+        <button data-complete-btn="proj-daisysp" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-lg transition-colors">标记为已完成</button>
+        <p class="text-sm text-slate-500 mt-3">完成本项目走读后，进度将自动保存</p>
+        <div class="flex justify-center gap-4 mt-4">
+          <a href="libdaisy.html" class="text-slate-400 hover:text-slate-300">← 上一个：libDaisy</a>
+          <a href="mutable-plaits.html" class="text-blue-400 hover:text-blue-300">下一个：Mutable Plaits →</a>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="../js/nav.js"></script>
+  <script src="../js/progress.js"></script>
+  <script src="../js/code-walkthrough.js"></script>
+  <script>mermaid.initialize({ theme: 'dark', themeVariables: { fontSize: '14px' }});</script>
+</body>
+</html>

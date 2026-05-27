@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>术语速查 — Cortex-M 音频学习</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="../css/custom.css" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { colors: { dark: { 900: '#020617', 800: '#0f172a', 700: '#1e293b', 600: '#334155' }}}}}</script>
+</head>
+<body class="bg-dark-900 text-slate-200 font-sans">
+
+  <aside id="sidebar" class="sidebar bg-dark-800 border-r border-dark-700">
+    <div class="p-4 border-b border-dark-700">
+      <a href="index.html" class="text-lg font-bold text-white flex items-center gap-2"><span class="text-blue-400">⌘</span> Cortex-M 音频学习</a>
+      <div class="mt-2 progress-bar" data-progress-bar><div class="fill" style="width:0%"></div></div>
+      <p class="text-xs text-slate-500 mt-1">进度: <span data-progress-text>0/21</span></p>
+    </div>
+    <nav class="sidebar-nav py-2">
+      <div class="section-title">学习阶段</div>
+      <a href="phase/1-architecture.html" data-nav-id="phase-1">一、Cortex-M 架构基础</a>
+      <a href="phase/2-peripherals.html" data-nav-id="phase-2">二、外设与通信协议</a>
+      <a href="phase/3-dma.html" data-nav-id="phase-3">三、DMA 数据引擎</a>
+      <a href="phase/4-rtos.html" data-nav-id="phase-4">四、RTOS 实时操作系统</a>
+      <a href="phase/5-dsp.html" data-nav-id="phase-5">五、音频 DSP</a>
+      <a href="phase/6-system.html" data-nav-id="phase-6">六、系统级工程</a>
+      <div class="section-title mt-4">源码走读</div>
+      <a href="projects/baremetal-guide.html" data-nav-id="proj-baremetal-guide">裸机编程指南</a>
+      <a href="projects/baremetal.html" data-nav-id="proj-baremetal">cortexm/baremetal</a>
+      <a href="projects/libopencm3.html" data-nav-id="proj-libopencm3">libopencm3</a>
+      <a href="projects/infinitime.html" data-nav-id="proj-infinitime">InfiniTime</a>
+      <a href="projects/zswatch.html" data-nav-id="proj-zswatch">ZSWatch</a>
+      <a href="projects/libdaisy.html" data-nav-id="proj-libdaisy">libDaisy</a>
+      <a href="projects/daisysp.html" data-nav-id="proj-daisysp">DaisySP</a>
+      <a href="projects/mutable-plaits.html" data-nav-id="proj-plaits">Mutable Plaits</a>
+      <a href="projects/teensy-audio.html" data-nav-id="proj-teensy">Teensy Audio</a>
+      <a href="projects/nrf5340-audio.html" data-nav-id="proj-nrf5340">nRF5340 Audio</a>
+      <div class="section-title mt-4">专题</div>
+      <a href="projects/openglass.html" data-nav-id="proj-openglass">omiGlass 智能眼镜</a>
+      <div class="section-title mt-4">参考</div>
+      <a href="glossary.html" class="active">术语速查</a>
+      <a href="resources.html">资源汇总</a>
+    </nav>
+  </aside>
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+  <header class="mobile-header lg:hidden fixed top-0 left-0 right-0 bg-dark-800 border-b border-dark-700 z-20 px-4 py-3 flex items-center gap-3">
+    <button id="sidebar-toggle" class="text-slate-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <span class="text-lg font-bold text-white">术语速查</span>
+  </header>
+
+  <main class="main-content">
+    <div class="max-w-4xl mx-auto px-6 py-12 lg:py-16">
+
+      <div class="fade-in mb-12">
+        <h1 class="text-3xl lg:text-4xl font-bold text-white mb-4">术语速查</h1>
+        <p class="text-lg text-slate-400">音频嵌入式开发中常见的术语，一句话解释 + 在哪个阶段学到。</p>
+        <input type="text" id="glossary-search" placeholder="搜索术语..." class="mt-4 w-full bg-dark-800 border border-dark-700 rounded-lg px-4 py-3 text-slate-200 placeholder-slate-500 focus:border-blue-500 focus:outline-none">
+      </div>
+
+      <div id="glossary-list" class="space-y-4">
+
+        <!-- A -->
+        <div class="glossary-card fade-in" data-term="adc dac">
+          <h3 class="text-white font-semibold">ADC / DAC</h3>
+          <p class="text-sm text-slate-400 mt-1">模数转换器 / 数模转换器。ADC 把模拟音频（麦克风信号）转为数字，DAC 把数字音频转为模拟（驱动扬声器）。通常集成在 Codec 芯片中。</p>
+          <a href="phase/2-peripherals.html" class="text-xs text-blue-400 mt-1 inline-block">阶段二：外设与通信协议</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="anc active noise cancellation">
+          <h3 class="text-white font-semibold">ANC (Active Noise Cancellation)</h3>
+          <p class="text-sm text-slate-400 mt-1">主动降噪。用参考麦克风采集环境噪声，生成反相信号叠加到输出，实现降噪。Feedforward ANC 最简单，Hybrid ANC 效果最好。</p>
+          <a href="phase/5-dsp.html" class="text-xs text-blue-400 mt-1 inline-block">阶段五：音频 DSP</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="biquad">
+          <h3 class="text-white font-semibold">Biquad</h3>
+          <p class="text-sm text-slate-400 mt-1">双二阶（Bi-quadratic）IIR 滤波器。音频 EQ 的基本单元。每个 EQ 频段 = 一个 Biquad。CMSIS-DSP 提供 arm_biquad_cascade_df1_f32 优化实现。</p>
+          <a href="phase/5-dsp.html" class="text-xs text-blue-400 mt-1 inline-block">阶段五：音频 DSP</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="ble le audio lc3">
+          <h3 class="text-white font-semibold">BLE LE Audio / LC3</h3>
+          <p class="text-sm text-slate-400 mt-1">蓝牙低功耗音频新标准。LC3 是其专用编解码器，同码率质量比 SBC 好 50%。ISO 通道保证时序同步。帧长 7.5-20ms。</p>
+          <a href="projects/nrf5340-audio.html" class="text-xs text-blue-400 mt-1 inline-block">nRF5340 Audio 源码走读</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="esp32 s3 xtensa">
+          <h3 class="text-white font-semibold">ESP32-S3</h3>
+          <p class="text-sm text-slate-400 mt-1">Espressif 的 Xtensa LX7 双核 MCU，240MHz + 8MB PSRAM + WiFi/BLE。虽非 Cortex-M，但音频管线（I2S PDM、Opus 编码、BLE 传输）与 Cortex-M 项目高度重叠，是优秀的参考对比平台。</p>
+          <a href="projects/openglass.html" class="text-xs text-blue-400 mt-1 inline-block">omiGlass 专题走读</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="opus codec audio encoding">
+          <h3 class="text-white font-semibold">Opus</h3>
+          <p class="text-sm text-slate-400 mt-1">开源音频编解码器，6-510kbps 可调。支持语音（VOIP 模式）和音乐。16kHz/32kbps/20ms 配置下语音质量接近原始 PCM。比 LC3 更通用，但不如 LC3 适合 BLE 专用场景。</p>
+          <a href="projects/openglass.html" class="text-xs text-blue-400 mt-1 inline-block">omiGlass 专题走读</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="mu-law mulaw pcm compression">
+          <h3 class="text-white font-semibold">μ-law (mu-law)</h3>
+          <p class="text-sm text-slate-400 mt-1">16-bit PCM → 8-bit 的对数压缩编码（2:1 压缩）。64kbps @ 8kHz。北美电话标准。已被 Opus/LC3 等现代编解码器取代，但实现简单（查表法），适合理解音频编码基础。</p>
+          <a href="projects/openglass.html" class="text-xs text-blue-400 mt-1 inline-block">omiGlass 专题走读</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="bss data section">
+          <h3 class="text-white font-semibold">.bss / .data 段</h3>
+          <p class="text-sm text-slate-400 mt-1">.bss = 未初始化的全局变量（启动时清零），.data = 已初始化的全局变量（从 Flash 复制到 RAM）。startup 代码负责处理这两个段。</p>
+          <a href="phase/1-architecture.html" class="text-xs text-blue-400 mt-1 inline-block">阶段一：Cortex-M 架构基础</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="cmsis">
+          <h3 class="text-white font-semibold">CMSIS</h3>
+          <p class="text-sm text-slate-400 mt-1">Cortex Microcontroller Software Interface Standard。ARM 定义的软件接口标准。CMSIS-DSP 是其 DSP 库，CMSIS-RTOS2 是 RTOS 抽象层。</p>
+          <a href="phase/5-dsp.html" class="text-xs text-blue-400 mt-1 inline-block">阶段五：音频 DSP</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="codec">
+          <h3 class="text-white font-semibold">Codec (音频芯片)</h3>
+          <p class="text-sm text-slate-400 mt-1">Coder-Decoder 芯片。集成 ADC + DAC + 放大器 + DSP。MCU 通过 I2C 配置它（采样率、增益），通过 I2S 传输音频数据。常见：WM8731, AK4556, CS43L22。</p>
+          <a href="phase/2-peripherals.html" class="text-xs text-blue-400 mt-1 inline-block">阶段二：外设与通信协议</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="dma direct memory access">
+          <h3 class="text-white font-semibold">DMA (Direct Memory Access)</h3>
+          <p class="text-sm text-slate-400 mt-1">直接内存访问。硬件模块，无需 CPU 干预即可在内存和外设之间搬运数据。音频系统的核心 — DMA 自动搬运音频数据，CPU 专注 DSP。</p>
+          <a href="phase/3-dma.html" class="text-xs text-blue-400 mt-1 inline-block">阶段三：DMA 数据引擎</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="drc dynamic range compression">
+          <h3 class="text-white font-semibold">DRC (Dynamic Range Compression)</h3>
+          <p class="text-sm text-slate-400 mt-1">动态范围压缩。自动控制音量 — 声音太大时压低，太小时提升。参数：阈值、压缩比、启动时间、释放时间。</p>
+          <a href="phase/5-dsp.html" class="text-xs text-blue-400 mt-1 inline-block">阶段五：音频 DSP</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="dwt data watchpoint trace">
+          <h3 class="text-white font-semibold">DWT (Data Watchpoint and Trace)</h3>
+          <p class="text-sm text-slate-400 mt-1">Cortex-M 内置调试外设。周期计数器（CYCCNT）可以精确测量代码执行时间（单周期精度）。还有数据观察点和 ITM 跟踪功能。</p>
+          <a href="phase/6-system.html" class="text-xs text-blue-400 mt-1 inline-block">阶段六：系统级工程</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="fpu floating point unit">
+          <h3 class="text-white font-semibold">FPU (Floating Point Unit)</h3>
+          <p class="text-sm text-slate-400 mt-1">浮点运算单元。M4F 及以上型号的硬件浮点加速器。单精度浮点乘法 1 周期（~6ns @ 168MHz），比软件模拟快 10 倍。音频 DSP 必需。</p>
+          <a href="phase/1-architecture.html" class="text-xs text-blue-400 mt-1 inline-block">阶段一：Cortex-M 架构基础</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="hardfault">
+          <h3 class="text-white font-semibold">HardFault</h3>
+          <p class="text-sm text-slate-400 mt-1">硬故障。Cortex-M 最常见的崩溃类型。原因：空指针、栈溢出、访问未映射内存。排查：读 SCB->HFSR/CFSR 寄存器和栈帧中的 PC 值。</p>
+          <a href="phase/1-architecture.html" class="text-xs text-blue-400 mt-1 inline-block">阶段一：Cortex-M 架构基础</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="i2c">
+          <h3 class="text-white font-semibold">I2C</h3>
+          <p class="text-sm text-slate-400 mt-1">两线串行总线（SDA + SCL）。用于配置外设芯片（如 Codec 的采样率、增益）。速度：标准 100kHz / 快速 400kHz。不传音频数据。</p>
+          <a href="phase/2-peripherals.html" class="text-xs text-blue-400 mt-1 inline-block">阶段二：外设与通信协议</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="i2s sai serial audio interface">
+          <h3 class="text-white font-semibold">I2S / SAI</h3>
+          <p class="text-sm text-slate-400 mt-1">Inter-IC Sound / Serial Audio Interface。数字音频传输标准。SAI 是 STM32 的 I2S 增强版。信号线：SCK（位时钟）、WS（左右声道）、SD（数据）、MCLK（主时钟）。</p>
+          <a href="phase/2-peripherals.html" class="text-xs text-blue-400 mt-1 inline-block">阶段二：外设与通信协议</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="nvic nested vectored interrupt controller">
+          <h3 class="text-white font-semibold">NVIC (Nested Vectored Interrupt Controller)</h3>
+          <p class="text-sm text-slate-400 mt-1">嵌套向量中断控制器。Cortex-M 内置硬件。支持中断嵌套、尾链（零延迟切换）、优先级分组。音频中断（DMA/SAI）优先级必须设高。</p>
+          <a href="phase/1-architecture.html" class="text-xs text-blue-400 mt-1 inline-block">阶段一：Cortex-M 架构基础</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="ota over the air dfu bootloader">
+          <h3 class="text-white font-semibold">OTA / DFU / Bootloader</h3>
+          <p class="text-sm text-slate-400 mt-1">OTA = 空中固件升级，DFU = Device Firmware Update，Bootloader = 引导加载程序。通常用双 Bank Flash 方案：新固件写入备用 Bank，验证后交换。</p>
+          <a href="phase/6-system.html" class="text-xs text-blue-400 mt-1 inline-block">阶段六：系统级工程</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="pdm pulse density modulation">
+          <h3 class="text-white font-semibold">PDM (Pulse Density Modulation)</h3>
+          <p class="text-sm text-slate-400 mt-1">脉冲密度调制。MEMS 数字麦克风的输出格式。需要低通滤波抽取转换为 PCM。nRF5340 有硬件 PDM 外设。</p>
+          <a href="phase/2-peripherals.html" class="text-xs text-blue-400 mt-1 inline-block">阶段二：外设与通信协议</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="ping pong double buffer">
+          <h3 class="text-white font-semibold">Ping-Pong 双缓冲</h3>
+          <p class="text-sm text-slate-400 mt-1">音频 DMA 的核心模式。DMA 和 CPU 交替使用两块缓冲区（Ping 和 Pong），通过半传输/全传输中断切换。实现无间断音频流。</p>
+          <a href="phase/3-dma.html" class="text-xs text-blue-400 mt-1 inline-block">阶段三：DMA 数据引擎</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="svcall pendsv systick">
+          <h3 class="text-white font-semibold">SVC / PendSV / SysTick</h3>
+          <p class="text-sm text-slate-400 mt-1">FreeRTOS 的三个关键中断：SVC 用于启动第一个任务，PendSV 用于任务间上下文切换（最低优先级保证安全），SysTick 提供 1ms 时基。</p>
+          <a href="phase/4-rtos.html" class="text-xs text-blue-400 mt-1 inline-block">阶段四：RTOS 实时操作系统</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="tdm time division multiplexing">
+          <h3 class="text-white font-semibold">TDM (Time Division Multiplexing)</h3>
+          <p class="text-sm text-slate-400 mt-1">时分复用。I2S 的多通道扩展。在一个 I2S 数据线上通过时分传输 4-16 通道音频。用于麦克风阵列和多通道系统。</p>
+          <a href="phase/2-peripherals.html" class="text-xs text-blue-400 mt-1 inline-block">阶段二：外设与通信协议</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="tickless idle">
+          <h3 class="text-white font-semibold">Tickless Idle</h3>
+          <p class="text-sm text-slate-400 mt-1">FreeRTOS 的低功耗模式。空闲时暂停 1ms 的 SysTick 中断，进入 Sleep 模式。唤醒后补偿流失的时间。在 DMA 音频流运行时仍可工作。</p>
+          <a href="phase/6-system.html" class="text-xs text-blue-400 mt-1 inline-block">阶段六：系统级工程</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="underrun overrun">
+          <h3 class="text-white font-semibold">Underrun / Overrun</h3>
+          <p class="text-sm text-slate-400 mt-1">欠载/过载。Underrun = DAC 没及时拿到数据（播放断音），Overrun = ADC 数据没及时读走（录音丢数据）。都会导致咔嗒声。音频系统的头号敌人。</p>
+          <a href="phase/3-dma.html" class="text-xs text-blue-400 mt-1 inline-block">阶段三：DMA 数据引擎</a>
+        </div>
+
+        <div class="glossary-card fade-in" data-term="zephyr device tree kconfig">
+          <h3 class="text-white font-semibold">Zephyr / Device Tree / Kconfig</h3>
+          <p class="text-sm text-slate-400 mt-1">Zephyr 是 Linux 基金会的 RTOS。Device Tree 用声明式语法定义硬件（类似 Linux），Kconfig 用菜单选择启用哪些功能。替代 CubeMX 的手写初始化代码。</p>
+          <a href="phase/4-rtos.html" class="text-xs text-blue-400 mt-1 inline-block">阶段四：RTOS 实时操作系统</a>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script src="js/nav.js"></script>
+  <script src="js/progress.js"></script>
+  <script>
+    // Glossary search
+    document.getElementById('glossary-search').addEventListener('input', function() {
+      var query = this.value.toLowerCase();
+      document.querySelectorAll('.glossary-card').forEach(function(card) {
+        var term = card.getAttribute('data-term') || '';
+        var text = card.textContent.toLowerCase();
+        if (text.includes(query) || term.includes(query)) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

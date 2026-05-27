@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>阶段一：Cortex-M 架构基础 — Cortex-M 音频学习</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-armasm.min.js"></script>
+  <link href="../css/custom.css" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { colors: { dark: { 900: '#020617', 800: '#0f172a', 700: '#1e293b', 600: '#334155' }}}}}</script>
+</head>
+<body class="bg-dark-900 text-slate-200 font-sans">
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="sidebar bg-dark-800 border-r border-dark-700">
+    <div class="p-4 border-b border-dark-700">
+      <a href="../index.html" class="text-lg font-bold text-white flex items-center gap-2">
+        <span class="text-blue-400">⌘</span> Cortex-M 音频学习
+      </a>
+      <div class="mt-2 progress-bar" data-progress-bar><div class="fill" style="width:0%"></div></div>
+      <p class="text-xs text-slate-500 mt-1">进度: <span data-progress-text>0/21</span></p>
+    </div>
+    <nav class="sidebar-nav py-2">
+      <div class="section-title">学习阶段</div>
+      <a href="1-architecture.html" data-nav-id="phase-1" class="active">一、Cortex-M 架构基础</a>
+      <a href="2-peripherals.html" data-nav-id="phase-2">二、外设与通信协议</a>
+      <a href="3-dma.html" data-nav-id="phase-3">三、DMA 数据引擎</a>
+      <a href="4-rtos.html" data-nav-id="phase-4">四、RTOS 实时操作系统</a>
+      <a href="5-dsp.html" data-nav-id="phase-5">五、音频 DSP</a>
+      <a href="6-system.html" data-nav-id="phase-6">六、系统级工程</a>
+      <div class="section-title mt-4">源码走读</div>
+      <a href="../projects/baremetal-guide.html" data-nav-id="proj-baremetal-guide">裸机编程指南</a>
+      <a href="../projects/baremetal.html" data-nav-id="proj-baremetal">cortexm/baremetal</a>
+      <a href="../projects/libopencm3.html" data-nav-id="proj-libopencm3">libopencm3</a>
+      <a href="../projects/infinitime.html" data-nav-id="proj-infinitime">InfiniTime</a>
+      <a href="../projects/zswatch.html" data-nav-id="proj-zswatch">ZSWatch</a>
+      <a href="../projects/libdaisy.html" data-nav-id="proj-libdaisy">libDaisy</a>
+      <a href="../projects/daisysp.html" data-nav-id="proj-daisysp">DaisySP</a>
+      <a href="../projects/mutable-plaits.html" data-nav-id="proj-plaits">Mutable Plaits</a>
+      <a href="../projects/teensy-audio.html" data-nav-id="proj-teensy">Teensy Audio</a>
+      <a href="../projects/nrf5340-audio.html" data-nav-id="proj-nrf5340">nRF5340 Audio</a>
+      <div class="section-title mt-4">专题</div>
+      <a href="../projects/openglass.html" data-nav-id="proj-openglass">omiGlass 智能眼镜</a>
+      <div class="section-title mt-4">参考</div>
+      <a href="../glossary.html">术语速查</a>
+      <a href="../resources.html">资源汇总</a>
+    </nav>
+  </aside>
+
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+  <header class="mobile-header lg:hidden fixed top-0 left-0 right-0 bg-dark-800 border-b border-dark-700 z-20 px-4 py-3 flex items-center gap-3">
+    <button id="sidebar-toggle" class="text-slate-400 hover:text-white">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <span class="text-lg font-bold text-white">阶段一：Cortex-M 架构基础</span>
+  </header>
+
+  <main class="main-content">
+    <div class="max-w-6xl mx-auto px-6 py-12 lg:py-16">
+
+      <!-- Header -->
+      <div class="fade-in mb-12">
+        <span class="text-xs font-mono bg-blue-500/20 text-blue-400 px-2 py-1 rounded">阶段一 · 1-2 周</span>
+        <h1 class="text-3xl lg:text-4xl font-bold text-white mt-3 mb-4">Cortex-M 架构基础</h1>
+        <p class="text-lg text-slate-400">理解 Cortex-M 处理器的编程模型、中断系统、启动流程和内存布局。这是所有后续学习的基础。</p>
+      </div>
+
+      <!-- 1.1 Cortex-M 家族 -->
+      <section class="mb-12 fade-in">
+        <div class="ai-era-layout">
+          <div class="ai-era-main">
+            <h2 class="text-2xl font-bold text-white mb-4">1.1 Cortex-M 家族与选型</h2>
+            <p class="text-slate-300 mb-4">Cortex-M 系列从低功耗的 M0 到高性能的 M55，覆盖不同应用场景。作为音频开发者，你最可能接触 M4F、M7 和 M33。</p>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm border-collapse">
+                <thead>
+                  <tr class="border-b border-dark-700 text-left">
+                    <th class="p-3 text-slate-400 font-medium">内核</th>
+                    <th class="p-3 text-slate-400 font-medium">流水线</th>
+                    <th class="p-3 text-slate-400 font-medium">FPU</th>
+                    <th class="p-3 text-slate-400 font-medium">DSP</th>
+                    <th class="p-3 text-slate-400 font-medium">典型芯片</th>
+                    <th class="p-3 text-slate-400 font-medium">音频适用</th>
+                  </tr>
+                </thead>
+                <tbody class="text-slate-300">
+                  <tr class="border-b border-dark-700/50"><td class="p-3 font-mono text-blue-400">M0/M0+</td><td class="p-3">3-stage</td><td class="p-3">无</td><td class="p-3">无</td><td class="p-3">STM32G0, nRF51</td><td class="p-3 text-red-400">不适合</td></tr>
+                  <tr class="border-b border-dark-700/50"><td class="p-3 font-mono text-blue-400">M3</td><td class="p-3">3-stage</td><td class="p-3">无</td><td class="p-3">无</td><td class="p-3">STM32F1, LM3S</td><td class="p-3 text-yellow-400">勉强</td></tr>
+                  <tr class="border-b border-dark-700/50 bg-blue-500/5"><td class="p-3 font-mono text-blue-400">M4F</td><td class="p-3">3-stage</td><td class="p-3">SP 单精度</td><td class="p-3">SIMD</td><td class="p-3">STM32F4, nRF52</td><td class="p-3 text-green-400">适合入门</td></tr>
+                  <tr class="border-b border-dark-700/50 bg-blue-500/5"><td class="p-3 font-mono text-blue-400">M7</td><td class="p-3">6-stage</td><td class="p-3">SP/DP</td><td class="p-3">SIMD</td><td class="p-3">STM32H7, i.MX RT</td><td class="p-3 text-green-400">高性能首选</td></tr>
+                  <tr class="border-b border-dark-700/50"><td class="p-3 font-mono text-blue-400">M33</td><td class="p-3">3-stage</td><td class="p-3">SP</td><td class="p-3">SIMD</td><td class="p-3">nRF53, STM32L5</td><td class="p-3 text-green-400">低功耗+安全</td></tr>
+                  <tr><td class="p-3 font-mono text-blue-400">M55</td><td class="p-3">—</td><td class="p-3">SP/DP</td><td class="p-3">Helium</td><td class="p-3">i.MX RT700</td><td class="p-3 text-green-400">AI+音频</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="callout callout-info mt-4">
+              <p class="text-sm text-slate-300"><strong class="text-blue-400">音频选型关键：</strong>FPU 是必须的 — 音频 DSP 大量浮点运算。M4F 的单精度 FPU 已经够用；M7 的双精度 FPU 和 6 级流水线提供更高性能余量，适合复杂算法（如多通道 ANC）。</p>
+            </div>
+          </div>
+          <div class="ai-era-sidebar">
+            <div class="ai-note ai-note-collab">
+              <span class="ai-note-badge">人机协作</span>
+              <h4>你选架构，AI 写配置</h4>
+              <p>选 M4F 还是 M33、要不要 FPU、RAM 需要多大——这些架构决策只有你能做。选定之后，Device Tree / Kconfig / CubeMX 配置可以让 AI 生成。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 1.2 编程模型 -->
+      <section class="mb-12 fade-in">
+        <div class="ai-era-layout">
+          <div class="ai-era-main">
+            <h2 class="text-2xl font-bold text-white mb-4">1.2 编程模型：寄存器与模式</h2>
+            <p class="text-slate-300 mb-4">Cortex-M 只有两种特权模式：<strong>Handler 模式</strong>（中断服务函数中）和 <strong>Thread 模式</strong>（普通代码）。每种模式有 MSP（主栈指针）和 PSP（进程栈指针）。</p>
+
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700 mb-6">
+          <pre class="mermaid">
+graph TB
+    subgraph "Cortex-M 特权级别"
+        P["Privileged<br/>特权模式"] --> H["Handler Mode<br/>中断处理"]
+        P --> T1["Thread Mode<br/>特权线程"]
+        U["Unprivileged<br/>非特权模式"] --> T2["Thread Mode<br/>用户线程"]
+    end
+    subgraph "栈指针选择"
+        MSP["MSP (主栈)<br/>中断 + 裸机默认"]
+        PSP["PSP (进程栈)<br/>RTOS 任务栈"]
+    end
+          </pre>
+        </div>
+
+        <p class="text-slate-300 mb-4">通用寄存器 <code class="text-blue-400">r0-r12</code>，其中 <code class="text-blue-400">r13</code> 是栈指针(SP)，<code class="text-blue-400">r14</code> 是链接寄存器(LR，存返回地址)，<code class="text-blue-400">r15</code> 是程序计数器(PC)。特殊寄存器：</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">特殊寄存器一览</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">// 程序状态寄存器 (xPSR)
+// APSR: 条件标志 (N, Z, C, V, Q)
+// IPSR: 当前中断号 (异常编号)
+// EPSR: 执行状态 (Thumb 位, IT 块)
+
+// PRIMASK — 中断屏蔽寄存器
+__disable_irq();    // PRIMASK = 1, 关闭所有可屏蔽中断
+__enable_irq();     // PRIMASK = 0, 恢复中断
+
+// BASEPRI — 优先级屏蔽
+__set_BASEPRI(5 << 4);  // 屏蔽优先级 ≥ 5 的中断 (M4 优先级 0最高)
+                         // 注意：左移4位因为优先级只用高4位
+
+// CONTROL — 控制寄存器
+// bit[0]: 0=特权 Thread, 1=非特权 Thread
+// bit[1]: 0=使用 MSP, 1=使用 PSP
+// bit[2]: 0=FPU 不 lazy stacking, 1=启用 lazy stacking</code></pre>
+          </div>
+        </div>
+
+        <div class="callout callout-tip mt-4">
+          <p class="text-sm text-slate-300"><strong class="text-green-400">实践建议：</strong>裸机程序只用 MSP 和特权模式就够了。当开始学 FreeRTOS 时，RTOS 会切到 PSP 给每个任务独立栈空间。PRIMASK 和 BASEPRI 在音频中断保护中非常重要。</p>
+        </div>
+          </div>
+          <div class="ai-era-sidebar">
+            <div class="ai-note ai-note-auto">
+              <span class="ai-note-badge">可淡化</span>
+              <h4>寄存器位操作 AI 随手写</h4>
+              <p>MODER &= ~(3U << (4*2)) 这类位操作模式是标准样板。理解原理即可，具体写法交给 AI。你的时间花在理解"为什么这样配置"上。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 1.3 NVIC -->
+      <section class="mb-12 fade-in">
+        <div class="ai-era-layout">
+          <div class="ai-era-main">
+            <h2 class="text-2xl font-bold text-white mb-4">1.3 NVIC 嵌套向量中断控制器</h2>
+            <p class="text-slate-300 mb-4">NVIC 是 Cortex-M 的核心组件。与 OS 框架中的中断不同，这里是硬件级别的中断嵌套和优先级管理。</p>
+
+        <div class="grid md:grid-cols-2 gap-4 mb-6">
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-blue-400 font-semibold mb-2">优先级机制</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• 数值越小优先级越高（0 是最高）</li>
+              <li>• 支持 <strong>抢占</strong>（Preemption）：高优先级打断低优先级</li>
+              <li>• 支持 <strong>尾链</strong>（Tail-chain）：连续中断零延迟切换</li>
+              <li>• STM32F4 用 4 位优先级 → 16 级（0-15）</li>
+            </ul>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-blue-400 font-semibold mb-2">音频中的 NVIC 应用</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• DMA 半传输/全传输中断 → 音频回调</li>
+              <li>• SAI/I2S 错误中断 → underrun/overrun</li>
+              <li>• 定时器中断 → 精确采样率时钟</li>
+              <li>• 用 BASEPRI 保护音频处理临界区</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">nvic_audio_config.c</span>
+            <span>配置音频相关中断优先级</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c"><span class="line-highlight">void audio_interrupt_setup(void) {</span>
+    // ① DMA 中断优先级设为 5 — 音频数据搬运
+    //    这是最高优先级，不能被其他中断打断
+    HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Stream1_IRQn);
+
+    // ② SAI (I2S) 中断优先级 6 — 略低于 DMA
+    //    用于检测 underrun/overrun 错误
+    HAL_NVIC_SetPriority(SAI1_IRQn, 6, 0);
+    HAL_NVIC_EnableIRQ(SAI1_IRQn);
+
+    // ③ SysTick 优先级最低（15）— RTOS 时间片
+    //    确保不会干扰音频中断时序
+    HAL_NVIC_SetPriority(SysTick_IRQn, 15, 0);
+<span class="line-highlight">}</span>
+
+// DMA 半传输完成中断 — 音频回调入口
+void DMA1_Stream1_IRQHandler(void) {
+    // 这里直接处理前半缓冲区的音频数据
+    // 典型延迟 = buffer_size / 2 / sample_rate
+    // 例：256 samples / 48000Hz ≈ 5.3ms
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+    if (DMA_GetFlagStatus(DMA1_Stream1, DMA_FLAG_HTIF1)) {
+        DMA_ClearFlag(DMA1_Stream1, DMA_FLAG_HTIF1);
+        // 通知音频处理任务
+        xTaskNotifyFromISR(audioTaskHandle, 0, eIncrement,
+                          &xHigherPriorityTaskWoken);
+    }
+
+    // 如果唤醒了更高优先级任务，触发上下文切换
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item" data-ann="①">
+              <span class="ann-num">①</span>
+              <span>DMA 中断是音频系统的核心回调。当 DMA 完成半缓冲区传输时触发，告诉 CPU "可以处理前半部分数据了"。</span>
+            </div>
+            <div class="ann-item" data-ann="②">
+              <span class="ann-num">②</span>
+              <span>SAI 错误中断用于检测 FIFO underrun（DAC 没及时拿到数据）或 overrun（ADC 数据没及时读走）。音频中出现这个就意味着有 "咔嗒" 噪声。</span>
+            </div>
+            <div class="ann-item" data-ann="③">
+              <span class="ann-num">③</span>
+              <span>SysTick 必须优先级最低！否则 1ms 的系统时钟中断会打断音频 DMA 回调，造成延迟抖动。这是初学者最常犯的错误。</span>
+            </div>
+          </div>
+        </div>
+          </div>
+          <div class="ai-era-sidebar">
+            <div class="ai-note ai-note-must">
+              <span class="ai-note-badge">不可替代</span>
+              <h4>优先级策略是工程判断</h4>
+              <p>DMA 抢占 SysTick 的排序不是代码问题，是架构决策。AI 可以生成 NVIC_SetPriority() 调用，但它不知道你的 BLE 栈和音频 DMA 会冲突。只有你能判断系统中断优先级的全局合理性。</p>
+            </div>
+            <div class="ai-note ai-note-collab">
+              <span class="ai-note-badge">人机协作</span>
+              <h4>你定策略 AI 写实现</h4>
+              <p>你描述"DMA 优先级 5，SAI 优先级 6，SysTick 最低"，Claude 生成完整 NVIC 初始化。瓶颈是你能否做出正确的优先级规划。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 1.4 启动流程 -->
+      <section class="mb-12 fade-in">
+
+        <div class="ai-era-layout">
+          <div class="ai-era-main">        <h2 class="text-2xl font-bold text-white mb-4">1.4 从上电到 main()</h2>
+        <p class="text-slate-300 mb-4">MCU 上电后并不是直接执行 main()。理解这个过程对调试硬故障（HardFault）和编写可靠代码至关重要。</p>
+
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700 mb-6">
+          <pre class="mermaid">
+sequenceDiagram
+    participant PWR as 上电
+    participant ROM as Boot ROM
+    participant VT as 向量表
+    participant SR as startup.s
+    participant M as main()
+    PWR->>ROM: 1. CPU 从 0x00000004 取 Reset_Handler
+    ROM->>VT: 2. 读取向量表 (Flash 起始处)
+    VT->>VT: 3. 加载 SP = 栈顶地址
+    VT->>SR: 4. 跳转 Reset_Handler 地址
+    SR->>SR: 5. 复制 .data 段 (Flash→RAM)
+    SR->>SR: 6. 清零 .bss 段
+    SR->>SR: 7. 调用 SystemInit() — 配置时钟
+    SR->>M: 8. 调用 main()
+          </pre>
+        </div>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">startup.c — 典型的启动代码</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">// 向量表 — 放在 Flash 最前面，CPU 上电时读取
+__attribute__((section(".isr_vector")))
+const uint32_t vector_table[] = {
+    (uint32_t)&_estack,         // 初始栈指针 (MSP)
+    (uint32_t)Reset_Handler,    // Reset
+    (uint32_t)NMI_Handler,      // NMI
+    (uint32_t)HardFault_Handler,// HardFault ← 最常遇到的错误
+    (uint32_t)MemManage_Handler,// 内存管理错误
+    (uint32_t)BusFault_Handler, // 总线错误
+    (uint32_t)UsageFault_Handler,// 用法错误
+    0, 0, 0, 0,                 // 保留
+    (uint32_t)SVC_Handler,      // SVCall (RTOS 上下文切换用)
+    (uint32_t)DebugMon_Handler, // Debug Monitor
+    0,                          // 保留
+    (uint32_t)PendSV_Handler,   // PendSV (RTOS 任务切换用)
+    (uint32_t)SysTick_Handler,  // SysTick
+    // 外部中断从这里开始...
+    (uint32_t)WWDG_IRQHandler,  // IRQ 0
+    (uint32_t)PVD_IRQHandler,   // IRQ 1
+    // ... 芯片手册定义的全部中断向量
+};
+
+void Reset_Handler(void) {
+    // 1. 把 .data 从 Flash 复制到 RAM
+    uint32_t *src = &_sidata;
+    uint32_t *dst = &_sdata;
+    while (dst < &_edata) *dst++ = *src++;
+
+    // 2. 清零 .bss 段（未初始化的全局变量）
+    dst = &_sbss;
+    while (dst < &_ebss) *dst++ = 0;
+
+    // 3. 系统初始化（配置时钟树等）
+    SystemInit();
+
+    // 4. C 库初始化（如果使用 newlib）
+    __libc_init_array();
+
+    // 5. 终于进入 main()
+    main();
+
+    // 不应该返回到这里
+    while (1);
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item">
+              <span class="ann-num">!</span>
+              <span><strong>HardFault</strong> 是最常见的错误 — 空指针解引用、栈溢出、访问未映射内存都会触发。学会用寄存器排查：SCB->HFSR、SCB->MMFAR、SCB->BFAR。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">★</span>
+              <span><strong>SVC 和 PendSV</strong> 现在不用管，当你学 FreeRTOS 时会发现：SVC 用于启动第一个任务，PendSV 用于任务间上下文切换（最低优先级确保安全切换）。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning mt-4">
+          <p class="text-sm text-slate-300"><strong class="text-yellow-400">常见坑：</strong>栈空间不够用。如果全局变量太多（.bss 和 .data）或递归太深，栈指针会溢出到非法内存区域，触发 HardFault。音频缓冲区特别大（如 48kHz × 2ch × 2bytes × 256samples = 256KB），一定要放在静态变量区或使用 heap。</p>
+        </div>
+          </div>
+          <div class="ai-era-sidebar">
+            <div class="ai-note ai-note-must">
+              <span class="ai-note-badge">不可替代</span>
+              <h4>HardFault 时你要知道 PC 怎么来的</h4>
+              <p>凌晨 3 点面对 HardFault 地址 0x08001234，你需要知道去 .map 文件查函数、去反汇编查指令。启动流程、向量表、栈帧布局是调试的基石。AI 无法 attach SWD 探针帮你读 CFSR 寄存器。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 1.5 Linker Script -->
+      <section class="mb-12 fade-in">
+
+        <div class="ai-era-layout">
+          <div class="ai-era-main">        <h2 class="text-2xl font-bold text-white mb-4">1.5 Linker Script — 内存地图</h2>
+        <p class="text-slate-300 mb-4">Linker Script (.ld) 定义了程序的内存布局。它告诉链接器：代码放哪里、数据放哪里、栈有多大。这对音频开发特别重要，因为需要精确控制大块音频缓冲区放哪里。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">STM32F407.ld — 简化的链接脚本</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">/* MCU 内存定义 */
+MEMORY {
+    FLASH (rx)  : ORIGIN = 0x08000000, LENGTH = 512K  /* 代码 + 只读数据 */
+    RAM (rwx)   : ORIGIN = 0x20000000, LENGTH = 128K  /* 数据 + 栈 + 堆 */
+    CCMRAM(rwx) : ORIGIN = 0x10000000, LENGTH = 64K   /* 核心 coupled 内存 */
+}
+
+/* 符号定义 — startup.c 中引用这些 */
+_estack = ORIGIN(RAM) + LENGTH(RAM);  /* 栈顶 = RAM 末尾，向低地址生长 */
+
+SECTIONS {
+    .isr_vector : { KEEP(*(.isr_vector)) } > FLASH     /* 向量表必须在最前面 */
+
+    .text : {
+        *(.text)           /* 代码 */
+        *(.rodata)         /* 只读数据 (const) */
+    } > FLASH
+
+    .data : {
+        _sdata = .;        /* .data 段起始 — startup.c 用 */
+        *(.data)
+        _edata = .;        /* .data 段结束 */
+    } > RAM AT > FLASH     /* 运行在 RAM，加载在 Flash (startup 复制) */
+
+    .bss : {
+        _sbss = .;
+        *(.bss)            /* 未初始化的全局变量 — startup 清零 */
+        *(COMMON)
+        _ebss = .;
+    } > RAM
+
+    /* DMA 缓冲区 — 放在特定 section */
+    .audio_buffers (NOLOAD) : {
+        *(.audio_dma_buf)  /* 用 __attribute__((section(".audio_dma_buf"))) */
+    } > RAM
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item">
+              <span class="ann-num">1</span>
+              <span><strong>CCMRAM</strong> (Core Coupled Memory) 是 STM32F4 的 64KB 额外 RAM，直接连 CPU 不经过总线矩阵。把频繁访问的音频数据放这里可以减少 DMA 争用。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">2</span>
+              <span><strong>DMA 缓冲区对齐</strong>很重要。如果 DMA 和 CPU 同时访问同一个 RAM bank，会有 wait state。最佳实践是 DMA 缓冲区 32 字节对齐。</span>
+            </div>
+          </div>
+        </div>
+          </div>
+          <div class="ai-era-sidebar">
+            <div class="ai-note ai-note-collab">
+              <span class="ai-note-badge">人机协作</span>
+              <h4>你规划内存布局 AI 写 .ld 文件</h4>
+              <p>你决定"音频缓冲放 SRAM，查找表放 CCMRAM，栈大小 4K"，AI 生成对应的 MEMORY 和 SECTIONS 定义。关键是你的布局规划能力。</p>
+            </div>
+            <div class="ai-note ai-note-must">
+              <span class="ai-note-badge">不可替代</span>
+              <h4>总线仲裁是系统级决策</h4>
+              <p>CCMRAM vs SRAM 的选择影响 DMA 和 CPU 的竞争。这种芯片特定的内存架构知识是 AI 无法替代的——它不知道你的 DMA stream 和 CPU 同时访问哪个 bank。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 1.6 Bus Matrix -->
+      <section class="mb-12 fade-in">
+
+        <div class="ai-era-layout">
+          <div class="ai-era-main">        <h2 class="text-2xl font-bold text-white mb-4">1.6 总线矩阵与内存架构</h2>
+        <p class="text-slate-300 mb-4">理解总线矩阵对音频性能至关重要：CPU、DMA、外设通过总线矩阵访问内存。如果多条总线同时访问同一个 RAM 区域，会产生等待状态（wait state），影响实时性。</p>
+
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700 mb-6">
+          <pre class="mermaid">
+graph LR
+    subgraph "总线主设备 Masters"
+        I["I-Code Bus<br/>(取指令)"]
+        D["D-Code Bus<br/>(读数据)"]
+        S["System Bus<br/>(RAM/外设)"]
+        DMA["DMA 控制器"]
+    end
+    subgraph "总线从设备 Slaves"
+        F["Flash<br/>0x0800_0000"]
+        R["SRAM<br/>0x2000_0000"]
+        C["CCMRAM<br/>0x1000_0000"]
+        P["外设寄存器<br/>0x4000_0000"]
+    end
+    I -->|取指| F
+    D -->|读数据| F
+    S -->|读写| R
+    S -->|读写| P
+    DMA -->|搬运| R
+    DMA -->|搬运| P
+          </pre>
+        </div>
+
+        <div class="callout callout-important">
+          <p class="text-sm text-slate-300"><strong class="text-purple-400">音频优化策略：</strong>让 CPU 用 CCMRAM（代码/查找表），DMA 用 SRAM（音频缓冲区）。这样两条总线并行工作，零等待。libDaisy 项目就用了这个策略 — 我们在源码走读中会看到。</p>
+        </div>
+          </div>
+          <div class="ai-era-sidebar">
+            <div class="ai-note ai-note-must">
+              <span class="ai-note-badge">不可替代</span>
+              <h4>总线冲突是音频性能瓶颈</h4>
+              <p>DMA 和 CPU 同时访问同一个 RAM bank 的竞争需要你手动规避。这不是代码问题而是硬件拓扑问题。让 CPU 用 CCMRAM、DMA 用 SRAM 的策略需要理解总线矩阵——这正是 libDaisy 等项目的核心优化。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Related Projects -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">关联项目源码走读</h2>
+        <p class="text-slate-400 mb-4">学完本阶段概念后，建议阅读以下项目的源码来巩固理解：</p>
+        <div class="grid md:grid-cols-2 gap-4">
+          <a href="../projects/baremetal-guide.html" class="project-card block">
+            <span class="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded">推荐首选</span>
+            <h3 class="font-semibold text-white mt-2">bare-metal-programming-guide</h3>
+            <p class="text-sm text-slate-400 mt-1">详细解释 startup 代码、寄存器操作、向量表 — 正好对应本阶段内容</p>
+          </a>
+          <a href="../projects/baremetal.html" class="project-card block">
+            <span class="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded">C++ 实例</span>
+            <h3 class="font-semibold text-white mt-2">cortexm/baremetal</h3>
+            <p class="text-sm text-slate-400 mt-1">完整的 C++ 裸机启动代码，包含 linker script 和 startup.cpp</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- Complete Button -->
+      <div class="text-center py-8 border-t border-dark-700 fade-in">
+        <button data-complete-btn="phase-1" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-lg transition-colors">
+          标记为已完成
+        </button>
+        <p class="text-sm text-slate-500 mt-3">完成本阶段后，进度将自动保存</p>
+        <a href="2-peripherals.html" class="inline-block mt-4 text-blue-400 hover:text-blue-300">下一阶段：外设与通信协议 →</a>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="../js/nav.js"></script>
+  <script src="../js/progress.js"></script>
+  <script src="../js/code-walkthrough.js"></script>
+  <script>mermaid.initialize({ theme: 'dark', themeVariables: { fontSize: '14px' }});</script>
+</body>
+</html>

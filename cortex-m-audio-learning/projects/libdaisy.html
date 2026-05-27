@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>libDaisy 源码走读 — Cortex-M 音频学习</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link href="../css/custom.css" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { colors: { dark: { 900: '#020617', 800: '#0f172a', 700: '#1e293b', 600: '#334155' }}}}}</script>
+</head>
+<body class="bg-dark-900 text-slate-200 font-sans">
+
+  <aside id="sidebar" class="sidebar bg-dark-800 border-r border-dark-700">
+    <div class="p-4 border-b border-dark-700">
+      <a href="../index.html" class="text-lg font-bold text-white flex items-center gap-2">
+        <span class="text-blue-400">⌘</span> Cortex-M 音频学习
+      </a>
+      <div class="mt-2 progress-bar" data-progress-bar><div class="fill" style="width:0%"></div></div>
+      <p class="text-xs text-slate-500 mt-1">进度: <span data-progress-text>0/21</span></p>
+    </div>
+    <nav class="sidebar-nav py-2">
+      <div class="section-title">学习阶段</div>
+      <a href="../phase/1-architecture.html" data-nav-id="phase-1">一、Cortex-M 架构基础</a>
+      <a href="../phase/2-peripherals.html" data-nav-id="phase-2">二、外设与通信协议</a>
+      <a href="../phase/3-dma.html" data-nav-id="phase-3">三、DMA 数据引擎</a>
+      <a href="../phase/4-rtos.html" data-nav-id="phase-4">四、RTOS 实时操作系统</a>
+      <a href="../phase/5-dsp.html" data-nav-id="phase-5">五、音频 DSP</a>
+      <a href="../phase/6-system.html" data-nav-id="phase-6">六、系统级工程</a>
+      <div class="section-title mt-4">源码走读</div>
+      <a href="baremetal-guide.html" data-nav-id="proj-baremetal-guide">裸机编程指南</a>
+      <a href="baremetal.html" data-nav-id="proj-baremetal">cortexm/baremetal</a>
+      <a href="libopencm3.html" data-nav-id="proj-libopencm3">libopencm3</a>
+      <a href="infinitime.html" data-nav-id="proj-infinitime">InfiniTime</a>
+      <a href="zswatch.html" data-nav-id="proj-zswatch">ZSWatch</a>
+      <a href="libdaisy.html" data-nav-id="proj-libdaisy" class="active">libDaisy</a>
+      <a href="daisysp.html" data-nav-id="proj-daisysp">DaisySP</a>
+      <a href="mutable-plaits.html" data-nav-id="proj-plaits">Mutable Plaits</a>
+      <a href="teensy-audio.html" data-nav-id="proj-teensy">Teensy Audio</a>
+      <a href="nrf5340-audio.html" data-nav-id="proj-nrf5340">nRF5340 Audio</a>
+      <div class="section-title mt-4">专题</div>
+      <a href="openglass.html" data-nav-id="proj-openglass">omiGlass 智能眼镜</a>
+      <div class="section-title mt-4">参考</div>
+      <a href="../glossary.html">术语速查</a>
+      <a href="../resources.html">资源汇总</a>
+    </nav>
+  </aside>
+
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+  <header class="mobile-header lg:hidden fixed top-0 left-0 right-0 bg-dark-800 border-b border-dark-700 z-20 px-4 py-3 flex items-center gap-3">
+    <button id="sidebar-toggle" class="text-slate-400 hover:text-white">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <span class="text-lg font-bold text-white">libDaisy 源码走读</span>
+  </header>
+
+  <main class="main-content">
+    <div class="max-w-6xl mx-auto px-6 py-12 lg:py-16">
+
+      <!-- Project Overview -->
+      <div class="fade-in mb-12">
+        <div class="flex flex-wrap gap-2 mb-3">
+          <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">阅读顺序 ⑥</span>
+          <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">音频驱动</span>
+        </div>
+        <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">libDaisy 源码走读</h1>
+        <p class="text-lg text-slate-400 mb-4">专业音频硬件抽象层 — SAI/I2S 驱动 + Codec 控制 + DMA 音频流</p>
+        <div class="flex flex-wrap gap-3 text-sm">
+          <span class="bg-dark-800 px-3 py-1 rounded border border-dark-700">STM32H750 (M7)</span>
+          <span class="bg-dark-800 px-3 py-1 rounded border border-dark-700">裸机 C++</span>
+          <span class="bg-dark-800 px-3 py-1 rounded border border-dark-700">Stars ★ 1500</span>
+          <a href="https://github.com/electro-smith/libDaisy" class="text-blue-400 hover:text-blue-300">GitHub →</a>
+        </div>
+      </div>
+
+      <!-- Architecture -->
+      <section class="mb-12 fade-in">
+      <div class="ai-era-layout">
+        <div class="ai-era-main">
+
+        <h2 class="text-2xl font-bold text-white mb-4">架构总览</h2>
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700 mb-6">
+          <pre class="mermaid">
+graph TB
+    subgraph "应用层"
+        APP["用户代码<br/>audio_callback()"]
+    end
+    subgraph "libDaisy HAL"
+        DAISY["DaisySeed<br/>系统初始化"]
+        SAI["SaiHandle<br/>SAI/I2S 驱动"]
+        CODEC["Codec<AK4556/WM8731><br/>Codec 控制"]
+        DMA["DMA<br/>Ping-Pong 双缓冲"]
+        GPIO["GPIO<br/>复位/Mute"]
+    end
+    subgraph "硬件"
+        HW_SAI["SAI1 外设"]
+        HW_CODEC["AK4556 Codec"]
+        HW_DMA["DMA1 Stream"]
+    end
+    APP --> DAISY
+    DAISY --> SAI
+    DAISY --> CODEC
+    SAI --> DMA
+    SAI --> HW_SAI
+    CODEC --> GPIO
+    CODEC -.->|"I2C 配置"| HW_CODEC
+    DMA --> HW_DMA
+    HW_SAI -.->|"I2S 数据"| HW_CODEC
+          </pre>
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-3">建议阅读顺序</h3>
+        <ol class="space-y-2 text-slate-300 text-sm">
+          <li class="flex gap-2"><span class="text-blue-400 font-mono">1.</span> <code class="text-blue-400">src/daisy_seed.h</code> — 系统初始化入口，看它如何组装各模块</li>
+          <li class="flex gap-2"><span class="text-blue-400 font-mono">2.</span> <code class="text-blue-400">src/per/sai.h/cpp</code> — SAI 外设驱动核心（本页重点走读）</li>
+          <li class="flex gap-2"><span class="text-blue-400 font-mono">3.</span> <code class="text-blue-400">src/dev/codec_ak4556.h</code> — Codec 芯片驱动</li>
+          <li class="flex gap-2"><span class="text-blue-400 font-mono">4.</span> <code class="text-blue-400">src/hid/audio.h</code> — 用户 API 封装</li>
+        </ol>
+      </section>
+
+      <!-- SAI Driver -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">源码走读：SaiHandle — SAI/I2S 驱动</h2>
+        <p class="text-slate-300 mb-4">这是 libDaisy 最核心的代码。SaiHandle 封装了 STM32 SAI 外设的配置、DMA 双缓冲和中断回调，是音频数据流的起点。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">src/per/sai.cpp — SAI 初始化与 DMA 配置</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-cpp">// SaiHandle 类定义 (简化)
+class SaiHandle {
+public:
+    struct Config {
+        int         dev_index;       // SAI1 or SAI2
+        SAI_MODE    mode;            // Master/Slave
+        SAI_DIR     direction;       // TX/RX
+        int         sample_rate;     // 48000, 96000, etc
+        int         bit_depth;       // 16, 24, 32
+        int         block_size;      // 音频块大小
+    };
+
+    // ① 初始化 — 配置 SAI 外设 + DMA + 时钟
+    void Init(const Config& config);
+
+    // ② 启动 DMA 音频流
+    void StartDma(int32_t* buffer, size_t size,
+                  SaiHandle::CallbackFunction cb);
+
+private:
+    SAI_HandleTypeDef hsai_;
+    DMA_HandleTypeDef hdma_;
+};
+
+void SaiHandle::Init(const Config& config) {
+    // ③ 使能 SAI 时钟
+    if (config.dev_index == 1) {
+        __HAL_RCC_SAI1_CLK_ENABLE();
+    }
+
+    // ④ 配置 SAI 为 I2S 主模式
+    hsai_.Instance = SAI1_Block_A;
+    hsai_.Init.AudioMode = SAI_MODEMASTER_TX;  // 主发送
+    hsai_.Init.Synchro   = SAI_ASYNCHRONOUS;   // 异步模式
+    hsai_.Init.OutputDrive = SAI_OUTPUTDRIVE_ENABLE;
+
+    // ⑤ I2S 协议参数
+    hsai_.Init.InitProtocol = SAI_I2S_STANDARD;
+    hsai_.Init.DataSize     = SAI_DATASIZE_24BIT;
+    hsai_.Init.FirstBit     = SAI_FIRSTBIT_MSB;
+    hsai_.Init.FrameSize    = SAI_FRAMESIZE_32;
+
+    // ⑥ 配置 DMA — Ping-Pong 双缓冲的关键
+    hdma_.Instance                 = DMA1_Stream1;
+    hdma_.Init.Channel             = DMA_CHANNEL_0;
+    hdma_.Init.Direction           = DMA_MEMORY_TO_PERIPH;  // RAM → SAI
+    hdma_.Init.PeriphInc           = DMA_PINC_DISABLE;
+    hdma_.Init.MemInc              = DMA_MINC_ENABLE;       // 内存地址递增
+    hdma_.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+    hdma_.Init.MemDataAlignment    = DMA_MDATAALIGN_WORD;
+    hdma_.Init.Mode                = DMA_CIRCULAR;          // 循环模式！
+    hdma_.Init.Priority            = DMA_PRIORITY_HIGH;
+
+    HAL_DMA_Init(&hdma_);
+    __HAL_LINKDMA(&hsai_, hdmatx, hdma_);
+
+    HAL_SAI_Init(&hsai_);
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item">
+              <span class="ann-num">①</span>
+              <span><strong>Init() 做了所有硬件配置</strong>：SAI 外设、DMA Stream、GPIO 复用、时钟分频。这是 libDaisy 封装得最好的地方 — 用户不需要碰任何寄存器。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">②</span>
+              <span><strong>StartDma()</strong> 启动 DMA 循环传输并注册回调。回调会在半传输完成和全传输完成时被调用，实现 Ping-Pong。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">③</span>
+              <span><strong>时钟使能</strong>是第一步。STM32 的每个外设独立时钟门控 — 不开时钟寄存器不工作。这是初学者最常忘记的事。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">⑥</span>
+              <span><strong>DMA_CIRCULAR</strong> 模式是音频的核心。DMA 到达缓冲区末尾后自动回到开头，不需要软件干预。配合半传输/全传输中断实现无缝循环。</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DMA Callbacks -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">源码走读：DMA 回调与音频流</h2>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">src/per/sai.cpp — DMA 中断回调</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-cpp">// DMA 半传输完成中断 — Ping 块就绪
+void SaiHandle::DmaHalfCpltCallback(SAI_HandleTypeDef* hsai) {
+    SaiHandle* self = (SaiHandle*)hsai->Parent;
+
+    if (self->callback_) {
+        // ① 告诉用户 "前半缓冲区可以处理了"
+        // direction_ 标记这是输入还是输出
+        // offset = 0 表示前半 (Ping)
+        self->callback_(
+            self->buff_,
+            self->block_size_,
+            0  // offset: 从缓冲区开头
+        );
+    }
+}
+
+// DMA 全传输完成中断 — Pong 块就绪
+void SaiHandle::DmaCpltCallback(SAI_HandleTypeDef* hsai) {
+    SaiHandle* self = (SaiHandle*)hsai->Parent;
+
+    if (self->callback_) {
+        // ② 告诉用户 "后半缓冲区可以处理了"
+        // offset = block_size 表示后半 (Pong)
+        self->callback_(
+            self->buff_ + self->block_size_,
+            self->block_size_,
+            self->block_size_  // offset: 从缓冲区中间
+        );
+    }
+}
+
+// ③ 用户注册的回调 — 在这里做 DSP
+void my_audio_callback(float* in, float* out, size_t size) {
+    // libDaisy 自动把 int32 转为 float (-1.0 ~ 1.0)
+    // 用户只需要处理 float 数据
+
+    // 调用 DaisySP 的 DSP 模块
+    for (size_t i = 0; i < size; i += 2) {
+        // 立体声：每 2 个 sample 是左+右
+        out[i]     = osc_.Process() * 0.5f;  // 左声道
+        out[i + 1] = out[i];                  // 右声道
+    }
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item">
+              <span class="ann-num">①</span>
+              <span><strong>HalfCplt = Ping</strong>：DMA 正在写后半缓冲区，前半安全可读。offset=0 告诉用户从前半开始。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">②</span>
+              <span><strong>Cplt = Pong</strong>：DMA 循环回前半，后半安全可读。offset=block_size 跳到后半。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">③</span>
+              <span><strong>libDaisy 的便利</strong>：它把底层的 int32 DMA 数据自动转换为 float (-1.0~1.0)，用户回调只处理 float。这比直接操作原始 DMA 缓冲区方便很多。</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Codec Driver -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">源码走读：AK4556 Codec 驱动</h2>
+        <p class="text-slate-300 mb-4">Codec 芯片（如 AK4556）负责 ADC/DAC。MCU 通过 I2C 配置它，通过 I2S 传输音频数据。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">src/dev/codec_ak4556.h — Codec 初始化</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-cpp">class Ak4556 {
+public:
+    struct Config {
+        I2CHandle i2c;       // ① I2C 总线（用于配置 Codec 寄存器）
+        uint8_t    address;  // Codec I2C 地址
+        Pin        reset;    // ② Codec 复位引脚（GPIO 控制）
+        bool       master;   // ③ MCU 是主还是从
+    };
+
+    void Init(const Config& config) {
+        config_ = config;
+
+        // ④ 硬件复位 Codec — 拉低 reset 引脚
+        config_.reset.Init(Pin::Mode::OUTPUT);
+        config_.reset.Write(0);   // Reset = LOW
+        System::Delay(1);         // 保持 1ms
+        config_.reset.Write(1);   // 释放复位
+        System::Delay(10);        // 等待 Codec 就绪
+
+        // ⑤ 通过 I2C 写 Codec 寄存器
+        // AK4556 的关键寄存器：
+        WriteReg(0x00, 0x07);  // Power Management: 使能 DAC + ADC
+        WriteReg(0x01, 0x03);  // PLL 设置: 256FS (48kHz × 256 = 12.288MHz)
+        WriteReg(0x02, 0x00);  // Format: I2S, 24-bit
+        WriteReg(0x03, 0x00);  // DAC 输出: 不 mute
+    }
+
+private:
+    void WriteReg(uint8_t reg, uint8_t val) {
+        uint8_t data[2] = { reg, val };
+        config_.i2c.Transmit(config_.address, data, 2);
+    }
+};</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item">
+              <span class="ann-num">①</span>
+              <span><strong>I2C 总线</strong>只用于配置 Codec 参数（采样率、格式、增益），不传音频数据。音频数据通过 I2S（SAI 外设）传输。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">②</span>
+              <span><strong>GPIO 复位</strong>：Codec 上电后需要硬件复位（reset 引脚拉低再拉高）。libDaisy 用 GPIO 控制。这是音频设备启动的标准流程。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">⑤</span>
+              <span><strong>I2C 寄存器写入</strong>对照 AK4556 数据手册理解每一位。PLL 配置决定了 MCLK 和采样率的关系。这里的 256FS 是标准配置。</span>
+            </div>
+          </div>
+        </div>
+      
+        </div>
+        <div class="ai-era-sidebar">
+        <div class="ai-note ai-note-must">
+          <span class="ai-note-badge">逐行精读</span>
+          <h4>Ping-Pong DMA 回调值得逐行理解</h4>
+          <p>libDaisy 的 SAI + DMA Ping-Pong 实现是音频驱动层的黄金参考。HalfCplt / FullCplt 回调的时序、buffer 指针切换、Cache 维护——每一行都有工程含义。</p>
+        </div>
+        <div class="ai-note ai-note-collab">
+          <span class="ai-note-badge">架构借鉴</span>
+          <h4>Codec 驱动的分层设计</h4>
+          <p>libDaisy 把 Codec 配置（I2C）和音频传输（SAI）严格分离。这种控制面/数据面分离的架构模式在所有音频系统中通用。</p>
+        </div>
+        </div>
+      </div></section>
+
+      <!-- What We Learned -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">学到了什么</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-green-400 font-semibold mb-2">核心收获</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• SAI 外设如何配置为 I2S 模式</li>
+              <li>• DMA Circular + Ping-Pong 双缓冲的完整实现</li>
+              <li>• Codec 通过 I2C 配置 + GPIO 复位的流程</li>
+              <li>• 音频数据的 float 抽象层设计</li>
+            </ul>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-blue-400 font-semibold mb-2">可以借鉴的模式</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• HAL 封装：隐藏寄存器细节，暴露 Config struct</li>
+              <li>• 回调函数模式：用户注册 callback，DMA 中断自动调用</li>
+              <li>• float 归一化：统一音频数据格式为 -1.0~1.0</li>
+              <li>• C++ RAII 管理 DMA/外设生命周期</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <div class="text-center py-8 border-t border-dark-700 fade-in">
+        <button data-complete-btn="proj-libdaisy" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-lg transition-colors">
+          标记为已完成
+        </button>
+        <p class="text-sm text-slate-500 mt-3">完成本项目走读后，进度将自动保存</p>
+        <div class="flex justify-center gap-4 mt-4">
+          <a href="zswatch.html" class="text-slate-400 hover:text-slate-300">← 上一个：ZSWatch</a>
+          <a href="daisysp.html" class="text-blue-400 hover:text-blue-300">下一个：DaisySP →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="../js/nav.js"></script>
+  <script src="../js/progress.js"></script>
+  <script src="../js/code-walkthrough.js"></script>
+  <script>mermaid.initialize({ theme: 'dark', themeVariables: { fontSize: '14px' }});</script>
+</body>
+</html>

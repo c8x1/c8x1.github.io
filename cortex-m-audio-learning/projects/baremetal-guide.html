@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>源码走读 — 裸机编程指南</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <link href="../css/custom.css" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { colors: { dark: { 900: '#020617', 800: '#0f172a', 700: '#1e293b', 600: '#334155' }}}}}</script>
+</head>
+<body class="bg-dark-900 text-slate-200 font-sans">
+
+  <aside id="sidebar" class="sidebar bg-dark-800 border-r border-dark-700">
+    <div class="p-4 border-b border-dark-700">
+      <a href="../index.html" class="text-lg font-bold text-white flex items-center gap-2"><span class="text-blue-400">⌘</span> Cortex-M 音频学习</a>
+      <div class="mt-2 progress-bar" data-progress-bar><div class="fill" style="width:0%"></div></div>
+      <p class="text-xs text-slate-500 mt-1">进度: <span data-progress-text>0/21</span></p>
+    </div>
+    <nav class="sidebar-nav py-2">
+      <div class="section-title">学习阶段</div>
+      <a href="../phase/1-architecture.html" data-nav-id="phase-1">一、Cortex-M 架构基础</a>
+      <a href="../phase/2-peripherals.html" data-nav-id="phase-2">二、外设与通信协议</a>
+      <a href="../phase/3-dma.html" data-nav-id="phase-3">三、DMA 数据引擎</a>
+      <a href="../phase/4-rtos.html" data-nav-id="phase-4">四、RTOS 实时操作系统</a>
+      <a href="../phase/5-dsp.html" data-nav-id="phase-5">五、音频 DSP</a>
+      <a href="../phase/6-system.html" data-nav-id="phase-6">六、系统级工程</a>
+      <div class="section-title mt-4">源码走读</div>
+      <a href="baremetal-guide.html" data-nav-id="proj-baremetal-guide">裸机编程指南</a>
+      <a href="baremetal.html" data-nav-id="proj-baremetal">cortexm/baremetal</a>
+      <a href="libopencm3.html" data-nav-id="proj-libopencm3">libopencm3</a>
+      <a href="infinitime.html" data-nav-id="proj-infinitime">InfiniTime</a>
+      <a href="zswatch.html" data-nav-id="proj-zswatch">ZSWatch</a>
+      <a href="libdaisy.html" data-nav-id="proj-libdaisy">libDaisy</a>
+      <a href="daisysp.html" data-nav-id="proj-daisysp">DaisySP</a>
+      <a href="mutable-plaits.html" data-nav-id="proj-plaits">Mutable Plaits</a>
+      <a href="teensy-audio.html" data-nav-id="proj-teensy">Teensy Audio</a>
+      <a href="nrf5340-audio.html" data-nav-id="proj-nrf5340">nRF5340 Audio</a>
+      <div class="section-title mt-4">专题</div>
+      <a href="openglass.html" data-nav-id="proj-openglass">omiGlass 智能眼镜</a>
+      <div class="section-title mt-4">参考</div>
+      <a href="../glossary.html">术语速查</a>
+      <a href="../resources.html">资源汇总</a>
+    </nav>
+  </aside>
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+  <header class="mobile-header lg:hidden fixed top-0 left-0 right-0 bg-dark-800 border-b border-dark-700 z-20 px-4 py-3 flex items-center gap-3">
+    <button id="sidebar-toggle" class="text-slate-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <span class="text-lg font-bold text-white">Cortex-M 音频学习</span>
+  </header>
+
+  <main class="main-content">
+    <div class="max-w-6xl mx-auto px-6 py-12 lg:py-16">
+
+      <!-- Project Overview Card -->
+      <div class="fade-in mb-10">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="text-xs font-mono bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded">阅读顺序 ①</span>
+          <span class="text-xs font-mono bg-slate-700 text-slate-400 px-2 py-0.5 rounded">启动基础</span>
+        </div>
+        <h1 class="text-3xl lg:text-4xl font-bold text-white mb-3">裸机编程指南</h1>
+        <p class="text-slate-400 mb-4">理解 main() 之前发生了什么 — 向量表、启动代码、链接脚本的完整流程</p>
+        <div class="flex flex-wrap gap-4 text-sm">
+          <a href="https://github.com/cpq/bare-metal-programming-guide" target="_blank" class="text-blue-400 hover:underline">GitHub: cpq/bare-metal-programming-guide</a>
+          <span class="text-slate-600">|</span>
+          <span class="text-slate-500">无特定 MCU 目标</span>
+          <span class="text-slate-600">|</span>
+          <span class="text-slate-500">重点: 启动流程基础</span>
+        </div>
+      </div>
+
+      <!-- Boot Sequence Introduction -->
+      <section class="fade-in mb-10">
+<div class="ai-era-layout"><div class="ai-era-main">
+        <h2 class="text-2xl font-bold text-white mb-4">Cortex-M 启动序列</h2>
+        <p class="text-slate-300 mb-4">当你按下复位按钮或上电时，Cortex-M 处理器执行一段固定的硬件流程，然后跳转到软件世界。这段流程发生在 <code class="text-blue-400">main()</code> 之前，是所有嵌入式程序的基础。</p>
+        <div class="callout callout-info">
+          <p class="font-semibold text-blue-400 mb-1">核心理解</p>
+          <p class="text-sm text-slate-300">Cortex-M 的启动是<strong>硬件固定流程</strong>，不像 x86 需要 BIOS。CPU 上电后直接从向量表地址 0x00000000 读取初始栈指针和复位处理函数地址。</p>
+        </div>
+      </section>
+
+      <!-- Boot Flow Diagram -->
+      <section class="fade-in mb-10">
+        <h2 class="text-xl font-bold text-white mb-4">启动流程图</h2>
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700">
+          <pre class="mermaid">
+graph TD
+    A["CPU 上电 / 复位"] --> B["硬件自动从 0x00000000 加载 SP"]
+    B --> C["硬件从 0x00000004 加载 Reset_Handler 地址"]
+    C --> D["Reset_Handler 执行"]
+    D --> E["复制 .data 段: Flash → RAM"]
+    E --> F["清零 .bss 段"]
+    F --> G["调用 SystemInit()<br/>配置时钟 / FPU"]
+    G --> H["调用 __libc_init_array()<br/>C++ 全局构造函数"]
+    H --> I["调用 main()"]
+    I --> J["进入应用逻辑"]
+
+    style A fill:#991b1b,stroke:#ef4444,color:#fff
+    style D fill:#1e40af,stroke:#3b82f6,color:#fff
+    style I fill:#065f46,stroke:#22c55e,color:#fff
+          </pre>
+        </div>
+      </section>
+
+      <!-- Reset Handler Pseudocode -->
+      <section class="fade-in mb-10">
+        <h2 class="text-xl font-bold text-white mb-4">Reset_Handler 流程（伪代码）</h2>
+        <p class="text-slate-400 text-sm mb-4">以下是每个 Cortex-M 芯片上电后第一段执行代码的完整流程。虽然不同厂商的实现细节不同，但核心步骤完全一致：</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">📁 startup.c (伪代码 — 通用 Cortex-M)</span>
+            <span class="text-xs">启动流程总览</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">// Reset_Handler — 上电后第一个执行的软件函数
+void Reset_Handler(void) {                <span class="ann-marker" data-note="由硬件自动跳转">①</span>
+
+    // 步骤 1: 初始化栈指针 (通常已在硬件自动完成)
+    // SP 已由硬件从向量表第 0 项加载
+
+    // 步骤 2: 复制 .data 段从 Flash 到 RAM
+    uint32_t *src = &_sidata;             <span class="ann-marker" data-note="Flash 中 .data 的起始地址">②</span>
+    uint32_t *dst = &_sdata;              <span class="ann-marker" data-note="RAM 中 .data 的起始地址">③</span>
+    while (dst &lt; &amp;_edata) {               <span class="ann-marker" data-note="复制直到 RAM 中 .data 的末尾">④</span>
+        *dst++ = *src++;
+    }
+
+    // 步骤 3: 清零 .bss 段
+    dst = &_sbss;                         <span class="ann-marker" data-note=".bss 段在 RAM 中的起始地址">⑤</span>
+    while (dst &lt; &amp;_ebss) {
+        *dst++ = 0;                       <span class="ann-marker" data-note="C 标准要求未初始化的全局变量为零">⑥</span>
+    }
+
+    // 步骤 4: 系统初始化
+    SystemInit();                         <span class="ann-marker" data-note="配置时钟树、使能 FPU 等">⑦</span>
+
+    // 步骤 5: C++ 运行时初始化
+    __libc_init_array();                  <span class="ann-marker" data-note="调用全局对象的构造函数">⑧</span>
+
+    // 步骤 6: 进入 main
+    main();                               <span class="ann-marker" data-note="永不返回 (理想情况)">⑨</span>
+
+    // 如果 main 返回，进入死循环
+    while (1);
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item" data-ann="①"><span class="ann-num">①</span><span>硬件从向量表的第 2 项（偏移 0x04）读取此函数的地址，然后跳转过来执行。这就是 main() 之前的世界</span></div>
+            <div class="ann-item" data-ann="②"><span class="ann-num">②</span><span><code>_sidata</code> 是链接脚本定义的符号，指向 Flash 中 .data 段的加载地址（LMA）。.data 段的初始值存储在 Flash 中</span></div>
+            <div class="ann-item" data-ann="③"><span class="ann-num">③</span><span><code>_sdata</code> 是 .data 段在 RAM 中的虚拟地址（VMA）。程序运行时，全局变量在这个地址被访问</span></div>
+            <div class="ann-item" data-ann="④"><span class="ann-num">④</span><span><code>_edata</code> 标记 .data 段末尾。将所有已初始化全局变量的值从 Flash 复制到 RAM，这样程序才能正确读写它们</span></div>
+            <div class="ann-item" data-ann="⑤"><span class="ann-num">⑤</span><span><code>_sbss</code> 标记 .bss 段的起始。BSS = Block Started by Symbol，存放未初始化或初始化为零的全局/静态变量</span></div>
+            <div class="ann-item" data-ann="⑥"><span class="ann-num">⑥</span><span>C 语言标准规定：未初始化的全局变量必须为零。如果跳过此步，变量值将是随机数（RAM 上电状态不定）</span></div>
+            <div class="ann-item" data-ann="⑦"><span class="ann-num">⑦</span><span>通常由 CMSIS 提供的函数：配置系统时钟（如 HSI/HSE/PLL）、使能 FPU（Cortex-M4F/M7）、设置中断优先级分组</span></div>
+            <div class="ann-item" data-ann="⑧"><span class="ann-num">⑧</span><span>遍历 .init_array 段，调用所有 C++ 全局对象的构造函数。如果不用 C++，可省略此步</span></div>
+            <div class="ann-item" data-ann="⑨"><span class="ann-num">⑨</span><span>嵌入式程序的 main() 通常不返回。如果返回了，进入下方的死循环（硬件异常保护的最后一道防线）</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vector Table -->
+      <section class="fade-in mb-10">
+        <h2 class="text-xl font-bold text-white mb-4">向量表定义</h2>
+        <p class="text-slate-400 text-sm mb-4">向量表是 Cortex-M 中断系统的核心数据结构。它位于 Flash 的起始位置，告诉 CPU 每个中断/异常的处理函数在哪里。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">📁 vector_table.c</span>
+            <span class="text-xs">最小向量表</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">// 向量表 — 必须放在 Flash 起始位置 (0x00000000 或 0x08000000)
+// 每个项是一个函数指针（4 字节），按固定顺序排列
+__attribute__((section(".isr_vector")))     <span class="ann-marker" data-note="指定放在 .isr_vector 段">①</span>
+const void (*g_pfnVectors[])(void) = {
+
+    // 前 16 项是 Cortex-M 核心异常 (所有芯片相同)
+    (void *)&_estack,                      <span class="ann-marker" data-note="栈顶地址，硬件自动加载到 SP">②</span>
+    Reset_Handler,                         <span class="ann-marker" data-note="偏移 0x04: 复位处理函数">③</span>
+    NMI_Handler,                           // 偏移 0x08: 不可屏蔽中断
+    HardFault_Handler,                     // 偏移 0x0C: 硬件故障
+    MemManage_Handler,                     // 偏移 0x10: 内存管理错误 (MPU)
+    BusFault_Handler,                      // 偏移 0x14: 总线错误
+    UsageFault_Handler,                    // 偏移 0x18: 用法错误 (除零等)
+    0, 0, 0, 0,                            // 偏移 0x1C-0x28: 保留
+    SVC_Handler,                           // 偏移 0x2C: 系统服务调用
+    DebugMon_Handler,                      // 偏移 0x30: 调试监控
+    0,                                     // 偏移 0x34: 保留
+    PendSV_Handler,                        <span class="ann-marker" data-note="PendSV: RTOS 任务切换的核心">④</span>
+    SysTick_Handler,                       <span class="ann-marker" data-note="SysTick: RTOS 时钟节拍源">⑤</span>
+
+    // 之后是芯片特定的外部中断 (数量由厂商决定)
+    // STM32F4: WWDG_IRQ, PVD_IRQ, TAMPER_IRQ, ...
+    // 数量可从几十到上百个
+};</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item" data-ann="①"><span class="ann-num">①</span><span><code>__attribute__((section(".isr_vector")))</code> 告诉链接器将此数组放在特定段。链接脚本会将此段放在 Flash 的最起始位置</span></div>
+            <div class="ann-item" data-ann="②"><span class="ann-num">②</span><span>第一项不是函数指针，而是栈顶地址。CPU 复位时自动将此值加载到 SP（栈指针）寄存器。<code>_estack</code> 由链接脚本定义，通常是 RAM 的末尾地址</span></div>
+            <div class="ann-item" data-ann="③"><span class="ann-num">③</span><span>第二项是 Reset_Handler 的地址。CPU 复位时自动加载到 PC（程序计数器），开始执行启动代码</span></div>
+            <div class="ann-item" data-ann="④"><span class="ann-num">④</span><span>PendSV（可挂起系统调用）是 RTOS 实现任务切换的关键中断。它的优先级设为最低，确保在其他中断完成后才执行上下文切换</span></div>
+            <div class="ann-item" data-ann="⑤"><span class="ann-num">⑤</span><span>SysTick 是 Cortex-M 内核自带的 24 位倒计时定时器，FreeRTOS/Zephyr 用它产生周期性时钟节拍（通常 1ms）</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Linker Script -->
+      <section class="fade-in mb-10">
+        <h2 class="text-xl font-bold text-white mb-4">链接脚本 (.ld)</h2>
+        <p class="text-slate-400 text-sm mb-4">链接脚本定义了内存布局：哪些地址是 Flash，哪些是 RAM，各个段怎么摆放。它还定义了启动代码需要的那些符号（_sdata, _edata 等）。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">📁 STM32F4.ld (简化版链接脚本)</span>
+            <span class="text-xs">内存布局定义</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">/* 定义芯片的物理内存区域 */
+MEMORY                                  <span class="ann-marker" data-note="MEMORY 命令描述物理内存">①</span>
+{
+    FLASH (rx)  : ORIGIN = 0x08000000, LENGTH = 1024K   <span class="ann-marker" data-note="Flash: 只读可执行">②</span>
+    RAM  (rwx)  : ORIGIN = 0x20000000, LENGTH =  128K   <span class="ann-marker" data-note="RAM: 可读写执行">③</span>
+}
+
+/* 定义各个段的摆放规则 */
+SECTIONS                                <span class="ann-marker" data-note="SECTIONS 描述输出文件的布局">④</span>
+{
+    /* 向量表必须放在 Flash 最前面 */
+    .isr_vector :
+    {
+        . = ALIGN(4);
+        KEEP(*(.isr_vector))            <span class="ann-marker" data-note="KEEP 防止被优化器删除">⑤</span>
+        . = ALIGN(4);
+    } > FLASH
+
+    /* 代码段 */
+    .text :
+    {
+        *(.text)                        /* 所有 .text 段 */
+        *(.text*)                       /* .text.* 子段 */
+        *(.rodata)                      /* 只读常量数据 */
+        *(.rodata*)
+        _etext = .;                     /* 代码段结束标记 */
+    } > FLASH
+
+    /* 已初始化数据 — 加载到 Flash，运行时复制到 RAM */
+    .data :
+    {
+        _sdata = .;                     <span class="ann-marker" data-note="启动代码从这里开始复制">⑥</span>
+        *(.data)
+        *(.data*)
+        _edata = .;                     <span class="ann-marker" data-note="启动代码复制到这里结束">⑦</span>
+    } > RAM AT > FLASH                  <span class="ann-marker" data-note="VMA=RAM, LMA=Flash">⑧</span>
+
+    /* 未初始化数据 — 只在 RAM 中，不需要 Flash 空间 */
+    .bss :
+    {
+        _sbss = .;                      <span class="ann-marker" data-note="启动代码从这里开始清零">⑨</span>
+        *(.bss)
+        *(.bss*)
+        *(COMMON)
+        _ebss = .;                      <span class="ann-marker" data-note="清零到这里结束">⑩</span>
+    } > RAM
+
+    /* 栈顶 — RAM 末尾 */
+    _estack = ORIGIN(RAM) + LENGTH(RAM);<span class="ann-marker" data-note="向量表第 0 项引用此值">⑪</span>
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item" data-ann="①"><span class="ann-num">①</span><span>MEMORY 命令告诉链接器目标芯片有哪些物理内存区域、它们的起始地址和大小</span></div>
+            <div class="ann-item" data-ann="②"><span class="ann-num">②</span><span>STM32F4 的 Flash 映射到 0x08000000。属性 rx 表示只读且可执行。向量表和代码都存在这里</span></div>
+            <div class="ann-item" data-ann="③"><span class="ann-num">③</span><span>Cortex-M 的 RAM 固定从 0x20000000 开始（由系统总线映射决定）。属性 rwx 表示可读写执行</span></div>
+            <div class="ann-item" data-ann="④"><span class="ann-num">④</span><span>SECTIONS 命令定义输入段如何合并为输出段，以及每个输出段放在哪个内存区域</span></div>
+            <div class="ann-item" data-ann="⑤"><span class="ann-num">⑤</span><span>KEEP() 告诉链接器即使没有代码引用此段也不要删除。向量表可能没有被代码直接引用，但硬件需要它</span></div>
+            <div class="ann-item" data-ann="⑥"><span class="ann-num">⑥</span><span><code>_sdata</code> 是一个链接器符号（不是变量），代表 .data 段在 RAM 中的起始地址。启动代码用它作为复制目标</span></div>
+            <div class="ann-item" data-ann="⑦"><span class="ann-num">⑦</span><span><code>_edata</code> 标记 .data 段末尾。启动代码通过 <code>_edata - _sdata</code> 知道要复制多少字节</span></div>
+            <div class="ann-item" data-ann="⑧"><span class="ann-num">⑧</span><span><code>&gt; RAM AT &gt; FLASH</code> 是关键：VMA（虚拟地址）在 RAM 中（运行时地址），LMA（加载地址）在 Flash 中。启动代码负责把数据从 LMA 搬到 VMA</span></div>
+            <div class="ann-item" data-ann="⑨"><span class="ann-num">⑨</span><span><code>_sbss</code> 标记 .bss 段起始。启动代码从这里开始填零</span></div>
+            <div class="ann-item" data-ann="⑩"><span class="ann-num">⑩</span><span><code>_ebss</code> 标记 .bss 段末尾。注意 .bss 不需要 AT > FLASH，因为它的初始值就是零，不占 Flash 空间</span></div>
+            <div class="ann-item" data-ann="⑪"><span class="ann-num">⑪</span><span><code>_estack</code> 指向 RAM 末尾。Cortex-M 栈是向下生长的（满递减），所以栈顶就是 RAM 的最高地址。向量表第一项引用此值</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- What You Learned -->
+      <section class="fade-in mb-10">
+        <h2 class="text-xl font-bold text-white mb-4">本节要点</h2>
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700">
+          <ul class="space-y-3 text-slate-300 text-sm">
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">1.</span> Cortex-M 上电后硬件自动从地址 0x00000000 读取栈指针，从 0x00000004 读取 Reset_Handler 地址</li>
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">2.</span> Reset_Handler 负责将 .data 段从 Flash 复制到 RAM，并将 .bss 段清零</li>
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">3.</span> 向量表是函数指针数组，前 16 项是核心异常，之后是芯片外部中断</li>
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">4.</span> 链接脚本定义内存区域（MEMORY）和段布局（SECTIONS），并通过 _sdata/_edata 等符号与启动代码协作</li>
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">5.</span> .data 的 VMA 在 RAM、LMA 在 Flash，需要运行时复制；.bss 只在 RAM，需要清零</li>
+          </ul>
+        </div>
+      </div><div class="ai-era-sidebar"><div class="ai-note ai-note-auto"><span class="ai-note-badge">了解即可</span><h4>启动汇编样板可快速过</h4><p>startup.s 的向量表定义和 .data/.bss 初始化是标准样板，AI 生成零错误。理解概念即可。</p></div>
+<div class="ai-note ai-note-collab"><span class="ai-note-badge">架构借鉴</span><h4>最小可用的裸机框架</h4><p>这个项目展示了从 Reset_Handler 到 main() 的最短路径。理解后用 AI 生成新芯片启动代码只需描述关键参数。</p></div></div></div></section>
+
+      <!-- Navigation -->
+      <div class="fade-in flex items-center justify-between mt-12 pt-6 border-t border-dark-700">
+        <a href="../index.html" class="text-slate-400 hover:text-white text-sm">&larr; 返回首页</a>
+        <button data-complete-btn="proj-baremetal-guide" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-5 py-2 rounded-lg transition">标记为已完成</button>
+        <a href="baremetal.html" class="text-blue-400 hover:text-blue-300 text-sm">下一篇: cortexm/baremetal &rarr;</a>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-c.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="../js/nav.js"></script>
+  <script src="../js/progress.js"></script>
+  <script src="../js/code-walkthrough.js"></script>
+  <script>mermaid.initialize({ theme: 'dark', themeVariables: { fontSize: '14px' }});</script>
+</body>
+</html>

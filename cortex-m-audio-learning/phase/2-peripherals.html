@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>阶段二：外设与通信协议 — Cortex-M 音频学习</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+  <link href="../css/custom.css" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { colors: { dark: { 900: '#020617', 800: '#0f172a', 700: '#1e293b', 600: '#334155' }}}}}</script>
+</head>
+<body class="bg-dark-900 text-slate-200 font-sans">
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="sidebar bg-dark-800 border-r border-dark-700">
+    <div class="p-4 border-b border-dark-700">
+      <a href="../index.html" class="text-lg font-bold text-white flex items-center gap-2">
+        <span class="text-blue-400">⌘</span> Cortex-M 音频学习
+      </a>
+      <div class="mt-2 progress-bar" data-progress-bar><div class="fill" style="width:0%"></div></div>
+      <p class="text-xs text-slate-500 mt-1">进度: <span data-progress-text>0/21</span></p>
+    </div>
+    <nav class="sidebar-nav py-2">
+      <div class="section-title">学习阶段</div>
+      <a href="1-architecture.html" data-nav-id="phase-1">一、Cortex-M 架构基础</a>
+      <a href="2-peripherals.html" data-nav-id="phase-2" class="active">二、外设与通信协议</a>
+      <a href="3-dma.html" data-nav-id="phase-3">三、DMA 数据引擎</a>
+      <a href="4-rtos.html" data-nav-id="phase-4">四、RTOS 实时操作系统</a>
+      <a href="5-dsp.html" data-nav-id="phase-5">五、音频 DSP</a>
+      <a href="6-system.html" data-nav-id="phase-6">六、系统级工程</a>
+      <div class="section-title mt-4">源码走读</div>
+      <a href="../projects/baremetal-guide.html" data-nav-id="proj-baremetal-guide">裸机编程指南</a>
+      <a href="../projects/baremetal.html" data-nav-id="proj-baremetal">cortexm/baremetal</a>
+      <a href="../projects/libopencm3.html" data-nav-id="proj-libopencm3">libopencm3</a>
+      <a href="../projects/infinitime.html" data-nav-id="proj-infinitime">InfiniTime</a>
+      <a href="../projects/zswatch.html" data-nav-id="proj-zswatch">ZSWatch</a>
+      <a href="../projects/libdaisy.html" data-nav-id="proj-libdaisy">libDaisy</a>
+      <a href="../projects/daisysp.html" data-nav-id="proj-daisysp">DaisySP</a>
+      <a href="../projects/mutable-plaits.html" data-nav-id="proj-plaits">Mutable Plaits</a>
+      <a href="../projects/teensy-audio.html" data-nav-id="proj-teensy">Teensy Audio</a>
+      <a href="../projects/nrf5340-audio.html" data-nav-id="proj-nrf5340">nRF5340 Audio</a>
+      <div class="section-title mt-4">专题</div>
+      <a href="../projects/openglass.html" data-nav-id="proj-openglass">omiGlass 智能眼镜</a>
+      <div class="section-title mt-4">参考</div>
+      <a href="../glossary.html">术语速查</a>
+      <a href="../resources.html">资源汇总</a>
+    </nav>
+  </aside>
+
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+  <header class="mobile-header lg:hidden fixed top-0 left-0 right-0 bg-dark-800 border-b border-dark-700 z-20 px-4 py-3 flex items-center gap-3">
+    <button id="sidebar-toggle" class="text-slate-400 hover:text-white">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <span class="text-lg font-bold text-white">阶段二：外设与通信协议</span>
+  </header>
+
+  <main class="main-content">
+    <div class="max-w-6xl mx-auto px-6 py-12 lg:py-16">
+
+      <div class="fade-in mb-12">
+        <span class="text-xs font-mono bg-blue-500/20 text-blue-400 px-2 py-1 rounded">阶段二 · 2-3 周</span>
+        <h1 class="text-3xl lg:text-4xl font-bold text-white mt-3 mb-4">外设与通信协议</h1>
+        <p class="text-lg text-slate-400">掌握 GPIO、I2C、SPI、I2S、SAI 等外设操作。理解时钟树配置。重点攻克音频接口：I2S/PDM/TDM。</p>
+      </div>
+
+      <!-- 2.1 GPIO -->
+      <section class="mb-12 fade-in">
+      <div class="ai-era-layout">
+        <div class="ai-era-main">
+
+        <h2 class="text-2xl font-bold text-white mb-4">2.1 GPIO — 万物之始</h2>
+        <p class="text-slate-300 mb-4">GPIO（通用输入输出）是控制外部硬件的基础。音频设备中 GPIO 用于：Codec 芯片复位、LED 指示、按键输入、Mute 控制等。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">gpio.c — 寄存器级 GPIO 操作</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">// STM32F4 GPIO 寄存器结构 (AHB1 总线基地址 0x4002_0000)
+typedef struct {
+    volatile uint32_t MODER;    // 模式: 00=输入, 01=输出, 10=复用, 11=模拟
+    volatile uint32_t OTYPER;   // 输出类型: 0=推挽, 1=开漏
+    volatile uint32_t OSPEEDR;  // 输出速度: 00=低, 01=中, 10=高, 11=极高
+    volatile uint32_t PUPDR;    // 上下拉: 00=无, 01=上拉, 10=下拉
+    volatile uint32_t IDR;      // 输入数据 (只读)
+    volatile uint32_t ODR;      // 输出数据 (读写)
+    volatile uint32_t BSRR;     // 置位/复位 (写 1 有效)
+    volatile uint32_t LCKR;     // 配置锁定
+    volatile uint32_t AFR[2];   // 复用功能选择 (AF0-AF15)
+} GPIO_TypeDef;
+
+#define GPIOA ((GPIO_TypeDef *)0x40020000)
+
+// 配置 PA4 为 Codec 复位引脚（推挽输出）
+void codec_reset_pin_init(void) {
+    // ① 使能 GPIOA 时钟 — 不开时钟寄存器不工作！
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+
+    // ② 配置 PA4 为输出模式
+    GPIOA->MODER &= ~(3U << (4 * 2));   // 清除位 [9:8]
+    GPIOA->MODER |=  (1U << (4 * 2));   // 设为 01 = 通用输出
+
+    // ③ 推挽输出，高速
+    GPIOA->OTYPER &= ~(1U << 4);        // 0 = 推挽
+    GPIOA->OSPEEDR |= (3U << (4 * 2));  // 11 = 极高速 (100MHz)
+
+    // ④ 无上下拉
+    GPIOA->PUPDR &= ~(3U << (4 * 2));
+}
+
+// 复位 Codec 芯片
+void codec_reset(void) {
+    GPIOA->BSRR = (1U << (4 + 16));  // PA4 = LOW (复位有效)
+    delay_ms(5);                      // 保持 5ms
+    GPIOA->BSRR = (1U << 4);         // PA4 = HIGH (释放复位)
+    delay_ms(10);                     // 等待 Codec 稳定
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item">
+              <span class="ann-num">①</span>
+              <span><strong>时钟使能是第一件事</strong>。STM32 的每个外设都有独立的时钟门控位。忘记开时钟是最常见的错误 — 寄存器写了但没效果，读回来全是 0。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">②</span>
+              <span><strong>BSRR 寄存器</strong>是原子操作：低 16 位置位，高 16 位复位。不能用 ODR 做 |= 操作（非原子，会被中断打断）。</span>
+            </div>
+          </div>
+        </div>
+      
+        </div>
+        <div class="ai-era-sidebar">
+        <div class="ai-note ai-note-auto">
+          <span class="ai-note-badge">可淡化</span>
+          <h4>位操作样板 AI 写得又快又对</h4>
+          <p>GPIO 翻转、Mute 控制这些 MODER/BSRR 位操作是标准样板。描述清楚"哪个 pin 做什么"，AI 生成代码又快又对。你的精力放在理解 pin mux 的全局规划上。</p>
+        </div>
+        </div>
+      </div>
+    </section></section>
+
+      <!-- 2.2 I2C -->
+      <section class="mb-12 fade-in">
+      <div class="ai-era-layout">
+        <div class="ai-era-main">
+
+        <h2 class="text-2xl font-bold text-white mb-4">2.2 I2C — Codec 配置总线</h2>
+        <p class="text-slate-300 mb-4">I2C 用于配置音频 Codec 芯片的参数（采样率、增益、滤波器等）。不是传输音频数据 — 那是 I2S/SAI 的工作。</p>
+
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700 mb-6">
+          <pre class="mermaid">
+sequenceDiagram
+    participant MCU as MCU (I2C Master)
+    participant Codec as Codec 芯片 (I2C Slave)
+    Note over MCU,Codec: 配置 WM8994 Codec 采样率
+    MCU->>Codec: START + 0x34 (Codec I2C 地址 + W)
+    Codec-->>MCU: ACK
+    MCU->>Codec: 0x01 (寄存器地址: PLL_CONFIG)
+    Codec-->>MCU: ACK
+    MCU->>Codec: 0x08 (寄存器值: PLL 使能 + 分频)
+    Codec-->>MCU: ACK
+    MCU->>Codec: STOP
+          </pre>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-blue-400 font-semibold mb-2">I2C 特点</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• 两线：SDA（数据）+ SCL（时钟）</li>
+              <li>• 速度：标准 100kHz / 快速 400kHz</li>
+              <li>• 只传控制命令，不传音频</li>
+              <li>• 典型用途：Codec 初始化、音量调节</li>
+            </ul>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-blue-400 font-semibold mb-2">音频 Codec 的 I2C 用法</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• 上电后通过 I2C 配置 PLL/分频器</li>
+              <li>• 设置采样率（48kHz / 16kHz / 8kHz）</li>
+              <li>• 配置输入/输出增益</li>
+              <li>• 使能/禁用 DSP 模块</li>
+            </ul>
+          </div>
+        </div>
+      
+        </div>
+        <div class="ai-era-sidebar">
+        <div class="ai-note ai-note-collab">
+          <span class="ai-note-badge">人机协作</span>
+          <h4>你描述 Codec 寄存器序列，AI 生成配置代码</h4>
+          <p>你告诉 AI："CS43L22，复位后设 PowerCtl=0x01, Format=I2S 16bit, Headphone 软 unmute"——AI 生成完整的 I2C 写序列。但你必须理解控制面和数据面的区别。</p>
+        </div>
+        </div>
+      </div>
+    </section></section>
+
+      <!-- 2.3 SPI -->
+      <section class="mb-12 fade-in">
+      <div class="ai-era-layout">
+        <div class="ai-era-main">
+
+        <h2 class="text-2xl font-bold text-white mb-4">2.3 SPI — 高速数据传输</h2>
+        <p class="text-slate-300 mb-4">SPI 用于驱动显示屏（LVGL UI）、Flash 存储、传感器等。全双工，速度可达数十 MHz。在音频智能眼镜中，SPI 可能连接显示驱动和 IMU 传感器。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">spi_display.c — SPI 驱动 LCD 显示</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">// SPI 配置 — 驱动 ST7789 LCD (InfiniTime 项目实际使用)
+void spi_lcd_init(void) {
+    SPI_HandleTypeDef hspi;
+    hspi.Instance = SPI1;
+    hspi.Init.Mode = SPI_MODE_MASTER;         // MCU 是主设备
+    hspi.Init.Direction = SPI_DIRECTION_2LINES; // 全双工
+    hspi.Init.DataSize = SPI_DATASIZE_8BIT;   // 8 位数据
+    hspi.Init.CLKPolarity = SPI_POLARITY_LOW; // CPOL=0
+    hspi.Init.CLKPhase = SPI_PHASE_1EDGE;     // CPHA=0 (Mode 0)
+    hspi.Init.NSS = SPI_NSS_SOFT;             // 软件片选
+    hspi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2; // 32MHz
+    hspi.Init.FirstBit = SPI_FIRSTBIT_MSB;
+    HAL_SPI_Init(&hspi);
+}
+
+// 通过 SPI 发送显示数据（DMA 模式，不阻塞 CPU）
+void spi_lcd_send_dma(const uint8_t *data, uint16_t len) {
+    // 拉低 DC 引脚 = 数据模式
+    HAL_GPIO_WritePin(LCD_DC_GPIO_Port, LCD_DC_Pin, GPIO_PIN_SET);
+    // 拉低 CS 片选
+    HAL_GPIO_WritePin(LCD_CS_GPIO_Port, LCD_CS_Pin, GPIO_PIN_RESET);
+
+    // DMA 发送 — CPU 可以同时做其他事
+    HAL_SPI_Transmit_DMA(&hspi1, (uint8_t*)data, len);
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="callout callout-tip mt-4">
+          <p class="text-sm text-slate-300"><strong class="text-green-400">实际项目：</strong><a href="../projects/infinitime.html" class="text-blue-400 underline">InfiniTime</a> 项目用 SPI 驱动 ST7789 显示屏（240×240）。结合 DMA 实现无阻塞刷新。阅读它的 <code>St7789.cpp</code> 可以看到完整的 SPI LCD 驱动。</p>
+        </div>
+      
+        </div>
+        <div class="ai-era-sidebar">
+        <div class="ai-note ai-note-auto">
+          <span class="ai-note-badge">可淡化</span>
+          <h4>显示驱动初始化是标准样板</h4>
+          <p>ST7789 等 LCD 驱动的 SPI 初始化序列高度标准化。CubeMX 或 AI 都能生成。值得理解的是 DMA 传输模式对帧率的影响。</p>
+        </div>
+        </div>
+      </div>
+    </section></section>
+
+      <!-- 2.4 I2S / SAI — 核心 -->
+      <section class="mb-12 fade-in">
+      <div class="ai-era-layout">
+        <div class="ai-era-main">
+
+        <h2 class="text-2xl font-bold text-white mb-4">2.4 I2S / SAI — 音频数据核心接口</h2>
+        <p class="text-slate-300 mb-4">这是音频开发最关键的外设。I2S（Inter-IC Sound）是数字音频的标准传输协议。STM32 的 SAI（Serial Audio Interface）是 I2S 的增强版。</p>
+
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700 mb-6">
+          <pre class="mermaid">
+graph LR
+    subgraph "I2S 信号线"
+        SCK["SCK/BCLK<br/>位时钟"]
+        WS["WS/LRCLK<br/>左右声道选择"]
+        SD["SD/SDOUT<br/>串行数据"]
+        MCLK["MCLK<br/>主时钟"]
+    end
+    subgraph "时钟关系"
+        FREQ["48kHz 采样率"]
+    end
+    SCK ---|"256 × FS = 12.288 MHz"| MCLK
+    WS ---|"FS = 48 kHz"| FREQ
+    SCK ---|"64 × FS = 3.072 MHz"| SCK
+          </pre>
+        </div>
+
+        <div class="overflow-x-auto mb-6">
+          <table class="w-full text-sm border-collapse">
+            <thead>
+              <tr class="border-b border-dark-700 text-left">
+                <th class="p-3 text-slate-400 font-medium">音频接口</th>
+                <th class="p-3 text-slate-400 font-medium">信号线</th>
+                <th class="p-3 text-slate-400 font-medium">通道数</th>
+                <th class="p-3 text-slate-400 font-medium">典型用途</th>
+              </tr>
+            </thead>
+            <tbody class="text-slate-300">
+              <tr class="border-b border-dark-700/50"><td class="p-3 font-mono text-blue-400">I2S</td><td class="p-3">SCK, WS, SD</td><td class="p-3">2ch (立体声)</td><td class="p-3">Codec 之间传音频</td></tr>
+              <tr class="border-b border-dark-700/50"><td class="p-3 font-mono text-blue-400">TDM</td><td class="p-3">SCK, WS, SD×n</td><td class="p-3">4-16ch</td><td class="p-3">多通道麦克风阵列</td></tr>
+              <tr class="border-b border-dark-700/50"><td class="p-3 font-mono text-blue-400">PDM</td><td class="p-3">CLK, DATA</td><td class="p-3">1-2ch/线</td><td class="p-3">数字麦克风 (MEMS)</td></tr>
+              <tr><td class="p-3 font-mono text-blue-400">SAI</td><td class="p-3">以上全部</td><td class="p-3">灵活配置</td><td class="p-3">STM32 超集接口</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">sai_audio.c — SAI 配置为 I2S 主模式</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">// SAI 配置 — I2S 主模式发送 (播放音频到 Codec)
+void sai_i2s_master_tx_init(void) {
+    SAI_HandleTypeDef hsai;
+    hsai.Instance = SAI1_Block_A;
+
+    // ① 音频模式：主发送 (MCU 提供时钟)
+    hsai.Init.AudioMode = SAI_MODEMASTER_TX;
+
+    // ② 同步模式：异步 (独立时钟)
+    hsai.Init.Synchro = SAI_ASYNCHRONOUS;
+
+    // ③ 时钟配置
+    hsai.Init.OutputDrive = SAI_OUTPUTDRIVE_ENABLE;
+    hsai.Init.NoDivider = SAI_MASTERDIVIDER_ENABLE;
+
+    // ④ I2S 协议参数
+    SAI_InitTypeDef proto = {0};
+    proto.Protocol = SAI_I2S_STANDARD;       // I2S 飞利浦标准
+    proto.DataSize = SAI_DATASIZE_24BIT;     // 24-bit 音频数据
+    proto.FirstBit = SAI_FIRSTBIT_MSB;       // MSB 优先
+    proto.FrameSize = SAI_FRAMESIZE_32;      // 32-bit 帧 (24bit 数据 + 8bit 填充)
+    proto.SlotActive = SAI_SLOTACTIVE_0 | SAI_SLOTACTIVE_1; // 左右声道
+
+    // ⑤ 位时钟 = 64 × FS
+    // 对于 48kHz: BCLK = 64 × 48000 = 3.072 MHz
+    // MCLK = 256 × 48000 = 12.288 MHz (Codec 通常需要这个)
+
+    HAL_SAI_Init(&hsai);
+}
+
+// 启动 DMA 音频播放
+HAL_StatusTypeDef audio_play_start(int16_t *buffer, uint32_t size) {
+    // buffer 是 DMA 双缓冲区，size 是总大小
+    // DMA 半传输中断会在 buffer[size/2] 传输完成时触发
+    return HAL_SAI_Transmit_DMA(&hsai, (uint8_t*)buffer, size);
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item">
+              <span class="ann-num">①</span>
+              <span><strong>Master TX</strong> = MCU 提供时钟并发送数据。Slave RX = Codec 接收。这意味着 MCU 控制 BCLK 和 WS 的频率。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">②</span>
+              <span><strong>帧大小 32-bit</strong> 是标准配置：I2S 传输 24-bit 数据在一个 32-bit 帧中，剩余 8 位是填充。这样 BCLK = 64 × FS（每声道 32 个 BCLK 周期）。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">③</span>
+              <span><strong>时钟链：</strong>MCLK → Codec 内部 PLL → BCLK/WS。STM32 的 SAI 时钟来自 PLLI2S（专门的音频 PLL），可以精确产生 12.288MHz 等音频常用频率。</span>
+            </div>
+          </div>
+        </div>
+      
+        </div>
+        <div class="ai-era-sidebar">
+        <div class="ai-note ai-note-must">
+          <span class="ai-note-badge">不可替代</span>
+          <h4>时钟数学必须内化</h4>
+          <p>256×FS = 12.288MHz——为什么标准 PLL 无法精确产生这个频率？时钟关系算错 = Codec 静默，不报任何异常。</p>
+        </div>
+        <div class="ai-note ai-note-collab">
+          <span class="ai-note-badge">人机协作</span>
+          <h4>你指定参数 AI 生成 SAI 配置</h4>
+          <p>你描述"I2S Philips 格式，32bit frame，16bit data，Master 模式"，AI 生成 SAI_InitTypeDef 全部字段。</p>
+        </div>
+        </div>
+      </div>
+    </section></section>
+
+      <!-- 2.5 PDM -->
+      <section class="mb-12 fade-in">
+      <div class="ai-era-layout">
+        <div class="ai-era-main">
+
+        <h2 class="text-2xl font-bold text-white mb-4">2.5 PDM — 数字麦克风接口</h2>
+        <p class="text-slate-300 mb-4">MEMS 数字麦克风输出 PDM（脉冲密度调制）信号。需要硬件滤波器或 CMSIS-DSP 的 PDM 转 PCM 库将其转换为标准 PCM 音频数据。智能眼镜的麦克风通常用 PDM。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">pdm_mic.c — PDM 麦克风配置</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">// PDM 麦克风通过 SPI/I2S 外设接收数据
+// 典型配置：
+//   - PDM 时钟: 1.024 - 3.072 MHz (由 MCU 提供)
+//   - 输出采样率: 16kHz (常用语音频率)
+//   - 抽取比: 64 (PDM_CLK / FS)
+
+void pdm_mic_init(void) {
+    // 配置 SPI/I2S 为 PDM 接收模式
+    I2S_HandleTypeDef hi2s;
+    hi2s.Instance = SPI2;
+    hi2s.Init.Mode = I2S_MODE_MASTER_RX;    // 主接收
+    hi2s.Init.Standard = I2S_STANDARD_PDM;   // PDM 模式
+    hi2s.Init.DataFormat = I2S_DATAFORMAT_16B;
+    hi2s.Init.MCLKOutput = I2S_MCLKOUTPUT_DISABLE;
+    hi2s.Init.AudioFreq = I2S_AUDIOFREQ_1024K; // PDM 时钟 ~1MHz
+    HAL_I2S_Init(&hi2s);
+}
+
+// PDM → PCM 转换 (使用 CMSIS-DSP PDM 库)
+#include "arm_pdm_fir_init.h"
+
+void pdm_to_pcm(uint8_t *pdm_buf, int16_t *pcm_out) {
+    // CMSIS-DSP 提供 PDM 滤波器
+    // 将高频 PDM 位流转换为低频 PCM 样本
+    // 抽取比 = 64 意味着每 64 个 PDM 位 → 1 个 PCM 样本
+    arm_pdm_fir_to_pcm(&pdm_filter, pdm_buf, pcm_out, pcm_buf_size);
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="callout callout-info mt-4">
+          <p class="text-sm text-slate-300"><strong class="text-blue-400">智能眼镜中的麦克风：</strong>典型的助听器/智能眼镜用 2-4 个 MEMS PDM 麦克风做波束成形和降噪。nRF5340 有硬件 PDM 外设，可以直接接收 PDM 数据。</p>
+        </div>
+      
+        </div>
+        <div class="ai-era-sidebar">
+        <div class="ai-note ai-note-collab">
+          <span class="ai-note-badge">人机协作</span>
+          <h4>你指定参数 AI 生成管线</h4>
+          <p>"2 个 MEMS 麦克风，16kHz 输出，PDM 时钟 1.024MHz"——描述清楚后 AI 能生成完整的 CMSIS-DSP 配置。</p>
+        </div>
+        <div class="ai-note ai-note-must">
+          <span class="ai-note-badge">不可替代</span>
+          <h4>Decimation 比率影响音质</h4>
+          <p>PDM 时钟 1MHz decimation 64 倍 = 15.6kHz 有效带宽。这个比率决定了你的麦克风能录到什么。这是信号处理的物理约束。</p>
+        </div>
+        </div>
+      </div>
+    </section></section>
+
+      <!-- 2.6 Clock Tree -->
+      <section class="mb-12 fade-in">
+<div class="ai-era-layout"><div class="ai-era-main">
+        <h2 class="text-2xl font-bold text-white mb-4">2.6 时钟树 — 音频的心跳</h2>
+        <p class="text-slate-300 mb-4">音频系统对时钟精度极其敏感。48kHz 采样率意味着每 20.83μs 必须精确地处理一个采样。时钟树的配置直接决定音频质量。</p>
+
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700 mb-6">
+          <pre class="mermaid">
+graph TD
+    HSE["HSE 外部晶振<br/>8 MHz"] --> PLL["PLL 主锁相环<br/>×N / M / P"]
+    HSE --> PLLI2S["PLLI2S 音频 PLL<br/>专门给 SAI/I2S 用"]
+    PLL --> SYSCLK["SYSCLK<br/>168 MHz"]
+    PLLI2S --> MCLK["MCLK<br/>12.288 MHz"]
+    SYSCLK --> AHB["AHB /1<br/>168 MHz"]
+    AHB --> APB1["APB1 /4<br/>42 MHz"]
+    AHB --> APB2["APB2 /2<br/>84 MHz"]
+    MCLK --> SAI["SAI 外设<br/>I2S 时钟源"]
+    APB1 --> TIM["定时器<br/>音频采样率"]
+          </pre>
+        </div>
+
+        <div class="callout callout-warning mt-4">
+          <p class="text-sm text-slate-300"><strong class="text-yellow-400">为什么需要专门的音频 PLL？</strong>标准 PLL 产生 168MHz 系统时钟，但 48kHz × 256 = 12.288MHz 无法从 168MHz 整数分频得到。STM32 提供独立的 PLLI2S，可以灵活配置乘法因子 N 和分频因子 R 来精确产生音频主时钟。</p>
+        </div>
+      </div><div class="ai-era-sidebar"><div class="ai-note ai-note-must"><span class="ai-note-badge">不可替代</span><h4>PLLI2S 分频比必须一次算对</h4><p>N/M/R 三个参数需要整数运算精确匹配目标频率。算错 = Codec 静默，不报错不 HardFault，就是没声音。这种 bug AI 帮不了你调试。</p></div></div></div></section>
+
+      <!-- Related Projects -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">关联项目源码走读</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <a href="../projects/libopencm3.html" class="project-card block">
+            <span class="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded">寄存器级</span>
+            <h3 class="font-semibold text-white mt-2">libopencm3</h3>
+            <p class="text-sm text-slate-400 mt-1">看 GPIO/SPI/I2C 的寄存器级实现 — 对照数据手册理解每一位的含义</p>
+          </a>
+          <a href="../projects/libdaisy.html" class="project-card block">
+            <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">音频驱动</span>
+            <h3 class="font-semibold text-white mt-2">libDaisy</h3>
+            <p class="text-sm text-slate-400 mt-1">SAI/I2S 驱动 + Codec 初始化 — 音频外设配置的完整实例</p>
+          </a>
+        </div>
+      </section>
+
+      <div class="text-center py-8 border-t border-dark-700 fade-in">
+        <button data-complete-btn="phase-2" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-lg transition-colors">
+          标记为已完成
+        </button>
+        <p class="text-sm text-slate-500 mt-3">完成本阶段后，进度将自动保存</p>
+        <div class="flex justify-center gap-4 mt-4">
+          <a href="1-architecture.html" class="text-slate-400 hover:text-slate-300">← 上一阶段</a>
+          <a href="3-dma.html" class="text-blue-400 hover:text-blue-300">下一阶段：DMA 数据引擎 →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="../js/nav.js"></script>
+  <script src="../js/progress.js"></script>
+  <script src="../js/code-walkthrough.js"></script>
+  <script>mermaid.initialize({ theme: 'dark', themeVariables: { fontSize: '14px' }});</script>
+</body>
+</html>
