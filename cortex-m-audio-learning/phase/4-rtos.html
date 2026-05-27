@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>阶段四：RTOS 实时操作系统 — Cortex-M 音频学习</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+  <link href="../css/custom.css" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { colors: { dark: { 900: '#020617', 800: '#0f172a', 700: '#1e293b', 600: '#334155' }}}}}</script>
+</head>
+<body class="bg-dark-900 text-slate-200 font-sans">
+
+  <aside id="sidebar" class="sidebar bg-dark-800 border-r border-dark-700">
+    <div class="p-4 border-b border-dark-700">
+      <a href="../index.html" class="text-lg font-bold text-white flex items-center gap-2">
+        <span class="text-blue-400">⌘</span> Cortex-M 音频学习
+      </a>
+      <div class="mt-2 progress-bar" data-progress-bar><div class="fill" style="width:0%"></div></div>
+      <p class="text-xs text-slate-500 mt-1">进度: <span data-progress-text>0/21</span></p>
+    </div>
+    <nav class="sidebar-nav py-2">
+      <div class="section-title">学习阶段</div>
+      <a href="1-architecture.html" data-nav-id="phase-1">一、Cortex-M 架构基础</a>
+      <a href="2-peripherals.html" data-nav-id="phase-2">二、外设与通信协议</a>
+      <a href="3-dma.html" data-nav-id="phase-3">三、DMA 数据引擎</a>
+      <a href="4-rtos.html" data-nav-id="phase-4" class="active">四、RTOS 实时操作系统</a>
+      <a href="5-dsp.html" data-nav-id="phase-5">五、音频 DSP</a>
+      <a href="6-system.html" data-nav-id="phase-6">六、系统级工程</a>
+      <div class="section-title mt-4">源码走读</div>
+      <a href="../projects/baremetal-guide.html" data-nav-id="proj-baremetal-guide">裸机编程指南</a>
+      <a href="../projects/baremetal.html" data-nav-id="proj-baremetal">cortexm/baremetal</a>
+      <a href="../projects/libopencm3.html" data-nav-id="proj-libopencm3">libopencm3</a>
+      <a href="../projects/infinitime.html" data-nav-id="proj-infinitime">InfiniTime</a>
+      <a href="../projects/zswatch.html" data-nav-id="proj-zswatch">ZSWatch</a>
+      <a href="../projects/libdaisy.html" data-nav-id="proj-libdaisy">libDaisy</a>
+      <a href="../projects/daisysp.html" data-nav-id="proj-daisysp">DaisySP</a>
+      <a href="../projects/mutable-plaits.html" data-nav-id="proj-plaits">Mutable Plaits</a>
+      <a href="../projects/teensy-audio.html" data-nav-id="proj-teensy">Teensy Audio</a>
+      <a href="../projects/nrf5340-audio.html" data-nav-id="proj-nrf5340">nRF5340 Audio</a>
+      <div class="section-title mt-4">专题</div>
+      <a href="../projects/openglass.html" data-nav-id="proj-openglass">omiGlass 智能眼镜</a>
+      <div class="section-title mt-4">参考</div>
+      <a href="../glossary.html">术语速查</a>
+      <a href="../resources.html">资源汇总</a>
+    </nav>
+  </aside>
+
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+  <header class="mobile-header lg:hidden fixed top-0 left-0 right-0 bg-dark-800 border-b border-dark-700 z-20 px-4 py-3 flex items-center gap-3">
+    <button id="sidebar-toggle" class="text-slate-400 hover:text-white">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <span class="text-lg font-bold text-white">阶段四：RTOS 实时操作系统</span>
+  </header>
+
+  <main class="main-content">
+    <div class="max-w-6xl mx-auto px-6 py-12 lg:py-16">
+
+      <div class="fade-in mb-12">
+        <span class="text-xs font-mono bg-blue-500/20 text-blue-400 px-2 py-1 rounded">阶段四 · 2-3 周</span>
+        <h1 class="text-3xl lg:text-4xl font-bold text-white mt-3 mb-4">RTOS 实时操作系统</h1>
+        <p class="text-lg text-slate-400">从裸机循环（super-loop）到 RTOS 多任务。对比 FreeRTOS 和 Zephyr，理解音频任务如何与其他任务协调。</p>
+      </div>
+
+      <!-- 4.1 裸机 vs RTOS -->
+      <section class="mb-12 fade-in">
+      <div class="ai-era-layout">
+        <div class="ai-era-main">
+
+        <h2 class="text-2xl font-bold text-white mb-4">4.1 Super-loop vs RTOS</h2>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">对比：裸机 vs RTOS 架构</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">// ===== 裸机 Super-loop =====
+// 优点：简单、可预测、无 RTOS 开销
+// 缺点：所有功能耦合在一起，无法独立调度
+
+void main(void) {
+    hardware_init();
+    while (1) {
+        audio_process();    // 必须最快完成！
+        ble_handler();      // 可能错过音频截止时间
+        ui_update();        // 低优先级但占 CPU
+        sensor_read();      // 每次循环都读，浪费
+    }
+}
+
+// ===== RTOS 多任务 =====
+// 优点：优先级调度、独立开发、实时保证
+// 缺点：开销（RAM/ROM/上下文切换时间）
+
+void audio_task(void *pv) {       // 最高优先级
+    while (1) {
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY); // 等 DMA 中断通知
+        dsp_process();            // 实时处理，保证不被打断
+    }
+}
+
+void ble_task(void *pv) {         // 中等优先级
+    while (1) {
+        vTaskDelay(pdMS_TO_TICKS(10));
+        ble_stack_process();      // BLE 协议栈处理
+    }
+}
+
+void ui_task(void *pv) {          // 低优先级
+    while (1) {
+        xSemaphoreTake(ui_mutex, portMAX_DELAY);
+        lvgl_update();            // LVGL UI 刷新
+    }
+}
+
+void main(void) {
+    hardware_init();
+    xTaskCreate(audio_task, "audio", 1024, NULL, 5, NULL);  // 优先级 5（最高）
+    xTaskCreate(ble_task,   "ble",   512,  NULL, 3, NULL);  // 优先级 3
+    xTaskCreate(ui_task,    "ui",    768,  NULL, 1, NULL);  // 优先级 1（最低）
+    vTaskStartScheduler();
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="callout callout-tip mt-4">
+          <p class="text-sm text-slate-300"><strong class="text-green-400">音频任务永远是最高优先级。</strong>RTOS 的抢占式调度保证：当 DMA 半传输中断通过 TaskNotify 唤醒音频任务时，它会立即抢占 BLE 和 UI 任务。这比 super-loop 可靠得多。</p>
+        </div>
+      
+        </div>
+        <div class="ai-era-sidebar">
+        <div class="ai-note ai-note-must">
+          <span class="ai-note-badge">不可替代</span>
+          <h4>任务划分和优先级是架构决策</h4>
+          <p>音频任务必须在最高优先级、永远不能阻塞——这是设计原则不是代码。AI 可以创建任务，但只有你知道为什么音频任务必须抢占一切。</p>
+        </div>
+        </div>
+      </div>
+    </section></section>
+
+      <!-- 4.2 FreeRTOS 核心 -->
+      <section class="mb-12 fade-in">
+      <div class="ai-era-layout">
+        <div class="ai-era-main">
+
+        <h2 class="text-2xl font-bold text-white mb-4">4.2 FreeRTOS 核心概念</h2>
+        <p class="text-slate-300 mb-4">FreeRTOS 是最广泛使用的嵌入式 RTOS。InfiniTime 智能手表就是基于 FreeRTOS 的。</p>
+
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700 mb-6">
+          <pre class="mermaid">
+graph TB
+    subgraph "FreeRTOS 内核对象"
+        T["Task 任务<br/>独立栈 + 优先级"]
+        Q["Queue 队列<br/>FIFO 数据传递"]
+        S["Semaphore 信号量<br/>资源保护/同步"]
+        N["TaskNotification<br/>轻量通知 (最快)"]
+        ST["StreamBuffer<br/>字节流 (适合音频)"]
+        MB["MessageBuffer<br/>变长消息"]
+    end
+    subgraph "调度器"
+        PX["优先级抢占调度<br/>同优先级时间片轮转"]
+    end
+    T --> PX
+          </pre>
+        </div>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">freertos_audio.c — FreeRTOS 音频管线</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">// FreeRTOS 音频管线 — 实际项目中使用的模式
+
+static TaskHandle_t audio_task_handle;
+static StreamBufferHandle_t mic_stream;  // 麦克风数据流
+
+// ① DMA 中断 → 通知音频任务
+void DMA1_Stream1_IRQHandler(void) {
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+    if (dma_half_transfer_flag) {
+        // 发送麦克风数据到 StreamBuffer
+        // StreamBuffer 是 ISR-safe 的，适合音频数据传递
+        xStreamBufferSendFromISR(mic_stream,
+            &audio_buffer[0],           // Ping 数据
+            HALF_BUF_SIZE * 2,          // 字节数
+            &xHigherPriorityTaskWoken);
+    }
+
+    if (dma_full_transfer_flag) {
+        xStreamBufferSendFromISR(mic_stream,
+            &audio_buffer[HALF_BUF_SIZE], // Pong 数据
+            HALF_BUF_SIZE * 2,
+            &xHigherPriorityTaskWoken);
+    }
+
+    // ② 如果唤醒了高优先级任务，请求上下文切换
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+
+// ③ 音频处理任务
+void audio_task(void *param) {
+    int16_t rx_buf[256];
+
+    while (1) {
+        // 阻塞等待麦克风数据 — 超时 = 检测 underrun
+        size_t received = xStreamBufferReceive(mic_stream,
+            rx_buf, sizeof(rx_buf),
+            pdMS_TO_TICKS(20));  // 超时 20ms
+
+        if (received > 0) {
+            // ④ 做实际的 DSP 处理
+            arm_biquad_cascade_df1_f32(&eq_filter,
+                float_in, float_out, received / 2);
+
+            // ⑤ 发送处理后的数据到输出 StreamBuffer
+            xStreamBufferSend(speaker_stream,
+                float_out, received,
+                pdMS_TO_TICKS(5));
+        }
+    }
+}
+
+// ⑥ 音频任务创建和 StreamBuffer 初始化
+void audio_pipeline_init(void) {
+    // StreamBuffer 大小必须 > 触发阈值，否则接收方不会被唤醒
+    mic_stream = xStreamBufferCreate(2048,   // 总大小
+                                      256);    // 触发阈值 (bytes)
+    speaker_stream = xStreamBufferCreate(2048, 256);
+
+    xTaskCreate(audio_task, "audio",
+                1024,  // 栈大小 (words) = 4096 bytes
+                NULL,
+                configMAX_PRIORITIES - 1,  // 最高优先级
+                &audio_task_handle);
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item">
+              <span class="ann-num">①</span>
+              <span><strong>ISR 中使用 FromISR 变体</strong>。FreeRTOS 的 API 分为任务版本和 ISR 版本。ISR 版本不阻塞，通过 xHigherPriorityTaskWoken 参数决定是否需要上下文切换。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">②</span>
+              <span><strong>portYIELD_FROM_ISR</strong> 是关键的上下文切换触发点。如果 ISR 唤醒了更高优先级的任务（音频任务），这里会直接切换到音频任务，而不是返回被中断的低优先级任务。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">③</span>
+              <span><strong>StreamBuffer</strong> 是 FreeRTOS 专门为音频/串口等连续数据流设计的。比 Queue 更高效（零拷贝语义，适合大数据块）。InfiniTime 项目大量使用它。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">⑥</span>
+              <span><strong>触发阈值</strong>很重要：StreamBuffer 积累到 256 字节才会唤醒接收任务。太小会频繁唤醒（浪费 CPU），太大会增加延迟。</span>
+            </div>
+          </div>
+        </div>
+      
+        </div>
+        <div class="ai-era-sidebar">
+        <div class="ai-note ai-note-auto">
+          <span class="ai-note-badge">可淡化</span>
+          <h4>FreeRTOS API 签名 AI 随手生成</h4>
+          <p>xTaskCreate、xSemaphoreGive、vTaskDelay——这些标准 API 调用 AI 生成正确且高效。学习投资应放在理解何时用 Queue、何时用 Semaphore、何时用 StreamBuffer。</p>
+        </div>
+        <div class="ai-note ai-note-collab">
+          <span class="ai-note-badge">人机协作</span>
+          <h4>你设计数据流 AI 实现 ISR-safe 代码</h4>
+          <p>StreamBuffer 的零拷贝语义完美适合音频。你描述"ISR 中发 256 bytes，任务端等满 512 bytes"，AI 生成完整模式。</p>
+        </div>
+        </div>
+      </div>
+    </section></section>
+
+      <!-- 4.3 Zephyr -->
+      <section class="mb-12 fade-in">
+      <div class="ai-era-layout">
+        <div class="ai-era-main">
+
+        <h2 class="text-2xl font-bold text-white mb-4">4.3 Zephyr RTOS — 现代替代方案</h2>
+        <p class="text-slate-300 mb-4">Zephyr 是 Linux 基金会主导的 RTOS，Nordic（nRF 系列）芯片的首选 RTOS。与 FreeRTOS 的最大区别：Device Tree、Kconfig、统一的设备驱动模型。</p>
+
+        <div class="grid md:grid-cols-2 gap-4 mb-6">
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-green-400 font-semibold mb-2">FreeRTOS</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• 手动配置外设（CubeMX 生成的代码）</li>
+              <li>• C API，简单直接</li>
+              <li>• 轻量，RAM 开销小</li>
+              <li>• 适合：STM32、ESP32</li>
+              <li>• 代表项目：InfiniTime</li>
+            </ul>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-cyan-400 font-semibold mb-2">Zephyr</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• Device Tree 声明硬件（像 Linux）</li>
+              <li>• Kconfig 配置系统</li>
+              <li>• 统一驱动模型 + 电源管理</li>
+              <li>• 适合：nRF、i.MX RT</li>
+              <li>• 代表项目：ZSWatch、nRF5340 Audio</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">zephyr_audio.conf — Zephyr 音频配置 (Kconfig)</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c"># Zephyr 通过 Kconfig 配置系统功能
+# 不需要手写初始化代码，配置即启用
+
+# 启用 I2S 驱动
+CONFIG_I2S=y
+
+# 启用 Nordic nRFx 外设驱动
+CONFIG_NRFX_I2S=y
+
+# 音频 Codec 支持
+CONFIG_AUDIO=y
+CONFIG_AUDIO_CODEC=y
+
+# 电源管理（对低功耗音频设备重要）
+CONFIG_PM=y
+CONFIG_PM_DEVICE=y
+
+# BLE 音频支持
+CONFIG_BT=y
+CONFIG_BT_AUDIO=y
+CONFIG_BT_AUDIO_UNICAST=y
+
+# LC3 编解码器
+CONFIG_LC3=y
+
+# 调试：RTT 输出（替代 UART，更快）
+CONFIG_DEBUG=y
+CONFIG_LOG=y
+CONFIG_LOG_BACKEND_RTT=y</code></pre>
+          </div>
+        </div>
+
+        <div class="callout callout-info mt-4">
+          <p class="text-sm text-slate-300"><strong class="text-blue-400">选型建议：</strong>如果目标是 Nordic nRF53 系列（智能眼镜很可能用这个），选 Zephyr。如果目标是 STM32，FreeRTOS 生态更成熟。两个都要了解，因为面试和开源项目中两个都会遇到。</p>
+        </div>
+      
+        </div>
+        <div class="ai-era-sidebar">
+        <div class="ai-note ai-note-collab">
+          <span class="ai-note-badge">人机协作</span>
+          <h4>Device Tree 描述硬件 AI 生成配置</h4>
+          <p>"nRF5340，I2S master，2 个 PDM 麦克风"——你用自然语言描述硬件，AI 生成 Device Tree overlay 和 Kconfig。</p>
+        </div>
+        <div class="ai-note ai-note-must">
+          <span class="ai-note-badge">不可替代</span>
+          <h4>Zephyr vs FreeRTOS 选型是架构决策</h4>
+          <p>nRF = Zephyr，STM32 = FreeRTOS。选型基于芯片厂商支持、社区生态、项目规模——这是技术战略不是代码选择。</p>
+        </div>
+        </div>
+      </div>
+    </section></section>
+
+      <!-- 4.4 Context Switch -->
+      <section class="mb-12 fade-in">
+      <div class="ai-era-layout">
+        <div class="ai-era-main">
+
+        <h2 class="text-2xl font-bold text-white mb-4">4.4 上下文切换与实时保证</h2>
+        <p class="text-slate-300 mb-4">RTOS 通过 PendSV 中断实现上下文切换。理解这个过程有助于估算音频任务的最坏响应时间。</p>
+
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700 mb-6">
+          <pre class="mermaid">
+sequenceDiagram
+    participant IRQ as DMA 中断
+    participant RTOS as FreeRTOS 调度器
+    participant PEND as PendSV
+    participant AUDIO as audio_task
+    participant BLE as ble_task
+
+    BLE->>BLE: 正在执行
+    IRQ->>RTOS: DMA 半传输完成
+    Note over IRQ: xTaskNotifyFromISR<br/>唤醒 audio_task
+    RTOS->>PEND: 触发 PendSV (最低优先级中断)
+    PEND->>PEND: 保存 BLE 上下文 (R4-R11, PSP)
+    PEND->>AUDIO: 恢复 audio_task 上下文
+    Note over AUDIO: 总延迟 ≈ 中断延迟 (12周期)<br/>+ ISR 时间 (~2μs)<br/>+ 上下文切换 (~1μs)<br/>≈ 3-5μs
+          </pre>
+        </div>
+
+        <div class="callout callout-important">
+          <p class="text-sm text-slate-300"><strong class="text-purple-400">实时保证：</strong>从 DMA 中断触发到音频任务开始执行，总延迟约 3-5μs（M4 @ 168MHz）。相比 5.33ms 的音频块处理时间，这个开销可以忽略。但前提是：音频任务的优先级最高，且不能在音频任务中调用阻塞 API。</p>
+        </div>
+      
+        </div>
+        <div class="ai-era-sidebar">
+        <div class="ai-note ai-note-must">
+          <span class="ai-note-badge">不可替代</span>
+          <h4>portYIELD_FROM_ISR 是正确性门槛</h4>
+          <p>这个宏决定了 RTOS 是否立即切换到更高优先级的音频任务。用错变体音频时序会静默出错。这不是样板代码——它是实时系统的正确性门槛。</p>
+        </div>
+        </div>
+      </div>
+    </section></section>
+
+      <!-- Related Projects -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">关联项目源码走读</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <a href="../projects/infinitime.html" class="project-card block">
+            <span class="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded">FreeRTOS</span>
+            <h3 class="font-semibold text-white mt-2">InfiniTime</h3>
+            <p class="text-sm text-slate-400 mt-1">FreeRTOS 任务架构的最佳学习案例 — SystemTask + DisplayApp + TileManager</p>
+          </a>
+          <a href="../projects/zswatch.html" class="project-card block">
+            <span class="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded">Zephyr</span>
+            <h3 class="font-semibold text-white mt-2">ZSWatch</h3>
+            <p class="text-sm text-slate-400 mt-1">Zephyr Device Tree + 多任务架构 — 现代 RTOS 项目组织方式</p>
+          </a>
+        </div>
+      </section>
+
+      <div class="text-center py-8 border-t border-dark-700 fade-in">
+        <button data-complete-btn="phase-4" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-lg transition-colors">
+          标记为已完成
+        </button>
+        <p class="text-sm text-slate-500 mt-3">完成本阶段后，进度将自动保存</p>
+        <div class="flex justify-center gap-4 mt-4">
+          <a href="3-dma.html" class="text-slate-400 hover:text-slate-300">← 上一阶段</a>
+          <a href="5-dsp.html" class="text-blue-400 hover:text-blue-300">下一阶段：音频 DSP →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="../js/nav.js"></script>
+  <script src="../js/progress.js"></script>
+  <script src="../js/code-walkthrough.js"></script>
+  <script>mermaid.initialize({ theme: 'dark', themeVariables: { fontSize: '14px' }});</script>
+</body>
+</html>

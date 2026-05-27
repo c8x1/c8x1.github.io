@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>资源汇总 — Cortex-M 音频学习</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="../css/custom.css" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { colors: { dark: { 900: '#020617', 800: '#0f172a', 700: '#1e293b', 600: '#334155' }}}}}</script>
+</head>
+<body class="bg-dark-900 text-slate-200 font-sans">
+
+  <aside id="sidebar" class="sidebar bg-dark-800 border-r border-dark-700">
+    <div class="p-4 border-b border-dark-700">
+      <a href="index.html" class="text-lg font-bold text-white flex items-center gap-2"><span class="text-blue-400">⌘</span> Cortex-M 音频学习</a>
+      <div class="mt-2 progress-bar" data-progress-bar><div class="fill" style="width:0%"></div></div>
+      <p class="text-xs text-slate-500 mt-1">进度: <span data-progress-text>0/21</span></p>
+    </div>
+    <nav class="sidebar-nav py-2">
+      <div class="section-title">学习阶段</div>
+      <a href="phase/1-architecture.html" data-nav-id="phase-1">一、Cortex-M 架构基础</a>
+      <a href="phase/2-peripherals.html" data-nav-id="phase-2">二、外设与通信协议</a>
+      <a href="phase/3-dma.html" data-nav-id="phase-3">三、DMA 数据引擎</a>
+      <a href="phase/4-rtos.html" data-nav-id="phase-4">四、RTOS 实时操作系统</a>
+      <a href="phase/5-dsp.html" data-nav-id="phase-5">五、音频 DSP</a>
+      <a href="phase/6-system.html" data-nav-id="phase-6">六、系统级工程</a>
+      <div class="section-title mt-4">源码走读</div>
+      <a href="projects/baremetal-guide.html" data-nav-id="proj-baremetal-guide">裸机编程指南</a>
+      <a href="projects/baremetal.html" data-nav-id="proj-baremetal">cortexm/baremetal</a>
+      <a href="projects/libopencm3.html" data-nav-id="proj-libopencm3">libopencm3</a>
+      <a href="projects/infinitime.html" data-nav-id="proj-infinitime">InfiniTime</a>
+      <a href="projects/zswatch.html" data-nav-id="proj-zswatch">ZSWatch</a>
+      <a href="projects/libdaisy.html" data-nav-id="proj-libdaisy">libDaisy</a>
+      <a href="projects/daisysp.html" data-nav-id="proj-daisysp">DaisySP</a>
+      <a href="projects/mutable-plaits.html" data-nav-id="proj-plaits">Mutable Plaits</a>
+      <a href="projects/teensy-audio.html" data-nav-id="proj-teensy">Teensy Audio</a>
+      <a href="projects/nrf5340-audio.html" data-nav-id="proj-nrf5340">nRF5340 Audio</a>
+      <div class="section-title mt-4">专题</div>
+      <a href="projects/openglass.html" data-nav-id="proj-openglass">omiGlass 智能眼镜</a>
+      <div class="section-title mt-4">参考</div>
+      <a href="glossary.html">术语速查</a>
+      <a href="resources.html" class="active">资源汇总</a>
+    </nav>
+  </aside>
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+  <header class="mobile-header lg:hidden fixed top-0 left-0 right-0 bg-dark-800 border-b border-dark-700 z-20 px-4 py-3 flex items-center gap-3">
+    <button id="sidebar-toggle" class="text-slate-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <span class="text-lg font-bold text-white">资源汇总</span>
+  </header>
+
+  <main class="main-content">
+    <div class="max-w-4xl mx-auto px-6 py-12 lg:py-16">
+
+      <div class="fade-in mb-12">
+        <h1 class="text-3xl lg:text-4xl font-bold text-white mb-4">资源汇总</h1>
+        <p class="text-lg text-slate-400">推荐书籍、开发板、工具和在线资源。</p>
+      </div>
+
+      <!-- Books -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-6">推荐书籍</h2>
+        <div class="space-y-4">
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-white font-semibold">The Definitive Guide to ARM Cortex-M0/M3/M4</h3>
+            <p class="text-sm text-slate-400 mt-1">Joseph Yiu — ARM 官方权威指南。涵盖架构、NVIC、MPU、调试。必读。</p>
+            <span class="text-xs text-blue-400 mt-2 inline-block">对应：阶段一</span>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-white font-semibold">Mastering the FreeRTOS Real Time Kernel</h3>
+            <p class="text-sm text-slate-400 mt-1">Richard Barry（FreeRTOS 作者）— 免费电子书。从任务管理到队列、信号量、流缓冲区，覆盖全部 API。</p>
+            <span class="text-xs text-blue-400 mt-2 inline-block">对应：阶段四</span>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-white font-semibold">DAFX — Digital Audio Effects</h3>
+            <p class="text-sm text-slate-400 mt-1">Udo Zölzer — 音频 DSP 理论经典。滤波器、延迟、混响、动态处理的数学基础。</p>
+            <span class="text-xs text-blue-400 mt-2 inline-block">对应：阶段五</span>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-white font-semibold">Making Embedded Systems (2nd Ed)</h3>
+            <p class="text-sm text-slate-400 mt-1">Elecia White — 嵌入式系统设计思维。架构、状态机、外设驱动、调试方法论。</p>
+            <span class="text-xs text-blue-400 mt-2 inline-block">对应：阶段六</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dev Boards -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-6">推荐开发板</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-white font-semibold">STM32F4-Discovery</h3>
+            <p class="text-sm text-slate-400 mt-1">STM32F407 (M4F) + 音频 Codec (CS43L22) + 加速度计 + 麦克风。~$20。最适合入门学习。</p>
+            <span class="text-xs text-green-400">推荐首选</span>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-white font-semibold">Electrosmith Daisy Seed</h3>
+            <p class="text-sm text-slate-400 mt-1">STM32H750 (M7) + AK4556 Codec + USB。~$30。libDaisy 官方板，音频开发开箱即用。</p>
+            <span class="text-xs text-green-400">音频专用</span>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-white font-semibold">nRF5340 DK</h3>
+            <p class="text-sm text-slate-400 mt-1">Nordic 官方开发板。双核 M33 + BLE + PDM/I2S。~$50。BLE Audio 开发必选。</p>
+            <span class="text-xs text-blue-400">BLE Audio 方向</span>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-white font-semibold">Teensy 4.0/4.1</h3>
+            <p class="text-sm text-slate-400 mt-1">i.MX RT1062 (M7 @ 600MHz)。超高性能。+ Audio Shield 有完整音频接口。~$25。</p>
+            <span class="text-xs text-blue-400">高性能实验</span>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-white font-semibold">XIAO ESP32-S3 Sense</h3>
+            <p class="text-sm text-slate-400 mt-1">ESP32-S3 + OV2640 相机 + PDM 麦克风 + 8MB PSRAM。~$15。omiGlass 智能眼镜的硬件平台，也可用于音频/BLE 实验。</p>
+            <span class="text-xs text-amber-400">ESP32 音频 + 相机</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tools -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-6">必备工具</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-white font-semibold">调试器</h3>
+            <ul class="text-sm text-slate-400 mt-2 space-y-1">
+              <li>• <strong>SEGGER J-Link</strong> — 最强 SWD 调试器，支持 RTT/ITM</li>
+              <li>• <strong>ST-Link V3</strong> — STM32 官方，~$25</li>
+              <li>• <strong>CMSIS-DAP</strong> — 开源方案，~$5</li>
+            </ul>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-white font-semibold">IDE / 工具链</h3>
+            <ul class="text-sm text-slate-400 mt-2 space-y-1">
+              <li>• <strong>STM32CubeIDE</strong> — 免费，Eclipse + GCC + 调试器</li>
+              <li>• <strong>VS Code + Cortex-Debug</strong> — 轻量级，推荐</li>
+              <li>• <strong>ARM GCC</strong> — 编译器（arm-none-eabi-gcc）</li>
+              <li>• <strong>CMake + Ninja</strong> — 构建系统</li>
+            </ul>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-white font-semibold">分析工具</h3>
+            <ul class="text-sm text-slate-400 mt-2 space-y-1">
+              <li>• <strong>Logic Analyzer</strong> — Saleae / 逻辑分析仪（看 I2S/SPI 波形）</li>
+              <li>• <strong>STM32CubeMonitor</strong> — 实时变量监控（免 printf）</li>
+              <li>• <strong>SEGGER SystemView</strong> — FreeRTOS 可视化分析</li>
+              <li>• <strong>WaveScope/Audacity</strong> — 音频波形分析</li>
+            </ul>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-white font-semibold">Zephyr 工具</h3>
+            <ul class="text-sm text-slate-400 mt-2 space-y-1">
+              <li>• <strong>west</strong> — Zephyr 的构建/Flash 工具</li>
+              <li>• <strong>nRF Connect SDK</strong> — Nordic 完整开发包</li>
+              <li>• <strong>nRF Connect for VS Code</strong> — VS Code 插件</li>
+              <li>• <strong>Devicetree Overlay</strong> — 硬件自定义</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Online Resources -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-6">在线资源</h2>
+        <div class="space-y-4">
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-white font-semibold">参考手册</h3>
+            <ul class="text-sm text-slate-400 mt-2 space-y-1">
+              <li>• <strong>STM32 Reference Manual</strong> — 寄存器级文档（必读 RM0090）</li>
+              <li>• <strong>ARM Cortex-M4 Technical Reference Manual</strong> — 内核架构文档</li>
+              <li>• <strong>CMSIS-DSP Documentation</strong> — API 参考</li>
+              <li>• <strong>Audio EQ Cookbook</strong> — Biquad 系数计算公式</li>
+            </ul>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-white font-semibold">社区 / 博客</h3>
+            <ul class="text-sm text-slate-400 mt-2 space-y-1">
+              <li>• <strong>STM32 Forum (community.st.com)</strong> — ST 官方论坛</li>
+              <li>• <strong>Nordic DevZone (devzone.nordicsemi.com)</strong> — Nordic 官方论坛</li>
+              <li>• <strong>Embedded Artistry</strong> — 嵌入式 C++ 最佳实践</li>
+              <li>• <strong>Quantum Leaps Blog</strong> — 状态机和实时系统设计</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="js/nav.js"></script>
+  <script src="js/progress.js"></script>
+</body>
+</html>

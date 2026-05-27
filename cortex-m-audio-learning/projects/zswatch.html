@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>源码走读 — ZSWatch</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <link href="../css/custom.css" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { colors: { dark: { 900: '#020617', 800: '#0f172a', 700: '#1e293b', 600: '#334155' }}}}}</script>
+</head>
+<body class="bg-dark-900 text-slate-200 font-sans">
+
+  <aside id="sidebar" class="sidebar bg-dark-800 border-r border-dark-700">
+    <div class="p-4 border-b border-dark-700">
+      <a href="../index.html" class="text-lg font-bold text-white flex items-center gap-2"><span class="text-blue-400">⌘</span> Cortex-M 音频学习</a>
+      <div class="mt-2 progress-bar" data-progress-bar><div class="fill" style="width:0%"></div></div>
+      <p class="text-xs text-slate-500 mt-1">进度: <span data-progress-text>0/21</span></p>
+    </div>
+    <nav class="sidebar-nav py-2">
+      <div class="section-title">学习阶段</div>
+      <a href="../phase/1-architecture.html" data-nav-id="phase-1">一、Cortex-M 架构基础</a>
+      <a href="../phase/2-peripherals.html" data-nav-id="phase-2">二、外设与通信协议</a>
+      <a href="../phase/3-dma.html" data-nav-id="phase-3">三、DMA 数据引擎</a>
+      <a href="../phase/4-rtos.html" data-nav-id="phase-4">四、RTOS 实时操作系统</a>
+      <a href="../phase/5-dsp.html" data-nav-id="phase-5">五、音频 DSP</a>
+      <a href="../phase/6-system.html" data-nav-id="phase-6">六、系统级工程</a>
+      <div class="section-title mt-4">源码走读</div>
+      <a href="baremetal-guide.html" data-nav-id="proj-baremetal-guide">裸机编程指南</a>
+      <a href="baremetal.html" data-nav-id="proj-baremetal">cortexm/baremetal</a>
+      <a href="libopencm3.html" data-nav-id="proj-libopencm3">libopencm3</a>
+      <a href="infinitime.html" data-nav-id="proj-infinitime">InfiniTime</a>
+      <a href="zswatch.html" data-nav-id="proj-zswatch">ZSWatch</a>
+      <a href="libdaisy.html" data-nav-id="proj-libdaisy">libDaisy</a>
+      <a href="daisysp.html" data-nav-id="proj-daisysp">DaisySP</a>
+      <a href="mutable-plaits.html" data-nav-id="proj-plaits">Mutable Plaits</a>
+      <a href="teensy-audio.html" data-nav-id="proj-teensy">Teensy Audio</a>
+      <a href="nrf5340-audio.html" data-nav-id="proj-nrf5340">nRF5340 Audio</a>
+      <div class="section-title mt-4">专题</div>
+      <a href="openglass.html" data-nav-id="proj-openglass">omiGlass 智能眼镜</a>
+      <div class="section-title mt-4">参考</div>
+      <a href="../glossary.html">术语速查</a>
+      <a href="../resources.html">资源汇总</a>
+    </nav>
+  </aside>
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+  <header class="mobile-header lg:hidden fixed top-0 left-0 right-0 bg-dark-800 border-b border-dark-700 z-20 px-4 py-3 flex items-center gap-3">
+    <button id="sidebar-toggle" class="text-slate-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <span class="text-lg font-bold text-white">Cortex-M 音频学习</span>
+  </header>
+
+  <main class="main-content">
+    <div class="max-w-6xl mx-auto px-6 py-12 lg:py-16">
+
+      <!-- Project Overview Card -->
+      <div class="fade-in mb-10">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="text-xs font-mono bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded">阅读顺序 ⑤</span>
+          <span class="text-xs font-mono bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded">Zephyr</span>
+        </div>
+        <h1 class="text-3xl lg:text-4xl font-bold text-white mb-3">ZSWatch</h1>
+        <p class="text-slate-400 mb-4">Zephyr RTOS 智能手表 — 体验现代嵌入式开发范式：Device Tree + Kconfig + 驱动模型</p>
+        <div class="flex flex-wrap gap-4 text-sm mb-4">
+          <a href="https://github.com/ZSWatch/ZSWatch" target="_blank" class="text-blue-400 hover:underline">GitHub: ZSWatch/ZSWatch</a>
+          <span class="text-slate-600">|</span>
+          <span class="text-yellow-400">★ 1500</span>
+          <span class="text-slate-600">|</span>
+          <span class="text-slate-500">nRF5340 (Cortex-M33 双核)</span>
+        </div>
+        <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+            <div><span class="text-slate-500">MCU:</span> <span class="text-slate-300">nRF5340</span></div>
+            <div><span class="text-slate-500">内核:</span> <span class="text-slate-300">Cortex-M33 (128MHz)</span></div>
+            <div><span class="text-slate-500">RTOS:</span> <span class="text-slate-300">Zephyr</span></div>
+            <div><span class="text-slate-500">架构:</span> <span class="text-slate-300">双核 (App + Net)</span></div>
+            <div><span class="text-slate-500">显示:</span> <span class="text-slate-300">GC9A01 (SPI)</span></div>
+            <div><span class="text-slate-500">IMU:</span> <span class="text-slate-300">BMA456 (I2C)</span></div>
+            <div><span class="text-slate-500">BLE:</span> <span class="text-slate-300">Zephyr BLE</span></div>
+            <div><span class="text-slate-500">音频:</span> <span class="text-slate-300">I2S DAC</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Architecture Diagram -->
+      <section class="fade-in mb-10">
+<div class="ai-era-layout"><div class="ai-era-main">
+        <h2 class="text-xl font-bold text-white mb-4">系统架构</h2>
+        <p class="text-slate-400 text-sm mb-4">ZSWatch 利用了 nRF5340 的双核架构：应用核运行 Zephyr + LVGL UI，网络核运行 BLE 协议栈。Zephyr 的 Device Tree 机制让硬件配置完全声明化。</p>
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700">
+          <pre class="mermaid">
+graph TD
+    subgraph AppCore["应用核 (Cortex-M33 @ 128MHz)"]
+        ZE["Zephyr 内核"]
+        LV["LVGL UI"]
+        SEN["传感器管理"]
+        PM["电源管理"]
+        ZE --> LV
+        ZE --> SEN
+        ZE --> PM
+    end
+
+    subgraph NetCore["网络核 (Cortex-M33 @ 64MHz)"]
+        BLE["BLE 5.2 协议栈"]
+        PROF["BLE Profile"]
+        BLE --> PROF
+    end
+
+    subgraph DevicTree["Device Tree 声明"]
+        DT_SPI["SPI 总线配置"]
+        DT_I2C["I2C 总线配置"]
+        DT_GPIO["GPIO 引脚映射"]
+        DT_PM["电源状态配置"]
+    end
+
+    AppCore -->|"IPC 消息通道"| NetCore
+    DevicTree -->|"编译时生成"| AppCore
+
+    style AppCore fill:#1e3a5f,stroke:#3b82f6,color:#fff
+    style NetCore fill:#1a4731,stroke:#22c55e,color:#fff
+    style DevicTree fill:#3b1a47,stroke:#a855f7,color:#fff
+          </pre>
+        </div>
+      </section>
+
+      <!-- Device Tree -->
+      <section class="fade-in mb-10">
+        <h2 class="text-xl font-bold text-white mb-4">Device Tree — 硬件声明式配置</h2>
+        <p class="text-slate-400 text-sm mb-4">Zephyr 最大的特色是 Device Tree。硬件配置不写在 C 代码里，而是声明在 .overlay 文件中。编译时，Zephyr 构建系统将 Device Tree 转换为 C 宏和结构体。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">📁 boards/zswatch_nrf5340.overlay</span>
+            <span class="text-xs">Device Tree 覆盖文件</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">// SPI 总线配置 (连接显示屏)
+&amp;spi1 {                                    <span class="ann-marker" data-note="引用 spi1 节点">①</span>
+    compatible = "nordic,nrf-spi";          <span class="ann-marker" data-note="指定使用 Nordic SPI 驱动">②</span>
+    status = "okay";                        <span class="ann-marker" data-note="启用此节点">③</span>
+    cs-gpios = &lt;&amp;gpio0 17 GPIO_ACTIVE_LOW&gt;;<span class="ann-marker" data-note="CS 片选引脚定义">④</span>
+
+    gc9a01: gc9a01@0 {                      <span class="ann-marker" data-note="SPI 从设备定义">⑤</span>
+        compatible = "galaxycore,gc9a01";   <span class="ann-marker" data-note="匹配驱动程序">⑥</span>
+        reg = &lt;0&gt;;                          // SPI 设备地址 (CS 索引)
+        spi-max-frequency = &lt;32000000&gt;;     <span class="ann-marker" data-note="最大 SPI 时钟 32MHz">⑦</span>
+        cmd-data-gpios = &lt;&amp;gpio0 14 0&gt;;     <span class="ann-marker" data-note="DC 引脚 (命令/数据)">⑧</span>
+        reset-gpios = &lt;&amp;gpio0 15 GPIO_ACTIVE_LOW&gt;;
+        width = &lt;240&gt;;
+        height = &lt;240&gt;;
+        pixel-format = &lt;PIXEL_FORMAT_RGB_565&gt;;
+    };
+};
+
+// I2C 总线配置 (连接传感器)
+&amp;i2c1 {
+    status = "okay";
+    pinctrl-0 = &lt;&amp;i2c1_default&gt;;           <span class="ann-marker" data-note="引脚复用配置引用">⑨</span>
+
+    bma456: bma456@68 {                     <span class="ann-marker" data-note="I2C 从设备 (地址 0x68)">⑩</span>
+        compatible = "bosch,bma456";
+        reg = &lt;0x68&gt;;
+        int-gpios = &lt;&amp;gpio1 5 GPIO_ACTIVE_LOW&gt;;
+    };
+};</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item" data-ann="①"><span class="ann-num">①</span><span><code>&amp;spi1</code> 引用 SoC 级 Device Tree 中定义的 SPI1 节点，在此基础上添加板级配置。这是 Device Tree 的"叠加"（overlay）机制</span></div>
+            <div class="ann-item" data-ann="②"><span class="ann-num">②</span><span><code>compatible</code> 是 Device Tree 的核心属性，用于匹配驱动程序。构建系统根据此字符串找到对应的 Zephyr 驱动</span></div>
+            <div class="ann-item" data-ann="③"><span class="ann-num">③</span><span>SoC 级 Device Tree 中大多数外设默认 <code>status = "disabled"</code>。板级 overlay 通过 <code>status = "okay"</code> 启用板子上实际存在的外设</span></div>
+            <div class="ann-item" data-ann="④"><span class="ann-num">④</span><span>CS（片选）引脚：<code>&amp;gpio0</code> 引用 GPIO 控制器，17 是引脚号，<code>GPIO_ACTIVE_LOW</code> 表示低电平有效</span></div>
+            <div class="ann-item" data-ann="⑤"><span class="ann-num">⑤</span><span><code>gc9a01@0</code> 定义一个 SPI 从设备。@0 是芯片选择索引（对应 cs-gpios 中的第一个引脚）</span></div>
+            <div class="ann-item" data-ann="⑥"><span class="ann-num">⑥</span><span>驱动匹配：Zephyr 构建系统扫描所有 compatible 字符串，自动包含匹配的驱动源文件。不需要手动 #include</span></div>
+            <div class="ann-item" data-ann="⑦"><span class="ann-num">⑦</span><span>告诉驱动 SPI 时钟上限。驱动会自动计算分频系数，不需要手动配置寄存器</span></div>
+            <div class="ann-item" data-ann="⑧"><span class="ann-num">⑧</span><span>DC 引脚用于 SPI 显示的命令/数据切换。等价于 InfiniTime 中手动操作 <code>nrf_gpio_pin_set/clear(pinDataCommand)</code></span></div>
+            <div class="ann-item" data-ann="⑨"><span class="ann-num">⑨</span><span>nRF53 系列使用 pinctrl（引脚控制器）子系统管理引脚复用。引脚映射定义在单独的 pinctrl 节点中</span></div>
+            <div class="ann-item" data-ann="⑩"><span class="ann-num">⑩</span><span>BMA456 加速度计挂在 I2C 总线上，7 位地址 0x68。中断引脚 GPIO1_5 用于 motion detect 唤醒</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Kconfig -->
+      <section class="fade-in mb-10">
+        <h3 class="text-lg font-bold text-white mb-3">Kconfig — 功能开关</h3>
+        <p class="text-slate-400 text-sm mb-4">Kconfig 是 Zephyr 的编译配置系统（类似 Linux 内核的 menuconfig）。通过 prj.conf 文件启用或关闭功能模块。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">📁 prj.conf</span>
+            <span class="text-xs">项目配置文件</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c"># RTOS 基础配置
+CONFIG_MAIN_STACK_SIZE=2048                <span class="ann-marker" data-note="主任务栈大小">①</span>
+CONFIG_SYSTEM_WORKQUEUE_PRIORITY=7
+
+# 显示子系统
+CONFIG_DISPLAY=y                           <span class="ann-marker" data-note="启用显示子系统">②</span>
+CONFIG_SPI=y                               <span class="ann-marker" data-note="启用 SPI 驱动">③</span>
+CONFIG_LCD=y
+CONFIG_LVGL=y                              <span class="ann-marker" data-note="启用 LVGL 图形库">④</span>
+CONFIG_LV_Z_VDB_SIZE=25
+
+# 传感器子系统
+CONFIG_SENSOR=y                            <span class="ann-marker" data-note="启用传感器抽象层">⑤</span>
+CONFIG_I2C=y
+CONFIG_BMI270=y                            <span class="ann-marker" data-note="启用 BMI270 驱动">⑥</span>
+
+# 蓝牙
+CONFIG_BT=y                                <span class="ann-marker" data-note="启用 BLE 协议栈">⑦</span>
+CONFIG_BT_PERIPHERAL=y
+CONFIG_BT_DEVICE_NAME="ZSWatch"
+
+# 电源管理
+CONFIG_PM=y                                <span class="ann-marker" data-note="启用电源管理子系统">⑧</span>
+CONFIG_PM_DEVICE=y
+CONFIG_PM_POLICY_APP=y                     <span class="ann-marker" data-note="应用自定义电源策略">⑨</span></code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item" data-ann="①"><span class="ann-num">①</span><span>栈大小以字节为单位。2048 字节 = 2KB。Zephyr 的栈由内核动态分配（线程栈），不像裸机那样在链接脚本中静态分配</span></div>
+            <div class="ann-item" data-ann="②"><span class="ann-num">②</span><span><code>=y</code> 表示启用。对应 <code>=n</code> 表示禁用。显示子系统是 SPI 显示驱动的上层抽象</span></div>
+            <div class="ann-item" data-ann="③"><span class="ann-num">③</span><span>Zephyr 的 SPI 驱动由 Kconfig 控制。启用后，构建系统自动包含 SPI 核心代码 + 与 Device Tree compatible 匹配的具体驱动</span></div>
+            <div class="ann-item" data-ann="④"><span class="ann-num">④</span><span>Zephyr 内置 LVGL 集成（CONFIG_LVGL），不需要手动移植。LV_Z_VDB_SIZE 控制显示缓冲区占屏幕的百分比</span></div>
+            <div class="ann-item" data-ann="⑤"><span class="ann-num">⑤</span><span>Zephyr 的 sensor API 提供统一的传感器访问接口。无论底层是 I2C 还是 SPI，上层代码都用同一套 API</span></div>
+            <div class="ann-item" data-ann="⑥"><span class="ann-num">⑥</span><span>启用特定传感器驱动。构建系统只编译被启用的驱动，不会把所有驱动都编进去——这比 STM32 HAL 的"全包含"方式节省大量 Flash</span></div>
+            <div class="ann-item" data-ann="⑦"><span class="ann-num">⑦</span><span>Zephyr 内置 BLE 协议栈（基于 Apache NimBLE），不需要像 InfiniTime 那样手动集成。CONFIG_BT_PERIPHERAL 启用外设角色</span></div>
+            <div class="ann-item" data-ann="⑧"><span class="ann-num">⑧</span><span>Zephyr 的电源管理（PM）子系统提供设备级和系统级功耗控制。与 FreeRTOS 需要手动实现 tickless 不同，Zephyr PM 自动处理</span></div>
+            <div class="ann-item" data-ann="⑨"><span class="ann-num">⑨</span><span>应用自定义电源策略：应用可以注册回调决定何时进入低功耗状态，比固定策略更灵活</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sensor API -->
+      <section class="fade-in mb-10">
+        <h2 class="text-xl font-bold text-white mb-4">传感器集成 — Zephyr Sensor API</h2>
+        <p class="text-slate-400 text-sm mb-4">Zephyr 提供了统一的传感器抽象层。不管底层是 I2C 还是 SPI，应用代码都用同一套 API。以下展示 IMU 传感器的使用模式。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">📁 src/sensor_manager.c (简化)</span>
+            <span class="text-xs">传感器采集与手势检测</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">// 获取 Device Tree 中定义的传感器设备
+const struct device *imu =                  <span class="ann-marker" data-note="编译时从 Device Tree 解析">①</span>
+    DEVICE_DT_GET(DT_NODELABEL(bma456));
+
+void sensor_init(void) {
+    if (!device_is_ready(imu)) {            <span class="ann-marker" data-note="检查驱动是否初始化成功">②</span>
+        printk("IMU not ready!\n");
+        return;
+    }
+
+    // 配置加速度计: ±4g, 100Hz 采样
+    struct sensor_value odr = {
+        .val1 = 100,  // Hz
+        .val2 = 0,
+    };
+    sensor_attr_set(imu, SENSOR_CHAN_ACCEL_XYZ,
+        SENSOR_ATTR_SAMPLING_FREQUENCY, &amp;odr);  <span class="ann-marker" data-note="设置采样率">③</span>
+
+    // 注册数据就绪触发器
+    struct sensor_trigger trig = {
+        .type = SENSOR_TRIG_DATA_READY,
+        .chan = SENSOR_CHAN_ACCEL_XYZ,
+    };
+    sensor_trigger_set(imu, &amp;trig,         <span class="ann-marker" data-note="中断触发回调">④</span>
+                       on_imu_data);
+}
+
+void on_imu_data(const struct device *dev,
+                 const struct sensor_trigger *trig) {
+    struct sensor_value accel[3];
+
+    // 从传感器 FIFO 读取最新样本
+    sensor_sample_fetch(dev);               <span class="ann-marker" data-note="触发一次 FIFO 读取">⑤</span>
+
+    // 获取 X/Y/Z 三轴加速度
+    sensor_channel_get(dev,                 <span class="ann-marker" data-note="解析为标准单位 (m/s²)">⑥</span>
+        SENSOR_CHAN_ACCEL_XYZ, accel);
+
+    // 检测抬腕手势 (简单的阈值判断)
+    float mag = sqrt(accel[0].val1 * accel[0].val1 +
+                     accel[1].val1 * accel[1].val1 +
+                     accel[2].val1 * accel[2].val1);
+    if (mag &gt; WAKE_THRESHOLD) {
+        pm_device_state_set(display,        <span class="ann-marker" data-note="唤醒显示屏">⑦</span>
+            PM_DEVICE_STATE_ACTIVE, NULL, NULL);
+    }
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item" data-ann="①"><span class="ann-num">①</span><span><code>DEVICE_DT_GET</code> 宏在编译时展开为设备结构体的引用。不需要运行时查找——设备地址在编译时就确定了。这比 FreeRTOS 的手动初始化安全得多</span></div>
+            <div class="ann-item" data-ann="②"><span class="ann-num">②</span><span>驱动初始化可能失败（I2C 通信错误、传感器未焊接等）。<code>device_is_ready()</code> 检查驱动的初始化标志，确保设备可用</span></div>
+            <div class="ann-item" data-ann="③"><span class="ann-num">③</span><span><code>sensor_attr_set</code> 是通用的传感器配置 API。不同驱动内部会翻译为具体的寄存器写入（如 BMA456 的 0x40 寄存器）</span></div>
+            <div class="ann-item" data-ann="④"><span class="ann-num">④</span><span>触发器模式：传感器数据就绪时，硬件产生中断，Zephyr 在中断上下文中调用此回调。等价于裸机编程中的 EXTI 中断处理</span></div>
+            <div class="ann-item" data-ann="⑤"><span class="ann-num">⑤</span><span><code>sensor_sample_fetch</code> 从传感器的 FIFO 或数据寄存器读取原始值。对于 BMA456，实际执行 I2C 读操作</span></div>
+            <div class="ann-item" data-ann="⑥"><span class="ann-num">⑥</span><span><code>sensor_channel_get</code> 将原始 ADC 值转换为物理单位（m/s²）。sensor_value 结构体用 val1 + val2*10^-6 表示浮点数，避免使用 float</span></div>
+            <div class="ann-item" data-ann="⑦"><span class="ann-num">⑦</span><span>检测到抬腕手势后，通过 Zephyr PM API 将显示设备从低功耗状态切换到活跃状态。PM 子系统自动处理时序和电源轨切换</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Comparison with InfiniTime -->
+      <section class="fade-in mb-10">
+        <h2 class="text-xl font-bold text-white mb-4">对比: Zephyr vs FreeRTOS (InfiniTime)</h2>
+        <div class="bg-dark-800 rounded-xl border border-dark-700 overflow-hidden">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-dark-700 text-slate-300">
+                <th class="text-left p-3">特性</th>
+                <th class="text-left p-3">InfiniTime (FreeRTOS)</th>
+                <th class="text-left p-3">ZSWatch (Zephyr)</th>
+              </tr>
+            </thead>
+            <tbody class="text-slate-400">
+              <tr class="border-t border-dark-700">
+                <td class="p-3 text-slate-300">硬件配置</td>
+                <td class="p-3">C 代码硬编码引脚号</td>
+                <td class="p-3 text-cyan-400">Device Tree 声明式</td>
+              </tr>
+              <tr class="border-t border-dark-700">
+                <td class="p-3 text-slate-300">功能裁剪</td>
+                <td class="p-3">手动 #ifdef</td>
+                <td class="p-3 text-cyan-400">Kconfig 菜单配置</td>
+              </tr>
+              <tr class="border-t border-dark-700">
+                <td class="p-3 text-slate-300">驱动模型</td>
+                <td class="p-3">自定义类封装</td>
+                <td class="p-3 text-cyan-400">统一设备驱动模型</td>
+              </tr>
+              <tr class="border-t border-dark-700">
+                <td class="p-3 text-slate-300">传感器 API</td>
+                <td class="p-3">直接 I2C 读寄存器</td>
+                <td class="p-3 text-cyan-400">sensor_sample_fetch/get</td>
+              </tr>
+              <tr class="border-t border-dark-700">
+                <td class="p-3 text-slate-300">电源管理</td>
+                <td class="p-3">手动 tickless idle</td>
+                <td class="p-3 text-cyan-400">PM 子系统自动管理</td>
+              </tr>
+              <tr class="border-t border-dark-700">
+                <td class="p-3 text-slate-300">BLE</td>
+                <td class="p-3">手动集成 NimBLE</td>
+                <td class="p-3 text-cyan-400">内置协议栈</td>
+              </tr>
+              <tr class="border-t border-dark-700">
+                <td class="p-3 text-slate-300">学习曲线</td>
+                <td class="p-3 text-green-400">低 (代码直观)</td>
+                <td class="p-3 text-yellow-400">高 (需学 DTS/Kconfig)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout-tip mt-4">
+          <p class="font-semibold text-green-400 mb-1">选择建议</p>
+          <p class="text-sm text-slate-300">如果目标是理解底层原理（寄存器、中断、DMA），先读 InfiniTime。如果目标是快速开发产品，Zephyr 的 Device Tree + Kconfig 体系能大幅减少"从零配置外设"的时间。后续的 nRF5340 Audio 项目也使用 Zephyr，届时你会更深入体验这套体系。</p>
+        </div>
+      </section>
+
+      <!-- What You Learned -->
+      <section class="fade-in mb-10">
+        <h2 class="text-xl font-bold text-white mb-4">本节要点</h2>
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700">
+          <ul class="space-y-3 text-slate-300 text-sm">
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">1.</span> Device Tree 是硬件的"声明式配置"：引脚映射、总线参数、设备地址都在 .overlay 文件中定义，不写在 C 代码里</li>
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">2.</span> Kconfig 控制编译选项：只有 CONFIG_X=y 的模块才会被编译进固件，自动裁剪未使用的代码</li>
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">3.</span> Zephyr Sensor API 提供统一接口：<code>sensor_sample_fetch</code> + <code>sensor_channel_get</code>，屏蔽底层差异</li>
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">4.</span> Zephyr PM 子系统自动管理设备电源状态，无需手动实现 tickless idle</li>
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">5.</span> Zephyr 的学习曲线更陡，但在复杂项目中（如双核 BLE Audio）能显著降低工程复杂度</li>
+          </ul>
+        </div>
+      </div><div class="ai-era-sidebar"><div class="ai-note ai-note-collab"><span class="ai-note-badge">架构借鉴</span><h4>Zephyr + nRF 的完整产品架构</h4><p>ZSWatch 是 Zephyr RTOS 在智能手表上的完整实现。如果走 Nordic 生态，这个项目架构就是你的起点。</p></div>
+<div class="ai-note ai-note-auto"><span class="ai-note-badge">了解即可</span><h4>传感器驱动代码可粗读</h4><p>BMA421 等传感器 I2C 驱动是标准样板。理解 Zephyr 传感器 API 框架比阅读具体驱动更有价值。</p></div></div></div></section>
+
+      <!-- Navigation -->
+      <div class="fade-in flex items-center justify-between mt-12 pt-6 border-t border-dark-700">
+        <a href="infinitime.html" class="text-slate-400 hover:text-white text-sm">&larr; InfiniTime</a>
+        <button data-complete-btn="proj-zswatch" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-5 py-2 rounded-lg transition">标记为已完成</button>
+        <a href="libdaisy.html" class="text-blue-400 hover:text-blue-300 text-sm">下一篇: libDaisy &rarr;</a>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-c.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="../js/nav.js"></script>
+  <script src="../js/progress.js"></script>
+  <script src="../js/code-walkthrough.js"></script>
+  <script>mermaid.initialize({ theme: 'dark', themeVariables: { fontSize: '14px' }});</script>
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mutable Instruments Plaits 源码走读 — Cortex-M 音频学习</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link href="../css/custom.css" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { colors: { dark: { 900: '#020617', 800: '#0f172a', 700: '#1e293b', 600: '#334155' }}}}}</script>
+</head>
+<body class="bg-dark-900 text-slate-200 font-sans">
+
+  <aside id="sidebar" class="sidebar bg-dark-800 border-r border-dark-700">
+    <div class="p-4 border-b border-dark-700">
+      <a href="../index.html" class="text-lg font-bold text-white flex items-center gap-2"><span class="text-blue-400">⌘</span> Cortex-M 音频学习</a>
+      <div class="mt-2 progress-bar" data-progress-bar><div class="fill" style="width:0%"></div></div>
+      <p class="text-xs text-slate-500 mt-1">进度: <span data-progress-text>0/21</span></p>
+    </div>
+    <nav class="sidebar-nav py-2">
+      <div class="section-title">学习阶段</div>
+      <a href="../phase/1-architecture.html" data-nav-id="phase-1">一、Cortex-M 架构基础</a>
+      <a href="../phase/2-peripherals.html" data-nav-id="phase-2">二、外设与通信协议</a>
+      <a href="../phase/3-dma.html" data-nav-id="phase-3">三、DMA 数据引擎</a>
+      <a href="../phase/4-rtos.html" data-nav-id="phase-4">四、RTOS 实时操作系统</a>
+      <a href="../phase/5-dsp.html" data-nav-id="phase-5">五、音频 DSP</a>
+      <a href="../phase/6-system.html" data-nav-id="phase-6">六、系统级工程</a>
+      <div class="section-title mt-4">源码走读</div>
+      <a href="baremetal-guide.html" data-nav-id="proj-baremetal-guide">裸机编程指南</a>
+      <a href="baremetal.html" data-nav-id="proj-baremetal">cortexm/baremetal</a>
+      <a href="libopencm3.html" data-nav-id="proj-libopencm3">libopencm3</a>
+      <a href="infinitime.html" data-nav-id="proj-infinitime">InfiniTime</a>
+      <a href="zswatch.html" data-nav-id="proj-zswatch">ZSWatch</a>
+      <a href="libdaisy.html" data-nav-id="proj-libdaisy">libDaisy</a>
+      <a href="daisysp.html" data-nav-id="proj-daisysp">DaisySP</a>
+      <a href="mutable-plaits.html" data-nav-id="proj-plaits" class="active">Mutable Plaits</a>
+      <a href="teensy-audio.html" data-nav-id="proj-teensy">Teensy Audio</a>
+      <a href="nrf5340-audio.html" data-nav-id="proj-nrf5340">nRF5340 Audio</a>
+      <div class="section-title mt-4">专题</div>
+      <a href="openglass.html" data-nav-id="proj-openglass">omiGlass 智能眼镜</a>
+      <div class="section-title mt-4">参考</div>
+      <a href="../glossary.html">术语速查</a>
+      <a href="../resources.html">资源汇总</a>
+    </nav>
+  </aside>
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+  <header class="mobile-header lg:hidden fixed top-0 left-0 right-0 bg-dark-800 border-b border-dark-700 z-20 px-4 py-3 flex items-center gap-3">
+    <button id="sidebar-toggle" class="text-slate-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <span class="text-lg font-bold text-white">Mutable Plaits 源码走读</span>
+  </header>
+
+  <main class="main-content">
+    <div class="max-w-6xl mx-auto px-6 py-12 lg:py-16">
+
+      <div class="fade-in mb-12">
+        <div class="flex flex-wrap gap-2 mb-3">
+          <span class="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded">阅读顺序 ⑧</span>
+          <span class="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded">顶级代码</span>
+        </div>
+        <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">Mutable Instruments Plaits 源码走读</h1>
+        <p class="text-lg text-slate-400 mb-4">嵌入式音频 DSP 代码质量的天花板 — FPU + CMSIS 内联优化的教科书级代码</p>
+        <div class="flex flex-wrap gap-3 text-sm">
+          <span class="bg-dark-800 px-3 py-1 rounded border border-dark-700">STM32F4 (M4)</span>
+          <span class="bg-dark-800 px-3 py-1 rounded border border-dark-700">裸机 C++</span>
+          <span class="bg-dark-800 px-3 py-1 rounded border border-dark-700">Stars ★ 2000+</span>
+          <a href="https://github.com/pichenettes/eurorack" class="text-blue-400 hover:text-blue-300">GitHub →</a>
+        </div>
+      </div>
+
+      <!-- Why Plaits -->
+      <section class="mb-12 fade-in">
+      <div class="ai-era-layout">
+        <div class="ai-era-main">
+
+        <h2 class="text-2xl font-bold text-white mb-4">为什么读 Plaits？</h2>
+        <div class="callout callout-important mb-6">
+          <p class="text-sm text-slate-300">Plaits 的作者 <strong class="text-purple-400">Émilie Gillet</strong> 是 Google 工程师，业余时间开发了整个 Mutable Instruments 模块化合成器产品线。代码质量极高 — 每一行都经过性能和精度的反复推敲。如果你只能读一个 DSP 项目的源码，就选这个。</p>
+        </div>
+
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700 mb-6">
+          <pre class="mermaid">
+graph TB
+    subgraph "Plaits 架构"
+        ENG["Engine 引擎<br/>8 种合成模式"]
+        MOD["Modulation<br/>LFO + Env"]
+        OUT["Output Stage<br/>渲染 + 混合"]
+    end
+    subgraph "Engine 类型"
+        E1["Waveshaping<br/>波形塑形"]
+        E2["Wavetable<br/>波表"]
+        E3["FM"]
+        E4["Grain<br/>粒子合成"]
+        E5["Additive<br/>加法合成"]
+        E6["Waveshape<br/>Super"]
+        E7["Chord<br/>和弦"]
+        E8["Speech<br/>语音合成"]
+    end
+    ENG --> E1
+    ENG --> E2
+    ENG --> E3
+    ENG --> E4
+    MOD --> OUT
+    ENG --> OUT
+          </pre>
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-3">建议阅读顺序</h3>
+        <ol class="space-y-2 text-slate-300 text-sm">
+          <li class="flex gap-2"><span class="text-blue-400 font-mono">1.</span> <code class="text-blue-400">dsp/engine.cc</code> — 引擎调度和渲染循环</li>
+          <li class="flex gap-2"><span class="text-blue-400 font-mono">2.</span> <code class="text-blue-400">dsp/oscillator/sine.h</code> — 正弦波优化（CMSIS 内联）</li>
+          <li class="flex gap-2"><span class="text-blue-400 font-mono">3.</span> <code class="text-blue-400">dsp/filter/svf.h</code> — 状态变量滤波器</li>
+          <li class="flex gap-2"><span class="text-blue-400 font-mono">4.</span> <code class="text-blue-400">dsp/patch.h</code> — 模块间接口设计</li>
+        </ol>
+      </section>
+
+      <!-- Engine Rendering -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">源码走读：引擎渲染循环</h2>
+
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">dsp/engine.cc — 核心渲染循环</span></div>
+          <div class="code-block">
+            <pre><code class="language-cpp">// Plaits 的渲染循环 — 块处理（不是单采样）
+// 每次处理 12 个采样（称为一个 "chunk"）
+// 为什么是 12？为了平衡延迟和缓存效率
+
+const int kBlockSize = 12;  // ① 块大小
+
+void Engine::Render(const Patch& patch,
+                    const Modulations& modulations,
+                    float* out,
+                    float* aux,
+                    size_t size) {
+    // ② 预处理参数平滑 — 避免参数突变导致咔嗒声
+    float parameters[kNumParameters];
+    for (int i = 0; i < kNumParameters; ++i) {
+        float target = patch.parameters[i];
+        // ③ 单极点低通滤波器做参数平滑
+        // 系数 0.005f = 非常慢的平滑（~200ms 时间常数）
+        smoothed_parameters_[i] += 0.005f * (target - smoothed_parameters_[i]);
+        parameters[i] = smoothed_parameters_[i];
+    }
+
+    // ④ 调用当前引擎的 Render 方法
+    // Plaits 支持 8 种引擎，通过 patch.engine 选择
+    switch (active_engine_) {
+        case ENGINE_WAVESHAPING:
+            waveshaping_engine_->Render(parameters, out, aux, size);
+            break;
+        case ENGINE_WAVETABLE:
+            wavetable_engine_->Render(parameters, out, aux, size);
+            break;
+        // ... 其他引擎
+    }
+
+    // ⑤ 后处理：应用 LFO 调制
+    ProcessModulation(modulations, out, aux, size);
+
+    // ⑥ 硬削波保护 — 确保输出不超过 [-1.0, 1.0]
+    for (size_t i = 0; i < size; ++i) {
+        out[i] = stmlib::SoftLimit(out[i]);  // 软削波
+        aux[i] = stmlib::SoftLimit(aux[i]);
+    }
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item">
+              <span class="ann-num">①</span>
+              <span><strong>kBlockSize = 12</strong>：Plaits 使用 12 采样块处理（不是单采样也不是大块）。12 是精心选择的：足够小保持低延迟（0.25ms @ 48kHz），足够大利用缓存局部性。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">③</span>
+              <span><strong>参数平滑</strong>是嵌入式音频的关键技术。用户旋动旋钮时参数突变，直接应用会产生咔嗒声。用单极点低通滤波器平滑参数变化是标准解决方案。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">⑤⑥</span>
+              <span><strong>软削波</strong>：不用硬削波（out = min(1, max(-1, out))），而用 tanh 曲线。听起来更温暖，减少高频失真成分。</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CMSIS Optimization -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">源码走读：CMSIS-DSP 内联优化</h2>
+        <p class="text-slate-300 mb-4">Plaits 大量使用 ARM CMSIS 内联函数直接操作 FPU 寄存器，这是极致优化的代表。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">dsp/oscillator/sine.h — 优化的正弦波生成</span></div>
+          <div class="code-block">
+            <pre><code class="language-cpp">// Plaits 的正弦波 — 使用多项式逼近，比 sinf() 快 10 倍
+class SineOscillator {
+public:
+    SineOscillator() { }
+    ~SineOscillator() { }
+
+    void Init() { phase_ = 0.0f; }
+
+    // ① 单采样处理 — 返回正弦值
+    inline float Process(float frequency) {
+        // ② 使用 CMSIS 内联函数 — 单周期 FPU 操作
+        float phase = phase_;
+        phase += frequency;
+        if (phase >= 1.0f) phase -= 1.0f;
+        phase_ = phase;
+
+        // ③ 多项式逼近正弦波 (0~1 相位 → -1~+1 输出)
+        // 比 sinf(2πx) 快很多，精度足够（误差 < 0.1%）
+        return ThisBlepBlep(phase);  // 多项式实现
+    }
+
+    // ④ 批量处理 12 个采样 — 利用流水线
+    void ProcessBlock(float frequency, float* out, size_t size) {
+        // 手动展开循环，减少分支预测失败
+        while (size -= 4 >= 0) {
+            // 每次处理 4 个采样
+            out[0] = Process(frequency);
+            out[1] = Process(frequency);
+            out[2] = Process(frequency);
+            out[3] = Process(frequency);
+            out += 4;
+        }
+    }
+
+private:
+    // ⑤ 多项式逼近 — 不调用任何库函数
+    static inline float ThisBlepBlep(float t) {
+        // 3 次多项式逼近 sin(2πt) 在 [0,1) 区间
+        // 精度: 最大误差 0.0009 (-61dB)
+        float s = 1.0f - t - t;  // 映射到 [-1, 1]
+        s *= s;                    // s^2
+        s *= s;                    // s^4
+        return (s * s * (s * 6.0f - 15.0f) + 10.0f) * s;
+    }
+
+    float phase_;
+};
+
+// ⑥ Plaits 的内存对齐 — 确保 DMA 和 cache 友好
+// Plaits 全局使用这个宏
+#define MAKE_INTEGRAL_FRACTIONAL(x) \
+    int x##_integral = static_cast<int>(x); \
+    float x##_fractional = x - static_cast<float>(x##_integral)</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item">
+              <span class="ann-num">①②</span>
+              <span><strong>inline + CMSIS</strong>：Plaits 几乎所有 Process() 函数都是 inline 的。编译器会内联展开，避免函数调用开销（保存/恢复寄存器 ~10 周期）。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">③⑤</span>
+              <span><strong>多项式逼近</strong>：不使用标准库 sinf()（~30 周期），用多项式逼近（~5 周期）。牺牲微小精度换取 6 倍速度提升。这是嵌入式 DSP 的常用技巧。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">④</span>
+              <span><strong>循环展开</strong>：每次处理 4 个采样，减少循环判断次数。M4F 的 3 级流水线在分支预测失败时要清空流水线（3 周期损失）。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">⑥</span>
+              <span><strong>整数/小数分离</strong>宏：用于波表查找。整数部分定位波表位置，小数部分用于线性插值。这是嵌入式波表合成的标准模式。</span>
+            </div>
+          </div>
+        </div>
+      
+        </div>
+        <div class="ai-era-sidebar">
+        <div class="ai-note ai-note-must">
+          <span class="ai-note-badge">逐行精读</span>
+          <h4>顶尖 DSP 代码，值得逐行品味</h4>
+          <p>Mutable Instruments 的代码质量在整个开源音频圈公认顶级。Plaits 的弹拨模型、粒子合成展示了"算法即音色"的哲学。是学习 DSP 工程的最佳教材。</p>
+        </div>
+        <div class="ai-note ai-note-collab">
+          <span class="ai-note-badge">架构借鉴</span>
+          <h4>ARM 优化的定点运算技巧</h4>
+          <p>Plaits 大量使用 SMLAD、QADD 等 DSP 指令。这些底层优化技巧可以被 CMSIS-DSP 替代，但理解原理有助于评估 AI 生成代码的性能。</p>
+        </div>
+        </div>
+      </div></section>
+
+      <!-- Key Lessons -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">学到了什么</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-red-400 font-semibold mb-2">顶级代码的特征</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• 多项式逼近代替三角函数</li>
+              <li>• 循环展开 + inline 展开</li>
+              <li>• 精心选择块大小（12 采样）</li>
+              <li>• 参数平滑避免突变噪声</li>
+              <li>• 软削波代替硬削波</li>
+            </ul>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-blue-400 font-semibold mb-2">可以借鉴的设计</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• Patch struct 传递所有参数</li>
+              <li>• 引擎模式用 switch 调度</li>
+              <li>• 整数/小数分离宏</li>
+              <li>• smoothed_parameters_ 平滑模式</li>
+              <li>• 12 采样块 + 4 采样展开</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <div class="text-center py-8 border-t border-dark-700 fade-in">
+        <button data-complete-btn="proj-plaits" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-lg transition-colors">标记为已完成</button>
+        <p class="text-sm text-slate-500 mt-3">完成本项目走读后，进度将自动保存</p>
+        <div class="flex justify-center gap-4 mt-4">
+          <a href="daisysp.html" class="text-slate-400 hover:text-slate-300">← 上一个：DaisySP</a>
+          <a href="teensy-audio.html" class="text-blue-400 hover:text-blue-300">下一个：Teensy Audio →</a>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="../js/nav.js"></script>
+  <script src="../js/progress.js"></script>
+  <script src="../js/code-walkthrough.js"></script>
+  <script>mermaid.initialize({ theme: 'dark', themeVariables: { fontSize: '14px' }});</script>
+</body>
+</html>

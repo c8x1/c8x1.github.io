@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>源码走读 — libopencm3</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <link href="../css/custom.css" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { colors: { dark: { 900: '#020617', 800: '#0f172a', 700: '#1e293b', 600: '#334155' }}}}}</script>
+</head>
+<body class="bg-dark-900 text-slate-200 font-sans">
+
+  <aside id="sidebar" class="sidebar bg-dark-800 border-r border-dark-700">
+    <div class="p-4 border-b border-dark-700">
+      <a href="../index.html" class="text-lg font-bold text-white flex items-center gap-2"><span class="text-blue-400">⌘</span> Cortex-M 音频学习</a>
+      <div class="mt-2 progress-bar" data-progress-bar><div class="fill" style="width:0%"></div></div>
+      <p class="text-xs text-slate-500 mt-1">进度: <span data-progress-text>0/21</span></p>
+    </div>
+    <nav class="sidebar-nav py-2">
+      <div class="section-title">学习阶段</div>
+      <a href="../phase/1-architecture.html" data-nav-id="phase-1">一、Cortex-M 架构基础</a>
+      <a href="../phase/2-peripherals.html" data-nav-id="phase-2">二、外设与通信协议</a>
+      <a href="../phase/3-dma.html" data-nav-id="phase-3">三、DMA 数据引擎</a>
+      <a href="../phase/4-rtos.html" data-nav-id="phase-4">四、RTOS 实时操作系统</a>
+      <a href="../phase/5-dsp.html" data-nav-id="phase-5">五、音频 DSP</a>
+      <a href="../phase/6-system.html" data-nav-id="phase-6">六、系统级工程</a>
+      <div class="section-title mt-4">源码走读</div>
+      <a href="baremetal-guide.html" data-nav-id="proj-baremetal-guide">裸机编程指南</a>
+      <a href="baremetal.html" data-nav-id="proj-baremetal">cortexm/baremetal</a>
+      <a href="libopencm3.html" data-nav-id="proj-libopencm3">libopencm3</a>
+      <a href="infinitime.html" data-nav-id="proj-infinitime">InfiniTime</a>
+      <a href="zswatch.html" data-nav-id="proj-zswatch">ZSWatch</a>
+      <a href="libdaisy.html" data-nav-id="proj-libdaisy">libDaisy</a>
+      <a href="daisysp.html" data-nav-id="proj-daisysp">DaisySP</a>
+      <a href="mutable-plaits.html" data-nav-id="proj-plaits">Mutable Plaits</a>
+      <a href="teensy-audio.html" data-nav-id="proj-teensy">Teensy Audio</a>
+      <a href="nrf5340-audio.html" data-nav-id="proj-nrf5340">nRF5340 Audio</a>
+      <div class="section-title mt-4">专题</div>
+      <a href="openglass.html" data-nav-id="proj-openglass">omiGlass 智能眼镜</a>
+      <div class="section-title mt-4">参考</div>
+      <a href="../glossary.html">术语速查</a>
+      <a href="../resources.html">资源汇总</a>
+    </nav>
+  </aside>
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+  <header class="mobile-header lg:hidden fixed top-0 left-0 right-0 bg-dark-800 border-b border-dark-700 z-20 px-4 py-3 flex items-center gap-3">
+    <button id="sidebar-toggle" class="text-slate-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <span class="text-lg font-bold text-white">Cortex-M 音频学习</span>
+  </header>
+
+  <main class="main-content">
+    <div class="max-w-6xl mx-auto px-6 py-12 lg:py-16">
+
+      <!-- Project Overview Card -->
+      <div class="fade-in mb-10">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="text-xs font-mono bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded">阅读顺序 ③</span>
+          <span class="text-xs font-mono bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded">寄存器级</span>
+        </div>
+        <h1 class="text-3xl lg:text-4xl font-bold text-white mb-3">libopencm3</h1>
+        <p class="text-slate-400 mb-4">从零编写的开源固件库 — 完全基于厂商数据手册的寄存器级操作，让你真正理解硬件</p>
+        <div class="flex flex-wrap gap-4 text-sm mb-4">
+          <a href="https://github.com/libopencm3/libopencm3" target="_blank" class="text-blue-400 hover:underline">GitHub: libopencm3/libopencm3</a>
+          <span class="text-slate-600">|</span>
+          <span class="text-yellow-400">★ 2500</span>
+          <span class="text-slate-600">|</span>
+          <span class="text-slate-500">多厂商 (STM32/NRF/LPC/LM4F...)</span>
+          <span class="text-slate-600">|</span>
+          <span class="text-slate-500">LGPL v3</span>
+        </div>
+        <div class="callout callout-info">
+          <p class="font-semibold text-blue-400 mb-1">为什么读 libopencm3？</p>
+          <p class="text-sm text-slate-300">STM32 HAL 是黑盒——调用 HAL_GPIO_WritePin() 但不知道它做了什么。libopencm3 打开了这个黑盒，每一行代码都对应参考手册的某个寄存器描述。对于音频开发，理解寄存器级操作是配置 I2S/SAI 外设的基础。</p>
+        </div>
+      </div>
+
+      <!-- GPIO Driver -->
+      <section class="fade-in mb-10">
+<div class="ai-era-layout"><div class="ai-era-main">
+        <h2 class="text-xl font-bold text-white mb-4">GPIO 驱动 — 寄存器操作的本质</h2>
+        <p class="text-slate-400 text-sm mb-4">GPIO 是最基础的外设。libopencm3 的 GPIO 驱动展示了如何直接操作寄存器来控制引脚。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">📁 lib/opencm3/stm32/gpio.c (简化)</span>
+            <span class="text-xs">GPIO 模式设置</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">void gpio_set_mode(uint32_t gpioport, uint8_t mode, uint8_t cnf,
+                   uint16_t gpios) {                  <span class="ann-marker" data-note="GPIO 端口 + 模式 + 配置 + 引脚掩码">①</span>
+    uint32_t crl = 0, crh = 0;
+    uint32_t shift, mask;
+    uint32_t moder = GPIO_CRL(gpioport);    <span class="ann-marker" data-note="读取 CRL 寄存器当前值">②</span>
+
+    // 遍历每个引脚位
+    for (shift = 0; shift &lt; 16; shift++) {
+        if (gpios & (1 &lt;&lt; shift)) {          <span class="ann-marker" data-note="检查此位是否在掩码中">③</span>
+            mask = (0xF &lt;&lt; (shift * 4));       <span class="ann-marker" data-note="每引脚占 4 位">④</span>
+            moder &= ~mask;                   // 先清零对应位
+            moder |= (mode &lt;&lt; (shift * 4 + 0));  <span class="ann-marker" data-note="写入 MODE 位">⑤</span>
+            moder |= (cnf  &lt;&lt; (shift * 4 + 2));  <span class="ann-marker" data-note="写入 CNF 位">⑥</span>
+        }
+    }
+
+    GPIO_CRL(gpioport) = moder;             <span class="ann-marker" data-note="写回 CRL 寄存器 (pin 0-7)">⑦</span>
+    // CRH 处理 pin 8-15, 逻辑类似...
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item" data-ann="①"><span class="ann-num">①</span><span>STM32F1 的 GPIO 配置需要四个参数：端口（GPIOA/B/C...）、模式（输入/输出/复用/模拟）、配置（推挽/开漏/上拉等）、引脚位掩码（哪几个引脚）</span></div>
+            <div class="ann-item" data-ann="②"><span class="ann-num">②</span><span><code>GPIO_CRL</code> 是端口配置低寄存器（Configuration Register Low），控制 pin 0-7。对应的 CRH 控制 pin 8-15。先读后改（read-modify-write）</span></div>
+            <div class="ann-item" data-ann="③"><span class="ann-num">③</span><span><code>gpios</code> 是位掩码，如 <code>GPIO5 | GPIO6</code> = <code>(1&lt;&lt;5) | (1&lt;&lt;6)</code>。通过遍历 16 位来检查每个引脚</span></div>
+            <div class="ann-item" data-ann="④"><span class="ann-num">④</span><span>STM32F1 每个引脚占 CRL/CRH 中的 4 位（2 位 MODE + 2 位 CNF），所以掩码是 <code>0xF &lt;&lt; (pin*4)</code></span></div>
+            <div class="ann-item" data-ann="⑤"><span class="ann-num">⑤</span><span>MODE[1:0] 控制输出速度（如 2MHz/10MHz/50MHz）或输入模式。对应参考手册 "GPIO port configuration register"</span></div>
+            <div class="ann-item" data-ann="⑥"><span class="ann-num">⑥</span><span>CNF[1:0] 控制具体配置（推挽/开漏/复用推挽/复用开漏/浮空输入/上拉下拉）。音频中的 I2S 引脚需要设为复用模式</span></div>
+            <div class="ann-item" data-ann="⑦"><span class="ann-num">⑦</span><span>将配置写回 CRL 寄存器。这是一次 32 位写操作，同时配置了 pin 0-7 的所有引脚</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- GPIO Atomic Operations -->
+      <section class="fade-in mb-10">
+        <h3 class="text-lg font-bold text-white mb-3">原子操作: BSRR vs ODR</h3>
+        <p class="text-slate-400 text-sm mb-4">这是 libopencm3 最值得学习的技巧。设置 GPIO 有两种方式，理解差异对音频开发至关重要。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">📁 lib/opencm3/stm32/gpio.c</span>
+            <span class="text-xs">原子位操作</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">// 方式 1: 通过 ODR 寄存器 — 非原子操作!
+void gpio_set_odr(uint32_t gpioport, uint16_t gpios) {
+    GPIO_ODR(gpioport) |= gpios;           <span class="ann-marker" data-note="读-改-写: 可能被中断打断">①</span>
+}
+
+// 方式 2: 通过 BSRR 寄存器 — 原子操作 (libopencm3 采用)
+void gpio_set(uint32_t gpioport, uint16_t gpios) {
+    GPIO_BSRR(gpioport) = gpios;           <span class="ann-marker" data-note="写 1 置位, 单次 32 位写">②</span>
+}
+
+void gpio_clear(uint32_t gpioport, uint16_t gpios) {
+    GPIO_BSRR(gpioport) = (gpios &lt;&lt; 16);  <span class="ann-marker" data-note="高 16 位写 1 清零">③</span>
+}
+
+// 切换引脚 — 音频 codec 的复位信号经常需要这种操作
+void toggle_codec_reset(void) {
+    gpio_clear(GPIOB, GPIO5);              // RESET = LOW → codec 复位
+    for (volatile int i = 0; i &lt; 1000; i++);  <span class="ann-marker" data-note="等待复位完成">④</span>
+    gpio_set(GPIOB, GPIO5);                // RESET = HIGH → codec 启动
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item" data-ann="①"><span class="ann-num">①</span><span><code>ODR |= gpios</code> 看似一行，实际是三步：读 ODR → 修改位 → 写回 ODR。如果中断在这三步之间打断了，中断中修改的 ODR 值会被覆盖（丢失更新）</span></div>
+            <div class="ann-item" data-ann="②"><span class="ann-num">②</span><span>BSRR（Bit Set/Reset Register）是硬件支持的原子操作。写入低 16 位的 1 会设置对应位，写入 0 无效。不需要读-改-写，天然原子</span></div>
+            <div class="ann-item" data-ann="③"><span class="ann-num">③</span><span>BSRR 高 16 位用于清零：写入 (gpios &lt;&lt; 16) 即可清除对应引脚。一个寄存器同时支持置位和清零，不需要关中断</span></div>
+            <div class="ann-item" data-ann="④"><span class="ann-num">④</span><span>音频 codec（如 WM8994/CS43L22）的复位信号需要保持 LOW 一段时间。volatile 防止编译器优化掉空循环</span></div>
+          </div>
+        </div>
+
+        <div class="callout callout-important mt-4">
+          <p class="font-semibold text-purple-400 mb-1">关键概念: BSRR 在音频中的意义</p>
+          <p class="text-sm text-slate-300">音频系统中，GPIO 操作经常在中断上下文中执行（如 DMA 半传输完成中断中切换缓冲区标志）。如果用 ODR 做读-改-写，可能出现竞态条件。BSRR 的原子特性保证了正确性。后续的 libDaisy 项目也会使用这个模式。</p>
+        </div>
+      </section>
+
+      <!-- SPI Driver -->
+      <section class="fade-in mb-10">
+        <h2 class="text-xl font-bold text-white mb-4">SPI 驱动 — 通信协议的寄存器实现</h2>
+        <p class="text-slate-400 text-sm mb-4">SPI 是音频 codec 控制（配置寄存器）和显示屏通信的常用协议。libopencm3 的 SPI 驱动展示了如何从零配置 SPI 外设。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">📁 lib/opencm3/stm32/spi.c (简化)</span>
+            <span class="text-xs">SPI 初始化与传输</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">void spi_init(uint32_t spi) {
+    // 1. 使能 SPI 时钟
+    if (spi == SPI1)
+        RCC_APB2ENR |= RCC_APB2ENR_SPI1EN; <span class="ann-marker" data-note="使能 APB2 总线上的 SPI1 时钟">①</span>
+    else if (spi == SPI2)
+        RCC_APB1ENR |= RCC_APB1ENR_SPI2EN; <span class="ann-marker" data-note="SPI2 在 APB1 总线上">②</span>
+
+    // 2. 配置 SPI CR1 寄存器
+    SPI_CR1(spi) = SPI_CR1_BAUDRATE_VAL(3) <span class="ann-marker" data-note="时钟分频: APB/16">③</span>
+                 | SPI_CR1_MSTR             <span class="ann-marker" data-note="主机模式">④</span>
+                 | SPI_CR1_SPE              <span class="ann-marker" data-note="使能 SPI">⑤</span>
+                 | SPI_CR1_SSM | SPI_CR1_SSI;<span class="ann-marker" data-note="软件 NSS 管理">⑥</span>
+}
+
+// 发送并接收一个字节 (全双工)
+uint16_t spi_transfer(uint32_t spi, uint16_t data) {
+    // 等待发送缓冲区空
+    while (!(SPI_SR(spi) & SPI_SR_TXE))    <span class="ann-marker" data-note="TXE=1 表示可以写入新数据">⑦</span>
+        ;
+
+    // 写入数据寄存器
+    SPI_DR(spi) = data;                    <span class="ann-marker" data-note="写入 DR 触发实际发送">⑧</span>
+
+    // 等待接收缓冲区非空
+    while (!(SPI_SR(spi) & SPI_SR_RXNE))   <span class="ann-marker" data-note="RXNE=1 表示收到数据">⑨</span>
+        ;
+
+    // 读取接收到的数据 (读取 DR 同时清除 RXNE 标志)
+    return SPI_DR(spi);                    <span class="ann-marker" data-note="读 DR 获取从设备返回数据">⑩</span>
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item" data-ann="①"><span class="ann-num">①</span><span>STM32 的所有外设都挂在不同总线上（APB1/APB2/AHB）。使用前必须先使能对应时钟，否则寄存器读写无效。SPI1 在 APB2（高速总线）</span></div>
+            <div class="ann-item" data-ann="②"><span class="ann-num">②</span><span>SPI2/SPI3 在 APB1（低速总线，最大 42MHz on STM32F4）。音频 codec 的 SPI 控制接口通常速度要求不高，用 SPI2 即可</span></div>
+            <div class="ann-item" data-ann="③"><span class="ann-num">③</span><span>BR[2:0] = 3 表示 FPCLK/16。如果 APB2 = 84MHz，则 SPI 时钟 = 5.25MHz。音频 codec 的 SPI 控制口通常支持到 20MHz</span></div>
+            <div class="ann-item" data-ann="④"><span class="ann-num">④</span><span>MSTR 位设为主机模式。STM32 作为 SPI master 控制 codec 的寄存器（音量、采样率、输入选择等）</span></div>
+            <div class="ann-item" data-ann="⑤"><span class="ann-num">⑤</span><span>SPE（SPI Enable）是总开关。必须在所有配置完成后再置位，否则可能以错误配置运行</span></div>
+            <div class="ann-item" data-ann="⑥"><span class="ann-num">⑥</span><span>SSM（Software Slave Management）+ SSI = 1，让 NSS 信号始终为高，避免因 NSS 电平变化意外退出主机模式</span></div>
+            <div class="ann-item" data-ann="⑦"><span class="ann-num">⑦</span><span>TXE（Transmit Buffer Empty）为 1 时表示可以写入新数据。忙等待（busy-wait）是裸机编程的典型模式</span></div>
+            <div class="ann-item" data-ann="⑧"><span class="ann-num">⑧</span><span>写入 DR（Data Register）会触发 SPI 硬件开始串行发送。16 位数据会分两次发送（8-bit 帧）</span></div>
+            <div class="ann-item" data-ann="⑨"><span class="ann-num">⑨</span><span>全双工 SPI：发送的同时也在接收。RXNE=1 表示从设备返回的数据已就绪</span></div>
+            <div class="ann-item" data-ann="⑩"><span class="ann-num">⑩</span><span>读取 DR 会同时清除 RXNE 标志。这是"读即清除"（read-to-clear）模式，在 Cortex-M 外设中非常常见</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Comparison with HAL -->
+      <section class="fade-in mb-10">
+        <h2 class="text-xl font-bold text-white mb-4">对比: libopencm3 vs STM32 HAL</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-sm font-bold text-blue-400 mb-2">libopencm3</h3>
+            <pre class="text-xs"><code class="language-c">gpio_set(GPIOA, GPIO5);
+gpio_clear(GPIOA, GPIO5);
+spi_transfer(SPI2, 0x1A);</code></pre>
+            <p class="text-xs text-slate-400 mt-2">1 行 = 1 次寄存器写入<br>可预测，无隐藏开销</p>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-sm font-bold text-yellow-400 mb-2">STM32 HAL</h3>
+            <pre class="text-xs"><code class="language-c">HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5,
+    GPIO_PIN_SET);
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5,
+    GPIO_PIN_RESET);
+HAL_SPI_TransmitReceive(&amp;hspi2,
+    &amp;tx, &amp;rx, 1, 100);</code></pre>
+            <p class="text-xs text-slate-400 mt-2">多层封装 + 超时检查 + 错误码<br>安全但难以预测时序</p>
+          </div>
+        </div>
+        <div class="callout callout-warning mt-4">
+          <p class="font-semibold text-yellow-400 mb-1">实际选择建议</p>
+          <p class="text-sm text-slate-300">理解 libopencm3 的原理后，实际项目可以用 HAL 加速开发。但遇到问题时，你需要能看懂寄存器级的操作。音频驱动的 DMA/SAI 配置尤其如此——HAL 的抽象层经常隐藏关键细节。</p>
+        </div>
+      </section>
+
+      <!-- What You Learned -->
+      <section class="fade-in mb-10">
+        <h2 class="text-xl font-bold text-white mb-4">本节要点</h2>
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700">
+          <ul class="space-y-3 text-slate-300 text-sm">
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">1.</span> GPIO 模式配置本质是写 CRL/CRH 寄存器（F1 系列）或 MODER 寄存器（F4 系列），每引脚占 2-4 位</li>
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">2.</span> BSRR 寄存器提供原子位操作：低 16 位置位，高 16 位清零。在音频中断处理中应优先使用</li>
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">3.</span> SPI 初始化三步：使能时钟 → 配置 CR1 → 使能 SPE。发送/接收通过 DR 寄存器 + 状态轮询</li>
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">4.</span> 外设使用前必须使能对应总线时钟，否则寄存器读写无效（这是初学者最常犯的错误之一）</li>
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">5.</span> libopencm3 是连接"数据手册描述"和"实际代码"的桥梁，读它等于同时在读参考手册</li>
+          </ul>
+        </div>
+      </div><div class="ai-era-sidebar"><div class="ai-note ai-note-collab"><span class="ai-note-badge">架构借鉴</span><h4>跨芯片 HAL 的抽象层次</h4><p>libopencm3 展示了如何抽象不同芯片的外设差异。这种分层思想今天依然适用。</p></div>
+<div class="ai-note ai-note-auto"><span class="ai-note-badge">了解即可</span><h4>API 层已可由 AI 平替</h4><p>rcc_periph_clock_enable() 等 API 今天可以用 AI 直接生成寄存器级代码替代。学习价值在架构思想。</p></div></div></div></section>
+
+      <!-- Navigation -->
+      <div class="fade-in flex items-center justify-between mt-12 pt-6 border-t border-dark-700">
+        <a href="baremetal.html" class="text-slate-400 hover:text-white text-sm">&larr; cortexm/baremetal</a>
+        <button data-complete-btn="proj-libopencm3" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-5 py-2 rounded-lg transition">标记为已完成</button>
+        <a href="infinitime.html" class="text-blue-400 hover:text-blue-300 text-sm">下一篇: InfiniTime &rarr;</a>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-c.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="../js/nav.js"></script>
+  <script src="../js/progress.js"></script>
+  <script src="../js/code-walkthrough.js"></script>
+  <script>mermaid.initialize({ theme: 'dark', themeVariables: { fontSize: '14px' }});</script>
+</body>
+</html>

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>阶段五：音频 DSP — Cortex-M 音频学习</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+  <link href="../css/custom.css" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { colors: { dark: { 900: '#020617', 800: '#0f172a', 700: '#1e293b', 600: '#334155' }}}}}</script>
+</head>
+<body class="bg-dark-900 text-slate-200 font-sans">
+
+  <aside id="sidebar" class="sidebar bg-dark-800 border-r border-dark-700">
+    <div class="p-4 border-b border-dark-700">
+      <a href="../index.html" class="text-lg font-bold text-white flex items-center gap-2">
+        <span class="text-blue-400">⌘</span> Cortex-M 音频学习
+      </a>
+      <div class="mt-2 progress-bar" data-progress-bar><div class="fill" style="width:0%"></div></div>
+      <p class="text-xs text-slate-500 mt-1">进度: <span data-progress-text>0/21</span></p>
+    </div>
+    <nav class="sidebar-nav py-2">
+      <div class="section-title">学习阶段</div>
+      <a href="1-architecture.html" data-nav-id="phase-1">一、Cortex-M 架构基础</a>
+      <a href="2-peripherals.html" data-nav-id="phase-2">二、外设与通信协议</a>
+      <a href="3-dma.html" data-nav-id="phase-3">三、DMA 数据引擎</a>
+      <a href="4-rtos.html" data-nav-id="phase-4">四、RTOS 实时操作系统</a>
+      <a href="5-dsp.html" data-nav-id="phase-5" class="active">五、音频 DSP</a>
+      <a href="6-system.html" data-nav-id="phase-6">六、系统级工程</a>
+      <div class="section-title mt-4">源码走读</div>
+      <a href="../projects/baremetal-guide.html" data-nav-id="proj-baremetal-guide">裸机编程指南</a>
+      <a href="../projects/baremetal.html" data-nav-id="proj-baremetal">cortexm/baremetal</a>
+      <a href="../projects/libopencm3.html" data-nav-id="proj-libopencm3">libopencm3</a>
+      <a href="../projects/infinitime.html" data-nav-id="proj-infinitime">InfiniTime</a>
+      <a href="../projects/zswatch.html" data-nav-id="proj-zswatch">ZSWatch</a>
+      <a href="../projects/libdaisy.html" data-nav-id="proj-libdaisy">libDaisy</a>
+      <a href="../projects/daisysp.html" data-nav-id="proj-daisysp">DaisySP</a>
+      <a href="../projects/mutable-plaits.html" data-nav-id="proj-plaits">Mutable Plaits</a>
+      <a href="../projects/teensy-audio.html" data-nav-id="proj-teensy">Teensy Audio</a>
+      <a href="../projects/nrf5340-audio.html" data-nav-id="proj-nrf5340">nRF5340 Audio</a>
+      <div class="section-title mt-4">专题</div>
+      <a href="../projects/openglass.html" data-nav-id="proj-openglass">omiGlass 智能眼镜</a>
+      <div class="section-title mt-4">参考</div>
+      <a href="../glossary.html">术语速查</a>
+      <a href="../resources.html">资源汇总</a>
+    </nav>
+  </aside>
+
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+  <header class="mobile-header lg:hidden fixed top-0 left-0 right-0 bg-dark-800 border-b border-dark-700 z-20 px-4 py-3 flex items-center gap-3">
+    <button id="sidebar-toggle" class="text-slate-400 hover:text-white">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <span class="text-lg font-bold text-white">阶段五：音频 DSP</span>
+  </header>
+
+  <main class="main-content">
+    <div class="max-w-6xl mx-auto px-6 py-12 lg:py-16">
+
+      <div class="fade-in mb-12">
+        <span class="text-xs font-mono bg-blue-500/20 text-blue-400 px-2 py-1 rounded">阶段五 · 3-4 周</span>
+        <h1 class="text-3xl lg:text-4xl font-bold text-white mt-3 mb-4">音频 DSP</h1>
+        <p class="text-lg text-slate-400">在 Cortex-M 上实现音频信号处理。使用 CMSIS-DSP 库进行 EQ、压缩、滤波等操作。理解定点/浮点优化。</p>
+      </div>
+
+      <!-- 5.1 CMSIS-DSP -->
+      <section class="mb-12 fade-in">
+        <div class="ai-era-layout">
+          <div class="ai-era-main">
+            <h2 class="text-2xl font-bold text-white mb-4">5.1 CMSIS-DSP — ARM 官方 DSP 库</h2>
+            <p class="text-slate-300 mb-4">CMSIS-DSP 是 ARM 提供的免费 DSP 库，针对 Cortex-M 的 FPU 和 SIMD 指令做了汇编级优化。这是嵌入式音频处理的标准工具。</p>
+
+            <div class="overflow-x-auto mb-6">
+              <table class="w-full text-sm border-collapse">
+                <thead>
+                  <tr class="border-b border-dark-700 text-left">
+                    <th class="p-3 text-slate-400 font-medium">功能类别</th>
+                    <th class="p-3 text-slate-400 font-medium">常用函数</th>
+                    <th class="p-3 text-slate-400 font-medium">音频应用</th>
+                  </tr>
+                </thead>
+                <tbody class="text-slate-300">
+                  <tr class="border-b border-dark-700/50"><td class="p-3 text-blue-400">滤波器</td><td class="p-3 font-mono text-xs">arm_biquad_cascade_df1_f32<br/>arm_fir_f32</td><td class="p-3">EQ、分频、低通/高通</td></tr>
+                  <tr class="border-b border-dark-700/50"><td class="p-3 text-blue-400">FFT</td><td class="p-3 font-mono text-xs">arm_rfft_fast_f32<br/>arm_cfft_f32</td><td class="p-3">频谱分析、频率域处理</td></tr>
+                  <tr class="border-b border-dark-700/50"><td class="p-3 text-blue-400">数学</td><td class="p-3 font-mono text-xs">arm_mult_f32<br/>arm_scale_f32</td><td class="p-3">增益、混音、向量运算</td></tr>
+                  <tr class="border-b border-dark-700/50"><td class="p-3 text-blue-400">统计</td><td class="p-3 font-mono text-xs">arm_rms_f32<br/>arm_power_f32</td><td class="p-3">RMS 电平、VU 表</td></tr>
+                  <tr><td class="p-3 text-blue-400">矩阵</td><td class="p-3 font-mono text-xs">arm_mat_mult_f32</td><td class="p-3">波束成形、空间音频</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="ai-era-sidebar">
+            <div class="ai-note ai-note-collab">
+              <span class="ai-note-badge">人机协作</span>
+              <h4>你指定处理链 AI 生成完整代码</h4>
+              <p>"3-band parametric EQ + compressor + float32，256 samples per block"——描述清楚后 AI 能生成完整的初始化、状态分配、per-block 处理代码。你的音频知识 × AI 的 API 熟练度 = 几分钟出可用的 DSP 代码。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5.2 Biquad EQ -->
+      <section class="mb-12 fade-in">
+        <div class="ai-era-layout">
+          <div class="ai-era-main">
+            <h2 class="text-2xl font-bold text-white mb-4">5.2 Biquad 滤波器 — 音频 EQ 的基础</h2>
+            <p class="text-slate-300 mb-4">Biquad（双二阶）滤波器是音频 EQ 的基本单元。每个频段的 EQ 就是一个 Biquad 滤波器。多个级联 = 多段 EQ。</p>
+
+            <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">audio_eq.c — 3 段参数 EQ 实现</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">#include "arm_math.h"
+
+// Biquad 滤波器状态和实例
+#define NUM_EQ_BANDS 3  // 低频、中频、高频
+
+static float32_t eq_state[NUM_EQ_BANDS * 4];  // 每个 biquad 需要 4 个状态变量
+static arm_biquad_casd_df1_inst_f32 eq_instance;
+
+// ① 计算 Biquad 系数（根据滤波器类型和参数）
+void calc_biquad_coeff(float *coeffs, float freq, float Q, float gain_db, int type) {
+    float A = powf(10.0f, gain_db / 40.0f);  // 增益转换为线性
+    float w0 = 2.0f * PI * freq / SAMPLE_RATE;
+    float alpha = sinf(w0) / (2.0f * Q);
+    float cosw0 = cosf(w0);
+
+    switch (type) {
+        case EQ_PEAKING:  // 峰值 EQ（最常用）
+            coeffs[0] = 1.0f + alpha * A;       // b0
+            coeffs[1] = -2.0f * cosw0;           // b1
+            coeffs[2] = 1.0f - alpha * A;        // b2
+            coeffs[3] = -2.0f * cosw0;           // a1 (注意符号)
+            coeffs[4] = 1.0f + alpha / A;        // a2
+            break;
+        case EQ_LOWSHELF:  // 低频搁架
+            // ... 类似公式，不同的系数计算
+            break;
+    }
+    // 归一化：所有系数除以 a0
+    float a0 = 1.0f + alpha / A;
+    for (int i = 0; i < 5; i++) coeffs[i] /= a0;
+}
+
+// ② 初始化 3 段 EQ
+void eq_init(void) {
+    float32_t coeffs[NUM_EQ_BANDS * 5];  // 每个 biquad 5 个系数
+
+    // 低频段：200Hz, Q=1.0, +3dB
+    calc_biquad_coeff(&coeffs[0], 200.0f, 1.0f, 3.0f, EQ_PEAKING);
+    // 中频段：1000Hz, Q=1.5, -2dB
+    calc_biquad_coeff(&coeffs[5], 1000.0f, 1.5f, -2.0f, EQ_PEAKING);
+    // 高频段：5000Hz, Q=1.0, +4dB
+    calc_biquad_coeff(&coeffs[10], 5000.0f, 1.0f, 4.0f, EQ_PEAKING);
+
+    arm_biquad_cascade_df1_init_f32(&eq_instance,
+        NUM_EQ_BANDS, coeffs, eq_state);
+}
+
+// ③ 在音频回调中使用 EQ
+void eq_process(float32_t *in, float32_t *out, uint32_t block_size) {
+    // CMSIS-DSP 优化过的 Biquad 级联滤波
+    // 利用 FPU 的 SIMD 指令，比手写 C 快 3-5 倍
+    arm_biquad_cascade_df1_f32(&eq_instance, in, out, block_size);
+}
+
+// ④ 完整的音频处理链
+void audio_callback(int16_t *in, int16_t *out, uint32_t size) {
+    float32_t float_in[256], float_out[256];
+
+    // Q15 → float
+    arm_q15_to_float(in, float_in, size);
+
+    // EQ 处理
+    eq_process(float_in, float_out, size);
+
+    // float → Q15
+    arm_float_to_q15(float_out, out, size);
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item">
+              <span class="ann-num">①</span>
+              <span><strong>Biquad 系数计算</strong>是 EQ 的核心数学。Audio EQ Cookbook（Robert Bristow-Johnson）是经典参考。不同类型（峰值、低架、高架、带通）有不同公式。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">②</span>
+              <span><strong>级联（Cascade）</strong>：3 段 EQ = 3 个 Biquad 串联。CMSIS-DSP 的 cascade 函数一次性处理所有级，比单独调用 3 次更高效。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">③</span>
+              <span><strong>FPU 加速</strong>：arm_biquad_cascade_df1_f32 在 M4F 上用硬件 FPU，每秒可处理数百万采样。256 samples 的 Biquad 处理只需 ~20μs。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">④</span>
+              <span><strong>数据格式转换</strong>：Codec 输出 int16（Q15），DSP 用 float32。这是标准做法 — float 运算在现代 Cortex-M 上比定点更快（有 FPU）。</span>
+            </div>
+          </div>
+        </div>
+          </div>
+          <div class="ai-era-sidebar">
+            <div class="ai-note ai-note-must">
+              <span class="ai-note-badge">不可替代</span>
+              <h4>EQ 类型 + Q 值的听觉判断是纯领域知识</h4>
+              <p>Peaking、Low-shelf、High-shelf、Bandpass——这些不是代码概念，是音频工程数十年的积累。Q=0.707 是 Butterworth 平坦响应，Q>1 会产生谐振峰。AI 能生成系数计算代码，但如果你分不清滤波器类型，EQ 不会对。</p>
+            </div>
+            <div class="ai-note ai-note-collab">
+              <span class="ai-note-badge">人机协作</span>
+              <h4>你描述滤波器规格 AI 生成系数</h4>
+              <p>"Peaking EQ, center 1kHz, Q=1.0, gain +3dB at 48kHz"——AI 从 Audio EQ Cookbook 公式生成 a0-a2, b0-b2 系数。你提供音频规格，AI 做数学计算。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">5.3 动态范围压缩（DRC）</h2>
+
+        <div class="ai-era-layout">
+          <div class="ai-era-main">        <p class="text-slate-300 mb-4">DRC 用于自动控制音量 — 声音太大时压低，太小时提升。助听器、TWS 耳机、智能眼镜都用得到。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">drc.c — 简单的动态范围压缩器</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">typedef struct {
+    float threshold;    // 阈值 (dB) — 超过这个开始压缩
+    float ratio;        // 压缩比 — 4:1 表示超过阈值的部分缩小到 1/4
+    float attack;       // 启动时间 (s) — 检测到超阈值后多快开始压缩
+    float release;      // 释放时间 (s) — 信号回到阈值下后多快停止压缩
+    float envelope;     // 当前包络值（内部状态）
+} compressor_t;
+
+float compressor_process(compressor_t *c, float input) {
+    // ① 计算输入信号电平（dB）
+    float input_level = 20.0f * log10f(fabsf(input) + 1e-10f);
+
+    // ② 计算目标增益
+    float gain_db = 0.0f;
+    if (input_level > c->threshold) {
+        // 超过阈值的部分按比例压缩
+        float excess = input_level - c->threshold;
+        gain_db = -excess * (1.0f - 1.0f / c->ratio);
+    }
+
+    // ③ 平滑增益变化（attack/release 包络跟随）
+    float coeff;
+    if (gain_db < c->envelope) {
+        // 信号在增大 → 使用 attack 系数（快速响应）
+        coeff = expf(-1.0f / (c->attack * SAMPLE_RATE));
+    } else {
+        // 信号在减小 → 使用 release 系数（慢速释放）
+        coeff = expf(-1.0f / (c->release * SAMPLE_RATE));
+    }
+    c->envelope = gain_db + coeff * (c->envelope - gain_db);
+
+    // ④ 应用增益
+    float gain_linear = powf(10.0f, c->envelope / 20.0f);
+    return input * gain_linear;
+}
+
+// 典型配置：语音处理
+compressor_t voice_compressor = {
+    .threshold = -20.0f,   // -20dB 以下不压缩
+    .ratio = 4.0f,         // 4:1 压缩比
+    .attack = 0.005f,      // 5ms 启动
+    .release = 0.050f,     // 50ms 释放
+    .envelope = 0.0f,
+};</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item">
+              <span class="ann-num">①②</span>
+              <span><strong>增益计算</strong>：输入在阈值以下不压缩；超过阈值的部分除以压缩比。4:1 意味着超过 20dB 的信号被压到 5dB。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">③</span>
+              <span><strong>Attack/Release</strong> 是关键。Attack 太快会失真（"泵浦"效应），太慢会漏掉瞬态。5ms attack + 50ms release 是语音处理的经典参数。</span>
+            </div>
+          </div>
+        </div>
+          </div>
+          <div class="ai-era-sidebar">
+            <div class="ai-note ai-note-must">
+              <span class="ai-note-badge">不可替代</span>
+              <h4>Attack/Release 来自心理声学</h4>
+              <p>5ms attack + 50ms release 是语音处理的经典参数——但这不是代码知识，是几十年的听觉工程积累。Attack 太快 = 泵浦效应失真，Release 太快 = 呼吸感。AI 能生成压缩器代码，但无法替你判断"这个声音压得对不对"。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5.4 ANC Basics -->
+      <section class="mb-12 fade-in">
+
+        <div class="ai-era-layout">
+          <div class="ai-era-main">        <h2 class="text-2xl font-bold text-white mb-4">5.4 主动降噪（ANC）基础</h2>
+        <p class="text-slate-300 mb-4">ANC 是智能音频设备的核心技术。原理：用参考麦克风采集环境噪声，生成反相信号叠加到输出，实现降噪。Feedforward ANC 是最简单的入门方案。</p>
+
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700 mb-6">
+          <pre class="mermaid">
+graph LR
+    NOISE["环境噪声"] --> REF["参考麦克风<br/>(Feedforward)"]
+    REF -->|"x(n)"| ADAPT["自适应滤波器<br/>LMS/NLMS"]
+    ADAPT -->|"反相噪声<br/>-y(n)"| SUM["Σ 求和"]
+    NOISE -->|"泄漏噪声<br/>d(n)"| ERR["误差麦克风"]
+    ERR -->|"e(n)"| ADAPT
+    SUM --> SPK["扬声器"]
+    ADAPT -.->|"更新滤波器系数<br/>W(n+1) = W(n) + μ·e(n)·X(n)"| ADAPT
+          </pre>
+        </div>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">anc_lms.c — NLMS 自适应滤波器（简化版）</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">#define FILTER_LEN 64  // 自适应滤波器长度
+
+typedef struct {
+    float w[FILTER_LEN];      // 滤波器系数（权重）
+    float x_buf[FILTER_LEN];  // 参考信号缓冲（环形）
+    int idx;                   // 环形缓冲区索引
+    float mu;                  // 步长（收敛速度 vs 稳定性）
+} nlms_filter_t;
+
+// NLMS (Normalized LMS) — 最常用的自适应算法
+float nlms_process(nlms_filter_t *f, float ref, float error) {
+    // ① 存储新的参考信号
+    f->x_buf[f->idx] = ref;
+
+    // ② 计算滤波器输出 y(n) = W^T · X
+    float y = 0.0f;
+    for (int i = 0; i < FILTER_LEN; i++) {
+        int j = (f->idx - i + FILTER_LEN) % FILTER_LEN;
+        y += f->w[i] * f->x_buf[j];
+    }
+
+    // ③ 计算参考信号功率（归一化用）
+    float power = 1e-10f;  // 防止除零
+    for (int i = 0; i < FILTER_LEN; i++) {
+        power += f->x_buf[i] * f->x_buf[i];
+    }
+
+    // ④ 更新滤波器系数
+    // NLMS: W(n+1) = W(n) + (μ / power) * e(n) * X(n)
+    float step = f->mu / power;
+    for (int i = 0; i < FILTER_LEN; i++) {
+        int j = (f->idx - i + FILTER_LEN) % FILTER_LEN;
+        f->w[i] += step * error * f->x_buf[j];
+    }
+
+    // 更新索引
+    f->idx = (f->idx + 1) % FILTER_LEN;
+
+    return y;  // 返回反相噪声信号
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item">
+              <span class="ann-num">①</span>
+              <span><strong>参考信号</strong> = 环境噪声（由外侧麦克风采集）。误差信号 = 用户耳道内实际听到的声音（内侧麦克风采集）。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">②③</span>
+              <span><strong>归一化 (Normalized)</strong>：LMS 的改进版。除以信号功率使得步长自适应 — 信号大时步长小，信号小时步长大。收敛更稳定。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">④</span>
+              <span><strong>系数更新</strong>是自适应滤波的核心。每次采样都更新所有 64 个系数，计算量 = 2 × 64 × 64 = 8192 MAC/采样。在 48kHz 下需要 394 MIPS — M7 可以做到，M4F 勉强。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-warning mt-4">
+          <p class="text-sm text-slate-300"><strong class="text-yellow-400">ANC 的挑战：</strong>① 延迟必须极低（< 2ms），否则反相信号和实际噪声不同步；② 声学路径变化（耳机位置移动）要求滤波器实时适应；③ 反馈稳定性（Feedforward 没有这个问题，Feedback ANC 有）。</p>
+        </div>
+          </div>
+          <div class="ai-era-sidebar">
+            <div class="ai-note ai-note-must">
+              <span class="ai-note-badge">不可替代</span>
+              <h4>延迟约束 + MIPS 预算是可行性分析</h4>
+              <p>M4F 做 64-tap NLMS@48kHz 需要 ~394 MIPS，但 M4F 只有 ~250 DMIPS。这个算术决定"做不了"，不是代码问题。ANC 的延迟必须 <2ms，这个硬约束决定了 buffer size、tap 数、MCU 选型。AI 无法做这种系统级可行性判断。</p>
+            </div>
+            <div class="ai-note ai-note-collab">
+              <span class="ai-note-badge">人机协作</span>
+              <h4>你提供约束 AI 实现 NLMS</h4>
+              <p>"NLMS, 32 taps, float32, 16kHz, step=0.01"——你给定约束，AI 能生成完整的自适应滤波器实现。瓶颈是你能否选择正确的 tap 数和步长。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5.5 Beamforming -->
+      <section class="mb-12 fade-in">
+
+        <div class="ai-era-layout">
+          <div class="ai-era-main">        <h2 class="text-2xl font-bold text-white mb-4">5.5 麦克风阵列与波束成形</h2>
+        <p class="text-slate-300 mb-4">智能眼镜通常有 2-4 个麦克风做波束成形 — 增强 speaking 方向的声音，抑制其他方向。核心是延时叠加（Delay-and-Sum）。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">beamform.c — 2 麦延时叠加波束成形</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-c">#define NUM_MICS 2
+#define MAX_DELAY_SAMPLES 48  // 最大延时 (采样数)，对应 ~34cm 距离
+
+// 延时叠加波束成形
+void beamform_delay_sum(float *mic_in[NUM_MICS], float *output,
+                        int *delays, uint32_t block_size) {
+    for (uint32_t n = 0; n < block_size; n++) {
+        float sum = 0.0f;
+        for (int m = 0; m < NUM_MICS; m++) {
+            // 对每个麦克风的信号施加延时
+            int delayed_n = n - delays[m];
+            if (delayed_n >= 0) {
+                sum += mic_in[m][delayed_n];
+            }
+        }
+        output[n] = sum / NUM_MICS;  // 平均
+    }
+}
+
+// 计算目标方向的延时
+void calc_steering_delays(float angle_deg, int *delays,
+                          float mic_spacing_m) {
+    // 声速 343 m/s
+    // 延时 = spacing × cos(angle) / speed_of_sound
+    float speed = 343.0f;
+    for (int m = 0; m < NUM_MICS; m++) {
+        float delay_sec = mic_spacing_m * cosf(angle_deg * PI / 180.0f) * m / speed;
+        delays[m] = (int)(delay_sec * SAMPLE_RATE + 0.5f);
+    }
+}</code></pre>
+          </div>
+        </div>
+          </div>
+          <div class="ai-era-sidebar">
+            <div class="ai-note ai-note-collab">
+              <span class="ai-note-badge">人机协作</span>
+              <h4>你提供物理约束 AI 实现 DSP 管线</h4>
+              <p>mic 间距 4cm、声速 343m/s、目标方向 0°——你提供物理参数，AI 生成延时叠加波束成形代码。波束宽度和旁瓣抑制的计算也可以委托 AI。你的价值在于理解"为什么需要 4 个 mic 而不是 2 个"。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Related Projects -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">关联项目源码走读</h2>
+        <div class="grid md:grid-cols-3 gap-4">
+          <a href="../projects/daisysp.html" class="project-card block">
+            <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">DSP</span>
+            <h3 class="font-semibold text-white mt-2">DaisySP</h3>
+            <p class="text-sm text-slate-400 mt-1">模块化 DSP — Moog 滤波器、振荡器、混响的 C++ 实现</p>
+          </a>
+          <a href="../projects/mutable-plaits.html" class="project-card block">
+            <span class="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded">顶级代码</span>
+            <h3 class="font-semibold text-white mt-2">Mutable Plaits</h3>
+            <p class="text-sm text-slate-400 mt-1">嵌入式 DSP 代码的天花板 — FPU + CMSIS 内联优化</p>
+          </a>
+          <a href="../projects/teensy-audio.html" class="project-card block">
+            <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">音频框架</span>
+            <h3 class="font-semibold text-white mt-2">Teensy Audio</h3>
+            <p class="text-sm text-slate-400 mt-1">100+ DSP 模块的图式处理框架设计模式</p>
+          </a>
+        </div>
+      </section>
+
+      <div class="text-center py-8 border-t border-dark-700 fade-in">
+        <button data-complete-btn="phase-5" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-lg transition-colors">
+          标记为已完成
+        </button>
+        <p class="text-sm text-slate-500 mt-3">完成本阶段后，进度将自动保存</p>
+        <div class="flex justify-center gap-4 mt-4">
+          <a href="4-rtos.html" class="text-slate-400 hover:text-slate-300">← 上一阶段</a>
+          <a href="6-system.html" class="text-blue-400 hover:text-blue-300">下一阶段：系统级工程 →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="../js/nav.js"></script>
+  <script src="../js/progress.js"></script>
+  <script src="../js/code-walkthrough.js"></script>
+  <script>mermaid.initialize({ theme: 'dark', themeVariables: { fontSize: '14px' }});</script>
+</body>
+</html>

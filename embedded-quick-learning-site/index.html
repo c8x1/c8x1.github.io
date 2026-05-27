@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>21天嵌入式速成学习站</title>
+    <link rel="stylesheet" href="./styles.css?v=20260504-source-reader" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Embedded Quick / Audio to Hardware</p>
+        <h1>21天嵌入式速成学习站</h1>
+        <p class="subtitle">从 DMA、ISR、buffer、RTOS task 这些底层概念开始，用代码化理解和工程实验建立嵌入式第一性原理。</p>
+      </div>
+      <div class="header-tools">
+        <div class="theme-switch" role="group" aria-label="主题">
+          <button data-theme-choice="system">系统</button>
+          <button data-theme-choice="light">浅色</button>
+          <button data-theme-choice="dark">深色</button>
+        </div>
+        <div class="progress-panel" aria-live="polite">
+          <span class="progress-number" id="progressNumber">0/21</span>
+          <span class="progress-label">已完成日课</span>
+          <div class="progress-bar"><span id="progressBar"></span></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <nav class="sidebar" aria-label="学习路径">
+        <div class="track-switch" role="group" aria-label="产品主线">
+          <button class="segmented active" data-track="foa">FOA麦克</button>
+          <button class="segmented" data-track="glasses">AI眼镜</button>
+        </div>
+        <section class="radar-card">
+          <h2>基础短板雷达</h2>
+          <div id="radarList" class="radar-list"></div>
+        </section>
+        <div class="search-box">
+          <label for="daySearch">检索课程</label>
+          <input id="daySearch" type="search" placeholder="例如 DMA、OTA、AEC、BLE" />
+        </div>
+        <div class="day-list" id="dayList"></div>
+      </nav>
+
+      <section class="content">
+        <section class="hero-band">
+          <div>
+            <p class="eyebrow">今日学习工作台</p>
+            <h2 id="dayTitle">Day 1</h2>
+            <p id="dayTheme"></p>
+          </div>
+          <button class="icon-button" id="favoriteBtn" title="收藏当前日课" aria-label="收藏当前日课">☆</button>
+        </section>
+
+        <section class="summary-grid">
+          <article class="panel">
+            <h3>今日目标</h3>
+            <p id="conceptText"></p>
+          </article>
+          <article class="panel accent">
+            <h3 id="trackTitle">产品映射</h3>
+            <p id="trackText"></p>
+          </article>
+          <article class="panel source-entry" id="sourceEntry">
+            <h3>源码导读版</h3>
+            <p>Day 1-7 已重做成多页面源码阅读教材。</p>
+            <a id="sourceGuideLink" href="./source/index.html">进入源码导读</a>
+          </article>
+        </section>
+
+        <div class="tabs" role="tablist" aria-label="日课内容">
+          <button class="tab active" data-tab="foundations">先修概念</button>
+          <button class="tab" data-tab="lesson">深度讲义</button>
+          <button class="tab" data-tab="lab">代码实验</button>
+          <button class="tab" data-tab="case">产品案例</button>
+          <button class="tab" data-tab="validation">验收挑战</button>
+        </div>
+
+        <section id="tab-foundations" class="tab-panel active">
+          <article class="panel">
+            <div class="section-heading">
+              <p class="eyebrow">Prerequisites</p>
+              <h3>今天先补这些基本概念</h3>
+            </div>
+            <div id="foundationCards" class="foundation-grid"></div>
+          </article>
+        </section>
+
+        <section id="tab-lesson" class="tab-panel">
+          <article class="panel">
+            <div class="section-heading">
+              <p class="eyebrow">Mental Model</p>
+              <h3 id="mentalModelTitle">直觉模型</h3>
+            </div>
+            <p id="mentalModelBody" class="lead"></p>
+            <div id="mentalModelFlow" class="flow"></div>
+          </article>
+          <article class="panel">
+            <div class="section-heading">
+              <p class="eyebrow">Deep Lesson</p>
+              <h3>深度讲义</h3>
+            </div>
+            <div id="lessonBlocks" class="lesson-blocks"></div>
+          </article>
+        </section>
+
+        <section id="tab-lab" class="tab-panel">
+          <article class="panel">
+            <div class="section-heading">
+              <p class="eyebrow">Code Walkthrough</p>
+              <h3 id="codeTitle">代码化理解</h3>
+            </div>
+            <pre class="code-block"><code id="codeBlock"></code></pre>
+            <div id="codeExplanation" class="detail-grid"></div>
+          </article>
+          <article class="panel">
+            <div class="section-heading">
+              <p class="eyebrow">Interactive Lab</p>
+              <h3 id="labTitle">实验</h3>
+            </div>
+            <div id="labControls" class="lab-controls"></div>
+            <div id="labOutput" class="lab-output"></div>
+          </article>
+        </section>
+
+        <section id="tab-case" class="tab-panel">
+          <article class="panel">
+            <div class="section-heading">
+              <p class="eyebrow">Case Study</p>
+              <h3 id="caseTitle">产品案例</h3>
+            </div>
+            <div id="caseStudy" class="case-study"></div>
+          </article>
+        </section>
+
+        <section id="tab-validation" class="tab-panel">
+          <article class="panel">
+            <div class="section-heading">
+              <p class="eyebrow">Validation</p>
+              <h3>验收挑战</h3>
+            </div>
+            <p id="validationChallenge" class="lead"></p>
+            <div id="validationFields" class="validation-fields"></div>
+          </article>
+          <article class="panel">
+            <h3>评分 Rubric</h3>
+            <div id="rubricList" class="rubric-list"></div>
+            <h3>常见误区</h3>
+            <div id="pitfallList" class="pitfall-list"></div>
+            <div id="referenceAnswer" class="reference-answer"></div>
+            <button class="secondary" id="evaluateBtn">让 LLM 评估</button>
+            <div id="evaluationResult" class="evaluation-result"></div>
+            <label class="score-label" for="scoreRange">自评分</label>
+            <input id="scoreRange" type="range" min="0" max="5" step="1" value="0" />
+            <div class="score-row"><span id="scoreValue">0</span><span> / 5</span></div>
+            <button class="primary" id="completeBtn">标记完成</button>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <button class="llm-fab" id="llmFab" aria-controls="llmDrawer" aria-expanded="false">问 LLM</button>
+    <aside class="llm-drawer" id="llmDrawer" aria-hidden="true">
+      <div class="llm-header">
+        <div>
+          <p class="eyebrow">Learning Copilot</p>
+          <h2>概念澄清</h2>
+        </div>
+        <button class="icon-button" id="llmClose" aria-label="关闭">×</button>
+      </div>
+      <p class="llm-status" id="llmStatus">LLM 未配置时可继续离线学习。</p>
+      <div class="llm-auth" id="llmAuth">
+        <label>
+          <span>访问密码</span>
+          <input id="llmPassword" type="password" autocomplete="current-password" placeholder="输入后才能调用 LLM" />
+        </label>
+        <button class="secondary" id="llmUnlock">解锁 LLM</button>
+      </div>
+      <div class="llm-messages" id="llmMessages"></div>
+      <label class="llm-input">
+        <span>你的问题</span>
+        <textarea id="llmQuestion" rows="4" placeholder="例如：DMA 和普通 CPU 拷贝到底差在哪？"></textarea>
+      </label>
+      <button class="primary" id="llmSend">发送问题</button>
+    </aside>
+
+    <script src="./data.js?v=20260504-source-reader"></script>
+    <script src="./config.js?v=20260504-source-reader"></script>
+    <script src="./foundations.js?v=20260504-source-reader"></script>
+    <script src="./lessons.js?v=20260504-source-reader"></script>
+    <script src="./app.js?v=20260504-source-reader"></script>
+  </body>
+</html>

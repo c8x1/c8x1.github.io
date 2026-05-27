@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teensy Audio Library 源码走读 — Cortex-M 音频学习</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link href="../css/custom.css" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { colors: { dark: { 900: '#020617', 800: '#0f172a', 700: '#1e293b', 600: '#334155' }}}}}</script>
+</head>
+<body class="bg-dark-900 text-slate-200 font-sans">
+
+  <aside id="sidebar" class="sidebar bg-dark-800 border-r border-dark-700">
+    <div class="p-4 border-b border-dark-700">
+      <a href="../index.html" class="text-lg font-bold text-white flex items-center gap-2"><span class="text-blue-400">⌘</span> Cortex-M 音频学习</a>
+      <div class="mt-2 progress-bar" data-progress-bar><div class="fill" style="width:0%"></div></div>
+      <p class="text-xs text-slate-500 mt-1">进度: <span data-progress-text>0/21</span></p>
+    </div>
+    <nav class="sidebar-nav py-2">
+      <div class="section-title">学习阶段</div>
+      <a href="../phase/1-architecture.html" data-nav-id="phase-1">一、Cortex-M 架构基础</a>
+      <a href="../phase/2-peripherals.html" data-nav-id="phase-2">二、外设与通信协议</a>
+      <a href="../phase/3-dma.html" data-nav-id="phase-3">三、DMA 数据引擎</a>
+      <a href="../phase/4-rtos.html" data-nav-id="phase-4">四、RTOS 实时操作系统</a>
+      <a href="../phase/5-dsp.html" data-nav-id="phase-5">五、音频 DSP</a>
+      <a href="../phase/6-system.html" data-nav-id="phase-6">六、系统级工程</a>
+      <div class="section-title mt-4">源码走读</div>
+      <a href="baremetal-guide.html" data-nav-id="proj-baremetal-guide">裸机编程指南</a>
+      <a href="baremetal.html" data-nav-id="proj-baremetal">cortexm/baremetal</a>
+      <a href="libopencm3.html" data-nav-id="proj-libopencm3">libopencm3</a>
+      <a href="infinitime.html" data-nav-id="proj-infinitime">InfiniTime</a>
+      <a href="zswatch.html" data-nav-id="proj-zswatch">ZSWatch</a>
+      <a href="libdaisy.html" data-nav-id="proj-libdaisy">libDaisy</a>
+      <a href="daisysp.html" data-nav-id="proj-daisysp">DaisySP</a>
+      <a href="mutable-plaits.html" data-nav-id="proj-plaits">Mutable Plaits</a>
+      <a href="teensy-audio.html" data-nav-id="proj-teensy" class="active">Teensy Audio</a>
+      <a href="nrf5340-audio.html" data-nav-id="proj-nrf5340">nRF5340 Audio</a>
+      <div class="section-title mt-4">专题</div>
+      <a href="openglass.html" data-nav-id="proj-openglass">omiGlass 智能眼镜</a>
+      <div class="section-title mt-4">参考</div>
+      <a href="../glossary.html">术语速查</a>
+      <a href="../resources.html">资源汇总</a>
+    </nav>
+  </aside>
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+  <header class="mobile-header lg:hidden fixed top-0 left-0 right-0 bg-dark-800 border-b border-dark-700 z-20 px-4 py-3 flex items-center gap-3">
+    <button id="sidebar-toggle" class="text-slate-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <span class="text-lg font-bold text-white">Teensy Audio Library 源码走读</span>
+  </header>
+
+  <main class="main-content">
+    <div class="max-w-6xl mx-auto px-6 py-12 lg:py-16">
+
+      <div class="fade-in mb-12">
+        <div class="flex flex-wrap gap-2 mb-3">
+          <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">阅读顺序 ⑨</span>
+          <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">音频框架</span>
+        </div>
+        <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">Teensy Audio Library 源码走读</h1>
+        <p class="text-lg text-slate-400 mb-4">图式音频处理框架 — Audio Graph 设计模式，100+ 可连接的 DSP 模块</p>
+        <div class="flex flex-wrap gap-3 text-sm">
+          <span class="bg-dark-800 px-3 py-1 rounded border border-dark-700">i.MX RT1062 (M7)</span>
+          <span class="bg-dark-800 px-3 py-1 rounded border border-dark-700">裸机 C++</span>
+          <span class="bg-dark-800 px-3 py-1 rounded border border-dark-700">Stars ★ 1000</span>
+          <a href="https://github.com/PaulStoffregen/Audio" class="text-blue-400 hover:text-blue-300">GitHub →</a>
+        </div>
+      </div>
+
+      <!-- Audio Graph -->
+      <section class="mb-12 fade-in">
+      <div class="ai-era-layout">
+        <div class="ai-era-main">
+
+        <h2 class="text-2xl font-bold text-white mb-4">Audio Graph 设计模式</h2>
+        <p class="text-slate-300 mb-4">Teensy Audio Library 的核心创新是 "音频图"（Audio Graph）。每个 DSP 模块是一个节点，节点之间通过连接传输音频数据块。用户在 GUI 中拖线连接模块，框架自动调度执行顺序。</p>
+
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700 mb-6">
+          <pre class="mermaid">
+graph LR
+    MIC["AudioInputI2S<br/>麦克风输入"] --> EQ["AudioFilterBiquad<br/>EQ 滤波"]
+    MIC --> COMP["AudioEffectCompressor<br/>动态压缩"]
+    EQ --> MIX["AudioMixer4<br/>混音器"]
+    COMP --> MIX
+    OSC["AudioSynthWaveform<br/>振荡器"] --> MIX
+    MIX --> OUT["AudioOutputI2S<br/>扬声器输出"]
+    MIX --> FTP["AudioAnalyzeFFT1024<br/>FFT 分析"]
+          </pre>
+        </div>
+      </section>
+
+      <!-- AudioStream Base Class -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">源码走读：AudioStream 基类</h2>
+        <p class="text-slate-300 mb-4">AudioStream 是所有 DSP 模块的基类。它管理输入/输出连接、音频块缓冲区和更新调度。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">AudioStream.h — 音频流基类</span></div>
+          <div class="code-block">
+            <pre><code class="language-cpp">// Teensy Audio 的核心常量
+#define AUDIO_BLOCK_SAMPLES  128   // ① 每个音频块 128 采样
+#define AUDIO_SAMPLE_RATE    44100 // 默认 44.1kHz
+// 块时间 = 128 / 44100 = 2.9ms
+
+class AudioStream {
+public:
+    // ② 构造函数 — 声明输入端口数量
+    AudioStream(uint8_t num_inputs, const uint8_t *input_list) {
+        num_inputs_ = num_inputs;
+        // 分配输入连接槽位
+        for (int i = 0; i < num_inputs; i++) {
+            inputQueue[i] = NULL;
+        }
+        // 注册到全局更新链表
+        next_update = first_update;
+        first_update = this;
+    }
+
+    // ③ 虚函数 — 子类实现具体 DSP
+    virtual void update(void) = 0;
+
+    // ④ 静态方法 — 框架调度所有模块
+    static void update_all(void) {
+        // 遍历链表，按连接顺序调用每个模块的 update()
+        for (AudioStream *p = first_update; p; p = p->next_update) {
+            p->update();
+        }
+    }
+
+protected:
+    // ⑤ 音频块内存池 — 静态分配，避免 malloc
+    static audio_block_t *allocate(void);
+    static void release(audio_block_t *block);
+
+    // 获取输入连接的数据块
+    audio_block_t *receiveReadOnly(uint8_t input_index);
+    audio_block_t *receiveWritable(uint8_t input_index);
+
+    // ⑥ 传输数据到下游连接
+    void transmit(audio_block_t *block, uint8_t output_index = 0);
+
+private:
+    uint8_t num_inputs_;
+    audio_block_t *inputQueue[AUDIO_MAX_INPUTS];
+    AudioConnection *inputConnections[AUDIO_MAX_INPUTS];
+    AudioStream *next_update;  // 链表指针
+    static AudioStream *first_update;
+};
+
+// ⑦ 音频块结构 — 128 个 int16 采样
+typedef struct {
+    int16_t data[AUDIO_BLOCK_SAMPLES];  // 256 bytes
+    uint8_t ref_count;                   // 引用计数
+    uint8_t memory_pool_index;
+} audio_block_t;</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item">
+              <span class="ann-num">①</span>
+              <span><strong>128 采样/块</strong>：在 44.1kHz 下约 2.9ms。这个大小经过优化：足够小保持低延迟，足够大让 DMA 高效传输。所有模块处理相同大小的块。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">③</span>
+              <span><strong>update() 是核心</strong>：每个模块实现自己的 update()。框架每 2.9ms 调用一次。类似 DaisySP 的 Process()，但处理整块数据而不是单采样。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">⑤</span>
+              <span><strong>内存池</strong>：不用 malloc/free（碎片化风险），预分配固定数量的 audio_block_t。引用计数管理生命周期。这是嵌入式实时系统的标准内存管理策略。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">⑦</span>
+              <span><strong>int16 数据格式</strong>：使用 16-bit Q15 而不是 float。因为 Teensy 3.x 的 M4 没有 DSP 优化用 float 更快。不过 Teensy 4.x 的 M7 有 FPU，float 会更快。</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AudioConnection -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">源码走读：AudioConnection — 模块连接</h2>
+
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">AudioConnection.h — 连接两个模块</span></div>
+          <div class="code-block">
+            <pre><code class="language-cpp">// ① AudioConnection 连接源模块的输出到目标模块的输入
+class AudioConnection {
+public:
+    AudioConnection(AudioStream &source, AudioStream &destination) :
+        src(source), dst(destination), src_index(0), dest_index(0) {
+        // ② 注册连接 — 自动插入目标模块的输入队列
+        destination.inputConnections[0] = this;
+        // 添加到连接链表
+        next = first_connection;
+        first_connection = this;
+    }
+
+    // 带端口号的连接（多输入/多输出模块）
+    AudioConnection(AudioStream &source, uint8_t source_output,
+                    AudioStream &destination, uint8_t dest_input) :
+        src(source), dst(destination),
+        src_index(source_output), dest_index(dest_input) {
+    }
+
+private:
+    AudioStream &src;
+    AudioStream &dst;
+    uint8_t src_index;
+    uint8_t dest_index;
+    AudioConnection *next;
+    static AudioConnection *first_connection;
+};
+
+// ③ 使用方式 — 在全局作用域声明连接
+AudioInputI2S          i2s_in;                    // 麦克风输入
+AudioFilterBiquad      eq_filter;                 // EQ
+AudioOutputI2S         i2s_out;                   // 扬声器输出
+AudioConnection        patchCord1(i2s_in, 0, eq_filter, 0);  // 输入 → EQ
+AudioConnection        patchCord2(eq_filter, 0, i2s_out, 0); // EQ → 输出</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item">
+              <span class="ann-num">①②</span>
+              <span><strong>声明式连接</strong>：连接在全局作用域创建（C++ 构造函数自动注册）。不需要手动调用 connect()。框架启动时自动建立所有连接。这种 "声明式" 设计让音频图一目了然。</span>
+            </div>
+            <div class="ann-item">
+              <span class="ann-num">③</span>
+              <span><strong>patchCord</strong> 是连接线。每条连接线在全局创建，框架自动管理数据流。这和 Max/MSP、Pure Data 等图形化音频编程环境的设计理念一致。</span>
+            </div>
+          </div>
+        </div>
+      
+        </div>
+        <div class="ai-era-sidebar">
+        <div class="ai-note ai-note-collab">
+          <span class="ai-note-badge">架构借鉴</span>
+          <h4>图形化音频管线的设计思想</h4>
+          <p>Teensy Audio 的 AudioConnection 对象图模式（节点+连线）是音频框架的经典设计。理解这个模式后，你可以在任何平台上复刻。</p>
+        </div>
+        <div class="ai-note ai-note-auto">
+          <span class="ai-note-badge">了解即可</span>
+          <h4>具体 effect 实现可粗读</h4>
+          <p>Teensy Audio 库中的 100+ effect 节点实现是标准 DSP 算法。如果你理解了 DaisySP 的核心算法，这里大部分是已知模式的重复。</p>
+        </div>
+        </div>
+      </div></section>
+
+      <!-- Key Lessons -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">学到了什么</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-green-400 font-semibold mb-2">框架设计</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• Audio Graph 模式：模块 + 连接线</li>
+              <li>• 统一 update() 接口</li>
+              <li>• 固定块大小（128 采样）</li>
+              <li>• 内存池避免碎片化</li>
+              <li>• 引用计数管理数据块生命周期</li>
+            </ul>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-blue-400 font-semibold mb-2">与 DaisySP/Plaits 对比</h3>
+            <ul class="text-sm text-slate-300 space-y-1">
+              <li>• Teensy: 块处理 (128 samples) + int16</li>
+              <li>• DaisySP: 单采样 + float32</li>
+              <li>• Plaits: 小块 (12 samples) + float32</li>
+              <li>• Teensy 的框架级抽象最复杂</li>
+              <li>• Plaits 的底层优化最极致</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <div class="text-center py-8 border-t border-dark-700 fade-in">
+        <button data-complete-btn="proj-teensy" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-lg transition-colors">标记为已完成</button>
+        <p class="text-sm text-slate-500 mt-3">完成本项目走读后，进度将自动保存</p>
+        <div class="flex justify-center gap-4 mt-4">
+          <a href="mutable-plaits.html" class="text-slate-400 hover:text-slate-300">← 上一个：Mutable Plaits</a>
+          <a href="nrf5340-audio.html" class="text-blue-400 hover:text-blue-300">下一个：nRF5340 Audio →</a>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="../js/nav.js"></script>
+  <script src="../js/progress.js"></script>
+  <script src="../js/code-walkthrough.js"></script>
+  <script>mermaid.initialize({ theme: 'dark', themeVariables: { fontSize: '14px' }});</script>
+</body>
+</html>

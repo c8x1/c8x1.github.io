@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>源码走读 — InfiniTime</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <link href="../css/custom.css" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { colors: { dark: { 900: '#020617', 800: '#0f172a', 700: '#1e293b', 600: '#334155' }}}}}</script>
+</head>
+<body class="bg-dark-900 text-slate-200 font-sans">
+
+  <aside id="sidebar" class="sidebar bg-dark-800 border-r border-dark-700">
+    <div class="p-4 border-b border-dark-700">
+      <a href="../index.html" class="text-lg font-bold text-white flex items-center gap-2"><span class="text-blue-400">⌘</span> Cortex-M 音频学习</a>
+      <div class="mt-2 progress-bar" data-progress-bar><div class="fill" style="width:0%"></div></div>
+      <p class="text-xs text-slate-500 mt-1">进度: <span data-progress-text>0/21</span></p>
+    </div>
+    <nav class="sidebar-nav py-2">
+      <div class="section-title">学习阶段</div>
+      <a href="../phase/1-architecture.html" data-nav-id="phase-1">一、Cortex-M 架构基础</a>
+      <a href="../phase/2-peripherals.html" data-nav-id="phase-2">二、外设与通信协议</a>
+      <a href="../phase/3-dma.html" data-nav-id="phase-3">三、DMA 数据引擎</a>
+      <a href="../phase/4-rtos.html" data-nav-id="phase-4">四、RTOS 实时操作系统</a>
+      <a href="../phase/5-dsp.html" data-nav-id="phase-5">五、音频 DSP</a>
+      <a href="../phase/6-system.html" data-nav-id="phase-6">六、系统级工程</a>
+      <div class="section-title mt-4">源码走读</div>
+      <a href="baremetal-guide.html" data-nav-id="proj-baremetal-guide">裸机编程指南</a>
+      <a href="baremetal.html" data-nav-id="proj-baremetal">cortexm/baremetal</a>
+      <a href="libopencm3.html" data-nav-id="proj-libopencm3">libopencm3</a>
+      <a href="infinitime.html" data-nav-id="proj-infinitime">InfiniTime</a>
+      <a href="zswatch.html" data-nav-id="proj-zswatch">ZSWatch</a>
+      <a href="libdaisy.html" data-nav-id="proj-libdaisy">libDaisy</a>
+      <a href="daisysp.html" data-nav-id="proj-daisysp">DaisySP</a>
+      <a href="mutable-plaits.html" data-nav-id="proj-plaits">Mutable Plaits</a>
+      <a href="teensy-audio.html" data-nav-id="proj-teensy">Teensy Audio</a>
+      <a href="nrf5340-audio.html" data-nav-id="proj-nrf5340">nRF5340 Audio</a>
+      <div class="section-title mt-4">专题</div>
+      <a href="openglass.html" data-nav-id="proj-openglass">omiGlass 智能眼镜</a>
+      <div class="section-title mt-4">参考</div>
+      <a href="../glossary.html">术语速查</a>
+      <a href="../resources.html">资源汇总</a>
+    </nav>
+  </aside>
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+  <header class="mobile-header lg:hidden fixed top-0 left-0 right-0 bg-dark-800 border-b border-dark-700 z-20 px-4 py-3 flex items-center gap-3">
+    <button id="sidebar-toggle" class="text-slate-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <span class="text-lg font-bold text-white">Cortex-M 音频学习</span>
+  </header>
+
+  <main class="main-content">
+    <div class="max-w-6xl mx-auto px-6 py-12 lg:py-16">
+
+      <!-- Project Overview Card -->
+      <div class="fade-in mb-10">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="text-xs font-mono bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded">阅读顺序 ④</span>
+          <span class="text-xs font-mono bg-green-500/20 text-green-400 px-2 py-0.5 rounded">FreeRTOS</span>
+        </div>
+        <h1 class="text-3xl lg:text-4xl font-bold text-white mb-3">InfiniTime</h1>
+        <p class="text-slate-400 mb-4">PineTime 智能手表固件 — FreeRTOS 多任务架构 + 低功耗设计 + BLE 通信的完整实战参考</p>
+        <div class="flex flex-wrap gap-4 text-sm mb-4">
+          <a href="https://github.com/InfiniTimeOrg/InfiniTime" target="_blank" class="text-blue-400 hover:underline">GitHub: InfiniTimeOrg/InfiniTime</a>
+          <span class="text-slate-600">|</span>
+          <span class="text-yellow-400">★ 3000</span>
+          <span class="text-slate-600">|</span>
+          <span class="text-slate-500">nRF52832 (Cortex-M4F)</span>
+        </div>
+        <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+            <div><span class="text-slate-500">MCU:</span> <span class="text-slate-300">nRF52832</span></div>
+            <div><span class="text-slate-500">内核:</span> <span class="text-slate-300">Cortex-M4F (64MHz)</span></div>
+            <div><span class="text-slate-500">RTOS:</span> <span class="text-slate-300">FreeRTOS</span></div>
+            <div><span class="text-slate-500">UI:</span> <span class="text-slate-300">LVGL</span></div>
+            <div><span class="text-slate-500">BLE:</span> <span class="text-slate-300">NimBLE</span></div>
+            <div><span class="text-slate-500">显示:</span> <span class="text-slate-300">ST7789 (SPI)</span></div>
+            <div><span class="text-slate-500">加速度:</span> <span class="text-slate-300">BMA421 (I2C)</span></div>
+            <div><span class="text-slate-500">心率:</span> <span class="text-slate-300">HRS3300</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Architecture Diagram -->
+      <section class="fade-in mb-10">
+<div class="ai-era-layout"><div class="ai-era-main">
+        <h2 class="text-xl font-bold text-white mb-4">系统架构</h2>
+        <p class="text-slate-400 text-sm mb-4">InfiniTime 采用多任务架构：SystemTask 是总指挥，通过消息队列协调各子系统。这是典型的嵌入式"星形任务"模式。</p>
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700">
+          <pre class="mermaid">
+graph TD
+    ST["SystemTask<br/>主协调器"] --> DA["DisplayApp<br/>LVGL 渲染"]
+    ST --> HA["HeartRateApp<br/>心率采集"]
+    ST --> MC["MotionController<br/>加速度计"]
+    ST --> AL["AlarmController<br/>闹钟管理"]
+    ST --> BLE["NimBLE<br/>蓝牙通信"]
+
+    DA --> LCD["St7789 驱动<br/>SPI 总线"]
+    MC --> BMA["BMA421 驱动<br/>I2C 总线"]
+    HA --> HRS["HRS3300 驱动<br/>I2C 总线"]
+
+    ST -->|"消息队列"| DA
+    ST -->|"消息队列"| HA
+
+    subgraph FreeRTOS
+        ST
+        DA
+        HA
+    end
+
+    style ST fill:#1e40af,stroke:#3b82f6,color:#fff
+    style LCD fill:#065f46,stroke:#22c55e,color:#fff
+    style BMA fill:#065f46,stroke:#22c55e,color:#fff
+    style HRS fill:#065f46,stroke:#22c55e,color:#fff
+          </pre>
+        </div>
+      </section>
+
+      <!-- SystemTask::Work() -->
+      <section class="fade-in mb-10">
+        <h2 class="text-xl font-bold text-white mb-4">SystemTask::Work() — 主循环</h2>
+        <p class="text-slate-400 text-sm mb-4">SystemTask 是 InfiniTime 的核心。它创建其他任务，然后进入消息队列循环，根据收到的消息分发给各子系统。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">📁 src/SystemTask.cpp</span>
+            <span class="text-xs">主任务入口</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-cpp">void SystemTask::Work() {                    <span class="ann-marker" data-note="FreeRTOS 任务函数">①</span>
+    // 1. 初始化硬件驱动
+    spi.Init();                               <span class="ann-marker" data-note="SPI 用于显示屏和 Flash">②</span>
+    display.Init();                           // ST7789 显示屏初始化
+    touchPanel.Init();                        // 触摸面板
+
+    // 2. 启动 BLE 协议栈
+    bleManager.Init();                        <span class="ann-marker" data-note="NimBLE 初始化">③</span>
+
+    // 3. 创建显示任务
+    displayApp = new DisplayApp();            <span class="ann-marker" data-note="独立任务负责 LVGL 渲染">④</span>
+    displayApp->Start();
+
+    // 4. 主消息循环
+    while (true) {
+        // 等待消息 (可被中断唤醒)
+        if (xQueueReceive(systemQueue, &msg,  <span class="ann-marker" data-note="阻塞等待，带超时">⑤</span>
+                          pdMS_TO_TICKS(100)))
+        {
+            switch (msg.command) {
+                case Messages::GoToSleep:     <span class="ann-marker" data-note="进入低功耗模式">⑥</span>
+                    displayApp->PushMessage(
+                        DisplayApp::Messages::GoToSleep);
+                    spi.Sleep();
+                    isSleeping = true;
+                    break;
+
+                case Messages::WakeUp:        <span class="ann-marker" data-note="唤醒并恢复显示">⑦</span>
+                    spi.Wakeup();
+                    display->Wakeup();
+                    isSleeping = false;
+                    break;
+
+                case Messages::OnTouchEvent:  <span class="ann-marker" data-note="触摸事件转发">⑧</span>
+                    displayApp->PushMessage(
+                        DisplayApp::Messages::TouchEvent);
+                    break;
+            }
+        }
+
+        // 5. 空闲时进入低功耗
+        if (isSleeping) {
+            vTaskDelay(pdMS_TO_TICKS(1000));  <span class="ann-marker" data-note="睡眠时降低轮询频率">⑨</span>
+        }
+    }
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item" data-ann="①"><span class="ann-num">①</span><span>这是 FreeRTOS 任务的入口函数。由 <code>xTaskCreate()</code> 调度执行。任务函数通常不返回（无限循环）</span></div>
+            <div class="ann-item" data-ann="②"><span class="ann-num">②</span><span>nRF52 的 SPI 外设（SPIM）同时用于驱动 ST7789 显示屏和外部 SPI Flash。初始化包括配置引脚、时钟频率、模式（CPOL/CPHA）</span></div>
+            <div class="ann-item" data-ann="③"><span class="ann-num">③</span><span>NimBLE 是 Apache BLE 协议栈的轻量级实现。初始化包括设置设备名、广播参数、GATT 服务（如心率服务、通知服务）</span></div>
+            <div class="ann-item" data-ann="④"><span class="ann-num">④</span><span>DisplayApp 是独立任务，运行 LVGL 渲染循环。分离 UI 渲染和系统管理是嵌入式 GUI 的最佳实践——避免阻塞系统任务</span></div>
+            <div class="ann-item" data-ann="⑤"><span class="ann-num">⑤</span><span><code>xQueueReceive</code> 阻塞等待消息。100ms 超时意味着即使没有消息，每秒也会醒来 10 次执行空闲逻辑。这是消息驱动架构的核心</span></div>
+            <div class="ann-item" data-ann="⑥"><span class="ann-num">⑥</span><span>收到 GoToSleep 时：先通知显示任务也进入睡眠，然后将 SPI 外设设为低功耗模式，设置 isSleeping 标志</span></div>
+            <div class="ann-item" data-ann="⑦"><span class="ann-num">⑦</span><span>唤醒是睡眠的逆序：先恢复 SPI，再唤醒显示驱动。时序很重要——SPI 必须先就绪，否则显示命令会失败</span></div>
+            <div class="ann-item" data-ann="⑧"><span class="ann-num">⑧</span><span>触摸事件由中断产生，通过 systemQueue 传到 SystemTask，再转发给 DisplayApp。这种"间接传递"模式解耦了中断和 UI</span></div>
+            <div class="ann-item" data-ann="⑨"><span class="ann-num">⑨</span><span>睡眠期间降低任务频率，配合 FreeRTOS 的 tickless idle 模式减少功耗。实际效果：PineTime 的待机功耗可降到 1mA 以下</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Display Driver -->
+      <section class="fade-in mb-10">
+        <h2 class="text-xl font-bold text-white mb-4">St7789 显示驱动 — SPI 实战</h2>
+        <p class="text-slate-400 text-sm mb-4">ST7789 是 240x240 TFT LCD 的控制芯片。通过 SPI 发送命令和数据来控制显示内容。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">📁 src/drivers/St7789.cpp (简化)</span>
+            <span class="text-xs">SPI 显示驱动</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-cpp">void St7789::Init() {                        <span class="ann-marker" data-note="显示芯片初始化序列">①</span>
+    // 硬件复位: RESET 引脚拉低再拉高
+    nrf_gpio_pin_clear(pinReset);
+    nrf_delay_ms(10);
+    nrf_gpio_pin_set(pinReset);
+    nrf_delay_ms(120);
+
+    // 软件复位命令
+    WriteCommand(0x01);                       <span class="ann-marker" data-note="SWRESET: 软件复位">②</span>
+    nrf_delay_ms(120);
+
+    // 退出睡眠模式
+    WriteCommand(0x11);                       <span class="ann-marker" data-note="SLPOUT: 退出睡眠">③</span>
+    nrf_delay_ms(120);
+
+    // 设置像素格式: 16-bit RGB565
+    WriteCommand(0x3A);
+    WriteData(0x05);                          <span class="ann-marker" data-note="05h = 16-bit/pixel">④</span>
+
+    // 正常显示模式
+    WriteCommand(0x13);                       // NORON
+    nrf_delay_ms(10);
+
+    // 开启显示
+    WriteCommand(0x29);                       <span class="ann-marker" data-note="DISPON: 开启显示">⑤</span>
+}
+
+void St7789::WriteCommand(uint8_t cmd) {
+    nrf_gpio_pin_clear(pinDataCommand);       <span class="ann-marker" data-note="DC=0: 命令模式">⑥</span>
+    spi.Write(&amp;cmd, 1);                      <span class="ann-marker" data-note="SPI 发送 1 字节命令">⑦</span>
+}
+
+void St7489::WriteData(uint8_t data) {
+    nrf_gpio_pin_set(pinDataCommand);         <span class="ann-marker" data-note="DC=1: 数据模式">⑧</span>
+    spi.Write(&amp;data, 1);
+}
+
+void St7789::SetAddrWindow(uint16_t x0, uint16_t y0,
+                           uint16_t x1, uint16_t y1) {
+    WriteCommand(0x2A);  // CASET: 列地址设置
+    WriteData16(x0); WriteData16(x1);
+    WriteCommand(0x2B);  // RASET: 行地址设置
+    WriteData16(y0); WriteData16(y1);
+    WriteCommand(0x2C);  // RAMWR: 写入显存    <span class="ann-marker" data-note="之后连续写入像素数据">⑨</span>
+}
+
+void St7789::Sleep() {
+    WriteCommand(0x28);  // DISPOFF: 关闭显示
+    WriteCommand(0x10);  // SLPIN: 进入睡眠    <span class="ann-marker" data-note="SLPIN: 省电模式">⑩</span>
+    nrf_delay_ms(120);
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item" data-ann="①"><span class="ann-num">①</span><span>显示芯片的初始化序列必须严格按照数据手册规定的顺序执行。复位 → 延时 → 命令配置 → 延时。跳过任何延时可能导致芯片行为异常</span></div>
+            <div class="ann-item" data-ann="②"><span class="ann-num">②</span><span>SWRESET（0x01）是软件复位命令。某些场景下可以替代硬件复位引脚操作</span></div>
+            <div class="ann-item" data-ann="③"><span class="ann-num">③</span><span>SLPOUT（0x11）让显示控制器退出低功耗状态。需要 120ms 等待内部 DC-DC 转换器稳定</span></div>
+            <div class="ann-item" data-ann="④"><span class="ann-num">④</span><span>RGB565 格式：每个像素 16 位（R=5bit, G=6bit, B=5bit）。嵌入式 LCD 的标准格式，比 24-bit RGB 节省 33% 显存</span></div>
+            <div class="ann-item" data-ann="⑤"><span class="ann-num">⑤</span><span>DISPON（0x29）开启显示输出。至此初始化完成，屏幕开始显示（虽然还是黑屏）</span></div>
+            <div class="ann-item" data-ann="⑥"><span class="ann-num">⑥</span><span>DC（Data/Command）引脚是 SPI 显示的标准控制线。DC=LOW 告诉 ST7789 接下来发送的是命令字节</span></div>
+            <div class="ann-item" data-ann="⑦"><span class="ann-num">⑦</span><span>SPI 发送命令字节。对于 nRF52，实际调用的是 SPIM 外设的 DMA 传输（NRF_SPIM_Task_START）</span></div>
+            <div class="ann-item" data-ann="⑧"><span class="ann-num">⑧</span><span>DC=HIGH 切换到数据模式。ST7789 将接下来的字节理解为命令的参数</span></div>
+            <div class="ann-item" data-ann="⑨"><span class="ann-num">⑨</span><span>RAMWR 命令后可以连续写入像素数据，无需重复命令。这就是 LVGL 渲染后刷新屏幕的核心机制</span></div>
+            <div class="ann-item" data-ann="⑩"><span class="ann-num">⑩</span><span>进入睡眠模式可大幅降低显示芯片功耗。配合 SystemTask 的 GoToSleep 消息，实现手表的息屏省电</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Power Management -->
+      <section class="fade-in mb-10">
+        <h2 class="text-xl font-bold text-white mb-4">低功耗管理 — Tickless Idle</h2>
+        <p class="text-slate-400 text-sm mb-4">手表的续航核心是低功耗。InfiniTime 利用 FreeRTOS 的 tickless idle 机制，在空闲时停止 SysTick，让 CPU 进入深度睡眠。</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header">
+            <span class="file-path">📁 src/SystemTask.cpp (低功耗部分)</span>
+            <span class="text-xs">电源管理</span>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-cpp">// FreeRTOS tickless idle 钩子
+extern "C" void vApplicationIdleHook(void) { <span class="ann-marker" data-note="空闲任务钩子函数">①</span>
+    if (isSleeping) {
+        // 计算可以睡眠的最大时间
+        TickType_t xExpectedIdleTime =
+            GetExpectedIdleTime();           <span class="ann-marker" data-note="距下一个任务唤醒的时间">②</span>
+
+        // 停止 SysTick，配置 RTC 唤醒
+        vPortSuppressTicksAndSleep(
+            xExpectedIdleTime);              <span class="ann-marker" data-note="FreeRTOS tickless API">③</span>
+    }
+}
+
+// 实际的 CPU 睡眠实现
+void EnterLowPower(void) {
+    // 1. 关闭不必要的外设时钟
+    nrf_spim_disable(NRF_SPIM0);             <span class="ann-marker" data-note="关闭 SPI 时钟">④</span>
+
+    // 2. 配置唤醒源 (GPIO 中断 或 RTC)
+    sd_power_system_off_set(false);          <span class="ann-marker" data-note="不是关机，而是进入 System ON Idle">⑤</span>
+
+    // 3. 执行 WFI (Wait For Interrupt)
+    __WFI();                                 <span class="ann-marker" data-note="CPU 暂停，等待中断唤醒">⑥</span>
+
+    // 4. 唤醒后恢复外设
+    nrf_spim_enable(NRF_SPIM0);             <span class="ann-marker" data-note="重新使能 SPI">⑦</span>
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item" data-ann="①"><span class="ann-num">①</span><span>FreeRTOS 空闲钩子在所有任务都阻塞时被调用。这是执行低功耗逻辑的最佳时机——没有任务需要运行</span></div>
+            <div class="ann-item" data-ann="②"><span class="ann-num">②</span><span>计算距下一个定时器到期或任务唤醒的时间。这段时间内 SysTick 可以安全停止</span></div>
+            <div class="ann-item" data-ann="③"><span class="ann-num">③</span><span><code>vPortSuppressTicksAndSleep</code> 是 FreeRTOS tickless idle 的核心 API。它停止 SysTick，用低功耗定时器（RTC）替代，到期后恢复 SysTick 并补上漏掉的 tick</span></div>
+            <div class="ann-item" data-ann="④"><span class="ann-num">④</span><span>睡眠前关闭外设时钟可以显著降低功耗。nRF52 的外设时钟独立于 CPU 时钟，可以单独开关</span></div>
+            <div class="ann-item" data-ann="⑤"><span class="ann-num">⑤</span><span>nRF52 有多种低功耗模式：System OFF（最低功耗，需复位唤醒）和 System ON Idle（可被中断唤醒）。这里用后者</span></div>
+            <div class="ann-item" data-ann="⑥"><span class="ann-num">⑥</span><span><code>__WFI()</code> 是 Cortex-M 的 WFI 指令（Wait For Interrupt）。CPU 暂停执行，直到 NVIC 检测到中断请求。这是最低功耗的"等中断"方式</span></div>
+            <div class="ann-item" data-ann="⑦"><span class="ann-num">⑦</span><span>唤醒后必须重新使能之前关闭的外设。顺序与睡眠时相反（后关的先开）</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- What You Learned -->
+      <section class="fade-in mb-10">
+        <h2 class="text-xl font-bold text-white mb-4">本节要点</h2>
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700">
+          <ul class="space-y-3 text-slate-300 text-sm">
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">1.</span> "星形任务"架构：SystemTask 作为中央协调器，通过 FreeRTOS 消息队列分发事件给子系统</li>
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">2.</span> SPI 显示驱动使用 DC 引脚区分命令和数据模式，初始化序列必须严格按数据手册的顺序和延时</li>
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">3.</span> tickless idle 机制：空闲时停止 SysTick，用 RTC 替代计时，配合 WFI 指令进入深度睡眠</li>
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">4.</span> 睡眠/唤醒是对称操作：先关的后开。外设关闭顺序影响唤醒可靠性</li>
+            <li class="flex gap-2"><span class="text-blue-400 font-bold">5.</span> 消息队列解耦了中断处理和任务逻辑——中断只发消息，不做耗时操作（如 SPI 传输）</li>
+          </ul>
+        </div>
+      </div><div class="ai-era-sidebar"><div class="ai-note ai-note-must"><span class="ai-note-badge">逐行精读</span><h4>FreeRTOS 任务架构值得逐行研究</h4><p>InfiniTime 的任务划分是智能穿戴设备的教科书级实现。每个任务的优先级、栈大小、消息队列选择都有工程考量。</p></div>
+<div class="ai-note ai-note-collab"><span class="ai-note-badge">架构借鉴</span><h4>LVGL + RTOS 的集成模式</h4><p>LVGL 在 RTOS 中的线程模型是这个项目的精华。AI 能写 LVGL 代码，但多线程集成模式需要你理解。</p></div></div></div></section>
+
+      <!-- Navigation -->
+      <div class="fade-in flex items-center justify-between mt-12 pt-6 border-t border-dark-700">
+        <a href="libopencm3.html" class="text-slate-400 hover:text-white text-sm">&larr; libopencm3</a>
+        <button data-complete-btn="proj-infinitime" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-5 py-2 rounded-lg transition">标记为已完成</button>
+        <a href="zswatch.html" class="text-blue-400 hover:text-blue-300 text-sm">下一篇: ZSWatch &rarr;</a>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-c.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="../js/nav.js"></script>
+  <script src="../js/progress.js"></script>
+  <script src="../js/code-walkthrough.js"></script>
+  <script>mermaid.initialize({ theme: 'dark', themeVariables: { fontSize: '14px' }});</script>
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cortex-M 音频嵌入式学习路线</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link href="css/custom.css" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { colors: { dark: { 900: '#020617', 800: '#0f172a', 700: '#1e293b', 600: '#334155' }}}}}</script>
+</head>
+<body class="bg-dark-900 text-slate-200 font-sans">
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="sidebar bg-dark-800 border-r border-dark-700">
+    <div class="p-4 border-b border-dark-700">
+      <a href="index.html" class="text-lg font-bold text-white flex items-center gap-2">
+        <span class="text-blue-400">⌘</span> Cortex-M 音频学习
+      </a>
+      <div class="mt-2 progress-bar" data-progress-bar><div class="fill" style="width:0%"></div></div>
+      <p class="text-xs text-slate-500 mt-1">进度: <span data-progress-text>0/21</span></p>
+    </div>
+    <nav class="sidebar-nav py-2">
+      <div class="section-title">学习阶段</div>
+      <a href="phase/1-architecture.html" data-nav-id="phase-1">一、Cortex-M 架构基础</a>
+      <a href="phase/2-peripherals.html" data-nav-id="phase-2">二、外设与通信协议</a>
+      <a href="phase/3-dma.html" data-nav-id="phase-3">三、DMA 数据引擎</a>
+      <a href="phase/4-rtos.html" data-nav-id="phase-4">四、RTOS 实时操作系统</a>
+      <a href="phase/5-dsp.html" data-nav-id="phase-5">五、音频 DSP</a>
+      <a href="phase/6-system.html" data-nav-id="phase-6">六、系统级工程</a>
+      <div class="section-title mt-4">源码走读</div>
+      <a href="projects/baremetal-guide.html" data-nav-id="proj-baremetal-guide">裸机编程指南</a>
+      <a href="projects/baremetal.html" data-nav-id="proj-baremetal">cortexm/baremetal</a>
+      <a href="projects/libopencm3.html" data-nav-id="proj-libopencm3">libopencm3</a>
+      <a href="projects/infinitime.html" data-nav-id="proj-infinitime">InfiniTime</a>
+      <a href="projects/zswatch.html" data-nav-id="proj-zswatch">ZSWatch</a>
+      <a href="projects/libdaisy.html" data-nav-id="proj-libdaisy">libDaisy</a>
+      <a href="projects/daisysp.html" data-nav-id="proj-daisysp">DaisySP</a>
+      <a href="projects/mutable-plaits.html" data-nav-id="proj-plaits">Mutable Plaits</a>
+      <a href="projects/teensy-audio.html" data-nav-id="proj-teensy">Teensy Audio</a>
+      <a href="projects/nrf5340-audio.html" data-nav-id="proj-nrf5340">nRF5340 Audio</a>
+      <div class="section-title mt-4">专题</div>
+      <a href="projects/openglass.html" data-nav-id="proj-openglass">omiGlass 智能眼镜</a>
+      <div class="section-title mt-4">参考</div>
+      <a href="glossary.html">术语速查</a>
+      <a href="resources.html">资源汇总</a>
+    </nav>
+  </aside>
+
+  <!-- Mobile overlay -->
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+
+  <!-- Mobile header -->
+  <header class="mobile-header lg:hidden fixed top-0 left-0 right-0 bg-dark-800 border-b border-dark-700 z-20 px-4 py-3 flex items-center gap-3">
+    <button id="sidebar-toggle" class="text-slate-400 hover:text-white">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <span class="text-lg font-bold text-white">Cortex-M 音频学习</span>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="max-w-6xl mx-auto px-6 py-12 lg:py-16">
+
+      <!-- Hero -->
+      <div class="fade-in text-center mb-16">
+        <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">
+          从 OS Framework 到<br><span class="text-blue-400">Cortex-M 音频硬件</span>
+        </h1>
+        <p class="text-lg text-slate-400 max-w-2xl mx-auto mb-6">
+          7 个学习阶段 · 10 个开源项目源码走读 · 4 个递进实战项目
+        </p>
+        <div class="flex items-center justify-center gap-4 text-sm text-slate-500">
+          <span>预计 10-16 周</span>
+          <span class="text-dark-600">|</span>
+          <span>当前进度: <strong class="text-blue-400" data-progress-text>0/21</strong></span>
+          <span class="text-dark-600">|</span>
+          <span><strong class="text-blue-400" data-progress-bar><span class="fill inline-block h-1 rounded" style="width:0%;background:linear-gradient(90deg,#3b82f6,#8b5cf6);display:inline-block;vertical-align:middle"></span></strong> <span class="percentage">0%</span></span>
+        </div>
+      </div>
+
+      <div class="callout callout-info fade-in mb-12">
+        <p class="text-sm text-slate-300"><strong class="text-blue-400">AI Agent Coding 视角：</strong>本站所有内容页面右侧都标注了 AI 时代下的知识价值——<span style="color:#ef4444">红色=不可替代</span>、<span style="color:#22c55e">绿色=可淡化</span>、<span style="color:#06b6d4">青色=人机协作</span>，帮助你聚焦真正需要内化的知识。</p>
+      </div>
+
+      <!-- Learning Roadmap Timeline -->
+      <section class="mb-16">
+        <h2 class="text-2xl font-bold text-white mb-8 fade-in">学习路线图</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <a href="phase/1-architecture.html" class="phase-card bg-dark-800 rounded-xl p-5 fade-in block" data-phase-id="phase-1">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-mono bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">1-2 周</span>
+              <div class="phase-status"></div>
+            </div>
+            <h3 class="text-lg font-semibold text-white">Cortex-M 架构基础</h3>
+            <p class="text-sm text-slate-400 mt-1">编程模型 · NVIC 中断 · 启动流程 · Linker Script</p>
+          </a>
+
+          <a href="phase/2-peripherals.html" class="phase-card bg-dark-800 rounded-xl p-5 fade-in block" data-phase-id="phase-2">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-mono bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">2-3 周</span>
+              <div class="phase-status"></div>
+            </div>
+            <h3 class="text-lg font-semibold text-white">外设与通信协议</h3>
+            <p class="text-sm text-slate-400 mt-1">GPIO · I2C/SPI · I2S/PDM/TDM · 时钟树 · SAI</p>
+          </a>
+
+          <a href="phase/3-dma.html" class="phase-card bg-dark-800 rounded-xl p-5 fade-in block" data-phase-id="phase-3">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-mono bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">1-2 周</span>
+              <div class="phase-status"></div>
+            </div>
+            <h3 class="text-lg font-semibold text-white">DMA 数据引擎</h3>
+            <p class="text-sm text-slate-400 mt-1">Ping-Pong 双缓冲 · Circular 模式 · 缓冲区与延迟</p>
+          </a>
+
+          <a href="phase/4-rtos.html" class="phase-card bg-dark-800 rounded-xl p-5 fade-in block" data-phase-id="phase-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-mono bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">2-3 周</span>
+              <div class="phase-status"></div>
+            </div>
+            <h3 class="text-lg font-semibold text-white">RTOS 实时操作系统</h3>
+            <p class="text-sm text-slate-400 mt-1">FreeRTOS · Zephyr · 任务调度 · Stream Buffer · 音频管线</p>
+          </a>
+
+          <a href="phase/5-dsp.html" class="phase-card bg-dark-800 rounded-xl p-5 fade-in block" data-phase-id="phase-5">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-mono bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">3-4 周</span>
+              <div class="phase-status"></div>
+            </div>
+            <h3 class="text-lg font-semibold text-white">音频 DSP</h3>
+            <p class="text-sm text-slate-400 mt-1">CMSIS-DSP · Biquad EQ · 降噪 · ANC · 波束成形</p>
+          </a>
+
+          <a href="phase/6-system.html" class="phase-card bg-dark-800 rounded-xl p-5 fade-in block" data-phase-id="phase-6">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-mono bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">2-3 周</span>
+              <div class="phase-status"></div>
+            </div>
+            <h3 class="text-lg font-semibold text-white">系统级工程</h3>
+            <p class="text-sm text-slate-400 mt-1">低功耗 · 调试技术 · Bootloader · OTA · 内存优化</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- Open Source Projects -->
+      <section class="mb-16">
+        <h2 class="text-2xl font-bold text-white mb-8 fade-in">开源项目源码走读</h2>
+        <p class="text-slate-400 mb-6 fade-in">每个项目都有独立的源码走读页面，嵌入真实代码 + 逐行中文注释。按推荐阅读顺序排列。</p>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <!-- Project 1 -->
+          <a href="projects/baremetal-guide.html" class="project-card fade-in block">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs text-slate-500 font-mono">阅读顺序 ①</span>
+              <span class="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded">启动基础</span>
+            </div>
+            <h3 class="font-semibold text-white">bare-metal-programming-guide</h3>
+            <p class="text-sm text-slate-400 mt-1">理解 main() 之前发生了什么 — 启动代码、寄存器、向量表</p>
+            <div class="flex gap-3 mt-3 text-xs text-slate-500">
+              <span>无 RTOS</span><span>·</span><span>全平台</span>
+            </div>
+          </a>
+
+          <!-- Project 2 -->
+          <a href="projects/baremetal.html" class="project-card fade-in block">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs text-slate-500 font-mono">阅读顺序 ②</span>
+              <span class="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded">启动基础</span>
+            </div>
+            <h3 class="font-semibold text-white">cortexm/baremetal</h3>
+            <p class="text-sm text-slate-400 mt-1">纯 C++ 裸机启动 — startup.cpp 和 linker script 实例</p>
+            <div class="flex gap-3 mt-3 text-xs text-slate-500">
+              <span>无 RTOS</span><span>·</span><span>C++</span><span>·</span><span>CMake</span>
+            </div>
+          </a>
+
+          <!-- Project 3 -->
+          <a href="projects/libopencm3.html" class="project-card fade-in block">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs text-slate-500 font-mono">阅读顺序 ③</span>
+              <span class="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded">寄存器级</span>
+            </div>
+            <h3 class="font-semibold text-white">libopencm3 <span class="stars text-sm">★ 2500</span></h3>
+            <p class="text-sm text-slate-400 mt-1">从零编写的固件库 — GPIO/SPI/I2C 寄存器操作对照数据手册</p>
+            <div class="flex gap-3 mt-3 text-xs text-slate-500">
+              <span>无 RTOS</span><span>·</span><span>多厂商</span><span>·</span><span>C</span>
+            </div>
+          </a>
+
+          <!-- Project 4 -->
+          <a href="projects/infinitime.html" class="project-card fade-in block">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs text-slate-500 font-mono">阅读顺序 ④</span>
+              <span class="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded">FreeRTOS</span>
+            </div>
+            <h3 class="font-semibold text-white">InfiniTime <span class="stars text-sm">★ 3000</span></h3>
+            <p class="text-sm text-slate-400 mt-1">PineTime 智能手表 — FreeRTOS 任务架构 + 低功耗 + BLE OTA</p>
+            <div class="flex gap-3 mt-3 text-xs text-slate-500">
+              <span>nRF52832 (M4F)</span><span>·</span><span>FreeRTOS</span><span>·</span><span>LVGL</span>
+            </div>
+          </a>
+
+          <!-- Project 5 -->
+          <a href="projects/zswatch.html" class="project-card fade-in block">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs text-slate-500 font-mono">阅读顺序 ⑤</span>
+              <span class="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded">Zephyr</span>
+            </div>
+            <h3 class="font-semibold text-white">ZSWatch <span class="stars text-sm">★ 1500</span></h3>
+            <p class="text-sm text-slate-400 mt-1">Zephyr 智能手表 — Device Tree + Kconfig + 电源管理子系统</p>
+            <div class="flex gap-3 mt-3 text-xs text-slate-500">
+              <span>nRF5340 (M33)</span><span>·</span><span>Zephyr</span><span>·</span><span>双核</span>
+            </div>
+          </a>
+
+          <!-- Project 6 -->
+          <a href="projects/libdaisy.html" class="project-card fade-in block">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs text-slate-500 font-mono">阅读顺序 ⑥</span>
+              <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">音频驱动</span>
+            </div>
+            <h3 class="font-semibold text-white">libDaisy <span class="stars text-sm">★ 1500</span></h3>
+            <p class="text-sm text-slate-400 mt-1">专业音频 HAL — SAI/I2S 驱动 + Codec 驱动 + DMA 配置</p>
+            <div class="flex gap-3 mt-3 text-xs text-slate-500">
+              <span>STM32H750 (M7)</span><span>·</span><span>裸机</span><span>·</span><span>C++</span>
+            </div>
+          </a>
+
+          <!-- Project 7 -->
+          <a href="projects/daisysp.html" class="project-card fade-in block">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs text-slate-500 font-mono">阅读顺序 ⑦</span>
+              <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">DSP</span>
+            </div>
+            <h3 class="font-semibold text-white">DaisySP <span class="stars text-sm">★ 1300</span></h3>
+            <p class="text-sm text-slate-400 mt-1">模块化音频 DSP — 振荡器/滤波器/效果器的 C++ 设计模式</p>
+            <div class="flex gap-3 mt-3 text-xs text-slate-500">
+              <span>Cortex-M7</span><span>·</span><span>C++</span><span>·</span><span>MIT</span>
+            </div>
+          </a>
+
+          <!-- Project 8 -->
+          <a href="projects/mutable-plaits.html" class="project-card fade-in block">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs text-slate-500 font-mono">阅读顺序 ⑧</span>
+              <span class="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded">顶级代码</span>
+            </div>
+            <h3 class="font-semibold text-white">Mutable Instruments Plaits <span class="stars text-sm">★ 2000+</span></h3>
+            <p class="text-sm text-slate-400 mt-1">嵌入式音频 DSP 代码质量的天花板 — FPU + CMSIS 内联函数</p>
+            <div class="flex gap-3 mt-3 text-xs text-slate-500">
+              <span>STM32F4 (M4)</span><span>·</span><span>裸机</span><span>·</span><span>C++</span>
+            </div>
+          </a>
+
+          <!-- Project 9 -->
+          <a href="projects/teensy-audio.html" class="project-card fade-in block">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs text-slate-500 font-mono">阅读顺序 ⑨</span>
+              <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">音频框架</span>
+            </div>
+            <h3 class="font-semibold text-white">Teensy Audio Library <span class="stars text-sm">★ 1000</span></h3>
+            <p class="text-sm text-slate-400 mt-1">图式音频处理框架 — 100+ 模块，Audio Graph 设计模式</p>
+            <div class="flex gap-3 mt-3 text-xs text-slate-500">
+              <span>i.MX RT1062 (M7)</span><span>·</span><span>裸机</span><span>·</span><span>C++</span>
+            </div>
+          </a>
+
+          <!-- Project 10 -->
+          <a href="projects/nrf5340-audio.html" class="project-card fade-in block">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs text-slate-500 font-mono">阅读顺序 ⑩</span>
+              <span class="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded">BLE Audio</span>
+            </div>
+            <h3 class="font-semibold text-white">nRF5340 Audio</h3>
+            <p class="text-sm text-slate-400 mt-1">Nordic 官方 BLE LE Audio — LC3 编解码 + 双核音频管线</p>
+            <div class="flex gap-3 mt-3 text-xs text-slate-500">
+              <span>nRF5340 (M33)</span><span>·</span><span>Zephyr</span><span>·</span><span>官方</span>
+            </div>
+          </a>
+
+          <!-- Topic: omiGlass -->
+          <a href="projects/openglass.html" class="project-card fade-in block">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs text-slate-500 font-mono">专题</span>
+              <span class="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded">参考专题</span>
+            </div>
+            <h3 class="font-semibold text-white">omiGlass 智能眼镜 <span class="stars text-sm">★ 7.5k</span></h3>
+            <p class="text-sm text-slate-400 mt-1">ESP32-S3 固件全量走读 — Opus 音频 · BLE 传输 · 功耗管理 · OTA</p>
+            <div class="flex gap-3 mt-3 text-xs text-slate-500">
+              <span>ESP32-S3 (Xtensa)</span><span>·</span><span>Arduino</span><span>·</span><span>Opus</span>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <!-- Architecture Overview -->
+      <section class="mb-16 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-6">学习路径总览</h2>
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700">
+          <pre class="mermaid">
+graph LR
+    A["阶段一<br/>Cortex-M 架构"] --> B["阶段二<br/>外设与协议"]
+    B --> C["阶段三<br/>DMA"]
+    C --> D["阶段四<br/>RTOS"]
+    B --> E["阶段五<br/>音频 DSP"]
+    D --> E
+    E --> F["阶段六<br/>系统工程"]
+    F --> G["实战项目<br/>智能眼镜原型"]
+
+    style A fill:#1e40af,stroke:#3b82f6,color:#fff
+    style G fill:#065f46,stroke:#22c55e,color:#fff
+          </pre>
+        </div>
+      </section>
+
+      <!-- Quick Start -->
+      <section class="fade-in">
+        <h2 class="text-2xl font-bold text-white mb-6">快速开始</h2>
+        <div class="callout callout-tip">
+          <p class="font-semibold text-green-400 mb-1">建议的第一步</p>
+          <p class="text-sm text-slate-300">阅读 <a href="projects/baremetal-guide.html" class="text-blue-400 underline">裸机编程指南</a> 理解 main() 之前的世界，同时买一块 <strong>STM32F4-Discovery</strong>（~$20）准备动手实践。</p>
+        </div>
+        <div class="callout callout-info mt-3">
+          <p class="font-semibold text-blue-400 mb-1">你的优势</p>
+          <p class="text-sm text-slate-300">作为 OS Framework 开发者，你已经理解调度、中断、内存管理的概念。你的差距主要在：寄存器级编程、硬件外设操作、实时约束下的工程实践。本站帮你精准填补这些空白。</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="js/nav.js"></script>
+  <script src="js/progress.js"></script>
+  <script>mermaid.initialize({ theme: 'dark', themeVariables: { fontSize: '14px' }});</script>
+</body>
+</html>

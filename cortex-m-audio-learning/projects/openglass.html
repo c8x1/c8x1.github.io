@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>omiGlass 智能眼镜专题 — Cortex-M 音频学习</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link href="../css/custom.css" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { colors: { dark: { 900: '#020617', 800: '#0f172a', 700: '#1e293b', 600: '#334155' }}}}}</script>
+</head>
+<body class="bg-dark-900 text-slate-200 font-sans">
+
+  <aside id="sidebar" class="sidebar bg-dark-800 border-r border-dark-700">
+    <div class="p-4 border-b border-dark-700">
+      <a href="../index.html" class="text-lg font-bold text-white flex items-center gap-2"><span class="text-blue-400">⌘</span> Cortex-M 音频学习</a>
+      <div class="mt-2 progress-bar" data-progress-bar><div class="fill" style="width:0%"></div></div>
+      <p class="text-xs text-slate-500 mt-1">进度: <span data-progress-text>0/21</span></p>
+    </div>
+    <nav class="sidebar-nav py-2">
+      <div class="section-title">学习阶段</div>
+      <a href="../phase/1-architecture.html" data-nav-id="phase-1">一、Cortex-M 架构基础</a>
+      <a href="../phase/2-peripherals.html" data-nav-id="phase-2">二、外设与通信协议</a>
+      <a href="../phase/3-dma.html" data-nav-id="phase-3">三、DMA 数据引擎</a>
+      <a href="../phase/4-rtos.html" data-nav-id="phase-4">四、RTOS 实时操作系统</a>
+      <a href="../phase/5-dsp.html" data-nav-id="phase-5">五、音频 DSP</a>
+      <a href="../phase/6-system.html" data-nav-id="phase-6">六、系统级工程</a>
+      <div class="section-title mt-4">源码走读</div>
+      <a href="baremetal-guide.html" data-nav-id="proj-baremetal-guide">裸机编程指南</a>
+      <a href="baremetal.html" data-nav-id="proj-baremetal">cortexm/baremetal</a>
+      <a href="libopencm3.html" data-nav-id="proj-libopencm3">libopencm3</a>
+      <a href="infinitime.html" data-nav-id="proj-infinitime">InfiniTime</a>
+      <a href="zswatch.html" data-nav-id="proj-zswatch">ZSWatch</a>
+      <a href="libdaisy.html" data-nav-id="proj-libdaisy">libDaisy</a>
+      <a href="daisysp.html" data-nav-id="proj-daisysp">DaisySP</a>
+      <a href="mutable-plaits.html" data-nav-id="proj-plaits">Mutable Plaits</a>
+      <a href="teensy-audio.html" data-nav-id="proj-teensy">Teensy Audio</a>
+      <a href="nrf5340-audio.html" data-nav-id="proj-nrf5340">nRF5340 Audio</a>
+      <div class="section-title mt-4">专题</div>
+      <a href="openglass.html" data-nav-id="proj-openglass" class="active">omiGlass 智能眼镜</a>
+      <div class="section-title mt-4">参考</div>
+      <a href="../glossary.html">术语速查</a>
+      <a href="../resources.html">资源汇总</a>
+    </nav>
+  </aside>
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+  <header class="mobile-header lg:hidden fixed top-0 left-0 right-0 bg-dark-800 border-b border-dark-700 z-20 px-4 py-3 flex items-center gap-3">
+    <button id="sidebar-toggle" class="text-slate-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <span class="text-lg font-bold text-white">omiGlass 智能眼镜专题</span>
+  </header>
+
+  <main class="main-content">
+    <div class="max-w-6xl mx-auto px-6 py-12 lg:py-16">
+
+      <!-- ========== 第一部分：总（概述） ========== -->
+      <div class="fade-in mb-12">
+        <div class="flex flex-wrap gap-2 mb-3">
+          <span class="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded">专题</span>
+          <span class="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded">ESP32-S3</span>
+          <span class="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded">Opus + BLE</span>
+        </div>
+        <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">omiGlass 智能眼镜源码走读</h1>
+        <p class="text-lg text-slate-400 mb-4">ESP32-S3 固件全量走读 — 音频管线 · BLE 传输 · 功耗管理 · OTA 升级</p>
+        <div class="flex flex-wrap gap-3 text-sm">
+          <span class="bg-dark-800 px-3 py-1 rounded border border-dark-700">ESP32-S3 (Xtensa 双核)</span>
+          <span class="bg-dark-800 px-3 py-1 rounded border border-dark-700">Arduino + PlatformIO</span>
+          <span class="bg-dark-800 px-3 py-1 rounded border border-dark-700">NimBLE</span>
+          <a href="https://github.com/BasedHardware/Omi" class="text-blue-400 hover:text-blue-300">GitHub (Omi) →</a>
+        </div>
+      </div>
+
+      <!-- 为什么读 omiGlass -->
+      <section class="mb-12 fade-in">
+      <div class="ai-era-layout">
+        <div class="ai-era-main">
+
+        <h2 class="text-2xl font-bold text-white mb-4">为什么读 omiGlass？</h2>
+        <div class="callout callout-info mb-4">
+          <p class="text-sm text-slate-300"><strong class="text-blue-400">虽然 MCU 是 Xtensa 不是 Cortex-M</strong>，但技术栈高度重叠：I2S PDM 音频采集、Opus 编码、BLE 数据传输、功耗管理、OTA 升级的思路可直接迁移到 Cortex-M 项目。</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-cyan-400 font-semibold mb-1 text-sm">音频管线</h3>
+            <p class="text-xs text-slate-400">PDM Mic → I2S → Opus 编码 → BLE 传输，与 STM32 SAI + LC3 的架构如出一辙</p>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-cyan-400 font-semibold mb-1 text-sm">功耗管理</h3>
+            <p class="text-xs text-slate-400">CPU 降频、Light Sleep、Deep Sleep，与 STM32 Stop/Standby 模式设计思路相同</p>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-cyan-400 font-semibold mb-1 text-sm">OTA 升级</h3>
+            <p class="text-xs text-slate-400">双分区 Flash 布局 + 安全回滚，与 STM32 双 Bank 和 nRF5340 DFU 对比学习</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 硬件架构总览 -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">硬件架构总览</h2>
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700 mb-4">
+          <pre class="mermaid">
+graph TB
+    subgraph "XIAO ESP32-S3 Sense"
+        MCU["ESP32-S3<br/>Xtensa 双核 240MHz"]
+        PSRAM["PSRAM 8MB"]
+        FLASH["Flash 8MB"]
+        BLE["BLE 5.0<br/>NimBLE 协议栈"]
+        WIFI["WiFi 6"]
+    end
+    subgraph "外设"
+        MIC["PDM 麦克风<br/>GPIO42(CLK) GPIO41(DATA)"]
+        CAM["OV2640 相机<br/>8-bit 并行 DVP"]
+        BTN["电源按钮<br/>GPIO1"]
+        LED["状态 LED<br/>GPIO21 (反逻辑)"]
+        BAT["双 250mAh 电池<br/>ADC GPIO2 分压器"]
+    end
+    MCU ---|"I2S PDM"| MIC
+    MCU ---|"DVP 并行"| CAM
+    MCU ---|"GPIO 中断"| BTN
+    MCU ---|"GPIO 输出"| LED
+    MCU ---|"ADC 12-bit"| BAT
+    MCU --- PSRAM
+    MCU --- FLASH
+    MCU --- BLE
+    MCU --- WIFI
+          </pre>
+        </div>
+      </section>
+
+      <!-- 数据流 -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">完整数据流</h2>
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700 mb-4">
+          <pre class="mermaid">
+graph LR
+    subgraph "音频管线"
+        MIC["PDM Mic"] -->|"I2S 16kHz"| GAIN["增益 ×2"]
+        GAIN -->|"PCM 16-bit"| RING["环形缓冲区<br/>8000 samples"]
+        RING -->|"320 samples/帧"| OPUS["Opus 编码<br/>32kbps 20ms"]
+        OPUS -->|"编码数据"| TX_BUF["TX 环形缓冲"]
+        TX_BUF -->|"3B 头 + payload"| BLE_A["BLE Notify"]
+    end
+    subgraph "OTA 升级"
+        BLE_CMD["BLE 命令"] -->|"WiFi 凭据 + URL"| WIFI_CONN["WiFi STA"]
+        WIFI_CONN -->|"HTTP/HTTPS"| HTTP_DL["流式下载 1KB"]
+        HTTP_DL -->|"Update 库"| FLASH_W["写入 Flash"]
+        FLASH_W -->|"重启"| REBOOT["ESP.restart()"]
+    end
+    BLE_A -->|"无线"| PHONE["手机 App"]
+    PHONE -->|"BLE 写入"| BLE_CMD
+          </pre>
+        </div>
+      </section>
+
+      <!-- 源码文件清单 -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-4">源码文件清单（15 个文件，全量覆盖）</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-slate-400 border-b border-dark-700">
+              <th class="py-2 pr-4">文件</th><th class="py-2 pr-4">行数</th><th class="py-2">走读方式</th>
+            </tr></thead>
+            <tbody class="text-slate-300">
+              <tr class="border-b border-dark-700/50"><td class="py-1.5 pr-4 font-mono text-xs">main.cpp</td><td class="pr-4">9</td><td>简述（入口转发）</td></tr>
+              <tr class="border-b border-dark-700/50"><td class="py-1.5 pr-4 font-mono text-xs">app.h</td><td class="pr-4">11</td><td>简述（接口声明）</td></tr>
+              <tr class="border-b border-dark-700/50"><td class="py-1.5 pr-4 font-mono text-xs">config.h</td><td class="pr-4">262</td><td class="text-blue-400">完整走读（4 部分）</td></tr>
+              <tr class="border-b border-dark-700/50"><td class="py-1.5 pr-4 font-mono text-xs">camera_pins.h</td><td class="pr-4">298</td><td>简述（多板适配设计）</td></tr>
+              <tr class="border-b border-dark-700/50"><td class="py-1.5 pr-4 font-mono text-xs">camera_index.h</td><td class="pr-4">1319</td><td>简述（压缩 Web UI）</td></tr>
+              <tr class="border-b border-dark-700/50"><td class="py-1.5 pr-4 font-mono text-xs">app.cpp</td><td class="pr-4">1010</td><td class="text-blue-400">完整走读（5 部分）</td></tr>
+              <tr class="border-b border-dark-700/50"><td class="py-1.5 pr-4 font-mono text-xs">mic.h + mic.cpp</td><td class="pr-4">38+144</td><td class="text-blue-400">完整走读</td></tr>
+              <tr class="border-b border-dark-700/50"><td class="py-1.5 pr-4 font-mono text-xs">opus_encoder.h + .cpp</td><td class="pr-4">48+174</td><td class="text-blue-400">完整走读</td></tr>
+              <tr class="border-b border-dark-700/50"><td class="py-1.5 pr-4 font-mono text-xs">mulaw.h</td><td class="pr-4">44</td><td>简述（遗留编码）</td></tr>
+              <tr class="border-b border-dark-700/50"><td class="py-1.5 pr-4 font-mono text-xs">ota.h + ota.cpp</td><td class="pr-4">31+408</td><td class="text-blue-400">完整走读</td></tr>
+              <tr class="border-b border-dark-700/50"><td class="py-1.5 pr-4 font-mono text-xs">platformio.ini</td><td class="pr-4">57</td><td class="text-blue-400">完整走读</td></tr>
+              <tr><td class="py-1.5 pr-4 font-mono text-xs">partitions_ota.csv</td><td class="pr-4">6</td><td class="text-blue-400">完整走读</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ========== 第二部分：分（由浅入深 8 层代码走读） ========== -->
+
+      <!-- 第 1 层：构建系统与 Flash 布局 -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-1">第 1 层：构建系统与 Flash 布局</h2>
+        <p class="text-sm text-slate-500 mb-6">由浅入深 · 第一层 — 从构建配置看全局</p>
+
+        <h3 class="text-lg font-semibold text-white mb-3">platformio.ini — 构建环境</h3>
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">platformio.ini — 两个构建环境</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">[env:seeed_xiao_esp32s3]          // ① 正常构建环境
+platform = espressif32
+board = seeed_xiao_esp32s3
+framework = arduino
+monitor_speed = 115200
+upload_speed = 115200
+board_build.partitions = partitions_ota.csv  // ② 自定义分区表
+board_build.arduino.memory_type = qio_opi    // ③ PSRAM OPI 模式
+build_flags =
+    -DCAMERA_MODEL_XIAO_ESP32S3   // ④ 板级定义
+    -DCORE_DEBUG_LEVEL=1           // ⑤ 调试级别（低）
+    -DBOARD_HAS_PSRAM              // ⑥ PSRAM 使能
+    -DARDUINO_LOOP_STACK_SIZE=32768  // ⑦ 32KB loop 栈
+    -DCONFIG_BT_BTC_TASK_STACK_SIZE=8192  // ⑧ 8KB BT 任务栈
+lib_deps =
+    h2zero/NimBLE-Arduino @ ^1.4.1      // ⑨ BLE 协议栈
+    espressif/esp32-camera @ ^2.0.0      // ⑩ 相机驱动
+    https://github.com/pschatzmann/arduino-libopus.git  // ⑪ Opus 编解码
+
+[env:seeed_xiao_esp32s3_slow]     // ⑫ 慢速烧录环境（仅 upload_speed 不同）
+upload_speed = 57600
+CORE_DEBUG_LEVEL=5                // 最高调试级别</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">②</span><span><strong>自定义分区表</strong>：ESP32 默认分区不支持 OTA，必须用自定义 CSV 文件定义双 App 分区。STM32 通过 linker script (.ld) 定义内存布局，ESP32 通过分区表。</span></div>
+            <div class="ann-item"><span class="ann-num">③</span><span><strong>qio_opi</strong>：XIAO ESP32-S3 使用 OPI PSRAM（8 线），比传统 SPI PSRAM 带宽翻倍。音频缓冲区分配在 PSRAM 中。</span></div>
+            <div class="ann-item"><span class="ann-num">⑦</span><span><strong>32KB loop 栈</strong>：Arduino 默认 8KB，这里扩大到 32KB 因为 app.cpp 的 loop_app() 中有大量局部缓冲区。</span></div>
+            <div class="ann-item"><span class="ann-num">⑨</span><span><strong>NimBLE</strong>：比 BLE 4.2 协议栈节省 ~50% RAM。智能眼镜内存紧张，NimBLE 是必选。</span></div>
+          </div>
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-3 mt-8">partitions_ota.csv — 8MB Flash 分区布局</h3>
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">partitions_ota.csv — OTA 双分区布局</span></div>
+          <div class="code-block">
+            <pre><code class="language-c"># Name,   Type, SubType, Offset,   Size,    Flags
+nvs,      data, nvs,     0x9000,   0x5000,       // ① NVS: 20KB (WiFi/蓝牙配对数据)
+otadata,  data, ota,     0xe000,   0x2000,       // ② OTA Data: 8KB (当前启动分区标记)
+app0,     app,  ota_0,   0x10000,  0x1C0000,     // ③ App0: 1.8MB (固件 A)
+app1,     app,  ota_1,   0x1D0000, 0x1C0000,     // ④ App1: 1.8MB (固件 B)
+spiffs,   data, spiffs,  0x390000, 0x70000,      // ⑤ SPIFFS: 448KB (文件系统)</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">③④</span><span><strong>双 App 分区</strong>：OTA 时新固件写入非活跃分区，验证通过后 otadata 指向新分区。失败可回滚到旧分区。与 STM32 双 Bank Flash、nRF5340 DFU 分区设计理念相同。</span></div>
+            <div class="ann-item"><span class="ann-num">⑤</span><span><strong>SPIFFS 448KB</strong>：存储相机 Web 界面等静态资源。camera_index.h 的 gzip HTML 就从这里提供服务。</span></div>
+          </div>
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-3 mt-8">入口文件</h3>
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">main.cpp + app.h — Arduino 入口转发</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">// main.cpp — Arduino 框架入口，仅做转发
+#include &lt;Arduino.h&gt;
+#include "app.h"
+void setup() { setup_app(); }   // 一次性初始化
+void loop()  { loop_app();  }   // 主循环（协作式调度）
+
+// app.h — 仅两个函数声明
+void setup_app();
+void loop_app();</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">→</span><span>Arduino 的 <code>setup()/loop()</code> 模式类似裸机 <code>main()</code> 中的 <code>init() + while(1)</code>。所有逻辑在 app.cpp 中实现，main.cpp 保持最小化。</span></div>
+          </div>
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-3 mt-8">camera_pins.h — 多板适配设计（简述）</h3>
+        <div class="callout callout-info">
+          <p class="text-sm text-slate-300"><code>camera_pins.h</code> 用 13 个 <code>#ifdef</code> 条件编译块覆盖 14 种 ESP32 相机板（WROVER、ESP-EYE、M5STACK、AI-Thinker、XIAO ESP32S3 等）。每个块定义 15 个 GPIO 映射（Y2-Y9 数据线、VSYNC/HREF/PCLK 同步、XCLK 主时钟、I2C SDA/SCL）。这是嵌入式工程中常见的<strong>板级抽象</strong>实践 — 类似 Zephyr 的 Device Tree，但用预处理器实现。</p>
+        </div>
+      </section>
+
+      <!-- 第 2 层：设备状态机与按钮交互 -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-1">第 2 层：设备状态机与按钮交互</h2>
+        <p class="text-sm text-slate-500 mb-6">由浅入深 · 第二层 — 状态驱动的设备行为</p>
+
+        <h3 class="text-lg font-semibold text-white mb-3">config.h — 枚举类型定义</h3>
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">config.h — 设备/功耗/按钮/LED 状态枚举</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">// 设备生命周期状态
+typedef enum {
+    DEVICE_BOOTING,      // ① 启动中：LED 快闪，初始化各子系统
+    DEVICE_ACTIVE,       // ② 正常工作：BLE + 音频 + 相机
+    DEVICE_POWER_SAVE,   // ③ 省电模式：CPU 降到 40MHz
+    DEVICE_LOW_BATTERY,  // ④ 低电：最小化操作
+    DEVICE_POWERING_OFF, // ⑤ 关机中：LED 闪烁序列
+    DEVICE_SLEEP         // ⑥ 深度睡眠：仅按钮唤醒
+} device_state_t;
+
+// 功耗状态（与设备状态独立管理）
+typedef enum {
+    POWER_STATE_ACTIVE,      // 正常操作
+    POWER_STATE_POWER_SAVE,  // 降频运行
+    POWER_STATE_LOW_BATTERY, // 最小操作
+    POWER_STATE_SLEEP        // Deep Sleep
+} power_state_t;
+
+// 按钮状态（消抖状态机）
+typedef enum {
+    BUTTON_IDLE,        // 空闲
+    BUTTON_PRESSED,     // ⑦ 刚按下（等待判断长短按）
+    BUTTON_LONG_PRESS,  // ⑧ 持续 2 秒 = 关机
+    BUTTON_RELEASED     // 释放
+} button_state_t;
+
+// LED 显示模式
+typedef enum {
+    LED_OFF,
+    LED_ON,
+    LED_BOOT_SEQUENCE,     // 启动：5 次快闪 1.5s
+    LED_NORMAL_OPERATION,  // 运行：连接=常亮，未连接=慢闪
+    LED_LOW_BATTERY,       // 低电：1s 间隔闪烁
+    LED_PHOTO_CAPTURE,     // 拍照：100ms 闪
+    LED_POWER_OFF_SEQUENCE,// 关机：2 次快闪 0.8s
+    LED_SLEEP_MODE         // 睡眠：5s 超慢闪
+} led_status_t;</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">⑦⑧</span><span><strong>按钮状态机</strong>：短按（&gt;50ms）= 唤醒/活跃，长按（≥2s）= 关机。消抖 50ms 防误触。这是嵌入式按钮处理的经典模式。</span></div>
+            <div class="ann-item"><span class="ann-num">→</span><span><strong>状态机解耦</strong>：device_state_t 管理设备生命周期，led_status_t 管理显示行为，两者独立。设备状态转换不直接操作 GPIO，而是通过 LED 模式间接表达。</span></div>
+          </div>
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-3 mt-8">app.cpp — 全局变量区 + 按钮处理</h3>
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">app.cpp:16-123 — 全局状态 + GPIO 中断 + 按钮消抖</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">// 全局状态
+float batteryVoltage = 0.0f;       // 电池电压
+int batteryPercentage = 0;         // 电池百分比
+device_state_t deviceState = DEVICE_BOOTING;  // 设备状态
+volatile bool buttonPressed = false;  // ① ISR 写入标志
+unsigned long buttonPressTime = 0;    // 按下时间戳
+led_status_t ledMode = LED_BOOT_SEQUENCE; // LED 模式
+unsigned long lastActivity = 0;      // 最后活动时间
+bool powerSaveMode = false;          // 省电模式标志
+bool lightSleepEnabled = true;       // Light Sleep 使能
+
+// GPIO 中断服务函数（RAM 中执行）
+void IRAM_ATTR buttonISR() {   // ② IRAM_ATTR 确保在 Flash 访问时仍可触发
+    buttonPressed = true;       // 仅设标志，不在 ISR 中做复杂操作
+}
+
+// 按钮处理（每次 loop 调用）
+void handleButton() {
+    unsigned long now = millis();
+    static unsigned long lastDebounceTime = 0;
+    static bool buttonDown = false;
+    static bool longPressTriggered = false;
+
+    bool currentButtonState = !digitalRead(POWER_BUTTON_PIN); // ③ 活跃低
+
+    if (currentButtonState && !buttonDown) {
+        if (now - lastDebounceTime &lt; 50) return;  // ④ 50ms 消抖
+        buttonPressTime = now;
+        buttonDown = true;
+        longPressTriggered = false;
+    } else if (currentButtonState && buttonDown && !longPressTriggered) {
+        if (now - buttonPressTime >= 2000) {  // ⑤ 长按 2s = 关机
+            longPressTriggered = true;
+            ledMode = LED_POWER_OFF_SEQUENCE;
+        }
+    } else if (!currentButtonState && buttonDown) {
+        if (now - lastDebounceTime &lt; 50) return;
+        buttonDown = false;
+        if (!longPressTriggered && (now - buttonPressTime) >= 50) {
+            lastActivity = now;        // ⑥ 短按 = 注册活动
+            if (powerSaveMode) exitPowerSave();
+        }
+    }
+    buttonPressed = false;
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">①②</span><span><strong>ISR 最小化原则</strong>：中断只设 volatile 标志，复杂逻辑在主循环处理。IRAM_ATTR 确保 ISR 代码在 RAM 中执行，不会被 Flash 访问阻塞。与 STM32 的 EXTI 中断设计相同。</span></div>
+            <div class="ann-item"><span class="ann-num">④</span><span><strong>消抖</strong>：50ms 内的连续触发被忽略。嵌入式按钮消抖的标配做法 — 也可以用硬件 RC 滤波。</span></div>
+            <div class="ann-item"><span class="ann-num">⑤⑥</span><span><strong>长短按区分</strong>：持续 2s → 关机序列；释放时 &gt;50ms → 短按（唤醒/退出省电）。用一个 static bool 防止长按重复触发。</span></div>
+          </div>
+        </div>
+
+        <div class="bg-dark-800 rounded-xl p-6 border border-dark-700 mt-6">
+          <pre class="mermaid">
+stateDiagram-v2
+    [*] --> BOOTING
+    BOOTING --> ACTIVE : 初始化完成
+    ACTIVE --> POWER_SAVE : 45s 空闲
+    POWER_SAVE --> ACTIVE : 按钮短按 / BLE 连接
+    ACTIVE --> LOW_BATTERY : 电压 &lt; 3.4V
+    LOW_BATTERY --> ACTIVE : 充电恢复
+    ACTIVE --> POWERING_OFF : 按钮长按 2s
+    POWERING_OFF --> SLEEP : LED 闪烁完毕
+    SLEEP --> BOOTING : 按钮 GPIO1 唤醒
+          </pre>
+        </div>
+      </section>
+
+      <!-- 第 3 层：LED 显示与状态指示 -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-1">第 3 层：LED 显示与状态指示</h2>
+        <p class="text-sm text-slate-500 mb-6">由浅入深 · 第三层 — 用一枚 LED 表达全部设备状态</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">app.cpp:128-187 — LED 控制逻辑</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">void updateLED() {
+    unsigned long now = millis();
+    static unsigned long bootStartTime = 0;
+    static unsigned long powerOffStartTime = 0;
+
+    switch (ledMode) {
+    case LED_BOOT_SEQUENCE:       // ① 启动：5 次快闪，1.5s 完成
+        if (bootStartTime == 0) bootStartTime = now;
+        if (now - bootStartTime &lt; 1500) {
+            int blinkPhase = ((now - bootStartTime) / 150) % 2;
+            digitalWrite(STATUS_LED_PIN, !blinkPhase);  // ② 反逻辑：HIGH=OFF
+        } else {
+            digitalWrite(STATUS_LED_PIN, HIGH); // OFF
+            ledMode = LED_NORMAL_OPERATION;
+        }
+        break;
+
+    case LED_POWER_OFF_SEQUENCE:  // ③ 关机：2 次快闪，0.8s 后进入 Deep Sleep
+        if (powerOffStartTime == 0) powerOffStartTime = now;
+        if (now - powerOffStartTime &lt; 800) {
+            int blinkPhase = ((now - powerOffStartTime) / 200) % 2;
+            digitalWrite(STATUS_LED_PIN, !blinkPhase);
+        } else {
+            digitalWrite(STATUS_LED_PIN, HIGH);
+            delay(100);
+            shutdownDevice();       // 关机
+        }
+        break;
+
+    case LED_NORMAL_OPERATION:    // ④ 正常运行
+    default:
+        if (connected) {
+            digitalWrite(STATUS_LED_PIN, LOW);   // ⑤ 已连接：常亮
+        } else {
+            int blinkPhase = (now / 1000) % 2;
+            digitalWrite(STATUS_LED_PIN, blinkPhase ? HIGH : LOW); // ⑥ 未连接：1s 慢闪
+        }
+        break;
+    }
+}
+
+void blinkLED(int count, int delayMs) {  // ⑦ 通用闪烁函数
+    for (int i = 0; i &lt; count; i++) {
+        digitalWrite(STATUS_LED_PIN, HIGH);  // OFF
+        delay(delayMs);
+        digitalWrite(STATUS_LED_PIN, LOW);   // ON
+        delay(delayMs);
+    }
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">②</span><span><strong>GPIO21 反逻辑</strong>：XIAO ESP32-S3 的用户 LED 是低电平点亮（HIGH=灭，LOW=亮）。这在嵌入式中很常见 — NPN 驱动 LED 就是这个逻辑。代码中统一用 <code>!</code> 取反。</span></div>
+            <div class="ann-item"><span class="ann-num">⑤⑥</span><span><strong>连接状态可视化</strong>：用户只需看 LED 就知道设备状态 — 常亮=已连接手机，慢闪=等待连接。这是没有屏幕的嵌入式设备的基本交互设计。</span></div>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4 mt-6">
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-cyan-400 font-semibold mb-2 text-sm">LED 模式速查</h3>
+            <ul class="text-xs text-slate-400 space-y-1">
+              <li>5 次快闪 1.5s → 启动中</li>
+              <li>常亮 → 已连接手机</li>
+              <li>1s 慢闪 → 等待连接</li>
+              <li>2 次快闪 0.8s → 正在关机</li>
+              <li>5s 超慢闪 → 深度睡眠</li>
+            </ul>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-cyan-400 font-semibold mb-2 text-sm">设计模式：枚举驱动显示</h3>
+            <p class="text-xs text-slate-400">led_status_t 枚举将设备状态与 LED 行为解耦。设备状态转换时只需修改 ledMode 变量，updateLED() 在每次 loop 中根据当前模式渲染 LED。类似 MVC 模式 — 状态是 Model，LED 是 View。</p>
+          </div>
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-3 mt-8">camera_index.h — 嵌入式 Web UI（简述）</h3>
+        <div class="callout callout-info">
+          <p class="text-sm text-slate-300"><code>camera_index.h</code>（1319 行）包含一个 gzip 压缩的 HTML 字节数组（6787 字节），是 OV2640 相机的 Web 查看界面。编译时嵌入固件，运行时通过 HTTP 服务提供。这是<strong>嵌入式 Web UI 的常见做法</strong> — 把静态资源编译进二进制，避免文件系统依赖。对比 InfiniTime 的 SPI LCD 驱动：一个用 Web UI 显示，一个用物理屏幕，都是"无桌面系统的 UI"。</p>
+        </div>
+      </section>
+
+      <!-- 第 4 层：I2S PDM 麦克风驱动 -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-1">第 4 层：I2S PDM 麦克风驱动</h2>
+        <p class="text-sm text-slate-500 mb-6">由浅入深 · 第四层 — 音频数据的起点</p>
+
+        <h3 class="text-lg font-semibold text-white mb-3">mic.h — 回调接口设计</h3>
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">mic.h — 麦克风驱动接口（38 行）</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">typedef void (*mic_data_handler)(int16_t *data, size_t samples);  // ① 回调类型
+
+bool mic_start();                   // 初始化 I2S + 启动采集
+void mic_stop();                    // 停止 + 卸载驱动
+bool mic_is_running();              // 查询状态
+void mic_set_callback(mic_data_handler callback);  // ② 注册回调
+void mic_process();                 // ③ 主循环中调用，读取数据并触发回调</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">①②③</span><span><strong>回调驱动设计</strong>：mic 模块不知道上层是谁 — 它只负责采集 PCM 数据并通过回调通知。上层（app.cpp）注册回调函数处理数据。这是嵌入式音频的分层设计：硬件驱动 → 回调 → 应用逻辑。</span></div>
+          </div>
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-3 mt-8">mic.cpp — I2S PDM 配置与数据采集</h3>
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">mic.cpp:15-87 — 初始化与 I2S 配置</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">bool mic_start() {
+    // ① PSRAM 分配（优先）+ 常规 RAM 兜底
+    i2s_read_buffer = (int16_t *) ps_malloc(MIC_BUFFER_SAMPLES * sizeof(int16_t));
+    if (i2s_read_buffer == nullptr) {
+        i2s_read_buffer = (int16_t *) malloc(MIC_BUFFER_SAMPLES * sizeof(int16_t));
+        // 分配失败则返回 false
+    }
+
+    // ② I2S PDM 配置
+    i2s_config_t i2s_config = {
+        .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX | I2S_MODE_PDM),  // ③ PDM 接收
+        .sample_rate = MIC_SAMPLE_RATE,           // 16kHz
+        .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,  // 16-bit
+        .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,   // ④ 单声道
+        .communication_format = I2S_COMM_FORMAT_STAND_I2S,
+        .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
+        .dma_buf_count = 8,     // ⑤ 8 个 DMA 缓冲区
+        .dma_buf_len = 256,     // 每个缓冲 256 字节
+        .use_apll = false,      // 不用 APLL（精度够用）
+    };
+
+    // ⑥ 引脚配置 — XIAO ESP32S3 Sense 内置 PDM 麦克风
+    i2s_pin_config_t pin_config = {
+        .bck_io_num = I2S_PIN_NO_CHANGE,   // PDM 不需要 BCK
+        .ws_io_num = MIC_CLK_PIN,           // GPIO42 = PDM CLK
+        .data_out_num = I2S_PIN_NO_CHANGE,  // 只接收不发送
+        .data_in_num = MIC_DATA_PIN,        // GPIO41 = PDM DATA
+    };
+
+    i2s_driver_install(I2S_PORT, &i2s_config, 0, NULL);  // ⑦ 安装驱动
+    i2s_set_pin(I2S_PORT, &pin_config);                    // 配置引脚
+    i2s_zero_dma_buffer(I2S_PORT);                         // 清空 DMA 缓冲
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">①</span><span><strong>PSRAM 优先策略</strong>：ESP32-S3 有 8MB PSRAM（外部 SRAM），适合存放大缓冲区。<code>ps_malloc()</code> 尝试 PSRAM，失败则用内部 RAM。对比 STM32 的 SRAM 紧张场景，ESP32 的 PSRAM 是巨大优势。</span></div>
+            <div class="ann-item"><span class="ann-num">③</span><span><strong>PDM 模式</strong>：MEMS 数字麦克风的输出格式。与 I2S 的区别：PDM 只需 2 根线（CLK+DATA），I2S 需要 3-4 根线（BCK+WS+DATA+MCLK）。nRF5340 有硬件 PDM 外设，STM32 需要用 SAI 的 PDM 模式。</span></div>
+            <div class="ann-item"><span class="ann-num">⑤</span><span><strong>8×256 DMA 缓冲</strong>：8 个缓冲区 × 256 字节 = 2KB DMA 缓冲。16kHz × 2 字节 = 32KB/s 数据率，每个缓冲可存 128 个样本 = 8ms。8 个缓冲 = 64ms 延迟容忍。与 libDaisy 的 Ping-Pong DMA 类似，但 ESP32 I2S 驱动内部管理 DMA 链。</span></div>
+          </div>
+        </div>
+
+        <div class="code-walkthrough mt-6">
+          <div class="file-header"><span class="file-path">mic.cpp:114-144 — 数据处理与增益</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">void mic_process() {
+    if (!mic_running || i2s_read_buffer == nullptr) return;
+
+    size_t bytes_read = 0;
+    // ① 非阻塞读取，20ms 超时
+    esp_err_t err = i2s_read(I2S_PORT, i2s_read_buffer,
+        MIC_BUFFER_SAMPLES * sizeof(int16_t), &bytes_read, pdMS_TO_TICKS(20));
+
+    if (err == ESP_OK && bytes_read > 0) {
+        size_t samples_read = bytes_read / sizeof(int16_t);
+
+        // ② 增益处理：int32 放大 + 16-bit 钳位
+        if (MIC_GAIN != 1) {
+            for (size_t i = 0; i &lt; samples_read; i++) {
+                int32_t sample = (int32_t)i2s_read_buffer[i] * MIC_GAIN;
+                if (sample > 32767)  sample = 32767;   // ③ 正向钳位
+                if (sample &lt; -32768) sample = -32768;  // 负向钳位
+                i2s_read_buffer[i] = (int16_t)sample;
+            }
+        }
+        if (audio_callback != nullptr)
+            audio_callback(i2s_read_buffer, samples_read);  // ④ 回调通知
+    }
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">②③</span><span><strong>增益 ×2</strong>：PDM 麦克风输出信号较小，需要软件放大。先转 int32 避免溢出，再钳位到 16-bit 范围。这是嵌入式音频的常规操作 — 类似模拟前端的 PGA（可编程增益放大器），但在数字域实现。</span></div>
+            <div class="ann-item"><span class="ann-num">④</span><span><strong>回调链</strong>：这里回调的是 app.cpp 的 <code>onMicData()</code>，后者调用 <code>opus_receive_pcm()</code> 写入环形缓冲区。数据流：Mic → I2S → 增益 → 回调 → Opus 编码器。</span></div>
+          </div>
+        </div>
+
+        <!-- 对比表格 -->
+        <div class="mt-6 overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-slate-400 border-b border-dark-700">
+              <th class="py-2 pr-4">特性</th><th class="py-2 pr-4">ESP32-S3 PDM</th><th class="py-2 pr-4">nRF5340 PDM</th><th class="py-2">STM32 SAI</th>
+            </tr></thead>
+            <tbody class="text-slate-300 text-xs">
+              <tr class="border-b border-dark-700/50"><td class="py-1.5 pr-4">接口</td><td class="pr-4">I2S PDM 模式</td><td class="pr-4">硬件 PDM 外设</td><td>SAI + PDM 滤波器</td></tr>
+              <tr class="border-b border-dark-700/50"><td class="py-1.5 pr-4">引脚</td><td class="pr-4">CLK + DATA (2线)</td><td class="pr-4">CLK + DATA (2线)</td><td class="pr-4">BCK+WS+DATA+MCLK (3-4线)</td></tr>
+              <tr class="border-b border-dark-700/50"><td class="py-1.5 pr-4">采样率</td><td class="pr-4">16kHz</td><td class="pr-4">16kHz</td><td class="pr-4">48kHz (典型)</td></tr>
+              <tr><td class="py-1.5 pr-4">DMA</td><td class="pr-4">驱动内部管理</td><td class="pr-4">EasyDMA</td><td>HAL DMA 配置</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 第 5 层：Opus 音频编码 -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-1">第 5 层：Opus 音频编码</h2>
+        <p class="text-sm text-slate-500 mb-6">由浅入深 · 第五层 — PCM 音频如何变成 32kbps 码流</p>
+
+        <h3 class="text-lg font-semibold text-white mb-3">opus_encoder.h — 接口声明</h3>
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">opus_encoder.h — Opus 编码器接口（48 行）</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">typedef void (*opus_encoded_handler)(uint8_t *data, size_t len);  // ① 编码数据回调
+
+bool opus_encoder_init();        // 初始化编码器 + 分配缓冲区
+int  opus_encode_frame(int16_t *pcm_data, size_t samples);  // 编码一帧
+void opus_set_callback(opus_encoded_handler callback);       // 注册回调
+void opus_process();             // ② 主循环调用：取帧 + 编码 + 回调
+int  opus_receive_pcm(int16_t *data, size_t samples);        // ③ 写入环形缓冲区
+uint8_t opus_get_codec_id();     // 返回 codec ID (21 = Opus)</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">②③</span><span><strong>双缓冲设计</strong>：<code>opus_receive_pcm()</code> 被 mic 回调调用（写入），<code>opus_process()</code> 在主循环中调用（读取+编码）。中间用环形缓冲区解耦生产者和消费者速率。</span></div>
+          </div>
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-3 mt-8">opus_encoder.cpp — PSRAM 分配 + 编码器初始化</h3>
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">opus_encoder.cpp:21-91 — 内存分配与 Opus 配置</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">bool opus_encoder_init() {
+    // ① 三个缓冲区全部分配在 PSRAM
+    pcm_ring_buffer = (int16_t *)heap_caps_malloc(
+        AUDIO_RING_BUFFER_SAMPLES * sizeof(int16_t), MALLOC_CAP_SPIRAM);  // 8000×2 = 16KB
+    opus_output_buffer = (uint8_t *)heap_caps_malloc(
+        OPUS_OUTPUT_MAX_BYTES, MALLOC_CAP_SPIRAM);  // 160 字节
+    opus_input_buffer = (int16_t *)heap_caps_malloc(
+        OPUS_FRAME_SAMPLES * sizeof(int16_t), MALLOC_CAP_SPIRAM);  // 320×2 = 640 字节
+
+    // ② 创建 Opus 编码器
+    int error;
+    encoder = opus_encoder_create(
+        MIC_SAMPLE_RATE,           // 16kHz 采样率
+        1,                         // 单声道
+        OPUS_APPLICATION_VOIP,     // ③ VOIP 模式（优化语音）
+        &error);
+
+    // ④ 编码器参数调优
+    opus_encoder_ctl(encoder, OPUS_SET_BITRATE(OPUS_BITRATE));        // 32kbps
+    opus_encoder_ctl(encoder, OPUS_SET_COMPLEXITY(OPUS_COMPLEXITY));  // 复杂度 3（1-10）
+    opus_encoder_ctl(encoder, OPUS_SET_SIGNAL(OPUS_SIGNAL_VOICE));    // 语音信号
+    opus_encoder_ctl(encoder, OPUS_SET_VBR(OPUS_VBR));               // ⑤ VBR 可变码率
+    opus_encoder_ctl(encoder, OPUS_SET_DTX(0));           // ⑥ DTX 关闭（不发送静音帧）
+    opus_encoder_ctl(encoder, OPUS_SET_INBAND_FEC(0));    // ⑦ FEC 关闭
+    opus_encoder_ctl(encoder, OPUS_SET_PACKET_LOSS_PERC(0)); // 丢包率 0（BLE 不丢包）
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">①</span><span><strong>PSRAM 缓冲策略</strong>：16KB 环形缓冲区存 8000 个样本 = 500ms @ 16kHz。即使编码器短暂阻塞，也能缓冲 500ms 数据。内部 RAM 只有 512KB，音频缓冲放 PSRAM 释放宝贵的内部 RAM。</span></div>
+            <div class="ann-item"><span class="ann-num">③</span><span><strong>VOIP 模式</strong>：Opus 有三种模式 — VOIP（语音优化）、AUDIO（音乐优化）、RESTRICTED_LOWDELAY。智能眼镜传输语音，VOIP 模式在 32kbps 下提供最佳语音质量。</span></div>
+            <div class="ann-item"><span class="ann-num">⑥⑦</span><span><strong>DTX/FEC 关闭</strong>：DTX（不连续传输）在静音时不发数据节省带宽。但 BLE 连接稳定，不需要这些抗丢包机制。对比 WebRTC 场景会开启 FEC。</span></div>
+          </div>
+        </div>
+
+        <div class="code-walkthrough mt-6">
+          <div class="file-header"><span class="file-path">opus_encoder.cpp:98-167 — 环形缓冲区 + 编码处理</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">// ① 环形缓冲区写入（被 mic 回调调用）
+int opus_receive_pcm(int16_t *data, size_t samples) {
+    for (size_t i = 0; i &lt; samples; i++) {
+        size_t next_write = (ring_write_pos + 1) % AUDIO_RING_BUFFER_SAMPLES;
+        if (next_write == ring_read_pos) {
+            ring_read_pos = (ring_read_pos + 1) % AUDIO_RING_BUFFER_SAMPLES; // ② 丢弃最旧
+        }
+        pcm_ring_buffer[ring_write_pos] = data[i];
+        ring_write_pos = next_write;
+    }
+    return 0;
+}
+
+// 缓冲区可用数据量
+static size_t ring_buffer_available() {
+    if (ring_write_pos >= ring_read_pos)
+        return ring_write_pos - ring_read_pos;
+    else
+        return AUDIO_RING_BUFFER_SAMPLES - ring_read_pos + ring_write_pos;
+}
+
+// ③ 编码处理（主循环调用）
+void opus_process() {
+    while (ring_buffer_available() >= OPUS_FRAME_SAMPLES) {  // ④ 凑够 320 样本
+        // 从环形缓冲区取一帧
+        for (size_t i = 0; i &lt; OPUS_FRAME_SAMPLES; i++) {
+            opus_input_buffer[i] = pcm_ring_buffer[ring_read_pos];
+            ring_read_pos = (ring_read_pos + 1) % AUDIO_RING_BUFFER_SAMPLES;
+        }
+        // 编码
+        int encoded_bytes = opus_encode_frame(opus_input_buffer, OPUS_FRAME_SAMPLES);
+        if (encoded_bytes > 0 && encoded_callback != nullptr)
+            encoded_callback(opus_output_buffer, encoded_bytes);  // ⑤ 回调通知
+    }
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">②</span><span><strong>丢弃策略</strong>：环形缓冲区满时丢弃最旧数据（读指针前进），保证最新音频不被延迟。音频系统宁可丢旧数据也不能阻塞 — 这是实时音频的基本原则。</span></div>
+            <div class="ann-item"><span class="ann-num">④</span><span><strong>20ms 帧粒度</strong>：320 samples @ 16kHz = 20ms。Opus 编码器要求固定帧长。每 20ms 产生一个编码包，BLE 每秒发 50 个包。</span></div>
+          </div>
+        </div>
+
+        <!-- 参数解读 -->
+        <div class="grid md:grid-cols-2 gap-4 mt-6">
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-green-400 font-semibold mb-2 text-sm">为什么 16kHz / 32kbps / 20ms？</h3>
+            <ul class="text-xs text-slate-400 space-y-1">
+              <li>• <strong>16kHz</strong>：语音频宽 8kHz 足够，16kHz 留余量</li>
+              <li>• <strong>32kbps</strong>：Opus 在 32kbps 语音质量接近原始 PCM</li>
+              <li>• <strong>20ms</strong>：BLE 连接间隔 25-50ms，20ms 帧正好适配</li>
+              <li>• <strong>320 samples/帧</strong>：16000 × 0.02 = 320</li>
+            </ul>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700">
+            <h3 class="text-blue-400 font-semibold mb-2 text-sm">编解码器对比</h3>
+            <ul class="text-xs text-slate-400 space-y-1">
+              <li>• <strong>Opus</strong>：6-510kbps，延迟 2.5-60ms，开源，语音+音乐</li>
+              <li>• <strong>LC3</strong>：BLE LE Audio 专用，同码率质量接近 Opus</li>
+              <li>• <strong>SBC</strong>：经典蓝牙，170-345kbps，质量最差</li>
+              <li>• <strong>μ-law</strong>：64kbps，8kHz，最简单（omiGlass 旧版使用）</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-3 mt-8">mulaw.h — 遗留 μ-law 编码（简述）</h3>
+        <div class="callout callout-info">
+          <p class="text-sm text-slate-300"><code>mulaw.h</code>（44 行）实现了 16-bit PCM → 8-bit μ-law 的压缩编码。这是 omiGlass 早期版本的音频编码方案，后被 Opus 完全替代。μ-law 将 16-bit 压缩到 8-bit（2:1 压缩），码率 128kbps @ 16kHz，比 Opus 的 32kbps 高 4 倍。文件保留作为历史参考，不再在生产代码路径中使用。</p>
+        </div>
+      </section>
+
+      <!-- 第 6 层：BLE 服务与音频传输 -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-1">第 6 层：BLE 服务与音频传输</h2>
+        <p class="text-sm text-slate-500 mb-6">由浅入深 · 第六层 — 编码后的音频如何通过 BLE 发到手机</p>
+
+        <h3 class="text-lg font-semibold text-white mb-3">config.h — BLE UUID 体系与参数</h3>
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">config.h:148-200 — OMI BLE 协议定义</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">// ① OMI Service UUID — 基础 UUID + 递增后缀
+#define OMI_SERVICE_UUID    "19B10000-E8F2-537E-4F6C-D104768A1214"
+#define AUDIO_DATA_UUID     "19B10001-..."  // 音频数据（Notify 推送）
+#define AUDIO_CODEC_UUID    "19B10002-..."  // 编解码器 ID（Read 查询）
+#define PHOTO_DATA_UUID     "19B10005-..."  // 照片数据
+#define PHOTO_CONTROL_UUID  "19B10006-..."  // 照片控制
+
+// ② 标准 BLE 服务
+#define BATTERY_SERVICE_UUID  (uint16_t) 0x180F  // 标准电池服务
+#define BATTERY_LEVEL_UUID    (uint16_t) 0x2A19
+
+// ③ OTA 服务
+#define OTA_SERVICE_UUID   "19B10010-..."
+#define OTA_CONTROL_UUID   "19B10011-..."  // 写命令/读状态
+#define OTA_DATA_UUID      "19B10012-..."  // 进度通知
+
+// ④ BLE 连接参数
+#define BLE_MTU_SIZE          517    // 最大 MTU（高效传输）
+#define BLE_CHUNK_SIZE        500    // 照片分块大小
+#define BLE_TX_POWER          ESP_PWR_LVL_N0  // 低功耗发射
+#define BLE_CONN_MIN_INTERVAL 20    // 25ms 最小连接间隔
+#define BLE_CONN_MAX_INTERVAL 40    // 50ms 最大连接间隔
+#define BLE_ADV_MIN_INTERVAL  0x0140  // 200ms 广播间隔</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">①</span><span><strong>UUID 设计</strong>：基础 UUID 相同，仅后缀递增（001-012）。这是 BLE 自定义服务的常见模式 — 一个 Service 下挂多个 Characteristic。对比 nRF5340 Audio 使用 BLE SIG 标准的 ISO 通道。</span></div>
+            <div class="ann-item"><span class="ann-num">④</span><span><strong>连接参数</strong>：25-50ms 连接间隔意味着每秒 20-40 次交互。音频 20ms 一帧，50ms 连接间隔意味着每 2-3 个连接事件发送一帧音频。BLE Notify 不保证时序，与 LE Audio 的 ISO 同步通道有本质区别。</span></div>
+          </div>
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-3 mt-8">app.cpp — BLE 服务搭建</h3>
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">app.cpp:587-694 — configure_ble() 四个 Service</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">void configure_ble() {
+    BLEDevice::init(BLE_DEVICE_NAME);   // "OMI Glass"
+    BLEServer *server = BLEDevice::createServer();
+    server->setCallbacks(new ServerHandler());  // ① 连接/断开回调
+
+    // ===== Service 1: OMI Main Service =====
+    BLEService *service = server->createService(serviceUUID);
+
+    // ② Audio Data: READ + NOTIFY + CCCD 订阅跟踪
+    audioDataCharacteristic = service->createCharacteristic(
+        audioDataUUID, BLECharacteristic::PROPERTY_READ
+                     | BLECharacteristic::PROPERTY_NOTIFY);
+    BLE2902 *audioCcc = new BLE2902();
+    audioCcc->setCallbacks(new AudioCCCDCallback()); // ③ 监听订阅事件
+    audioDataCharacteristic->addDescriptor(audioCcc);
+
+    // Audio Codec: READ-only（返回字节 21 = Opus）
+    audioCodecCharacteristic = service->createCharacteristic(
+        audioCodecUUID, BLECharacteristic::PROPERTY_READ);
+    uint8_t codecId = opus_get_codec_id();  // ④ 手机读此值确认编码格式
+    audioCodecCharacteristic->setValue(&codecId, 1);
+
+    // Photo Data + Control (略)
+
+    // ===== Service 2: Battery Service =====
+    BLEService *batteryService = server->createService(BATTERY_SERVICE_UUID);
+    batteryLevelCharacteristic = batteryService->createCharacteristic(
+        BATTERY_LEVEL_UUID, PROPERTY_READ | PROPERTY_NOTIFY);  // ⑤ 标准电池百分比
+
+    // ===== Service 3: Device Info Service =====
+    BLEService *deviceInfoService = server->createService((uint16_t)0x180A);
+    // ⑥ Manufacturer / Model / Firmware / Hardware / Serial Number
+    // Serial Number 用 ESP32 eFuse MAC 地址生成
+
+    // ===== Service 4: OTA Service =====
+    BLEService *otaService = server->createService(otaServiceUUID);
+    // OTA Control (READ+WRITE) + OTA Data (READ+NOTIFY)
+
+    // ⑦ 启动所有服务 + 开始广播
+    service->start();
+    batteryService->start();
+    deviceInfoService->start();
+    otaService->start();
+    BLEDevice::startAdvertising();
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">③</span><span><strong>CCCD 回调</strong>：手机 App 写入 CCCD（Client Characteristic Configuration Descriptor）订阅通知。编码器只在订阅后才开始发送数据 — 避免无接收方时的无效发送。</span></div>
+            <div class="ann-item"><span class="ann-num">⑤</span><span><strong>标准电池服务 0x180F</strong>：BLE SIG 定义的标准服务，手机系统设置可直接读取电池百分比，无需专门 App。</span></div>
+          </div>
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-3 mt-8">app.cpp — 音频管线：从编码到 BLE 发送</h3>
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">app.cpp:324-417 — 音频数据流</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">// ① Mic 回调 → 写入 Opus 环形缓冲区
+void onMicData(int16_t *data, size_t samples) {
+    opus_receive_pcm(data, samples);
+}
+
+// ② Opus 编码回调 → 写入 TX 环形缓冲区
+void onOpusEncoded(uint8_t *data, size_t len) {
+    if (len > OPUS_OUTPUT_MAX_BYTES) return;
+    size_t packet_size = len + 2;  // 2 字节长度头
+    // 写入 TX 环形缓冲区（length + data）
+    audio_tx_buffer[audio_tx_write_pos] = len & 0xFF;
+    audio_tx_buffer[(audio_tx_write_pos + 1) % AUDIO_TX_BUFFER_SIZE] = (len >> 8) & 0xFF;
+    for (size_t i = 0; i &lt; len; i++)
+        audio_tx_buffer[(audio_tx_write_pos + 2 + i) % AUDIO_TX_BUFFER_SIZE] = data[i];
+    audio_tx_write_pos = (audio_tx_write_pos + packet_size) % AUDIO_TX_BUFFER_SIZE;
+}
+
+// ③ 构建音频包：3 字节头 + payload
+void broadcastAudioPacket(uint8_t *data, size_t len) {
+    if (!connected || !audioSubscribed) return;
+    audio_packet_buffer[0] = audioPacketIndex & 0xFF;        // 帧索引低字节
+    audio_packet_buffer[1] = (audioPacketIndex >> 8) & 0xFF; // 帧索引高字节
+    audio_packet_buffer[2] = 0;  // ④ 子索引（分片用，当前不用）
+    memcpy(audio_packet_buffer + AUDIO_PACKET_HEADER_SIZE, data, len);
+    audioDataCharacteristic->setValue(audio_packet_buffer, len + 3);
+    audioDataCharacteristic->notify();  // ⑤ BLE Notify 推送
+    audioPacketIndex++;
+}
+
+// ⑥ TX 环形缓冲区出队 + 发送（主循环调用）
+void processAudioTx() {
+    if (!connected || !audioSubscribed) return;
+    while (audio_tx_read_pos != audio_tx_write_pos) {
+        uint16_t len = audio_tx_buffer[audio_tx_read_pos]
+                     | (audio_tx_buffer[(audio_tx_read_pos+1) % BUF_SIZE] &lt;&lt; 8);
+        // 读取数据 → broadcastAudioPacket → 发送
+        audio_tx_read_pos = (audio_tx_read_pos + 2 + len) % AUDIO_TX_BUFFER_SIZE;
+        broadcastAudioPacket(temp_data, len);
+        delay(1);  // ⑦ 1ms 间隔防止 BLE 拥塞
+    }
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">③④</span><span><strong>音频包协议</strong>：3 字节头 = 2 字节帧索引（递增，接收端排序）+ 1 字节子索引（大包分片用）。payload 是 Opus 编码数据（通常 40-80 字节）。对比 BLE LE Audio 的 ISO 通道自带时序标记，BLE Notify 需要应用层自己管理序列号。</span></div>
+            <div class="ann-item"><span class="ann-num">⑦</span><span><strong>1ms 限流</strong>：BLE Notify 不能连续快速发送，需要间隔。这里用 delay(1) 在每个包之间留 1ms。音频每 20ms 产出一帧编码数据，50Hz 发送频率完全在 BLE 带宽范围内（MTU 517 字节 × 40 连接/秒 = 20KB/s）。</span></div>
+          </div>
+        </div>
+
+        <div class="callout callout-tip mt-4">
+          <p class="text-sm text-slate-300"><strong class="text-green-400">与 nRF5340 Audio 的对比</strong>：nRF5340 Audio 使用 BLE LE Audio 的 ISO 同步通道，硬件保证时序、无需应用层序列号。omiGlass 用 BLE Notify + 应用层协议实现，更简单但不保证实时性。这是"标准方案"vs"实用方案"的典型对比。</p>
+        </div>
+      </section>
+
+      <!-- 第 7 层：功耗管理 -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-1">第 7 层：功耗管理</h2>
+        <p class="text-sm text-slate-500 mb-6">由浅入深 · 第七层 — 双 250mAh 电池如何撑 6-8 小时</p>
+
+        <h3 class="text-lg font-semibold text-white mb-3">config.h — 功耗参数配置</h3>
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">config.h:22-43 — CPU / 睡眠 / 电池参数</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">// CPU 频率管理 — 激进省电
+#define MAX_CPU_FREQ_MHZ   100   // 最高 100MHz（从 120MHz 降低）
+#define NORMAL_CPU_FREQ_MHZ 80   // ① 正常运行 80MHz（性能/功耗平衡）
+#define MIN_CPU_FREQ_MHZ    40   // ② 空闲时降到 40MHz
+
+// 睡眠管理
+#define LIGHT_SLEEP_DURATION_US 50000    // 50ms Light Sleep 间隔
+#define DEEP_SLEEP_THRESHOLD_MS 300000   // ③ 5 分钟无活动 → Deep Sleep
+#define IDLE_THRESHOLD_MS        45000   // ④ 45 秒无活动 → 省电模式
+
+// 电池配置 — 双 250mAh @ 3.5-4.1V（共 500mAh）
+#define BATTERY_MAX_VOLTAGE      4.2f    // 满电 4.2V
+#define BATTERY_MIN_VOLTAGE      3.2f    // 空电 3.2V
+#define BATTERY_CRITICAL_VOLTAGE 3.3f    // ⑤ 紧急关机 3.3V
+#define BATTERY_LOW_VOLTAGE      3.4f    // 低电警告 3.4V
+#define VOLTAGE_DIVIDER_RATIO    6.086f  // ⑥ 校准分压器比
+
+// 电池监测间隔
+#define BATTERY_REPORT_INTERVAL_MS 90000  // 90s 外部报告
+#define BATTERY_TASK_INTERVAL_MS   20000  // 20s 内部检查</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">①②</span><span><strong>CPU 降频省电</strong>：ESP32-S3 @ 80MHz 功耗约 30mA，@ 40MHz 约 15mA。降到 40MHz 音频编码仍然来得及（Opus 复杂度 3 在 40MHz 下 &lt;5ms/帧）。对比 STM32 的 Stop 模式（停止 CPU 时钟）更温和 — Light Sleep 保留 RAM 内容。</span></div>
+            <div class="ann-item"><span class="ann-num">⑥</span><span><strong>分压器比 6.086</strong>：电池最高 4.2V，ADC 最大 3.3V。需要电阻分压器降压。这个比例是实际用万用表校准的，考虑了负载压降。</span></div>
+          </div>
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-3 mt-8">app.cpp — 功耗管理函数</h3>
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">app.cpp:246-319 — 省电/恢复/关机/Light Sleep</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">// ① 进入省电模式
+void enterPowerSave() {
+    if (!powerSaveMode) {
+        setCpuFrequencyMhz(MIN_CPU_FREQ_MHZ);  // 降到 40MHz
+        powerSaveMode = true;
+    }
+}
+
+// ② 退出省电模式
+void exitPowerSave() {
+    if (powerSaveMode) {
+        setCpuFrequencyMhz(NORMAL_CPU_FREQ_MHZ);  // 恢复到 80MHz
+        powerSaveMode = false;
+    }
+}
+
+// ③ Light Sleep — 节省 ~15mA（增加 3-4 小时续航）
+void enableLightSleep() {
+    if (!lightSleepEnabled || !connected || photoDataUploading) return;
+    if (millis() - lastActivity &lt; 5000) return;  // 5 秒内有活动不睡
+
+    unsigned long timeUntilNextPhoto = 0;
+    if (isCapturingPhotos && captureInterval > 0) {
+        // ④ 计算到下次拍照的时间
+        unsigned long timeSinceLastPhoto = millis() - lastCaptureTime;
+        if (timeSinceLastPhoto &lt; captureInterval)
+            timeUntilNextPhoto = captureInterval - timeSinceLastPhoto;
+    }
+
+    // 仅当距下次拍照 &gt; 10 秒时才睡
+    if (timeUntilNextPhoto > 10000) {
+        unsigned long sleepTime = timeUntilNextPhoto - 5000;
+        if (sleepTime > 15000) sleepTime = 15000;  // ⑤ 最长睡 15 秒
+        esp_sleep_enable_timer_wakeup(sleepTime * 1000);
+        esp_light_sleep_start();  // ⑥ 进入 Light Sleep
+        lastActivity = millis();  // 唤醒后更新活动时间
+    }
+}
+
+// ⑦ 关机序列
+void shutdownDevice() {
+    mic_stop();          // 停麦克风
+    isCapturingPhotos = false;
+    digitalWrite(STATUS_LED_PIN, HIGH);  // LED 关（反逻辑）
+    esp_sleep_enable_ext0_wakeup(GPIO_NUM_1, 0);  // ⑧ GPIO1 按钮唤醒
+    delay(100);
+    esp_deep_sleep_start();  // ⑨ 进入 Deep Sleep（功耗 &lt; 10μA）
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">③</span><span><strong>Light Sleep</strong>：CPU 暂停，但 BLE 连接保持、RAM 保持。唤醒后从中断处继续执行。节省 ~15mA = 增加 3-4 小时续航。对比 FreeRTOS 的 Tickless Idle — 用定时器唤醒代替 SysTick。</span></div>
+            <div class="ann-item"><span class="ann-num">⑧⑨</span><span><strong>Deep Sleep</strong>：关闭 CPU 和大部分外设，仅 RTC 和 GPIO 唤醒源保持。功耗 &lt;10μA。设置 GPIO1 为唤醒源 — 用户按电源按钮时从 Deep Sleep 唤醒，重新走 setup_app() 流程。与 STM32 Standby 模式类似。</span></div>
+          </div>
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-3 mt-8">app.cpp — 电池读取</h3>
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">app.cpp:510-582 — ADC 电池监测</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">void readBatteryLevel() {
+    // ① 10 次 ADC 采样取平均（抗噪声）
+    int adcSum = 0;
+    for (int i = 0; i &lt; 10; i++) {
+        adcSum += analogRead(BATTERY_ADC_PIN);  // GPIO2
+        delay(10);
+    }
+    int adcValue = adcSum / 10;
+
+    // ② ADC 转换：12-bit → 电压
+    float adcVoltage = (adcValue / 4095.0f) * 3.3f;
+
+    // ③ 分压器还原真实电池电压
+    batteryVoltage = adcVoltage * VOLTAGE_DIVIDER_RATIO;  // ×6.086
+
+    // ④ 负载补偿的百分比计算
+    if (batteryVoltage >= BATTERY_MAX_VOLTAGE)
+        batteryPercentage = 100;
+    else if (batteryVoltage &lt;= BATTERY_MIN_VOLTAGE)
+        batteryPercentage = 0;
+    else
+        batteryPercentage = (int)(((batteryVoltage - BATTERY_MIN_VOLTAGE)
+            / (BATTERY_MAX_VOLTAGE - BATTERY_MIN_VOLTAGE)) * 100.0f);
+
+    // ⑤ 平滑处理：变化 &gt; 5% 才更新（防止跳变）
+    static int lastBatteryPercentage = batteryPercentage;
+    if (abs(batteryPercentage - lastBatteryPercentage) > 5)
+        batteryPercentage = lastBatteryPercentage +
+            (batteryPercentage > lastBatteryPercentage ? 2 : -2);
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">①⑤</span><span><strong>抗噪声 + 防跳变</strong>：10 次采样平均消除 ADC 噪声，百分比变化限制在 ±2% 防止 UI 跳变。这是电池监测的标准做法 — STM32 也可以用同样的 ADC + 分压器方案。</span></div>
+          </div>
+        </div>
+
+        <div class="mt-6 overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-slate-400 border-b border-dark-700">
+              <th class="py-2 pr-4">模式</th><th class="py-2 pr-4">CPU</th><th class="py-2 pr-4">功耗</th><th class="py-2">触发条件</th>
+            </tr></thead>
+            <tbody class="text-slate-300 text-xs">
+              <tr class="border-b border-dark-700/50"><td class="py-1.5 pr-4">Active</td><td class="pr-4">80MHz</td><td class="pr-4">~100mA</td><td>BLE 连接 + 音频</td></tr>
+              <tr class="border-b border-dark-700/50"><td class="py-1.5 pr-4">Power Save</td><td class="pr-4">40MHz</td><td class="pr-4">~60mA</td><td>45s 无活动</td></tr>
+              <tr class="border-b border-dark-700/50"><td class="py-1.5 pr-4">Light Sleep</td><td class="pr-4">暂停</td><td class="pr-4">~15mA</td><td>5s 无活动 + 无拍照</td></tr>
+              <tr><td class="py-1.5 pr-4">Deep Sleep</td><td class="pr-4">关闭</td><td class="pr-4">&lt;10μA</td><td>5 分钟无活动 / 关机</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 第 8 层：OTA 空中升级 -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-1">第 8 层：OTA 空中升级</h2>
+        <p class="text-sm text-slate-500 mb-6">由浅入深 · 第八层 — 通过 BLE 触发 WiFi 下载固件并写入 Flash</p>
+
+        <h3 class="text-lg font-semibold text-white mb-3">ota.h — 接口声明</h3>
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">ota.h — OTA 模块接口（31 行）</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">void ota_init(BLEService *service);
+void ota_set_characteristics(BLECharacteristic *controlChar, BLECharacteristic *dataChar);
+void ota_handle_command(uint8_t *data, size_t length);  // ① 处理 BLE 命令
+void ota_loop();                     // 主循环调用（当前为空）
+uint8_t ota_get_status();            // 查询状态
+bool ota_is_busy();                  // 是否正在升级
+void ota_cancel();                   // 取消升级
+void ota_notify_status(uint8_t status, uint8_t progress = 0);  // ② BLE 通知进度</code></pre>
+          </div>
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-3 mt-8">ota.cpp — BLE 命令解析</h3>
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">ota.cpp:58-163 — ota_handle_command 命令分发</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">void ota_handle_command(uint8_t *data, size_t length) {
+    uint8_t command = data[0];
+    switch (command) {
+    case OTA_CMD_SET_WIFI: {  // ① 设置 WiFi 凭据
+        // 格式: [cmd, ssid_len, ssid..., pass_len, pass...]
+        uint8_t ssidLen = data[1];
+        memcpy(wifiSSID, &data[2], ssidLen);
+        wifiSSID[ssidLen] = '\0';
+        uint8_t passLen = data[2 + ssidLen];
+        memcpy(wifiPassword, &data[3 + ssidLen], passLen);
+        wifiPassword[passLen] = '\0';
+        wifiCredentialsSet = true;
+        break;
+    }
+    case OTA_CMD_SET_URL: {   // ② 设置固件 URL
+        // 格式: [cmd, url_len(2B big-endian), url...]
+        uint16_t urlLen = (data[1] &lt;&lt; 8) | data[2];
+        memcpy(firmwareURL, &data[3], urlLen);
+        firmwareURL[urlLen] = '\0';
+        firmwareURLSet = true;
+        break;
+    }
+    case OTA_CMD_START_OTA: { // ③ 启动 OTA 任务
+        if (!wifiCredentialsSet || !firmwareURLSet) {
+            ota_notify_status(OTA_STATUS_ERROR); return;
+        }
+        if (otaTaskRunning) return;  // ④ 防止重复启动
+        otaCancelled = false;
+        otaTaskRunning = true;
+        xTaskCreate(ota_task, "ota_task", 8192, NULL, 5, &otaTaskHandle);  // ⑤ FreeRTOS 任务
+        break;
+    }
+    case OTA_CMD_CANCEL_OTA:  ota_cancel(); break;
+    case OTA_CMD_GET_STATUS:  ota_notify_status(otaStatus, otaProgress); break;
+    }
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">⑤</span><span><strong>FreeRTOS 任务</strong>：OTA 在独立任务中运行（8KB 栈，优先级 5），不阻塞主循环的音频处理。ESP32 的 Arduino 框架底层就是 FreeRTOS。</span></div>
+          </div>
+        </div>
+
+        <div class="code-walkthrough mt-6">
+          <div class="file-header"><span class="file-path">ota.cpp:178-389 — OTA 任务：WiFi 连接 + HTTP 下载 + Flash 写入</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">static void ota_task(void *parameter) {
+    // ① Step 1: WiFi STA 连接
+    if (!connect_wifi()) {  // 15 秒超时
+        otaTaskRunning = false; vTaskDelete(NULL); return;
+    }
+    // ② Step 2: 下载并安装固件
+    if (!download_and_install_firmware()) {
+        WiFi.disconnect(true); otaTaskRunning = false; vTaskDelete(NULL); return;
+    }
+    // ③ Step 3: 重启
+    ota_notify_status(OTA_STATUS_REBOOTING);
+    delay(2000);  // 等 BLE 通知发出
+    WiFi.disconnect(true); WiFi.mode(WIFI_OFF);
+    ESP.restart();  // ④ 重启到新固件
+}
+
+static bool download_and_install_firmware() {
+    // HTTP/HTTPS 流式下载
+    HTTPClient http;
+    http.begin(*client, firmwareURL);
+    int httpCode = http.GET();  // ⑤ GET 请求
+    int contentLength = http.getSize();
+
+    Update.begin(contentLength);  // ⑥ 初始化 Flash 写入
+
+    WiFiClient *stream = http.getStreamPtr();
+    uint8_t buffer[1024];  // ⑦ 1KB 块读取
+    while (http.connected() && totalRead &lt; contentLength) {
+        if (otaCancelled) { Update.abort(); return false; }  // ⑧ 支持取消
+        size_t toRead = min(available, sizeof(buffer));
+        int bytesRead = stream->readBytes(buffer, toRead);
+        Update.write(buffer, bytesRead);  // ⑨ 写入 Flash
+        totalRead += bytesRead;
+
+        int progress = (totalRead * 100) / contentLength;
+        if (progress % 5 == 0)  // ⑩ 每 5% 通过 BLE Notify 上报进度
+            ota_notify_status(OTA_STATUS_INSTALLING, progress);
+    }
+    Update.end(true);  // ⑪ 完成写入，标记新分区为启动分区
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">⑤⑥</span><span><strong>HTTP → Flash 流式写入</strong>：不把整个固件下载到 RAM（放不下），而是 1KB 块边下载边写 Flash。ESP32 的 <code>Update</code> 库自动处理分区切换 — 写入非活跃的 App0/App1 分区。</span></div>
+            <div class="ann-item"><span class="ann-num">⑩⑪</span><span><strong>进度上报 + 安全写入</strong>：手机通过 BLE Notify 实时看到升级进度。<code>Update.end(true)</code> 验证写入完整性，通过后设置 otadata 指向新分区。重启后运行新固件，失败则回滚。</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- setup_app + loop_app -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-1">初始化序列与主循环</h2>
+        <p class="text-sm text-slate-500 mb-6">app.cpp 的 setup_app() 和 loop_app() — 把所有模块串起来</p>
+
+        <div class="code-walkthrough">
+          <div class="file-header"><span class="file-path">app.cpp:801-867 — setup_app() 初始化序列</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">void setup_app() {
+    Serial.begin(921600);         // ① 高速串口调试
+    pinMode(POWER_BUTTON_PIN, INPUT_PULLUP);  // 按钮上拉
+    pinMode(STATUS_LED_PIN, OUTPUT);
+    digitalWrite(STATUS_LED_PIN, HIGH);  // LED 关（反逻辑）
+    attachInterrupt(digitalPinToInterrupt(POWER_BUTTON_PIN), buttonISR, CHANGE);
+    ledMode = LED_BOOT_SEQUENCE;         // 启动 LED 序列
+    setCpuFrequencyMhz(NORMAL_CPU_FREQ_MHZ);  // ② CPU 设为 80MHz
+
+    configure_ble();     // ③ BLE 初始化（4 个 Service）
+    configure_camera();  // ④ 相机初始化（OV2640 DVP 配置）
+
+    s_compressed_frame_2 = (uint8_t *)ps_calloc(202, sizeof(uint8_t)); // ⑤ PSRAM 分配
+    isCapturingPhotos = true;
+    captureInterval = PHOTO_CAPTURE_INTERVAL_MS;  // 30s 默认拍照间隔
+
+    analogReadResolution(12);                    // ADC 12-bit
+    analogSetPinAttenuation(BATTERY_ADC_PIN, ADC_11db);  // ⑥ 全量程衰减
+    readBatteryLevel();
+
+    // ⑦ 音频子系统初始化（最后启动）
+    if (opus_encoder_init()) {
+        opus_set_callback(onOpusEncoded);
+        if (mic_start()) {
+            mic_set_callback(onMicData);
+        }
+    }
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">③④⑦</span><span><strong>初始化顺序</strong>：BLE → 相机 → 电池 → Opus → 麦克风。BLE 和相机先启动因为不依赖其他模块。Opus 在麦克风之前初始化，确保回调链就绪。这是嵌入式系统初始化的<strong>依赖排序</strong>原则。</span></div>
+          </div>
+        </div>
+
+        <div class="code-walkthrough mt-6">
+          <div class="file-header"><span class="file-path">app.cpp:869-1010 — loop_app() 协作式调度</span></div>
+          <div class="code-block">
+            <pre><code class="language-c">void loop_app() {
+    unsigned long now = millis();
+
+    handleButton();    // ① 按钮处理（消抖 + 长短按判断）
+    updateLED();       // ② LED 状态显示
+    ota_loop();        // ③ OTA 处理（当前为空）
+
+    // ④ 音频处理 — 最高优先级
+    if (audioEnabled && mic_is_running()) {
+        mic_process();   // 读取 I2S → 增益 → 回调
+        opus_process();  // 环形缓冲区 → Opus 编码 → 回调
+    }
+    if (connected && audioSubscribed)
+        processAudioTx();  // ⑤ BLE 发送编码音频
+
+    // ⑥ 省电检查
+    if (!connected && (now - lastActivity > IDLE_THRESHOLD_MS))
+        enterPowerSave();
+    else if (connected || photoDataUploading)
+        if (powerSaveMode) exitPowerSave();
+
+    // ⑦ 电池监测（20s 间隔）
+    if (now - lastBatteryCheck >= BATTERY_TASK_INTERVAL_MS) {
+        readBatteryLevel();
+        updateBatteryService();
+    }
+
+    // 照片传输（限流：每轮最多 2 块，音频优先）...
+    // ⑧ Light Sleep（无音频活跃时）
+    if (!photoDataUploading && !audioSubscribed)
+        enableLightSleep();
+
+    // ⑨ 自适应延时
+    if (photoDataUploading || audioSubscribed) delay(5);   // 活跃：5ms
+    else delay(50);                                         // 空闲：50ms
+}</code></pre>
+          </div>
+          <div class="annotation-list">
+            <div class="ann-item"><span class="ann-num">④⑤</span><span><strong>音频优先</strong>：音频处理在照片传输之前。照片传输限流为每轮最多 2 块，且当音频缓冲区有数据时立即让步。这是协作式调度的核心 — 没有优先级抢占，靠代码中的优先级判断实现。</span></div>
+            <div class="ann-item"><span class="ann-num">⑧⑨</span><span><strong>功耗自适应</strong>：无音频时进入 Light Sleep，活跃时 5ms 轮询，空闲时 50ms 轮询。整个主循环没有阻塞等待 — 所有操作都是非阻塞的，用时间戳判断是否执行。</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 第三部分：总（总结） ========== -->
+
+      <!-- 架构全景对比 -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-6">架构全景对比</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-slate-400 border-b border-dark-700">
+              <th class="py-2 pr-4">特性</th>
+              <th class="py-2 pr-4">omiGlass</th>
+              <th class="py-2 pr-4">libDaisy</th>
+              <th class="py-2 pr-4">InfiniTime</th>
+              <th class="py-2">nRF5340 Audio</th>
+            </tr></thead>
+            <tbody class="text-slate-300 text-xs">
+              <tr class="border-b border-dark-700/50">
+                <td class="py-2 pr-4 font-medium">MCU</td>
+                <td class="pr-4">ESP32-S3 (Xtensa)</td>
+                <td class="pr-4">STM32H750 (M7)</td>
+                <td class="pr-4">nRF52832 (M4F)</td>
+                <td>nRF5340 (M33 双核)</td>
+              </tr>
+              <tr class="border-b border-dark-700/50">
+                <td class="py-2 pr-4 font-medium">RTOS</td>
+                <td class="pr-4">FreeRTOS (Arduino)</td>
+                <td class="pr-4">裸机</td>
+                <td class="pr-4">FreeRTOS</td>
+                <td>Zephyr</td>
+              </tr>
+              <tr class="border-b border-dark-700/50">
+                <td class="py-2 pr-4 font-medium">音频接口</td>
+                <td class="pr-4">I2S PDM</td>
+                <td class="pr-4">SAI I2S</td>
+                <td class="pr-4">—</td>
+                <td>I2S + PDM</td>
+              </tr>
+              <tr class="border-b border-dark-700/50">
+                <td class="py-2 pr-4 font-medium">编解码</td>
+                <td class="pr-4">Opus 32kbps</td>
+                <td class="pr-4">PCM 直通</td>
+                <td class="pr-4">—</td>
+                <td>LC3 96kbps</td>
+              </tr>
+              <tr class="border-b border-dark-700/50">
+                <td class="py-2 pr-4 font-medium">传输</td>
+                <td class="pr-4">BLE Notify</td>
+                <td class="pr-4">USB / Codec 输出</td>
+                <td class="pr-4">BLE OTA</td>
+                <td>BLE ISO 同步通道</td>
+              </tr>
+              <tr class="border-b border-dark-700/50">
+                <td class="py-2 pr-4 font-medium">功耗策略</td>
+                <td class="pr-4">降频 + Light/Deep Sleep</td>
+                <td class="pr-4">— (桌面设备)</td>
+                <td class="pr-4">Tickless + Deep Sleep</td>
+                <td>Zephyr PM 子系统</td>
+              </tr>
+              <tr>
+                <td class="py-2 pr-4 font-medium">OTA</td>
+                <td class="pr-4">BLE→WiFi HTTP 双分区</td>
+                <td class="pr-4">—</td>
+                <td class="pr-4">BLE DFU 单分区</td>
+                <td>Zephyr DFU 双 Bank</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 可借鉴的设计模式 -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-6">可借鉴的设计模式</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-green-400 font-semibold mb-3">集中式配置</h3>
+            <p class="text-sm text-slate-400">config.h 一个文件管理所有参数 — 引脚、BLE UUID、音频参数、功耗阈值。修改配置只改一个地方。STM32 项目可用同类的 <code>board.h</code> 或 <code>conf.h</code>。</p>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-green-400 font-semibold mb-3">回调链驱动数据流</h3>
+            <p class="text-sm text-slate-400">Mic → onMicData → Opus ring buffer → opus_process → onOpusEncoded → TX ring buffer → processAudioTx → BLE Notify。每一层不知道上下层细节，只通过回调通信。</p>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-green-400 font-semibold mb-3">PSRAM 大容量缓冲</h3>
+            <p class="text-sm text-slate-400">ESP32-S3 的 8MB PSRAM 用于音频环形缓冲区（16KB）和相机帧缓冲。内部 512KB RAM 留给栈和关键变量。STM32 没有 PSRAM，需要更精细的内存规划。</p>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-green-400 font-semibold mb-3">环形缓冲区</h3>
+            <p class="text-sm text-slate-400">两级环形缓冲：PCM 环形缓冲（mic→opus）+ TX 环形缓冲（opus→BLE）。解耦生产者和消费者速率差异。嵌入式音频流的经典模式。</p>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-green-400 font-semibold mb-3">BLE 分帧传输协议</h3>
+            <p class="text-sm text-slate-400">3 字节头（帧索引 + 子索引）+ payload。帧索引用于接收端排序和去重。照片传输用类似的帧索引机制。设计简洁实用。</p>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-5 border border-dark-700">
+            <h3 class="text-green-400 font-semibold mb-3">协作式主循环调度</h3>
+            <p class="text-sm text-slate-400">loop_app() 不用 RTOS 任务优先级，靠代码顺序 + 条件判断实现优先级：音频 > 照片 > 功耗检查。适合单线程 Arduino 框架。对比 FreeRTOS 的抢占式调度各有优劣。</p>
+          </div>
+        </div>
+      
+        </div>
+        <div class="ai-era-sidebar">
+        <div class="ai-note ai-note-must">
+          <span class="ai-note-badge">逐行精读</span>
+          <h4>PDM → Opus → BLE 音频管线</h4>
+          <p>omiGlass 的音频管线（PDM Mic → I2S → Ring Buffer → Opus 编码 → BLE Notify）是智能眼镜音频的完整参考。Ring Buffer 的线程安全和 Opus 帧边界处理值得逐行研究。</p>
+        </div>
+        <div class="ai-note ai-note-collab">
+          <span class="ai-note-badge">架构借鉴</span>
+          <h4>OTA 双分区设计的实战实现</h4>
+          <p>omiGlass 的 OTA（BLE 接收 → WiFi HTTP 下载 → 双 App 分区写入）是完整 OTA 方案。AI 能生成实现代码——但安全回滚的设计逻辑必须你来保证。</p>
+        </div>
+        </div>
+      </div></section>
+
+      <!-- 知识迁移路线 -->
+      <section class="mb-12 fade-in">
+        <h2 class="text-2xl font-bold text-white mb-6">从 omiGlass 到 Cortex-M：知识迁移路线</h2>
+        <div class="space-y-4">
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700 flex gap-4">
+            <div class="flex-shrink-0 w-10 h-10 bg-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center font-bold">1</div>
+            <div>
+              <h3 class="text-white font-semibold">I2S PDM → STM32 SAI / nRF5340 PDM</h3>
+              <p class="text-sm text-slate-400 mt-1">ESP32 的 I2S PDM 模式等价于 STM32 的 SAI PDM 模式或 nRF5340 的硬件 PDM 外设。采样率配置、DMA 缓冲区设计、增益处理可直接迁移。</p>
+            </div>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700 flex gap-4">
+            <div class="flex-shrink-0 w-10 h-10 bg-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center font-bold">2</div>
+            <div>
+              <h3 class="text-white font-semibold">Opus → LC3（编解码器设计理念通用）</h3>
+              <p class="text-sm text-slate-400 mt-1">帧长、码率、复杂度的参数调优逻辑相同。Opus 用 16kHz/32kbps/20ms，LC3 用 48kHz/96kbps/10ms — 都是采样率/码率/延迟的三角权衡。</p>
+            </div>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700 flex gap-4">
+            <div class="flex-shrink-0 w-10 h-10 bg-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center font-bold">3</div>
+            <div>
+              <h3 class="text-white font-semibold">BLE Notify → BLE ISO（传输协议演进）</h3>
+              <p class="text-sm text-slate-400 mt-1">omiGlass 的 BLE Notify + 应用层协议是"手动挡"，nRF5340 Audio 的 ISO 同步通道是"自动挡"。理解手动挡有助于理解自动挡为什么更好。</p>
+            </div>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700 flex gap-4">
+            <div class="flex-shrink-0 w-10 h-10 bg-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center font-bold">4</div>
+            <div>
+              <h3 class="text-white font-semibold">ESP32 功耗管理 → STM32 Stop/Standby</h3>
+              <p class="text-sm text-slate-400 mt-1">CPU 降频 ≈ STM32 降低主频；Light Sleep ≈ STM32 Sleep；Deep Sleep ≈ STM32 Standby。策略相同：分级省电 + 唤醒源配置。</p>
+            </div>
+          </div>
+          <div class="bg-dark-800 rounded-lg p-4 border border-dark-700 flex gap-4">
+            <div class="flex-shrink-0 w-10 h-10 bg-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center font-bold">5</div>
+            <div>
+              <h3 class="text-white font-semibold">Arduino HAL → HAL 库 → 寄存器直操作（抽象层级对比）</h3>
+              <p class="text-sm text-slate-400 mt-1">omiGlass 用 Arduino HAL（i2s_driver_install 等），屏蔽了寄存器细节。STM32 用 HAL 库（HAL_I2S_Receive_DMA），或直接操作寄存器。从 Arduino 入门 → 理解 HAL → 直操作寄存器，是学习路径。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 完成按钮 + 导航 -->
+      <div class="text-center py-8 border-t border-dark-700 fade-in">
+        <button data-complete-btn="proj-openglass" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-lg transition-colors">标记为已完成</button>
+        <p class="text-sm text-slate-500 mt-3">完成本专题走读后，进度将自动保存</p>
+        <div class="flex justify-center gap-4 mt-4">
+          <a href="nrf5340-audio.html" class="text-slate-400 hover:text-slate-300">← 上一个：nRF5340 Audio</a>
+          <a href="../glossary.html" class="text-blue-400 hover:text-blue-300">术语速查 →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+  <script src="../js/nav.js"></script>
+  <script src="../js/progress.js"></script>
+  <script src="../js/code-walkthrough.js"></script>
+  <script>mermaid.initialize({ theme: 'dark', themeVariables: { fontSize: '14px' }});</script>
+</body>
+</html>
