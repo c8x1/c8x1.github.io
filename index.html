@@ -252,7 +252,7 @@ fetch('data/latest.json').then(function(r){return r.json()}).then(function(lates
 }).catch(function(){renderTrending(defaultTrending);document.getElementById('article-count').textContent=defaultArticles.length;renderArticles(defaultArticles)});
 
 /* Load Research */
-fetch('research-index.json').then(function(r){return r.json()}).then(function(reports){
+fetch('research-index.json?ts='+Date.now(), {cache:'no-store'}).then(function(r){return r.json()}).then(function(reports){
     var con=document.getElementById('research-container');con.innerHTML='';
     reports.slice(0,4).forEach(function(r){
         var card=document.createElement('a');card.className='research-card';card.href=r.file;
