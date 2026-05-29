@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>音频 Agent 范式创新调研：2024-2026</title>
+  <style>
+    :root {
+      --ink: #172026;
+      --muted: #5d6972;
+      --faint: #87929b;
+      --paper: #fbfaf7;
+      --line: #d8dedc;
+      --green: #0d6b57;
+      --teal: #0f7f8a;
+      --blue: #325f9c;
+      --red: #a83f3f;
+      --amber: #a56a14;
+      --violet: #6550a8;
+      --surface: #ffffff;
+      --wash: #eef5f2;
+      --wash2: #eef2f8;
+      --wash3: #f8f2e8;
+      --shadow: 0 16px 38px rgba(23, 32, 38, 0.09);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      line-height: 1.68;
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    header {
+      min-height: 76vh;
+      display: grid;
+      align-items: end;
+      padding: 56px clamp(20px, 5vw, 72px) 42px;
+      background:
+        linear-gradient(rgba(13, 31, 39, 0.34), rgba(13, 31, 39, 0.48)),
+        url("https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=2200&q=82") center / cover;
+      color: #fff;
+    }
+
+    .hero {
+      max-width: 1060px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      padding: 6px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.44);
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: rgba(14, 31, 39, 0.26);
+      backdrop-filter: blur(8px);
+      border-radius: 999px;
+    }
+
+    h1 {
+      margin: 18px 0 18px;
+      max-width: 960px;
+      font-size: clamp(42px, 8vw, 92px);
+      line-height: 0.98;
+      font-weight: 820;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      max-width: 840px;
+      margin: 0;
+      font-size: clamp(18px, 2.1vw, 25px);
+      color: rgba(255, 255, 255, 0.86);
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 28px;
+    }
+
+    .hero-meta span {
+      border: 1px solid rgba(255, 255, 255, 0.38);
+      background: rgba(255, 255, 255, 0.12);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 14px;
+      backdrop-filter: blur(8px);
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid var(--line);
+      background: rgba(251, 250, 247, 0.92);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-inner {
+      display: flex;
+      gap: 8px;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 10px 20px;
+      overflow-x: auto;
+    }
+
+    .nav-inner a {
+      flex: 0 0 auto;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 7px 11px;
+      border-radius: 999px;
+      font-size: 14px;
+    }
+
+    main {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 34px 20px 72px;
+    }
+
+    section {
+      margin: 54px 0;
+    }
+
+    h2 {
+      margin: 0 0 18px;
+      font-size: clamp(28px, 4vw, 48px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    p { margin: 0 0 14px; }
+
+    .lead {
+      max-width: 880px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .span-3 { grid-column: span 3; }
+    .span-4 { grid-column: span 4; }
+    .span-5 { grid-column: span 5; }
+    .span-6 { grid-column: span 6; }
+    .span-7 { grid-column: span 7; }
+    .span-8 { grid-column: span 8; }
+    .span-12 { grid-column: span 12; }
+
+    .stat {
+      display: grid;
+      gap: 8px;
+      min-height: 154px;
+    }
+
+    .stat strong {
+      font-size: 34px;
+      line-height: 1;
+    }
+
+    .stat small {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: #fff;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .tag.green { color: var(--green); background: #e9f6f1; border-color: #c7e5da; }
+    .tag.blue { color: var(--blue); background: #edf3fb; border-color: #cfdbeb; }
+    .tag.amber { color: var(--amber); background: #fbf2e3; border-color: #ead8b9; }
+    .tag.red { color: var(--red); background: #faeeee; border-color: #edcdcd; }
+    .tag.violet { color: var(--violet); background: #f1eef8; border-color: #d8d0eb; }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: minmax(160px, 0.9fr) 1.1fr 1.6fr 1.4fr;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .matrix > div {
+      padding: 14px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      min-height: 72px;
+    }
+
+    .matrix > div:nth-child(4n) { border-right: 0; }
+    .matrix .head {
+      background: #edf2ef;
+      font-weight: 760;
+      color: var(--ink);
+      min-height: auto;
+    }
+
+    .tone-green { border-top: 4px solid var(--green); }
+    .tone-teal { border-top: 4px solid var(--teal); }
+    .tone-blue { border-top: 4px solid var(--blue); }
+    .tone-amber { border-top: 4px solid var(--amber); }
+    .tone-red { border-top: 4px solid var(--red); }
+    .tone-violet { border-top: 4px solid var(--violet); }
+
+    .idea {
+      display: grid;
+      gap: 10px;
+      min-height: 100%;
+      text-align: left;
+      font: inherit;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .idea-card {
+      position: relative;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+    }
+
+    .idea-card:hover {
+      transform: translateY(-3px);
+      border-color: #aebbb6;
+      box-shadow: 0 22px 48px rgba(23, 32, 38, 0.14);
+    }
+
+    .idea-card:focus-visible {
+      outline: 3px solid rgba(50, 95, 156, 0.34);
+      outline-offset: 3px;
+    }
+
+    .card-action {
+      align-self: end;
+      justify-self: start;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+      color: var(--blue);
+      font-size: 14px;
+      font-weight: 720;
+    }
+
+    .card-action::after {
+      content: "↗";
+      font-size: 13px;
+    }
+
+    .idea .score {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+      margin-top: 4px;
+    }
+
+    .pattern {
+      display: grid;
+      gap: 12px;
+      background: var(--wash);
+      border: 1px solid #d8e8e1;
+      border-radius: 8px;
+      padding: 18px;
+    }
+
+    .pattern:nth-child(even) {
+      background: var(--wash2);
+      border-color: #d7deeb;
+    }
+
+    .pattern code {
+      display: block;
+      padding: 10px 12px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.72);
+      color: #29333a;
+      overflow-x: auto;
+    }
+
+    ul {
+      margin: 8px 0 0;
+      padding-left: 20px;
+    }
+
+    li { margin: 6px 0; }
+
+    .timeline {
+      display: grid;
+      gap: 14px;
+      border-left: 3px solid #cbd8d2;
+      padding-left: 18px;
+    }
+
+    .time-item {
+      position: relative;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .time-item::before {
+      content: "";
+      position: absolute;
+      left: -28px;
+      top: 22px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--green);
+      border: 3px solid var(--paper);
+    }
+
+    .quote {
+      background: #172026;
+      color: #ecf1ee;
+      border-radius: 8px;
+      padding: 26px;
+      font-size: 20px;
+      line-height: 1.5;
+    }
+
+    .quote small {
+      display: block;
+      margin-top: 14px;
+      color: #b4c1bd;
+      font-size: 14px;
+    }
+
+    .risk {
+      border-left: 4px solid var(--red);
+      background: #fff;
+      border-radius: 8px;
+      padding: 18px;
+      border-top: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .mini-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: table;
+    }
+
+    .mini-table th,
+    .mini-table td {
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+      padding: 13px 14px;
+      font-size: 14px;
+    }
+
+    .mini-table th {
+      background: #edf2ef;
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .mini-table tr:last-child td { border-bottom: 0; }
+
+    .source-list {
+      columns: 2;
+      column-gap: 28px;
+      padding-left: 18px;
+    }
+
+    .source-list li {
+      break-inside: avoid;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      padding: 24px 20px 42px;
+      max-width: 1240px;
+      margin: 0 auto;
+      font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+      header { min-height: 68vh; padding: 36px 20px 34px; }
+      .span-3, .span-4, .span-5, .span-6, .span-7, .span-8 { grid-column: span 12; }
+      .matrix { grid-template-columns: 1fr; }
+      .matrix > div { border-right: 0; }
+      .matrix .head { display: none; }
+      .source-list { columns: 1; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hero">
+      <div class="eyebrow">Audio Agents · 2024-2026 · inspiration report</div>
+      <h1>音频领域的 Agent 范式，正在从“会说话”走向“会组织声音工作”</h1>
+      <p class="subtitle">这份调研不把视野限制在 TTS，而是把语音、音乐、播客、音频理解、DAW 工作流、实时交互和跨领域 agent 模式放在同一张地图里看。</p>
+      <div class="hero-meta">
+        <span>研究日期：2026-05-27</span>
+        <span>范围：论文 / 产品 / 开源 / 跨领域范式</span>
+        <span>目标：提供应用灵感，而非完整系统综述</span>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="#takeaways">结论</a>
+      <a href="#native">音频原生创新</a>
+      <a href="#scenarios">新场景</a>
+      <a href="#daw-agent-future">DAW agent化</a>
+      <a href="#transfer">跨领域迁移</a>
+      <a href="#architecture">系统蓝图</a>
+      <a href="#risks">风险与实验</a>
+      <a href="#sources">来源</a>
+    </div>
+  </nav>
+
+  <main>
+    <section id="takeaways">
+      <h2>一页结论</h2>
+      <p class="lead">近期创新的主线不是“把一个 TTS 模型包装成 agent”，而是把声音任务拆成可规划、可调用工具、可记忆、可评审、可回滚的工作流。音频 agent 的机会更像一个“声音操作系统”：能听、能查、能改、能生成、能记住偏好，也能让多个角色互相制衡。</p>
+
+      <div class="grid">
+        <div class="card stat span-3 tone-green">
+          <strong>1</strong>
+          <h3>从单模型到工具编排</h3>
+          <small>AudioToolAgent 这类框架把多个 audio-language model 当工具，由中心 LLM 决定调用、追问与冲突仲裁。</small>
+        </div>
+        <div class="card stat span-3 tone-teal">
+          <strong>2</strong>
+          <h3>从生成片段到制作流程</h3>
+          <small>PodAgent、AudioGenie、WeaveMuse 把播客、多音频生成、音乐理解/生成组织成多阶段 pipeline。</small>
+        </div>
+        <div class="card stat span-3 tone-blue">
+          <strong>3</strong>
+          <h3>从聊天到实时执行</h3>
+          <small>OpenAI Realtime、ElevenLabs Conversational AI、LiveKit Agents、Pipecat 等把语音 agent 产品化为低延迟、可接工具的实时系统。</small>
+        </div>
+        <div class="card stat span-3 tone-amber">
+          <strong>4</strong>
+          <h3>从人格到长期声音身份</h3>
+          <small>Memory agent 的迁移价值很高：角色音色、品牌 sonic identity、播客系列风格、用户偏好都需要可审计的长期记忆。</small>
+        </div>
+      </div>
+    </section>
+
+    <section id="native">
+      <h2>音频原生的 agent 创新点</h2>
+      <p class="lead">按证据强度看，音频 agent 仍处在 preprint 与产品 demo 较多的阶段，但已经出现了几个清晰模式：多工具仲裁、多角色协作、长流程生成、实时语音工具调用、以及面向 DAW/编辑器的可执行操作层。</p>
+
+      <div class="matrix">
+        <div class="head">方向</div>
+        <div class="head">代表信号</div>
+        <div class="head">核心机制</div>
+        <div class="head">可借鉴创新</div>
+
+        <div><strong>Audio-Language Tool Agent</strong></div>
+        <div><a href="https://arxiv.org/abs/2510.02995">AudioToolAgent</a>，preprint，2025；有 <a href="https://github.com/GLJS/AudioToolAgent">GitHub</a>。</div>
+        <div>中心 LLM 不直接听音频，而是调用音频问答、ASR 等工具，重写 follow-up query，并仲裁工具冲突。</div>
+        <div>适合做“音频诊断 agent”：同一段声音由多个模型/工具检测噪声、情绪、说话人、事件，再由 critic 合并。</div>
+
+        <div><strong>多模态到多音频生成</strong></div>
+        <div><a href="https://arxiv.org/search/?query=AudioGenie+Training-Free+Multi-Agent+Framework&searchtype=all">AudioGenie</a> / AudioGenie-Reasoner，preprint 线索，2025。</div>
+        <div>把输入理解、声音事件规划、生成模型选择、细化评估拆成多个 agent；强调 training-free 的多 agent 编排。</div>
+        <div>比“prompt 到音频”更适合复杂声景：游戏关卡、短视频配乐、广告声效包、空间音频。</div>
+
+        <div><strong>播客/长音频生产 agent</strong></div>
+        <div><a href="https://arxiv.org/abs/2503.00455">PodAgent</a>，preprint，2025。</div>
+        <div>把选题、资料整理、脚本、多说话人对话、TTS、后期生成拆成端到端框架。</div>
+        <div>核心不是“自动生成播客”，而是“节目制作团队自动化”：主持人、嘉宾、事实核查、剪辑、发行都可 agent 化。</div>
+
+        <div><strong>音乐理解与生成 agent</strong></div>
+        <div><a href="https://arxiv.org/search/?query=WeaveMuse+Open+Agentic+System+Multimodal+Music+Understanding+Generation&searchtype=all">WeaveMuse</a>、<a href="https://arxiv.org/search/?query=CoComposer+LLM+Multi-Agent+Collaborative+Music+Composition&searchtype=all">CoComposer</a> 等 preprint/project 线索。</div>
+        <div>把作曲、编曲、乐器分配、审美批评、MIDI/音频工具调用作为协作过程，而不是一次性生成。</div>
+        <div>音乐 agent 的强点是“多版本探索 + 批评 + 局部改写”，适合 DAW copilot、游戏自适应配乐、品牌音乐资产库。</div>
+
+        <div><strong>实时语音执行层</strong></div>
+        <div><a href="https://platform.openai.com/docs/guides/realtime">OpenAI Realtime API</a>、<a href="https://openai.github.io/openai-agents-python/voice/quickstart/">OpenAI Agents SDK VoicePipeline</a>、<a href="https://elevenlabs.io/docs/conversational-ai/overview">ElevenLabs Conversational AI</a>、<a href="https://docs.livekit.io/agents/">LiveKit Agents</a>、<a href="https://docs.pipecat.ai/">Pipecat</a>。</div>
+        <div>低延迟 streaming、barge-in、工具调用、会话状态、电话/网页/会议集成。</div>
+        <div>这让音频 agent 从“生成内容”走到“现场执行”：客服、会议主持、实时教练、现场混音、伴随式学习。</div>
+      </div>
+
+      <h3 style="margin-top:28px">高价值研究信号速览</h3>
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>项目</th>
+            <th>年份 / 强度</th>
+            <th>Agent 机制</th>
+            <th>灵感</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a href="https://arxiv.org/abs/2410.03335">Audio-Agent</a></td>
+            <td>2024 / preprint</td>
+            <td>LLM 把文本或视频条件拆成 atomic audio instructions，再调用音频生成/编辑工具。</td>
+            <td>时间线编排、声音事件拆解、可变长音频合成。</td>
+          </tr>
+          <tr>
+            <td><a href="https://arxiv.org/abs/2404.18081">ComposerX</a></td>
+            <td>2024 / ISMIR 2024</td>
+            <td>多 agent symbolic music composition，利用音乐理论与历史知识协作生成多声部音乐。</td>
+            <td>作曲家、和声、审稿、修订的音乐工作流。</td>
+          </tr>
+          <tr>
+            <td><a href="https://arxiv.org/abs/2503.07217">ReelWave</a></td>
+            <td>2025 / preprint</td>
+            <td>Sound Director 监督 Foley Artist、Composer、Voice Actor，区分画内同步声与画外氛围/音乐。</td>
+            <td>长视频声音设计团队的 agent 化。</td>
+          </tr>
+          <tr>
+            <td><a href="https://arxiv.org/abs/2506.21448">ThinkSound</a></td>
+            <td>2025 / NeurIPS 2025</td>
+            <td>用 multimodal CoT reasoning 引导音频生成与 targeted editing。</td>
+            <td>把音频编辑计划显性化，便于人类审查。</td>
+          </tr>
+          <tr>
+            <td><a href="https://arxiv.org/abs/2508.20088">AudioStory</a></td>
+            <td>2025 / preprint</td>
+            <td>把长叙事音频拆成时间有序子任务，用 bridging/residual query 保持事件内外一致性。</td>
+            <td>有声书、游戏声景、互动剧的长程 coherence。</td>
+          </tr>
+          <tr>
+            <td><a href="https://arxiv.org/abs/2506.23049">AURA</a> / <a href="https://arxiv.org/abs/2506.01268">CleanS2S</a></td>
+            <td>2025 / preprint</td>
+            <td>语音驱动工具调用、记忆、何时打断/拒绝/沉默/回应的 action judgement。</td>
+            <td>语音 agent 的关键不是会说，而是知道何时说、何时执行工具。</td>
+          </tr>
+          <tr>
+            <td><a href="https://arxiv.org/abs/2505.17326">VoxRAG</a></td>
+            <td>2025 / ACL workshop</td>
+            <td>transcription-free spoken QA RAG，结合分段、diarization、CLAP embedding 与 FAISS。</td>
+            <td>为音频档案库、法证、会议资料做原生音频检索层。</td>
+          </tr>
+          <tr>
+            <td><a href="https://arxiv.org/abs/2510.07978">VoiceAgentBench</a> / <a href="https://arxiv.org/abs/2603.13686">tau-Voice</a></td>
+            <td>2025-2026 / benchmark</td>
+            <td>评估多工具、多轮、安全、噪声、口音、全双工、政策遵循与环境交互。</td>
+            <td>产品评测应从“听懂”升级到“在真实电话/语音任务中完成事”。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="scenarios">
+      <h2>更值得探索的新应用场景</h2>
+      <p class="lead">下面这些场景故意不只围绕 TTS。每个方向都把 agent 的 planning、memory、tool-use、multi-agent review 或实时闭环放在核心。</p>
+
+      <div class="grid">
+        <a class="card idea idea-card span-4 tone-green" href="audio-details/audio-drama-factory.html">
+          <h3>1. 角色连续剧式有声内容工厂</h3>
+          <p>每个角色有 voice profile、台词风格、情绪边界、历史事件记忆。导演 agent 规划剧情，演员 agent 生成表演，continuity agent 检查声线和人物行为是否断裂。</p>
+          <div class="tag-row"><span class="tag green">memory</span><span class="tag blue">multi-agent</span><span class="tag amber">IP production</span></div>
+          <div class="score"><span>成熟度：中</span><span>新意：高</span></div>
+          <span class="card-action">详情</span>
+        </a>
+
+        <a class="card idea idea-card span-4 tone-teal" href="audio-details/daw-rollback-producer.html">
+          <h3>2. DAW 中的“可回滚制作人”</h3>
+          <p>像 SWE-agent 一样对音频工程做 inspect、edit、render、test、diff。它能修复路由、替换缺失 sample、生成 A/B mix，所有动作以 non-destructive diff 呈现。</p>
+          <div class="tag-row"><span class="tag blue">tool-use</span><span class="tag green">verification loop</span><span class="tag violet">DAW</span></div>
+          <div class="score"><span>成熟度：中低</span><span>新意：很高</span></div>
+          <span class="card-action">详情</span>
+        </a>
+
+        <a class="card idea idea-card span-4 tone-blue" href="audio-details/sonic-brand-memory.html">
+          <h3>3. 声音品牌资产记忆库</h3>
+          <p>为品牌、游戏、播客建立 sonic identity memory：音色、乐器、响度、情绪、禁用元素、授权素材。新项目由 agent 检索并生成符合品牌的变体。</p>
+          <div class="tag-row"><span class="tag green">asset memory</span><span class="tag amber">rights ledger</span><span class="tag blue">retrieval</span></div>
+          <div class="score"><span>成熟度：中</span><span>新意：高</span></div>
+          <span class="card-action">详情</span>
+        </a>
+
+        <a class="card idea idea-card span-4 tone-amber" href="audio-details/realtime-hearing-agent.html">
+          <h3>4. 实时听觉辅助 agent</h3>
+          <p>借鉴 robotics affordance：agent 判断当前声景可安全执行哪些动作，如降噪、放大近场人声、抑制反馈、保留警报声，并根据用户偏好持续学习。</p>
+          <div class="tag-row"><span class="tag red">low latency</span><span class="tag green">closed loop</span><span class="tag blue">accessibility</span></div>
+          <div class="score"><span>成熟度：中</span><span>新意：中高</span></div>
+          <span class="card-action">详情</span>
+        </a>
+
+        <a class="card idea idea-card span-4 tone-violet" href="audio-details/meeting-negotiation-agent.html">
+          <h3>5. 会议与谈判的语音协作 agent</h3>
+          <p>不只是转写，而是实时区分议题、情绪、行动项、风险话术。多个 agent 分别做事实核查、冲突缓和、下一步建议，并在会后生成可追责记录。</p>
+          <div class="tag-row"><span class="tag blue">real-time</span><span class="tag green">RAG</span><span class="tag red">governance</span></div>
+          <div class="score"><span>成熟度：高</span><span>新意：中</span></div>
+          <span class="card-action">详情</span>
+        </a>
+
+        <a class="card idea idea-card span-4 tone-red" href="audio-details/audio-dataset-steward.html">
+          <h3>6. 音频模型训练数据 steward</h3>
+          <p>agent 自动检查音频数据授权、speaker consent、噪声分布、语言/口音覆盖、重复样本，生成数据卡和训练风险报告。</p>
+          <div class="tag-row"><span class="tag amber">dataset</span><span class="tag red">consent</span><span class="tag blue">audit</span></div>
+          <div class="score"><span>成熟度：中</span><span>新意：高</span></div>
+          <span class="card-action">详情</span>
+        </a>
+
+        <a class="card idea idea-card span-4 tone-green" href="audio-details/music-practice-coach.html">
+          <h3>7. 音乐学习的实时陪练 agent</h3>
+          <p>同时听音准、节奏、力度、音色和乐句意图。teacher agent 给反馈，practice designer 生成下一轮练习，motivation agent 调整难度和鼓励方式。</p>
+          <div class="tag-row"><span class="tag green">education</span><span class="tag blue">audio analysis</span><span class="tag amber">adaptive</span></div>
+          <div class="score"><span>成熟度：中</span><span>新意：中高</span></div>
+          <span class="card-action">详情</span>
+        </a>
+
+        <a class="card idea idea-card span-4 tone-teal" href="audio-details/audio-qc-lab.html">
+          <h3>8. 自主音频 QA / QC 实验室</h3>
+          <p>为播客、有声书、广告、游戏音频跑 loudness、clip、噪声、错读、人声一致性、版权风险、平台规范检查；不合格自动提出修复补丁。</p>
+          <div class="tag-row"><span class="tag blue">workflow</span><span class="tag green">metrics</span><span class="tag red">compliance</span></div>
+          <div class="score"><span>成熟度：高</span><span>新意：中高</span></div>
+          <span class="card-action">详情</span>
+        </a>
+
+        <a class="card idea idea-card span-4 tone-blue" href="audio-details/soundscape-npc.html">
+          <h3>9. 互动式声景 NPC</h3>
+          <p>游戏或 XR 中，每个空间有声音 agent：根据玩家行为、天气、剧情和历史记忆生成动态 Foley、环境声、角色远近声与音乐过渡。</p>
+          <div class="tag-row"><span class="tag violet">game</span><span class="tag green">world memory</span><span class="tag blue">spatial audio</span></div>
+          <div class="score"><span>成熟度：中低</span><span>新意：很高</span></div>
+          <span class="card-action">详情</span>
+        </a>
+
+        <a class="card idea idea-card span-4 tone-green" href="audio-details/pickup-director-agent.html">
+          <h3>10. 智能拾音导演 agent</h3>
+          <p>把麦克风阵列、摄像头和语义目标合在一起，动态决定“该听谁、保留什么环境声、抑制哪些干扰”，让拾音从固定 DSP 变成可解释的导演决策。</p>
+          <div class="tag-row"><span class="tag green">pickup</span><span class="tag blue">AV-TSE</span><span class="tag amber">beamforming</span></div>
+          <div class="score"><span>成熟度：中</span><span>新意：高</span></div>
+          <span class="card-action">详情</span>
+        </a>
+
+        <a class="card idea idea-card span-4 tone-teal" href="audio-details/spatial-scene-understanding.html">
+          <h3>11. 空间声景理解 agent</h3>
+          <p>不仅识别“有车声/狗叫”，还推理方向、距离、运动轨迹和场景关系，为 AR、机器人、无障碍导航提供可问答的空间听觉地图。</p>
+          <div class="tag-row"><span class="tag blue">spatial QA</span><span class="tag green">scene graph</span><span class="tag violet">AR</span></div>
+          <div class="score"><span>成熟度：中低</span><span>新意：很高</span></div>
+          <span class="card-action">详情</span>
+        </a>
+
+        <a class="card idea idea-card span-4 tone-amber" href="audio-details/adaptive-hearing-fitting.html">
+          <h3>12. 自适应助听调参 agent</h3>
+          <p>根据听力图、环境声、用户反馈和安全边界，多轮调整降噪、压缩、方向性和人声增强，让助听设备从预设模式走向上下文自适应。</p>
+          <div class="tag-row"><span class="tag green">hearing aid</span><span class="tag blue">multi-agent</span><span class="tag red">clinical boundary</span></div>
+          <div class="score"><span>成熟度：中</span><span>新意：高</span></div>
+          <span class="card-action">详情</span>
+        </a>
+
+        <a class="card idea idea-card span-4 tone-violet" href="audio-details/spatial-aigc-workbench.html">
+          <h3>13. Spatial AIGC 声音设计工作台</h3>
+          <p>创作者用文字描述声源轨迹、距离、混响和空间情绪，agent 将其转成可编辑的空间音频工程，用于游戏、XR、广告和沉浸式剧场。</p>
+          <div class="tag-row"><span class="tag violet">AIGC</span><span class="tag blue">spatial audio</span><span class="tag amber">sound design</span></div>
+          <div class="score"><span>成熟度：中低</span><span>新意：很高</span></div>
+          <span class="card-action">详情</span>
+        </a>
+
+        <a class="card idea idea-card span-4 tone-blue" href="audio-details/collaborative-audio-description.html">
+          <h3>14. 协作式 Audio Description 平台</h3>
+          <p>让 AI、专业描述者和社区版本共同制作无障碍旁白，控制描述密度、风格、时机和用户偏好，而不是只自动生成一个固定版本。</p>
+          <div class="tag-row"><span class="tag green">accessibility</span><span class="tag blue">AD</span><span class="tag violet">collaboration</span></div>
+          <div class="score"><span>成熟度：中</span><span>新意：高</span></div>
+          <span class="card-action">详情</span>
+        </a>
+
+        <a class="card idea idea-card span-4 tone-red" href="audio-details/acoustic-privacy-firewall.html">
+          <h3>15. 声学隐私防火墙 agent</h3>
+          <p>在会议、直播、家庭设备或数据采集前识别敏感声音和背景对话，自动做局部遮蔽、摘要替代、权限提示和审计记录。</p>
+          <div class="tag-row"><span class="tag red">privacy</span><span class="tag amber">edge AI</span><span class="tag blue">governance</span></div>
+          <div class="score"><span>成熟度：中</span><span>新意：高</span></div>
+          <span class="card-action">详情</span>
+        </a>
+      </div>
+    </section>
+
+    <section id="daw-agent-future">
+      <h2>DAW agent化：业界进展与未来方向</h2>
+      <p class="lead">DAW 是音频 agent 最值得深挖的下一站：它不是单次生成工具，而是创作者真实工作的“操作系统”。近期信号显示，MCP、Max for Live、Remote Script、REAPER ReaScript 和语音 agent 基础设施正在把 DAW 从图形界面软件，推向可被 agent 读取、规划、修改、回滚和评估的创作环境。</p>
+
+      <div class="grid">
+        <a class="card idea idea-card span-4 tone-teal" href="audio-details/daw-agent-future.html">
+          <h3>专题深度页：DAW agent 化路线图</h3>
+          <p>整理 Ableton MCP、Producer Pal、DAWZY / REAPER、AudioToolAgent、SWE-agent 等进展，并扩展到未来的 session graph、plugin agent、rights memory、real-time co-producer 与 DAW benchmark。</p>
+          <div class="tag-row"><span class="tag blue">industry progress</span><span class="tag green">future map</span><span class="tag violet">DAW</span></div>
+          <div class="score"><span>证据：GitHub + arXiv + 官方文档</span><span>建议优先读</span></div>
+          <span class="card-action">查看专题</span>
+        </a>
+
+        <div class="card span-4 tone-blue">
+          <h3>现有进展：MCP 已经跑通 DAW 工具调用</h3>
+          <p>Ableton 社区项目已经证明“LLM → MCP tool → DAW API”的链路可用。ahujasid/ableton-mcp 走 Remote Script + TCP，Producer Pal 走 Max for Live + TypeScript，并开始出现 LLM 友好的 MIDI 表示、跨会话记忆和 companion server 扩展。</p>
+        </div>
+
+        <div class="card span-4 tone-green">
+          <h3>关键分水岭：从控制命令到可回滚创作</h3>
+          <p>下一阶段不应只追求“能新建轨道/加 MIDI”，而要像 SWE-agent 一样形成 inspect、patch、render、test、rollback 的闭环。DAWZY 在 REAPER 中强调可解释、原子脚本和撤销，是很重要的方向信号。</p>
+        </div>
+
+        <div class="card span-12 tone-amber">
+          <h3>7 个未来方向</h3>
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>方向</th>
+                <th>产品想象</th>
+                <th>技术抓手</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Session Graph</td>
+                <td>把轨道、clip、设备、路由、automation、素材来源变成可查询图谱。</td>
+                <td>DAW state snapshot、graph RAG、版本 diff。</td>
+              </tr>
+              <tr>
+                <td>Non-destructive Patch</td>
+                <td>agent 只提交候选补丁和 A/B render，由人批准后应用。</td>
+                <td>事务语义、render sandbox、undo ledger。</td>
+              </tr>
+              <tr>
+                <td>Plugin Parameter Agent</td>
+                <td>把“更贴脸的人声”“鼓更紧”翻译成插件链和参数自动化。</td>
+                <td>参数语义层、听感指标、reference matching。</td>
+              </tr>
+              <tr>
+                <td>Rights-aware Sample Memory</td>
+                <td>自动记住 sample 来源、授权范围、替换历史和不可用素材。</td>
+                <td>asset ledger、授权 RAG、发布前合规 gate。</td>
+              </tr>
+              <tr>
+                <td>Multi-agent Producer Room</td>
+                <td>制作人、编曲、混音、母带、版权、目标听众并行评审同一版本。</td>
+                <td>多角色 rubric、dissent log、偏好记忆。</td>
+              </tr>
+              <tr>
+                <td>Real-time Co-producer</td>
+                <td>播放循环时语音对话，agent 在小节边界生成安全候选操作。</td>
+                <td>低延迟语音、barge-in、transport-aware scheduling。</td>
+              </tr>
+              <tr>
+                <td>DAW Agent Benchmark</td>
+                <td>用真实工程任务评估 agent：修 clipping、找缺失 sample、导出 stem、保持风格。</td>
+                <td>可复现 session、客观音频指标、人工盲听。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>产品与开源基础设施信号</h2>
+      <p class="lead">音频 agent 的落地速度，很大程度取决于基础设施是否成熟。2024-2026 的强信号是：实时 speech-to-speech、电话/客服平台、WebRTC voice agent 框架、以及 agentic editing 工具都在补齐。</p>
+
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>方向</th>
+            <th>代表来源</th>
+            <th>成熟度判断</th>
+            <th>应用启发</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>实时语音模型/API</td>
+            <td><a href="https://platform.openai.com/docs/guides/realtime">OpenAI Realtime</a>、<a href="https://ai.google.dev/gemini-api/docs/live">Gemini Live API</a>、<a href="https://aws.amazon.com/blogs/machine-learning/introducing-amazon-nova-sonic-a-new-foundation-model-for-speech-understanding-and-generation/">Amazon Nova Sonic</a></td>
+            <td>成熟云 API 信号，官方支持 streaming、低延迟、工具/多模态能力。</td>
+            <td>语音不再只是输入法，而是可打断、可执行任务的前台交互层。</td>
+          </tr>
+          <tr>
+            <td>Voice agent framework</td>
+            <td><a href="https://github.com/livekit/agents">LiveKit Agents</a>、<a href="https://github.com/pipecat-ai/pipecat">Pipecat</a>、<a href="https://docs.vapi.ai/">Vapi</a>、<a href="https://developers.deepgram.com/docs/voice-agent">Deepgram Voice Agent</a></td>
+            <td>强工程基础设施信号，覆盖 WebRTC、VAD、STT、LLM、TTS、tool call、部署。</td>
+            <td>团队可以把重点放在任务设计、状态管理、权限和评测，而不是从零搭语音链路。</td>
+          </tr>
+          <tr>
+            <td>电话/客服 agent</td>
+            <td><a href="https://www.twilio.com/docs/voice/conversationrelay">Twilio ConversationRelay</a>、<a href="https://docs.retellai.com/">Retell</a>、<a href="https://docs.vapi.ai/">Vapi</a></td>
+            <td>强商用信号，电话网络、SIP、CRM、人工转接和通话分析已经产品化。</td>
+            <td>预约、筛选、售后、保险/医疗前台会比“全能助理”更先规模化。</td>
+          </tr>
+          <tr>
+            <td>Agentic editing / podcast</td>
+            <td><a href="https://www.descript.com/underlord">Descript Underlord</a>、<a href="https://blog.google/technology/ai/notebooklm-audio-overviews/">NotebookLM Audio Overviews</a>、<a href="https://elevenlabs.io/docs/product-guides/projects">ElevenLabs Projects</a></td>
+            <td>成熟产品 + 生成式功能混合；已能把“剪辑”转为“制作意图”。</td>
+            <td>播客/有声内容先做“制作人代理”，而不是一上来替代完整创作团队。</td>
+          </tr>
+          <tr>
+            <td>开源语音模型/系统</td>
+            <td><a href="https://github.com/kyutai-labs/moshi">Moshi</a>、<a href="https://github.com/QwenLM/Qwen2.5-Omni">Qwen2.5-Omni</a>、<a href="https://github.com/SesameAILabs/csm">Sesame CSM</a></td>
+            <td>研究与自建信号强，生产可用性需要单独验证。</td>
+            <td>医疗、金融、政府、教育等私有化场景会需要本地/边缘语音 agent 栈。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="transfer">
+      <h2>从其他领域迁移过来的 agent pattern</h2>
+      <p class="lead">跨领域最有价值的不是“把聊天机器人加到音频产品里”，而是借用它们的任务结构：测试回路、角色辩论、长期记忆、可执行 affordance、审计与审批。</p>
+
+      <div class="grid">
+        <div class="pattern span-6">
+          <h3>Software Engineering Agent → Audio Project Agent</h3>
+          <code>issue → inspect session → edit → render → test → reflect → patch</code>
+          <p>SWE-agent 的启发是：让 agent 面对真实工程环境，并用测试判断有没有变好。迁移到音频，就是让 agent 对 DAW session、插件链、音频文件和 loudness report 做可回滚操作。</p>
+          <p><strong>音频场景：</strong>自动修破音、找缺失素材、重建 podcast 工程、比较 mix A/B、生成修复 diff。</p>
+        </div>
+
+        <div class="pattern span-6">
+          <h3>Research Agent → Audio Reference & Rights Agent</h3>
+          <code>multi-perspective questions → retrieval → source grounding → synthesis</code>
+          <p>STORM、PaperQA 这类 research agent 的强项是多视角提问和来源接地。迁移到音频，就是把参考曲、声音设计配方、授权素材、训练数据出处串成可验证证据链。</p>
+          <p><strong>音频场景：</strong>生成“某风格鼓声”的合法参考包；为播客主题自动找资料并标注可引用片段；做训练数据授权 ledger。</p>
+        </div>
+
+        <div class="pattern span-6">
+          <h3>Robotics Agent → Real-time Audio Control</h3>
+          <code>perception → affordance scoring → safe action → feedback</code>
+          <p>SayCan / RT-2 的关键不是语音，而是“只做当前世界可执行的动作”。音频里的世界就是声场、延迟、反馈、响度和人的注意力。</p>
+          <p><strong>音频场景：</strong>现场混音、助听、会议降噪、车载语音、乐器练习反馈。</p>
+        </div>
+
+        <div class="pattern span-6">
+          <h3>Multi-agent Debate → Producer Room</h3>
+          <code>creator → critic → compliance → listener advocate → synthesis</code>
+          <p>多 agent 辩论适合音频的原因是审美本来就是多目标：情绪、清晰度、创新、平台规范、版权都可能冲突。</p>
+          <p><strong>音频场景：</strong>制作人、混音师、母带师、版权审查员、目标听众分别评审同一版本，保留 dissent log。</p>
+        </div>
+
+        <div class="pattern span-6">
+          <h3>Memory Agent → Sonic Identity Memory</h3>
+          <code>episodic memory + semantic profile + reflection + delete/edit controls</code>
+          <p>MemGPT / Letta / Generative Agents 的迁移重点是分层记忆。音频 agent 的长期价值，往往来自记住“这个人/品牌/角色听起来应该是什么样”。</p>
+          <p><strong>音频场景：</strong>跨剧集保持角色音色，记住常用人声链，避免重复失败的 render，维护品牌声音手册。</p>
+        </div>
+
+        <div class="pattern span-6">
+          <h3>Workflow / RPA Agent → Audio Ops Agent</h3>
+          <code>event trigger → tool execution → approval gate → audit log</code>
+          <p>企业 agent 的成熟经验是审批、审计、回滚和 human-in-the-loop。音频生产同样需要这些东西，尤其是发布、广告、客服和医疗/教育场景。</p>
+          <p><strong>音频场景：</strong>录音入库、转写、剪辑、show notes、上架、版本追踪、合规检查。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="architecture">
+      <h2>一个可落地的 Audio Agent 蓝图</h2>
+      <div class="grid">
+        <div class="quote span-5">
+          音频 agent 最有潜力的形态，不是“一个会说话的大模型”，而是“多角色、多工具、多记忆层的声音工作台”。
+          <small>设计判断：把不可控的生成任务拆成可观测、可评审、可回滚的小步骤。</small>
+        </div>
+
+        <div class="card span-7 tone-green">
+          <h3>核心模块</h3>
+          <ul>
+            <li><strong>Planner：</strong>把用户目标拆成 listen / retrieve / edit / generate / review / publish。</li>
+            <li><strong>Audio Tool Router：</strong>调 ASR、speaker diarization、source separation、TTS、music gen、DAW/MCP、loudness/QC 工具。</li>
+            <li><strong>Memory：</strong>短期会话、长期人物/品牌/项目记忆、失败案例反思、授权与素材来源。</li>
+            <li><strong>Critic Swarm：</strong>听感、技术指标、版权/安全、角色一致性、目标受众几个角色并行评审。</li>
+            <li><strong>Action Ledger：</strong>记录每个 edit、render、prompt、素材、模型版本和人类批准。</li>
+          </ul>
+        </div>
+
+        <div class="card span-12 tone-blue">
+          <h3>推荐的 MVP 路线</h3>
+          <div class="timeline">
+            <div class="time-item">
+              <strong>阶段 1：Audio QA Agent</strong>
+              <p>从风险最低、验证最清晰的 QC 开始：检测 loudness、clip、噪声、空白、错读、speaker mismatch，输出报告和修复建议。</p>
+            </div>
+            <div class="time-item">
+              <strong>阶段 2：Non-destructive Editor Agent</strong>
+              <p>让 agent 只生成补丁和候选 render，不直接覆盖工程。支持 A/B 对比、人工批准、版本回退。</p>
+            </div>
+            <div class="time-item">
+              <strong>阶段 3：Memory-driven Style Agent</strong>
+              <p>引入角色/品牌/主播记忆，对跨剧集音色一致性、节目结构、音乐风格进行约束。</p>
+            </div>
+            <div class="time-item">
+              <strong>阶段 4：Multi-agent Studio</strong>
+              <p>加入 producer、engineer、rights、audience、critic 等角色，形成可解释的协作与争议记录。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="risks">
+      <h2>反方压测：哪些点会卡住</h2>
+      <p class="lead">这些不是“以后再说”的边角问题，而是决定 audio agent 能不能进入真实工作流的门槛。</p>
+
+      <div class="grid">
+        <div class="risk span-6">
+          <h3>延迟与打断</h3>
+          <p>实时语音 agent 需要处理 barge-in、端到端延迟、网络 jitter 和工具调用慢的问题。测试应包含 P50/P95 latency、打断成功率、长对话稳定性。</p>
+        </div>
+        <div class="risk span-6">
+          <h3>音色与角色一致性</h3>
+          <p>多角色 TTS、互动有声剧和长期播客都容易出现声线漂移。需要 speaker embedding drift、人工 ABX、跨集角色一致性评分。</p>
+        </div>
+        <div class="risk span-6">
+          <h3>授权、声纹与肖像权</h3>
+          <p>语音克隆、音乐生成和训练数据都涉及 consent 与 deepfake 风险。FTC、EU AI Act 与平台政策都在强化披露和责任。</p>
+        </div>
+        <div class="risk span-6">
+          <h3>评估指标不够</h3>
+          <p>音频质量不能只看 MOS 或 WER。agent 还要评估任务成功率、动作可回滚性、引用/素材可追溯、审美偏好、合规风险。</p>
+        </div>
+        <div class="risk span-6">
+          <h3>多 agent 不等于更可靠</h3>
+          <p>多个 agent 可能互相强化错误。必须保留独立评审、固定 rubric、真实声学指标，以及 dissent log，而不是只输出“达成一致”。</p>
+        </div>
+        <div class="risk span-6">
+          <h3>Memory 会污染，也会泄漏</h3>
+          <p>长期记忆容易把临时偏好固化，也可能存储敏感声纹/身份信息。需要可删除、可编辑、可追溯、分权限的记忆系统。</p>
+        </div>
+      </div>
+
+      <h3 style="margin-top:26px">上线前建议强制跑的压力测试</h3>
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>测试</th>
+            <th>做法</th>
+            <th>失败信号</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>真实网络延迟</td>
+            <td>1,000 通 call，测 user stop speaking 到 first audible phoneme、barge-in cancel、tool roundtrip 的 P50/P95/P99。</td>
+            <td>P95 超过约 900ms、弱网下重复回答、打断失败。</td>
+          </tr>
+          <tr>
+            <td>角色声线漂移</td>
+            <td>同一角色连续 30 分钟，跨情绪、语速、语言；测 speaker embedding drift、F0/formant drift、ABX。</td>
+            <td>人工能稳定分辨漂移，或跨情绪后 voice profile 不可恢复。</td>
+          </tr>
+          <tr>
+            <td>Audio needle-in-haystack</td>
+            <td>在 2 小时对话中埋入承诺、偏好、情绪线索，比较全上下文、摘要、向量检索、事件图谱。</td>
+            <td>错引、把 A 的偏好记到 B、长程 recall 明显坍塌。</td>
+          </tr>
+          <tr>
+            <td>授权撤回</td>
+            <td>建立 consent ledger，测试用途、地域、期限、二次训练权、撤回后的相似声生成能力。</td>
+            <td>撤回后仍能生成高相似声音，或无法解释素材来源。</td>
+          </tr>
+          <tr>
+            <td>音乐/声音肖像红队</td>
+            <td>名人声、受保护歌曲、政治 robocall、亲友诈骗、客服验证绕过、多语言 prompt 注入。</td>
+            <td>policy violation、over-refusal、非英语绕过、检测器 EER 不稳定。</td>
+          </tr>
+          <tr>
+            <td>72 小时 soak test</td>
+            <td>注入 packet loss、jitter、重连、server failover、tool timeout、TTS 中断。</td>
+            <td>call drop、audio gap、状态丢失、错过打断、重复执行工具。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>建议立刻做的 6 个小实验</h2>
+      <div class="grid">
+        <div class="card span-4 tone-green">
+          <h3>Speaker Consistency Memory</h3>
+          <p>让 agent 为 3 个角色跨 5 集维护 voice profile，对比无记忆/有记忆的声线漂移和人工偏好。</p>
+        </div>
+        <div class="card span-4 tone-blue">
+          <h3>Audio QC Copilot</h3>
+          <p>输入播客或有声书片段，自动跑 loudness、clip、噪声、空白、转写错读检测，输出可执行修复队列。</p>
+        </div>
+        <div class="card span-4 tone-amber">
+          <h3>DAW Patch Diff</h3>
+          <p>让 agent 修改一个小型 Ableton/Reaper 工程，只输出 patch、render 和指标变化，人工决定是否应用。</p>
+        </div>
+        <div class="card span-4 tone-violet">
+          <h3>Producer Room Debate</h3>
+          <p>同一首 30 秒广告音乐，creator/critic/legal/audience 四 agent 独立评分，再看合成版本是否优于单 agent。</p>
+        </div>
+        <div class="card span-4 tone-teal">
+          <h3>Real-time Voice Tool Use</h3>
+          <p>用 Realtime API / LiveKit / Pipecat 做一个能查资料、改会议记录、发送任务的语音 agent，测打断和工具延迟。</p>
+        </div>
+        <div class="card span-4 tone-red">
+          <h3>Rights Ledger for Audio Assets</h3>
+          <p>让 agent 对素材库生成授权表、可用场景、禁用场景和风险标签，再接入生成流程做拦截。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="sources">
+      <h2>主要来源与进一步阅读</h2>
+      <p class="lead">来源包含论文/preprint、官方文档、开源项目与政策/安全材料。对未完全核验的 preprint/project 线索，正文已使用“线索”或“preprint”标注。</p>
+      <ol class="source-list">
+        <li><a href="https://arxiv.org/abs/2510.02995">AudioToolAgent: An Agentic Framework for Audio-Language Models</a>；<a href="https://github.com/GLJS/AudioToolAgent">GitHub</a>。</li>
+        <li><a href="https://arxiv.org/abs/2410.03335">Audio-Agent: Leveraging LLMs for Audio Generation, Editing and Composition</a>。</li>
+        <li><a href="https://arxiv.org/abs/2404.18081">ComposerX: Multi-Agent Symbolic Music Composition with LLMs</a>。</li>
+        <li><a href="https://arxiv.org/abs/2503.07217">ReelWave: Multi-Agentic Movie Sound Generation</a>。</li>
+        <li><a href="https://arxiv.org/abs/2503.00455">PodAgent: A Comprehensive Framework for Podcast Generation</a>。</li>
+        <li><a href="https://arxiv.org/abs/2505.22053">AudioGenie</a>；<a href="https://audiogenie.github.io/">project page</a>；<a href="https://arxiv.org/abs/2509.16971">AudioGenie-Reasoner</a>。</li>
+        <li><a href="https://arxiv.org/abs/2506.21448">ThinkSound: CoT Reasoning for Audio Generation and Editing</a>。</li>
+        <li><a href="https://arxiv.org/abs/2508.20088">AudioStory: Long-Form Narrative Audio with LLMs</a>。</li>
+        <li><a href="https://arxiv.org/search/?query=WeaveMuse+Open+Agentic+System+Multimodal+Music+Understanding+Generation&searchtype=all">WeaveMuse arXiv search</a>。</li>
+        <li><a href="https://arxiv.org/abs/2509.00132">CoComposer: LLM Multi-agent Collaborative Music Composition</a>。</li>
+        <li><a href="https://arxiv.org/abs/2512.24645">AudioFab: open-source audio agent framework</a>。</li>
+        <li><a href="https://arxiv.org/abs/2506.23049">AURA voice-driven tool-use agent</a>；<a href="https://arxiv.org/abs/2506.01268">CleanS2S</a>；<a href="https://arxiv.org/abs/2509.06502">FireRedChat</a>；<a href="https://arxiv.org/abs/2510.06917">SHANKS</a>。</li>
+        <li><a href="https://arxiv.org/abs/2505.17326">VoxRAG</a>；<a href="https://arxiv.org/abs/2510.07978">VoiceAgentBench</a>；<a href="https://arxiv.org/abs/2603.13686">tau-Voice</a>。</li>
+        <li><a href="https://platform.openai.com/docs/guides/realtime">OpenAI Realtime API docs</a>；<a href="https://openai.github.io/openai-agents-python/voice/quickstart/">OpenAI Agents SDK voice quickstart</a>；<a href="https://openai.com/index/introducing-the-realtime-api/">Realtime API announcement</a>。</li>
+        <li><a href="https://ai.google.dev/gemini-api/docs/live">Google Gemini Live API docs</a>；<a href="https://developers.googleblog.com/en/the-next-chapter-of-the-gemini-era-for-developers/">Gemini 2.0 developer update</a>；<a href="https://aws.amazon.com/blogs/machine-learning/introducing-amazon-nova-sonic-a-new-foundation-model-for-speech-understanding-and-generation/">Amazon Nova Sonic</a>。</li>
+        <li><a href="https://elevenlabs.io/docs/conversational-ai/overview">ElevenLabs Conversational AI docs</a>；<a href="https://elevenlabs.io/blog/conversational-ai-2-0">Conversational AI 2.0</a>。</li>
+        <li><a href="https://docs.livekit.io/agents/">LiveKit Agents docs</a>；<a href="https://docs.pipecat.ai/">Pipecat docs</a>；<a href="https://docs.vapi.ai/">Vapi docs</a>；<a href="https://docs.retellai.com/">Retell docs</a>；<a href="https://developers.deepgram.com/docs/voice-agent">Deepgram Voice Agent</a>。</li>
+        <li><a href="https://www.twilio.com/docs/voice/conversationrelay">Twilio ConversationRelay docs</a>；<a href="https://www.twilio.com/en-us/blog/conversationrelay-real-time-ai-voice-agents">Twilio blog</a>。</li>
+        <li><a href="https://www.descript.com/underlord">Descript Underlord</a>；<a href="https://blog.google/technology/ai/notebooklm-audio-overviews/">NotebookLM Audio Overviews</a>；<a href="https://elevenlabs.io/docs/product-guides/projects">ElevenLabs Projects</a>。</li>
+        <li><a href="https://github.com/kyutai-labs/moshi">Kyutai Moshi</a>；<a href="https://github.com/QwenLM/Qwen2.5-Omni">Qwen2.5-Omni</a>；<a href="https://github.com/SesameAILabs/csm">Sesame CSM</a>。</li>
+        <li><a href="https://arxiv.org/abs/2405.15793">SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering</a>；<a href="https://github.com/SWE-agent/SWE-agent">GitHub</a>。</li>
+        <li><a href="https://arxiv.org/abs/2402.14207">STORM: Synthesis of Topic Outlines through Retrieval and Multi-perspective Question Asking</a>。</li>
+        <li><a href="https://arxiv.org/abs/2304.03442">Generative Agents: Interactive Simulacra of Human Behavior</a>。</li>
+        <li><a href="https://arxiv.org/abs/2310.08560">MemGPT</a>；<a href="https://docs.letta.com/guides/agents/memory">Letta memory docs</a>。</li>
+        <li><a href="https://arxiv.org/abs/2204.01691">SayCan</a>；<a href="https://arxiv.org/abs/2307.15818">RT-2</a>。</li>
+        <li><a href="https://www.anthropic.com/news/model-context-protocol">Anthropic Model Context Protocol announcement</a>；<a href="https://developers.googleblog.com/en/a2a-a-new-era-of-agent-interoperability/">Google Agent2Agent protocol</a>。</li>
+        <li><a href="https://openai.com/index/gpt-4o-system-card/">OpenAI GPT-4o System Card</a>；<a href="https://www.ftc.gov/policy/advocacy-research/tech-at-ftc/2024/04/approaches-address-ai-enabled-voice-cloning">FTC voice cloning risks</a>；<a href="https://docs.fcc.gov/public/attachments/DOC-400393A1.pdf">FCC AI-generated robocall ruling</a>；<a href="https://artificialintelligenceact.eu/">EU AI Act tracker</a>。</li>
+        <li><a href="https://www.copyright.gov/ai/index.html">U.S. Copyright Office AI reports</a>；<a href="https://www.tn.gov/governor/news/2024/3/21/photos--gov--lee-signs-elvis-act-into-law.html">Tennessee ELVIS Act</a>；<a href="https://www.gov.ca.gov/2024/09/17/governor-newsom-signs-bills-to-protect-digital-likeness-of-performers/">California digital likeness laws</a>。</li>
+        <li><a href="https://arxiv.org/abs/2406.16020">AudioBench</a>；<a href="https://arxiv.org/abs/2410.17196">VoiceBench</a>；<a href="https://www.asvspoof.org/">ASVspoof</a>；<a href="https://www.w3.org/TR/webrtc/">W3C WebRTC</a>。</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    <p>生成说明：本报告使用 ARS deep-research 思路整理，结合并行研究分支与来源核验；重点是应用启发，不构成系统性综述或法律意见。</p>
+  </footer>
+</body>
+</html>
