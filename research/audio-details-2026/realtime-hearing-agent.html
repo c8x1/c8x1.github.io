@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>实时听觉辅助 Agent - 深度页</title>
+<link rel="stylesheet" href="detail-common.css">
+</head>
+<body>
+<div class="detail-container">
+  <div class="detail-header">
+    <a href="../audio-agent-research-2026.html" class="back-link">&larr; 返回主报告</a>
+    <h1 class="detail-title">实时听觉辅助 Agent</h1>
+    <div class="detail-meta">
+      <span class="meta-item">证据强度：机器人 agent 论文 + 实时音频官方文档</span>
+      <span class="meta-item">适用阶段：助听 / 会议 / 现场音频 / 车载</span>
+      <span class="meta-item">核心范式：perception → safe action → feedback</span>
+    </div>
+    <a href="https://arxiv.org/abs/2204.01691" target="_blank" class="source-link">↗ 核心来源：SayCan</a>
+    <div class="tag-row">
+      <span class="tag highlight">闭环控制</span>
+      <span class="tag green">低延迟</span>
+      <span class="tag orange">听觉安全</span>
+      <span class="tag">WebRTC</span>
+    </div>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">背景介绍</span>
+    <h2>音频里的 affordance 是“现在能安全做什么”</h2>
+    <p>机器人 agent 的关键不是会聊天，而是能根据当前环境选择可执行动作。SayCan 将语言计划与 affordance 结合，RT-2 将视觉、语言和动作对齐。迁移到音频，agent 需要先听懂声景，再判断现在能否降噪、增强人声、抑制反馈、保留警报声或请求用户确认。</p>
+    <p>这个方向不应从“全能语音助理”切入，而应从实时听觉辅助、会议增强和现场控制等明确任务开始。它的成败由延迟、稳定性和安全边界决定，而不是回复是否聪明。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">使用场景</span>
+    <h2>实时环境中的可执行音频动作</h2>
+    <ul>
+      <li><strong>助听与可访问性</strong>：突出近场人声，同时保留门铃、警报、车辆等关键声源。</li>
+      <li><strong>会议降噪</strong>：根据说话人、设备、房间混响和背景噪声动态选择处理策略。</li>
+      <li><strong>现场演出辅助</strong>：检测反馈啸叫风险，自动建议 EQ notch 或降低监听增益。</li>
+      <li><strong>车载听觉 agent</strong>：区分导航、人声、道路警报和乘客对话，避免过度降噪。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">关键技术创新</span>
+    <h2>从“增强音频”到“选择安全动作”</h2>
+    <ul>
+      <li><strong>Audio Affordance Scoring</strong>：对每个候选动作估计收益、延迟、风险和可逆性。</li>
+      <li><strong>Latency Budget Manager</strong>：将动作分为 20ms 内实时处理、数百毫秒可接受处理和离线处理。</li>
+      <li><strong>Critical Sound Preservation</strong>：增强语音时不吞掉警报、车声、婴儿哭声等关键事件。</li>
+      <li><strong>Personal Preference Memory</strong>：学习用户对降噪强度、空间感、人声亮度和疲劳度的偏好。</li>
+      <li><strong>Streaming Failure Recovery</strong>：在丢包、jitter、重连和工具超时时保持最小可用音频路径。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">参考架构</span>
+    <h2>Realtime Audio Action Loop</h2>
+    <pre><code>Microphone / stream
+  → VAD + sound event detector
+  → scene state
+  → affordance scorer
+  → safe DSP / model action
+  → user feedback + telemetry
+  → preference memory</code></pre>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">产品化切入</span>
+    <h2>先做“可解释的自动听觉模式”</h2>
+    <p>用户对实时音频处理最敏感的是失控感：为什么突然变闷，为什么警报声不见了，为什么别人说话被压掉。第一版产品应该把动作解释清楚，例如“检测到键盘噪声，降低 2-4kHz 瞬态”“保留门铃声，未启用强降噪”。这种解释不需要打断用户，但可以在会后或设置页展示。</p>
+    <p>差异化不是追求最强降噪，而是个性化和安全。有人宁愿保留环境感，有人追求极干净人声；有人在办公室，有人在马路边。agent 应根据声景、用户偏好和安全声音优先级选择动作，而不是用同一套增强参数覆盖所有人。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">MVP/实验</span>
+    <h2>先做“会议声景自适应增强”</h2>
+    <p>MVP 使用 WebRTC 或 Realtime API 接入会议音频，只做 4 个动作：人声增强、背景噪声抑制、警报声保留、请求用户确认。测试 50 段不同声景，包括咖啡厅、车内、会议室、键盘声和多人打断。指标包括端到端延迟、语音可懂度、关键事件保留率、用户主观疲劳度和处理动作误触发率。失败信号是延迟超过交互阈值，或系统为了降噪吞掉安全相关声音。</p>
+    <p>需要专门测弱网和长时间稳定性。实时系统不能只看 5 分钟 demo，应跑 2 小时会议、移动网络、蓝牙耳机、重连和多人插话。记录 audio gap、重复处理、状态恢复、误判静音和用户手动关闭增强的次数。</p>
+    <p>产品上还应提供“保守模式”。当模型置信度低或网络波动时，系统退回传统 DSP，而不是继续执行复杂 agent 决策。这个模式会降低炫技感，但能显著提高用户信任。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">风险</span>
+    <h2>实时系统没有“慢慢修”的空间</h2>
+    <p>实时听觉辅助的风险比离线编辑高，因为错误会立刻影响人的感知和判断。必须保留安全直通路径，一旦模型延迟、工具超时或网络异常，就回落到保守 DSP 策略。任何涉及健康、驾驶和公共安全的场景都需要明确非诊断边界和人工接管。</p>
+    <p>落地时应把 agent 决策限制在少数可解释动作中，而不是开放任意音频处理。用户界面也要提供快速关闭、手动强度控制和“为什么这样处理”的记录。实时系统的信任往往来自可预期，而不是功能数量。</p>
+    <p>如果要进入硬件或边缘设备，还要额外评估功耗、发热、麦克风阵列差异和离线可用性。云端能力再强，也不能成为关键听觉路径的单点故障。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">可信来源</span>
+    <h2>进一步阅读</h2>
+    <ul>
+      <li><a href="https://arxiv.org/abs/2204.01691" target="_blank">SayCan</a></li>
+      <li><a href="https://arxiv.org/abs/2307.15818" target="_blank">RT-2</a></li>
+      <li><a href="https://platform.openai.com/docs/guides/realtime" target="_blank">OpenAI Realtime API docs</a></li>
+      <li><a href="https://www.w3.org/TR/webrtc/" target="_blank">W3C WebRTC specification</a></li>
+      <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/RTCRemoteInboundRtpStreamStats/jitter" target="_blank">MDN WebRTC jitter reference</a></li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

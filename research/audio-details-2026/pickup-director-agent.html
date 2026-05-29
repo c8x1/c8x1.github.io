@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智能拾音导演 Agent - 深度页</title>
+<link rel="stylesheet" href="detail-common.css">
+</head>
+<body>
+<div class="detail-container">
+  <div class="detail-header">
+    <a href="../audio-agent-research-2026.html" class="back-link">&larr; 返回主报告</a>
+    <h1 class="detail-title">智能拾音导演 Agent</h1>
+    <div class="detail-meta">
+      <span class="meta-item">证据强度：AV-TSE / target speaker extraction 论文</span>
+      <span class="meta-item">适用阶段：会议室 / 直播 / 课堂 / 采访 / 法庭记录</span>
+      <span class="meta-item">核心范式：listen target → spatial focus → semantic preservation</span>
+    </div>
+    <a href="https://arxiv.org/abs/2506.09792" target="_blank" class="source-link">↗ 核心来源：AV-TSE linguistic constraints</a>
+    <div class="tag-row">
+      <span class="tag highlight">拾音</span>
+      <span class="tag green">目标说话人提取</span>
+      <span class="tag orange">麦克风阵列</span>
+      <span class="tag">视听联合</span>
+    </div>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">背景介绍</span>
+    <h2>从固定拾音规则到“该听谁”的导演决策</h2>
+    <p>传统拾音系统通常围绕波束形成、降噪和回声消除展开，目标是让声音更干净。但真实场景的问题往往更语义化：会议中此刻该听主讲人还是提问者，直播中要保留多少现场欢呼，课堂里要不要捕捉学生插话，采访时哪些环境声是氛围而不是噪声。智能拾音导演 agent 的价值，是把声学信号处理与任务目标结合起来。</p>
+    <p>近年的 audio-visual target speaker extraction 研究已经开始把视觉、语言和目标约束引入分离过程。语言约束可以告诉系统“提取正在解释产品的人”，视觉约束可以帮助判断嘴型和方位，麦克风阵列提供方向与距离。agent 层负责把这些线索组织成可解释的拾音策略。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">使用场景</span>
+    <h2>拾音成为内容生产和协作的前置智能</h2>
+    <ul>
+      <li><strong>会议室与远程会议</strong>：根据议程和发言权重动态聚焦当前有效说话人，同时保留打断与附和。</li>
+      <li><strong>直播与采访</strong>：在主讲、人群声、环境声之间动态平衡，避免把现场感完全消掉。</li>
+      <li><strong>课堂录制</strong>：老师、学生提问和板书声都可能重要，agent 根据教学阶段调节拾音目标。</li>
+      <li><strong>法庭/听证记录</strong>：优先保障发言归属、低误删和可追溯原始音频，而不是追求过度降噪。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">关键技术创新</span>
+    <h2>把拾音变成可解释的多目标优化</h2>
+    <ul>
+      <li><strong>Semantic Target Selector</strong>：将“听主持人”“保留观众反应”“忽略侧后方闲聊”等自然语言目标转成分离约束。</li>
+      <li><strong>Audio-Visual Fusion</strong>：结合嘴型、人体朝向、声源方向和声纹线索，提高嘈杂场景下目标锁定稳定性。</li>
+      <li><strong>Scene-aware Noise Policy</strong>：区分应保留的环境声和应抑制的干扰声，避免把氛围当噪声清掉。</li>
+      <li><strong>Pickup Decision Log</strong>：记录每次聚焦、衰减、切换的理由，便于直播、会议和法务场景复核。</li>
+      <li><strong>Fallback Raw Track</strong>：始终保留原始多轨或阵列信号，防止 agent 错删不可恢复信息。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">参考架构</span>
+    <h2>Pickup Director Loop</h2>
+    <pre><code>Mic array + camera + agenda
+  → speaker / direction / activity detection
+  → semantic target planner
+  → beamforming + target speaker extraction
+  → preservation policy
+  → mixed output + raw archive + decision log</code></pre>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">MVP/实验</span>
+    <h2>先做“会议拾音导演”</h2>
+    <p>MVP 可用 4 麦阵列和摄像头，处理 20 场模拟会议：主讲、插话、多人重叠、远端噪声和投影仪风扇。指标包括目标说话人保真、非目标抑制、插话保留率、speaker attribution accuracy、听感偏好和原始轨可恢复率。失败信号是系统为了干净而删掉关键插话，或在多人重叠时频繁切错目标。</p>
+    <p>产品化时先提供“导演模式”选择：会议记录、直播现场、采访、课堂。每个模式有不同保留策略，而不是同一套降噪参数。用户还应能回看拾音决策日志，知道为什么某段环境声被保留或抑制。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">风险</span>
+    <h2>不能让 agent 成为不可见剪辑师</h2>
+    <p>拾音 agent 一旦错删，后期很难恢复。严肃场景必须保存原始轨，并明确标记哪些音频经过增强或分离。隐私也是核心风险：摄像头、声纹和会议内容都可能敏感，默认应本地处理或最小化上传。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">可信来源</span>
+    <h2>进一步阅读</h2>
+    <ul>
+      <li><a href="https://arxiv.org/abs/2506.09792" target="_blank">Audio-Visual Target Speaker Extraction with Linguistic Constraints</a></li>
+      <li><a href="https://arxiv.org/abs/2511.06288" target="_blank">ELEGANCE target speaker extraction</a></li>
+      <li><a href="https://arxiv.org/abs/2512.20978" target="_blank">GenTSE</a></li>
+      <li><a href="https://arxiv.org/abs/2505.17326" target="_blank">VoxRAG</a></li>
+      <li><a href="https://docs.livekit.io/agents/" target="_blank">LiveKit Agents docs</a></li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

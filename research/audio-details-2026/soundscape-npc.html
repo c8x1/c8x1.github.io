@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>互动式声景 NPC - 深度页</title>
+<link rel="stylesheet" href="detail-common.css">
+</head>
+<body>
+<div class="detail-container">
+  <div class="detail-header">
+    <a href="../audio-agent-research-2026.html" class="back-link">&larr; 返回主报告</a>
+    <h1 class="detail-title">互动式声景 NPC</h1>
+    <div class="detail-meta">
+      <span class="meta-item">证据强度：多 agent 音频生成 + generative agents</span>
+      <span class="meta-item">适用阶段：游戏 / XR / 互动展览 / 虚拟电台</span>
+      <span class="meta-item">核心范式：world memory + adaptive sound generation</span>
+    </div>
+    <a href="https://arxiv.org/abs/2505.22053" target="_blank" class="source-link">↗ 核心来源：AudioGenie</a>
+    <div class="tag-row">
+      <span class="tag highlight">World Memory</span>
+      <span class="tag green">动态 Foley</span>
+      <span class="tag orange">空间一致性</span>
+      <span class="tag">NPC Persona</span>
+    </div>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">背景介绍</span>
+    <h2>游戏音频不是素材播放表</h2>
+    <p>开放世界、XR 和互动展览里的声音由地点、天气、玩家行为、剧情状态、空间遮挡和角色关系共同决定。传统做法依赖大量预制素材和规则触发，难以覆盖长尾状态。ReelWave 和 AudioGenie 展示了多角色声音生成团队，Generative Agents 和 Voyager 则提示我们可以让 agent 维护世界记忆和技能库。</p>
+    <p>互动式声景 NPC 不是一个会说话的角色，而是一个“听得见世界状态”的声音导演。它根据玩家历史和环境状态生成 Foley、环境声、音乐过渡和远近角色声，并确保声音不会破坏玩法或空间真实感。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">使用场景</span>
+    <h2>让世界自己发声</h2>
+    <ul>
+      <li><strong>开放世界游戏</strong>：根据地点、天气、敌人状态和玩家声望动态生成环境声。</li>
+      <li><strong>XR 展览</strong>：参观者靠近展品时，声景根据停留时间和路线变化。</li>
+      <li><strong>互动有声剧</strong>：听众选择影响场景声、角色远近和音乐动机。</li>
+      <li><strong>虚拟电台 DJ</strong>：长期记住听众偏好和虚拟世界事件，生成节目氛围。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">关键技术创新</span>
+    <h2>从触发规则到声景代理</h2>
+    <ul>
+      <li><strong>World-state Audio Memory</strong>：记录地点、事件、角色关系、已播放声景和玩家偏好。</li>
+      <li><strong>Director + Foley + Composer Team</strong>：导演分配任务，Foley 和 Composer 分别生成，由 critic 合成。</li>
+      <li><strong>Spatial Consistency Checker</strong>：检查距离、遮挡、方向、混响和场景连续性。</li>
+      <li><strong>Adaptive Music Motif</strong>：主题动机随剧情推进变体，而不是随机换 BGM。</li>
+      <li><strong>Player-safe Policy</strong>：避免生成误导、惊吓过度或破坏公平性的声音。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">参考架构</span>
+    <h2>Soundscape NPC Loop</h2>
+    <pre><code>Game state + player history
+  → world audio memory
+  → sound director
+  → foley / ambience / music agents
+  → spatial consistency check
+  → runtime audio engine
+  → player feedback</code></pre>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">产品化切入</span>
+    <h2>先做可控的“声景导演”，再做完全生成</h2>
+    <p>游戏团队不会接受一个随意生成声音的黑盒。第一版应让 agent 在策划和音频设计师定义的素材池、音量范围、优先级和触发规则内工作。它可以动态组合、变体化和转场，但不能绕过 runtime audio engine 的约束。</p>
+    <p>差异化来自世界记忆。普通动态音乐系统知道当前状态，声景 NPC 还知道玩家历史、地点故事和角色关系。例如同一条街道在玩家帮助居民后不只是 BGM 变轻快，远处对话、商店门铃和环境密度也发生细微变化。这种细节会比单次生成音质更能提升沉浸感。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">MVP/实验</span>
+    <h2>做一个 3 场景的互动声景 demo</h2>
+    <p>MVP 选择森林、室内、街道 3 个场景，每个场景 5 个状态变量，例如天气、危险等级、玩家速度、任务阶段和 NPC 关系。系统实时生成或选择环境声、Foley 和音乐过渡。指标包括场景识别一致性、空间错误率、循环疲劳感、玩家沉浸评分和生成延迟。失败信号是声音频繁跳变、空间方向错误或音乐动机无法随剧情连续变化。</p>
+    <p>实验还应比较“规则系统”“素材随机变体”和“agent 声景导演”三种方案。若 agent 只是在随机换素材，玩家不会感到世界更聪明。真正的收益应体现在声音能回应历史状态，例如某个地点因玩家行动而逐渐恢复生活感。</p>
+    <p>指标上要记录 runtime 成本和可控性。游戏团队需要稳定帧率、稳定内存和可预测混音优先级。任何生成式能力都必须服从音频引擎，而不是把最终混音交给不可控模型。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">风险</span>
+    <h2>沉浸感很容易被小错误破坏</h2>
+    <p>游戏音频对时机和空间极敏感。agent 生成内容必须受 runtime audio engine 的约束，不应绕过音频设计师设定的优先级、音量范围和安全规则。恐怖、儿童和竞技游戏还需要额外的内容政策，避免声音误导玩家或造成不适。</p>
+    <p>落地路线建议先做设计师工具，而不是玩家端实时生成。设计师输入世界状态和剧情变量，agent 生成候选声景和规则，再由设计师挑选进入引擎。等素材池和一致性检查成熟后，再开放小范围运行时变体。</p>
+    <p>上线后还要监控玩家行为反馈：哪些声景被频繁关闭，哪些区域停留更久，哪些声音造成误判。声景 agent 应持续学习设计意图，而不是只学习点击率。</p>
+    <p>最终目标是增强世界可信度，而不是展示生成能力本身。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">可信来源</span>
+    <h2>进一步阅读</h2>
+    <ul>
+      <li><a href="https://arxiv.org/abs/2503.07217" target="_blank">ReelWave</a></li>
+      <li><a href="https://arxiv.org/abs/2505.22053" target="_blank">AudioGenie</a></li>
+      <li><a href="https://audiogenie.github.io/" target="_blank">AudioGenie project page</a></li>
+      <li><a href="https://arxiv.org/abs/2304.03442" target="_blank">Generative Agents</a></li>
+      <li><a href="https://arxiv.org/abs/2305.16291" target="_blank">Voyager</a></li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

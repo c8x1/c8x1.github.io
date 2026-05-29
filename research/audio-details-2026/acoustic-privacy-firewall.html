@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>声学隐私防火墙 Agent - 深度页</title>
+<link rel="stylesheet" href="detail-common.css">
+</head>
+<body>
+<div class="detail-container">
+  <div class="detail-header">
+    <a href="../audio-agent-research-2026.html" class="back-link">&larr; 返回主报告</a>
+    <h1 class="detail-title">声学隐私防火墙 Agent</h1>
+    <div class="detail-meta">
+      <span class="meta-item">证据强度：隐私/安全官方材料 + voice cloning 风险材料</span>
+      <span class="meta-item">适用阶段：会议 / 直播 / 家庭设备 / 数据采集</span>
+      <span class="meta-item">核心范式：detect → redact → explain → audit</span>
+    </div>
+    <a href="https://www.ftc.gov/policy/advocacy-research/tech-at-ftc/2024/04/approaches-address-ai-enabled-voice-cloning" target="_blank" class="source-link">↗ 核心来源：FTC voice cloning risks</a>
+    <div class="tag-row">
+      <span class="tag highlight">隐私防火墙</span>
+      <span class="tag green">边缘处理</span>
+      <span class="tag orange">局部遮蔽</span>
+      <span class="tag red">审计</span>
+    </div>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">背景介绍</span>
+    <h2>音频采集会带走比用户意识到更多的信息</h2>
+    <p>会议录音、直播、家庭语音设备和训练数据采集常常会捕捉背景对话、儿童声音、地址、电话、医疗信息、键盘声、门铃和其他身份线索。文本隐私工具只能处理转写后的内容，但很多敏感信息在转写前就已经存在于声音里。声学隐私防火墙 agent 的目标，是在音频进入云端、发布或训练前进行事件级检测、局部遮蔽和审计。</p>
+    <p>FTC、FCC、OpenAI system card 和 ASVspoof 等材料都显示，voice cloning、robocall、deepfake 和声纹滥用已经是现实风险。相比事后检测，防火墙思路更靠前：默认最小化采集，必要时只上传摘要、特征或脱敏片段。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">使用场景</span>
+    <h2>在声音离开设备前先过一关</h2>
+    <ul>
+      <li><strong>企业会议</strong>：自动遮蔽无关背景对话、个人信息和未授权参会者声音。</li>
+      <li><strong>直播与播客</strong>：发布前检测儿童声、地址、电话号码、敏感背景声和未授权音乐。</li>
+      <li><strong>家庭设备</strong>：本地识别隐私事件，只上传必要意图或匿名事件。</li>
+      <li><strong>研究数据采集</strong>：在数据入库前执行脱敏、授权检查和审计记录。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">关键技术创新</span>
+    <h2>音频隐私不能只靠转写过滤</h2>
+    <ul>
+      <li><strong>Pre-transcription Detection</strong>：在 ASR 前检测声纹、儿童声、背景对话、音乐和环境敏感事件。</li>
+      <li><strong>Local Redaction</strong>：在设备端执行静音、变声、噪声替换或摘要替代，减少原始音频外流。</li>
+      <li><strong>Policy-aware Routing</strong>：根据会议类型、参与者同意和数据用途决定是否上传或保留。</li>
+      <li><strong>Audit Ledger</strong>：记录何时遮蔽了什么、为什么遮蔽、谁批准恢复。</li>
+      <li><strong>Human Review Queue</strong>：对高风险但不确定片段进入人工复核，而不是自动发布。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">参考架构</span>
+    <h2>Acoustic Privacy Firewall</h2>
+    <pre><code>Raw audio stream
+  → local sensitive event detector
+  → consent and policy check
+  → redact / summarize / block
+  → audit ledger
+  → approved downstream ASR, storage or publishing</code></pre>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">MVP/实验</span>
+    <h2>先做“发布前隐私扫描”</h2>
+    <p>MVP 输入会议或播客录音，检测 6 类风险：电话号码/地址、儿童声、背景对话、未授权音乐、疑似声纹克隆风险、敏感关键词。输出时间轴、风险类别、建议处理方式和可审计报告。指标包括高风险召回率、误报率、人工复核时间、遮蔽后可懂度和用户信任度。失败信号是系统漏掉明显个人信息，或过度遮蔽导致内容不可用。</p>
+    <p>第二阶段可以做实时版本，但只在边缘设备执行轻量检测。实时系统应默认提示而不是自动中断，除非风险类别被组织策略明确配置为阻断。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">风险</span>
+    <h2>隐私工具不能变成监控工具</h2>
+    <p>声学隐私防火墙本身会分析敏感声音，因此必须最小化存储、限制访问、提供删除和审计。它不应被用来偷偷识别员工、家庭成员或路人。所有声纹相关能力都应以授权和安全目的为边界。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">可信来源</span>
+    <h2>进一步阅读</h2>
+    <ul>
+      <li><a href="https://www.ftc.gov/policy/advocacy-research/tech-at-ftc/2024/04/approaches-address-ai-enabled-voice-cloning" target="_blank">FTC voice cloning risks</a></li>
+      <li><a href="https://docs.fcc.gov/public/attachments/DOC-400393A1.pdf" target="_blank">FCC AI-generated robocall ruling</a></li>
+      <li><a href="https://openai.com/index/gpt-4o-system-card/" target="_blank">OpenAI GPT-4o System Card</a></li>
+      <li><a href="https://www.asvspoof.org/" target="_blank">ASVspoof</a></li>
+      <li><a href="https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence" target="_blank">NIST GenAI profile</a></li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

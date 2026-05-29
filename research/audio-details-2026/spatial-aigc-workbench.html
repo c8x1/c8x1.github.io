@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spatial AIGC 声音设计工作台 - 深度页</title>
+<link rel="stylesheet" href="detail-common.css">
+</head>
+<body>
+<div class="detail-container">
+  <div class="detail-header">
+    <a href="../audio-agent-research-2026.html" class="back-link">&larr; 返回主报告</a>
+    <h1 class="detail-title">Spatial AIGC 声音设计工作台</h1>
+    <div class="detail-meta">
+      <span class="meta-item">证据强度：空间音频生成 / motion-to-audio 论文</span>
+      <span class="meta-item">适用阶段：游戏 / XR / 广告 / 沉浸式剧场</span>
+      <span class="meta-item">核心范式：text prompt → trajectory → spatial render graph</span>
+    </div>
+    <a href="https://arxiv.org/abs/2509.11124" target="_blank" class="source-link">↗ 核心来源：STASE</a>
+    <div class="tag-row">
+      <span class="tag highlight">AIGC</span>
+      <span class="tag green">空间音频</span>
+      <span class="tag orange">声音设计</span>
+      <span class="tag">可编辑工程</span>
+    </div>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">背景介绍</span>
+    <h2>从“生成声音”到“生成空间工程”</h2>
+    <p>文本到音频已经能生成很多短片段，但游戏、XR 和沉浸式内容需要的是空间化、可编辑、可同步的声音工程。创作者想描述的不只是“脚步声”，而是“脚步从右后方绕到左前方，雨声在远处，怪物低频像从地下靠近”。Spatial AIGC 工作台的目标，是把这种描述转成声源轨迹、距离、混响、遮挡、声像和渲染参数。</p>
+    <p>STASE、AudioSpa、TTMBA、Text2Move 等方向说明空间文本到音频、轨迹生成和双耳渲染正在快速发展。agent 可以成为中间层：先规划空间事件，再调用生成、采样、渲染和 QC 工具，最后输出可编辑工程，而不是单个不可控 wav。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">使用场景</span>
+    <h2>让空间音频成为可 prompt 的设计材料</h2>
+    <ul>
+      <li><strong>游戏声效预演</strong>：快速生成怪物接近、场景转场、机关启动的空间声草图。</li>
+      <li><strong>XR 原型</strong>：为交互展览和训练模拟生成可移动声源和环境声层。</li>
+      <li><strong>广告与短片</strong>：根据画面运动和品牌情绪生成空间化声音设计方案。</li>
+      <li><strong>沉浸式剧场</strong>：导演用自然语言描述观众周围的声源运动和空间情绪。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">关键技术创新</span>
+    <h2>输出应是工程，不只是音频文件</h2>
+    <ul>
+      <li><strong>Spatial Prompt Parser</strong>：把自然语言解析成声源、轨迹、距离、遮挡和混响意图。</li>
+      <li><strong>Trajectory Planner</strong>：生成可编辑的时间-空间轨迹，而不是把运动固化进音频。</li>
+      <li><strong>Asset + Generation Hybrid</strong>：优先检索可授权素材，不足部分再生成。</li>
+      <li><strong>Render Graph Export</strong>：输出 DAW、游戏引擎或 WebAudio 可用的轨道与参数。</li>
+      <li><strong>Spatial QC</strong>：检查方向反转、距离跳变、遮挡不一致和晕动风险。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">参考架构</span>
+    <h2>Spatial Sound Design Agent</h2>
+    <pre><code>Creative prompt + video / scene state
+  → spatial event planner
+  → asset retrieval + audio generation
+  → trajectory and reverb graph
+  → binaural / game-engine render
+  → spatial QC + editable export</code></pre>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">MVP/实验</span>
+    <h2>先做 10 秒空间声草图</h2>
+    <p>MVP 限制在 3 个声源、10 秒以内、固定双耳渲染。用户输入一段空间描述，系统输出音频、轨迹图和可编辑参数表。指标包括声源方向感、轨迹可理解度、用户编辑次数、生成耗时和空间 QC 错误。失败信号是声音本身好听但无法编辑，或者用户无法把输出放入现有制作工具。</p>
+    <p>产品化时要强调“草图到工程”的路径。创作者可以先用 agent 生成方向，再替换素材、微调轨迹和混响。这样它服务专业工作流，而不是和专业声音设计师抢最终控制权。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">风险</span>
+    <h2>空间效果很容易造成不适或误导</h2>
+    <p>空间音频错误比普通音效错误更明显。方向反转、距离跳变、过强低频和过度运动都可能造成晕动或惊吓。系统应提供安全预设，并对儿童、公共空间和无障碍场景使用更保守的运动范围。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">可信来源</span>
+    <h2>进一步阅读</h2>
+    <ul>
+      <li><a href="https://arxiv.org/abs/2509.11124" target="_blank">STASE: Spatial Text-to-Audio Sound Event Generation</a></li>
+      <li><a href="https://arxiv.org/abs/2502.11219" target="_blank">AudioSpa</a></li>
+      <li><a href="https://arxiv.org/abs/2507.16564" target="_blank">TTMBA</a></li>
+      <li><a href="https://arxiv.org/abs/2509.21919" target="_blank">Text2Move</a></li>
+      <li><a href="https://arxiv.org/abs/2503.10719" target="_blank">LVAS-Agent</a></li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

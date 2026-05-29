@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DAW 中的可回滚制作人 - 深度页</title>
+<link rel="stylesheet" href="detail-common.css">
+</head>
+<body>
+<div class="detail-container">
+  <div class="detail-header">
+    <a href="../audio-agent-research-2026.html" class="back-link">&larr; 返回主报告</a>
+    <h1 class="detail-title">DAW 中的可回滚制作人</h1>
+    <div class="detail-meta">
+      <span class="meta-item">证据强度：arXiv + GitHub + 既有 MCP 生态</span>
+      <span class="meta-item">适用阶段：DAW / 后期 / 音频工程修复</span>
+      <span class="meta-item">核心范式：inspect → patch → render → test</span>
+    </div>
+    <a href="https://github.com/adamjmurray/producer-pal" target="_blank" class="source-link">↗ 核心来源：Producer Pal</a>
+    <div class="tag-row">
+      <span class="tag highlight">DAW Copilot</span>
+      <span class="tag green">可回滚补丁</span>
+      <span class="tag orange">音频测试</span>
+      <span class="tag">MCP</span>
+    </div>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">背景介绍</span>
+    <h2>把 SWE-agent 的工程回路搬进 DAW</h2>
+    <p>软件工程 agent 的价值来自真实环境中的闭环：读取项目、定位问题、编辑文件、运行测试、再根据失败信息修正。音频工程也有同样的结构。一个 Ableton、Reaper 或 Pro Tools 工程包含轨道、clip、插件链、自动化、采样路径和导出目标；问题可能是缺失素材、路由错误、爆音、响度不合规、相位抵消或人声链风格不一致。</p>
+    <p>Producer Pal 和 Ableton MCP 生态已经证明 DAW 可以通过工具接口被 LLM 操作；AudioToolAgent 和 AudioFab 则展示了把音频模型、算法和工具注册给中心 agent 的路线。关键产品判断是：agent 不能直接覆盖工程，而应输出可审查、可回滚的 patch。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">使用场景</span>
+    <h2>先从修复和版本探索切入</h2>
+    <ul>
+      <li><strong>工程健康检查</strong>：读取 session，列出缺失 sample、静音轨、路由环路、clip、响度超标和插件缺失。</li>
+      <li><strong>A/B Mix 探索</strong>：根据“更温暖”“更有电台感”等意图生成多个非破坏性版本。</li>
+      <li><strong>播客后期</strong>：自动降噪、去空白、对齐片头片尾、统一 LUFS，并输出修复日志。</li>
+      <li><strong>游戏音频交付</strong>：批量检查命名、长度、响度、循环点和平台规格。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">关键技术创新</span>
+    <h2>让 agent 有“工程手感”</h2>
+    <ul>
+      <li><strong>DAW 状态快照</strong>：把轨道、clip、设备、参数、路由和素材路径转换成 LLM 可读但可精确执行的中间表示。</li>
+      <li><strong>Patch-first 操作</strong>：每次修改都生成 patch、理由、预期影响和回滚路径，人工确认后才应用。</li>
+      <li><strong>Audio Regression</strong>：对 render 结果跑 LUFS、true peak、silence、noise floor、phase correlation、频谱差异和人工盲听。</li>
+      <li><strong>工具注册层</strong>：把 source separation、denoise、EQ、compressor、ffmpeg、DAW automation 暴露为可组合工具。</li>
+      <li><strong>失败记忆</strong>：记录“上次这么处理导致齿音过重”这类项目级反思，避免重复坏操作。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">参考架构</span>
+    <h2>Non-destructive Audio Agent Loop</h2>
+    <pre><code>User intent
+  → Session Inspector
+  → Patch Planner
+  → DAW / DSP Tool Router
+  → Render Sandbox
+  → Audio Test Suite
+  → Human approval
+  → Apply or rollback</code></pre>
+    <p>这里的核心是 render sandbox。agent 可以大胆试错，但试错必须发生在隔离副本里，主工程只接受通过指标和人工确认的补丁。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">产品化切入</span>
+    <h2>先卖“工程体检”，再进入自动制作</h2>
+    <p>DAW agent 最大阻力是用户不放心它改工程。因此第一版可以只做只读体检：扫描工程、列出问题、解释影响、给出修复脚本或手动步骤。第二版再允许生成 patch 和 A/B render。这样用户能先建立信任，也能积累大量真实工程问题样本。</p>
+    <p>商业上可从播客工作室、广告后期、小型游戏音频团队切入。这些场景比音乐创作更规则化，交付标准清晰，用户愿意为节省 QC 和整理时间付费。等工具链稳定后，再扩展到混音建议、编曲辅助和声音设计探索。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">MVP/实验</span>
+    <h2>从“播客工程修复”开始</h2>
+    <p>选择 20 个真实或半真实播客工程，注入缺失素材、过响、空白过长、噪声、片头片尾不一致等问题。MVP 只允许 agent 输出 patch 和对比 render，不允许直接覆盖。验收指标包括问题检出率、误报率、LUFS 合规率、人工采用率、回滚成功率和处理时间。失败信号是 agent 修改了用户未授权的创作意图，或修复一个指标却引入新的听感问题。</p>
+    <p>后续实验可以加入“创作意图保持”评估：让三位工程师盲听原版、agent 修复版和人工修复版，分别评价清晰度、自然度、风格保真和是否过度处理。只有当 agent 修复版在硬指标达标的同时不显著损害风格保真，才允许从建议模式进入半自动模式。</p>
+    <p>运营指标也很重要：平均每个工程节省多少整理时间、用户采用哪些类型补丁、哪些补丁被频繁撤销。这些数据会反过来指导工具优先级，而不是一开始就追求全能 DAW 控制。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">风险</span>
+    <h2>创作意图比指标更难保护</h2>
+    <p>音频工程的危险在于“看似正确”的修复可能破坏审美。比如压缩更稳、响度合规，但 groove 和空间感没了。因此产品必须保留 A/B render、差异解释和撤销机制。另一个风险是插件和采样授权，agent 不能擅自替换为未授权素材。</p>
+    <p>落地路线建议分三步：第一步只读诊断，第二步生成离线 patch，第三步才接入 DAW 内实时协作。每一步都要保留人工批准和版本回退。这样即使 agent 出错，损失也被限制在候选版本里，不会污染主工程。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">可信来源</span>
+    <h2>进一步阅读</h2>
+    <ul>
+      <li><a href="https://arxiv.org/abs/2405.15793" target="_blank">SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering</a></li>
+      <li><a href="https://github.com/SWE-agent/SWE-agent" target="_blank">SWE-agent GitHub</a></li>
+      <li><a href="https://arxiv.org/abs/2510.02995" target="_blank">AudioToolAgent</a></li>
+      <li><a href="https://arxiv.org/abs/2512.24645" target="_blank">AudioFab</a></li>
+      <li><a href="https://github.com/adamjmurray/producer-pal" target="_blank">Producer Pal GitHub</a></li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

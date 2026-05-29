@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>空间声景理解 Agent - 深度页</title>
+<link rel="stylesheet" href="detail-common.css">
+</head>
+<body>
+<div class="detail-container">
+  <div class="detail-header">
+    <a href="../audio-agent-research-2026.html" class="back-link">&larr; 返回主报告</a>
+    <h1 class="detail-title">空间声景理解 Agent</h1>
+    <div class="detail-meta">
+      <span class="meta-item">证据强度：spatial audio QA / motion reasoning 论文</span>
+      <span class="meta-item">适用阶段：AR / 机器人 / 无障碍导航 / 安防</span>
+      <span class="meta-item">核心范式：sound events → spatial relations → scene graph</span>
+    </div>
+    <a href="https://arxiv.org/abs/2509.14666" target="_blank" class="source-link">↗ 核心来源：Spatial Audio Motion Understanding</a>
+    <div class="tag-row">
+      <span class="tag highlight">Spatial Audio QA</span>
+      <span class="tag green">声景图谱</span>
+      <span class="tag orange">方向/距离推理</span>
+      <span class="tag">AR</span>
+    </div>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">背景介绍</span>
+    <h2>听懂空间，而不是只识别事件</h2>
+    <p>很多音频模型能识别“狗叫”“车声”“脚步”，但真实应用还需要知道声音在什么方向、多远、是否靠近、与其他声源有什么关系。对 AR 眼镜、机器人和无障碍导航来说，这些空间关系比标签更重要。空间声景理解 agent 的目标，是把连续声音变成可查询的声景图谱。</p>
+    <p>近期 spatial audio motion understanding、spatial audio descriptor 和 spatial audio QA 方向正在补这块空白。它们让模型不只回答“发生了什么”，还能回答“从哪里来”“是否移动”“哪个声源更危险”。agent 层可以进一步把这些答案转成提醒、导航、控制和记录。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">使用场景</span>
+    <h2>给设备一张听觉地图</h2>
+    <ul>
+      <li><strong>视障导航</strong>：识别左后方自行车靠近、前方人群聚集、右侧门口有人说话。</li>
+      <li><strong>AR 眼镜</strong>：把声源关系叠加到视觉界面，帮助用户理解被遮挡的事件。</li>
+      <li><strong>机器人与无人设备</strong>：在视觉不可见或低光环境下，用声音补全环境状态。</li>
+      <li><strong>安防与工业巡检</strong>：判断异常声是否移动、来自哪个设备、是否接近人员区域。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">关键技术创新</span>
+    <h2>从音频标签到空间关系图</h2>
+    <ul>
+      <li><strong>Spatial Scene Graph</strong>：节点是声源，边是方向、距离、遮挡、运动趋势和危险关系。</li>
+      <li><strong>Motion-aware Memory</strong>：记录声源轨迹，而不是只记录某一帧的分类结果。</li>
+      <li><strong>Question-answer Interface</strong>：允许用户问“刚才右边响的是什么”“有没有东西靠近”。</li>
+      <li><strong>Multimodal Grounding</strong>：结合视觉、IMU、头动和麦克风阵列，降低空间幻觉。</li>
+      <li><strong>Priority Policy</strong>：按安全性、距离和用户偏好决定哪些声源需要提醒。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">参考架构</span>
+    <h2>Spatial Listening Pipeline</h2>
+    <pre><code>Binaural / mic array stream
+  → sound event + localization
+  → motion tracking
+  → spatial scene graph
+  → user query / safety policy
+  → audio, haptic or visual response</code></pre>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">MVP/实验</span>
+    <h2>先做“室内空间问答”</h2>
+    <p>MVP 可在办公室或家庭场景中采集 30 段双耳/阵列音频，覆盖脚步、门铃、宠物、车辆、对话、设备异常声。系统回答方向、距离粗分、是否移动、是否接近用户。指标包括事件识别准确率、方向误差、运动趋势准确率、危险提醒漏报率和用户主观信任。失败信号是模型能识别事件却无法稳定定位，或对不确定空间关系过度自信。</p>
+    <p>产品上应允许用户切换提醒密度：安全优先、安静模式、探索模式。无障碍场景中，过多提醒会造成认知负担，少而准比全量播报更重要。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">风险</span>
+    <h2>空间幻觉比分类错误更危险</h2>
+    <p>如果 agent 把危险声源方向说反，可能带来真实安全风险。系统应输出置信度，并在低置信度时使用“附近有车辆声”而不是“左侧有车”。涉及导航和安全提示时，必须保守表达，避免替代用户判断。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">可信来源</span>
+    <h2>进一步阅读</h2>
+    <ul>
+      <li><a href="https://arxiv.org/abs/2509.14666" target="_blank">Spatial Audio Motion Understanding and Reasoning</a></li>
+      <li><a href="https://arxiv.org/abs/2510.05542" target="_blank">Sci-Phi spatial audio descriptor</a></li>
+      <li><a href="https://arxiv.org/abs/2507.09195" target="_blank">Spatial Audio QA</a></li>
+      <li><a href="https://support.google.com/accessibility/android/answer/10092548?hl=en" target="_blank">Google Android Sound Notifications</a></li>
+      <li><a href="https://www.microsoft.com/en-us/garage/wall-of-fame/seeing-ai/" target="_blank">Microsoft Seeing AI</a></li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
