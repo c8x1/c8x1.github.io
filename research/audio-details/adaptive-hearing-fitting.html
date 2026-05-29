@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自适应助听调参 Agent - 深度页</title>
+<link rel="stylesheet" href="detail-common.css">
+</head>
+<body>
+<div class="detail-container">
+  <div class="detail-header">
+    <a href="../audio-agent-research-report.html" class="back-link">&larr; 返回主报告</a>
+    <h1 class="detail-title">自适应助听调参 Agent</h1>
+    <div class="detail-meta">
+      <span class="meta-item">证据强度：CAFA 论文 + Apple/FDA 官方信息</span>
+      <span class="meta-item">适用阶段：耳机 / 助听器 / 会议模式 / 电视增强</span>
+      <span class="meta-item">核心范式：environment + audiogram + feedback → fitting advice</span>
+    </div>
+    <a href="https://arxiv.org/abs/2509.06382" target="_blank" class="source-link">↗ 核心来源：CAFA</a>
+    <div class="tag-row">
+      <span class="tag highlight">助听调参</span>
+      <span class="tag green">个性化</span>
+      <span class="tag orange">环境自适应</span>
+      <span class="tag red">医疗边界</span>
+    </div>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">背景介绍</span>
+    <h2>从预设模式到上下文调参</h2>
+    <p>助听设备和耳机正在从简单的“降噪/通透/增强人声”走向更细粒度的个性化。用户真实需求往往是场景化的：餐厅里听不清对面的人，会议里空调声太烦，电视对白太小，户外又不能丢掉交通声。自适应助听调参 agent 的任务，是把环境、听力图、用户反馈和安全边界转成可执行参数建议。</p>
+    <p>CAFA 提出了 context-adaptive hearing aid fitting advisor，用多 agent LLM workflow 处理实时助听调参。与此同时，Apple AirPods Pro 的听力辅助功能和 FDA 授权说明显示，消费耳机正在进入更严肃的听力健康场景。这让“个性化听觉 agent”成为产品和研究都值得关注的方向。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">使用场景</span>
+    <h2>把用户反馈变成调参策略</h2>
+    <ul>
+      <li><strong>餐厅对话</strong>：增强正前方人声，抑制侧后方噪声，同时保留服务员提醒。</li>
+      <li><strong>会议模式</strong>：根据发言人距离和房间混响调整方向性、压缩和降噪强度。</li>
+      <li><strong>电视/音乐增强</strong>：提升对白清晰度，但避免过度压缩音乐动态。</li>
+      <li><strong>日常通勤</strong>：在交通环境中保留关键安全声音，避免强降噪造成风险。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">关键技术创新</span>
+    <h2>让调参过程可解释、可回退</h2>
+    <ul>
+      <li><strong>Context Classifier</strong>：识别餐厅、会议、户外、电视、音乐等场景，并估计噪声类型。</li>
+      <li><strong>Audiogram-aware Policy</strong>：结合用户听力图和偏好，避免对所有用户使用同一增强曲线。</li>
+      <li><strong>Feedback Dialogue</strong>：把“太刺耳”“听不清右边的人”转成可执行参数变化。</li>
+      <li><strong>Safety Guard</strong>：保留警报、车辆、门铃等关键声音，不让优化目标只追求舒适。</li>
+      <li><strong>Parameter Memory</strong>：记录哪些场景下哪些调参有效，形成个人听觉档案。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">参考架构</span>
+    <h2>Adaptive Fitting Loop</h2>
+    <pre><code>Environment audio + audiogram
+  → scene classifier
+  → fitting advisor agents
+  → safe parameter proposal
+  → user A/B feedback
+  → personal hearing profile</code></pre>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">MVP/实验</span>
+    <h2>先做“听觉 A/B 调参助手”</h2>
+    <p>MVP 不直接声称医疗能力，只在耳机 App 中提供 3 个场景的 A/B 调参：餐厅、会议、电视。用户选择更清楚、更舒适或更自然，agent 学习参数偏好。指标包括用户偏好稳定性、语音可懂度、疲劳感、关键声音保留率和用户手动覆盖次数。失败信号是系统为了清晰度牺牲安全声音，或频繁自动调参让用户失去控制感。</p>
+    <p>如果进入临床或助听器场景，需要专业听力师参与，agent 只能作为建议和记录工具。每次参数变化都应可解释、可回滚，并能导出给专业人员复核。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">风险</span>
+    <h2>听力健康不能用普通消费 AI 逻辑处理</h2>
+    <p>助听调参涉及健康和安全。产品必须明确医疗边界，避免暗示诊断能力。不同国家和地区对助听设备有监管要求，任何自动化建议都应保守，并允许用户快速关闭或恢复默认设置。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">可信来源</span>
+    <h2>进一步阅读</h2>
+    <ul>
+      <li><a href="https://arxiv.org/abs/2509.06382" target="_blank">CAFA: Context-Adaptive Hearing Aid Fitting Advisor</a></li>
+      <li><a href="https://support.apple.com/en-us/120992" target="_blank">Apple AirPods Pro Hearing Aid feature</a></li>
+      <li><a href="https://www.fda.gov/news-events/press-announcements/la-fda-autoriza-el-primer-software-para-dispositivos-auditivos-de-venta-libre" target="_blank">FDA authorization announcement</a></li>
+      <li><a href="https://platform.openai.com/docs/guides/realtime" target="_blank">OpenAI Realtime API docs</a></li>
+      <li><a href="https://www.w3.org/TR/webrtc/" target="_blank">W3C WebRTC specification</a></li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

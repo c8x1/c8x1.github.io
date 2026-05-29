@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>会议与谈判的语音协作 Agent - 深度页</title>
+<link rel="stylesheet" href="detail-common.css">
+</head>
+<body>
+<div class="detail-container">
+  <div class="detail-header">
+    <a href="../audio-agent-research-report.html" class="back-link">&larr; 返回主报告</a>
+    <h1 class="detail-title">会议与谈判的语音协作 Agent</h1>
+    <div class="detail-meta">
+      <span class="meta-item">证据强度：audio RAG + voice benchmark + 官方平台文档</span>
+      <span class="meta-item">适用阶段：销售 / 客服 / 项目会议 / 法务谈判</span>
+      <span class="meta-item">核心范式：实时 RAG + 多角色监督 + 任务跟进</span>
+    </div>
+    <a href="https://arxiv.org/abs/2505.17326" target="_blank" class="source-link">↗ 核心来源：VoxRAG</a>
+    <div class="tag-row">
+      <span class="tag highlight">Audio RAG</span>
+      <span class="tag green">实时工具调用</span>
+      <span class="tag orange">证据链纪要</span>
+      <span class="tag red">合规边界</span>
+    </div>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">背景介绍</span>
+    <h2>会议 agent 不该停在 summary</h2>
+    <p>今天很多会议工具已经能转写和总结，但真正有价值的 agent 应该能在会中发现缺失信息、追踪承诺、检索证据、提示风险，并在会后自动生成可追责的行动项。VoxRAG 提醒我们音频检索不一定要先完整转写；VoiceAgentBench 和 tau-Voice 则把语音 agent 评测推进到多工具、多轮、安全和真实任务。</p>
+    <p>这个场景适合采用多 agent：fact-checker 检查事实，risk monitor 识别高风险承诺，facilitator 发现未回应问题，task tracker 生成 owner 和 deadline。最终输出不是一篇漂亮纪要，而是带音频证据链接的工作流。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">使用场景</span>
+    <h2>从会议记录员升级为流程管理者</h2>
+    <ul>
+      <li><strong>销售谈判</strong>：实时提示客户历史、合同条款、价格边界和竞品风险。</li>
+      <li><strong>客服升级</strong>：识别情绪升级、合规话术缺失和需要转人工的节点。</li>
+      <li><strong>项目周会</strong>：自动发现阻塞点、未回答问题和行动项 owner。</li>
+      <li><strong>跨语言会议</strong>：保留原始音频证据，纪要可以跳回关键片段。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">关键技术创新</span>
+    <h2>纪要必须能追溯到声音证据</h2>
+    <ul>
+      <li><strong>Transcription-free Retrieval</strong>：对音频片段建立 embedding，降低 ASR 错误对检索的影响。</li>
+      <li><strong>Evidence-linked Minutes</strong>：每个结论、承诺和风险都链接到原始音频时间戳。</li>
+      <li><strong>Role-specific Agents</strong>：事实核查、谈判风险、任务提取、情绪缓和分别独立评分。</li>
+      <li><strong>Tool Permission Layer</strong>：创建任务、发邮件、更新 CRM 前必须经过权限和审批策略。</li>
+      <li><strong>Live Intervention Policy</strong>：只有在高价值场景才打断会议，普通观察进入会后报告。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">参考架构</span>
+    <h2>Meeting Agent Pipeline</h2>
+    <pre><code>Live audio
+  → diarization + audio retrieval
+  → meeting state graph
+  → fact / risk / task / facilitator agents
+  → evidence-linked minutes
+  → approval gate
+  → CRM / calendar / issue tracker</code></pre>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">产品化切入</span>
+    <h2>先做会后工作流，不急着实时插话</h2>
+    <p>实时插话对会议体验破坏很大，也更容易出错。更稳的入口是会后 3 分钟内生成“可执行纪要”：行动项、风险、未回答问题、关键证据片段和建议跟进邮件。用户先在低风险场景建立信任，再逐步开启会中提醒。</p>
+    <p>对销售和客服团队，价值不在漂亮摘要，而在少漏跟进、少错承诺、少违反话术。产品可以按角色提供不同视图：经理看风险和转化，销售看下一步动作，法务看敏感承诺，客户成功看情绪和阻塞点。所有视图都应能回到原始音频证据。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">MVP/实验</span>
+    <h2>先做“会后可追责行动项”</h2>
+    <p>MVP 不需要实时打断，先处理 30 场真实会议录音，输出行动项、owner、deadline、风险点和音频证据链接。指标包括行动项准确率、speaker attribution accuracy、证据时间戳命中率、人工编辑时间节省和错误创建任务数。第二阶段再加入实时提醒，测 barge-in 是否被用户接受。</p>
+    <p>评估要区分三类错误：漏掉行动项、行动项内容错误、把行动项归给错误的人。第三类最危险，因为它会破坏团队信任。系统默认应把低置信度行动项放入“待确认”，并给出对应音频片段，而不是直接写进项目管理工具。</p>
+    <p>实时提醒也要有触发预算。每场会议最多提醒几次，提醒对象是谁，哪些风险只进入会后报告，这些都应由团队策略控制。否则 agent 很容易从助手变成会议噪音。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">风险</span>
+    <h2>隐私、误归因和自动执行要保守</h2>
+    <p>会议 agent 最危险的是把 A 的承诺记到 B 名下，或在没有批准的情况下执行外部动作。所有输出都应带置信度和证据片段；所有外部写操作默认进入草稿或审批队列。涉及法律、医疗、财务谈判时，应明确它不是法律或财务意见。</p>
+    <p>落地路线建议从“只读会议助手”开始，只生成会后报告，不主动发言、不写外部系统。第二阶段接入任务工具但保持草稿状态。第三阶段才开放实时提醒，并让团队配置哪些提醒允许打断，哪些只能静默记录。</p>
+    <p>组织侧还需要明确录音告知、参会人同意、数据保留期限和跨境传输策略。没有这些治理规则，技术上可行的会议 agent 也很难进入严肃业务场景。</p>
+    <p>尤其在客户会议中，透明告知本身就是产品体验的一部分。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">可信来源</span>
+    <h2>进一步阅读</h2>
+    <ul>
+      <li><a href="https://arxiv.org/abs/2505.17326" target="_blank">VoxRAG</a></li>
+      <li><a href="https://arxiv.org/abs/2510.07978" target="_blank">VoiceAgentBench</a></li>
+      <li><a href="https://arxiv.org/abs/2603.13686" target="_blank">tau-Voice</a></li>
+      <li><a href="https://ai.google.dev/gemini-api/docs/live" target="_blank">Gemini Live API docs</a></li>
+      <li><a href="https://www.twilio.com/docs/voice/conversationrelay" target="_blank">Twilio ConversationRelay docs</a></li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>角色连续剧式有声内容工厂 - 深度页</title>
+<link rel="stylesheet" href="detail-common.css">
+</head>
+<body>
+<div class="detail-container">
+  <div class="detail-header">
+    <a href="../audio-agent-research-report.html" class="back-link">&larr; 返回主报告</a>
+    <h1 class="detail-title">角色连续剧式有声内容工厂</h1>
+    <div class="detail-meta">
+      <span class="meta-item">证据强度：preprint + 官方文档 + 安全报告</span>
+      <span class="meta-item">适用阶段：内容 IP / 有声剧 / 游戏叙事</span>
+      <span class="meta-item">核心范式：memory + multi-agent + voice consistency</span>
+    </div>
+    <a href="https://arxiv.org/abs/2503.07217" target="_blank" class="source-link">↗ 核心来源：ReelWave</a>
+    <div class="tag-row">
+      <span class="tag highlight">导演 Agent</span>
+      <span class="tag green">角色音色记忆</span>
+      <span class="tag orange">长叙事一致性</span>
+      <span class="tag red">授权风险</span>
+    </div>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">背景介绍</span>
+    <h2>为什么不是“多角色 TTS”这么简单</h2>
+    <p>长篇有声内容的难点不是让某个模型念出台词，而是让一个角色在第 1 集、第 8 集和番外篇里仍然像同一个人。角色有声音身份、语速、情绪边界、口头禅、关系史和剧情承诺；制作团队还要维护环境声、音乐动机和场景转场。<strong>ReelWave</strong> 把电影声音生成拆成 Sound Director、Foley Artist、Composer、Voice Actor 等角色，这说明声音生产天然适合多 agent 分工。<strong>AudioStory</strong> 则强调长叙事音频需要按时间拆成子任务，并用 bridging query 与 residual query 维持事件内外一致性。</p>
+    <p>因此这个方向的产品形态更像“有声内容制作室”，而不是 TTS 页面。导演 agent 负责规划剧情和场景，演员 agent 负责表演，连续性 agent 检查角色是否偏离设定，版权 agent 管理声音、音乐和素材的授权边界。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">使用场景</span>
+    <h2>可以落地的内容形态</h2>
+    <ul>
+      <li><strong>IP 有声剧工厂</strong>：为小说、漫画、游戏 IP 自动生成试播集、番外短剧和多语言配音版本。</li>
+      <li><strong>互动儿童故事</strong>：孩子选择剧情分支后，角色音色、性格和关系仍保持稳定。</li>
+      <li><strong>游戏支线剧情</strong>：NPC 根据玩家历史关系改变台词和情绪，但不能发生角色声线漂移。</li>
+      <li><strong>虚拟偶像广播剧</strong>：角色长期运营，需要记住人设、粉丝梗和节目历史。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">关键技术创新</span>
+    <h2>从角色表演到连续性控制</h2>
+    <ul>
+      <li><strong>角色 Voice Profile</strong>：保存参考声、speaker embedding、语速、音高范围、情绪表演边界和禁用表达。</li>
+      <li><strong>导演与连续性双 agent</strong>：导演追求戏剧张力，连续性 agent 审查声线、设定、时间线和上一集承诺。</li>
+      <li><strong>场景声资产记忆</strong>：把地点、环境声、主题音乐、角色关系与剧情事件绑定，减少长篇声景漂移。</li>
+      <li><strong>声纹漂移检测</strong>：每段生成后测 speaker embedding drift、F0/formant 变化，并抽样做人工 ABX。</li>
+      <li><strong>授权账本</strong>：每个角色声、BGM、SFX 都记录授权范围、期限、地域、撤回和二次训练权。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">参考架构</span>
+    <h2>多角色有声剧 Studio</h2>
+    <div class="arch-diagram">
+      <div class="arch-flow">
+        <div class="arch-node primary">Story Director<small>分集大纲、场景、节奏、角色目标</small></div>
+        <div class="arch-arrow">&darr;</div>
+        <div class="arch-row">
+          <div class="arch-node success">Actor Agents<small>角色表演与台词生成</small></div>
+          <div class="arch-node success">Foley Agent<small>动作声与环境声</small></div>
+          <div class="arch-node success">Composer Agent<small>主题音乐与转场</small></div>
+        </div>
+        <div class="arch-arrow">&darr;</div>
+        <div class="arch-node warn">Continuity + Rights Review<small>声线一致性、剧情一致性、授权边界</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">产品化切入</span>
+    <h2>从“试播集生成器”切入，而不是一开始做全集自动化</h2>
+    <p>更现实的产品入口是帮助 IP 团队快速做 1 集试播或 3 个风格方向，而不是承诺完整替代编剧、配音和后期。用户上传角色设定、世界观、样章和授权声线，系统输出多个短样：偏广播剧、偏儿童故事、偏游戏任务对白。每个样本都附带角色声线报告、素材来源和可继续制作的任务拆解。</p>
+    <p>差异化可以放在“连续性控制”上。普通 TTS 工具强调声音自然度，这个产品强调第 10 集仍像第 1 集：角色不会忘记关系，声音不会随情绪漂移，场景音乐不会突然换世界观。对内容公司来说，这比单句音质更接近真实生产痛点。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">MVP/实验</span>
+    <h2>先做 3 角色、5 集的可验证样机</h2>
+    <p>MVP 可以限制在 3 个角色、每集 3 分钟、总共 5 集。输入角色设定、剧情大纲和合法参考声，系统输出每集脚本、角色音频、环境声和一致性报告。核心指标包括：角色声线相似度、人工 ABX 角色识别率、剧情设定冲突数、每集制作时间、授权来源覆盖率。失败信号是角色在情绪切换后无法回到原声线，或者系统把 A 角色的记忆写入 B 角色。</p>
+    <p>另一个关键指标是“可修订性”。用户要求“让角色更疲惫但不要变老”时，系统应只改变语速、气息和情绪强度，而不是改变 speaker identity。每次修订都应保留前后版本、修改理由和被影响的后续集数。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">风险</span>
+    <h2>边界与红线</h2>
+    <p>这个方向会直接触碰声音肖像权、未授权克隆、儿童内容安全和长期记忆隐私。不要从名人声线或真实人物复刻开始，优先使用授权演员、合成角色声或内部品牌声。所有声音记忆都应可删除、可回滚、可解释。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">可信来源</span>
+    <h2>进一步阅读</h2>
+    <ul>
+      <li><a href="https://arxiv.org/abs/2503.07217" target="_blank">ReelWave: Multi-Agentic Movie Sound Generation</a></li>
+      <li><a href="https://arxiv.org/abs/2508.20088" target="_blank">AudioStory: Long-Form Narrative Audio with LLMs</a></li>
+      <li><a href="https://openai.com/index/gpt-4o-system-card/" target="_blank">OpenAI GPT-4o System Card</a></li>
+      <li><a href="https://elevenlabs.io/docs/product-guides/voices" target="_blank">ElevenLabs Voices documentation</a></li>
+      <li><a href="https://www.copyright.gov/ai/index.html" target="_blank">U.S. Copyright Office AI reports</a></li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

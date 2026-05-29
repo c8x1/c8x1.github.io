@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>音频模型训练数据 Steward - 深度页</title>
+<link rel="stylesheet" href="detail-common.css">
+</head>
+<body>
+<div class="detail-container">
+  <div class="detail-header">
+    <a href="../audio-agent-research-report.html" class="back-link">&larr; 返回主报告</a>
+    <h1 class="detail-title">音频模型训练数据 Steward</h1>
+    <div class="detail-meta">
+      <span class="meta-item">证据强度：政策材料 + 公平性论文 + 风险框架</span>
+      <span class="meta-item">适用阶段：训练数据治理 / 声音授权 / 模型上线前审计</span>
+      <span class="meta-item">核心范式：consent ledger + provenance + bias scan</span>
+    </div>
+    <a href="https://www.copyright.gov/ai/index.html" target="_blank" class="source-link">↗ 核心来源：USCO AI Reports</a>
+    <div class="tag-row">
+      <span class="tag highlight">Consent Ledger</span>
+      <span class="tag green">数据卡</span>
+      <span class="tag orange">公平性扫描</span>
+      <span class="tag red">声音肖像权</span>
+    </div>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">背景介绍</span>
+    <h2>音频数据天然带身份属性</h2>
+    <p>音频训练数据比文本更敏感，因为声音包含身份、年龄、口音、健康状态、情绪和环境线索。TTS、voice cloning、ASR、音乐生成和音频事件检测都会遇到授权、代表性和数据泄漏问题。美国版权局 AI 报告、Tennessee ELVIS Act、California digital likeness 法案都指向同一个趋势：声音和肖像权会成为产品级风险。</p>
+    <p>数据 steward agent 的任务不是训练模型，而是在数据进入训练前建立可审计的来源、授权、用途、撤回和偏差报告。它像一个持续运行的数据治理团队，自动检查新增数据是否适合进入某个模型或场景。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">使用场景</span>
+    <h2>从数据入库开始控制风险</h2>
+    <ul>
+      <li><strong>TTS 数据治理</strong>：检查说话人 consent、地域、用途、期限和撤回条款。</li>
+      <li><strong>ASR 公平性</strong>：按口音、语言、年龄、设备、噪声和语速分层统计覆盖。</li>
+      <li><strong>音乐生成数据审计</strong>：识别受保护录音、旋律、歌词和高相似风格风险。</li>
+      <li><strong>客户数据隔离</strong>：确保企业上传音频不会被混入通用训练集。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">关键技术创新</span>
+    <h2>让授权和代表性变成机器可检查对象</h2>
+    <ul>
+      <li><strong>Consent Ledger</strong>：逐条记录用途、地域、期限、撤回、二次训练权、商业使用权。</li>
+      <li><strong>Provenance Graph</strong>：把音频文件、切片、增强版本、标签和训练 run 连接起来。</li>
+      <li><strong>Bias Scanner</strong>：分层测 WER、任务成功率、安全误拒率和群体差异。</li>
+      <li><strong>Duplicate Leakage Check</strong>：检测重复说话人、测试集泄漏和过度相似片段。</li>
+      <li><strong>Canary Set</strong>：为名人声、受保护音乐、敏感身份和非法用途建立红队样本。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">参考架构</span>
+    <h2>Dataset Steward Workflow</h2>
+    <pre><code>Audio intake
+  → metadata extraction
+  → consent ledger match
+  → speaker / language / noise profiling
+  → duplicate + leakage checks
+  → bias and coverage report
+  → approve / quarantine / reject</code></pre>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">产品化切入</span>
+    <h2>先做训练前准入门禁</h2>
+    <p>数据治理最容易落地的位置是在训练前。团队把候选数据丢进系统，steward agent 输出三类队列：可训练、需补授权、禁止使用。这样它不直接阻塞研究探索，但能在数据进入正式训练或商业部署前形成审计记录。</p>
+    <p>产品差异化可以来自“证据可追溯”。很多数据平台只能告诉你样本标签，不能回答这个声音来自哪里、谁同意了什么、撤回后影响哪些模型。steward agent 应把原始授权文件、切片过程、增强版本和训练 run 连接起来，形成可查询的 provenance graph。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">MVP/实验</span>
+    <h2>先做“声音授权与覆盖报告”</h2>
+    <p>输入 1,000 条音频样本和对应授权文件，agent 输出数据卡：授权状态、用途限制、说话人覆盖、语言/口音分布、噪声条件和不可训练样本。验收指标包括授权字段抽取准确率、不可用样本召回率、覆盖统计正确率和人工审核节省时间。失败信号是把撤回或用途受限的声音放入训练候选集。</p>
+    <p>还应设计“撤回传播”测试：当一个说话人撤回授权，系统需要找出原始样本、增强样本、切片样本、训练清单和受影响模型版本。若只能删除原始文件而不能追踪衍生物，说明 provenance graph 不足以支撑真实合规。</p>
+    <p>公平性实验要用分层指标，而不是平均 WER。比如按口音、年龄、设备和噪声分组比较任务成功率，并设置 disparity budget。平均表现提升但某一群体显著下降，应阻止进入生产训练。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">风险</span>
+    <h2>治理 agent 本身也需要审计</h2>
+    <p>如果数据 steward 错误判断授权，后果会非常严重。因此它不能只输出结论，必须输出依据、原始文件位置和置信度。涉及法律解释时只给风险标注，不替代律师判断。对人口统计属性的推断也要谨慎，避免在缺少同意的情况下生成新的敏感标签。</p>
+    <p>落地路线可以从内部数据集开始，不直接处理外部客户数据。先建立统一元数据字段和审核队列，再把授权解析、覆盖统计和撤回传播自动化。等人工审核证明准确后，再进入训练准入门禁，最后接入模型发布流程。</p>
+    <p>它还应支持“无法判断”状态。真实授权文件经常含糊或缺字段，系统宁可把样本送入人工队列，也不应为了流程顺畅强行判定可用。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">可信来源</span>
+    <h2>进一步阅读</h2>
+    <ul>
+      <li><a href="https://www.copyright.gov/ai/index.html" target="_blank">U.S. Copyright Office AI reports</a></li>
+      <li><a href="https://www.tn.gov/governor/news/2024/3/21/photos--gov--lee-signs-elvis-act-into-law.html" target="_blank">Tennessee ELVIS Act</a></li>
+      <li><a href="https://www.gov.ca.gov/2024/09/17/governor-newsom-signs-bills-to-protect-digital-likeness-of-performers/" target="_blank">California digital likeness laws</a></li>
+      <li><a href="https://arxiv.org/abs/2408.12734" target="_blank">Fair-Speech dataset</a></li>
+      <li><a href="https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence" target="_blank">NIST GenAI profile</a></li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

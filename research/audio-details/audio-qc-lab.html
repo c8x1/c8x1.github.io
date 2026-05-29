@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自主音频 QA / QC 实验室 - 深度页</title>
+<link rel="stylesheet" href="detail-common.css">
+</head>
+<body>
+<div class="detail-container">
+  <div class="detail-header">
+    <a href="../audio-agent-research-report.html" class="back-link">&larr; 返回主报告</a>
+    <h1 class="detail-title">自主音频 QA / QC 实验室</h1>
+    <div class="detail-meta">
+      <span class="meta-item">证据强度：benchmark + 产品信号 + deepfake 评测</span>
+      <span class="meta-item">适用阶段：播客 / 有声书 / 广告 / 游戏音频交付</span>
+      <span class="meta-item">核心范式：metrics + critic agents + repair queue</span>
+    </div>
+    <a href="https://arxiv.org/abs/2406.16020" target="_blank" class="source-link">↗ 核心来源：AudioBench</a>
+    <div class="tag-row">
+      <span class="tag highlight">Audio QA</span>
+      <span class="tag green">修复队列</span>
+      <span class="tag orange">回归测试</span>
+      <span class="tag red">合规检查</span>
+    </div>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">背景介绍</span>
+    <h2>音频交付有大量可测试规则</h2>
+    <p>相比开放式创作，音频 QA/QC 更适合先 agent 化。播客、有声书、广告、游戏音频、客服录音都需要检查响度、峰值、静音、噪声、错读、断句、speaker mismatch、平台格式和版权风险。Descript Underlord 这类产品已经把后期工具转成意图驱动流程；AudioBench、VoiceBench 和 ASVspoof 则说明音频模型必须面对多任务、多风险评估。</p>
+    <p>自主 QC 实验室的核心不是“自动修好一切”，而是把问题组织成带证据、建议动作、风险和审批状态的修复队列。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">使用场景</span>
+    <h2>先做交付前最后一关</h2>
+    <ul>
+      <li><strong>播客发布前 QC</strong>：响度、空白、clip、噪声、片头片尾和 show notes 对齐。</li>
+      <li><strong>有声书审校</strong>：错读、漏读、章节顺序、角色声线一致性和平台规格。</li>
+      <li><strong>广告音频交付</strong>：秒数、响度、品牌声、禁用词和授权素材检查。</li>
+      <li><strong>模型升级回归</strong>：固定音频任务每次模型变更重跑，防止上线退化。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">关键技术创新</span>
+    <h2>让听感、指标和合规同时进入队列</h2>
+    <ul>
+      <li><strong>Critic Swarm</strong>：技术指标、听感、版权、平台规范和目标用户分别评审。</li>
+      <li><strong>Repair Queue</strong>：每个问题对应建议动作、预估风险、A/B render 和人工批准。</li>
+      <li><strong>Evidence-linked Transcript</strong>：错读和事实问题可跳回原音频、原文本和修复记录。</li>
+      <li><strong>Regression Suite</strong>：固定 500 条音频任务，追踪模型、插件和参数变更的影响。</li>
+      <li><strong>Deepfake / Spoofing Gate</strong>：对高风险声音进行合成检测、来源证明和人工复核。</li>
+    </ul>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">参考架构</span>
+    <h2>QC Lab Pipeline</h2>
+    <pre><code>Audio package
+  → technical metrics
+  → transcript / alignment checks
+  → rights and policy checks
+  → critic agents
+  → repair queue
+  → approved render
+  → delivery report</code></pre>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">产品化切入</span>
+    <h2>从“交付报告”变成团队标准</h2>
+    <p>QC 产品最容易形成习惯，因为它贴近交付节点。每个项目导出前都跑一次，生成平台规格、技术指标、内容风险和修复建议。团队可以把报告作为交付附件，减少反复返工，也让客户知道哪些问题已被检查。</p>
+    <p>长期价值在于沉淀团队标准。不同工作室对“干净”“自然”“电台感”的定义不同，QC agent 可以记住团队偏好，把硬性指标和风格偏好分开。硬性指标自动拦截，风格建议进入人工选择，避免把所有内容都处理成同一种声音。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">MVP/实验</span>
+    <h2>用 100 条播客片段验证价值</h2>
+    <p>MVP 输入 100 条播客片段和转写文本，输出 QC 报告和修复队列。只处理 6 类问题：clip、LUFS 不合规、长空白、噪声、错读和片头片尾缺失。指标包括问题检出率、误报率、修复后合规率、人工审查时间节省和用户采纳率。失败信号是系统提出过多低价值建议，导致人类比原来更累。</p>
+    <p>建议单独设置“建议价值率”：用户最终采纳的建议数除以总建议数。如果这个比例低，说明 agent 虽然能发现问题，却没有判断优先级。优秀的 QC agent 应少报但准报，把阻塞交付的问题排在最前面。</p>
+    <p>还要评估修复副作用。降噪可能引入水下感，响度修复可能压坏动态，去空白可能破坏喜剧节奏。因此每个自动修复都应生成前后对比和副作用提示，而不是只显示指标变绿。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">风险</span>
+    <h2>不要把指标当成审美</h2>
+    <p>QC agent 容易把声音做得“正确但无聊”。它应区分硬性平台规格、明显错误和审美建议。硬性错误可自动修复，审美建议只提供 A/B 版本。涉及 deepfake 或版权风险时，系统应进入人工复核，而不是给出绝对判断。</p>
+    <p>落地路线可以从固定交付标准开始，例如播客 LUFS、空白、clip 和错读，再逐步增加风格类建议。团队应能配置自己的优先级：有的节目重视自然停顿，有的节目重视紧凑节奏。QC agent 的规则不应一刀切。</p>
+    <p>另一个边界是责任归属。QC 报告应标明哪些问题由自动检测发现，哪些修复由人类批准，哪些风险仍未覆盖。这样它才能成为交付凭证，而不是模糊的自动化黑箱。</p>
+    <p>报告越可审计，团队越敢把它纳入正式发布流程。</p>
+    <p>对于外包协作，它也能减少来回沟通成本和责任争议。</p>
+    <p>这类价值很容易被团队感知，也更容易形成每日使用习惯。</p>
+  </div>
+
+  <div class="detail-section">
+    <span class="section-label">可信来源</span>
+    <h2>进一步阅读</h2>
+    <ul>
+      <li><a href="https://arxiv.org/abs/2406.16020" target="_blank">AudioBench</a></li>
+      <li><a href="https://arxiv.org/abs/2410.17196" target="_blank">VoiceBench</a></li>
+      <li><a href="https://www.descript.com/underlord" target="_blank">Descript Underlord</a></li>
+      <li><a href="https://www.asvspoof.org/" target="_blank">ASVspoof</a></li>
+      <li><a href="https://www.ftc.gov/policy/advocacy-research/tech-at-ftc/2024/04/approaches-address-ai-enabled-voice-cloning" target="_blank">FTC voice cloning risks</a></li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
