@@ -16,24 +16,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
-# Node.js / claude：从 PATH 或常见位置查找
-NODE_BIN="$(command -v node 2>/dev/null && dirname "$(command -v node)")" || true
-if [ -z "$NODE_BIN" ]; then
-  # 尝试 nvm 默认
-  for d in "$HOME/.nvm/versions/node/"*/bin; do
-    if [ -x "$d/node" ]; then NODE_BIN="$d"; break; fi
-  done
-fi
-if [ -z "$NODE_BIN" ]; then
-  echo "ERROR: node not found. Install Node.js or nvm first." >&2; exit 1
-fi
-export PATH="$NODE_BIN:$HOME/.bun/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin"
-
-# claude CLI
-CLAUDE="$(command -v claude 2>/dev/null)" || true
-if [ -z "$CLAUDE" ]; then
-  echo "ERROR: claude CLI not found. Install: npm install -g @anthropic-ai/claude-code" >&2; exit 1
-fi
+# 硬编码路径（cron 环境没有 nvm，自动检测不可靠）
+export PATH="$HOME/.nvm/versions/node/v24.14.1/bin:$HOME/.bun/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin"
+CLAUDE="$HOME/.nvm/versions/node/v24.14.1/bin/claude"
 
 # 代理（可选）：读取环境变量或使用默认值
 # 如果不需要代理，设置 NO_PROXY=1 或注释掉下面一行
