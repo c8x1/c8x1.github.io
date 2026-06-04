@@ -169,6 +169,14 @@ translations 数组长度必须与输入段落数完全一致。仔细数。` })
 Agent({ model: "sonnet", description: "Generate parable article for [concept]",
   prompt: `Write a parable that fully explains [concept] but indirectly, the way good parables do. Only at the very end should it become clear what the concept was. Then write a plain explanation.
 
+MANDATORY STRUCTURE — your output MUST follow this exact format:
+
+1. The story itself (multiple paragraphs, never naming the concept directly)
+2. A separator line: exactly "---" on its own line
+3. A concept reveal paragraph that starts with "This story reveals the essence of [concept] —" followed by a plain, clear explanation of the concept in everyday language (3-5 sentences)
+
+The --- separator and concept reveal paragraph are NOT optional. Every parable MUST end with an explicit concept explanation. Do NOT end with literary prose alone.
+
 等你写完上面的英文 parable + plain explanation 后：
 
 1. 为整个文章起一个英文标题（不要直接提及概念名称）
@@ -190,12 +198,15 @@ JSON 格式（纯 JSON，无 markdown 围栏，用 Write 工具写入 /tmp/parab
 - 人名、专有名词第一次出现时标注英文原文
 - 中文引号必须使用「」（U+300C/U+300D），绝对不要使用 "" 或 ""
 - EN 和 CN 段落数量必须完全一致
-- 去掉 --- 分隔线和 "Plain Explanation" 标题等结构性段落
+- 去掉 "---" 分隔线本身，但保留概念揭示段落作为最后一个段落（这是故事的核心部分，不能删）
 
 重要：必须用 Write 工具把 JSON 写入 /tmp/parable_article.json。` })
 ```
 
-3. 读取 `/tmp/parable_article.json`，构建寓言 article 对象：
+3. 读取 `/tmp/parable_article.json`，**验证概念揭示**：
+   - 检查最后一个段落的 `cn` 是否包含概念名称（如「量子纠缠」「囚徒困境」等）
+   - 如果最后一段没有明确提及概念名称，说明寓言 Agent 没有遵循格式要求，必须重新生成
+   - 验证通过后，构建寓言 article 对象：
 
 ```json
 {
