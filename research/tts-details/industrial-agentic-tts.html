@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>工业 agentic TTS 接口：OpenAI / Google / ElevenLabs / AWS / Cartesia</title>
+  <link rel="stylesheet" href="detail.css">
+</head>
+<body>
+  <div class="detail-shell">
+    <a class="back-link" href="../multi-agent-tts-insight-2026.html#industry">← 返回 Multi-Agent TTS 洞察</a>
+    <header class="hero">
+      <span class="eyebrow">Industry Brief · as of 2026-06-05</span>
+      <h1>工业 TTS 正在从“音频 API”变成 agentic interface</h1>
+      <p class="lead">OpenAI、Google、ElevenLabs、AWS、Cartesia 的共同趋势是：更自然的风格指令、更流式的输出、多说话人能力、情绪/标签控制和语音对话集成。</p>
+      <div class="meta">
+        <span>来源：官方文档/官方发布页</span>
+        <span>定位：能力地图，不是性能排名</span>
+        <span>用途：模型路由和产品架构设计</span>
+      </div>
+    </header>
+
+    <nav>
+      <a href="#signals">能力信号</a>
+      <a href="#router">路由策略</a>
+      <a href="#stack">系统栈</a>
+      <a href="#sources">来源</a>
+    </nav>
+
+    <section id="signals">
+      <h2>5 个能力信号</h2>
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>信号</th>
+            <th>代表来源</th>
+            <th>对 multi-agent TTS 的意义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>自然语言风格指令</td>
+            <td>OpenAI TTS、Google Gemini TTS</td>
+            <td>Prosody Director 可以输出 instructions，而不只输出 SSML。</td>
+          </tr>
+          <tr>
+            <td>多说话人和 dialogue</td>
+            <td>Gemini TTS、Eleven v3</td>
+            <td>Voice Casting 可以把角色和声音资产显式绑定。</td>
+          </tr>
+          <tr>
+            <td>情绪/非语言标签</td>
+            <td>Eleven v3、Cartesia Sonic</td>
+            <td>导演 agent 可以用标签控制笑声、耳语、叹气、兴奋等表现。</td>
+          </tr>
+          <tr>
+            <td>低延迟流式</td>
+            <td>OpenAI Realtime、Cartesia、AWS Nova Sonic</td>
+            <td>Synthesis Router 要按实时/离线制作分流，而不是单模型覆盖。</td>
+          </tr>
+          <tr>
+            <td>语音对话 + 工具</td>
+            <td>AWS Nova Sonic、OpenAI Realtime</td>
+            <td>TTS 进入 voice agent runtime，和工具调用、RAG、电话集成耦合。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="router">
+      <h2>建议的模型路由策略</h2>
+      <div class="grid">
+        <div class="card span-4">
+          <h3>实时对话</h3>
+          <p>优先低延迟、打断处理和工具调用。音质可以略低于离线制作，但稳定性和 time-to-first-audio 更关键。</p>
+        </div>
+        <div class="card span-4">
+          <h3>高表现力内容</h3>
+          <p>优先情绪、标签、多说话人和可编辑性。适合播客、有声书、广告、角色剧。</p>
+        </div>
+        <div class="card span-4">
+          <h3>企业合规场景</h3>
+          <p>优先权限、日志、授权声音、区域合规、可追溯和可回滚，性能声明必须在内部语料上复测。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="stack">
+      <h2>工业栈里的 agent 分工</h2>
+      <div class="callout">
+        <h3>不要把供应商 API 当作完整产品</h3>
+        <p>API 负责合成能力，产品还需要 intent planner、script agent、voice casting、prosody director、policy agent、critic、router、observability。agentic TTS 的价值就是把这些职责外显。</p>
+      </div>
+    </section>
+
+    <section id="sources">
+      <h2>来源</h2>
+      <ul class="source-list">
+        <li><a href="https://openai.com/index/introducing-our-next-generation-audio-models/">OpenAI next-generation audio models</a></li>
+        <li><a href="https://developers.openai.com/api/docs/guides/text-to-speech">OpenAI text-to-speech guide</a></li>
+        <li><a href="https://ai.google.dev/gemini-api/docs/speech-generation">Google Gemini speech generation docs</a></li>
+        <li><a href="https://elevenlabs.io/blog/eleven-v3">ElevenLabs Eleven v3</a></li>
+        <li><a href="https://aws.amazon.com/blogs/aws/introducing-amazon-nova-2-sonic-next-generation-speech-to-speech-model-for-conversational-ai/">AWS Nova 2 Sonic</a></li>
+        <li><a href="https://docs.cartesia.ai/build-with-cartesia/models">Cartesia model docs</a></li>
+      </ul>
+    </section>
+    <footer>本页只使用官方来源描述能力方向；所有性能和成本判断都需要用目标业务数据复测。</footer>
+  </div>
+</body>
+</html>

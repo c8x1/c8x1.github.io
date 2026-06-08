@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TTS 三次解耦：从模型能力到系统能力</title>
+  <link rel="stylesheet" href="detail.css">
+</head>
+<body>
+  <div class="detail-shell">
+    <a class="back-link" href="../multi-agent-tts-insight-2026.html#paradigms">← 返回 Multi-Agent TTS 洞察</a>
+    <header class="hero">
+      <span class="eyebrow">Insight Note</span>
+      <h1>TTS 三次解耦：文本、身份、实时性分别成为控制面</h1>
+      <p class="lead">近期 TTS 进展的深层变化，是把“读出文本”拆成语义、说话方式、角色身份和交互时延几个可独立优化的维度。</p>
+      <div class="meta">
+        <span>类型：综合洞察</span>
+        <span>证据：近期 TTS 论文 + 工业模型接口</span>
+        <span>用途：产品战略判断</span>
+      </div>
+    </header>
+
+    <nav>
+      <a href="#one">语义/方式</a>
+      <a href="#two">身份/情绪</a>
+      <a href="#three">离线/实时</a>
+      <a href="#sources">来源</a>
+    </nav>
+
+    <section id="one">
+      <h2>解耦一：文本语义与说话方式</h2>
+      <div class="card fact">
+        <p>F5-TTS、E2 TTS、MaskGCT、CosyVoice 2、VALL-E 2 等工作说明，zero-shot、非自回归、codec、flow matching、streaming 等技术路线正在提升“给定文本和参考声音，快速生成自然语音”的基础能力。</p>
+      </div>
+      <div class="card inference">
+        <h3>产品含义</h3>
+        <p>当基础音质接近可用门槛，差异化会转向“怎么说”：可控节奏、情绪强度、非语言事件、品牌声音和跨段一致性。</p>
+      </div>
+    </section>
+
+    <section id="two">
+      <h2>解耦二：角色身份与情绪韵律</h2>
+      <div class="card fact">
+        <p>AgentSteerTTS 特别关注 speaker-emotion leakage，这反映了可控 TTS 的关键痛点：情绪一变，声音身份可能漂移；音色稳定了，情绪又可能不足。</p>
+      </div>
+      <div class="card inference">
+        <h3>产品含义</h3>
+        <p>需要把 voice card 和 emotion plan 分开存储、分开评分。一个角色的“像本人”和“此刻情绪正确”是两项指标，不应混在一个自然度分里。</p>
+      </div>
+    </section>
+
+    <section id="three">
+      <h2>解耦三：离线制作与实时对话</h2>
+      <div class="card fact">
+        <p>工业模型呈现明显分工：有的更适合高表现力制作，有的强调低延迟和实时对话，有的提供 speech-to-speech 与工具调用能力。</p>
+      </div>
+      <div class="card inference">
+        <h3>产品含义</h3>
+        <p>不要让单一模型承担全部任务。长音频、广告、有声剧可以选择高表现力模型；实时客服和陪伴需要低延迟模型；敏感业务需要合规和日志优先的供应商。</p>
+      </div>
+    </section>
+
+    <section id="sources">
+      <h2>来源</h2>
+      <ul class="source-list">
+        <li><a href="https://arxiv.org/abs/2410.06885">F5-TTS</a></li>
+        <li><a href="https://arxiv.org/abs/2406.18009">E2 TTS</a></li>
+        <li><a href="https://arxiv.org/abs/2412.10117">CosyVoice 2</a></li>
+        <li><a href="https://arxiv.org/abs/2409.00750">MaskGCT</a></li>
+        <li><a href="https://arxiv.org/abs/2406.05370">VALL-E 2</a></li>
+        <li><a href="https://arxiv.org/abs/2605.17583">AgentSteerTTS</a></li>
+        <li><a href="../multi-agent-tts-insight-2026.html#industry">主报告工业模型对照</a></li>
+      </ul>
+    </section>
+    <footer>三次解耦是综合推论，不是单篇论文结论；用于指导产品分层和模型路由。</footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Agent TTS 范式洞察：从可控语音到语音智能体</title>
+  <style>
+    :root {
+      --ink: #182026;
+      --muted: #5a6870;
+      --faint: #7d8a91;
+      --paper: #f7f8f5;
+      --surface: #ffffff;
+      --surface-2: #eef4f1;
+      --line: #d9e1dd;
+      --green: #0d6b57;
+      --teal: #0f7785;
+      --blue: #315f9f;
+      --violet: #6550a8;
+      --amber: #986414;
+      --red: #9a4040;
+      --shadow: 0 14px 32px rgba(24, 32, 38, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      line-height: 1.68;
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    header {
+      min-height: 72vh;
+      display: grid;
+      align-items: end;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(90deg, rgba(10, 26, 31, 0.62), rgba(10, 26, 31, 0.24)),
+        url("https://images.unsplash.com/photo-1598488035139-bdbb2231ce04") center / cover;
+      color: #fff;
+    }
+
+    .hero {
+      max-width: 1180px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 58px 20px 40px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.38);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.13);
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 13px;
+      font-weight: 700;
+      backdrop-filter: blur(10px);
+    }
+
+    h1 {
+      max-width: 980px;
+      margin: 18px 0 14px;
+      font-size: clamp(36px, 6.8vw, 78px);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      max-width: 880px;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.88);
+      font-size: clamp(17px, 2vw, 23px);
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .meta span {
+      border: 1px solid rgba(255, 255, 255, 0.34);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.12);
+      padding: 8px 10px;
+      color: rgba(255, 255, 255, 0.88);
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--line);
+      background: rgba(247, 248, 245, 0.94);
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 10px 20px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+    }
+
+    .nav-inner a {
+      flex: 0 0 auto;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      background: var(--surface);
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 26px 20px 66px;
+    }
+
+    section { margin: 42px 0; }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: clamp(25px, 3.4vw, 40px);
+      line-height: 1.14;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    p { margin: 0 0 14px; }
+    .lead { max-width: 900px; color: var(--muted); font-size: 18px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .plain {
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+
+    .span-3 { grid-column: span 3; }
+    .span-4 { grid-column: span 4; }
+    .span-5 { grid-column: span 5; }
+    .span-6 { grid-column: span 6; }
+    .span-7 { grid-column: span 7; }
+    .span-8 { grid-column: span 8; }
+    .span-12 { grid-column: span 12; }
+
+    .kpi {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .kpi div {
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 8px;
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.13);
+      backdrop-filter: blur(10px);
+    }
+
+    .kpi strong {
+      display: block;
+      font-size: 24px;
+      line-height: 1.1;
+      margin-bottom: 5px;
+    }
+
+    .kpi small { color: rgba(255, 255, 255, 0.8); }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 3px 9px;
+      margin: 0 5px 7px 0;
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .detail-link {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 4px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-2);
+      padding: 6px 10px;
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .detail-link:hover { text-decoration: none; background: #e4eee9; }
+
+    .note {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .accent {
+      border-left: 4px solid var(--green);
+      padding-left: 14px;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .step {
+      min-height: 138px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 14px;
+      position: relative;
+    }
+
+    .step::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -9px;
+      width: 18px;
+      height: 1px;
+      background: var(--line);
+    }
+
+    .step:last-child::after { display: none; }
+
+    .step b {
+      display: inline-flex;
+      width: 30px;
+      height: 30px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: var(--green);
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    .step h3 { font-size: 16px; }
+    .step p { color: var(--muted); font-size: 14px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+
+    th { background: var(--surface-2); color: var(--ink); }
+    tr:last-child td { border-bottom: 0; }
+
+    .matrix td:nth-child(1), .matrix th:nth-child(1) { width: 20%; }
+    .matrix td:nth-child(4), .matrix th:nth-child(4) { width: 24%; }
+
+    .callout {
+      border: 1px solid rgba(13, 107, 87, 0.22);
+      background: linear-gradient(135deg, rgba(13, 107, 87, 0.10), rgba(49, 95, 159, 0.08));
+      border-radius: 8px;
+      padding: 22px;
+    }
+
+    .risk {
+      border-left: 4px solid var(--amber);
+      background: #fffaf0;
+    }
+
+    .source-list {
+      columns: 2;
+      column-gap: 30px;
+      padding-left: 18px;
+    }
+
+    .source-list li {
+      break-inside: avoid;
+      margin: 0 0 10px;
+      color: var(--muted);
+    }
+
+    footer {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 22px 20px 48px;
+      color: var(--faint);
+      border-top: 1px solid var(--line);
+      font-size: 14px;
+    }
+
+    @media (max-width: 920px) {
+      header { min-height: 66vh; }
+      .span-3, .span-4, .span-5, .span-6, .span-7, .span-8 { grid-column: span 12; }
+      .kpi { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .flow { grid-template-columns: 1fr; }
+      .step::after { display: none; }
+      .source-list { columns: 1; }
+      table { display: block; overflow-x: auto; }
+    }
+
+    @media (max-width: 560px) {
+      .hero { padding-top: 44px; }
+      .kpi { grid-template-columns: 1fr; }
+      .card, .plain, .callout { padding: 16px; }
+      th, td { min-width: 180px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hero">
+      <div class="eyebrow">Research Brief · as of 2026-06-05</div>
+      <h1>Multi-Agent TTS 范式洞察</h1>
+      <p class="subtitle">近期论文与工业模型正在把 TTS 从“文本进、音频出”的声码器问题，推进到“意图、角色、声学控制、流式交互、质检反馈”共同编排的语音智能体系统。</p>
+      <div class="meta">
+        <span>范围：2024-2026 近期研究</span>
+        <span>重点：多智能体结构设计</span>
+        <span>对照：OpenAI / Google / ElevenLabs / AWS / Sesame / Cartesia / Qwen</span>
+        <span>输出：产品与工程架构洞察</span>
+      </div>
+      <div class="kpi">
+        <div><strong>5</strong><small>类可复用 agentic TTS 结构</small></div>
+        <div><strong>4</strong><small>工业能力跃迁方向</small></div>
+        <div><strong>6</strong><small>生产级系统模块</small></div>
+        <div><strong>1</strong><small>核心判断：闭环控制胜过单次提示</small></div>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="#thesis">核心判断</a>
+      <a href="#paradigms">结构范式</a>
+      <a href="#industry">工业进展</a>
+      <a href="#architecture">目标架构</a>
+      <a href="#roadmap">路线图</a>
+      <a href="#risks">风险</a>
+      <a href="#sources">来源</a>
+    </div>
+  </nav>
+
+  <main>
+    <section id="thesis">
+      <h2>核心判断</h2>
+      <p class="lead">Multi-agent TTS 的价值不在于“多叫几个 LLM 角色写台词”，而在于把语音生成中原本混在一起的约束拆开：语义意图、人物身份、情绪强度、节奏韵律、上下文记忆、声学锚点、安全合规和低时延预算。拆开之后，每个模块才能被评估、回滚和优化。</p>
+      <div class="grid">
+        <div class="card span-4">
+          <span class="tag">证据</span>
+          <h3>研究侧已出现闭环控制</h3>
+          <p>AgentSteerTTS 将复合指令 TTS 拆成解耦、检索锚定、合成与快慢反馈 agent，直指“离散文本意图”和“连续声学实现”之间的结构错配。</p>
+          <p class="note"><a href="https://arxiv.org/abs/2605.17583">AgentSteerTTS, 2026-05-14</a></p>
+          <a class="detail-link" href="tts-details/agentsteertts.html">查看详情</a>
+        </div>
+        <div class="card span-4">
+          <span class="tag">证据</span>
+          <h3>内容型语音开始角色化协作</h3>
+          <p>PodAgent 与 DialogueAgents 用主持人、嘉宾、编剧、语音合成器、评论者等角色生成播客或多方对话，说明“脚本质量”和“声音表现”已被放到同一流程内迭代。</p>
+          <p class="note"><a href="https://arxiv.org/abs/2503.00455">PodAgent</a> · <a href="https://arxiv.org/abs/2504.14482">DialogueAgents</a></p>
+          <a class="detail-link" href="tts-details/podagent.html">PodAgent 详情</a>
+          <a class="detail-link" href="tts-details/dialogueagents.html">DialogueAgents 详情</a>
+        </div>
+        <div class="card span-4">
+          <span class="tag">推论</span>
+          <h3>工业侧正逼近 agentic 接口</h3>
+          <p>OpenAI、Google、ElevenLabs、Cartesia 的 TTS 接口都在增强自然语言风格控制、标签控制、多说话人、流式输出和超低延迟；AWS Nova 2 Sonic 进一步把异步工具调用放进语音对话。</p>
+          <p class="note">这意味着 TTS API 不再只是末端渲染器，而会成为 agent runtime 的一部分。</p>
+          <a class="detail-link" href="tts-details/industrial-agentic-tts.html">查看工业接口说明</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="paradigms">
+      <h2>近期 Multi-Agent TTS/Audio 结构范式</h2>
+      <p class="lead">这些工作并不全都只做狭义 TTS，但它们提供了可迁移到 TTS 产品的结构设计：谁负责理解上下文，谁负责选声音，谁负责把抽象风格落到声学参数，谁负责听回生成结果并修正。</p>
+
+      <div class="grid">
+        <div class="card span-6">
+          <span class="tag">1 · 闭环可控 TTS</span>
+          <h3>AgentSteerTTS：从 prompt 控制走向声学控制闭环</h3>
+          <p>结构上包含三层：先用对抗解耦降低 speaker-emotion 泄漏；再用声学原型库和检索 agent 将抽象意图锚定到可听的表达样本；最后用快慢反馈 agent 做低层潜变量修正和高层感知批评。</p>
+          <p><strong>设计启发：</strong>把“温柔但坚定”“疲惫但专业”这类复合指令拆成可互相制衡的控制向量，而不是把全部希望押在一句风格 prompt 上。</p>
+          <a class="detail-link" href="tts-details/agentsteertts.html">展开 AgentSteerTTS</a>
+        </div>
+        <div class="card span-6">
+          <span class="tag">2 · 内容到语音节目</span>
+          <h3>PodAgent：从文本摘要到有角色分工的播客生成</h3>
+          <p>PodAgent 使用 Host-Guest-Writer 多智能体生成主题讨论内容，再用 voice pool 做角色-声音匹配，并借助 LLM 增强语音合成。它报告了 87.4% 的 voice-matching accuracy，但该数字来自论文实验语境，生产迁移时需要重新测。</p>
+          <p><strong>设计启发：</strong>播客、访谈、课程、客服培训音频的关键不是单句音色，而是角色意图、发言顺序、知识密度、情绪层级和口语化节奏。</p>
+          <a class="detail-link" href="tts-details/podagent.html">展开 PodAgent</a>
+        </div>
+        <div class="card span-6">
+          <span class="tag">3 · 生成-批评-再合成</span>
+          <h3>DialogueAgents：Script Writer + Synthesizer + Critic</h3>
+          <p>DialogueAgents 用脚本作者、语音合成器、对话评论者协作生成多方多轮语音数据，并依据 speech review 迭代脚本与合成结果。它更像“合成数据工厂”，适合给后续 TTS 或语音对话模型造高质量多方训练素材。</p>
+          <p><strong>设计启发：</strong>语音质量评估不应只看 MOS，也应看人物一致性、非语言特征、情绪递进和上下文承接。</p>
+          <a class="detail-link" href="tts-details/dialogueagents.html">展开 DialogueAgents</a>
+        </div>
+        <div class="card span-6">
+          <span class="tag">4 · 多模态到多音频编排</span>
+          <h3>AudioGenie / LVAS-Agent：监督团队成为必要模块</h3>
+          <p>AudioGenie 把多模态到多音频生成拆成 generation team 与 supervisor team；LVAS-Agent 面向长视频，拆成场景切分、脚本生成、声音设计和音频合成，并引入讨论修正与检索循环。</p>
+          <p><strong>设计启发：</strong>面向影视、游戏、有声书时，TTS 需要和音效、音乐、空间感一起被编排，监督 agent 应同时检查时间对齐、语义一致与声画关系。</p>
+          <a class="detail-link" href="tts-details/audiogenie-lvas-agent.html">展开音频编排范式</a>
+        </div>
+        <div class="card span-12">
+          <span class="tag">5 · 端到端语音智能体的“内部分工”</span>
+          <h3>Qwen2.5-Omni / Sesame CSM：不是多 agent，但提供了分层接口</h3>
+          <p>Qwen2.5-Omni 的 Thinker-Talker 架构把多模态理解与流式语音输出分成两个协同模块；Sesame CSM 用上下文对话历史生成更自然的 conversational speech，并明确指出当前模型仍难完整学习人类对话结构。对产品架构而言，这提示我们：外部 multi-agent runtime 可以围绕端到端模型补上角色管理、记忆、工具、质检与合规。</p>
+          <a class="detail-link" href="tts-details/qwen-sesame-csm.html">展开端到端语音模型说明</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="industry">
+      <h2>工业 TTS/语音模型的新进展</h2>
+      <p class="lead">工业侧的共同方向是：更可控、更流式、更会处理多说话人、更接近语音智能体。模型本身越来越强，但控制面仍需要结构化 agent 编排。</p>
+
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>厂商/模型</th>
+            <th>近期能力</th>
+            <th>对 TTS 范式的意义</th>
+            <th>需要保留的怀疑</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>OpenAI gpt-4o-mini-tts / Realtime</td>
+            <td>2025-03 发布下一代音频模型，TTS 可通过 instructions 控制语气；文档列出 accent、emotion、intonation、speed、tone、whispering 等控制项。Realtime 文档将 gpt-realtime-2 定位为低时延 voice agent 起点。</td>
+            <td>自然语言风格指令变成 API 一等参数，适合让“风格规划 agent”输出可执行控制。</td>
+            <td>官方说明预设合成声音受限制，个性化声音仍受安全策略约束。</td>
+          </tr>
+          <tr>
+            <td>Google Gemini TTS / Chirp 3</td>
+            <td>Gemini TTS 支持单说话人和最多 2 人多说话人音频，可用自然语言控制风格、口音、速度和语气；定位上区分精确朗读 TTS 与动态 Live API。</td>
+            <td>多说话人配置适合“角色 casting agent”，同时保留脚本可控性。</td>
+            <td>Gemini TTS 在文档中仍为 Preview，生产 SLA 与长音频稳定性需实测。</td>
+          </tr>
+          <tr>
+            <td>ElevenLabs Eleven v3</td>
+            <td>2025-06 发布 v3 alpha，后续页面标注已 GA；支持 70+ 语言、多说话人 dialogue、audio tags，如 excited、whispers、sighs。官方也提示 v3 对实时场景不如 Turbo/Flash 可靠。</td>
+            <td>情绪与非语言标签适合成为“导演 agent”的输出语言。</td>
+            <td>更强表现力往往带来更高 prompt 工程成本、延迟与稳定性风险。</td>
+          </tr>
+          <tr>
+            <td>AWS Nova 2 Sonic / Polly Generative</td>
+            <td>Nova 2 Sonic 于 2025-12 GA，强调语音到语音、跨模态输入、自然打断、异步工具调用和电话集成；Polly Generative 使用十亿参数 transformer 生成 speech codes 并流式解码。</td>
+            <td>企业 voice agent 会把 TTS、ASR、工具调用、RAG 和电话基础设施绑定成一个系统。</td>
+            <td>供应商 benchmark 与“industry-leading”表述需在本业务数据上复核。</td>
+          </tr>
+          <tr>
+            <td>Cartesia Sonic 3 / 3.5</td>
+            <td>Sonic-3 文档强调 streaming TTS、42 种语言、volume/speed/emotion 控制；2026-04 changelog 标注 Sonic 3.5 在自然度、节奏、情绪表达和多语言读数上改进。</td>
+            <td>低延迟 TTS 让“听到用户意图后边想边说”的架构更现实。</td>
+            <td>模型与 API 版本迁移较频繁，voice ID 与旧 embedding 兼容性需要治理。</td>
+          </tr>
+          <tr>
+            <td>Sesame CSM / Qwen2.5-Omni</td>
+            <td>Sesame CSM 将对话历史作为上下文生成语音；Qwen2.5-Omni 以 Thinker-Talker 流式输出自然语音。</td>
+            <td>端到端模型会压缩传统 ASR-LLM-TTS 链路，但外部 agent 仍需要管理目标、工具、策略与评估。</td>
+            <td>端到端系统更难解释和局部修复，仍需可观测的控制层。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="architecture">
+      <h2>建议的 Multi-Agent TTS 产品架构</h2>
+      <p class="lead">如果要把这些研究和工业模型落成一个产品，不建议从“选择一个最强 TTS API”开始，而应先定义可观测的控制闭环。下面是一个可用于播客、有声书、客服语音、虚拟角色和交互式陪伴的通用结构。</p>
+
+      <div class="flow">
+        <div class="step">
+          <b>1</b>
+          <h3>Intent Planner</h3>
+          <p>把用户目标拆成语义、角色、语气、情绪强度、时长和安全约束。</p>
+        </div>
+        <div class="step">
+          <b>2</b>
+          <h3>Script &amp; Turn Agent</h3>
+          <p>生成可朗读脚本，管理多说话人轮次、打断、停顿和口语化。</p>
+        </div>
+        <div class="step">
+          <b>3</b>
+          <h3>Voice Casting</h3>
+          <p>从 voice pool 选择或克隆声音，绑定角色身份和语言/口音。</p>
+        </div>
+        <div class="step">
+          <b>4</b>
+          <h3>Prosody Director</h3>
+          <p>输出 tags、SSML、instructions 或声学 anchor，控制节奏与情绪。</p>
+        </div>
+        <div class="step">
+          <b>5</b>
+          <h3>Synthesis Router</h3>
+          <p>按延迟、成本、语言、音质和权利边界路由到不同 TTS/Realtime 模型。</p>
+        </div>
+        <div class="step">
+          <b>6</b>
+          <h3>Critic &amp; Repair</h3>
+          <p>回听音频，检查文本忠实、情绪匹配、身份一致、噪声和合规，必要时重试。</p>
+        </div>
+      </div>
+
+      <div class="grid" style="margin-top: 18px;">
+        <div class="callout span-7">
+          <h3>最关键的接口不是 prompt，而是“可评分控制意图”</h3>
+          <p>每次合成都应生成一份 control manifest：角色、语言、音色、情绪目标、速度、停顿、非语言事件、必须逐字忠实的片段、允许改写的片段、延迟预算和安全限制。TTS 结果再由 critic agent 逐项评分，评分低的项回到对应 agent，而不是简单整体重生成。</p>
+          <a class="detail-link" href="tts-details/control-manifest-architecture.html">展开 control manifest 架构</a>
+        </div>
+        <div class="card span-5">
+          <h3>最小可行数据结构</h3>
+          <p><strong>scene_id：</strong>段落或对话场景</p>
+          <p><strong>speaker_profile：</strong>角色、voice_id、语言、口音、情绪边界</p>
+          <p><strong>prosody_plan：</strong>速度、音高、停顿、强调、标签</p>
+          <p><strong>model_route：</strong>首选模型、备选模型、时延预算</p>
+          <p><strong>review：</strong>ASR 回译、情绪分类、说话人相似、合规结果</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>综合洞察：TTS 正在经历三次解耦</h2>
+      <div class="grid">
+        <div class="card span-4">
+          <span class="tag">解耦一</span>
+          <h3>文本语义与说话方式解耦</h3>
+          <p>E2 TTS、F5-TTS、MaskGCT、CosyVoice 2 等模型让 zero-shot、非自回归、流式合成与大规模多语言数据更成熟。下一步的差异化不只是“更像人”，而是谁能稳定把文本外的风格意图变成可听结果。</p>
+          <a class="detail-link" href="tts-details/tts-three-decouplings.html#one">展开三次解耦</a>
+        </div>
+        <div class="card span-4">
+          <span class="tag">解耦二</span>
+          <h3>角色身份与情绪韵律解耦</h3>
+          <p>AgentSteerTTS 所关注的 speaker-emotion leakage，是商业 TTS 的常见痛点：一个声音一激动就不像本人，或一个角色切语言后人格消失。多 agent 结构可以让身份守恒和情绪表达彼此约束。</p>
+          <a class="detail-link" href="tts-details/tts-three-decouplings.html#two">展开三次解耦</a>
+        </div>
+        <div class="card span-4">
+          <span class="tag">解耦三</span>
+          <h3>离线生成与实时对话解耦</h3>
+          <p>Eleven v3 更偏高表现力离线/半离线制作，Cartesia Sonic 和 OpenAI/AWS Realtime 更偏低延迟交互。产品不应强行一个模型覆盖全部场景，而应由 router agent 按任务切换。</p>
+          <a class="detail-link" href="tts-details/tts-three-decouplings.html#three">展开三次解耦</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="roadmap">
+      <h2>落地路线图</h2>
+      <div class="grid">
+        <div class="plain span-4">
+          <h3>0-30 天：做可测闭环</h3>
+          <p>实现 control manifest、模型路由、ASR 回译、文本忠实度检查、基础情绪/速度评分。先用现成 TTS API，不急于训练模型。</p>
+        </div>
+        <div class="plain span-4">
+          <h3>30-90 天：做角色资产库</h3>
+          <p>建立 voice pool、角色声音卡、风格标签词表、失败样例库和自动 A/B 测试。把“哪种声音适合哪类内容”变成数据，而不是品味争论。</p>
+        </div>
+        <div class="plain span-4">
+          <h3>90-180 天：做混合模型编排</h3>
+          <p>将高表现力模型用于制作，把低延迟模型用于实时，把端到端语音模型用于对话，把可控 TTS 用于精确朗读；router 根据质量、成本和延迟动态选择。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="risks">
+      <h2>风险与反例</h2>
+      <div class="grid">
+        <div class="card risk span-6">
+          <h3>多 agent 可能放大不可控性</h3>
+          <p>脚本 agent、风格 agent、TTS 模型都可能各自“加戏”。必须明确哪些文本必须逐字保真，哪些可以口语化；critic agent 要优先抓文本忠实和身份一致，而不是只打自然度分。</p>
+        </div>
+        <div class="card risk span-6">
+          <h3>表现力越强，合规越重要</h3>
+          <p>拟真声音、克隆声音和情绪诱导会触及授权、冒充、诈骗、未成年人、医疗/金融建议等边界。生产系统应默认保存授权凭证、voice provenance、合成水印或可追溯日志。</p>
+        </div>
+        <div class="card risk span-6">
+          <h3>供应商能力更新快，版本漂移会伤害长内容一致性</h3>
+          <p>Amazon Polly 文档已提示生成式声音可能随模型更新产生细微变化。连续剧、有声书、品牌语音等场景需要模型快照、声音版本和重生成策略。</p>
+        </div>
+        <div class="card risk span-6">
+          <h3>端到端模型不是闭环的替代品</h3>
+          <p>端到端 speech-to-speech 模型会降低链路延迟，但也会让局部问题更难诊断。外部 agent runtime 仍需要承担业务目标、工具、评估、记忆和策略治理。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="sources">
+      <h2>检索策略与来源核验</h2>
+      <p class="lead">检索日期为 2026-06-05。优先采用 arXiv/会议论文页面、厂商官方博客与官方文档。论文多为技术报告或预印本，按“快速变化 AI/音频领域”的证据等级看，应视为中等强度技术证据；厂商来源是能力声明的权威入口，但存在商业偏向，需用自有数据复测。</p>
+      <div class="grid">
+        <div class="card span-6">
+          <h3>纳入标准</h3>
+          <p>2024-2026 年；与 TTS、speech generation、multi-agent audio、voice agent、流式语音或可控语音相关；有可访问论文页、官方文档或官方发布页。</p>
+        </div>
+        <div class="card span-6">
+          <h3>排除标准</h3>
+          <p>只讨论普通聊天 agent 而没有语音生成结构；无法追溯到论文或官方来源；只有二手新闻且没有技术细节的材料。</p>
+        </div>
+      </div>
+
+      <h3>主要来源</h3>
+      <ul class="source-list">
+        <li><a href="https://arxiv.org/abs/2605.17583">AgentSteerTTS: A Multi-Agent Closed-Loop Framework for Composite-Instruction Text-to-Speech</a></li>
+        <li><a href="https://arxiv.org/abs/2503.00455">PodAgent: A Comprehensive Framework for Podcast Generation</a></li>
+        <li><a href="https://arxiv.org/abs/2504.14482">DialogueAgents: A Hybrid Agent-Based Speech Synthesis Framework for Multi-Party Dialogue</a></li>
+        <li><a href="https://arxiv.org/abs/2505.22053">AudioGenie: A Training-Free Multi-Agent Framework for Diverse Multimodality-to-Multiaudio Generation</a></li>
+        <li><a href="https://arxiv.org/abs/2503.10719">LVAS-Agent: Long-Video Audio Synthesis with Multi-Agent Collaboration</a></li>
+        <li><a href="https://arxiv.org/abs/2410.06885">F5-TTS: Flow Matching for Zero-Shot TTS</a></li>
+        <li><a href="https://arxiv.org/abs/2406.18009">E2 TTS: Fully Non-Autoregressive Zero-Shot TTS</a></li>
+        <li><a href="https://arxiv.org/abs/2412.10117">CosyVoice 2: Scalable Streaming Speech Synthesis</a></li>
+        <li><a href="https://arxiv.org/abs/2409.00750">MaskGCT: Masked Generative Codec Transformer</a></li>
+        <li><a href="https://arxiv.org/abs/2406.05370">VALL-E 2: Neural Codec Language Models</a></li>
+        <li><a href="https://openai.com/index/introducing-our-next-generation-audio-models/">OpenAI next-generation audio models</a> 与 <a href="https://developers.openai.com/api/docs/guides/text-to-speech">OpenAI TTS docs</a></li>
+        <li><a href="https://ai.google.dev/gemini-api/docs/speech-generation">Google Gemini TTS speech generation docs</a></li>
+        <li><a href="https://elevenlabs.io/blog/eleven-v3">ElevenLabs Eleven v3 announcement</a></li>
+        <li><a href="https://aws.amazon.com/blogs/aws/introducing-amazon-nova-2-sonic-next-generation-speech-to-speech-model-for-conversational-ai/">AWS Nova 2 Sonic announcement</a> 与 <a href="https://docs.aws.amazon.com/polly/latest/dg/generative-voices.html">Amazon Polly Generative voices</a></li>
+        <li><a href="https://docs.cartesia.ai/build-with-cartesia/models">Cartesia Sonic 3 docs</a> 与 <a href="https://docs.cartesia.ai/changelog/february-2026">Cartesia 2026 changelog</a></li>
+        <li><a href="https://www.sesame.com/blog/crossing-the-uncanny-valley-of-voice">Sesame CSM technical post</a></li>
+        <li><a href="https://qwenlm.github.io/blog/qwen2.5-omni/">Qwen2.5-Omni blog</a> 与 <a href="https://arxiv.org/abs/2503.20215">technical report</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    AI-assisted research disclosure: 本文档由 Codex 根据公开论文与官方资料辅助整理；所有核心事实均附来源链接。行业性能声明需在具体业务语料、语言、声音资产和时延预算下复测。
+  </footer>
+</body>
+</html>

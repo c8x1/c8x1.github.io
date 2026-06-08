@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Manifest：Multi-Agent TTS 产品架构说明</title>
+  <link rel="stylesheet" href="detail.css">
+</head>
+<body>
+  <div class="detail-shell">
+    <a class="back-link" href="../multi-agent-tts-insight-2026.html#architecture">← 返回 Multi-Agent TTS 洞察</a>
+    <header class="hero">
+      <span class="eyebrow">Architecture Note</span>
+      <h1>Control Manifest：让 TTS 生成变成可评分、可回滚的过程</h1>
+      <p class="lead">如果没有结构化控制清单，multi-agent TTS 会退化成一堆 prompt。control manifest 的作用是把每次语音生成的目标、约束和评估项固定下来。</p>
+      <div class="meta">
+        <span>对象：产品架构</span>
+        <span>核心：可观测控制意图</span>
+        <span>适用：长内容、实时 voice agent、角色语音</span>
+      </div>
+    </header>
+
+    <nav>
+      <a href="#schema">最小 schema</a>
+      <a href="#agents">agent 分工</a>
+      <a href="#repair">修复路径</a>
+      <a href="#checks">评估项</a>
+    </nav>
+
+    <section id="schema">
+      <h2>最小 schema</h2>
+      <p class="formula">scene_id: "chapter_03_scene_07"<br>speaker_profile: { role, voice_id, language, accent, identity_boundary }<br>prosody_plan: { emotion, intensity, pace, pitch, pauses, nonverbal_tags }<br>fidelity_rules: { verbatim_spans, paraphrase_allowed_spans, forbidden_claims }<br>model_route: { preferred, fallback, latency_budget_ms, cost_ceiling }<br>review: { asr_backcheck, emotion_score, speaker_similarity, policy_flags }</p>
+    </section>
+
+    <section id="agents">
+      <h2>agent 分工</h2>
+      <div class="flow">
+        <div class="step">
+          <b>1</b>
+          <h3>Intent Planner</h3>
+          <p>把用户目标和业务约束写入 manifest。</p>
+        </div>
+        <div class="step">
+          <b>2</b>
+          <h3>Script Agent</h3>
+          <p>产出可朗读文本和 turn-level 标注。</p>
+        </div>
+        <div class="step">
+          <b>3</b>
+          <h3>Voice Agent</h3>
+          <p>选择声音、校验授权、绑定身份边界。</p>
+        </div>
+        <div class="step">
+          <b>4</b>
+          <h3>Prosody Agent</h3>
+          <p>把风格目标转成标签、SSML 或模型 instructions。</p>
+        </div>
+        <div class="step">
+          <b>5</b>
+          <h3>Critic Agent</h3>
+          <p>听回输出，按 manifest 逐项评分。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="repair">
+      <h2>局部修复路径</h2>
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>失败现象</th>
+            <th>优先修哪里</th>
+            <th>避免什么</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>文本漏读或改写过度</td>
+            <td>fidelity_rules 和脚本分段。</td>
+            <td>不要只换 TTS 模型。</td>
+          </tr>
+          <tr>
+            <td>情绪过强或过弱</td>
+            <td>prosody_plan 的 intensity 与 reference。</td>
+            <td>不要整段重写脚本。</td>
+          </tr>
+          <tr>
+            <td>声音不像同一角色</td>
+            <td>speaker_profile、voice_id、相似度阈值。</td>
+            <td>不要让情绪标签覆盖身份约束。</td>
+          </tr>
+          <tr>
+            <td>实时延迟过高</td>
+            <td>model_route 和分句流式策略。</td>
+            <td>不要用高表现力离线模型硬撑实时场景。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="checks">
+      <h2>评估项</h2>
+      <div class="grid">
+        <div class="card span-4"><h3>忠实度</h3><p>ASR 回译、关键词覆盖、verbatim span 检查。</p></div>
+        <div class="card span-4"><h3>身份一致</h3><p>speaker embedding、voice card、人工抽检。</p></div>
+        <div class="card span-4"><h3>表现力</h3><p>情绪分类、速度/停顿统计、LLM 感知批评。</p></div>
+        <div class="card span-4"><h3>安全</h3><p>授权声音、敏感内容、合成水印、审计日志。</p></div>
+        <div class="card span-4"><h3>时延</h3><p>time-to-first-audio、分句延迟、重试预算。</p></div>
+        <div class="card span-4"><h3>成本</h3><p>模型单价、重生成率、缓存命中率。</p></div>
+      </div>
+    </section>
+
+    <footer>Control manifest 是本文的架构建议，不是某篇论文的原始贡献；它综合了 AgentSteerTTS、PodAgent、DialogueAgents 和工业 TTS 接口趋势。</footer>
+  </div>
+</body>
+</html>

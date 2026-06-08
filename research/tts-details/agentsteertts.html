@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentSteerTTS 论文精读：Multi-Agent 闭环可控 TTS</title>
+  <link rel="stylesheet" href="detail.css">
+</head>
+<body>
+  <div class="detail-shell">
+    <a class="back-link" href="../multi-agent-tts-insight-2026.html#paradigms">← 返回 Multi-Agent TTS 洞察</a>
+
+    <header class="hero">
+      <span class="eyebrow">Paper Deep Dive · 2026-05</span>
+      <h1>AgentSteerTTS：把 TTS 控制从 prompt 变成闭环系统</h1>
+      <p class="lead">这篇论文最值得关注的不是“用了多个 agent”，而是它把复合语音指令拆成可检索、可合成、可回听、可修正的控制流程。它是 multi-agent TTS 范式里最接近产品架构的一篇。</p>
+      <div class="meta">
+        <span>对象：Composite-Instruction TTS</span>
+        <span>核心：解耦 + 检索锚定 + 快慢反馈</span>
+        <span>证据等级：预印本，需复现实测</span>
+      </div>
+    </header>
+
+    <nav>
+      <a href="#summary">30 秒摘要</a>
+      <a href="#architecture">架构拆解</a>
+      <a href="#why">为什么重要</a>
+      <a href="#product">产品迁移</a>
+      <a href="#limits">局限</a>
+      <a href="#sources">来源</a>
+    </nav>
+
+    <section id="summary">
+      <h2>30 秒摘要</h2>
+      <div class="grid">
+        <div class="card fact span-6">
+          <h3>论文要解决的问题</h3>
+          <p>传统可控 TTS 很容易把复杂风格指令压成一个模糊 prompt：例如“温柔但坚定、低疲劳感、仍保持专业”。模型可能听懂语义，但声学输出常常出现身份漂移、情绪过强、节奏不稳定，或者 speaker 与 emotion 互相污染。</p>
+        </div>
+        <div class="card inference span-6">
+          <h3>本文的结构性答案</h3>
+          <p>AgentSteerTTS 把控制拆成三件事：先让 speaker 与 emotion 表征尽量解耦；再用声学原型库把抽象意图锚定为可听样本；最后用 fast feedback 与 slow feedback 分别修低层声学潜变量和高层感知问题。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="architecture">
+      <h2>架构拆解</h2>
+      <div class="flow">
+        <div class="step">
+          <b>1</b>
+          <h3>Instruction Decomposer</h3>
+          <p>把复合指令拆成 speaker、emotion、style、prosody 等可执行约束。</p>
+        </div>
+        <div class="step">
+          <b>2</b>
+          <h3>Disentanglement</h3>
+          <p>用对抗式解耦减少身份和情绪之间的泄漏，避免“情绪一变声音就不像本人”。</p>
+        </div>
+        <div class="step">
+          <b>3</b>
+          <h3>Acoustic Prototype</h3>
+          <p>从声学原型库检索接近目标意图的参考表达，让抽象风格有可听锚点。</p>
+        </div>
+        <div class="step">
+          <b>4</b>
+          <h3>Fast Feedback</h3>
+          <p>针对低层潜变量做快速修正，处理音高、能量、速度、停顿等局部偏差。</p>
+        </div>
+        <div class="step">
+          <b>5</b>
+          <h3>Slow Feedback</h3>
+          <p>用更高层的感知批评检查整体表达是否符合复合指令，再决定是否重合成。</p>
+        </div>
+      </div>
+
+      <div class="callout" style="margin-top: 16px;">
+        <h3>关键看法</h3>
+        <p>AgentSteerTTS 的 agent 不是“几个 LLM 角色轮流聊天”，而是围绕一个声学控制问题形成闭环：意图拆解 agent 定义目标，检索 agent 提供锚点，反馈 agent 评价差距，合成模块执行修正。这个结构比单 prompt 更容易做监控和调参。</p>
+      </div>
+    </section>
+
+    <section id="why">
+      <h2>为什么它对 TTS 范式重要</h2>
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>传统做法</th>
+            <th>AgentSteerTTS 式做法</th>
+            <th>产品意义</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>把风格写进一句 prompt 或 SSML。</td>
+            <td>把风格拆成可评分的目标，并引入反馈修正。</td>
+            <td>能解释失败原因：是脚本、音色、情绪、节奏还是模型路由错了。</td>
+          </tr>
+          <tr>
+            <td>靠单模型泛化处理所有复合指令。</td>
+            <td>用声学原型库把抽象词落到具体声音样本。</td>
+            <td>适合建设品牌声音库、角色声音卡、失败样例库。</td>
+          </tr>
+          <tr>
+            <td>生成失败时整体重试。</td>
+            <td>快反馈修局部，慢反馈修整体。</td>
+            <td>减少成本和延迟，也能避免反复重生成导致的声音漂移。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="product">
+      <h2>产品迁移：怎么把它变成可用系统</h2>
+      <div class="grid">
+        <div class="card span-6">
+          <h3>1. 建 control manifest</h3>
+          <p class="formula">speaker = voice_id + identity_boundary<br>style = emotion + intensity + pace + nonverbal_tags<br>constraints = latency + fidelity + safety + retry_budget</p>
+          <p>每次合成都输出这份清单。后续回听和评分都围绕清单，而不是只问“自然不自然”。</p>
+        </div>
+        <div class="card span-6">
+          <h3>2. 建声学原型库</h3>
+          <p>把“平静解释”“惊喜插话”“专业确认”“疲惫低声”等表达收集成可检索样本。原型库可以来自授权人声、合成样本和人工标注的高分片段。</p>
+        </div>
+        <div class="card span-6">
+          <h3>3. 做双层 critic</h3>
+          <p>低层 critic 检查速度、音量、停顿、噪声、ASR 回译；高层 critic 检查情绪是否过度、人格是否一致、对话是否自然承接。</p>
+        </div>
+        <div class="card span-6">
+          <h3>4. 做局部修复路径</h3>
+          <p>如果只是某句话情绪过强，优先修该句的 prosody plan 或换局部参考样本；不要整段重来。长内容尤其需要这种局部回滚。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="limits">
+      <h2>局限与注意事项</h2>
+      <div class="grid">
+        <div class="card warning span-6">
+          <h3>预印本不等于生产结论</h3>
+          <p>论文提供了结构和实验线索，但不同语言、不同声音资产、不同 TTS 基座上的效果需要重新复测。尤其是中文、多说话人、实时对话场景，不能直接套论文数字。</p>
+        </div>
+        <div class="card warning span-6">
+          <h3>原型库会引入数据治理问题</h3>
+          <p>声学原型越强，越需要声音授权、来源记录、可撤回机制和相似度边界。否则系统很容易滑向未经授权的声音复刻。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="sources">
+      <h2>来源</h2>
+      <ul class="source-list">
+        <li><a href="https://arxiv.org/abs/2605.17583">AgentSteerTTS: A Multi-Agent Closed-Loop Framework for Composite-Instruction Text-to-Speech</a></li>
+        <li><a href="../multi-agent-tts-insight-2026.html#sources">主报告来源清单与检索说明</a></li>
+      </ul>
+    </section>
+
+    <footer>本文把论文事实、架构推论和产品建议分开表达；生产落地前应在目标语料和目标声音资产上复测。</footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PodAgent 项目介绍：多智能体播客生成</title>
+  <link rel="stylesheet" href="detail.css">
+</head>
+<body>
+  <div class="detail-shell">
+    <a class="back-link" href="../multi-agent-tts-insight-2026.html#paradigms">← 返回 Multi-Agent TTS 洞察</a>
+    <header class="hero">
+      <span class="eyebrow">Project Brief · 2025</span>
+      <h1>PodAgent：把播客生成拆成主持人、嘉宾、编剧和声音匹配</h1>
+      <p class="lead">PodAgent 的价值在于说明：长音频内容不是把摘要读出来，而是要规划角色、轮次、信息密度、语气和声音资产。</p>
+      <div class="meta">
+        <span>对象：自动播客生成</span>
+        <span>结构：Host-Guest-Writer + voice pool</span>
+        <span>适用：访谈、课程、企业内训、有声资讯</span>
+      </div>
+    </header>
+
+    <nav>
+      <a href="#summary">摘要</a>
+      <a href="#architecture">结构</a>
+      <a href="#product">产品说明</a>
+      <a href="#limits">局限</a>
+      <a href="#sources">来源</a>
+    </nav>
+
+    <section id="summary">
+      <h2>30 秒摘要</h2>
+      <div class="grid">
+        <div class="card fact span-6">
+          <h3>它解决什么</h3>
+          <p>把输入材料转成播客时，系统不仅要抽取信息，还要决定谁来讲、怎么接话、哪里追问、哪里总结，以及每个角色该用什么声音。</p>
+        </div>
+        <div class="card inference span-6">
+          <h3>为什么值得做详情页</h3>
+          <p>它把 TTS 放进了内容工作流：脚本 agent 决定知识结构，角色 agent 决定对话关系，声音匹配决定听感身份。这个模式比“摘要 + 单说话人 TTS”更接近真实内容产品。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="architecture">
+      <h2>结构拆解</h2>
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>模块</th>
+            <th>职责</th>
+            <th>可迁移设计</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Host Agent</td>
+            <td>开场、控场、追问、总结，保证节奏。</td>
+            <td>适合产品里的“导演/主持”角色，管信息密度和听众体验。</td>
+          </tr>
+          <tr>
+            <td>Guest Agent</td>
+            <td>承担观点、案例、专业解释或反方问题。</td>
+            <td>可映射成专家、客户、学生、旁白等不同 persona。</td>
+          </tr>
+          <tr>
+            <td>Writer Agent</td>
+            <td>把材料组织成可朗读脚本，而不是书面摘要。</td>
+            <td>应输出 turn-level 脚本，包含停顿、插话、过渡语。</td>
+          </tr>
+          <tr>
+            <td>Voice Pool</td>
+            <td>为角色匹配声音资产。</td>
+            <td>需要角色声音卡：年龄感、权威感、亲和力、语言和口音。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="product">
+      <h2>产品说明扩充</h2>
+      <div class="grid">
+        <div class="card span-4">
+          <h3>面向播客</h3>
+          <p>重点是“节目感”：开场 hook、主持人追问、嘉宾例子、段落总结、结尾行动项。TTS 只是最后一步，真正难的是对话结构。</p>
+        </div>
+        <div class="card span-4">
+          <h3>面向课程</h3>
+          <p>可把老师、助教、学生疑问拆成多角色。语音表现要服务认知节奏：关键概念慢一点，例子轻一点，复盘更明确。</p>
+        </div>
+        <div class="card span-4">
+          <h3>面向企业知识库</h3>
+          <p>RAG 提供材料，Writer Agent 负责口语化，Host Agent 负责追问，Critic 检查是否虚构政策或误读文档。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="limits">
+      <h2>局限与注意事项</h2>
+      <div class="callout warning">
+        <h3>不要让角色化掩盖事实忠实</h3>
+        <p>播客越自然，越容易让模型补桥段、补笑点、补因果。生产系统应把“可改写”和“必须逐字忠实”的内容分开，并用引用回链或 ASR 回译做校验。</p>
+      </div>
+    </section>
+
+    <section id="sources">
+      <h2>来源</h2>
+      <ul class="source-list">
+        <li><a href="https://arxiv.org/abs/2503.00455">PodAgent: A Comprehensive Framework for Podcast Generation</a></li>
+        <li><a href="../multi-agent-tts-insight-2026.html#sources">主报告来源清单与检索说明</a></li>
+      </ul>
+    </section>
+    <footer>PodAgent 页强调产品迁移，不把论文实验数字直接视为通用性能承诺。</footer>
+  </div>
+</body>
+</html>
