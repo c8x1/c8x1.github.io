@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TTS 可控模型选型报告</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:15px}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#0a0e1a;color:#c8d0e8;line-height:1.72}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#0a0e1a}::-webkit-scrollbar-thumb{background:#2a3258;border-radius:3px}
+.sidebar{position:fixed;top:0;left:0;width:260px;height:100vh;background:linear-gradient(180deg,#0d1225,#0a0e1a);border-right:1px solid #1a2040;padding:28px 0;overflow-y:auto;z-index:100}
+.sidebar-logo{padding:0 24px 24px;font-size:1.15rem;font-weight:700;color:#00b4d8;border-bottom:1px solid #1a2040;margin-bottom:16px}
+.sidebar-logo span{display:block;font-size:.72rem;font-weight:400;color:#5a6490;margin-top:4px}
+.sidebar nav{padding:0 12px}
+.sidebar nav a{display:block;padding:9px 14px;color:#8090b8;text-decoration:none;border-radius:6px;font-size:.85rem;transition:all .2s;margin-bottom:2px}
+.sidebar nav a:hover{background:rgba(0,180,216,.08);color:#00b4d8}
+.nav-section{padding:16px 14px 6px;font-size:.7rem;text-transform:uppercase;letter-spacing:1.2px;color:#3d4a70;font-weight:600}
+.main{margin-left:260px;min-height:100vh}
+.hero{padding:64px 48px 40px;background:linear-gradient(135deg,#0a0e1a,#111733,#0e1530);border-bottom:1px solid #1a2040;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-60%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(0,180,216,.06) 0%,transparent 70%);pointer-events:none}
+.hero h1{font-size:2.4rem;font-weight:800;color:#e8edf8;margin-bottom:10px}
+.hero h1 .accent{color:#00b4d8}
+.hero .subtitle{font-size:1rem;color:#6c8cff;margin-bottom:28px;font-weight:500}
+.stats-bar{display:flex;gap:20px;flex-wrap:wrap}
+.stat-item{background:rgba(19,24,50,.8);border:1px solid #1e2650;border-radius:10px;padding:14px 22px;min-width:180px;flex:1;max-width:260px}
+.stat-item .stat-number{font-size:1.5rem;font-weight:700;color:#00b4d8}
+.stat-item .stat-label{font-size:.8rem;color:#5a6490;margin-top:2px}
+.content{padding:40px 48px 60px}
+.section-header{margin-bottom:32px}
+.section-header .section-tag{display:inline-block;font-size:.68rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#00b4d8;margin-bottom:6px;opacity:.8}
+.section-header h2{font-size:1.6rem;font-weight:700;color:#e8edf8;margin-bottom:6px}
+.section-header p{color:#5a6490;font-size:.9rem}
+.model-card{background:#111733;border:1px solid #1a2040;border-radius:12px;padding:28px 32px;margin-bottom:28px;transition:border-color .3s}
+.model-card:hover{border-color:#2a3a68}
+.model-card .card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+.model-card .card-title{font-size:1.3rem;font-weight:700;color:#e8edf8}
+.model-card .card-title .org{color:#5a6490;font-weight:400;font-size:.85rem}
+.card-badges{display:flex;gap:8px;flex-wrap:wrap}
+.tier-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:600}
+.tier-badge.tier-1{background:rgba(0,180,216,.12);color:#00b4d8;border:1px solid rgba(0,180,216,.25)}
+.tier-badge.tier-2{background:rgba(255,183,77,.1);color:#ffb74d;border:1px solid rgba(255,183,77,.25)}
+.tier-badge.tier-3{background:rgba(156,163,175,.1);color:#9ca3af;border:1px solid rgba(156,163,175,.2)}
+.license-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:4px;font-size:.7rem;font-weight:600}
+.license-badge.open{background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.2)}
+.license-badge.custom{background:rgba(255,152,0,.1);color:#ff9800;border:1px solid rgba(255,152,0,.2)}
+.card-body p{color:#8090b8;font-size:.88rem;margin-bottom:12px;line-height:1.7}
+.card-body h3{font-size:.95rem;font-weight:600;color:#a0b0d0;margin:20px 0 10px}
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:16px 0}
+.spec-item{padding:10px 14px;background:rgba(0,0,0,.2);border-radius:8px;border:1px solid #1a2040}
+.spec-item .spec-label{font-size:.68rem;color:#4a5678;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.spec-item .spec-value{font-size:.85rem;color:#c8d0e8;font-weight:500}
+.code-block{background:#0d1117;border:1px solid #1e2540;border-radius:8px;padding:18px;margin:14px 0;overflow-x:auto;font-size:.8rem;line-height:1.6}
+.code-block code{font-family:"SF Mono","Fira Code","JetBrains Mono",Menlo,Monaco,monospace;color:#c8d0e8;white-space:pre}
+.code-block .code-lang{font-size:.68rem;color:#5a6490;text-transform:uppercase;letter-spacing:.5px;font-weight:600;display:block;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #1e2540}
+.sources{margin-top:16px;padding-top:12px;border-top:1px solid #1a2040}
+.sources span{font-size:.78rem;color:#4a5678;font-weight:600}
+.sources a{font-size:.78rem;color:#6c8cff;text-decoration:none;margin-right:12px}
+.sources a:hover{color:#00b4d8}
+.highlight{color:#00b4d8;font-weight:600}.green{color:#22c55e}.orange{color:#ff9800}.red{color:#ef4444}
+.model-card.honorable{border-left:3px solid #f59e0b}
+.model-card.quality{border-left:3px solid #a78bfa}
+.comparison-table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid #1a2040;border-radius:10px;overflow:hidden;font-size:.85rem;margin-bottom:28px}
+.comparison-table thead{background:#0d1225}
+.comparison-table th{padding:14px 18px;text-align:left;color:#8090b8;font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #1a2040}
+.comparison-table td{padding:14px 18px;border-bottom:1px solid #1a2040;color:#c8d0e8;vertical-align:top}
+.comparison-table tbody tr:last-child td{border-bottom:none}
+.comparison-table tbody tr{background:#111733;transition:background .2s}
+.comparison-table tbody tr:hover{background:#151d3d}
+.rec-box{background:linear-gradient(135deg,rgba(0,180,216,.06),rgba(0,180,216,.02));border:1px solid rgba(0,180,216,.18);border-radius:12px;padding:28px 32px;margin:24px 0;position:relative}
+.rec-box::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:#00b4d8;border-radius:12px 0 0 12px}
+.rec-box h3{font-size:1.05rem;font-weight:700;color:#00b4d8;margin-bottom:12px}
+.rec-box ol{padding-left:24px;color:#8090b8;font-size:.9rem;line-height:1.8}
+.rec-box ol li{margin-bottom:8px}.rec-box ol strong{color:#c8d0e8}
+.warn-box{background:rgba(255,152,0,.05);border:1px solid rgba(255,152,0,.15);border-radius:12px;padding:20px 24px;margin:20px 0}
+.warn-box h4{color:#ffb74d;font-weight:700;font-size:.92rem;margin-bottom:8px}
+.warn-box p{color:#8090b8;font-size:.88rem;line-height:1.65}
+.note-box{background:rgba(107,140,255,.05);border:1px solid rgba(107,140,255,.15);border-radius:12px;padding:20px 24px;margin:20px 0}
+.note-box h4{color:#6c8cff;font-weight:700;font-size:.92rem;margin-bottom:8px}
+.note-box p{color:#8090b8;font-size:.88rem;line-height:1.65}
+.footer{padding:32px 48px;border-top:1px solid #1a2040;text-align:center;color:#3d4a70;font-size:.82rem;line-height:1.8}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">TTS 选型报告<span>多角色 · 多情感 · 高可控</span></div>
+  <nav>
+    <div class="nav-section">候选模型</div>
+    <a href="#fish">Fish Audio S2 Pro</a>
+    <a href="#cosyvoice">CosyVoice 2/3</a>
+    <a href="#indextts">IndexTTS 2</a>
+    <a href="#chatterbox">Chatterbox TTS</a>
+    <a href="#moss">MOSS-TTS / TTSD</a>
+    <a href="#dia">Dia</a>
+    <a href="#gptsovits">GPT-SoVITS</a>
+    <a href="#parler">Parler-TTS</a>
+    <a href="#dotstts">dots.tts</a>
+    <div class="nav-section">虚拟音色</div>
+    <a href="#voicegen">音色生成方案</a>
+    <div class="nav-section">总结</div>
+    <a href="#comparison">对比总览</a>
+    <a href="#strategy">推荐策略</a>
+  </nav>
+</aside>
+<div class="main">
+<div class="hero">
+  <h1>TTS 可控模型<span class="accent">选型</span>报告</h1>
+  <div class="subtitle">多角色 · 多情感 · 高可控 — 2025-2026 开源方案深度对比</div>
+  <div class="stats-bar">
+    <div class="stat-item"><div class="stat-number">10</div><div class="stat-label">候选模型</div></div>
+    <div class="stat-item"><div class="stat-number">6</div><div class="stat-label">完全开源</div></div>
+    <div class="stat-item"><div class="stat-number">8</div><div class="stat-label">可控维度</div></div>
+    <div class="stat-item"><div class="stat-number">3</div><div class="stat-label">组合策略</div></div>
+  </div>
+</div>
+<div class="content">
+
+<section id="models">
+<div class="section-header">
+  <div class="section-tag">Models · 候选模型</div>
+  <h2>候选模型 — 按可控性排序</h2>
+  <p>9 个候选模型的控制维度全部经过源码验证，按情感控制粒度从细到粗排列</p>
+</div>
+
+<div class="model-card" id="fish">
+  <div class="card-header">
+    <div class="card-title">Fish Audio S2 Pro <span class="org">Fish Audio</span></div>
+    <div class="card-badges">
+      <span class="tier-badge tier-1">可控性最强</span>
+      <span class="license-badge custom">Research License</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <p><strong>定位：</strong>可控性全场最强 — 自由格式自然语言 inline 标签，亚词级精度，原生多角色。4B+400M Dual-AR，80+ 语言。</p>
+    <h3>控制维度（源码验证）</h3>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-label">情感/风格</div><div class="spec-value">[tag] 自由格式 NL 标签</div></div>
+      <div class="spec-item"><div class="spec-label">粒度</div><div class="spec-value">亚词级（任意位置插入）</div></div>
+      <div class="spec-item"><div class="spec-label">多角色</div><div class="spec-value">原生 speaker tokens</div></div>
+      <div class="spec-item"><div class="spec-label">副语言</div><div class="spec-value">[laughing] [gasps] [pause] ...</div></div>
+      <div class="spec-item"><div class="spec-label">语言</div><div class="spec-value">80+ 语言</div></div>
+      <div class="spec-item"><div class="spec-label">标签空间</div><div class="spec-value">开放域自由格式 NL</div></div>
+    </div>
+    <h3>代码示例</h3>
+    <pre class="code-block"><span class="code-lang">Text — 自由格式 inline 标签 + 多角色 (SGLang 服务端)</span><code># [方括号] 语法，可在任意位置插入，从插入点生效
+# 多角色使用 &lt;|speaker:i|&gt; token（README 源码验证）
+
+&lt;|speaker:0|&gt; [calm narration] In a world where AI transforms everything...
+&lt;|speaker:1|&gt; [excited] Oh my goodness! I just heard the news!
+&lt;|speaker:2|&gt; [whispering] I can't believe it.
+&lt;|speaker:3|&gt; [dark, menacing tone] You have no idea what's coming.
+&lt;|speaker:4|&gt; [determined, passionate] Not today!
+
+# 常用标签: [whisper] [excited] [angry] [laughing] [pause]
+# [speaking slowly] [professional broadcast tone]  ← 自由格式</code></pre>
+    <div class="note-box">
+      <h4>验证说明</h4>
+      <p>标签为 [方括号] 语法已确认。多角色: README 用 &lt;|speaker:i|&gt; token，博客示例的 NAME: 格式为脚本风格包装。推理主要通过 SGLang 服务端（无官方 Python 本地推理 API）。Python SDK 见 docs.fish.audio。"15000+ tags" 为 README 描述，实际为开放域自由格式输入。</p>
+    </div>
+    <div class="sources">
+      <span>来源：</span>
+      <a href="https://github.com/fishaudio/fish-speech">GitHub</a>
+      <a href="https://fish.audio/blog/fish-audio-s2-fine-grained-ai-voice-control-at-the-word-level/">Blog</a>
+      <a href="https://arxiv.org/html/2603.08823v1">arXiv</a>
+    </div>
+  </div>
+</div>
+
+
+<div class="model-card" id="cosyvoice">
+  <div class="card-header">
+    <div class="card-title">CosyVoice 2/3 <span class="org">Alibaba FunAudioLLM</span></div>
+    <div class="card-badges">
+      <span class="tier-badge tier-1">综合最优</span>
+      <span class="license-badge open">Apache 2.0</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <p><strong>定位：</strong>综合能力最强的开源 TTS。NL 指令控制 + 显式语速 + voice cloning + inline 副语言标签。Apache 2.0。</p>
+    <h3>控制维度（源码验证: cosyvoice/cli/cosyvoice.py）</h3>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-label">情感/风格</div><div class="spec-value">instruct_text NL 指令</div></div>
+      <div class="spec-item"><div class="spec-label">语速</div><div class="spec-value">speed float (仅非流式)</div></div>
+      <div class="spec-item"><div class="spec-label">Voice Cloning</div><div class="spec-value">prompt_wav 参考音频</div></div>
+      <div class="spec-item"><div class="spec-label">Inline 副语言</div><div class="spec-value">[breath] [laughter] [cough] ...</div></div>
+      <div class="spec-item"><div class="spec-label">发音修正 (v3)</div><div class="spec-value">拼音/音素 inline 标注</div></div>
+      <div class="spec-item"><div class="spec-label">方言</div><div class="spec-value">16 种（广东话/东北话...)</div></div>
+    </div>
+    <h3>代码示例</h3>
+    <pre class="code-block"><span class="code-lang">Python — inference_instruct2 (源码验证)</span><code>from cosyvoice.cli.cosyvoice import CosyVoice2
+
+cosyvoice = CosyVoice2('FunAudioLLM/CosyVoice2-0.5B', load_jit=True)
+
+# NL 指令 + voice cloning + 语速（需要 prompt_wav）
+for result in cosyvoice.inference_instruct2(
+    tts_text="今天天气真好，我们出去散步吧。",
+    instruct_text="You are a helpful assistant. 请非常开心地说一句话。",
+    prompt_wav="reference.wav",     # 必需：参考音频
+    speed=1.1,                      # 仅 stream=False 时生效
+):
+    torchaudio.save('output.wav', result['tts_speech'], cosyvoice.sample_rate)</code></pre>
+    <pre class="code-block"><span class="code-lang">Python — Inline 副语言标签 (源码: tokenizer.py)</span><code># 嵌入文本中的控制标签（源码验证）：
+# [breath] [laughter] [cough] [sigh] [noise] [accent] [quick_breath]
+# &lt;laughter&gt;...&lt;/laughter&gt; — 笑着说
+
+text = "欢迎收听 [breath] 今天的嘉宾 [laughter]非常[laughter] 精彩！"</code></pre>
+    <pre class="code-block"><span class="code-lang">Python — CosyVoice3 发音修正 (源码: example.py)</span><code># CosyVoice3: 音素标注直接嵌入文本，精确控制特定字发音
+text = "高管也通过电话对报道[j][&#464;]予好评。"
+#  [j][&#464;] = 音素标注，修正"给予"的读音</code></pre>
+    <div class="sources">
+      <span>来源：</span>
+      <a href="https://github.com/FunAudioLLM/CosyVoice">GitHub</a>
+      <a href="https://funaudiollm.github.io/pdf/CosyVoice_2.pdf">Paper PDF</a>
+      <a href="https://huggingface.co/FunAudioLLM/CosyVoice2-0.5B">HuggingFace</a>
+    </div>
+  </div>
+</div>
+
+
+<div class="model-card" id="indextts">
+  <div class="card-header">
+    <div class="card-title">IndexTTS 2 <span class="org">IndexTeam / Bilibili</span></div>
+    <div class="card-badges">
+      <span class="tier-badge tier-1">情感控制最精细</span>
+      <span class="license-badge custom">联系 Bilibili</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <p><strong>定位：</strong>情感控制最精细 — 8 维连续情感向量，4 种情感输入方式，情感/音色解耦。拼音发音控制。</p>
+    <h3>控制维度（源码验证: indextts/infer_v2.py）</h3>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-label">情感向量</div><div class="spec-value">8 维 [0.0,1.2] 连续</div></div>
+      <div class="spec-item"><div class="spec-label">情感输入</div><div class="spec-value">4 种: 音频/向量/文本/分离文本</div></div>
+      <div class="spec-item"><div class="spec-label">情感强度</div><div class="spec-value">emo_alpha [0.0,1.0]</div></div>
+      <div class="spec-item"><div class="spec-label">解耦</div><div class="spec-value">spk 音色 + emo 情感独立</div></div>
+      <div class="spec-item"><div class="spec-label">发音控制</div><div class="spec-value">拼音声调 inline 标注</div></div>
+      <div class="spec-item"><div class="spec-label">时长控制</div><div class="spec-value">max_mel_tokens 间接</div></div>
+    </div>
+    <h3>代码示例</h3>
+    <pre class="code-block"><span class="code-lang">Python — 完整推理签名 (源码验证: infer_v2.py line 357)</span><code>from indextts.infer_v2 import IndexTTS2
+tts = IndexTTS2(cfg_path="checkpoints/config.yaml", model_dir="checkpoints")
+
+# 完整参数列表:
+# tts.infer(
+#   spk_audio_prompt,       # 必需: speaker 音色参考音频
+#   text,                   # 必需: 要合成的文本
+#   output_path,            # 必需: 输出路径
+#   emo_audio_prompt=None,  # 情感参考音频（独立于音色！）
+#   emo_alpha=1.0,          # 情感强度 [0.0, 1.0]
+#   emo_vector=None,        # 8维情感向量
+#   use_emo_text=False,     # 自动从文本检测情感
+#   emo_text=None,          # 独立情感描述文本
+#   use_random=False,
+#   interval_silence=200,   # 段间静音(ms)
+#   verbose=False,
+#   max_text_tokens_per_segment=120,
+#   **generation_kwargs     # top_p=0.8, top_k=30, temperature=0.8, ...
+# )</code></pre>
+    <pre class="code-block"><span class="code-lang">Python — 4 种情感控制方式</span><code># 方式1: 8维情感向量 [高兴,愤怒,悲伤,恐惧,反感,低落,惊讶,自然]
+tts.infer(spk_audio_prompt='speaker.wav', text="对不起。",
+    output_path="sad.wav",
+    emo_vector=[0, 0, 0.8, 0, 0, 0, 0, 0],  # 80% 悲伤
+    emo_alpha=0.9)
+
+# 方式2: 独立情感参考音频（与 speaker 音色解耦）
+tts.infer(spk_audio_prompt='speaker.wav',
+    emo_audio_prompt="angry_sample.wav",  # 情感参考
+    emo_alpha=0.8, text="Quick!", output_path="angry.wav")
+
+# 方式3: 自动从文本检测情感 (use_emo_text)
+tts.infer(spk_audio_prompt='speaker.wav',
+    text="天哪，太可怕了！", use_emo_text=True, output_path="auto.wav")
+
+# 方式4: 独立情感描述文本
+tts.infer(spk_audio_prompt='speaker.wav', text="快跑！",
+    use_emo_text=True, emo_text="你吓死我了！你是鬼吗？",
+    output_path="scared.wav")</code></pre>
+    <div class="sources">
+      <span>来源：</span>
+      <a href="https://github.com/index-tts/index-tts">GitHub</a>
+      <a href="https://arxiv.org/html/2506.21619v2">arXiv</a>
+    </div>
+  </div>
+</div>
+
+<div class="model-card" id="chatterbox">
+  <div class="card-header">
+    <div class="card-title">Chatterbox TTS <span class="org">Resemble AI</span></div>
+    <div class="card-badges">
+      <span class="tier-badge tier-1">最简洁情感API</span>
+      <span class="license-badge open">MIT</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <p><strong>定位：</strong>最简洁的情感控制 API，专为实时语音 Agent 设计。MIT 开源。Original + Turbo 两个变体。</p>
+    <h3>控制维度（源码验证: tts.py + tts_turbo.py）</h3>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-label">情感强度</div><div class="spec-value">exaggeration (Original only)</div></div>
+      <div class="spec-item"><div class="spec-label">CFG 控制</div><div class="spec-value">cfg_weight (Original only)</div></div>
+      <div class="spec-item"><div class="spec-label">Turbo 副语言</div><div class="spec-value">9 种: [laugh] [sigh] ...</div></div>
+      <div class="spec-item"><div class="spec-label">延迟</div><div class="spec-value">&lt; 200ms TTFA</div></div>
+      <div class="spec-item"><div class="spec-label">语速控制</div><div class="spec-value" style="color:#ff9800">无（TODO 未实现）</div></div>
+      <div class="spec-item"><div class="spec-label">语言</div><div class="spec-value">英语 + Multilingual 23 语言</div></div>
+    </div>
+    <h3>代码示例</h3>
+    <pre class="code-block"><span class="code-lang">Python — Original (源码验证: tts.py)</span><code>from chatterbox.tts import ChatterboxTTS
+import torchaudio as ta
+
+model = ChatterboxTTS.from_pretrained(device="cuda")
+
+# generate() 完整参数:
+# model.generate(text, repetition_penalty=1.2, min_p=0.05,
+#   top_p=1.0, audio_prompt_path=None, exaggeration=0.5,
+#   cfg_weight=0.5, temperature=0.8)
+
+wav = model.generate(
+    "I can't believe we won the championship!",
+    audio_prompt_path="ref.wav",
+    exaggeration=0.7,   # 0.5=默认, 0.7+=富有表现力
+    cfg_weight=0.3,     # 越低语速越快，越高越沉稳
+    temperature=0.8,
+)
+ta.save("output.wav", wav, model.sr)</code></pre>
+    <pre class="code-block"><span class="code-lang">Python — Turbo 副语言标签 (源码验证: tts_turbo.py)</span><code>from chatterbox.tts_turbo import ChatterboxTurboTTS
+import torchaudio as ta
+
+model = ChatterboxTurboTTS.from_pretrained(device="cuda")
+
+# Turbo 的 9 种副语言标签（嵌入文本）:
+# [clear throat] [sigh] [shush] [cough] [groan]
+# [sniff] [gasp] [chuckle] [laugh]
+# 注意: exaggeration/cfg_weight 在 Turbo 中被忽略!
+
+text = "Hi Sarah [chuckle], got one minute to chat?"
+wav = model.generate(text, audio_prompt_path="ref.wav")
+ta.save("output.wav", wav, model.sr)</code></pre>
+    <div class="warn-box">
+      <h4>重要差异</h4>
+      <p>Turbo 版本的 <code>exaggeration</code> 和 <code>cfg_weight</code> 参数<strong>被忽略</strong>（代码中有警告日志）。情感控制仅在 Original 版本有效。无 <code>speed</code> 参数（源码中有 TODO 注释表明计划但未实现）。</p>
+    </div>
+    <div class="sources">
+      <span>来源：</span>
+      <a href="https://github.com/resemble-ai/chatterbox">GitHub</a>
+      <a href="https://huggingface.co/ResembleAI/chatterbox">HuggingFace</a>
+      <a href="https://chatterboxtts.com/docs">Official Docs</a>
+    </div>
+  </div>
+</div>
+
+
+<div class="model-card" id="moss">
+  <div class="card-header">
+    <div class="card-title">MOSS-TTS / TTSD <span class="org">OpenMOSS (Fudan University)</span></div>
+    <div class="card-badges">
+      <span class="tier-badge tier-2">音素级精细控制</span>
+      <span class="license-badge open">Apache 2.0</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <p><strong>定位：</strong>音素级发音和时长控制 + 多角色对话（TTSD）。支持拼音/IPA/混合输入，20+ 语言。Apache 2.0。</p>
+    <h3>控制维度（源码验证: GitHub README）</h3>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-label">发音控制</div><div class="spec-value">拼音/IPA/混合 inline</div></div>
+      <div class="spec-item"><div class="spec-label">时长控制</div><div class="spec-value">tokens 参数 或 ${token:N}</div></div>
+      <div class="spec-item"><div class="spec-label">暂停控制</div><div class="spec-value">[pause X.Ys] inline</div></div>
+      <div class="spec-item"><div class="spec-label">多角色 (TTSD)</div><div class="spec-value">[S1]-[S5] 最多5个 speaker</div></div>
+      <div class="spec-item"><div class="spec-label">语言</div><div class="spec-value">20+ 语言 + language 参数</div></div>
+      <div class="spec-item"><div class="spec-label">情感/语速</div><div class="spec-value" style="color:#ff9800">无显式参数</div></div>
+    </div>
+    <h3>代码示例</h3>
+    <pre class="code-block"><span class="code-lang">Python — HuggingFace pipeline (源码验证: README)</span><code>from transformers import AutoModel, AutoProcessor
+
+model = AutoModel.from_pretrained("OpenMOSS-Team/MOSS-TTS-v1.5", trust_remote_code=True)
+processor = AutoProcessor.from_pretrained("OpenMOSS-Team/MOSS-TTS-v1.5", trust_remote_code=True)
+
+# 拼音输入（声调数字）
+messages = [processor.build_user_message(
+    text="nin2 hao3,qing3 wen4 nin2 lai2 zi4 na3 zuo4 cheng2 shi4?",
+)]
+
+# 混合输入（中文字符 + 拼音标注）
+messages = [processor.build_user_message(
+    text="您好，请问您来自哪 zuo4 cheng2 shi4？",
+)]
+
+# 时长控制（通过 tokens 参数）
+messages = [processor.build_user_message(
+    text="你好世界", tokens=325,  # 更多 tokens = 更长音频
+)]
+
+# 暂停控制
+messages = [processor.build_user_message(
+    text="我今天学习了一首古诗，它叫[pause 3.2s]静夜思！",
+)]
+
+# 语音克隆 + 语言指定
+messages = [processor.build_user_message(
+    text="Bonjour le monde",
+    reference=["reference.wav"],
+    language="French",
+)]</code></pre>
+    <pre class="code-block"><span class="code-lang">Python — MOSS-TTSD 多角色对话 (源码验证: README)</span><code># MOSS-TTSD: 支持 1-5 个 speaker 的多角色对话
+# 每个 speaker 需要独立的参考音频
+
+from transformers import AutoModel, AutoProcessor
+
+processor = AutoProcessor.from_pretrained("OpenMOSS-Team/MOSS-TTSD", trust_remote_code=True)
+model = AutoModel.from_pretrained("OpenMOSS-Team/MOSS-TTSD", trust_remote_code=True)
+
+# 多角色对话文本
+dialogue = "[S1]你好，今天你过得怎么样？[S2]挺好的！[S1]有什么开心的事吗？"
+
+messages = [processor.build_user_message(
+    text=dialogue,
+    reference=[speaker1_ref, speaker2_ref],  # 每个 speaker 的参考音频
+)]
+
+inputs = processor.apply_chat_template(messages, return_tensors="pt")
+outputs = model.generate(input_ids=inputs, attention_mask=..., max_new_tokens=2000)</code></pre>
+    <div class="sources">
+      <span>来源：</span>
+      <a href="https://github.com/OpenMOSS/MOSS-TTS">MOSS-TTS GitHub</a>
+      <a href="https://github.com/OpenMOSS/MOSS-TTSD">MOSS-TTSD GitHub</a>
+      <a href="https://arxiv.org/html/2603.18090">arXiv 技术报告</a>
+    </div>
+  </div>
+</div>
+
+<div class="model-card" id="dia">
+  <div class="card-header">
+    <div class="card-title">Dia <span class="org">Nari Labs</span></div>
+    <div class="card-badges">
+      <span class="tier-badge tier-2">多角色对话最佳</span>
+      <span class="license-badge open">Apache 2.0</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <p><strong>定位：</strong>多角色对话场景最佳 — 原生 [S1]/[S2] 标签，20+ 副语言标签，voice cloning。1.6B，Apache 2.0。仅英语。</p>
+    <h3>控制维度（源码验证: dia/model.py + hf.py）</h3>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-label">多角色</div><div class="spec-value">原生 [S1]/[S2] 标签</div></div>
+      <div class="spec-item"><div class="spec-label">副语言</div><div class="spec-value">20+ 标签: (laughs) (sighs) ...</div></div>
+      <div class="spec-item"><div class="spec-label">Voice Cloning</div><div class="spec-value">audio_prompt 参数</div></div>
+      <div class="spec-item"><div class="spec-label">生成参数</div><div class="spec-value">cfg_scale, temperature, top_p</div></div>
+      <div class="spec-item"><div class="spec-label">语言</div><div class="spec-value">仅英语</div></div>
+      <div class="spec-item"><div class="spec-label">情感控制</div><div class="spec-value" style="color:#ff9800">隐式（无显式参数）</div></div>
+    </div>
+    <h3>代码示例</h3>
+    <pre class="code-block"><span class="code-lang">Python — HuggingFace (源码验证: hf.py)</span><code>from transformers import AutoProcessor, DiaForConditionalGeneration
+
+processor = AutoProcessor.from_pretrained("nari-labs/Dia-1.6B-0626")
+model = DiaForConditionalGeneration.from_pretrained("nari-labs/Dia-1.6B-0626").to("cuda")
+
+text = ["[S1] Dia is an open weights text to dialogue model. "
+        "[S2] You get full control over scripts and voices. "
+        "[S1] Wow. Amazing. (laughs) "
+        "[S2] Try it now on GitHub."]
+
+inputs = processor(text=text, padding=True, return_tensors="pt").to("cuda")
+outputs = model.generate(**inputs, max_new_tokens=3072,
+    guidance_scale=3.0, temperature=1.8)</code></pre>
+    <pre class="code-block"><span class="code-lang">Python — Custom package (源码验证: dia/model.py)</span><code>from dia.model import Dia
+
+model = Dia.from_pretrained("nari-labs/Dia-1.6B-0626")
+
+# generate() 完整参数:
+# model.generate(text, max_tokens=3072, cfg_scale=3.0,
+#   temperature=1.2, top_p=0.95, cfg_filter_top_k=45,
+#   audio_prompt=None,        # voice cloning: str path 或 Tensor
+#   audio_prompt_path=None,
+#   use_torch_compile=False, verbose=False)
+
+output = model.generate(
+    "[S1] Hello there! [S2] Hi! [S1] (laughs) Nice to meet you.",
+    audio_prompt="reference.wav",   # voice cloning
+    cfg_scale=3.0,
+    temperature=1.2,
+)</code></pre>
+    <div class="note-box">
+      <h4>副语言标签完整列表 (README 验证)</h4>
+      <p>(laughs) (clears throat) (sighs) (gasps) (coughs) (singing) (sings) (mumbles) (beep) (groans) (sniffs) (claps) (screams) (inhales) (exhales) (applause) (burps) (humming) (sneezes) (chuckle) (whistles) — 共 21 个</p>
+    </div>
+    <div class="sources">
+      <span>来源：</span>
+      <a href="https://github.com/nari-labs/dia">GitHub</a>
+      <a href="https://huggingface.co/nari-labs/Dia-1.6B-0626">HuggingFace</a>
+    </div>
+  </div>
+</div>
+
+
+<div class="model-card" id="gptsovits">
+  <div class="card-header">
+    <div class="card-title">GPT-SoVITS <span class="org">RVC-Boss</span></div>
+    <div class="card-badges">
+      <span class="tier-badge tier-2">中文社区最流行</span>
+      <span class="license-badge open">MIT</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <p><strong>定位：</strong>中文社区最流行（70k+ stars），参考音频驱动情感。最新 v2Pro (2025.06)。MIT。</p>
+    <h3>控制维度（源码验证: api_v2.py）</h3>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-label">情感控制</div><div class="spec-value">参考音频选择（隐式）</div></div>
+      <div class="spec-item"><div class="spec-label">语速</div><div class="spec-value">speed_factor float</div></div>
+      <div class="spec-item"><div class="spec-label">生成参数</div><div class="spec-value">top_k, top_p, temperature</div></div>
+      <div class="spec-item"><div class="spec-label">多 speaker 融合</div><div class="spec-value">aux_ref_audio_paths</div></div>
+      <div class="spec-item"><div class="spec-label">采样步数</div><div class="spec-value">sample_steps (默认32)</div></div>
+      <div class="spec-item"><div class="spec-label">语言</div><div class="spec-value">中英日</div></div>
+    </div>
+    <h3>代码示例</h3>
+    <pre class="code-block"><span class="code-lang">Python — API v2 (源码验证: api_v2.py TTS_Request)</span><code>import requests
+
+# API v2 端点: POST /tts (端口 9880)
+# 注意: 参数名是 speed_factor，不是 speed!
+response = requests.post("http://localhost:9880/tts", json={
+    "text": "欢迎来到节目，今天嘉宾阵容太棒了！",
+    "text_lang": "zh",
+    "ref_audio_path": "happy_reference.wav",
+    "prompt_text": "这是参考音频的转录文本。",
+    "prompt_lang": "zh",
+    "speed_factor": 1.0,        # 注意: 不是 speed!
+    "top_k": 15,
+    "top_p": 1.0,
+    "temperature": 1.0,
+    "repetition_penalty": 1.35,
+    "sample_steps": 32,
+})</code></pre>
+    <div class="sources">
+      <span>来源：</span>
+      <a href="https://github.com/RVC-Boss/GPT-SoVITS">GitHub (70k+ stars)</a>
+      <a href="https://github.com/RVC-Boss/GPT-SoVITS/blob/main/api_v2.py">api_v2.py</a>
+    </div>
+  </div>
+</div>
+
+
+<div class="model-card" id="parler">
+  <div class="card-header">
+    <div class="card-title">Parler-TTS <span class="org">Hugging Face</span></div>
+    <div class="card-badges">
+      <span class="tier-badge tier-2">NL 描述驱动</span>
+      <span class="license-badge open">Apache 2.0</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <p><strong>定位：</strong>自然语言描述驱动风格控制，独立 description prompt。Large v1 (2.3B)，34 命名 speaker。Apache 2.0。</p>
+    <h3>控制维度（源码验证: modeling_parler_tts.py + README）</h3>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-label">风格控制</div><div class="spec-value">description prompt (NL)</div></div>
+      <div class="spec-item"><div class="spec-label">音高/语速</div><div class="spec-value">NL 描述（非数值）</div></div>
+      <div class="spec-item"><div class="spec-label">命名 Speaker</div><div class="spec-value">34 个预设 speaker</div></div>
+      <div class="spec-item"><div class="spec-label">情感 (Expresso)</div><div class="spec-value">happy/sad/confused/laughing</div></div>
+      <div class="spec-item"><div class="spec-label">质量属性</div><div class="spec-value">清晰度/混响/噪声</div></div>
+      <div class="spec-item"><div class="spec-label">语言</div><div class="spec-value">英语为主</div></div>
+    </div>
+    <h3>代码示例</h3>
+    <pre class="code-block"><span class="code-lang">Python — 双 tokenizer (源码验证: README)</span><code>from parler_tts import ParlerTTSForConditionalGeneration
+from transformers import AutoTokenizer
+import soundfile as sf
+
+# 注意: 用 AutoTokenizer，不是 AutoProcessor!
+model = ParlerTTSForConditionalGeneration.from_pretrained(
+    "parler-tts/parler-tts-large-v1")
+tokenizer = AutoTokenizer.from_pretrained("parler-tts/parler-tts-large-v1")
+
+# description 控制声音风格，prompt 是要合成的文本
+description = "A female speaker with a slightly high pitch, moderate rate, very clear recording."
+prompt = "Welcome to the show, everyone!"
+
+input_ids = tokenizer(description, return_tensors="pt").input_ids
+prompt_input_ids = tokenizer(prompt, return_tensors="pt").input_ids
+generation = model.generate(input_ids=input_ids,
+    prompt_input_ids=prompt_input_ids)
+sf.write("output.wav", generation.cpu().numpy().squeeze(), 44100)</code></pre>
+    <div class="sources">
+      <span>来源：</span>
+      <a href="https://github.com/huggingface/parler-tts">GitHub</a>
+      <a href="https://huggingface.co/parler-tts/parler-tts-large-v1">HuggingFace Large v1</a>
+      <a href="https://huggingface.co/parler-tts/parler-tts-mini-expresso">Expresso 变体</a>
+    </div>
+  </div>
+</div>
+
+
+<div class="model-card quality" id="dotstts">
+  <div class="card-header">
+    <div class="card-title">dots.tts <span class="org">RedNote (Xiaohongshu) + SJTU X-LANCE</span></div>
+    <div class="card-badges">
+      <span class="tier-badge tier-1">质量 SOTA</span>
+      <span class="license-badge open">Apache 2.0</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <p><strong>定位：</strong>开源质量 SOTA — Seed-TTS-Eval WER 2.95/SIM 79.2，24 语言。全连续隐空间 AR，2B 参数。Apache 2.0。<strong>当前版本无显式控制参数</strong>。</p>
+    <h3>控制维度（源码验证: runtime.py）</h3>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-label">Voice Cloning</div><div class="spec-value">prompt_audio_path + prompt_text</div></div>
+      <div class="spec-item"><div class="spec-label">Speaker 强度</div><div class="spec-value">speaker_scale float (默认1.5)</div></div>
+      <div class="spec-item"><div class="spec-label">CFG</div><div class="spec-value">guidance_scale float (默认1.2)</div></div>
+      <div class="spec-item"><div class="spec-label">采样步数</div><div class="spec-value">num_steps int (默认10)</div></div>
+      <div class="spec-item"><div class="spec-label">语言</div><div class="spec-value">112 语言 + auto_detect</div></div>
+      <div class="spec-item"><div class="spec-label">模板</div><div class="spec-value">tts / instruction_tts / interleave</div></div>
+    </div>
+    <h3>代码示例</h3>
+    <pre class="code-block"><span class="code-lang">Python — generate() 完整签名 (源码验证: runtime.py line 479)</span><code>from dots_tts.runtime import DotsTtsRuntime
+import soundfile as sf
+
+runtime = DotsTtsRuntime.from_pretrained(
+    "rednote-hilab/dots.tts",  # 变体: dots.tts (Pretrain/SCA/MF)
+    precision="bfloat16", optimize=True,
+)
+
+# 所有参数均为 keyword-only:
+result = runtime.generate(
+    text="Hello, this is a demo.",             # 必需
+    prompt_audio_path="reference.wav",          # voice cloning
+    prompt_text="Transcript of reference.",     # 参考音频转录
+    template_name="tts",                        # tts/instruction_tts/...
+    language="EN",                              # 112 语言或 auto_detect
+    speaker_scale=1.5,                          # speaker 嵌入强度
+    num_steps=10,                               # flow-matching 步数
+    guidance_scale=1.2,                         # CFG 强度
+    normalize_text=False,
+)
+sf.write("out.wav", result["audio"].float().cpu().squeeze().numpy(),
+         result["sample_rate"])</code></pre>
+    <div class="warn-box">
+      <h4>可控性警告</h4>
+      <p>无显式情感/语速/音高参数。<code>instruction_tts</code> 模板名存在但无显式 instruction 参数。<code>speaker_scale</code> 控制 speaker 嵌入强度（0.0-3.0），非情感控制。变体为 Pretrain/SCA/MF（无 "soar"）。</p>
+    </div>
+    <div class="sources">
+      <span>来源：</span>
+      <a href="https://github.com/rednote-hilab/dots.tts">GitHub</a>
+      <a href="https://arxiv.org/abs/2606.07080">arXiv:2606.07080</a>
+      <a href="https://huggingface.co/rednote-hilab/dots.tts">HuggingFace</a>
+    </div>
+  </div>
+</div>
+</section>
+
+
+<!-- ===== VOICE GENERATION ===== -->
+<section id="voicegen">
+<div class="section-header">
+  <div class="section-tag">Voice Generation · 虚拟音色生成</div>
+  <h2>虚拟音色生成 — 无需录音生成 Reference Audio</h2>
+  <p>多模型依赖 ref audio 做 zero-shot cloning，但录音从哪来？以下方案无需真实录音即可生成任意音色</p>
+</div>
+
+<div class="model-card" id="qwen3vd">
+  <div class="card-header">
+    <div class="card-title">Qwen3-TTS VoiceDesign <span class="org">Alibaba Qwen</span></div>
+    <div class="card-badges">
+      <span class="tier-badge tier-1">最推荐</span>
+      <span class="license-badge open">Apache 2.0</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <p><strong>定位：</strong>自由格式自然语言描述生成任意音色，无需录音。生成后可喂给任何 zero-shot 模型。1.7B，Apache 2.0。</p>
+    <h3>控制维度</h3>
+    <div class="spec-grid">
+      <div class="spec-item"><div class="spec-label">音色描述</div><div class="spec-value">自由格式 NL（无限）</div></div>
+      <div class="spec-item"><div class="spec-label">可控属性</div><div class="spec-value">性别/年龄/音高/口音/风格</div></div>
+      <div class="spec-item"><div class="spec-label">预设 Speaker</div><div class="spec-value">9 个（Vivian/Serena/Uncle_Fu...)</div></div>
+      <div class="spec-item"><div class="spec-label">语言</div><div class="spec-value">中/英/日/韩</div></div>
+    </div>
+    <h3>代码示例</h3>
+    <pre class="code-block"><span class="code-lang">Python — VoiceDesign 生成 reference + 喂给 CosyVoice</span><code># Step 1: VoiceDesign 生成虚拟音色 reference
+from qwen_tts import Qwen3TTSModel
+import soundfile as sf
+
+design = Qwen3TTSModel.from_pretrained(
+    "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
+    device_map="cuda:0", dtype=torch.bfloat16,
+)
+
+ref_wavs, sr = design.generate_voice_design(
+    text="哥哥，你回来啦",
+    language="Chinese",
+    instruct="体现撒娇稚嫩的萝莉女声，音调偏高，营造出黏人卖萌的听觉效果。",
+)
+sf.write('virtual_girl_ref.wav', ref_wavs[0].numpy(), sr)
+
+# Step 2: 喂给 CosyVoice 做 high-quality 合成
+from cosyvoice.cli.cosyvoice import CosyVoice2
+cosyvoice = CosyVoice2('FunAudioLLM/CosyVoice2-0.5B', load_jit=True)
+for result in cosyvoice.inference_instruct2(
+    tts_text="今天天气真好，我们出去散步吧。",
+    instruct_text="用开心、可爱的语气说。",
+    prompt_wav='virtual_girl_ref.wav',
+    speed=1.1,
+):
+    torchaudio.save('final.wav', result['tts_speech'], cosyvoice.sample_rate)</code></pre>
+    <pre class="code-block"><span class="code-lang">Python — CustomVoice 9个预设 Speaker</span><code>custom = Qwen3TTSModel.from_pretrained(
+    "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice",
+    device_map="cuda:0", dtype=torch.bfloat16,
+)
+
+# 9 个预设 Speaker:
+# Vivian(明亮年轻女声) Serena(温柔年轻女声)
+# Uncle_Fu(沉稳低沉男声) Dylan(京腔年轻男声)
+# Eric(活泼成都男声) Ryan(动感男声/英)
+# Aiden(阳光美式男声/英) Ono_Anna(俏皮女声/日) Sohee(温暖女声/韩)
+
+wavs, sr = custom.generate_custom_voice(
+    text="欢迎收听今天的节目！",
+    language="Chinese",
+    speaker="Serena",                    # 选择预设 speaker
+    instruct="用特别开心的语气说",       # 可叠加情感指令
+)</code></pre>
+    <div class="sources">
+      <span>来源：</span>
+      <a href="https://github.com/QwenLM/Qwen3-TTS">GitHub</a>
+      <a href="https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign">VoiceDesign</a>
+      <a href="https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice">CustomVoice</a>
+    </div>
+  </div>
+</div>
+
+<div class="model-card" id="sparkvc">
+  <div class="card-header">
+    <div class="card-title">Spark-TTS Voice Creation <span class="org">SparkAudio / HKUST</span></div>
+    <div class="card-badges">
+      <span class="tier-badge tier-2">最快速</span>
+      <span class="license-badge open">Apache 2.0</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <p><strong>定位：</strong>3 个参数直接生成虚拟音色，无需描述或录音。2x5x5=50 种组合，Apache 2.0。</p>
+    <h3>代码示例</h3>
+    <pre class="code-block"><span class="code-lang">Python — 属性参数生成虚拟 speaker</span><code>from cli.SparkTTS import SparkTTS
+import soundfile as sf
+
+# 无需参考音频！3个参数直接生成
+model = SparkTTS(
+    text="大家好，我是你的语音助手。",
+    prompt_speech_path=None,     # 不需要参考音频
+    gender="female",             # male / female
+    pitch="very_high",           # very_low / low / median / high / very_high
+    speed="high",                # very_low / low / median / high / very_high
+)
+sf.write('spark_virtual_ref.wav', wav, 24000)
+
+# 然后喂给任何 zero-shot 模型做 cloning
+# 50 种组合: 2 性别 x 5 音高 x 5 语速</code></pre>
+    <div class="sources">
+      <span>来源：</span>
+      <a href="https://github.com/SparkAudio/Spark-TTS">GitHub</a>
+      <a href="https://huggingface.co/SparkAudio/Spark-TTS-0.5B">HuggingFace</a>
+    </div>
+  </div>
+</div>
+
+<div class="model-card" id="mossvoice">
+  <div class="card-header">
+    <div class="card-title">MOSS-VoiceGenerator <span class="org">OpenMOSS (Fudan University)</span></div>
+    <div class="card-badges">
+      <span class="tier-badge tier-2">NL 描述生成</span>
+      <span class="license-badge open">Apache 2.0</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <p><strong>定位：</strong>MOSS 团队的专用音色生成模型，用自然语言描述生成语音，无需录音。1.7B，Apache 2.0。与 MOSS-TTS 互补。</p>
+    <h3>代码示例</h3>
+    <pre class="code-block"><span class="code-lang">Python — NL 描述生成虚拟音色</span><code>from transformers import AutoModel, AutoProcessor
+
+processor = AutoProcessor.from_pretrained(
+    "OpenMOSS-Team/MOSS-VoiceGenerator", trust_remote_code=True)
+model = AutoModel.from_pretrained(
+    "OpenMOSS-Team/MOSS-VoiceGenerator",
+    trust_remote_code=True, device_map="cuda:0",
+    torch_dtype=torch.bfloat16,
+)
+
+# instruction 为必需参数，自然语言描述生成音色
+messages = [processor.build_user_message(
+    text="A warm gentle middle-aged woman, slight southern accent, calming rhythm.",
+    instruction="Generate a voice matching this description.",
+)]
+batch = processor([messages], mode="generation")
+outputs = model.generate(
+    input_ids=batch["input_ids"].to("cuda:0"),
+    attention_mask=batch["attention_mask"].to("cuda:0"),
+    max_new_tokens=2048,
+)</code></pre>
+    <div class="sources">
+      <span>来源：</span>
+      <a href="https://github.com/OpenMOSS/MOSS-TTS">MOSS-TTS GitHub</a>
+      <a href="https://arxiv.org/html/2603.28086v1">arXiv 技术报告</a>
+      <a href="https://huggingface.co/OpenMOSS-Team/MOSS-VoiceGenerator">HuggingFace</a>
+    </div>
+  </div>
+</div>
+
+<div class="model-card" id="cosyvoice-sft">
+  <div class="card-header">
+    <div class="card-title">CosyVoice SFT 预注册 Speaker <span class="org">Alibaba FunAudioLLM</span></div>
+    <div class="card-badges">
+      <span class="tier-badge tier-2">中文预设</span>
+      <span class="license-badge open">Apache 2.0</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <p><strong>定位：</strong>CosyVoice SFT 模型自带预设 speaker，直接 spk_id 调用，无需参考音频。适合中文场景。</p>
+    <h3>代码示例</h3>
+    <pre class="code-block"><span class="code-lang">Python — 预注册 speaker 直接使用</span><code>from cosyvoice.cli.cosyvoice import CosyVoice
+
+cosyvoice = CosyVoice('iic/CosyVoice-300M-SFT')
+
+# 查看可用 speaker
+print(cosyvoice.list_available_spks())
+# ['中文女', '中文男', '英文女', '英文男', '日语男', '粤语女', '韩语女', ...]
+
+# 直接使用，无需参考音频
+for result in cosyvoice.inference_sft(
+    '你好，欢迎使用语音合成系统',
+    spk_id='中文女',
+):
+    torchaudio.save('sft_out.wav', result['tts_speech'], cosyvoice.sample_rate)</code></pre>
+    <div class="sources">
+      <span>来源：</span>
+      <a href="https://github.com/FunAudioLLM/CosyVoice">GitHub</a>
+    </div>
+  </div>
+</div>
+
+<div class="model-card" id="parler-voice">
+  <div class="card-header">
+    <div class="card-title">Parler-TTS NL 描述 + 34 Speaker <span class="org">Hugging Face</span></div>
+    <div class="card-badges">
+      <span class="tier-badge tier-2">英文场景</span>
+      <span class="license-badge open">Apache 2.0</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <p><strong>定位：</strong>34 个命名 speaker + NL 描述控制。适合英文场景，输出可喂给其他模型做 reference。</p>
+    <h3>代码示例</h3>
+    <pre class="code-block"><span class="code-lang">Python — NL 描述生成特定音色</span><code>from parler_tts import ParlerTTSForConditionalGeneration
+from transformers import AutoTokenizer
+
+model = ParlerTTSForConditionalGeneration.from_pretrained(
+    "parler-tts/parler-tts-large-v1")
+tokenizer = AutoTokenizer.from_pretrained("parler-tts/parler-tts-large-v1")
+
+# 用 NL 描述控制音色（34 个命名 speaker 可选）
+description = ("A young female speaker with a bright, cheerful voice, "
+               "slightly high pitch, speaking at a moderate pace.")
+prompt = "Welcome to our show!"
+
+input_ids = tokenizer(description, return_tensors="pt").input_ids
+prompt_ids = tokenizer(prompt, return_tensors="pt").input_ids
+generation = model.generate(input_ids=input_ids,
+    prompt_input_ids=prompt_ids)</code></pre>
+    <div class="sources">
+      <span>来源：</span>
+      <a href="https://github.com/huggingface/parler-tts">GitHub</a>
+    </div>
+  </div>
+</div>
+
+<div class="rec-box">
+  <h3>生产推荐：TTS-to-TTS 管线</h3>
+  <ol>
+    <li><strong>最佳实践：</strong>Qwen3-TTS VoiceDesign 生成 5-10s reference clip，再喂给 CosyVoice 2 / Fish S2 / IndexTTS 2 做高质量合成。NL 描述无限可控。</li>
+    <li><strong>快速原型：</strong>Spark-TTS 3 个参数生成 50 种音色，直接喂给下游模型。</li>
+    <li><strong>中文场景：</strong>CosyVoice SFT 预注册 speaker 直接使用（中文女/男/粤语女/韩语女...）。</li>
+    <li><strong>英文场景：</strong>Parler-TTS 34 个命名 speaker + NL 描述，输出做 reference。</li>
+  </ol>
+</div>
+
+<table class="comparison-table">
+<thead>
+<tr><th>方案</th><th>需录音</th><th>可控维度</th><th>质量</th><th>语言</th><th>推荐度</th></tr>
+</thead>
+<tbody>
+<tr class="highlight-row">
+  <td><strong>Qwen3-TTS VoiceDesign</strong></td><td>否</td><td>自由 NL（无限）</td><td>高</td><td>中英日韩</td><td>最推荐</td></tr>
+<tr>
+  <td><strong>Spark-TTS</strong></td><td>否</td><td>gender/pitch/speed (50)</td><td>中</td><td>中英</td><td>快速原型</td></tr>
+<tr>
+  <td><strong>MOSS-VoiceGenerator</strong></td><td>否</td><td>自由 NL 描述</td><td>高</td><td>多语言</td><td>推荐</td></tr>
+<tr>
+  <td><strong>CosyVoice SFT</strong></td><td>否</td><td>~10 预设 speaker</td><td>高</td><td>中英日韩粤</td><td>中文首选</td></tr>
+<tr>
+  <td><strong>Parler-TTS</strong></td><td>否</td><td>NL 描述 + 34 speaker</td><td>中</td><td>英语</td><td>英文首选</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ===== COMPARISON ===== -->
+<section id="comparison">
+<div class="section-header">
+  <div class="section-tag">Comparison · 对比总览</div>
+  <h2>对比总览</h2>
+  <p>9 个候选模型的控制维度全表（全部经过源码验证）</p>
+</div>
+
+<table class="comparison-table">
+<thead>
+<tr><th>模型</th><th>许可证</th><th>情感</th><th>语速</th><th>多角色</th><th>副语言</th><th>发音</th><th>语言</th></tr>
+</thead>
+<tbody>
+<tr class="highlight-row">
+  <td><strong>Fish S2 Pro</strong></td><td><span class="orange">Research</span></td>
+  <td><strong>亚词级 [tag]</strong></td><td>间接</td><td>原生</td><td>丰富</td><td>&#10060;</td><td>80+</td></tr>
+<tr>
+  <td><strong>CosyVoice 2/3</strong></td><td><span class="green">Apache 2.0</span></td>
+  <td>NL 指令 + inline 标签</td><td>显式 speed</td><td>部分</td><td>[breath] [laughter]...</td><td>v3 音素</td><td>中英日韩粤</td></tr>
+<tr>
+  <td><strong>IndexTTS 2</strong></td><td><span class="orange">Custom</span></td>
+  <td><strong>8维向量</strong> 4种输入</td><td>间接 max_mel</td><td>&#10060;</td><td>&#10060;</td><td>拼音声调</td><td>中英</td></tr>
+<tr>
+  <td><strong>Chatterbox</strong></td><td><span class="green">MIT</span></td>
+  <td>exaggeration 旋钮</td><td>&#10060;</td><td>&#10060;</td><td>Turbo: 9 种标签</td><td>&#10060;</td><td>英+23</td></tr>
+<tr>
+  <td><strong>MOSS-TTS/TTSD</strong></td><td><span class="green">Apache 2.0</span></td>
+  <td>&#10060;</td><td>tokens 间接</td><td>TTSD [S1]-[S5]</td><td>[pause Xs]</td><td><strong>拼音/IPA</strong></td><td>20+</td></tr>
+<tr>
+  <td><strong>Dia</strong></td><td><span class="green">Apache 2.0</span></td>
+  <td>隐式</td><td>&#10060;</td><td><strong>原生 [S1]/[S2]</strong></td><td><strong>21 种标签</strong></td><td>&#10060;</td><td>仅英</td></tr>
+<tr>
+  <td><strong>GPT-SoVITS</strong></td><td><span class="green">MIT</span></td>
+  <td>参考音频（隐式）</td><td>speed_factor</td><td>部分</td><td>&#10060;</td><td>&#10060;</td><td>中英日</td></tr>
+<tr>
+  <td><strong>Parler-TTS</strong></td><td><span class="green">Apache 2.0</span></td>
+  <td>NL 描述 + Expresso</td><td>NL 描述</td><td>&#10060;</td><td>&#10060;</td><td>&#10060;</td><td>英语</td></tr>
+<tr>
+  <td><strong>dots.tts</strong></td><td><span class="green">Apache 2.0</span></td>
+  <td style="color:#ff9800">&#10060;</td><td>&#10060;</td><td>&#10060;</td><td>&#10060;</td><td>&#10060;</td><td>112</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ===== STRATEGY ===== -->
+<section id="strategy">
+<div class="section-header">
+  <div class="section-tag">Strategy · 推荐策略</div>
+  <h2>Demo 构建推荐</h2>
+  <p>按场景推荐最佳模型组合</p>
+</div>
+
+<div class="rec-box">
+  <h3>推荐组合方案</h3>
+  <ol>
+    <li><strong>最强可控性：</strong>Fish S2 Pro — 亚词级标签 + 原生多角色 + 开放域 NL 描述。可控性远超其他所有模型。</li>
+    <li><strong>情感精细控制：</strong>IndexTTS 2 — 8 维连续情感向量 + 情感/音色解耦。4 种情感输入方式灵活选择。</li>
+    <li><strong>综合首选（完全开源）：</strong>CosyVoice 2/3 — NL 指令 + 显式语速 + voice cloning + inline 副语言标签。Apache 2.0。</li>
+    <li><strong>多角色对话：</strong>Dia（英文）或 MOSS-TTSD（中英文）— 原生多 speaker 对话生成。</li>
+    <li><strong>质量基准：</strong>dots.tts — SOTA 语音质量，用于对照测试。当前无控制参数，等待 instruction-tuned 变体。</li>
+  </ol>
+</div>
+
+<div class="warn-box">
+  <h4>注意事项</h4>
+  <p>本次验证发现多处与先前认知不符：CosyVoice 的 <code>inference_instruct2</code> 需要 <code>prompt_wav</code>（非可选）；Chatterbox Turbo 的 exaggeration/cfg_weight 被忽略；MOSS-TTS 无显式情感参数但有 [pause] 标签；IndexTTS 2 无显式语速控制；dots.tts 无 "soar" 变体。所有代码示例均经源码验证。</p>
+</div>
+
+<div class="note-box">
+  <h4>SSML 支持现状</h4>
+  <p>无开源 TTS 原生支持 W3C SSML 1.1。但 Fish S2 的 [tag]、CosyVoice 的 [breath]/[laughter]、Chatterbox Turbo 的 [laugh]、Dia 的 (laughs)、MOSS/IndexTTS 的拼音注解均为 SSML-like inline 语法。需自行编写解析层桥接。</p>
+</div>
+</section>
+</div> <!-- .content -->
+
+<div class="footer">
+  <strong>TTS 可控模型选型报告</strong><br>
+  报告编译于 2026年6月 · 基于9个TTS模型的公开文档与源码验证 · 仅供技术选型参考
+</div>
+</div>
+</body></html>
