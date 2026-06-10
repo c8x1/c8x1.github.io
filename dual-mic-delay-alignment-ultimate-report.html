@@ -1751,6 +1751,178 @@ PHAT 加权将所有频率分量等权化，抑制噪声频谱的影响，
 
     </section>
 
+    <!-- =================== §7 检测算法与亚采样精度 =================== -->
+    <section id="sec7">
+      <h2>7. 检测算法与亚采样精度</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 匹配滤波 + 对数域抛物线插值是最佳组合</strong>— 在 SNR&gt;10dB 时精度约 ±0.02 样本（±0.42μs @48kHz），远超 10ms 要求。多径环境下取"最早且足够强的峰"而非全局最大峰。
+      </div>
+
+      <!-- 7.1 匹配滤波检测流程 -->
+      <h3 id="sec7-1">7.1 匹配滤波检测流程</h3>
+
+      <p>手机扬声器播放已知校准信号 <code>s(t)</code>，两路麦克风分别拾取后对原始信号做互相关（匹配滤波），找到各自的到达时间，两者之差即为时延差。</p>
+
+      <div class="diagram">
+       播放校准信号 s(t)
+            │
+  ┌─────────┼─────────┐
+  ↓                   ↓
+手机 mic 录音        DJI Mic 录音
+  r₁(t)              r₂(t)
+  │                   │
+  ↓                   ↓
+匹配滤波/相关        匹配滤波/相关
+  p₁(τ) = r₁⋆s      p₂(τ) = r₂⋆s
+  │                   │
+  ↓                   ↓
+峰值检测              峰值检测
+  τ₁ = argmax(p₁)   τ₂ = argmax(p₂)
+  │                   │
+  └─────────┬─────────┘
+            ↓
+    Δτ = τ₁ − τ₂   ← 两路时延差</div>
+
+      <p>因为 <code>s(t)</code> 是自定义信号，其自相关特性可以被优化到极其尖锐（近似 delta 函数），互相关峰的 SNR 远高于被动方案。</p>
+
+      <!-- 7.2 亚采样插值方法 -->
+      <h3 id="sec7-2">7.2 亚采样插值方法</h3>
+
+      <p>互相关峰值落在离散样本上，但真实延迟可能在两个样本之间。需要亚采样插值才能达到 &lt;1ms 的精度。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>方法</th><th>SNR=20dB</th><th>SNR=10dB</th><th>复杂度</th><th>推荐度</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>无插值</td><td>±0.5 样本</td><td>±0.5 样本</td><td>低</td><td>基础</td></tr>
+            <tr><td>抛物线（线性幅度）</td><td>±0.05</td><td>±0.15</td><td>低</td><td>有偏</td></tr>
+            <tr class="highlight"><td><strong>抛物线（对数幅度）</strong></td><td><strong>±0.02</strong></td><td><strong>±0.08</strong></td><td><strong>低</strong></td><td><strong>⭐推荐</strong></td></tr>
+            <tr><td>GCC-PHAT 加权</td><td>±0.02 样本</td><td>—</td><td>中</td><td>可选</td></tr>
+            <tr><td>匹配滤波插值</td><td>±0.01</td><td>±0.05</td><td>中</td><td>高精度</td></tr>
+            <tr><td>频域相位斜率</td><td>±0.01</td><td>—</td><td>中</td><td>高精度需求</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>对数域抛物线插值公式</h4>
+      <div class="formula">
+设峰值在 index k，互相关结果 c[]
+
+α = log(|c[k-1]|)
+β = log(|c[k]|)
+γ = log(|c[k+1]|)
+
+δ = (α - γ) / (2 · (α - 2β + γ))   // 亚样本偏移
+τ = k + δ                             // 精确延迟（样本数）
+delay_seconds = τ / fs</div>
+
+      <div class="callout callout-info">
+        <strong>插值精度与偏差说明</strong>
+        <p>对数域抛物线插值在 SNR &gt; 10dB 时精度约 ±0.02 样本（±0.42μs @48kHz），远超 10ms 要求。在极低 SNR（&lt;5dB）条件下存在约 0.05-0.1 样本的系统偏差，如需更高精度可改用 Quinn 或 Macleod 估计器。对于本项目的 10ms 精度目标，对数域抛物线插值完全足够。</p>
+        <p>参考：Lai et al., NTNU</p>
+      </div>
+
+      <!-- 7.3 多径/混响处理 -->
+      <h3 id="sec7-3">7.3 多径/混响处理</h3>
+
+      <p>室内环境下，校准信号会通过多条路径到达两路 mic。互相关输出会出现：</p>
+      <ul>
+        <li><strong>主峰</strong>：直达路径（最强或最早）</li>
+        <li><strong>次峰</strong>：反射路径（较弱、较晚，通常在主峰后 5-50ms）</li>
+      </ul>
+
+      <p>桌面、墙面、手持姿态都可能带来反射峰。如果简单地取全局最大峰，可能选中反射路径而非直达路径，导致时延估计偏差。</p>
+
+      <div class="callout callout-success">
+        <strong>策略：取最早出现的显著峰（而非全局最大峰）</strong>
+        <p>对互相关结果做 onset detection：找到超过噪声基底 6dB 以上的<strong>第一个峰</strong>。如果两路 mic 到声源的距离差很小，反射路径通常在主峰之后出现——直达峰仍然清晰可辨。</p>
+        <p>此外，建议<strong>重复测量 3 次</strong>并取中位数（median），以降低偶发噪声和反射峰误选的概率。</p>
+      </div>
+
+      <!-- 7.4 置信度门控 -->
+      <h3 id="sec7-4">7.4 置信度门控</h3>
+
+      <p>校准结果必须通过置信度检查，才能用于正式混音。以下为关键门控条件：</p>
+
+      <div class="callout callout-warn">
+        <strong>置信度门控清单</strong>
+        <ul>
+          <li>相关峰 <code>peak / second_peak</code> 大于阈值（如 1.5-2.5）</li>
+          <li>两路都能检测到探针，且峰值能量高于噪声底</li>
+          <li>估计 delay 落在设备先验范围内（如 -200ms 到 +200ms）</li>
+          <li>重复探针的 delay 方差小于阈值（如 1-2ms）</li>
+          <li>失败时<strong>不要硬用错误值</strong>：降副麦、单主麦，或进入 fallback</li>
+        </ul>
+      </div>
+
+    </section>
+
+    <!-- =================== §8 心理声学与用户体验设计 =================== -->
+    <section id="sec8">
+      <h2>8. 心理声学与用户体验设计</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 最佳用户体验：将校准 Chirp 嵌入"录音开始"提示音或倒计时音效中</strong>— 用户听到的是自然提示音，算法看到的是可定位探针。校准信号段保留在预滚缓存中，不写入最终素材。
+      </div>
+
+      <!-- 8.1 三种频谱整形策略 -->
+      <h3 id="sec8-1">8.1 三种频谱整形策略</h3>
+
+      <p>用户体验的关键——校准信号不能让用户觉得刺耳或突兀。以下三种策略各有取舍：</p>
+
+      <div class="grid-3">
+        <div class="card">
+          <h4>策略 A：高频偏好</h4>
+          <p>将校准信号集中在 <strong>8-16kHz</strong> 频段。成年人对 &gt;12kHz 的感知显著下降，年轻人感知略好但总体弱于中低频。</p>
+          <p><strong>代价</strong>：带宽减半，但时延分辨率仍有 ~140μs。</p>
+        </div>
+        <div class="card">
+          <h4>策略 B：宽带 + 低振幅 + 渐变</h4>
+          <p>200Hz-16kHz 宽带，振幅 30-40% 满量程，前后 10ms 余弦淡入淡出。</p>
+          <p>总感知约 50-55 dB SPL，接近正常对话音量——用户会注意到但不刺耳。</p>
+        </div>
+        <div class="card">
+          <h4>策略 C：掩蔽效应嵌入 <span class="tag tag-rec">⭐最佳UX</span></h4>
+          <p>利用 UI 提示音的<strong>前向掩蔽窗口</strong>（~20ms），将校准信号紧跟在提示音之后播放，感知降低 10-20dB。</p>
+          <p>用户几乎无感知，算法仍可定位。来源：Amazon Science</p>
+        </div>
+      </div>
+
+      <!-- 8.2 用户可接受性设计 -->
+      <h3 id="sec8-2">8.2 用户可接受性设计</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>设计方案</th><th>用户感知</th><th>校准精度</th><th>推荐场景</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>50ms "嘀"声</td><td>明确知道在校准</td><td>高</td><td>专业用户</td></tr>
+            <tr><td>100ms chirp "嗖"声</td><td>注意到轻微声音</td><td>高</td><td>普通用户可接受</td></tr>
+            <tr class="highlight"><td><strong>嵌入"录音开始"提示音中</strong></td><td><strong>几乎无感知</strong></td><td><strong>中-高</strong></td><td><strong>⭐最佳UX</strong></td></tr>
+            <tr><td>完全无声（超声/时间戳）</td><td>零感知</td><td>中</td><td>理想但有局限</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 8.3 产品化策略 -->
+      <h3 id="sec8-3">8.3 产品化策略</h3>
+
+      <div class="callout callout-success">
+        <strong>产品默认策略</strong>
+        <p>默认播放一个短、可解释的 UI 声音，其中嵌入 2-8kHz log chirp。两路麦克风分别对已知探针做匹配滤波，取相关峰位置相减，得到输入链路相对 delay。探针段保留在预滚缓存里，但<strong>不写入最终素材</strong>。</p>
+      </div>
+
+      <div class="callout callout-warn">
+        <strong>失败兜底策略</strong>
+        <p>如果相关峰低置信，先不要双路满幅混音；用单主麦或低电平副麦进入录制，同时提示用户说"开始"完成口部源校准。这条路线的优势是工程可控：不依赖第一次自然说话，不强依赖近超声频响，也不会把失败静默地带进正式录音。</p>
+      </div>
+
+    </section>
+
     <div class="toc-card">
       <h2>目录</h2>
       <ol class="toc-list">
