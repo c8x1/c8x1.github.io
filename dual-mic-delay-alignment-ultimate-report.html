@@ -1439,6 +1439,318 @@ TBP: <span class="num">0.05</span> × <span class="num">3000</span> = <span clas
 
     </section>
 
+    <!-- =================== §5 音频水印持续校准 =================== -->
+    <section id="sec5">
+      <h2>5. 音频水印持续校准</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 快速结论：</strong>音频水印将同步标记嵌入正常音频流中，不仅解决冷启动，还能持续跟踪延迟漂移。扩频水印(DSSS) + 导频音(Pilot Tone) 组合是最全面的方案，但实现复杂度较高。适合作为 Phase 3 的高级方案。
+      </div>
+
+      <!-- 5.1 核心原理差异 -->
+      <h3 id="sec5-1">5.1 核心原理差异</h3>
+
+      <div class="diagram">
+方案 A：播放 → 等待 → 检测（一次性或周期性）
+  → 校准信号和用户信号在时间上是分离的
+
+方案 B：水印信号与用户信号始终共存
+  → 校准信息嵌入在正常音频流中
+  → 任何时候都可以提取对齐信息
+  → 不仅解决冷启动，还能持续、无缝地跟踪延迟变化</div>
+
+      <!-- 5.2 扩频水印 DSSS -->
+      <h3 id="sec5-2">5.2 扩频水印（DSSS）</h3>
+
+      <h4>基本原理</h4>
+      <p>借用<strong>直接序列扩频通信（DSSS）</strong>思想：将同步标记的能量分散到很宽的频带，每个频点的能量极低（人耳感知不到），但用同一个 PN 序列做相关可以恢复出来。</p>
+
+      <h4>嵌入算法（频域，利用心理声学掩蔽）</h4>
+      <pre><code><span class="kw">def</span> <span class="fn">embed_watermark_freq</span>(host_audio, pn_seq, alpha, fs):
+    <span class="str">"""频域扩频水印嵌入"""</span>
+    frame_size = <span class="num">2048</span>   <span class="cmt"># 42.7ms @48kHz</span>
+    hop_size   = <span class="num">512</span>    <span class="cmt"># 10.7ms</span>
+    frames = <span class="fn">stft</span>(host_audio, frame_size, hop_size)
+
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(frames.shape[<span class="num">0</span>]):
+        mag   = <span class="fn">np.abs</span>(frames[i])
+        phase = <span class="fn">np.angle</span>(frames[i])
+
+        <span class="cmt"># 心理声学掩蔽阈值（简化版）</span>
+        <span class="cmt"># 每个频点的嵌入强度不超过该频点的掩蔽阈值</span>
+        mask = <span class="fn">compute_masking_threshold</span>(mag, fs)
+
+        <span class="cmt"># 水印 = PN序列 × 嵌入强度 × 掩蔽阈值</span>
+        wm_spectrum = alpha * pn_seq * mask
+
+        <span class="cmt"># 叠加</span>
+        frames[i] = (mag + wm_spectrum) * <span class="fn">np.exp</span>(<span class="num">1j</span> * phase)
+
+    <span class="kw">return</span> <span class="fn">istft</span>(frames, frame_size, hop_size)</code></pre>
+
+      <h4>心理声学掩蔽模型（HAS）</h4>
+      <p>水印必须<strong>听不到</strong>，嵌入强度受限于人耳听觉系统的掩蔽阈值：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>机制</th><th>说明</th><th>对水印设计的影响</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>频域掩蔽</strong></td>
+              <td>强信号频率附近，弱信号被"遮盖"。向上 ~1 Bark，向下 ~0.5 Bark</td>
+              <td>语音/音乐活跃时，水印可嵌入在掩蔽区</td>
+            </tr>
+            <tr>
+              <td><strong>时域掩蔽</strong></td>
+              <td>前向掩蔽 100-200ms，后向掩蔽 5-20ms</td>
+              <td>语音结束后的短暂窗口仍可嵌入</td>
+            </tr>
+            <tr>
+              <td><strong>绝对听阈</strong></td>
+              <td>无掩蔽信号时的最低可听阈值（ISO 226:2003）</td>
+              <td>静默期的嵌入强度上限</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-success">
+        <strong>近超声频段是水印的理想载体</strong>
+        <p>在 15kHz 以上，人耳的绝对听阈显著升高（18kHz 约 55dB SPL ≈ -32dBFS），意味着可以在更高频段嵌入更强的水印而不被听到。但需验证硬件支持（见 §4.5 近超声硬件警告）。</p>
+      </div>
+
+      <h4>扩频处理增益</h4>
+      <div class="formula">
+G_ss = 10·log₁₀(L) dB    (L = PN序列长度 = 每帧频点数量)
+
+L=1024: 30.1 dB  |  L=2048: 33.1 dB  |  L=4096: 36.1 dB</div>
+
+      <h4>检测算法（相关接收机）</h4>
+      <pre><code><span class="kw">def</span> <span class="fn">detect_watermark_delay</span>(y1, y2, pn_seq, frame_size, hop_size):
+    <span class="str">"""检测两路麦克风拾取的水印，计算时延差"""</span>
+    frames1 = <span class="fn">stft</span>(y1, frame_size, hop_size)
+    frames2 = <span class="fn">stft</span>(y2, frame_size, hop_size)
+
+    <span class="cmt"># 每帧与 PN 序列做点积（相关）</span>
+    corr1 = [<span class="fn">np.dot</span>(<span class="fn">np.abs</span>(f[:<span class="fn">len</span>(pn_seq)]), pn_seq) <span class="kw">for</span> f <span class="kw">in</span> frames1]
+    corr2 = [<span class="fn">np.dot</span>(<span class="fn">np.abs</span>(f[:<span class="fn">len</span>(pn_seq)]), pn_seq) <span class="kw">for</span> f <span class="kw">in</span> frames2]
+
+    <span class="cmt"># 两路相关序列的互相关 → 帧级时延差</span>
+    lag_corr = <span class="fn">np.correlate</span>(corr1, corr2, mode=<span class="str">'full'</span>)
+    peak_lag = <span class="fn">np.argmax</span>(<span class="fn">np.abs</span>(lag_corr)) - <span class="fn">len</span>(corr2) + <span class="num">1</span>
+
+    <span class="kw">return</span> peak_lag * hop_size / fs  <span class="cmt"># 秒</span></code></pre>
+
+      <!-- 5.3 导频音 Pilot Tone -->
+      <h3 id="sec5-3">5.3 导频音（Pilot Tone）</h3>
+
+      <h4>原理</h4>
+      <p>在特定频率持续插入一个低幅度单音，两路麦克风拾取后通过 <strong>Hilbert 变换提取瞬时相位</strong>，相位差 = 延迟差。</p>
+
+      <pre><code><span class="kw">def</span> <span class="fn">detect_pilot_delay</span>(y1, y2, pilot_freq, fs):
+    <span class="str">"""导频音相位差 → 时延"""</span>
+    <span class="cmt"># 带通滤波提取导频频段</span>
+    p1 = <span class="fn">bandpass</span>(y1, pilot_freq - <span class="num">50</span>, pilot_freq + <span class="num">50</span>, fs)
+    p2 = <span class="fn">bandpass</span>(y2, pilot_freq - <span class="num">50</span>, pilot_freq + <span class="num">50</span>, fs)
+
+    <span class="cmt"># Hilbert 变换 → 瞬时相位</span>
+    phase1 = <span class="fn">np.unwrap</span>(<span class="fn">np.angle</span>(<span class="fn">hilbert</span>(p1)))
+    phase2 = <span class="fn">np.unwrap</span>(<span class="fn">np.angle</span>(<span class="fn">hilbert</span>(p2)))
+
+    <span class="cmt"># 相位差 → 时延</span>
+    delta_phase = <span class="fn">np.mean</span>(phase1 - phase2)
+    <span class="kw">return</span> delta_phase / (<span class="num">2</span> * <span class="fn">np.pi</span> * pilot_freq)</code></pre>
+
+      <h4>精度分析</h4>
+      <div class="formula">
+δt = δφ / (2π·f_pilot)
+
+例: f_pilot=18kHz, SNR=10dB → δφ≈0.22rad → δt≈2.0μs
+    SNR=0dB  → δφ≈0.71rad → δt≈6.3μs
+精度极高，远超 10ms 要求</div>
+
+      <h4>相位模糊问题与多频 Vernier 解法</h4>
+      <div class="callout callout-warn">
+        <strong>单频导频有严重的相位模糊</strong>
+        <p>f<sub>pilot</sub>=18kHz → 不模糊范围 = 1/18000 = <strong>55.6μs</strong>。DJI Mic 延迟约 15ms → 15ms/55.6μs ≈ <strong>270 个周期</strong> → 严重模糊。</p>
+      </div>
+
+      <p><strong>多频 Vernier 解法</strong>：使用两个导频频率 f₁, f₂：</p>
+      <div class="formula">
+等效不模糊范围 = f₁·f₂ / |f₁ - f₂|
+
+例: f₁=16kHz, f₂=16.5kHz → 不模糊范围 = 16000×16500/500 = 528 ms
+完全可以覆盖 DJI Mic 的 ~15ms 延迟。
+
+如需更大范围，加第三频 f₃=15kHz → 与 f₁ 的差频 1kHz → 不模糊范围 1s</div>
+
+      <!-- 5.4 自同步机制 -->
+      <h3 id="sec5-4">5.4 自同步机制</h3>
+
+      <p>三种方式让水印自带定时信息：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>方法</th><th>原理</th><th>优点</th><th>缺点</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>周期性嵌入 + 自相关</strong></td>
+              <td>周期性插入特殊 Pilot PN 序列，检测端做自相关找周期性峰</td>
+              <td>简单可靠</td>
+              <td>需要等待至少一个周期</td>
+            </tr>
+            <tr>
+              <td><strong>循环前缀（OFDM 式）</strong></td>
+              <td>每帧前面加循环前缀，利用 CP 的自相关特性做帧同步</td>
+              <td>无需外部同步</td>
+              <td>增加 20-30% 开销</td>
+            </tr>
+            <tr>
+              <td><strong>自相关扩频（Amazon）</strong></td>
+              <td>设计 PN 序列使其自相关在特定延迟处有峰，只需做自相关即可检测</td>
+              <td>最优雅，对信道失真更鲁棒</td>
+              <td>序列设计复杂</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>参考：Rochester: Self-Sync SS Watermark；Amazon: Practical Over-the-Air Watermarking (Interspeech 2022)；Amazon: Modulated Self-Correlation</p>
+
+      <!-- 5.5 方案 B 综合对比 -->
+      <h3 id="sec5-5">5.5 方案 B 综合对比</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>子方案</th><th>嵌入频段</th><th>可听度</th><th>复杂度</th><th>精度</th><th>持续跟踪</th><th>冷启动</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>B2 扩频（全频带）</td><td>全频带</td><td>无感</td><td>高</td><td>1-5ms</td><td>✅</td><td>&lt;100ms</td>
+            </tr>
+            <tr>
+              <td>B3 导频音（单频）</td><td>15-20kHz</td><td>几乎无</td><td>低</td><td>&lt;1ms</td><td>✅</td><td>&lt;50ms</td>
+            </tr>
+            <tr>
+              <td>B3 导频音（多频 Vernier）</td><td>15-20kHz</td><td>几乎无</td><td>中</td><td>&lt;1ms</td><td>✅</td><td>&lt;50ms</td>
+            </tr>
+            <tr class="highlight">
+              <td><strong>B2+B3 组合</strong></td><td><strong>2-8kHz + 16-19kHz</strong></td><td><strong>无感</strong></td><td><strong>高</strong></td><td><strong>&lt;1ms</strong></td><td><strong>✅</strong></td><td><strong>&lt;100ms</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>实时性能评估</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>操作</th><th>运算量 @48kHz/10ms帧</th><th>手机 CPU 占用</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>FFT (2048点)</td><td>~22K</td><td>&lt;0.1%</td></tr>
+            <tr><td>IFFT</td><td>~22K</td><td>&lt;0.1%</td></tr>
+            <tr><td>PN 序列相关</td><td>~2K</td><td>&lt;0.01%</td></tr>
+            <tr><td>心理声学模型</td><td>~50K</td><td>&lt;0.5%</td></tr>
+            <tr class="highlight"><td><strong>总计</strong></td><td>—</td><td><strong>&lt;1%</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-info">
+        <strong>实时可行性说明</strong>
+        <p>&lt;1% CPU 占用基于现代旗舰手机（Snapdragon 8 Gen 2+ / A16+）。在中端设备（Snapdragon 6 系列）上可能达到 3-5%。已在 ARM940T（200MHz）上验证过 Verance 水印方案的实时运行。建议在实际目标设备上 benchmark。</p>
+      </div>
+
+      <h4>算法延迟预算</h4>
+      <pre><code><span class="cmt">// 算法延迟预算</span>
+<span class="fn">STFT</span> 分帧延迟:  hop_size / fs = <span class="num">512</span>/<span class="num">48000</span> = <span class="num">10.7</span> <span class="kw">ms</span>
+<span class="fn">FFT</span> 计算延迟:   &lt;<span class="num">1</span> <span class="kw">ms</span>
+<span class="fn">相关检测延迟</span>:   &lt;<span class="num">1</span> <span class="kw">ms</span>
+──────────────────────────
+<span class="kw">总算法延迟</span>:     ~<span class="num">12-13</span> <span class="kw">ms</span>
+
+<span class="cmt">// 如需更低延迟:</span>
+<span class="cmt">//   hop=256 → 5.3ms 分帧延迟</span>
+<span class="cmt">//   时域嵌入+检测 → ~1ms</span></code></pre>
+
+    </section>
+
+    <!-- =================== §6 被动 TDE 基线 — GCC-PHAT =================== -->
+    <section id="sec6">
+      <h2>6. 被动 TDE 基线 — GCC-PHAT</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 快速结论：</strong>GCC-PHAT 是双麦克风时延估计的行业标准基线。完全被动、零用户感知、计算量极低，但需要持续声源——这正是冷启动问题所在。它的角色是"持续精细对齐引擎"，与方案 A/B 互补而非替代。
+      </div>
+
+      <!-- 6.1 原理 -->
+      <h3 id="sec6-1">6.1 原理</h3>
+
+      <p>广义互相关-相位变换（Generalized Cross-Correlation with Phase Transform）：</p>
+
+      <div class="formula">
+τ̂ = argmax_τ ∫₋π^π [X₁(ω)·X₂*(ω) / |X₁(ω)·X₂*(ω)|] · e^(jωτ) dω
+
+PHAT 加权将所有频率分量等权化，抑制噪声频谱的影响，
+在混响和噪声环境下比基本互相关更鲁棒。</div>
+
+      <!-- 6.2 优势与局限 -->
+      <h3 id="sec6-2">6.2 优势与局限</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>维度</th><th>说明</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>✅ 无需播放信号</td><td>完全被动，零用户感知</td></tr>
+            <tr><td>✅ 计算量极低</td><td>一次 FFT + PHAT 加权 + IFFT</td></tr>
+            <tr><td>✅ 抗混响能力强</td><td>PHAT 加权抑制混响导致的频谱着色</td></tr>
+            <tr><td>❌ <strong>需要持续声源</strong></td><td>静默期间无信号 → 估计不稳定（冷启动问题）</td></tr>
+            <tr><td>❌ 精度受限于带宽</td><td>窄带信号精度差</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 6.3 与主动方案的互补关系 -->
+      <h3 id="sec6-3">6.3 与主动方案的互补关系</h3>
+
+      <div class="diagram">
+┌──────────────────────────────────────────────────────┐
+│         GCC-PHAT 在方案体系中的角色                    │
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│  你现有的 Interspeech TDE ≈ GCC-PHAT 或其改进版       │
+│  ↓                                                   │
+│  它是你的 "持续精细对齐" 引擎                         │
+│  但它在静默期失效 = 冷启动问题                        │
+│                                                      │
+│  方案 A/B 的角色：                                    │
+│  = 在 GCC-PHAT "失灵" 的时段提供初始/备用延迟估计     │
+│  = 不是替代 GCC-PHAT，而是互补                        │
+│                                                      │
+│  理想流程：                                           │
+│  1. 方案 A/B 给出初始延迟 τ₀                         │
+│  2. 一旦检测到语音 → 切换到 GCC-PHAT 做精细跟踪       │
+│  3. 语音间歇期 → 方案 B 的水印持续提供延迟更新        │
+└──────────────────────────────────────────────────────┘</div>
+
+      <!-- 6.4 参考文献 -->
+      <h3 id="sec6-4">6.4 参考文献</h3>
+
+      <ul>
+        <li>Berg et al. "Extending GCC-PHAT using Shift Equivariant Neural Networks." Interspeech 2022</li>
+        <li>ICASSP 1997. "A Robust Method for Speech Signal Time-Delay Estimation in Reverberant Rooms."</li>
+      </ul>
+
+    </section>
+
     <div class="toc-card">
       <h2>目录</h2>
       <ol class="toc-list">
