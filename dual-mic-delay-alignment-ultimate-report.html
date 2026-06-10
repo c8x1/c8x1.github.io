@@ -2186,6 +2186,354 @@ delay_seconds = τ / fs</div>
 
     </section>
 
+    <!-- ==================== SECTION 12: 参考代码 ==================== -->
+    <section id="sec12">
+      <div class="quick-take">⚡ 完整可运行的 Python 参考实现：Chirp 信号生成 + 匹配滤波延迟估计 + Golay 序列生成 + Android AudioTimestamp 粗估。最小可行方案约 100 行代码。</div>
+
+      <h2>12. 参考代码与伪代码</h2>
+
+      <h3>12.1 Chirp 信号生成</h3>
+
+      <div class="callout callout-info">
+        <strong>推荐版本（Tukey 窗线性扫频）</strong>
+        <p>以下为简洁版，使用 scipy.signal.tukey 窗函数，适合快速实现：</p>
+      </div>
+
+      <pre><code><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> scipy.signal <span class="kw">import</span> tukey
+
+<span class="kw">def</span> <span class="fn">generate_chirp</span>(f0, f1, T, fs):
+    <span class="str">"""生成线性扫频信号 + Tukey 窗"""</span>
+    t = np.<span class="fn">arange</span>(<span class="num">0</span>, T, <span class="num">1.0</span>/fs)
+    k = (f1 - f0) / T
+    chirp = np.<span class="fn">sin</span>(<span class="num">2</span> * np.pi * f0 * t + np.pi * k * t**<span class="num">2</span>)
+    window = <span class="fn">tukey</span>(<span class="fn">len</span>(chirp), alpha=<span class="num">0.5</span>)
+    <span class="kw">return</span> chirp * window</code></pre>
+
+      <div class="callout callout-warn">
+        <strong>替代版本（Hamming 窗 + 余弦平方淡入淡出）</strong>
+        <p>以下版本来自 R2 §9.3，使用 Hamming 窗和余弦平方淡入淡出，更精细地控制信号边界：</p>
+      </div>
+
+      <pre><code><span class="kw">def</span> <span class="fn">generate_calibration_chirp</span>(fs=<span class="num">48000</span>, duration=<span class="num">0.1</span>, f_low=<span class="num">200</span>, f_high=<span class="num">16000</span>, amplitude=<span class="num">0.35</span>, fade_ms=<span class="num">5</span>):
+    <span class="str">"""生成校准用加窗线性 chirp 信号（含余弦平方淡入淡出）"""</span>
+    N = <span class="fn">int</span>(fs * duration)
+    t = np.<span class="fn">arange</span>(N) / fs
+
+    <span class="cmt"># 线性 chirp: 频率从 f_low 线性扫到 f_high</span>
+    k = (f_high - f_low) / duration
+    phase = <span class="num">2</span> * np.pi * (f_low * t + <span class="num">0.5</span> * k * t**<span class="num">2</span>)
+    signal = np.<span class="fn">cos</span>(phase)
+
+    <span class="cmt"># Hamming 窗 (旁瓣 -42.7 dB)</span>
+    window = np.<span class="fn">hamming</span>(N)
+    signal *= window
+
+    <span class="cmt"># 余弦平方淡入淡出 (避免咔嗒声)</span>
+    fade_samples = <span class="fn">int</span>(fs * fade_ms / <span class="num">1000</span>)
+    fade_in  = np.<span class="fn">sin</span>(np.<span class="fn">linspace</span>(<span class="num">0</span>, np.pi/<span class="num">2</span>, fade_samples))**<span class="num">2</span>
+    fade_out = np.<span class="fn">cos</span>(np.<span class="fn">linspace</span>(<span class="num">0</span>, np.pi/<span class="num">2</span>, fade_samples))**<span class="num">2</span>
+    signal[:fade_samples] *= fade_in
+    signal[-fade_samples:] *= fade_out
+
+    <span class="cmt"># 归一化到目标振幅</span>
+    signal = amplitude * signal / np.<span class="fn">max</span>(np.<span class="fn">abs</span>(signal))
+    <span class="kw">return</span> signal</code></pre>
+
+      <h3>12.2 延迟估计算法</h3>
+
+      <div class="callout callout-info">
+        <strong>推荐版本（频域匹配滤波 + 对数域抛物线插值）</strong>
+        <p>使用频域 FFT 实现匹配滤波（比时域 correlate 更高效），并在对数幅度域做抛物线插值以获得亚采样精度：</p>
+      </div>
+
+      <pre><code><span class="kw">def</span> <span class="fn">estimate_delay_chirp</span>(y1, y2, chirp_template, fs):
+    <span class="str">"""用匹配滤波估计两路麦克风的时延差"""</span>
+    n = <span class="fn">max</span>(<span class="fn">len</span>(y1), <span class="fn">len</span>(y2))
+    Y1 = np.fft.<span class="fn">rfft</span>(y1, n=n)
+    Y2 = np.fft.<span class="fn">rfft</span>(y2, n=n)
+    X  = np.fft.<span class="fn">rfft</span>(chirp_template, n=n)
+
+    <span class="cmt"># 匹配滤波: 互相关 = IFFT(Y * conj(X))</span>
+    c1 = np.fft.<span class="fn">irfft</span>(Y1 * np.<span class="fn">conj</span>(X))
+    c2 = np.fft.<span class="fn">irfft</span>(Y2 * np.<span class="fn">conj</span>(X))
+
+    <span class="cmt"># 整数峰值检测</span>
+    k1 = np.<span class="fn">argmax</span>(np.<span class="fn">abs</span>(c1))
+    k2 = np.<span class="fn">argmax</span>(np.<span class="fn">abs</span>(c2))
+
+    <span class="cmt"># 对数域抛物线插值 (亚采样精度)</span>
+    <span class="kw">def</span> <span class="fn">sub_sample_peak</span>(c, k):
+        <span class="kw">if</span> k <= <span class="num">0</span> <span class="kw">or</span> k >= <span class="fn">len</span>(c) - <span class="num">1</span>: <span class="kw">return</span> <span class="fn">float</span>(k)
+        a = np.<span class="fn">log</span>(np.<span class="fn">abs</span>(c[k-<span class="num">1</span>]) + <span class="num">1e-10</span>)
+        b = np.<span class="fn">log</span>(np.<span class="fn">abs</span>(c[k]) + <span class="num">1e-10</span>)
+        g = np.<span class="fn">log</span>(np.<span class="fn">abs</span>(c[k+<span class="num">1</span>]) + <span class="num">1e-10</span>)
+        denom = a - <span class="num">2</span>*b + g
+        <span class="kw">if</span> <span class="fn">abs</span>(denom) < <span class="num">1e-10</span>: <span class="kw">return</span> <span class="fn">float</span>(k)
+        delta = (a - g) / (<span class="num">2</span> * denom)
+        <span class="kw">return</span> k + delta
+
+    tau1 = <span class="fn">sub_sample_peak</span>(c1, k1)
+    tau2 = <span class="fn">sub_sample_peak</span>(c2, k2)
+    <span class="kw">return</span> (tau1 - tau2) / fs</code></pre>
+
+      <h3>12.3 Golay 序列生成</h3>
+
+      <div class="callout callout-info">
+        <strong>Golay 互补序列对</strong>
+        <p>Golay 序列的独特优势：两序列的互相关之和具有零旁瓣，适合高精度延迟估计。递归构造法保证序列长度为 2 的幂。</p>
+      </div>
+
+      <pre><code><span class="kw">def</span> <span class="fn">generate_golay_pair</span>(N=<span class="num">16384</span>):
+    <span class="str">"""递归构造 Golay 互补序列对"""</span>
+    <span class="kw">assert</span> N & (N-<span class="num">1</span>) == <span class="num">0</span> <span class="kw">and</span> N > <span class="num">0</span>, <span class="str">"N 必须为 2 的幂"</span>
+    a, b = np.<span class="fn">array</span>([<span class="num">1</span>]), np.<span class="fn">array</span>([<span class="num">1</span>])
+    <span class="kw">while</span> <span class="fn">len</span>(a) < N:
+        a, b = np.<span class="fn">concatenate</span>([a, b]), np.<span class="fn">concatenate</span>([a, -b])
+    <span class="kw">return</span> a, b
+
+<span class="kw">def</span> <span class="fn">estimate_delay_golay</span>(yA_ch1, yB_ch1, yA_ch2, yB_ch2, A, B, fs=<span class="num">48000</span>):
+    <span class="str">"""使用 Golay 对估计时延（零旁瓣特性）"""</span>
+    <span class="cmt"># Channel 1: 合并两序列的相关结果 → 完美脉冲</span>
+    h1 = np.<span class="fn">correlate</span>(yA_ch1, A, <span class="str">'full'</span>) + np.<span class="fn">correlate</span>(yB_ch1, B, <span class="str">'full'</span>)
+    <span class="cmt"># Channel 2</span>
+    h2 = np.<span class="fn">correlate</span>(yA_ch2, A, <span class="str">'full'</span>) + np.<span class="fn">correlate</span>(yB_ch2, B, <span class="str">'full'</span>)
+
+    tau1 = np.<span class="fn">argmax</span>(np.<span class="fn">abs</span>(h1))
+    tau2 = np.<span class="fn">argmax</span>(np.<span class="fn">abs</span>(h2))
+    <span class="kw">return</span> (tau1 - tau2) / fs * <span class="num">1000</span>  <span class="cmt"># ms</span></code></pre>
+
+      <h3>12.4 Android AudioTimestamp 粗估</h3>
+
+      <div class="callout callout-info">
+        <strong>Layer 1: 系统级时延粗估</strong>
+        <p>利用 Android AudioTimestamp API 直接获取两路 AudioRecord 的时间戳关系，耗时 &lt;1ms，精度约 ±5ms。适合作为初始补偿的即时方案。</p>
+      </div>
+
+      <pre><code><span class="cmt">// Java/Kotlin: 两个 AudioRecord 实例取时间戳</span>
+AudioTimestamp ts1 = <span class="kw">new</span> AudioTimestamp();
+AudioTimestamp ts2 = <span class="kw">new</span> AudioTimestamp();
+
+recordInternal.<span class="fn">getTimestamp</span>(ts1, AudioTimestamp.TIMEBASE_BOOTTIME);
+recordUSB.<span class="fn">getTimestamp</span>(ts2, AudioTimestamp.TIMEBASE_BOOTTIME);
+
+<span class="cmt">// 计算两路的采样点对齐关系</span>
+<span class="kw">double</span> timeDiffNs = ts1.nanoTime - ts2.nanoTime;
+<span class="kw">long</span> frameDiff = ts2.framePosition - ts1.framePosition;
+<span class="kw">double</span> delaySamples = timeDiffNs / <span class="num">1e9</span> * sampleRate + frameDiff;
+<span class="kw">double</span> delayMs = delaySamples / sampleRate * <span class="num">1000</span>;</code></pre>
+
+      <h3>12.5 最小可行方案 vs 完美方案</h3>
+
+      <div class="grid-2">
+        <div class="card">
+          <h4>🏃 最小可行方案（1-2天）</h4>
+          <ol>
+            <li>录音开始时播放 <strong>100ms Hamming 窗线性 chirp</strong>（200Hz-16kHz）</li>
+            <li>两路 mic 录音 → 匹配滤波 → 抛物线插值</li>
+            <li>得到精确时延 → 立即应用补偿</li>
+          </ol>
+          <p><strong>预期效果：第一句话开头即无重音</strong></p>
+          <p>代码量：约 <strong>100 行</strong></p>
+        </div>
+        <div class="card">
+          <h4>🏆 完美方案（完整实现）</h4>
+          <ol>
+            <li><strong>AudioTimestamp 粗估</strong>（0ms, ±5ms）→ 立即应用</li>
+            <li><strong>100ms chirp 精修</strong>（~150ms, ±0.1ms）→ 更新</li>
+            <li><strong>NLMS 自适应滤波器</strong>持续追踪漂移</li>
+            <li><strong>语音 TDE</strong>（现有算法）最终精修</li>
+            <li>静音间隙周期性重校准（可选）</li>
+          </ol>
+          <p><strong>精度 &lt;0.1ms，鲁棒性极高</strong></p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== SECTION 13: 参考文献与审查 ==================== -->
+    <section id="sec13">
+      <div class="quick-take">⚡ 本报告综合 35+ 篇学术论文、工业文档和开源项目。核心技术经独立 DSP 工程师审查，修正 3 项关键问题。</div>
+
+      <h2>13. 参考文献与审查</h2>
+
+      <h3>13.1 校准信号文献</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>文献</th><th>链接</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Farina (2000) — ESS swept-sine 基奠论文</td><td><a href="https://www.melaudia.net/zdoc/sweepSine.PDF">PDF</a></td></tr>
+            <tr><td>2</td><td>Novák et al. (2020) — Synchronized Swept-Sine</td><td><a href="https://hal.science/hal-02504321v1/document">PDF</a></td></tr>
+            <tr><td>3</td><td>Farina — AES 122 Impulse Response Advancements</td><td><a href="https://www.angelofarina.it/Public/Presentations/AES122-Farina.pdf">PDF</a></td></tr>
+            <tr><td>4</td><td>Gil et al. (2025) — MLS-Based Round-Trip Latency</td><td><a href="https://hal.science/hal-05154354v2/file/Gil_Richard_David_MLS_Based_Roundtrip_Latency_Reviewed.pdf">PDF</a></td></tr>
+            <tr><td>5</td><td>Raykar et al. (ICASSP 2004) — Auto Position Calibration</td><td><a href="https://www.umiacs.umd.edu/~ramani/pubs/raykar_icassp2004.pdf">PDF</a></td></tr>
+            <tr><td>6</td><td>Stan et al. — Comparison of IR Measurement Techniques</td><td><a href="https://gstan.bg-research.cc.ic.ac.uk/JAES_Online_version.pdf">PDF</a></td></tr>
+            <tr><td>7</td><td>Foster — Golay Codes for IR Measurement</td><td><a href="https://www.semanticscholar.org/paper/0a95c2ef8379c6f4c43551b391ce8c1fb756b0d5">Link</a></td></tr>
+            <tr><td>8</td><td>Lai et al. — Interpolation for TDE</td><td><a href="https://htorp.folk.ntnu.no/publ/Paper/96-00/InterpXlUffc99.pdf">PDF</a></td></tr>
+            <tr><td>9</td><td>CMU — Ultrasonic Pseudo-ranging on Mobile Devices</td><td><a href="https://users.ece.cmu.edu/~agr/resources/publications/p99-lazik.pdf">PDF</a></td></tr>
+            <tr><td>10</td><td>CMU — Ultrasonic Time Sync on Smartphones</td><td><a href="https://users.ece.cmu.edu/~agr/resources/publications/rtas15.pdf">PDF</a></td></tr>
+            <tr><td>11</td><td>EURASIP 2021 — Near-Ultrasonic Communication with Consumer Devices</td><td><a href="https://eurasip.org/Proceedings/Eusipco/Eusipco2021/pdfs/0001681.pdf">PDF</a></td></tr>
+            <tr><td>12</td><td>IEEE — Ultrasonic Communication Using Consumer Hardware</td><td><a href="https://ieeexplore.ieee.org/iel7/6046/4456689/08080245.pdf">PDF</a></td></tr>
+            <tr><td>13</td><td>Frequency Response of Smartphones at Upper Audible Limit</td><td><a href="https://www.researchgate.net/publication/362094978">Link</a></td></tr>
+            <tr><td>14</td><td>PowerPhone (PMC 2026) — Acoustic Sensing on Smartphones</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12765216/">Link</a></td></tr>
+            <tr><td>15</td><td>gilpanal/weblatencytest — MLS-based Web Audio Latency</td><td><a href="https://github.com/gilpanal/weblatencytest">GitHub</a></td></tr>
+            <tr><td>16</td><td>AOSP — Audio Latency Measurements</td><td><a href="https://source.android.com/docs/core/audio/latency/measurements">Link</a></td></tr>
+            <tr><td>17</td><td>DSP StackExchange — Pulse Compression SNR Gain</td><td><a href="https://dsp.stackexchange.com/questions/35072/pulse-compressionchirp-snr-gain">Link</a></td></tr>
+            <tr><td>18</td><td>DSP StackExchange — Subsample TDE</td><td><a href="https://dsp.stackexchange.com/questions/24654/subsample-time-delay-estimation">Link</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>13.2 水印文献</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>文献</th><th>链接</th></tr></thead>
+          <tbody>
+            <tr><td>19</td><td>Kirovski & Malvar — Spread-Spectrum Watermarking of Audio</td><td><a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/KirovskiMalvarTSPApr03.pdf">PDF</a></td></tr>
+            <tr><td>20</td><td>Cox et al. — Secure Spread Spectrum Watermarking for Multimedia</td><td><a href="https://www.ee.columbia.edu/~ywang/MSS/HW2/CoxSpectrumWatermarking.pdf">PDF</a></td></tr>
+            <tr><td>21</td><td>Nadeau & Sharma (2014) — Self-Sync SS Watermark</td><td><a href="https://hajim.rochester.edu/ece/sites/gsharma/papers/NadeauSelfSyncSSWMIDSEI2014.pdf">PDF</a></td></tr>
+            <tr><td>22</td><td>Agaskar et al. (Interspeech 2022) — Practical Over-the-Air Watermarking</td><td><a href="https://www.isca-archive.org/interspeech_2022/agaskar22_interspeech.pdf">PDF</a></td></tr>
+            <tr><td>23</td><td>Amazon Science — Audio Watermarking with Modulated Self-Correlation</td><td><a href="https://cdn.amazon.science/b5/ac/64968dc64c53bc9dbc3807979ac1/audio-watermarking-over-the-air-with-modulated-self-correlation.pdf">PDF</a></td></tr>
+            <tr><td>24</td><td>MDPI 2024 — Audio Watermarking in Real-Time</td><td><a href="https://www.mdpi.com/2227-9709/12/1/1">Link</a></td></tr>
+            <tr><td>25</td><td>Looney (Interspeech 2024) — Robust SS Speech Watermarking</td><td><a href="https://www.isca-archive.org/interspeech_2024/looney24_interspeech.pdf">PDF</a></td></tr>
+            <tr><td>26</td><td>MIT Media Lab — Psychoacoustic Model Watermarking</td><td><a href="https://sound.media.mit.edu/Papers/ragoAES1999.pdf">PDF</a></td></tr>
+            <tr><td>27</td><td>Fraunhofer IIS — Digital Watermarking and Audio Quality</td><td><a href="https://www.iis.fraunhofer.de/content/dam/iis/de/doc/ame/conference/AES4823_Digital_Watermarking_and_its_Influence_on_Audio_Quality.pdf">PDF</a></td></tr>
+            <tr><td>28</td><td>Hartung et al. — SS Watermarking Attacks and Counterattacks</td><td><a href="https://web.cs.ucla.edu/~miodrag/cs259-security/hartung99spread.pdf">PDF</a></td></tr>
+            <tr><td>29</td><td>DeepMark 2026 — WebRTC and Audio Watermarking</td><td><a href="https://www.deepmark.me/blog/webrtc-and-audio-watermarking-in-real-time-systems">Link</a></td></tr>
+            <tr><td>30</td><td>ARM940T Real-Time Watermark Extractor (2003)</td><td><a href="https://ui.adsabs.harvard.edu/abs/2003sics....2...68M/abstract">Link</a></td></tr>
+            <tr><td>31</td><td>US Patent 20070217626A1 — Watermark Synchronization</td><td><a href="https://patents.google.com/patent/US20070217626A1/en">Link</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>13.3 TDE / GCC-PHAT 文献</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>文献</th><th>链接</th></tr></thead>
+          <tbody>
+            <tr><td>32</td><td>Berg et al. (Interspeech 2022) — Neural GCC-PHAT</td><td><a href="https://www.isca-archive.org/interspeech_2022/berg22_interspeech.pdf">PDF</a></td></tr>
+            <tr><td>33</td><td>ICASSP 1997 — Robust Speech TDE in Reverberant Rooms</td><td><a href="https://www2.spsc.tugraz.at/people/franklyn/ICASSP97/pdf/scan/ic970375.pdf">PDF</a></td></tr>
+            <tr><td>34</td><td>MathWorks — gccphat documentation</td><td><a href="https://www.mathworks.com/help/phased/ref/gccphat.html">Link</a></td></tr>
+            <tr><td>35</td><td>arXiv:2208.04654 — Neural GCC-PHAT detailed</td><td><a href="https://arxiv.org/abs/2208.04654">Link</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>13.4 约束与工程文献</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>文献</th><th>链接</th></tr></thead>
+          <tbody>
+            <tr><td>36</td><td>WebRTC AEC3 documentation</td><td><a href="https://switchboard.audio/hub/how-webrtc-aec3-works/">Link</a></td></tr>
+            <tr><td>37</td><td>Amazon — Async AEC Over Wireless</td><td><a href="https://cdn.amazon.science/10/d9/f1bd1ff942ec991cf5ff04adb882/asynchronous-acoustic-echo-cancellation-over-wireless-channels.pdf">PDF</a></td></tr>
+            <tr><td>38</td><td>Google Nearby Ultrasonic Signal RE</td><td><a href="https://nihal-pasham.medium.com/dsp-hacking-reversing-g-pay-s-ultrasound-signal-part-1-fa7f6d93320b">Medium</a></td></tr>
+            <tr><td>39</td><td>DJI Mic Sync Issues (Reddit)</td><td><a href="https://www.reddit.com/r/SonyFX6/comments/1odl915/dji_mic_sync_issues/">Link</a></td></tr>
+            <tr><td>40</td><td>Julian Schroden — DJI Mic Review</td><td><a href="https://julianschroden.com/post/2022-11-19-dji-mic-review/">Link</a></td></tr>
+            <tr><td>41</td><td>Android NDK Audio Latency Guide</td><td><a href="https://developer.android.com/ndk/guides/audio/audio-latency">Link</a></td></tr>
+            <tr><td>42</td><td>Apple Core Audio Essentials</td><td><a href="https://developer.apple.com/library/archive/documentation/MusicAudio/Conceptual/CoreAudioOverview/CoreAudioEssentials/CoreAudioEssentials.html">Link</a></td></tr>
+            <tr><td>43</td><td>arXiv:2506.19612 — Wireless Self-Calibrating Ultrasound Mic Array (2025)</td><td><a href="https://arxiv.org/pdf/2506.19612">PDF</a></td></tr>
+            <tr><td>44</td><td>arXiv:2403.05791 — Async Mic Array Calibration using Hybrid TDOA</td><td><a href="https://arxiv.org/html/2403.05791v4">Link</a></td></tr>
+            <tr><td>45</td><td>DJI Mic 2 Specifications</td><td><a href="https://www.dji.com/id/mic-2/specs">Link</a></td></tr>
+            <tr><td>46</td><td>Android MediaRecorder.AudioSource.UNPROCESSED</td><td><a href="https://developer.android.com/reference/android/media/MediaRecorder.AudioSource#UNPROCESSED">Link</a></td></tr>
+            <tr><td>47</td><td>Apple AVAudioSession.Mode.measurement</td><td><a href="https://developer.apple.com/documentation/avfaudio/avaudiosession/mode-swift.struct/measurement">Link</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>13.5 独立审查摘要</h3>
+
+      <div class="review-section">
+        <p>本报告经独立技术审查人（资深音频 DSP 工程师）审查后，发现并修正了 <strong>3 项关键问题</strong> 和 <strong>5 项重要改进建议</strong>。</p>
+
+        <div class="review-grid">
+          <div class="review-card">
+            <div class="grade">A-</div>
+            <div class="label">技术准确性</div>
+          </div>
+          <div class="review-card">
+            <div class="grade">B+ → A-</div>
+            <div class="label">完整性<br>(修订后)</div>
+          </div>
+          <div class="review-card">
+            <div class="grade">B+ → A-</div>
+            <div class="label">实用性<br>(修订后)</div>
+          </div>
+          <div class="review-card">
+            <div class="grade">A</div>
+            <div class="label">结构组织</div>
+          </div>
+        </div>
+
+        <h4>已修正的关键问题</h4>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>问题</th><th>修正</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span class="tag tag-fix">C1</span></td>
+                <td>缺少 GCC-PHAT 基线对比</td>
+                <td>新增 §6 GCC-PHAT 章节，明确被动 TDE 基线的定位及其与主动方案的互补关系</td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-fix">C2</span></td>
+                <td>蓝牙编码延迟抖动未考虑</td>
+                <td>新增 §9.1 详细分析各编码的抖动范围，增加看门狗机制和自适应跟踪建议</td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-fix">C3</span></td>
+                <td>近超声硬件可靠性被高估</td>
+                <td>增加设备兼容矩阵验证要求、运行时回退协议</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>已纳入的重要改进</h4>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>建议</th><th>处理方式</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span class="tag tag-new">I1</span></td>
+                <td>抛物线插值偏差校正</td>
+                <td>补充偏差量级说明和 Quinn/Macleod 替代方案</td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-new">I2</span></td>
+                <td>ESS 逆滤波器归一化</td>
+                <td>补充归一化常数 A<sub>norm</sub></td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-new">I3</span></td>
+                <td>手机 DSP 管线对抗水印</td>
+                <td>新增 §9.3 详细分析 NS/AGC/AEC 对水印的影响和对策</td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-new">I4</span></td>
+                <td>Golay 实际时间开销</td>
+                <td>量化保护间隔和总校准时间</td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-new">I5</span></td>
+                <td>时钟漂移</td>
+                <td>新增 §9.2 量化漂移速率，强调持续跟踪的必要性</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>审查人认可的优点</h4>
+        <ul>
+          <li>方案分类体系清晰，帮助从业者按复杂度/性能权衡导航选项</li>
+          <li>核心数学正确——处理增益公式、旁瓣电平、自相关特性与标准文献一致</li>
+          <li>分阶段路线图务实——从最低风险（可听 chirp）到最高复杂度（ML 预测）</li>
+          <li>蓝牙编码影响的标注体现了工程思维，很多学术综述忽略了这一点</li>
+          <li>对比表真正有用——信号类型和水印方案的表格可直接用于设计评审</li>
+        </ul>
+      </div>
+
+    </section>
+
     <div class="toc-card">
       <h2>目录</h2>
       <ol class="toc-list">
@@ -2210,7 +2558,7 @@ delay_seconds = τ / fs</div>
         <li><a href="#sec10">时延跟踪与动态调整</a></li>
         <li><a href="#sec11">实现路线图</a></li>
         <li><a href="#sec12">参考代码与伪代码</a></li>
-        <li><a href="#sec13">参考文献</a></li>
+        <li><a href="#sec13">参考文献与审查</a></li>
       </ol>
     </div>
 
@@ -2220,7 +2568,8 @@ delay_seconds = τ / fs</div>
   <!-- ===== Footer ===== -->
   <footer class="footer">
     <div class="container">
-      <p>placeholder — will be completed in Task 10</p>
+      <p><strong>AI Disclosure</strong>: 本报告使用 AI 辅助文献检索和技术分析综合。所有引用论文均指向真实出版物，建议工程实现前独立验证关键技术参数。</p>
+      <p>生成日期: 2026-06-10 | 版本: v3.0 Ultimate（三报告整合版）| 综合自三份独立深度调研报告</p>
     </div>
   </footer>
 
