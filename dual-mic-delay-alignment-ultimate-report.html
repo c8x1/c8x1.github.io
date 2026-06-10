@@ -1145,6 +1145,300 @@
       </div>
     </section>
 
+    <!-- =================== §4 主动校准信号 =================== -->
+    <section id="sec4">
+      <h2>4. 主动校准信号</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 快速结论：</strong>推荐首选：线性 Chirp (LFM) + Tukey 窗，50ms，200Hz→8kHz 扫频，处理增益 26dB。实现最简单，精度 &lt;1ms，远超 10ms 要求。Golay 互补序列精度最高但不适合无线场景（需播放两次）。近超声方案体验最好但需硬件验证。
+      </div>
+
+      <!-- 4.1 线性 Chirp -->
+      <h3 id="sec4-1">4.1 线性 Chirp（LFM） <span class="tag tag-rec">⭐ 推荐</span></h3>
+
+      <h4>数学定义</h4>
+      <div class="formula">
+x(t) = A · sin(2π·f₀·t + π·k·t²)    t ∈ [0, T]
+
+f₀ = 起始频率  f₁ = 终止频率  B = f₁ - f₀ = 带宽
+k = B / T = 扫频速率  T = 信号持续时间</div>
+
+      <h4>匹配滤波检测</h4>
+      <p>匹配滤波本质是将接收信号与已知 chirp 的<strong>时间反转共轭</strong>做卷积，等价于频域实现：</p>
+      <pre><code><span class="cmt">// 频域匹配滤波（高效实现）</span>
+<span class="fn">C</span>(f) = <span class="fn">S</span>(f) · <span class="fn">X*</span>(f)        <span class="cmt">// S=接收信号频谱, X=chirp模板频谱</span>
+<span class="fn">c</span>[k] = <span class="fn">IFFT</span>{<span class="fn">C</span>(f)}           <span class="cmt">// 互相关结果</span>
+
+<span class="cmt">// 处理增益 (Processing Gain)</span>
+<span class="fn">G_p</span> = <span class="fn">T</span> × <span class="fn">B</span>                  <span class="cmt">// 时间-带宽积</span>
+
+<span class="cmt">// 示例: T=50ms, B=7.8kHz (200Hz→8kHz)</span>
+<span class="fn">G_p</span> = <span class="num">0.05</span> × <span class="num">7800</span> = <span class="num">390</span> ≈ <span class="num">25.9</span> <span class="kw">dB</span></code></pre>
+
+      <p>处理增益 26dB 意味着：即使 chirp 信号的音量比环境噪声低 20dB，匹配滤波后仍然能清晰检测到峰值。</p>
+
+      <h4>旁瓣问题与窗函数</h4>
+      <p>线性 chirp 的匹配滤波输出有<strong>旁瓣（sidelobes）</strong>。矩形窗下第一旁瓣为 -13.2 dB（相对主瓣）。施加窗函数可抑制旁瓣：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>窗函数</th><th>第一旁瓣</th><th>主瓣展宽</th><th>适用场景</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>矩形（无窗）</td><td>-13.2 dB</td><td>1.0×</td><td>SNR 优先</td></tr>
+            <tr><td>Hamming</td><td>-42.7 dB</td><td>1.5×</td><td>通用</td></tr>
+            <tr><td>Hann</td><td>-31.5 dB</td><td>1.5×</td><td>旁瓣抑制</td></tr>
+            <tr class="highlight"><td><strong>Tukey (α=0.5)</strong></td><td><strong>-22 dB</strong></td><td><strong>1.2×</strong></td><td><strong>⭐ 推荐 — 平衡 SNR 和旁瓣</strong></td></tr>
+            <tr><td>Blackman</td><td>-58.1 dB</td><td>1.8×</td><td>极端旁瓣抑制</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>亚样本精度插值</h4>
+      <p>互相关峰值落在离散样本上，但真实延迟可能在两个样本之间。使用<strong>对数域抛物线插值</strong>：</p>
+      <pre><code><span class="cmt">// k = 峰值样本索引, c[] = 互相关结果</span>
+<span class="fn">α</span> = <span class="fn">log</span>(|c[k-<span class="num">1</span>]|)
+<span class="fn">β</span> = <span class="fn">log</span>(|c[k]|)
+<span class="fn">γ</span> = <span class="fn">log</span>(|c[k+<span class="num">1</span>]|)
+
+<span class="fn">δ</span> = (<span class="fn">α</span> - <span class="fn">γ</span>) / (<span class="num">2</span> · (<span class="fn">α</span> - <span class="num">2</span><span class="fn">β</span> + <span class="fn">γ</span>))   <span class="cmt">// 亚样本偏移</span>
+<span class="fn">τ</span> = k + <span class="fn">δ</span>                             <span class="cmt">// 精确延迟（样本数）</span>
+<span class="fn">delay_seconds</span> = <span class="fn">τ</span> / fs</code></pre>
+
+      <div class="callout callout-info">
+        <strong>插值精度参考</strong>
+        <p>对数域抛物线插值在 SNR &gt; 10dB 时精度约 ±0.02 样本（±0.42μs @48kHz），远超 10ms 要求。在极低 SNR（&lt;5dB）条件下，该估计器存在约 0.05-0.1 样本的系统偏差，如需更高精度可改用 Quinn 或 Macleod 估计器。</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>插值方法</th><th>SNR=20dB</th><th>SNR=10dB</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>无插值</td><td>±0.5 样本</td><td>±0.5 样本</td></tr>
+            <tr><td>抛物线（线性幅度）</td><td>±0.05</td><td>±0.15</td></tr>
+            <tr class="highlight"><td><strong>抛物线（对数幅度）</strong></td><td><strong>±0.02</strong></td><td><strong>±0.08</strong></td><td><strong>推荐</strong></td></tr>
+            <tr><td>匹配滤波插值</td><td>±0.01</td><td>±0.05</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>推荐参数</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>参数</th><th>推荐值</th><th>理由</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>f₀</td><td>200 Hz</td><td>避开直流和低频噪声</td></tr>
+            <tr><td>f₁</td><td>8000 Hz</td><td>手机扬声器/麦克风的上限</td></tr>
+            <tr><td>T</td><td>50 ms</td><td>感知为短促"嗖"声，可接受</td></tr>
+            <tr><td>fs</td><td>48000 Hz</td><td>满足 Nyquist</td></tr>
+            <tr><td>TBP</td><td>390 (25.9 dB)</td><td>极高处理增益</td></tr>
+            <tr><td>窗函数</td><td>Tukey (α=0.5)</td><td>平衡 SNR 与旁瓣</td></tr>
+            <tr><td>幅度</td><td>-20 dBFS</td><td>不突兀但 SNR 充足</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 4.2 ESS -->
+      <h3 id="sec4-2">4.2 指数扫频 ESS（Farina 方法）</h3>
+
+      <h4>数学定义</h4>
+      <div class="formula">
+x(t) = sin( K · (e^(t/L · ln(f₁/f₀)) - 1) )
+K = 2πf₀L / ln(f₁/f₀),  L = T</div>
+
+      <p>ESS 的关键特性：<strong>频率随时间指数增长</strong>，低频部分花费更多时间（能量更多），高频部分扫得更快。</p>
+
+      <h4>逆滤波器归一化</h4>
+      <div class="formula">
+x_inv(t) = (1/A_norm) · x(T - t) · e^(t/T · ln(f₁/f₀))
+
+其中 A_norm 为归一化常数，确保反卷积后脉冲响应的 DC 增益为单位值。
+省略归一化会导致脉冲响应的绝对幅度取决于扫频参数，影响跨配置 SNR 比较。</div>
+
+      <h4>非线性失真分离 — ESS 独有优势</h4>
+      <p>如果手机扬声器在大音量下播放时产生非线性失真（削波），产生的各阶谐波失真在反卷积后会出现在主脉冲的<strong>负时间区域</strong>，可以干净地分离：</p>
+      <div class="diagram">
+反卷积结果：
+  ...[3次谐波]...[2次谐波].....[主脉冲(线性IR)]...
+  ←── 负时间 ────────────────── 0 ─── 正时间 ──→
+
+→ 主脉冲不受谐波失真污染，延迟检测更可靠</div>
+
+      <h4>LFM vs ESS 对比</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>特性</th><th>LFM Chirp</th><th>ESS (Farina)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>频谱能量分布</td><td>均匀</td><td>低频能量多（3dB/oct）</td></tr>
+            <tr><td>逆滤波器</td><td>需数值计算</td><td>有解析公式</td></tr>
+            <tr><td>非线性分离</td><td>❌</td><td><strong>✅</strong></td></tr>
+            <tr><td>实现复杂度</td><td>低</td><td>中</td></tr>
+            <tr><td>动态范围</td><td>—</td><td>ESS 80.1dB vs MLS 60.5dB (arXiv:1106.1199)</td></tr>
+            <tr><td><strong>推荐度</strong></td><td><strong>⭐⭐⭐ 通用首选</strong></td><td><strong>⭐⭐⭐ 扬声器失真严重时</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-info">
+        <strong>ESS 的定位</strong>
+        <p>如果你不仅想测时延，还想<strong>诊断两路通道的频率响应差异</strong>（理解为什么两路 mic 声音不同），ESS 是最佳选择。但对于"录音开始时的快速校准"，ESS 时长偏长（≥1s），Chirp 更适合。</p>
+      </div>
+
+      <!-- 4.3 MLS -->
+      <h3 id="sec4-3">4.3 最大长度序列（MLS）</h3>
+
+      <h4>数学基础</h4>
+      <p>MLS 由<strong>线性反馈移位寄存器（LFSR）</strong>生成，序列长度 P = 2<sup>n</sup> - 1，值域 {+1, -1}。反馈多项式必须是<strong>本原多项式</strong>。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>阶数 n</th><th>本原多项式</th><th>序列长度 P</th><th>播放时长 @48kHz</th><th>SNR 增益</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>10</td><td>x¹⁰ + x³ + 1</td><td>1023</td><td><strong>21.3 ms</strong></td><td>30.1 dB</td></tr>
+            <tr><td>12</td><td>x¹² + x⁶ + x⁴ + x + 1</td><td>4095</td><td>85.3 ms</td><td>36.1 dB</td></tr>
+            <tr><td>14</td><td>x¹⁴ + x⁵ + 1</td><td>16383</td><td>341 ms</td><td>42.1 dB</td></tr>
+            <tr><td>16</td><td>x¹⁶ + x⁵ + x³ + x² + 1</td><td>65535</td><td>1.37 s</td><td>48.2 dB</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-info">
+        <strong>MLS 长度选择建议</strong>
+        <p>对于 10ms 精度目标和 48kHz 采样率，<strong>n=10 (P=1023, 21ms)</strong> 是最实际的选择——30dB 增益足够，播放时间最短。如果对 SNR 有更高要求（嘈杂环境），升级到 n=12。</p>
+      </div>
+
+      <h4>自相关特性</h4>
+      <div class="formula">
+R_MLS[k] = 1 当 k = 0 (mod P)；-1/P 当 k ≠ 0
+P=4095 时, -1/P ≈ -0.000244 → 近似完美 delta 函数</div>
+
+      <h4>FHT 加速</h4>
+      <p>MLS 互相关可用快速 Hadamard 变换（FHT）加速，计算量 O(N·log₂N) 且<strong>全是加减法</strong>，没有乘法：</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>方法</th><th>复杂度</th><th>N=4095 运算量</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>直接互相关</td><td>O(N²)</td><td>~16.8M 次乘加</td></tr>
+            <tr><td>FFT 互相关</td><td>O(N·logN)</td><td>~49K 次乘加</td></tr>
+            <tr class="highlight"><td><strong>FHT（MLS 专用）</strong></td><td><strong>O(N·log₂N)</strong></td><td><strong>~49K 次加减</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 4.4 Golay -->
+      <h3 id="sec4-4">4.4 Golay 互补序列</h3>
+
+      <h4>数学定义</h4>
+      <p>Golay 互补序列是<strong>一对</strong>二值序列 (A, B)，满足：</p>
+      <div class="formula">
+R_A[k] + R_B[k] = 2N 当 k=0；0 当 k≠0
+两个序列各自自相关的旁瓣<strong>完全抵消</strong>，合成完美 delta 函数。</div>
+
+      <h4>优势：零旁瓣 + ~3dB 优于 MLS</h4>
+      <p>Golay 对是唯一能做到<strong>非周期自相关完美零旁瓣</strong>的信号：两个序列的自相关函数相加后，所有非零 shift 处的旁瓣精确抵消为零。SNR 约 3dB 优于同等长度的 MLS。</p>
+
+      <div class="callout callout-danger">
+        <strong>Golay 的实际时间开销 — 不推荐无线场景</strong>
+        <p>两段序列必须<strong>顺序播放</strong>，且中间需要<strong>保护间隔</strong>（guard interval）防止混响重叠。以 N=2048 为例：每段 42.7ms + 保护间隔 ~15ms → 总校准时间 ~100ms，是 Chirp 50ms 的两倍。</p>
+        <p>更关键的是，两次播放间如果无线麦克风延迟发生变化（常见于蓝牙重传），会导致不对称相关峰，严重影响精度。<strong>结论：不推荐用于无线麦克风场景。</strong></p>
+      </div>
+
+      <h4>Golay vs MLS vs Chirp 对比</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>特性</th><th>Golay</th><th>MLS</th><th>Chirp</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>自相关旁瓣</td><td><strong>精确为零</strong></td><td>MLS 有极小旁瓣</td><td>-13.2dB</td></tr>
+            <tr><td>SNR</td><td>~3dB 优于 MLS</td><td>10·log₁₀(P)</td><td>T·B</td></tr>
+            <tr><td>播放次数</td><td><strong>2 次</strong></td><td>1 次</td><td>1 次</td></tr>
+            <tr><td>时变系统鲁棒性</td><td><strong>低</strong></td><td>高</td><td>高</td></tr>
+            <tr><td>非线性分离</td><td>❌</td><td>❌</td><td>✅ (ESS)</td></tr>
+            <tr><td>FFT 兼容性</td><td>2 的幂次 ✓</td><td>2<sup>N</sup> - 1 ✗</td><td>✓</td></tr>
+            <tr><td>Crest Factor</td><td>√2</td><td>1.0</td><td>~1.4</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 4.5 近超声 -->
+      <h3 id="sec4-5">4.5 近超声 Chirp（16-20kHz） <span class="tag tag-new">需硬件验证</span></h3>
+
+      <p>将 Chirp 信号移到 16-20kHz 的近超声频段，人耳几乎听不到。</p>
+
+      <h4>手机硬件在近超声频段的能力</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>频段</th><th>手机扬声器输出</th><th>手机麦克风灵敏度</th><th>人耳可听度</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>16-17 kHz</td><td>好（接近全幅）</td><td>好</td><td>年轻人可能听到</td></tr>
+            <tr><td>17-18 kHz</td><td>好（-3 ~ -6 dB）</td><td>好</td><td>大多数人听不到</td></tr>
+            <tr><td>18-19 kHz</td><td>中等（-6 ~ -12 dB）</td><td>中等</td><td>几乎所有人听不到</td></tr>
+            <tr><td>19-20 kHz</td><td>弱（-12 ~ -24 dB）</td><td>弱</td><td>听不到</td></tr>
+            <tr><td>20+ kHz</td><td>极弱或无</td><td>极弱或无</td><td>听不到</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>参考：Google Nearby 使用 18.520kHz；CMU 超声时间同步论文；EURASIP 2021 近超声通信论文</p>
+
+      <div class="callout callout-danger">
+        <strong>硬件可靠性警告</strong>
+        <p>上表的频率响应数据基于有限设备的测量结果，<strong>不代表所有手机</strong>。近超声频段的硬件能力高度依赖于具体设备型号：</p>
+        <ul>
+          <li>某些 Samsung 设备在 16kHz 以上有激进的低通滤波</li>
+          <li>某些 iPhone 型号可以通过 20kHz，某些不行</li>
+          <li>低端 Android 手机可能在 14kHz 就开始衰减</li>
+          <li>许多手机在 Audio HAL 层施加 16-18kHz 的低通滤波以防止超声伪影</li>
+        </ul>
+        <p><strong>必须的验证步骤</strong>：在目标设备矩阵（至少 top 10 SKU）上测试 16-20kHz 频率响应；同时测试 DJI Mic 接收端的超声频段响应；实现运行时回退协议——如果超声 SNR &lt; 阈值，自动降级到可听 Chirp。</p>
+      </div>
+
+      <h4>推荐参数</h4>
+      <pre><code><span class="cmt">// 近超声 Chirp 推荐参数</span>
+频率范围: <span class="num">16.5</span> kHz → <span class="num">19.5</span> kHz （<span class="num">3</span> kHz 带宽）
+持续时间: <span class="num">50</span> ms
+TBP: <span class="num">0.05</span> × <span class="num">3000</span> = <span class="num">150</span> （<span class="num">21.8</span> <span class="kw">dB</span> 处理增益，仍然充足）
+采样率: <span class="num">48</span> kHz
+窗函数: Tukey (<span class="fn">α</span>=<span class="num">0.5</span>)</code></pre>
+
+      <!-- 4.6 综合对比 -->
+      <h3 id="sec4-6">4.6 综合对比表</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>特性</th><th>LFM Chirp</th><th>ESS (Farina)</th><th>MLS</th><th>Golay</th><th>近超声 Chirp</th></tr>
+          </thead>
+          <tbody>
+            <tr class="highlight"><td>自相关旁瓣</td><td>-13.2 dB</td><td>很低</td><td>-1/P ≈ 0</td><td><strong>精确零</strong></td><td>-13.2 dB</td></tr>
+            <tr><td>SNR 增益</td><td>T·B (线性)</td><td>T·B (指数加权)</td><td>10·log₁₀(P)</td><td>10·log₁₀(2N)</td><td>T·B</td></tr>
+            <tr><td>非线性分离</td><td>❌</td><td><strong>✅</strong></td><td>❌</td><td>❌</td><td>❌</td></tr>
+            <tr><td>播放次数</td><td>1</td><td>1</td><td>1</td><td><strong>2</strong></td><td>1</td></tr>
+            <tr><td>最小时长 @48kHz</td><td>50ms</td><td>50ms</td><td>21ms (n=10)</td><td>2×43ms+保护</td><td>50ms</td></tr>
+            <tr><td>时变系统鲁棒性</td><td>高</td><td>高</td><td>高</td><td><strong>低</strong></td><td>高</td></tr>
+            <tr><td>用户感知</td><td>"嗖"声</td><td>"嗖"(低频更明显)</td><td>"嘶"声</td><td>"嘶嘶"×2</td><td>几乎无感</td></tr>
+            <tr><td>硬件兼容性</td><td>通用</td><td>通用</td><td>通用</td><td>通用</td><td>需验证</td></tr>
+            <tr class="highlight"><td><strong>推荐度</strong></td><td><span class="stars">★★★★★</span></td><td><span class="stars">★★★★☆</span></td><td><span class="stars">★★★☆☆</span></td><td><span class="stars">★★☆☆☆</span></td><td><span class="stars">★★★★☆</span> <small>(验证后)</small></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
     <div class="toc-card">
       <h2>目录</h2>
       <ol class="toc-list">
