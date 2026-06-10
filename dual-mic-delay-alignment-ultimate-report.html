@@ -1923,6 +1923,269 @@ delay_seconds = τ / fs</div>
 
     </section>
 
+    <!-- =================== §9 关键工程约束 =================== -->
+    <section id="sec9">
+      <h2>9. 关键工程约束</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 三个最容易被忽略的工程陷阱：</strong>1) 蓝牙编码延迟不是固定的，抖动可达 ±5-20ms；2) 独立时钟漂移 ~0.1ms/s，100 秒后累积 10ms；3) 手机 DSP（AEC/NS/AGC）会主动消除校准信号。必须用 <code>UNPROCESSED</code>/<code>measurement</code> 模式获取原始音频。
+      </div>
+
+      <!-- 9.1 蓝牙编码延迟抖动 -->
+      <h3>9.1 蓝牙编码延迟抖动</h3>
+
+      <p>原报告将 DJI Mic 的延迟视为<strong>固定偏移</strong>（~15ms），但实际蓝牙编码延迟是<strong>时变的</strong>：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>延迟来源</th><th>典型值</th><th>抖动范围</th><th>触发条件</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>SBC 编解码</td><td>~30ms</td><td>±2-5ms</td><td>bitpool 动态调整</td></tr>
+            <tr><td>AAC 编解码</td><td>~25ms</td><td>±3-8ms</td><td>编码器复杂度波动</td></tr>
+            <tr><td>aptX / aptX LL</td><td>~15ms</td><td>±1-3ms</td><td>相对稳定</td></tr>
+            <tr><td>aptX Adaptive</td><td>8-20ms 动态</td><td>±5-12ms</td><td>根据信道质量自适应</td></tr>
+            <tr><td>蓝牙重传</td><td>0-20ms</td><td>0-20ms</td><td>2.4GHz 干扰</td></tr>
+            <tr><td>USB 传输</td><td>~3ms</td><td>±0.5ms</td><td>USB 调度抖动</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-warn">
+        <strong>对方案设计的影响</strong>
+        <p>即使初始校准完美，延迟可能在录制过程中漂移 ±5-20ms — <strong>超出 10ms 精度要求</strong>。必须实现自适应跟踪（连续或半连续），而非离散重校准事件。增加看门狗机制：如果两次校准之间延迟变化 >5ms，立即触发重校准。检查 DJI Mic 是否暴露了编码协商参数（如 codec 类型、bitpool），可用于约束延迟变化范围。</p>
+      </div>
+
+      <!-- 9.2 时钟漂移 -->
+      <h3>9.2 时钟漂移</h3>
+
+      <p>手机和无线麦克风有<strong>独立的采样时钟</strong>，即使蓝牙延迟完全稳定，两个 ADC 的采样率差异也会导致对齐逐渐漂移：</p>
+
+      <div class="formula">典型消费级晶振精度: ±20-50 ppm
+
+最坏情况 (两端各 50ppm, 反向偏差):
+  相对偏差 = 100 ppm = 0.01%
+  @48kHz: 4.8 样本/秒 漂移 = 0.1 ms/s
+  → 10 秒后累积 1ms，100 秒后 10ms
+
+典型情况 (两端各 20ppm):
+  → ~40 秒后累积 1ms，400 秒后 10ms</div>
+
+      <div class="callout callout-warn">
+        <strong>时钟漂移是方案 B（持续水印）的核心价值所在</strong>
+        <p>对于超过 20 秒的录音，持续或周期性重估计是<strong>必须的</strong>，与校准方法无关。方案 B 的扩频水印天然提供持续跟踪能力，这是它作为长期方案的根本优势之一。方案 A 的一次性校准只能解决冷启动，无法应对时钟漂移 — 必须搭配持续跟踪机制。</p>
+      </div>
+
+      <!-- 9.3 手机音频 DSP 管线 -->
+      <h3>9.3 手机音频 DSP 管线</h3>
+
+      <p>现代手机对麦克风输入施加了<strong>激进的 DSP 处理</strong>，这些处理专为去除"非语音信号"设计，会主动抑制或破坏校准信号和水印：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>DSP 模块</th><th>行为</th><th>对水印的影响</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>噪声抑制 (NS)</strong></td><td>检测并衰减非语音成分</td><td>2-8kHz 水印可能被识别为"噪声"</td></tr>
+            <tr><td><strong>自动增益 (AGC)</strong></td><td>动态调整增益</td><td>水印幅度不稳定</td></tr>
+            <tr><td><strong>回声消除 (AEC)</strong></td><td>去除扬声器回放信号</td><td><strong>致命！</strong> 可能直接消除校准信号</td></tr>
+            <tr><td><strong>波束成形</strong></td><td>空间滤波</td><td>改变相位关系</td></tr>
+            <tr><td><strong>带宽限制</strong></td><td>8kHz/16kHz 截止</td><td>高频水印直接丢失</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-danger">
+        <strong>关键对策</strong>
+        <ol>
+          <li><strong>获取原始音频</strong>：通过平台特定 API 绕过 DSP 处理
+            <ul>
+              <li>Android: <code>AudioSource.UNPROCESSED</code> 或 <code>VOICE_RECOGNITION</code> 模式</li>
+              <li>iOS: <code>AVAudioSession.Mode.measurement</code>（禁用 AEC/NS/AGC）</li>
+            </ul>
+          </li>
+          <li><strong>关闭 AEC</strong>：如果 App 同时播放校准信号和录音，必须确保 AEC 不会消除校准信号</li>
+          <li><strong>测试水印存活率</strong>：通过常见 DSP 链（WebRTC NS, RNNoise, 厂商特定）测试水印是否存活</li>
+          <li><strong>频带选择</strong>：将水印放在 NS 不太激进的频段（通常 6-8kHz 边缘），或使用频率跳变避免窄带抑制器</li>
+        </ol>
+      </div>
+
+      <!-- 9.4 多径反射 -->
+      <h3>9.4 多径反射</h3>
+
+      <p>桌面、墙面、手持姿态都可能带来反射峰。如果简单地取全局最大峰，可能选中反射路径而非直达路径，导致时延估计偏差。室内环境下校准信号通过多条路径到达两路 mic，互相关输出会出现主峰（直达路径）和次峰（反射路径，通常在主峰后 5-50ms）。</p>
+
+      <div class="callout callout-success">
+        <strong>策略：取"最早且足够强"的峰</strong>
+        <p>对互相关结果做 onset detection：找到超过噪声基底 6dB 以上的<strong>第一个峰</strong>，而非绝对最大峰。此外，建议<strong>重复探针取 median</strong>（3 次），以降低偶发噪声和反射峰误选的概率。</p>
+      </div>
+
+      <!-- 9.5 不要把主动探针当唯一真相 -->
+      <h3>9.5 不要把主动探针当唯一真相</h3>
+
+      <div class="callout callout-danger">
+        <strong>探针只测量探针声源位置下的相对 delay</strong>
+        <p>主动探针估计的是"探针声源位置下的相对 delay"。正式说话开始后，仍应把语音 TDE 作为<strong>二次确认和微调来源</strong>。产品上可以把主动校准视为首句保护层，把持续语音估计视为长期稳定层。</p>
+      </div>
+
+    </section>
+
+    <!-- =================== §10 持续跟踪与漂移对策 =================== -->
+    <section id="sec10">
+      <h2>10. 持续跟踪与漂移对策</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 初始对齐后仍会漂移（时钟 + 蓝牙）：</strong>三条持续跟踪路线 — 扩频水印（每 500ms 更新）、NLMS 自适应滤波器（语音段持续适应）、BFM 二值化特征匹配（极低计算量）。搭配看门狗：延迟变化 >5ms 时立即重校准。
+      </div>
+
+      <!-- 10.1 扩频水印持续跟踪 -->
+      <h3>10.1 扩频水印持续跟踪</h3>
+
+      <p>一次性校准解决"录音开始时"的冷启动问题。如果时延在录音过程中漂移（蓝牙编码抖动、时钟漂移），扩频水印可以提供<strong>持续、无缝的跟踪</strong>：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>参数</th><th>推荐值</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>水印信号</td><td>CSS chirp, 12-18kHz, 重复周期 500ms</td></tr>
+            <tr><td>水印功率</td><td>低于内容信号 25-30dB</td></tr>
+            <tr><td>检测方法</td><td>滑动互相关，每 500ms 更新</td></tr>
+            <tr><td>跟踪精度</td><td>±2-5ms</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>来源：MDPI 2024 "Audio Watermarking System in Real-Time" + Amazon Science 感知水印论文</p>
+
+      <!-- 10.2 NLMS 自适应滤波器 -->
+      <h3>10.2 NLMS 自适应滤波器</h3>
+
+      <p>初始对齐完成后启动 NLMS 自适应滤波器，在语音段持续适应漂移变化：</p>
+
+      <pre><code><span class="cmt">// NLMS 自适应滤波器跟踪流程</span>
+<span class="kw">初始化</span>:  用校准信号的时延值设置初始补偿延迟
+<span class="kw">运行</span>:    NLMS 滤波器在语音段持续适应
+<span class="kw">检测</span>:    每 100ms 检查滤波器系数峰值位置
+          如果偏移 > 阈值(<span class="num">2ms</span>) → 更新补偿
+<span class="kw">重校准</span>:  如果滤波器发散 → 重新播放校准信号</code></pre>
+
+      <p>来源：XMOS ADEC (XVF3610) 自适应时延估计完整实现</p>
+
+      <!-- 10.3 BFM 二值化特征匹配 -->
+      <h3>10.3 BFM 二值化特征匹配</h3>
+
+      <p>Interspeech 2024 Gao &amp; Su (Tencent) 提出的 <strong>Binary Feature Matching (BFM)</strong> 方法：将音频特征二值化后用 XOR 位运算匹配，<strong>计算量极低</strong>，适合作为移动端持续追踪器。BFM-FP（音频指纹）变体可在任何音频内容上工作（含环境噪声），不需要专门的校准信号。</p>
+
+      <!-- 10.4 周期性重校准 + 看门狗 -->
+      <h3>10.4 周期性重校准 + 看门狗</h3>
+
+      <div class="callout callout-warn">
+        <strong>看门狗机制</strong>
+        <p>如果连续两次校准延迟差 >5ms → 立即触发一次 Chirp 重校准。每 10s 播放超声 Chirp Burst（20ms, 16-19kHz）持续跟踪漂移（蓝牙抖动 + 时钟漂移），在语音间歇期也可校准。</p>
+      </div>
+
+    </section>
+
+    <!-- =================== §11 实施与实验路线 =================== -->
+    <section id="sec11">
+      <h2>11. 实施与实验路线</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 建议分 4 个阶段实施：</strong>Phase 1 可听 Chirp（1-2周，最快上线）→ Phase 2 近超声升级（需硬件验证）→ Phase 3 扩频水印（1-3月）→ Phase 4 产品级优化。每个阶段都有明确的成功标准和失败处理。
+      </div>
+
+      <!-- 11.1 Phase 时间线 -->
+      <h3>11.1 Phase 时间线</h3>
+
+      <div class="phase-timeline">
+
+        <div class="phase-item">
+          <div class="phase-item-title">Phase 1（1-2 周）: 可听 Chirp 校准 <span class="tag tag-rec">P0 最快上线</span></div>
+          <div class="phase-item-desc">
+            <ul>
+              <li>功能开启 → 播放语音提示"协同拾音已开启" → 尾部叠加 50ms LFM Chirp (200Hz→8kHz)</li>
+              <li>匹配滤波 + 对数域抛物线插值</li>
+              <li>确保获取 <code>UNPROCESSED</code>/<code>measurement</code> 模式的原始音频</li>
+              <li>验证精度 &lt;10ms（至少 10 次重复测量，标准差 &lt;2ms）</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="phase-item">
+          <div class="phase-item-title">Phase 2（2-4 周）: 近超声升级 + 延迟跟踪 <span class="tag tag-new">需硬件验证</span></div>
+          <div class="phase-item-desc">
+            <ul>
+              <li>在目标设备矩阵上测试 16-20kHz 频率响应</li>
+              <li>SNR &gt;6dB → 升级为近超声 Chirp</li>
+              <li>SNR &lt;6dB → 保持可听 Chirp</li>
+              <li>增加周期性校准 + 看门狗</li>
+              <li>运行时回退协议</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="phase-item">
+          <div class="phase-item-title">Phase 3（1-3 月）: 扩频水印持续校准 <span class="tag tag-rec">P2 高级版</span></div>
+          <div class="phase-item-desc">
+            <ul>
+              <li>手机端音频输出流中嵌入扩频水印</li>
+              <li>频段: 2-8kHz（抗蓝牙编码）+ 16-19kHz（近超声辅助，如硬件支持）</li>
+              <li>自相关扩频检测做持续延迟跟踪</li>
+              <li>与 GCC-PHAT 做互补融合</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="phase-item">
+          <div class="phase-item-title">Phase 4（3-6 月）: 产品级优化</div>
+          <div class="phase-item-desc">
+            <ul>
+              <li>心理声学自适应嵌入</li>
+              <li>多设备延迟预测模型</li>
+              <li>A/B 测试不同校准策略</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 11.2 实验矩阵 -->
+      <h3>11.2 实验矩阵</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>阶段</th><th>实验</th><th>成功标准</th><th>失败处理</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Phase 1</td><td>160ms 2-8kHz log chirp</td><td>静室 delay 方差 &lt;2ms</td><td>增加长度到 250ms 或改 1-10kHz</td></tr>
+            <tr><td>Phase 2</td><td>3 次短 chirp 取 median</td><td>嘈杂环境误检率下降</td><td>加入"最早可靠峰"策略</td></tr>
+            <tr><td>Phase 3</td><td>MLS/PN 序列低音量测试</td><td>低于提示音响度仍可估计</td><td>仅作为静音友好模式</td></tr>
+            <tr><td>Phase 4</td><td>18-20kHz 近超声跨设备测试</td><td>覆盖 80%+ 目标机型</td><td>改为白名单功能</td></tr>
+            <tr><td>Phase 5</td><td>"请说开始"口部源校准</td><td>困难姿态下仍稳定</td><td>作为低置信用户引导 fallback</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 11.3 方案组合推荐 -->
+      <h3>11.3 方案组合推荐</h3>
+
+      <div class="diagram">功能开启时：
+1. 播放语音提示："协同拾音已开启"（~1.5秒）
+2. 语音提示最后 50ms，叠加 Chirp 信号（2kHz→8kHz, -15dBFS）
+3. Chirp 结束后立即开始录音
+4. 两路 MIC 做匹配滤波 → 得到初始时延 τ₀
+5. 用 τ₀ 做初始对齐
+6. 切换到 GCC-PHAT / Interspeech TDE 做持续精细对齐
+7. 每 10s 播放超声 Chirp Burst（20ms, 16-19kHz）持续跟踪漂移
+8. 看门狗：连续两次校准延迟差 >5ms → 立即重校准</div>
+
+    </section>
+
     <div class="toc-card">
       <h2>目录</h2>
       <ol class="toc-list">
