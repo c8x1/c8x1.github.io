@@ -992,6 +992,128 @@
   </style>
 </head>
 <body>
-  <!-- Content will be added by subsequent tasks -->
+
+<!-- Hero -->
+<header class="hero">
+  <div class="container">
+    <p style="opacity:0.85;font-size:0.9rem;">创新技术评议报告</p>
+    <h1>手机+无线麦克风协同拾音系统</h1>
+    <p style="font-size:1.1rem;opacity:0.9;margin-top:0.5rem;">
+      异构双路采集 · 自适应校准 · 低复杂度对齐 · 智能闪避混音
+    </p>
+  </div>
+</header>
+
+<main class="container">
+
+<!-- §1 执行摘要 -->
+<section id="sec1">
+  <h2>1. 执行摘要</h2>
+
+  <p>本报告提出一种<strong>面向移动内容创作场景的异构双路协同拾音系统</strong>。
+  该系统同时采集手机内置麦克风和佩戴式无线麦克风（如 DJI Mic）两路异构音频信号，
+  通过冷启动校准、持续延迟对齐、目标说话人检测、智能闪避与自适应混音五大环节的协同工作，
+  实现"主说话人清晰突出 + 环境音自然保留"的专业级拾音效果。
+  全链路包含 <strong>18 个技术创新点</strong>，覆盖架构、算法、方法三个创新层级。</p>
+
+  <h3>核心创新亮点速览</h3>
+
+  <table class="innovation-table">
+    <thead>
+      <tr><th>环节</th><th>核心创新</th><th>创新等级</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>§3 双路采集</td>
+        <td>异构双路中间件 + 延迟指纹库</td>
+        <td><span class="badge badge-first">架构创新</span></td>
+      </tr>
+      <tr>
+        <td>§4 冷启动校准</td>
+        <td>噪声自适应校准信号 + 隐写式校准</td>
+        <td><span class="badge badge-significant">算法创新</span></td>
+      </tr>
+      <tr>
+        <td>§5 延迟对齐</td>
+        <td>多尺度 BFM + 跨模态辅助</td>
+        <td><span class="badge badge-significant">算法创新</span></td>
+      </tr>
+      <tr>
+        <td>§6 说话人检测</td>
+        <td>双路空间互验证 VAD + 多模态检测</td>
+        <td><span class="badge badge-first">方法创新</span></td>
+      </tr>
+      <tr>
+        <td>§7 智能闪避</td>
+        <td>频谱选择性闪避 + IMU 预测性预闪避</td>
+        <td><span class="badge badge-cross-domain">跨领域创新</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- §2 系统全局架构 -->
+<section id="sec2">
+  <h2>2. 系统全局架构</h2>
+
+  <h3>2.1 完整信号处理流水线</h3>
+
+  <div class="pipeline-diagram">
+    <div class="pipeline-branch">
+      <div class="pipeline-node">🎤 DJI Mic<br><small>近场 · 主说话人</small></div>
+      <div class="pipeline-node">📱 手机 MIC<br><small>远场 · 环境音</small></div>
+    </div>
+    <div class="pipeline-arrow"></div>
+    <div class="pipeline-node highlight">异构双路采集中间件 <small>(§3)</small><br><small>统一抽象 · 时钟域桥接 · 延迟指纹库</small></div>
+    <div class="pipeline-arrow"></div>
+    <div class="pipeline-branch">
+      <div class="pipeline-node">冷启动校准 <small>(§4)</small><br><small>NACS · 隐写式 · 掩蔽感知</small></div>
+      <div style="display:flex;align-items:center;color:var(--primary);font-weight:bold;">⟷</div>
+      <div class="pipeline-node">持续延迟对齐 <small>(§5)</small><br><small>Multi-Scale BFM · 跨模态</small></div>
+    </div>
+    <div class="pipeline-arrow"></div>
+    <div class="pipeline-branch">
+      <div class="pipeline-node">目标说话人检测 <small>(§6)</small><br><small>声纹VAD · 空间互验证 · 多模态</small></div>
+      <div style="display:flex;align-items:center;color:var(--accent);font-weight:bold;">→</div>
+      <div class="pipeline-node highlight">智能闪避与混音 <small>(§7)</small><br><small>频谱选择性 · SNR自适应 · 场景驱动</small></div>
+    </div>
+    <div class="pipeline-arrow"></div>
+    <div class="pipeline-node" style="background:var(--accent-light);">🔊 自适应混音输出</div>
+  </div>
+
+  <h3>2.2 模块间信息流与反馈机制</h3>
+
+  <p>本系统的核心差异化在于各模块间存在<strong>三条闭环反馈回路</strong>，
+  使系统成为自适应整体而非简单串联：</p>
+
+  <div class="feedback-loop">
+    <strong>反馈回路 ① 闪避→对齐：</strong>
+    闪避模块实时估计 DJI Mic 路径的 SNR，该值反馈给 BFM 模块调整二值化阈值——
+    高 SNR 时降低阈值提高精度，低 SNR 时提高阈值保证可靠性。
+  </div>
+
+  <div class="feedback-loop">
+    <strong>反馈回路 ② 检测→校准：</strong>
+    声纹 VAD 持续输出匹配置信度。当置信度连续低于阈值（如 3 帧 &lt;0.4），
+    判定目标说话人丢失，自动触发一次校准信号重播，重建对齐基线。
+  </div>
+
+  <div class="feedback-loop">
+    <strong>反馈回路 ③ 场景分类→全管线：</strong>
+    场景分类引擎的输出（Vlog/环境展示/对话/紧急 四种模式）驱动所有模块的参数配置——
+    包括校准信号类型选择、BFM 搜索范围、闪避深度、混音比例等。
+  </div>
+
+  <h3>2.3 系统级创新声明</h3>
+
+  <div class="callout callout-success">
+    <strong>整体 &gt; 部分之和</strong>
+    <p>单独审视每个环节，BFM 延迟估计、声纹 VAD、侧链压缩等均为已知技术概念。
+    但将这些技术在<strong>移动双路异构拾音场景</strong>下串联为闭环系统，
+    并通过模块间反馈实现自适应协同——这是一种全新的系统架构，
+    目前业界无同类产品或方案覆盖此完整链路。</p>
+  </div>
+</section>
+
 </body>
 </html>
