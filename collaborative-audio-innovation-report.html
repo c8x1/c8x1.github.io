@@ -1534,5 +1534,198 @@
   </table>
 </section>
 
+<!-- §8 技术先进性总评 -->
+<section id="sec8">
+  <h2>8. 技术先进性总评</h2>
+
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>技术环节</th>
+        <th>业界 SOTA</th>
+        <th>本方案</th>
+        <th>先进性判定</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>双路采集</td>
+        <td>单路无线传输 (DJI/Rode)</td>
+        <td>异构双路中间件 + 延迟指纹库</td>
+        <td><span class="badge badge-first">首创</span></td>
+      </tr>
+      <tr>
+        <td>冷启动校准</td>
+        <td>固定参数 Chirp</td>
+        <td>NACS + 隐写式 + 掩蔽感知</td>
+        <td><span class="badge badge-significant">显著改进</span></td>
+      </tr>
+      <tr>
+        <td>延迟对齐</td>
+        <td>BFM 单尺度 (Gao 2024)</td>
+        <td>Multi-Scale BFM + IMU 跨模态</td>
+        <td><span class="badge badge-incremental">增量创新</span></td>
+      </tr>
+      <tr>
+        <td>说话人检测</td>
+        <td>单路声纹 VAD</td>
+        <td>双路互验证 + 多模态检测</td>
+        <td><span class="badge badge-significant">显著改进</span></td>
+      </tr>
+      <tr>
+        <td>音频闪避</td>
+        <td>后期侧链压缩</td>
+        <td>实时频谱选择性 + IMU 预测</td>
+        <td><span class="badge badge-cross-domain">跨领域创新</span></td>
+      </tr>
+      <tr>
+        <td>系统集成</td>
+        <td>无完整方案</td>
+        <td>全链路闭环 + 三条反馈回路</td>
+        <td><span class="badge badge-first">首创</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-info">
+    <strong>总结：</strong>本方案在 6 个技术环节中，2 项为行业首创（双路采集架构、系统集成），
+    2 项为显著改进（冷启动校准、说话人检测），1 项为增量创新（延迟对齐），
+    1 项为跨领域创新（音频闪避从后期搬到实时采集端）。
+  </div>
+</section>
+
+<!-- §9 专利布局建议 -->
+<section id="sec9">
+  <h2>9. 专利布局建议</h2>
+
+  <h3>9.1 核心系统专利（1 件）</h3>
+
+  <div class="patent-card">
+    <span class="patent-type">发明专利 · 系统</span>
+    <h4>一种基于异构双路协同拾音的自适应音频处理方法及系统</h4>
+    <p><strong>独立权利要求框架：</strong>覆盖"双路采集→校准→对齐→检测→闪避→混音"完整信号处理管线，
+    以及模块间三条反馈回路（闪避→对齐、检测→校准、场景→全管线）。</p>
+    <p><strong>保护范围：</strong>任何采用手机 + 佩戴式麦克风双路协同拾音，
+    并包含基于语音检测的自适应混音的方案。</p>
+  </div>
+
+  <h3>9.2 从属方法专利（4 件）</h3>
+
+  <div class="patent-card">
+    <span class="patent-type">发明专利 · 方法</span>
+    <h4>专利 A：一种基于环境噪声自适应的音频校准信号生成方法</h4>
+    <p><strong>覆盖创新点：</strong>#4 NACS 三级策略、#5 心理声学掩蔽感知校准、#6 隐写式校准</p>
+    <p><strong>核心权利要求：</strong>基于实时环境噪声水平自动选择校准信号类型和参数的方法，
+    包括将校准信号嵌入到功能提示音中的隐写编码方案。</p>
+  </div>
+
+  <div class="patent-card">
+    <span class="patent-type">发明专利 · 方法</span>
+    <h4>专利 B：一种多尺度二值化特征匹配的延迟估计方法</h4>
+    <p><strong>覆盖创新点：</strong>#8 Multi-Scale BFM 三级金字塔、#9 环境自适应二值化阈值</p>
+    <p><strong>核心权利要求：</strong>多尺度级联二值化特征匹配方法，
+    包含噪声感知的自适应阈值调整和匹配置信度评估机制。</p>
+  </div>
+
+  <div class="patent-card">
+    <span class="patent-type">发明专利 · 方法</span>
+    <h4>专利 C：一种基于双路信号空间互验证的目标说话人检测方法</h4>
+    <p><strong>覆盖创新点：</strong>#12 双路空间互验证 VAD、#14 多模态说话人存在检测</p>
+    <p><strong>核心权利要求：</strong>利用近场/远场双路信号的语音活动检测结果进行交叉验证，
+    结合 IMU 振动信号辅助判断目标说话人存在的方法。</p>
+  </div>
+
+  <div class="patent-card">
+    <span class="patent-type">发明专利 · 方法</span>
+    <h4>专利 D：一种基于运动预测的实时音频闪避方法</h4>
+    <p><strong>覆盖创新点：</strong>#15 频谱选择性闪避、#18 IMU 预测性预闪避</p>
+    <p><strong>核心权利要求：</strong>基于佩戴端 IMU 运动信号预测说话意图，
+    在声学 VAD 触发前启动渐弱环境音的实时音频闪避方法，
+    包含频谱选择性增益控制。</p>
+  </div>
+
+  <h3>9.3 技术秘密清单</h3>
+
+  <table class="comparison-table">
+    <thead>
+      <tr><th>技术秘密</th><th>关联创新点</th><th>保密理由</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>延迟指纹库众包采集与更新策略</td>
+        <td>#2</td>
+        <td>数据资产，竞品难以复制</td>
+      </tr>
+      <tr>
+        <td>多因子决策引擎参数调优方法</td>
+        <td>#7</td>
+        <td>调参经验难以逆向工程</td>
+      </tr>
+      <tr>
+        <td>声纹增量学习具体算法实现</td>
+        <td>#13</td>
+        <td>模型细节不易从外部观察</td>
+      </tr>
+      <tr>
+        <td>场景分类模型训练数据与参数</td>
+        <td>#17</td>
+        <td>训练数据为核心壁垒</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- §10 参考文献 -->
+<section id="sec10">
+  <h2>10. 参考文献</h2>
+
+  <h3>校准信号与水印</h3>
+  <ul>
+    <li>Agaskar et al., "Practical Over-the-air Perceptual Acoustic Watermarking," <em>Interspeech 2022</em></li>
+    <li>Farina, "Simultaneous Measurement of Impulse Response and Distortion with a Swept-sine Signal," <em>AES 108th Convention, 2000</em></li>
+    <li>Latent-Mark: Audio Watermark Robust to Neural Resynthesis, <em>arXiv 2026</em></li>
+  </ul>
+
+  <h3>延迟估计算法</h3>
+  <ul>
+    <li>Gao &amp; Su, "Low Complexity Echo Delay Estimator Based on Binarized Feature Matching," <em>Interspeech 2024</em> (DOI: 10.21437/Interspeech.2024-107)</li>
+    <li>Knapp &amp; Carter, "The Generalized Correlation Method for Estimation of Time Delay," <em>IEEE Trans. ASSP, 1976</em></li>
+  </ul>
+
+  <h3>目标说话人检测</h3>
+  <ul>
+    <li>Deshetty et al., "Personal VAD: Speaker-Conditioned Voice Activity Detection," <em>Odyssey 2020</em></li>
+    <li>Medennikov et al., "Target-Speaker Voice Activity Detection for Multi-Speaker Diarization," <em>Interspeech 2021</em></li>
+    <li>MIMO Target-Speaker VAD, <em>arXiv 2024</em></li>
+  </ul>
+
+  <h3>音频闪避与混音</h3>
+  <ul>
+    <li>US20100211199A1 — Dynamic Audio Ducking</li>
+    <li>Sonible smart:comp — Spectral Sidechain Ducking</li>
+  </ul>
+
+  <h3>心理声学</h3>
+  <ul>
+    <li>Zwicker &amp; Fastl, <em>Psychoacoustics: Facts and Models</em>, Springer, 2013</li>
+    <li>ISO 532 — Methods for Calculating Loudness</li>
+  </ul>
+
+  <h3>相关专利</h3>
+  <ul>
+    <li>US Patent 12,342,137 — Nureva: Discrete Microphones for Collaboration (2025)</li>
+    <li>US20240284364A1 — Wireless Synchronization of Mobile Devices (2024)</li>
+    <li>EP2573773A3 — Harman: Time Alignment of Recorded Audio Signals</li>
+  </ul>
+</section>
+
+</main>
+
+<!-- Footer -->
+<footer style="text-align:center;padding:2rem;color:var(--text-dim);font-size:0.85rem;border-top:1px solid var(--border);margin-top:2rem;">
+  <p>手机+无线麦克风协同拾音系统 — 创新技术评议报告 v1.0</p>
+  <p>2026 年 6 月 · 内部评审文件</p>
+</footer>
+
 </body>
 </html>
