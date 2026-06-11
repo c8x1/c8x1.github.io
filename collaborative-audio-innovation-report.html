@@ -1287,5 +1287,252 @@
   </table>
 </section>
 
+<!-- §5 低复杂度持续延迟对齐 -->
+<section id="sec5">
+  <h2>5. 低复杂度持续延迟对齐</h2>
+
+  <div class="quick-take">
+    <strong>⚡ 快速结论：</strong>在 Yi Gao 的 BFM（Interspeech 2024）基础上做四项增量创新——
+    多尺度金字塔搜索、自适应阈值、IMU 跨模态辅助、置信度驱动模式切换。
+    搜索效率提升 80%，极端噪声下仍可维持追踪。
+  </div>
+
+  <h3>🔴 现有技术缺陷</h3>
+
+  <ul>
+    <li>冷启动校准后，蓝牙抖动（±5ms）+ 时钟漂移（~1ppm/min）导致延迟持续变化，单次校准不够</li>
+    <li>GCC-PHAT 等传统 TDE 算法计算量大（FFT + 互相关，~5 MIPS），不适合移动端持续运行</li>
+    <li>Yi Gao 的 BFM（Interspeech 2024, Tencent）计算量极低（XOR + popcount，~0.5 MIPS），
+        但原始设计面向回声消除场景，存在三个局限：
+      <ul>
+        <li>单一时间尺度——搜索范围与精度互斥</li>
+        <li>固定二值化阈值——高噪环境下误匹配率上升</li>
+        <li>无置信度评估——无法判断追踪是否已失效</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h3>🟢 创新方案</h3>
+
+  <h4>创新点 8：多尺度二值化特征匹配（Multi-Scale BFM）</h4>
+  <p>构建三级金字塔级联搜索：</p>
+  <table class="comparison-table">
+    <thead>
+      <tr><th>层级</th><th>分辨率</th><th>搜索范围</th><th>特征类型</th><th>计算量</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>粗粒度</td><td>10ms</td><td>±200ms</td><td>低频包络二值化</td><td>~0.1 MIPS</td></tr>
+      <tr><td>中粒度</td><td>2ms</td><td>±20ms</td><td>中频频谱二值化</td><td>~0.3 MIPS</td></tr>
+      <tr><td>精粒度</td><td>亚采样</td><td>±2ms</td><td>高频细节 + 插值</td><td>~0.4 MIPS</td></tr>
+    </tbody>
+  </table>
+  <p>每一级搜索范围缩小 10 倍，总搜索量比单尺度减少约 80%。
+  各级之间通过<strong>范围传递</strong>衔接：上一级的匹配峰值位置 ± 半级分辨率作为下一级搜索中心。</p>
+
+  <h4>创新点 9：环境自适应二值化阈值</h4>
+  <p>原始 BFM 的二值化阈值固定（如过零率 &gt; 中值 → 1，否则 → 0）。本方案动态调整：</p>
+  <ul>
+    <li><strong>高噪环境</strong> → 提高阈值（只保留强特征），牺牲灵敏度换取可靠性</li>
+    <li><strong>安静环境</strong> → 降低阈值（保留弱特征），最大化精度</li>
+    <li>阈值 = <code>base_threshold × (1 + α × noise_floor_dB)</code>，α 为自适应系数</li>
+    <li>同时输出<strong>匹配置信度分数</strong>：基于 popcount 分布的集中度（峰值/均值比）</li>
+  </ul>
+
+  <h4>创新点 10：跨模态辅助 BFM（IMU + 音频联合估计）</h4>
+  <p>DJI Mic 佩戴在主播身上，其 IMU 可检测说话时的<strong>喉部/头部微振动</strong>：</p>
+  <ul>
+    <li>将 IMU 振动信号作为 BFM 的辅助验证通道</li>
+    <li>音频 BFM 候选延迟 vs. IMU 到达时间 → 一致性验证（差异 &lt;5ms 则确认）</li>
+    <li>在极端噪声环境（&gt;80dBA）下，纯音频 BFM 可能失效，但 IMU 信号不受声学噪声影响</li>
+    <li><strong>独特优势</strong>：只有佩戴式麦克风才有此跨模态信息，是竞品无法复制的硬件壁垒</li>
+  </ul>
+
+  <h4>创新点 11：置信度驱动的被动/主动模式切换</h4>
+  <p>BFM 每次匹配输出置信度分数，驱动三级状态机：</p>
+  <table class="comparison-table">
+    <thead>
+      <tr><th>置信度</th><th>模式</th><th>行为</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>&gt; 0.8</td><td>被动追踪</td><td>BFM 持续运行，不播放校准信号</td></tr>
+      <tr><td>0.5 - 0.8</td><td>警戒模式</td><td>增加超声 Chirp burst 频率至每 5s 一次</td></tr>
+      <tr><td>&lt; 0.5</td><td>主动校准</td><td>播放一次完整 Chirp（50-100ms）重校准</td></tr>
+    </tbody>
+  </table>
+
+  <h3>📊 与现有技术对比</h3>
+
+  <table class="comparison-table">
+    <thead>
+      <tr><th>维度</th><th>原始 BFM (Gao 2024)</th><th>本方案</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>搜索效率</td><td>单尺度全搜索</td><td><strong>三级金字塔，搜索量 -80%</strong></td></tr>
+      <tr><td>高噪鲁棒性</td><td>固定阈值，误匹配率↑</td><td><strong>自适应阈值 + 置信度评估</strong></td></tr>
+      <tr><td>极端噪声应对</td><td>纯音频，可能失效</td><td><strong>IMU 跨模态兜底</strong></td></tr>
+      <tr><td>追踪失效检测</td><td>无</td><td><strong>置信度状态机自动切换</strong></td></tr>
+      <tr><td>计算量</td><td>~0.5 MIPS</td><td>~0.8 MIPS（仍远低于 GCC-PHAT）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- §6 目标说话人选择性检测 -->
+<section id="sec6">
+  <h2>6. 目标说话人选择性检测</h2>
+
+  <div class="quick-take">
+    <strong>⚡ 快速结论：</strong>利用双路信号的天然空间差异构建互验证 VAD，
+    结合快速声纹注册和多模态（IMU + 体传导）检测，
+    在极端噪声环境下仍可可靠区分目标说话人与干扰说话人。
+  </div>
+
+  <h3>🔴 现有技术缺陷</h3>
+
+  <ul>
+    <li>普通 VAD 无法区分目标说话人（主播）和周围其他说话人</li>
+    <li>传统声纹 VAD（如 Google Personal VAD）需要较长注册语料，且在高噪环境下准确率显著下降</li>
+    <li>现有方案均为单路信号处理，无法利用双路信号的空间信息差异</li>
+    <li>佩戴式麦克风的 IMU 和体传导信号被浪费</li>
+  </ul>
+
+  <h3>🟢 创新方案</h3>
+
+  <h4>创新点 12：双路信号空间互验证 VAD</h4>
+  <p>核心观察：主播说话时，两路信号<strong>都应该</strong>检测到语音；
+  周围人说话时，通常<strong>只有手机路径</strong>检测到语音：</p>
+  <table class="comparison-table">
+    <thead>
+      <tr><th>DJI Mic (近场)</th><th>手机 (远场)</th><th>判定</th><th>动作</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>✅ VAD</td><td>✅ VAD</td><td><strong>主播说话</strong></td><td>触发闪避</td></tr>
+      <tr><td>✅ VAD</td><td>❌ 无</td><td>疑似误触发（风吹/触碰）</td><td>不闪避</td></tr>
+      <tr><td>❌ 无</td><td>✅ VAD</td><td>周围人说话</td><td>不闪避</td></tr>
+      <tr><td>❌ 无</td><td>❌ 无</td><td>静默</td><td>不闪避</td></tr>
+    </tbody>
+  </table>
+  <p><strong>独特优势</strong>：利用双路异构信号的天然空间差异做决策，无需额外硬件或复杂模型。</p>
+
+  <h4>创新点 13：快速声纹注册 + 增量更新</h4>
+  <ul>
+    <li>首次使用时主播说口令（如"开始录音"，约 3 秒）→ 提取声纹 embedding（128 维）</li>
+    <li>运行时每次 VAD 触发做声纹验证（&lt;5ms 额外延迟，轻量 embedding 模型）</li>
+    <li><strong>增量学习</strong>：每次成功验证后微调声纹模型，适应长时间录制中的嗓音变化（疲劳、感冒等）</li>
+    <li>与空间互验证互补：空间互验证快速筛选 → 声纹验证精确确认</li>
+  </ul>
+
+  <h4>创新点 14：多模态说话人存在检测</h4>
+  <p>综合利用 DJI Mic 佩戴端的多种物理信号：</p>
+  <ul>
+    <li><strong>IMU 微振动</strong>：说话时喉部振动通过身体传导到麦克风夹（低频 ~100-300Hz 分量）</li>
+    <li><strong>呼吸气流模式</strong>：近距离拾音特有的周期性低频脉冲（~0.2-0.5Hz 呼吸频率）</li>
+    <li><strong>体传导声学</strong>：佩戴式麦克风拾取的骨传导/体传导信号频谱特征与空气传导显著不同</li>
+  </ul>
+  <p>这些信号<strong>与环境噪声完全无关</strong>，在极端噪声下仍可可靠检测目标说话人。
+  三重验证：IMU 振动 ✅ + 声学 VAD ✅ + 声纹匹配 ✅ → 高置信度确认。</p>
+
+  <h3>📊 与现有技术对比</h3>
+
+  <table class="comparison-table">
+    <thead>
+      <tr><th>维度</th><th>普通 VAD</th><th>声纹 VAD (Google)</th><th>本方案</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>区分目标/干扰</td><td>❌</td><td>✅（安静环境）</td><td><strong>✅（含高噪环境）</strong></td></tr>
+      <tr><td>注册成本</td><td>无</td><td>需较长注册语料</td><td><strong>3 秒口令</strong></td></tr>
+      <tr><td>极端噪声鲁棒性</td><td>差</td><td>差</td><td><strong>强（IMU + 体传导兜底）</strong></td></tr>
+      <tr><td>误触发防护</td><td>无</td><td>仅声纹</td><td><strong>空间互验证 + 声纹 + IMU 三重</strong></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- §7 智能音频闪避与自适应混音 -->
+<section id="sec7">
+  <h2>7. 智能音频闪避与自适应混音</h2>
+
+  <div class="quick-take">
+    <strong>⚡ 快速结论：</strong>从传统全频段侧链压缩升级为频谱选择性闪避，
+    结合 SNR 自适应深度、场景感知策略引擎和 IMU 预测性预闪避，
+    实现"人声清晰突出 + 环境氛围保留 + 零感知延迟"的专业级混音效果。
+  </div>
+
+  <h3>🔴 现有技术缺陷</h3>
+
+  <ul>
+    <li>传统 audio ducking（侧链压缩）是全频段宽带压低，环境音质感损失严重</li>
+    <li>现有 ducking 深度固定，不随 SNR 变化——安静环境过度 ducking 浪费环境信息，嘈杂环境 ducking 不足</li>
+    <li>场景切换全靠用户手动（如切换"人声优先/环境优先"模式），无自动场景感知</li>
+    <li>VAD 检测延迟（50-100ms）导致闪避启动瞬间有"硬切"感</li>
+  </ul>
+
+  <h3>🟢 创新方案</h3>
+
+  <h4>创新点 15：频谱选择性闪避（Spectral-Selective Ducking）</h4>
+  <p>对 DJI Mic 路径做实时频谱分析，提取主说话人的频谱包络，
+  只对手机路径中与主说话人频谱<strong>重叠</strong>的频段做增益衰减：</p>
+  <ul>
+    <li>保留环境音中不与语音重叠的频段（如低频氛围 &lt;200Hz、高频空气感 &gt;6kHz）</li>
+    <li>频域 gain mask：<code>G(f) = 1 - α × overlap_ratio(f)</code>，α 为 ducking 深度系数</li>
+    <li>实现：1024 点 STFT，帧移 256 采样，频域 gain 平滑（相邻 bin 差 &lt;1dB）避免频谱泄漏</li>
+    <li><strong>效果</strong>：人声清晰度不降，环境音"存在感"保留约 60%</li>
+  </ul>
+
+  <h4>创新点 16：SNR 自适应闪避深度</h4>
+  <p>根据 DJI Mic 路径的实时 SNR 动态调整 ducking 深度：</p>
+  <table class="comparison-table">
+    <thead>
+      <tr><th>SNR 范围</th><th>场景典型</th><th>Ducking 深度</th><th>环境音保留度</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>&gt;20dB</td><td>安静室内</td><td>-6dB（浅）</td><td>~80%</td></tr>
+      <tr><td>10-20dB</td><td>一般户外</td><td>-12dB（中）</td><td>~50%</td></tr>
+      <tr><td>&lt;10dB</td><td>嘈杂街头</td><td>-18dB（深）</td><td>~25%</td></tr>
+    </tbody>
+  </table>
+  <p>映射曲线采用 <strong>sigmoid 函数</strong>，避免深度跳变引起的听觉突变：
+  <code>depth_dB = -6 - 12 / (1 + exp(-(snr_dB - 15) / 5))</code></p>
+
+  <h4>创新点 17：场景感知混音策略引擎</h4>
+  <p>实时音频场景分类（轻量规则引擎或小型 CNN），四种模式自动切换：</p>
+  <table class="comparison-table">
+    <thead>
+      <tr><th>场景模式</th><th>触发条件</th><th>混音策略</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Vlog 模式</strong></td><td>主播说话为主</td><td>正常频谱选择性 ducking</td></tr>
+      <tr><td><strong>环境展示</strong></td><td>主播沉默 &gt;5s</td><td>不 ducking，环境音全量输出</td></tr>
+      <tr><td><strong>对话模式</strong></td><td>多人语音交替</td><td>选择性 ducking（仅压低非目标说话人频段）</td></tr>
+      <tr><td><strong>紧急感知</strong></td><td>检测到警报声/鸣笛</td><td>反向 ducking（压低 DJI Mic 路径）</td></tr>
+    </tbody>
+  </table>
+  <p>模式切换采用 <strong>500ms 交叉渐变</strong>（crossfade），避免突变。</p>
+
+  <h4>创新点 18：IMU 预测性预闪避（Predictive Pre-Ducking）</h4>
+  <p>DJI Mic 的 IMU 检测佩戴者的头部/身体运动模式：</p>
+  <ul>
+    <li>主播转头面向镜头 → 运动特征匹配"开始说话"意图</li>
+    <li>主播抬手做手势 → 运动特征匹配"解说"意图</li>
+    <li>在声学 VAD 触发<strong>之前 200ms</strong> 启动渐弱环境音（线性 fade 0→ducking_depth）</li>
+    <li><strong>效果</strong>：消除 VAD 固有的 50-100ms 检测延迟，实现用户感知上的"零延迟"闪避</li>
+    <li><strong>独特优势</strong>：只有佩戴式麦克风 + IMU 方案才能实现，纯声学方案不可能做到</li>
+  </ul>
+
+  <h3>📊 与现有技术对比</h3>
+
+  <table class="comparison-table">
+    <thead>
+      <tr><th>维度</th><th>传统侧链压缩</th><th>Sonible smart:comp</th><th>本方案</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Ducking 粒度</td><td>全频段宽带</td><td>频谱选择性</td><td><strong>频谱选择性</strong></td></tr>
+      <tr><td>深度自适应</td><td>固定</td><td>信号自适应</td><td><strong>SNR + 场景双自适应</strong></td></tr>
+      <tr><td>场景切换</td><td>手动</td><td>无</td><td><strong>自动（4 种模式）</strong></td></tr>
+      <tr><td>启动延迟</td><td>50-100ms</td><td>离线无延迟</td><td><strong>~0ms（IMU 预测）</strong></td></tr>
+      <tr><td>适用场景</td><td>后期/直播</td><td>后期制作</td><td><strong>实时采集端</strong></td></tr>
+      <tr><td>紧急声音处理</td><td>无</td><td>无</td><td><strong>反向 ducking</strong></td></tr>
+    </tbody>
+  </table>
+</section>
+
 </body>
 </html>
