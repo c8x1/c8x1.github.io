@@ -1,0 +1,2751 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>双路麦克风时延对齐 — 终极调研报告 v3.0</title>
+  <style>
+    /* ===== Custom Properties ===== */
+    :root {
+      --bg: #fafaf7;
+      --surface: #ffffff;
+      --primary: #1e40af;
+      --primary-light: #e8edfb;
+      --accent: #059669;
+      --accent-light: #d1fae5;
+      --warn: #d97706;
+      --warn-light: #fef3c7;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --code-bg: #1e293b;
+      --code-text: #e2e8f0;
+      --text: #1f2937;
+      --text-dim: #6b7280;
+      --border: #e5e7eb;
+      --highlight: rgba(5,150,105,0.06);
+      --shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans SC", sans-serif;
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    /* ===== Container ===== */
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* ===== Section Headers ===== */
+    h2 {
+      color: var(--primary);
+      font-size: 1.5rem;
+      font-weight: 700;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.5rem;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+
+    h4 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    /* ===== Section Layout ===== */
+    section {
+      scroll-margin-top: 60px;
+      padding: 1.5rem 0;
+      page-break-inside: avoid;
+    }
+
+    /* ===== Hero / Header ===== */
+    .hero {
+      background: linear-gradient(135deg, var(--primary) 0%, #3b82f6 50%, var(--accent) 100%);
+      color: #ffffff;
+      padding: 3rem 0 2.5rem;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin: 0.75rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    .hero .subtitle {
+      font-size: 1.05rem;
+      opacity: 0.9;
+      max-width: 680px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .hero .meta {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      opacity: 0.85;
+    }
+
+    .hero .badge {
+      font-size: 0.8rem;
+    }
+
+    /* ===== Sticky Navigation ===== */
+    .sticky-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 0;
+    }
+
+    .nav-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.25rem;
+      height: 48px;
+    }
+
+    .nav-inner a {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+
+    .nav-inner a:hover,
+    .nav-inner a:focus {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    /* ===== Table of Contents ===== */
+    .toc-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem 2rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+
+    .toc-card h2 {
+      margin-top: 0;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 0.4rem;
+      font-size: 1.2rem;
+    }
+
+    .toc-list {
+      list-style: none;
+      counter-reset: toc-counter;
+    }
+
+    .toc-list > li {
+      counter-increment: toc-counter;
+      margin: 0.5rem 0;
+      line-height: 1.6;
+    }
+
+    .toc-list > li::before {
+      content: counter(toc-counter) ". ";
+      font-weight: 700;
+      color: var(--primary);
+      min-width: 2.5ch;
+      display: inline-block;
+    }
+
+    .toc-list > li a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .toc-list > li a:hover {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+
+    .toc-sub {
+      list-style: none;
+      margin-left: 2.5ch;
+      margin-top: 0.25rem;
+    }
+
+    .toc-sub li {
+      margin: 0.2rem 0;
+    }
+
+    .toc-sub li a {
+      font-weight: 400;
+      font-size: 0.92rem;
+      color: var(--text-dim);
+    }
+
+    .toc-sub li a:hover {
+      color: var(--primary);
+    }
+
+    /* ===== KPI Cards ===== */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 16px;
+      margin: 1rem 0;
+    }
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .kpi-card:first-child {
+      background: linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%);
+      color: #ffffff;
+      border-color: transparent;
+    }
+
+    .kpi-value {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .kpi-card:first-child .kpi-value {
+      font-size: 2.4rem;
+    }
+
+    .kpi-label {
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+      opacity: 0.8;
+    }
+
+    .kpi-card:first-child .kpi-label {
+      opacity: 0.9;
+    }
+
+    /* ===== Score Cards ===== */
+    .score-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin: 1rem 0;
+      box-shadow: var(--shadow);
+    }
+
+    .score-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0.4rem 0;
+    }
+
+    .score-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      min-width: 140px;
+      color: var(--text);
+    }
+
+    .score-bar {
+      flex: 1;
+      background: var(--border);
+      border-radius: 4px;
+      height: 18px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .score-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #ffffff;
+      min-width: 2.5ch;
+    }
+
+    /* ===== Comparison Tables ===== */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 1rem 0;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .table-wrap table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      background: var(--surface);
+    }
+
+    .table-wrap table thead {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .table-wrap table thead th {
+      background: var(--primary);
+      color: #ffffff;
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      border: none;
+    }
+
+    .table-wrap table tbody td {
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .table-wrap table tbody tr:nth-child(even) {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .table-wrap table tbody tr:hover {
+      background: var(--highlight);
+    }
+
+    .table-wrap table tbody tr.highlight {
+      background: var(--primary-light);
+      font-weight: 500;
+    }
+
+    .table-wrap table tbody tr.highlight td {
+      border-bottom-color: var(--primary);
+    }
+
+    /* ===== Callouts ===== */
+    .callout {
+      border-left: 4px solid;
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .callout-info {
+      border-left-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--text);
+    }
+
+    .callout-warn {
+      border-left-color: var(--warn);
+      background: var(--warn-light);
+      color: var(--text);
+    }
+
+    .callout-danger {
+      border-left-color: var(--danger);
+      background: var(--danger-light);
+      color: var(--text);
+    }
+
+    .callout-success {
+      border-left-color: var(--accent);
+      background: var(--accent-light);
+      color: var(--text);
+    }
+
+    .callout strong {
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .callout-info strong {
+      color: var(--primary);
+    }
+
+    .callout-warn strong {
+      color: var(--warn);
+    }
+
+    .callout-danger strong {
+      color: var(--danger);
+    }
+
+    .callout-success strong {
+      color: var(--accent);
+    }
+
+    /* ===== Formula Blocks ===== */
+    .formula {
+      background: #fffbeb;
+      border: 1px dashed #fbbf24;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      font-family: "SF Mono", "JetBrains Mono", "Fira Code", Consolas, monospace;
+      font-size: 0.88rem;
+      overflow-x: auto;
+      white-space: pre;
+      line-height: 1.5;
+      color: var(--text);
+    }
+
+    /* ===== Code Blocks ===== */
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+      overflow-x: auto;
+      font-family: "SF Mono", "JetBrains Mono", "Fira Code", Consolas, monospace;
+      font-size: 0.82rem;
+      line-height: 1.55;
+    }
+
+    code {
+      font-family: "SF Mono", "JetBrains Mono", "Fira Code", Consolas, monospace;
+      font-size: 0.88em;
+    }
+
+    p code, li code, td code {
+      background: rgba(0, 0, 0, 0.06);
+      color: #b91c1c;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-size: 0.85em;
+    }
+
+    /* Syntax highlighting classes */
+    .kw { color: #ff7b72; font-weight: 600; }
+    .str { color: #a5d6ff; }
+    .fn { color: #d2a8ff; }
+    .num { color: #79c0ff; }
+    .cmt { color: #6a737d; font-style: italic; }
+
+    /* ===== ASCII Diagrams ===== */
+    .diagram {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+      font-family: "SF Mono", "JetBrains Mono", "Fira Code", Consolas, monospace;
+      font-size: 0.82rem;
+      white-space: pre;
+      overflow-x: auto;
+      line-height: 1.4;
+      color: var(--text);
+    }
+
+    /* ===== Phase Timeline ===== */
+    .phase-timeline {
+      position: relative;
+      padding-left: 2rem;
+      margin: 1.5rem 0;
+    }
+
+    .phase-timeline::before {
+      content: "";
+      position: absolute;
+      left: 12px;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, var(--primary) 0%, var(--accent) 100%);
+      border-radius: 2px;
+    }
+
+    .phase-item {
+      position: relative;
+      margin: 1.5rem 0;
+      padding: 0;
+    }
+
+    .phase-item::before {
+      content: "";
+      position: absolute;
+      left: -2rem;
+      top: 6px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 3px solid var(--surface);
+      box-shadow: 0 0 0 2px var(--accent);
+      z-index: 1;
+    }
+
+    .phase-item-title {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+
+    .phase-item-desc {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    /* ===== Badges ===== */
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      line-height: 1.4;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-green {
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .badge-blue {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .badge-orange {
+      background: var(--warn-light);
+      color: var(--warn);
+    }
+
+    .badge-red {
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+
+    .badge-purple {
+      background: #ede9fe;
+      color: #7c3aed;
+    }
+
+    /* ===== Flow Steps ===== */
+    .flow-steps {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin: 1rem 0;
+    }
+
+    .flow-step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 0.75rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .flow-step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .flow-step-title {
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.25rem;
+      color: var(--text);
+    }
+
+    .flow-step-desc {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      line-height: 1.4;
+    }
+
+    /* ===== Quick Conclusion ===== */
+    .quick-take {
+      background: var(--highlight);
+      border-left: 5px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 1.25rem 1.5rem;
+      margin: 1rem 0;
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    .quick-take strong {
+      color: var(--accent);
+      display: block;
+      font-size: 1.1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    /* ===== Grid Layouts ===== */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin: 1rem 0;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 1rem 0;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin: 1rem 0;
+    }
+
+    /* ===== Star Ratings ===== */
+    .stars {
+      color: #f59e0b;
+      letter-spacing: 0.15em;
+      font-size: 0.95rem;
+    }
+
+    /* ===== Tags ===== */
+    .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      line-height: 1.4;
+      letter-spacing: 0.02em;
+    }
+
+    .tag-rec {
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .tag-warn {
+      background: var(--warn-light);
+      color: var(--warn);
+    }
+
+    .tag-new {
+      background: #ede9fe;
+      color: #7c3aed;
+    }
+
+    .tag-fix {
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+
+    /* ===== Content Cards ===== */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+
+    .card h3,
+    .card h4 {
+      margin-top: 0;
+    }
+
+    /* ===== Review Section ===== */
+    .review-section {
+      margin: 1rem 0;
+    }
+
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin: 1rem 0;
+    }
+
+    .review-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .grade {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+
+    .label {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.3;
+    }
+
+    /* ===== Footer ===== */
+    .footer {
+      background: var(--surface);
+      border-top: 2px solid var(--primary);
+      padding: 2rem 0;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    /* ===== Paragraphs & Lists ===== */
+    p {
+      margin: 0.5rem 0;
+    }
+
+    ul, ol {
+      margin: 0.5rem 0 0.5rem 1.5rem;
+    }
+
+    li {
+      margin: 0.25rem 0;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      body {
+        font-size: 14px;
+      }
+
+      .hero h1 {
+        font-size: 1.5rem;
+      }
+
+      .hero .subtitle {
+        font-size: 0.92rem;
+      }
+
+      .hero .meta {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .nav-inner {
+        height: auto;
+        padding: 8px 12px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+      }
+
+      .nav-inner a {
+        font-size: 0.72rem;
+        padding: 5px 7px;
+      }
+
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .kpi-grid .kpi-card:first-child {
+        grid-column: auto;
+      }
+
+      .kpi-value {
+        font-size: 1.5rem;
+      }
+
+      .kpi-card:first-child .kpi-value {
+        font-size: 1.7rem;
+      }
+
+      .score-label {
+        min-width: 100px;
+      }
+
+      .flow-steps {
+        grid-template-columns: 1fr;
+      }
+
+      .grid-2,
+      .grid-3,
+      .grid-4 {
+        grid-template-columns: 1fr;
+      }
+
+      .review-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .toc-card {
+        padding: 1rem 1.25rem;
+      }
+
+      .toc-sub {
+        margin-left: 1.5ch;
+      }
+
+      h2 {
+        font-size: 1.3rem;
+      }
+
+      h3 {
+        font-size: 1.05rem;
+      }
+
+      section {
+        padding: 1rem 0;
+      }
+
+      .container {
+        padding: 0 16px;
+      }
+    }
+
+    /* ===== Print ===== */
+    @media print {
+      body {
+        background: #ffffff;
+        color: #000000;
+        font-size: 12px;
+      }
+
+      .hero {
+        background: #ffffff;
+        color: #000000;
+        padding: 1.5rem 0;
+      }
+
+      .hero h1 {
+        color: #000000;
+      }
+
+      .hero .subtitle,
+      .hero .meta {
+        color: #333333;
+        opacity: 1;
+      }
+
+      .sticky-nav {
+        display: none;
+      }
+
+      .kpi-card,
+      .score-card,
+      .callout,
+      .formula,
+      .diagram,
+      .toc-card,
+      .quick-take,
+      .flow-step,
+      .table-wrap {
+        box-shadow: none;
+      }
+
+      .table-wrap {
+        border: 1px solid #cccccc;
+      }
+
+      pre {
+        font-size: 0.7rem;
+        background: #f0f0f0;
+        color: #000000;
+      }
+
+      p code, li code, td code {
+        background: #f0f0f0;
+        color: #333333;
+      }
+
+      section {
+        page-break-inside: avoid;
+      }
+
+      a {
+        color: #000000;
+        text-decoration: underline;
+      }
+
+      .badge,
+      .tag {
+        border: 1px solid #cccccc;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Hero / Header ===== -->
+  <header class="hero">
+    <div class="container">
+      <div class="badge badge-green">&#x1F52C; Deep Research &middot; v3.0 Ultimate</div>
+      <h1>&#x1F3A4; 双路麦克风时延对齐 — 终极调研报告</h1>
+      <p class="subtitle">手机 + 外接无线麦克风双路拾音 · 冷启动时延估计 · 信号设计 · 系统架构</p>
+      <div class="meta">
+        <span>&#x1F4C5; 2026-06-10</span>
+        <span>&#x1F4C4; v3.0 Ultimate（三报告整合版）</span>
+        <span>&#x1F3AF; 精度目标 &lt;10ms</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Sticky Navigation ===== -->
+  <nav class="sticky-nav">
+    <div class="nav-inner">
+      <a href="#sec1">结论</a>
+      <a href="#sec2">问题</a>
+      <a href="#sec3">全景</a>
+      <a href="#sec4">校准信号</a>
+      <a href="#sec5">水印</a>
+      <a href="#sec6">GCC-PHAT</a>
+      <a href="#sec7">检测</a>
+      <a href="#sec8">心理声学</a>
+      <a href="#sec9">工程约束</a>
+      <a href="#sec10">跟踪</a>
+      <a href="#sec11">路线</a>
+      <a href="#sec12">代码</a>
+      <a href="#sec13">文献</a>
+    </div>
+  </nav>
+
+  <!-- ===== Table of Contents ===== -->
+  <main class="container">
+
+    <!-- =================== §1 一页结论 =================== -->
+    <section id="sec1">
+      <h2>1. 一页结论</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 快速结论：</strong>100-300ms 的可听短 Chirp 配合匹配滤波，代码约 100 行，即可从根本上消除第一句话的重音问题。这是投入产出比最高的方案。
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card" style="grid-column: span 2;">
+          <div class="kpi-value">100-300ms 可听短 Chirp</div>
+          <div class="kpi-label">首选 MVP — 放进倒计时、开录提示音里，正式内容前剪掉</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value">用户说"开始"</div>
+          <div class="kpi-label">最稳 Fallback — 声源位置更接近嘴巴，几何误差最小</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value">近超声探针</div>
+          <div class="kpi-label">高级探索 — 体验好，但机型覆盖和处理链路风险高</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value">&lt; 10ms</div>
+          <div class="kpi-label">验收指标 — 建议内部目标先压到 3-5ms，给漂移留余量</div>
+        </div>
+      </div>
+
+      <div class="flow-steps" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="flow-step">
+          <div class="flow-step-num">1</div>
+          <div class="flow-step-title">可听 Chirp 校准</div>
+          <div class="flow-step-desc">Phase 1 · 1-2 周</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">2</div>
+          <div class="flow-step-title">近超声升级</div>
+          <div class="flow-step-desc">Phase 2 · 需验证</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">3</div>
+          <div class="flow-step-title">扩频水印</div>
+          <div class="flow-step-desc">Phase 3 · 持续跟踪</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">4</div>
+          <div class="flow-step-title">产品级优化</div>
+          <div class="flow-step-desc">Phase 4 · 心理声学</div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <strong>为什么算法不能单独解决冷启动</strong>
+        <p>时延估计需要两路里存在共同可观测信号。首个有效共同信号出现前，算法没有信息可以估计。主动校准的本质是：在正式内容开始前，主动制造一个高 SNR、形状已知的共同信号。</p>
+      </div>
+    </section>
+
+    <!-- =================== §2 问题本质与约束 =================== -->
+    <section id="sec2">
+      <h2>2. 问题本质与约束</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 核心痛点是"冷启动"</strong>— TDE 算法需要语音信号才能检测延迟，第一句话开头没有对齐依据。精度要求：对齐后残余误差 &lt;10ms（Haas Effect 阈值）。
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th style="width:25%">维度</th><th>内容</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>场景</strong></td><td>手机内置麦克风 + 外接无线麦克风（如 DJI Mic，标称延迟 ~15ms）双路拾音</td></tr>
+            <tr><td><strong>核心痛点</strong></td><td>两路信号存在固定/时变延迟，混音后产生重音</td></tr>
+            <tr><td><strong>精度要求</strong></td><td>对齐后残余误差 &lt;10ms（人耳不可感知重音的阈值）</td></tr>
+            <tr><td><strong>现有方案</strong></td><td>基于 Interspeech 发表的 TDE 算法做实时对齐</td></tr>
+            <tr><td><strong>待解决问题</strong></td><td>TDE 需要语音信号才能检测延迟 → 冷启动问题</td></tr>
+            <tr><td><strong>约束</strong></td><td>移动端实时运行；用户无感知或低感知；不依赖特殊硬件改造</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-warn">
+        <strong>为什么是 10ms？</strong>
+        <p>10ms 对应空间距离约 3.4m（声速 343m/s）。时间差小于 10ms 时，人耳将它们感知为同一声源（优先效应 / Haas Effect）。实际中 5ms 以下更保险。</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>手机喇叭发探针时</h3>
+          <div class="formula">estimated_delay = input_path_delta + speaker_to_mic_geometry_delta</div>
+          <p style="margin-top: 0.5rem; color: var(--text-dim);">喇叭播放延迟是两路共有的发声起点；真正进入估计的是两条输入链路差，以及喇叭到两支麦的空气传播路径差。</p>
+        </div>
+        <div class="card">
+          <h3>正式人声混音真正需要</h3>
+          <div class="formula">wanted_delay = input_path_delta + mouth_to_mic_geometry_delta</div>
+          <p style="margin-top: 0.5rem; color: var(--text-dim);">如果喇叭位置和嘴巴位置差得很远，校准值会带几何偏差。声速约 343m/s，10ms 对应约 3.43m 路径差；20cm 位置误差约 0.6ms，通常可接受。</p>
+        </div>
+      </div>
+
+      <div class="callout callout-warn">
+        <strong>关键设计含义</strong>
+        <p>手持手机拍摄时，用手机喇叭 chirp 校准通常足够。如果手机在桌上、DJI 夹在胸口、说话者频繁移动，最好改成"用户说开始/打响指"的口部源校准。</p>
+      </div>
+    </section>
+
+    <!-- =================== §3 方案全景图 =================== -->
+    <section id="sec3">
+      <h2>3. 方案全景图</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 方案分三大族</strong>：A 主动校准信号（一次性播放已知信号）、B 音频水印（持续嵌入不可感知信号）、C 被动 TDE 基线（GCC-PHAT）。注入架构有 4 种选择，推荐 MVP 是短 Chirp。
+      </div>
+
+      <div class="grid-3">
+  <div class="card">
+    <h4>方案 A：主动校准信号</h4>
+    <p>播放已知信号 → 两 MIC 拾取 → 互相关检测</p>
+    <ul>
+      <li>一次性/周期性播放</li>
+      <li>精度: &lt;1ms</li>
+      <li><span class="badge badge-green">解决冷启动</span></li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>方案 B：音频水印嵌入</h4>
+    <p>不可感知信号嵌入音频流 → 持续检测水印位置</p>
+    <ul>
+      <li>持续无缝</li>
+      <li>精度: 1-5ms</li>
+      <li><span class="badge badge-green">解决冷启动 + 持续跟踪</span></li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>方案 C：GCC-PHAT 被动基线</h4>
+    <p>利用环境音/噪声的互相关做延迟估计</p>
+    <ul>
+      <li>依赖环境声源</li>
+      <li>精度: 5-50ms</li>
+      <li><span class="badge badge-orange">冷启动问题所在</span></li>
+    </ul>
+  </div>
+</div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>架构</th><th>原理</th><th>可行性</th><th>备注</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>A. 扬声器外放</strong></td><td>手机扬声器播放→空气传播→两路mic拾取</td><td><span class="badge badge-orange">⚠️ 条件可行</span></td><td>DJI Mic TX 必须离手机足够近</td></tr>
+            <tr><td><strong>B. TX 端内置信号源</strong></td><td>DJI Mic TX 端播放/振动产生校准信号</td><td><span class="badge badge-green">✅ 最优</span></td><td>需要 TX 端硬件支持</td></tr>
+            <tr><td><strong>C. 用户操作产生</strong></td><td>拍手/弹指/敲击→瞬态声源</td><td><span class="badge badge-green">✅ 实用</span></td><td>最 low-tech，精度较低</td></tr>
+            <tr><td><strong>D. RX 端数字注入</strong></td><td>在 DJI Mic RX 的 DSP 注入参考信号</td><td><span class="badge badge-orange">⚠️ 部分可行</span></td><td>仅测数字通路时延</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-warn">
+        <strong>关键判断</strong>
+        <p>如果 DJI Mic 是手持/桌面式（TX 在手机附近），架构 A 可行。如果是领夹式（TX 在人身上，距手机 1-3m），架构 A 的信噪比会很差。变通方案：让 TX 端的监听扬声器播放校准信号。</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="score-card">
+          <div class="score-card-title">#1 短 Chirp — 100-300ms 扫频信号</div>
+          <div class="score-row"><span class="score-label">稳定性</span><div class="score-bar"><div class="score-fill" style="width: 86%;">86%</div></div></div>
+          <div class="score-row"><span class="score-label">用户体验</span><div class="score-bar"><div class="score-fill" style="width: 72%;">72%</div></div></div>
+          <div class="score-row"><span class="score-label">实现复杂度</span><div class="score-bar"><div class="score-fill" style="width: 52%;">52%</div></div></div>
+          <div style="margin-top: 0.5rem;">
+            <span class="tag tag-rec">推荐MVP</span>
+            <span class="tag tag-rec">抗噪较好</span>
+          </div>
+        </div>
+
+        <div class="score-card">
+          <div class="score-card-title">#2 MLS/PN 序列 — 伪随机序列</div>
+          <div class="score-row"><span class="score-label">稳定性</span><div class="score-bar"><div class="score-fill" style="width: 78%;">78%</div></div></div>
+          <div class="score-row"><span class="score-label">用户体验</span><div class="score-bar"><div class="score-fill" style="width: 62%;">62%</div></div></div>
+          <div class="score-row"><span class="score-label">实现复杂度</span><div class="score-bar"><div class="score-fill" style="width: 65%;">65%</div></div></div>
+          <div style="margin-top: 0.5rem;">
+            <span class="tag tag-warn">低音量可试</span>
+            <span class="tag tag-warn">像短噪声</span>
+          </div>
+        </div>
+
+        <div class="score-card">
+          <div class="score-card-title">#3 近超声 Chirp — 17.5-19.5kHz</div>
+          <div class="score-row"><span class="score-label">稳定性</span><div class="score-bar"><div class="score-fill" style="width: 48%;">48%</div></div></div>
+          <div class="score-row"><span class="score-label">用户体验</span><div class="score-bar"><div class="score-fill" style="width: 88%;">88%</div></div></div>
+          <div class="score-row"><span class="score-label">实现复杂度</span><div class="score-bar"><div class="score-fill" style="width: 82%;">82%</div></div></div>
+          <div style="margin-top: 0.5rem;">
+            <span class="tag tag-new">体验潜力高</span>
+            <span class="tag tag-warn">必须fallback</span>
+          </div>
+        </div>
+
+        <div class="score-card">
+          <div class="score-card-title">#4 用户口部源校准 — 说"开始"/打响指</div>
+          <div class="score-row"><span class="score-label">稳定性</span><div class="score-bar"><div class="score-fill" style="width: 90%;">90%</div></div></div>
+          <div class="score-row"><span class="score-label">用户体验</span><div class="score-bar"><div class="score-fill" style="width: 58%;">58%</div></div></div>
+          <div class="score-row"><span class="score-label">实现复杂度</span><div class="score-bar"><div class="score-fill" style="width: 45%;">45%</div></div></div>
+          <div style="margin-top: 0.5rem;">
+            <span class="tag tag-rec">最稳fallback</span>
+            <span class="tag tag-rec">几何误差小</span>
+          </div>
+        </div>
+
+        <div class="score-card">
+          <div class="score-card-title">#5 硬件 Loopback — 线材/治具</div>
+          <div class="score-row"><span class="score-label">稳定性</span><div class="score-bar"><div class="score-fill" style="width: 92%;">92%</div></div></div>
+          <div class="score-row"><span class="score-label">用户体验</span><div class="score-bar"><div class="score-fill" style="width: 30%;">30%</div></div></div>
+          <div class="score-row"><span class="score-label">实现复杂度</span><div class="score-bar"><div class="score-fill" style="width: 78%;">78%</div></div></div>
+          <div style="margin-top: 0.5rem;">
+            <span class="tag tag-warn">QA/实验室</span>
+          </div>
+        </div>
+
+        <div class="score-card">
+          <div class="score-card-title">#6 UI 音效嵌码 — 混进提示音</div>
+          <div class="score-row"><span class="score-label">稳定性</span><div class="score-bar"><div class="score-fill" style="width: 80%;">80%</div></div></div>
+          <div class="score-row"><span class="score-label">用户体验</span><div class="score-bar"><div class="score-fill" style="width: 82%;">82%</div></div></div>
+          <div class="score-row"><span class="score-label">实现复杂度</span><div class="score-bar"><div class="score-fill" style="width: 60%;">60%</div></div></div>
+          <div style="margin-top: 0.5rem;">
+            <span class="tag tag-rec">产品化主线</span>
+            <span class="tag tag-rec">可解释</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================== §4 主动校准信号 =================== -->
+    <section id="sec4">
+      <h2>4. 主动校准信号</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 快速结论：</strong>推荐首选：线性 Chirp (LFM) + Tukey 窗，50ms，200Hz→8kHz 扫频，处理增益 26dB。实现最简单，精度 &lt;1ms，远超 10ms 要求。Golay 互补序列精度最高但不适合无线场景（需播放两次）。近超声方案体验最好但需硬件验证。
+      </div>
+
+      <!-- 4.1 线性 Chirp -->
+      <h3 id="sec4-1">4.1 线性 Chirp（LFM） <span class="tag tag-rec">⭐ 推荐</span></h3>
+
+      <h4>数学定义</h4>
+      <div class="formula">
+x(t) = A · sin(2π·f₀·t + π·k·t²)    t ∈ [0, T]
+
+f₀ = 起始频率  f₁ = 终止频率  B = f₁ - f₀ = 带宽
+k = B / T = 扫频速率  T = 信号持续时间</div>
+
+      <h4>匹配滤波检测</h4>
+      <p>匹配滤波本质是将接收信号与已知 chirp 的<strong>时间反转共轭</strong>做卷积，等价于频域实现：</p>
+      <pre><code><span class="cmt">// 频域匹配滤波（高效实现）</span>
+<span class="fn">C</span>(f) = <span class="fn">S</span>(f) · <span class="fn">X*</span>(f)        <span class="cmt">// S=接收信号频谱, X=chirp模板频谱</span>
+<span class="fn">c</span>[k] = <span class="fn">IFFT</span>{<span class="fn">C</span>(f)}           <span class="cmt">// 互相关结果</span>
+
+<span class="cmt">// 处理增益 (Processing Gain)</span>
+<span class="fn">G_p</span> = <span class="fn">T</span> × <span class="fn">B</span>                  <span class="cmt">// 时间-带宽积</span>
+
+<span class="cmt">// 示例: T=50ms, B=7.8kHz (200Hz→8kHz)</span>
+<span class="fn">G_p</span> = <span class="num">0.05</span> × <span class="num">7800</span> = <span class="num">390</span> ≈ <span class="num">25.9</span> <span class="kw">dB</span></code></pre>
+
+      <p>处理增益 26dB 意味着：即使 chirp 信号的音量比环境噪声低 20dB，匹配滤波后仍然能清晰检测到峰值。</p>
+
+      <h4>旁瓣问题与窗函数</h4>
+      <p>线性 chirp 的匹配滤波输出有<strong>旁瓣（sidelobes）</strong>。矩形窗下第一旁瓣为 -13.2 dB（相对主瓣）。施加窗函数可抑制旁瓣：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>窗函数</th><th>第一旁瓣</th><th>主瓣展宽</th><th>适用场景</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>矩形（无窗）</td><td>-13.2 dB</td><td>1.0×</td><td>SNR 优先</td></tr>
+            <tr><td>Hamming</td><td>-42.7 dB</td><td>1.5×</td><td>通用</td></tr>
+            <tr><td>Hann</td><td>-31.5 dB</td><td>1.5×</td><td>旁瓣抑制</td></tr>
+            <tr class="highlight"><td><strong>Tukey (α=0.5)</strong></td><td><strong>-22 dB</strong></td><td><strong>1.2×</strong></td><td><strong>⭐ 推荐 — 平衡 SNR 和旁瓣</strong></td></tr>
+            <tr><td>Blackman</td><td>-58.1 dB</td><td>1.8×</td><td>极端旁瓣抑制</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>亚样本精度插值</h4>
+      <p>互相关峰值落在离散样本上，但真实延迟可能在两个样本之间。使用<strong>对数域抛物线插值</strong>：</p>
+      <pre><code><span class="cmt">// k = 峰值样本索引, c[] = 互相关结果</span>
+<span class="fn">α</span> = <span class="fn">log</span>(|c[k-<span class="num">1</span>]|)
+<span class="fn">β</span> = <span class="fn">log</span>(|c[k]|)
+<span class="fn">γ</span> = <span class="fn">log</span>(|c[k+<span class="num">1</span>]|)
+
+<span class="fn">δ</span> = (<span class="fn">α</span> - <span class="fn">γ</span>) / (<span class="num">2</span> · (<span class="fn">α</span> - <span class="num">2</span><span class="fn">β</span> + <span class="fn">γ</span>))   <span class="cmt">// 亚样本偏移</span>
+<span class="fn">τ</span> = k + <span class="fn">δ</span>                             <span class="cmt">// 精确延迟（样本数）</span>
+<span class="fn">delay_seconds</span> = <span class="fn">τ</span> / fs</code></pre>
+
+      <div class="callout callout-info">
+        <strong>插值精度参考</strong>
+        <p>对数域抛物线插值在 SNR &gt; 10dB 时精度约 ±0.02 样本（±0.42μs @48kHz），远超 10ms 要求。在极低 SNR（&lt;5dB）条件下，该估计器存在约 0.05-0.1 样本的系统偏差，如需更高精度可改用 Quinn 或 Macleod 估计器。</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>插值方法</th><th>SNR=20dB</th><th>SNR=10dB</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>无插值</td><td>±0.5 样本</td><td>±0.5 样本</td></tr>
+            <tr><td>抛物线（线性幅度）</td><td>±0.05</td><td>±0.15</td></tr>
+            <tr class="highlight"><td><strong>抛物线（对数幅度）</strong></td><td><strong>±0.02</strong></td><td><strong>±0.08</strong></td><td><strong>推荐</strong></td></tr>
+            <tr><td>匹配滤波插值</td><td>±0.01</td><td>±0.05</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>推荐参数</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>参数</th><th>推荐值</th><th>理由</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>f₀</td><td>200 Hz</td><td>避开直流和低频噪声</td></tr>
+            <tr><td>f₁</td><td>8000 Hz</td><td>手机扬声器/麦克风的上限</td></tr>
+            <tr><td>T</td><td>50 ms</td><td>感知为短促"嗖"声，可接受</td></tr>
+            <tr><td>fs</td><td>48000 Hz</td><td>满足 Nyquist</td></tr>
+            <tr><td>TBP</td><td>390 (25.9 dB)</td><td>极高处理增益</td></tr>
+            <tr><td>窗函数</td><td>Tukey (α=0.5)</td><td>平衡 SNR 与旁瓣</td></tr>
+            <tr><td>幅度</td><td>-20 dBFS</td><td>不突兀但 SNR 充足</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 4.2 ESS -->
+      <h3 id="sec4-2">4.2 指数扫频 ESS（Farina 方法）</h3>
+
+      <h4>数学定义</h4>
+      <div class="formula">
+x(t) = sin( K · (e^(t/L · ln(f₁/f₀)) - 1) )
+K = 2πf₀L / ln(f₁/f₀),  L = T</div>
+
+      <p>ESS 的关键特性：<strong>频率随时间指数增长</strong>，低频部分花费更多时间（能量更多），高频部分扫得更快。</p>
+
+      <h4>逆滤波器归一化</h4>
+      <div class="formula">
+x_inv(t) = (1/A_norm) · x(T - t) · e^(t/T · ln(f₁/f₀))
+
+其中 A_norm 为归一化常数，确保反卷积后脉冲响应的 DC 增益为单位值。
+省略归一化会导致脉冲响应的绝对幅度取决于扫频参数，影响跨配置 SNR 比较。</div>
+
+      <h4>非线性失真分离 — ESS 独有优势</h4>
+      <p>如果手机扬声器在大音量下播放时产生非线性失真（削波），产生的各阶谐波失真在反卷积后会出现在主脉冲的<strong>负时间区域</strong>，可以干净地分离：</p>
+      <div class="callout callout-success">
+  <strong>ESS 独有优势：非线性失真分离</strong>
+  <p>反卷积后，各阶谐波失真出现在主脉冲的<strong>负时间区域</strong>，可以干净地分离：</p>
+  <div style="display:flex; align-items:center; gap:0; font-family:monospace; font-size:0.85rem; margin:1rem 0; flex-wrap:wrap;">
+    <span style="background:#fee2e2; padding:6px 10px; border-radius:4px; color:#991b1b;">3次谐波</span>
+    <span style="color:var(--text-dim); padding:0 4px;">···</span>
+    <span style="background:#fef3c7; padding:6px 10px; border-radius:4px; color:#92400e;">2次谐波</span>
+    <span style="color:var(--text-dim); padding:0 4px;">·····</span>
+    <span style="background:#d1fae5; padding:6px 14px; border-radius:4px; color:#065f46; font-weight:700;">主脉冲(线性IR)</span>
+    <span style="color:var(--text-dim); padding:0 4px;">···</span>
+  </div>
+  <p style="font-size:0.85rem; color:var(--text-dim);">← 负时间 ──────────── 0 ──── 正时间 →</p>
+  <p>主脉冲不受谐波失真污染，延迟检测更可靠。</p>
+</div>
+
+      <h4>LFM vs ESS 对比</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>特性</th><th>LFM Chirp</th><th>ESS (Farina)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>频谱能量分布</td><td>均匀</td><td>低频能量多（3dB/oct）</td></tr>
+            <tr><td>逆滤波器</td><td>需数值计算</td><td>有解析公式</td></tr>
+            <tr><td>非线性分离</td><td>❌</td><td><strong>✅</strong></td></tr>
+            <tr><td>实现复杂度</td><td>低</td><td>中</td></tr>
+            <tr><td>动态范围</td><td>—</td><td>ESS 80.1dB vs MLS 60.5dB (arXiv:1106.1199)</td></tr>
+            <tr><td><strong>推荐度</strong></td><td><strong>⭐⭐⭐ 通用首选</strong></td><td><strong>⭐⭐⭐ 扬声器失真严重时</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-info">
+        <strong>ESS 的定位</strong>
+        <p>如果你不仅想测时延，还想<strong>诊断两路通道的频率响应差异</strong>（理解为什么两路 mic 声音不同），ESS 是最佳选择。但对于"录音开始时的快速校准"，ESS 时长偏长（≥1s），Chirp 更适合。</p>
+      </div>
+
+      <!-- 4.3 MLS -->
+      <h3 id="sec4-3">4.3 最大长度序列（MLS）</h3>
+
+      <h4>数学基础</h4>
+      <p>MLS 由<strong>线性反馈移位寄存器（LFSR）</strong>生成，序列长度 P = 2<sup>n</sup> - 1，值域 {+1, -1}。反馈多项式必须是<strong>本原多项式</strong>。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>阶数 n</th><th>本原多项式</th><th>序列长度 P</th><th>播放时长 @48kHz</th><th>SNR 增益</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>10</td><td>x¹⁰ + x³ + 1</td><td>1023</td><td><strong>21.3 ms</strong></td><td>30.1 dB</td></tr>
+            <tr><td>12</td><td>x¹² + x⁶ + x⁴ + x + 1</td><td>4095</td><td>85.3 ms</td><td>36.1 dB</td></tr>
+            <tr><td>14</td><td>x¹⁴ + x⁵ + 1</td><td>16383</td><td>341 ms</td><td>42.1 dB</td></tr>
+            <tr><td>16</td><td>x¹⁶ + x⁵ + x³ + x² + 1</td><td>65535</td><td>1.37 s</td><td>48.2 dB</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-info">
+        <strong>MLS 长度选择建议</strong>
+        <p>对于 10ms 精度目标和 48kHz 采样率，<strong>n=10 (P=1023, 21ms)</strong> 是最实际的选择——30dB 增益足够，播放时间最短。如果对 SNR 有更高要求（嘈杂环境），升级到 n=12。</p>
+      </div>
+
+      <h4>自相关特性</h4>
+      <div class="formula">
+R_MLS[k] = 1 当 k = 0 (mod P)；-1/P 当 k ≠ 0
+P=4095 时, -1/P ≈ -0.000244 → 近似完美 delta 函数</div>
+
+      <h4>FHT 加速</h4>
+      <p>MLS 互相关可用快速 Hadamard 变换（FHT）加速，计算量 O(N·log₂N) 且<strong>全是加减法</strong>，没有乘法：</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>方法</th><th>复杂度</th><th>N=4095 运算量</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>直接互相关</td><td>O(N²)</td><td>~16.8M 次乘加</td></tr>
+            <tr><td>FFT 互相关</td><td>O(N·logN)</td><td>~49K 次乘加</td></tr>
+            <tr class="highlight"><td><strong>FHT（MLS 专用）</strong></td><td><strong>O(N·log₂N)</strong></td><td><strong>~49K 次加减</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 4.4 Golay -->
+      <h3 id="sec4-4">4.4 Golay 互补序列</h3>
+
+      <h4>数学定义</h4>
+      <p>Golay 互补序列是<strong>一对</strong>二值序列 (A, B)，满足：</p>
+      <div class="formula">
+R_A[k] + R_B[k] = 2N 当 k=0；0 当 k≠0
+两个序列各自自相关的旁瓣<strong>完全抵消</strong>，合成完美 delta 函数。</div>
+
+      <h4>优势：零旁瓣 + ~3dB 优于 MLS</h4>
+      <p>Golay 对是唯一能做到<strong>非周期自相关完美零旁瓣</strong>的信号：两个序列的自相关函数相加后，所有非零 shift 处的旁瓣精确抵消为零。SNR 约 3dB 优于同等长度的 MLS。</p>
+
+      <div class="callout callout-danger">
+        <strong>Golay 的实际时间开销 — 不推荐无线场景</strong>
+        <p>两段序列必须<strong>顺序播放</strong>，且中间需要<strong>保护间隔</strong>（guard interval）防止混响重叠。以 N=2048 为例：每段 42.7ms + 保护间隔 ~15ms → 总校准时间 ~100ms，是 Chirp 50ms 的两倍。</p>
+        <p>更关键的是，两次播放间如果无线麦克风延迟发生变化（常见于蓝牙重传），会导致不对称相关峰，严重影响精度。<strong>结论：不推荐用于无线麦克风场景。</strong></p>
+      </div>
+
+      <h4>Golay vs MLS vs Chirp 对比</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>特性</th><th>Golay</th><th>MLS</th><th>Chirp</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>自相关旁瓣</td><td><strong>精确为零</strong></td><td>MLS 有极小旁瓣</td><td>-13.2dB</td></tr>
+            <tr><td>SNR</td><td>~3dB 优于 MLS</td><td>10·log₁₀(P)</td><td>T·B</td></tr>
+            <tr><td>播放次数</td><td><strong>2 次</strong></td><td>1 次</td><td>1 次</td></tr>
+            <tr><td>时变系统鲁棒性</td><td><strong>低</strong></td><td>高</td><td>高</td></tr>
+            <tr><td>非线性分离</td><td>❌</td><td>❌</td><td>✅ (ESS)</td></tr>
+            <tr><td>FFT 兼容性</td><td>2 的幂次 ✓</td><td>2<sup>N</sup> - 1 ✗</td><td>✓</td></tr>
+            <tr><td>Crest Factor</td><td>√2</td><td>1.0</td><td>~1.4</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 4.5 近超声 -->
+      <h3 id="sec4-5">4.5 近超声 Chirp（16-20kHz） <span class="tag tag-new">需硬件验证</span></h3>
+
+      <p>将 Chirp 信号移到 16-20kHz 的近超声频段，人耳几乎听不到。</p>
+
+      <h4>手机硬件在近超声频段的能力</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>频段</th><th>手机扬声器输出</th><th>手机麦克风灵敏度</th><th>人耳可听度</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>16-17 kHz</td><td>好（接近全幅）</td><td>好</td><td>年轻人可能听到</td></tr>
+            <tr><td>17-18 kHz</td><td>好（-3 ~ -6 dB）</td><td>好</td><td>大多数人听不到</td></tr>
+            <tr><td>18-19 kHz</td><td>中等（-6 ~ -12 dB）</td><td>中等</td><td>几乎所有人听不到</td></tr>
+            <tr><td>19-20 kHz</td><td>弱（-12 ~ -24 dB）</td><td>弱</td><td>听不到</td></tr>
+            <tr><td>20+ kHz</td><td>极弱或无</td><td>极弱或无</td><td>听不到</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>参考：Google Nearby 使用 18.520kHz；CMU 超声时间同步论文；EURASIP 2021 近超声通信论文</p>
+
+      <div class="callout callout-danger">
+        <strong>硬件可靠性警告</strong>
+        <p>上表的频率响应数据基于有限设备的测量结果，<strong>不代表所有手机</strong>。近超声频段的硬件能力高度依赖于具体设备型号：</p>
+        <ul>
+          <li>某些 Samsung 设备在 16kHz 以上有激进的低通滤波</li>
+          <li>某些 iPhone 型号可以通过 20kHz，某些不行</li>
+          <li>低端 Android 手机可能在 14kHz 就开始衰减</li>
+          <li>许多手机在 Audio HAL 层施加 16-18kHz 的低通滤波以防止超声伪影</li>
+        </ul>
+        <p><strong>必须的验证步骤</strong>：在目标设备矩阵（至少 top 10 SKU）上测试 16-20kHz 频率响应；同时测试 DJI Mic 接收端的超声频段响应；实现运行时回退协议——如果超声 SNR &lt; 阈值，自动降级到可听 Chirp。</p>
+      </div>
+
+      <h4>推荐参数</h4>
+      <pre><code><span class="cmt">// 近超声 Chirp 推荐参数</span>
+频率范围: <span class="num">16.5</span> kHz → <span class="num">19.5</span> kHz （<span class="num">3</span> kHz 带宽）
+持续时间: <span class="num">50</span> ms
+TBP: <span class="num">0.05</span> × <span class="num">3000</span> = <span class="num">150</span> （<span class="num">21.8</span> <span class="kw">dB</span> 处理增益，仍然充足）
+采样率: <span class="num">48</span> kHz
+窗函数: Tukey (<span class="fn">α</span>=<span class="num">0.5</span>)</code></pre>
+
+      <!-- 4.6 综合对比 -->
+      <h3 id="sec4-6">4.6 综合对比表</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>特性</th><th>LFM Chirp</th><th>ESS (Farina)</th><th>MLS</th><th>Golay</th><th>近超声 Chirp</th></tr>
+          </thead>
+          <tbody>
+            <tr class="highlight"><td>自相关旁瓣</td><td>-13.2 dB</td><td>很低</td><td>-1/P ≈ 0</td><td><strong>精确零</strong></td><td>-13.2 dB</td></tr>
+            <tr><td>SNR 增益</td><td>T·B (线性)</td><td>T·B (指数加权)</td><td>10·log₁₀(P)</td><td>10·log₁₀(2N)</td><td>T·B</td></tr>
+            <tr><td>非线性分离</td><td>❌</td><td><strong>✅</strong></td><td>❌</td><td>❌</td><td>❌</td></tr>
+            <tr><td>播放次数</td><td>1</td><td>1</td><td>1</td><td><strong>2</strong></td><td>1</td></tr>
+            <tr><td>最小时长 @48kHz</td><td>50ms</td><td>50ms</td><td>21ms (n=10)</td><td>2×43ms+保护</td><td>50ms</td></tr>
+            <tr><td>时变系统鲁棒性</td><td>高</td><td>高</td><td>高</td><td><strong>低</strong></td><td>高</td></tr>
+            <tr><td>用户感知</td><td>"嗖"声</td><td>"嗖"(低频更明显)</td><td>"嘶"声</td><td>"嘶嘶"×2</td><td>几乎无感</td></tr>
+            <tr><td>硬件兼容性</td><td>通用</td><td>通用</td><td>通用</td><td>通用</td><td>需验证</td></tr>
+            <tr class="highlight"><td><strong>推荐度</strong></td><td><span class="stars">★★★★★</span></td><td><span class="stars">★★★★☆</span></td><td><span class="stars">★★★☆☆</span></td><td><span class="stars">★★☆☆☆</span></td><td><span class="stars">★★★★☆</span> <small>(验证后)</small></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 4.7 试听校准信号 -->
+      <h3 id="sec4-7">4.7 试听校准信号 🎧</h3>
+
+      <div class="callout callout-info">
+        <strong>以下为各校准信号的实际音频样本</strong>
+        <p>全部为 48kHz / 16-bit WAV 格式，可直接播放或下载用于测试。建议使用耳机试听以准确判断可听度。</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>信号类型</th><th>参数</th><th>时长</th><th>试听 & 下载</th></tr>
+          </thead>
+          <tbody>
+            <tr class="highlight">
+              <td><strong>① LFM Chirp（推荐）</strong></td>
+              <td>200Hz→8kHz, Tukey 窗</td>
+              <td>50ms</td>
+              <td>
+                <audio controls preload="none" src="audio-samples/01_chirp_lfm_200Hz-8kHz_50ms.wav" style="height:32px;width:220px;"></audio>
+                <br><a href="audio-samples/01_chirp_lfm_200Hz-8kHz_50ms.wav" download style="font-size:0.82rem;">⬇ 下载 WAV</a>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>② LFM Chirp（扩展版）</strong></td>
+              <td>200Hz→16kHz, Hamming + 淡入淡出</td>
+              <td>100ms</td>
+              <td>
+                <audio controls preload="none" src="audio-samples/02_chirp_lfm_200Hz-16kHz_100ms.wav" style="height:32px;width:220px;"></audio>
+                <br><a href="audio-samples/02_chirp_lfm_200Hz-16kHz_100ms.wav" download style="font-size:0.82rem;">⬇ 下载 WAV</a>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>③ ESS 指数扫频</strong></td>
+              <td>200Hz→8kHz, Farina 方法</td>
+              <td>500ms</td>
+              <td>
+                <audio controls preload="none" src="audio-samples/03_ess_200Hz-8kHz_500ms.wav" style="height:32px;width:220px;"></audio>
+                <br><a href="audio-samples/03_ess_200Hz-8kHz_500ms.wav" download style="font-size:0.82rem;">⬇ 下载 WAV</a>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>④ MLS 序列</strong></td>
+              <td>n=10, P=1023, 播放 2 遍</td>
+              <td>42.6ms</td>
+              <td>
+                <audio controls preload="none" src="audio-samples/04_mls_n10_P1023.wav" style="height:32px;width:220px;"></audio>
+                <br><a href="audio-samples/04_mls_n10_P1023.wav" download style="font-size:0.82rem;">⬇ 下载 WAV</a>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>⑤ 近超声 Chirp</strong></td>
+              <td>16.5kHz→19.5kHz, Tukey 窗</td>
+              <td>50ms</td>
+              <td>
+                <audio controls preload="none" src="audio-samples/05_chirp_ultrasonic_16.5kHz-19.5kHz_50ms.wav" style="height:32px;width:220px;"></audio>
+                <br><a href="audio-samples/05_chirp_ultrasonic_16.5kHz-19.5kHz_50ms.wav" download style="font-size:0.82rem;">⬇ 下载 WAV</a>
+                <br><small style="color:var(--text-dim);">⚠️ 大多数人听不到，需设备验证</small>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>⑥ Golay 互补对</strong></td>
+              <td>N=1024, A+保护间隔+B</td>
+              <td>57.7ms</td>
+              <td>
+                <audio controls preload="none" src="audio-samples/06_golay_pair_N1024.wav" style="height:32px;width:220px;"></audio>
+                <br><a href="audio-samples/06_golay_pair_N1024.wav" download style="font-size:0.82rem;">⬇ 下载 WAV</a>
+                <span style="font-size:0.82rem; margin-left:8px;">
+                  <a href="audio-samples/06a_golay_A_N1024.wav" download>A序列</a> ·
+                  <a href="audio-samples/06b_golay_B_N1024.wav" download>B序列</a>
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>⑦ 导频音 Pilot Tone</strong></td>
+              <td>18kHz 单音, 20ms 淡入淡出</td>
+              <td>200ms</td>
+              <td>
+                <audio controls preload="none" src="audio-samples/07_pilot_tone_18kHz_200ms.wav" style="height:32px;width:220px;"></audio>
+                <br><a href="audio-samples/07_pilot_tone_18kHz_200ms.wav" download style="font-size:0.82rem;">⬇ 下载 WAV</a>
+                <br><small style="color:var(--text-dim);">⚠️ 高频单音，年轻人可能听到</small>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-warn">
+        <strong>试听建议</strong>
+        <ul>
+          <li>①② 是最常用的校准信号，听起来像短促的"嗖"声</li>
+          <li>③ ESS 持续时间较长，低频部分更明显</li>
+          <li>④ MLS 听起来像短促的白噪声"嘶"声</li>
+          <li>⑤⑦ 为高频/超声信号，建议使用耳机测试可听度</li>
+          <li>所有信号均已应用窗函数和淡入淡出，可直接用于实际校准测试</li>
+        </ul>
+      </div>
+
+    </section>
+
+    <!-- =================== §5 音频水印持续校准 =================== -->
+    <section id="sec5">
+      <h2>5. 音频水印持续校准</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 快速结论：</strong>音频水印将同步标记嵌入正常音频流中，不仅解决冷启动，还能持续跟踪延迟漂移。扩频水印(DSSS) + 导频音(Pilot Tone) 组合是最全面的方案，但实现复杂度较高。适合作为 Phase 3 的高级方案。
+      </div>
+
+      <!-- 5.1 核心原理差异 -->
+      <h3 id="sec5-1">5.1 核心原理差异</h3>
+
+      <div class="grid-2">
+  <div class="card">
+    <h4>方案 A：时间分离</h4>
+    <p>播放 → 等待 → 检测（一次性或周期性）</p>
+    <p>校准信号和用户信号在<strong>时间上分离</strong></p>
+    <p><span class="badge badge-blue">解决冷启动</span></p>
+  </div>
+  <div class="card">
+    <h4>方案 B：持续共存</h4>
+    <p>水印信号与用户信号<strong>始终共存</strong></p>
+    <ul>
+      <li>校准信息嵌入在正常音频流中</li>
+      <li>任何时候都可以提取对齐信息</li>
+      <li>不仅解决冷启动，还能持续、无缝地跟踪延迟变化</li>
+    </ul>
+    <p><span class="badge badge-green">解决冷启动 + 持续跟踪</span></p>
+  </div>
+</div>
+
+      <!-- 5.2 扩频水印 DSSS -->
+      <h3 id="sec5-2">5.2 扩频水印（DSSS）</h3>
+
+      <h4>基本原理</h4>
+      <p>借用<strong>直接序列扩频通信（DSSS）</strong>思想：将同步标记的能量分散到很宽的频带，每个频点的能量极低（人耳感知不到），但用同一个 PN 序列做相关可以恢复出来。</p>
+
+      <h4>嵌入算法（频域，利用心理声学掩蔽）</h4>
+      <pre><code><span class="kw">def</span> <span class="fn">embed_watermark_freq</span>(host_audio, pn_seq, alpha, fs):
+    <span class="str">"""频域扩频水印嵌入"""</span>
+    frame_size = <span class="num">2048</span>   <span class="cmt"># 42.7ms @48kHz</span>
+    hop_size   = <span class="num">512</span>    <span class="cmt"># 10.7ms</span>
+    frames = <span class="fn">stft</span>(host_audio, frame_size, hop_size)
+
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(frames.shape[<span class="num">0</span>]):
+        mag   = <span class="fn">np.abs</span>(frames[i])
+        phase = <span class="fn">np.angle</span>(frames[i])
+
+        <span class="cmt"># 心理声学掩蔽阈值（简化版）</span>
+        <span class="cmt"># 每个频点的嵌入强度不超过该频点的掩蔽阈值</span>
+        mask = <span class="fn">compute_masking_threshold</span>(mag, fs)
+
+        <span class="cmt"># 水印 = PN序列 × 嵌入强度 × 掩蔽阈值</span>
+        wm_spectrum = alpha * pn_seq * mask
+
+        <span class="cmt"># 叠加</span>
+        frames[i] = (mag + wm_spectrum) * <span class="fn">np.exp</span>(<span class="num">1j</span> * phase)
+
+    <span class="kw">return</span> <span class="fn">istft</span>(frames, frame_size, hop_size)</code></pre>
+
+      <h4>心理声学掩蔽模型（HAS）</h4>
+      <p>水印必须<strong>听不到</strong>，嵌入强度受限于人耳听觉系统的掩蔽阈值：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>机制</th><th>说明</th><th>对水印设计的影响</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>频域掩蔽</strong></td>
+              <td>强信号频率附近，弱信号被"遮盖"。向上 ~1 Bark，向下 ~0.5 Bark</td>
+              <td>语音/音乐活跃时，水印可嵌入在掩蔽区</td>
+            </tr>
+            <tr>
+              <td><strong>时域掩蔽</strong></td>
+              <td>前向掩蔽 100-200ms，后向掩蔽 5-20ms</td>
+              <td>语音结束后的短暂窗口仍可嵌入</td>
+            </tr>
+            <tr>
+              <td><strong>绝对听阈</strong></td>
+              <td>无掩蔽信号时的最低可听阈值（ISO 226:2003）</td>
+              <td>静默期的嵌入强度上限</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-success">
+        <strong>近超声频段是水印的理想载体</strong>
+        <p>在 15kHz 以上，人耳的绝对听阈显著升高（18kHz 约 55dB SPL ≈ -32dBFS），意味着可以在更高频段嵌入更强的水印而不被听到。但需验证硬件支持（见 §4.5 近超声硬件警告）。</p>
+      </div>
+
+      <h4>扩频处理增益</h4>
+      <div class="formula">
+G_ss = 10·log₁₀(L) dB    (L = PN序列长度 = 每帧频点数量)
+
+L=1024: 30.1 dB  |  L=2048: 33.1 dB  |  L=4096: 36.1 dB</div>
+
+      <h4>检测算法（相关接收机）</h4>
+      <pre><code><span class="kw">def</span> <span class="fn">detect_watermark_delay</span>(y1, y2, pn_seq, frame_size, hop_size):
+    <span class="str">"""检测两路麦克风拾取的水印，计算时延差"""</span>
+    frames1 = <span class="fn">stft</span>(y1, frame_size, hop_size)
+    frames2 = <span class="fn">stft</span>(y2, frame_size, hop_size)
+
+    <span class="cmt"># 每帧与 PN 序列做点积（相关）</span>
+    corr1 = [<span class="fn">np.dot</span>(<span class="fn">np.abs</span>(f[:<span class="fn">len</span>(pn_seq)]), pn_seq) <span class="kw">for</span> f <span class="kw">in</span> frames1]
+    corr2 = [<span class="fn">np.dot</span>(<span class="fn">np.abs</span>(f[:<span class="fn">len</span>(pn_seq)]), pn_seq) <span class="kw">for</span> f <span class="kw">in</span> frames2]
+
+    <span class="cmt"># 两路相关序列的互相关 → 帧级时延差</span>
+    lag_corr = <span class="fn">np.correlate</span>(corr1, corr2, mode=<span class="str">'full'</span>)
+    peak_lag = <span class="fn">np.argmax</span>(<span class="fn">np.abs</span>(lag_corr)) - <span class="fn">len</span>(corr2) + <span class="num">1</span>
+
+    <span class="kw">return</span> peak_lag * hop_size / fs  <span class="cmt"># 秒</span></code></pre>
+
+      <!-- 5.3 导频音 Pilot Tone -->
+      <h3 id="sec5-3">5.3 导频音（Pilot Tone）</h3>
+
+      <h4>原理</h4>
+      <p>在特定频率持续插入一个低幅度单音，两路麦克风拾取后通过 <strong>Hilbert 变换提取瞬时相位</strong>，相位差 = 延迟差。</p>
+
+      <pre><code><span class="kw">def</span> <span class="fn">detect_pilot_delay</span>(y1, y2, pilot_freq, fs):
+    <span class="str">"""导频音相位差 → 时延"""</span>
+    <span class="cmt"># 带通滤波提取导频频段</span>
+    p1 = <span class="fn">bandpass</span>(y1, pilot_freq - <span class="num">50</span>, pilot_freq + <span class="num">50</span>, fs)
+    p2 = <span class="fn">bandpass</span>(y2, pilot_freq - <span class="num">50</span>, pilot_freq + <span class="num">50</span>, fs)
+
+    <span class="cmt"># Hilbert 变换 → 瞬时相位</span>
+    phase1 = <span class="fn">np.unwrap</span>(<span class="fn">np.angle</span>(<span class="fn">hilbert</span>(p1)))
+    phase2 = <span class="fn">np.unwrap</span>(<span class="fn">np.angle</span>(<span class="fn">hilbert</span>(p2)))
+
+    <span class="cmt"># 相位差 → 时延</span>
+    delta_phase = <span class="fn">np.mean</span>(phase1 - phase2)
+    <span class="kw">return</span> delta_phase / (<span class="num">2</span> * <span class="fn">np.pi</span> * pilot_freq)</code></pre>
+
+      <h4>精度分析</h4>
+      <div class="formula">
+δt = δφ / (2π·f_pilot)
+
+例: f_pilot=18kHz, SNR=10dB → δφ≈0.22rad → δt≈2.0μs
+    SNR=0dB  → δφ≈0.71rad → δt≈6.3μs
+精度极高，远超 10ms 要求</div>
+
+      <h4>相位模糊问题与多频 Vernier 解法</h4>
+      <div class="callout callout-warn">
+        <strong>单频导频有严重的相位模糊</strong>
+        <p>f<sub>pilot</sub>=18kHz → 不模糊范围 = 1/18000 = <strong>55.6μs</strong>。DJI Mic 延迟约 15ms → 15ms/55.6μs ≈ <strong>270 个周期</strong> → 严重模糊。</p>
+      </div>
+
+      <p><strong>多频 Vernier 解法</strong>：使用两个导频频率 f₁, f₂：</p>
+      <div class="formula">
+等效不模糊范围 = f₁·f₂ / |f₁ - f₂|
+
+例: f₁=16kHz, f₂=16.5kHz → 不模糊范围 = 16000×16500/500 = 528 ms
+完全可以覆盖 DJI Mic 的 ~15ms 延迟。
+
+如需更大范围，加第三频 f₃=15kHz → 与 f₁ 的差频 1kHz → 不模糊范围 1s</div>
+
+      <!-- 5.4 自同步机制 -->
+      <h3 id="sec5-4">5.4 自同步机制</h3>
+
+      <p>三种方式让水印自带定时信息：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>方法</th><th>原理</th><th>优点</th><th>缺点</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>周期性嵌入 + 自相关</strong></td>
+              <td>周期性插入特殊 Pilot PN 序列，检测端做自相关找周期性峰</td>
+              <td>简单可靠</td>
+              <td>需要等待至少一个周期</td>
+            </tr>
+            <tr>
+              <td><strong>循环前缀（OFDM 式）</strong></td>
+              <td>每帧前面加循环前缀，利用 CP 的自相关特性做帧同步</td>
+              <td>无需外部同步</td>
+              <td>增加 20-30% 开销</td>
+            </tr>
+            <tr>
+              <td><strong>自相关扩频（Amazon）</strong></td>
+              <td>设计 PN 序列使其自相关在特定延迟处有峰，只需做自相关即可检测</td>
+              <td>最优雅，对信道失真更鲁棒</td>
+              <td>序列设计复杂</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>参考：Rochester: Self-Sync SS Watermark；Amazon: Practical Over-the-Air Watermarking (Interspeech 2022)；Amazon: Modulated Self-Correlation</p>
+
+      <!-- 5.5 方案 B 综合对比 -->
+      <h3 id="sec5-5">5.5 方案 B 综合对比</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>子方案</th><th>嵌入频段</th><th>可听度</th><th>复杂度</th><th>精度</th><th>持续跟踪</th><th>冷启动</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>B2 扩频（全频带）</td><td>全频带</td><td>无感</td><td>高</td><td>1-5ms</td><td>✅</td><td>&lt;100ms</td>
+            </tr>
+            <tr>
+              <td>B3 导频音（单频）</td><td>15-20kHz</td><td>几乎无</td><td>低</td><td>&lt;1ms</td><td>✅</td><td>&lt;50ms</td>
+            </tr>
+            <tr>
+              <td>B3 导频音（多频 Vernier）</td><td>15-20kHz</td><td>几乎无</td><td>中</td><td>&lt;1ms</td><td>✅</td><td>&lt;50ms</td>
+            </tr>
+            <tr class="highlight">
+              <td><strong>B2+B3 组合</strong></td><td><strong>2-8kHz + 16-19kHz</strong></td><td><strong>无感</strong></td><td><strong>高</strong></td><td><strong>&lt;1ms</strong></td><td><strong>✅</strong></td><td><strong>&lt;100ms</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>实时性能评估</h4>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>操作</th><th>运算量 @48kHz/10ms帧</th><th>手机 CPU 占用</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>FFT (2048点)</td><td>~22K</td><td>&lt;0.1%</td></tr>
+            <tr><td>IFFT</td><td>~22K</td><td>&lt;0.1%</td></tr>
+            <tr><td>PN 序列相关</td><td>~2K</td><td>&lt;0.01%</td></tr>
+            <tr><td>心理声学模型</td><td>~50K</td><td>&lt;0.5%</td></tr>
+            <tr class="highlight"><td><strong>总计</strong></td><td>—</td><td><strong>&lt;1%</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-info">
+        <strong>实时可行性说明</strong>
+        <p>&lt;1% CPU 占用基于现代旗舰手机（Snapdragon 8 Gen 2+ / A16+）。在中端设备（Snapdragon 6 系列）上可能达到 3-5%。已在 ARM940T（200MHz）上验证过 Verance 水印方案的实时运行。建议在实际目标设备上 benchmark。</p>
+      </div>
+
+      <h4>算法延迟预算</h4>
+      <pre><code><span class="cmt">// 算法延迟预算</span>
+<span class="fn">STFT</span> 分帧延迟:  hop_size / fs = <span class="num">512</span>/<span class="num">48000</span> = <span class="num">10.7</span> <span class="kw">ms</span>
+<span class="fn">FFT</span> 计算延迟:   &lt;<span class="num">1</span> <span class="kw">ms</span>
+<span class="fn">相关检测延迟</span>:   &lt;<span class="num">1</span> <span class="kw">ms</span>
+──────────────────────────
+<span class="kw">总算法延迟</span>:     ~<span class="num">12-13</span> <span class="kw">ms</span>
+
+<span class="cmt">// 如需更低延迟:</span>
+<span class="cmt">//   hop=256 → 5.3ms 分帧延迟</span>
+<span class="cmt">//   时域嵌入+检测 → ~1ms</span></code></pre>
+
+    </section>
+
+    <!-- =================== §6 被动 TDE 基线 — GCC-PHAT =================== -->
+    <section id="sec6">
+      <h2>6. 被动 TDE 基线 — GCC-PHAT</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 快速结论：</strong>GCC-PHAT 是双麦克风时延估计的行业标准基线。完全被动、零用户感知、计算量极低，但需要持续声源——这正是冷启动问题所在。它的角色是"持续精细对齐引擎"，与方案 A/B 互补而非替代。
+      </div>
+
+      <!-- 6.1 原理 -->
+      <h3 id="sec6-1">6.1 原理</h3>
+
+      <p>广义互相关-相位变换（Generalized Cross-Correlation with Phase Transform）：</p>
+
+      <div class="formula">
+τ̂ = argmax_τ ∫₋π^π [X₁(ω)·X₂*(ω) / |X₁(ω)·X₂*(ω)|] · e^(jωτ) dω
+
+PHAT 加权将所有频率分量等权化，抑制噪声频谱的影响，
+在混响和噪声环境下比基本互相关更鲁棒。</div>
+
+      <!-- 6.2 优势与局限 -->
+      <h3 id="sec6-2">6.2 优势与局限</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>维度</th><th>说明</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>✅ 无需播放信号</td><td>完全被动，零用户感知</td></tr>
+            <tr><td>✅ 计算量极低</td><td>一次 FFT + PHAT 加权 + IFFT</td></tr>
+            <tr><td>✅ 抗混响能力强</td><td>PHAT 加权抑制混响导致的频谱着色</td></tr>
+            <tr><td>❌ <strong>需要持续声源</strong></td><td>静默期间无信号 → 估计不稳定（冷启动问题）</td></tr>
+            <tr><td>❌ 精度受限于带宽</td><td>窄带信号精度差</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 6.3 与主动方案的互补关系 -->
+      <h3 id="sec6-3">6.3 与主动方案的互补关系</h3>
+
+      <div class="callout callout-info">
+  <strong>GCC-PHAT 的角色定位</strong>
+  <p>你现有的 Interspeech TDE ≈ GCC-PHAT 或其改进版。它是你的"持续精细对齐"引擎，但在静默期失效（= 冷启动问题）。方案 A/B 不是替代它，而是互补。</p>
+</div>
+
+<div class="flow-steps" style="grid-template-columns: repeat(3, 1fr);">
+  <div class="flow-step">
+    <strong>1. 初始对齐</strong>
+    <p>方案 A/B 给出初始延迟 τ₀，在冷启动期间提供可靠的延迟估计</p>
+  </div>
+  <div class="flow-step">
+    <strong>2. 语音精细跟踪</strong>
+    <p>一旦检测到语音 → 切换到 GCC-PHAT / Interspeech TDE 做精细跟踪</p>
+  </div>
+  <div class="flow-step">
+    <strong>3. 间歇期持续更新</strong>
+    <p>语音间歇期 → 方案 B 的水印持续提供延迟更新，补偿时钟漂移</p>
+  </div>
+</div>
+
+      <!-- 6.4 参考文献 -->
+      <h3 id="sec6-4">6.4 参考文献</h3>
+
+      <ul>
+        <li>Berg et al. "Extending GCC-PHAT using Shift Equivariant Neural Networks." Interspeech 2022</li>
+        <li>ICASSP 1997. "A Robust Method for Speech Signal Time-Delay Estimation in Reverberant Rooms."</li>
+      </ul>
+
+    </section>
+
+    <!-- =================== §7 检测算法与亚采样精度 =================== -->
+    <section id="sec7">
+      <h2>7. 检测算法与亚采样精度</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 匹配滤波 + 对数域抛物线插值是最佳组合</strong>— 在 SNR&gt;10dB 时精度约 ±0.02 样本（±0.42μs @48kHz），远超 10ms 要求。多径环境下取"最早且足够强的峰"而非全局最大峰。
+      </div>
+
+      <!-- 7.1 匹配滤波检测流程 -->
+      <h3 id="sec7-1">7.1 匹配滤波检测流程</h3>
+
+      <p>手机扬声器播放已知校准信号 <code>s(t)</code>，两路麦克风分别拾取后对原始信号做互相关（匹配滤波），找到各自的到达时间，两者之差即为时延差。</p>
+
+      <div class="flow-steps">
+  <div class="flow-step">
+    <strong>1. 播放</strong>
+    <p>手机扬声器播放已知校准信号 s(t)</p>
+  </div>
+  <div class="flow-step">
+    <strong>2. 双路拾取</strong>
+    <p>手机 MIC 拾取 r₁(t)<br>DJI MIC 拾取 r₂(t)</p>
+  </div>
+  <div class="flow-step">
+    <strong>3. 匹配滤波</strong>
+    <p>两路各自与 s(t) 做互相关：<br>p₁(τ) = r₁⋆s<br>p₂(τ) = r₂⋆s</p>
+  </div>
+  <div class="flow-step">
+    <strong>4. 峰值检测</strong>
+    <p>τ₁ = argmax|p₁|<br>τ₂ = argmax|p₂|</p>
+  </div>
+  <div class="flow-step">
+    <strong>5. 时延差</strong>
+    <p><strong>Δτ = τ₁ − τ₂</strong><br>即两路时延差</p>
+  </div>
+</div>
+
+      <p>因为 <code>s(t)</code> 是自定义信号，其自相关特性可以被优化到极其尖锐（近似 delta 函数），互相关峰的 SNR 远高于被动方案。</p>
+
+      <!-- 7.2 亚采样插值方法 -->
+      <h3 id="sec7-2">7.2 亚采样插值方法</h3>
+
+      <p>互相关峰值落在离散样本上，但真实延迟可能在两个样本之间。需要亚采样插值才能达到 &lt;1ms 的精度。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>方法</th><th>SNR=20dB</th><th>SNR=10dB</th><th>复杂度</th><th>推荐度</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>无插值</td><td>±0.5 样本</td><td>±0.5 样本</td><td>低</td><td>基础</td></tr>
+            <tr><td>抛物线（线性幅度）</td><td>±0.05</td><td>±0.15</td><td>低</td><td>有偏</td></tr>
+            <tr class="highlight"><td><strong>抛物线（对数幅度）</strong></td><td><strong>±0.02</strong></td><td><strong>±0.08</strong></td><td><strong>低</strong></td><td><strong>⭐推荐</strong></td></tr>
+            <tr><td>GCC-PHAT 加权</td><td>±0.02 样本</td><td>—</td><td>中</td><td>可选</td></tr>
+            <tr><td>匹配滤波插值</td><td>±0.01</td><td>±0.05</td><td>中</td><td>高精度</td></tr>
+            <tr><td>频域相位斜率</td><td>±0.01</td><td>—</td><td>中</td><td>高精度需求</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>对数域抛物线插值公式</h4>
+      <div class="formula">
+设峰值在 index k，互相关结果 c[]
+
+α = log(|c[k-1]|)
+β = log(|c[k]|)
+γ = log(|c[k+1]|)
+
+δ = (α - γ) / (2 · (α - 2β + γ))   // 亚样本偏移
+τ = k + δ                             // 精确延迟（样本数）
+delay_seconds = τ / fs</div>
+
+      <div class="callout callout-info">
+        <strong>插值精度与偏差说明</strong>
+        <p>对数域抛物线插值在 SNR &gt; 10dB 时精度约 ±0.02 样本（±0.42μs @48kHz），远超 10ms 要求。在极低 SNR（&lt;5dB）条件下存在约 0.05-0.1 样本的系统偏差，如需更高精度可改用 Quinn 或 Macleod 估计器。对于本项目的 10ms 精度目标，对数域抛物线插值完全足够。</p>
+        <p>参考：Lai et al., NTNU</p>
+      </div>
+
+      <!-- 7.3 多径/混响处理 -->
+      <h3 id="sec7-3">7.3 多径/混响处理</h3>
+
+      <p>室内环境下，校准信号会通过多条路径到达两路 mic。互相关输出会出现：</p>
+      <ul>
+        <li><strong>主峰</strong>：直达路径（最强或最早）</li>
+        <li><strong>次峰</strong>：反射路径（较弱、较晚，通常在主峰后 5-50ms）</li>
+      </ul>
+
+      <p>桌面、墙面、手持姿态都可能带来反射峰。如果简单地取全局最大峰，可能选中反射路径而非直达路径，导致时延估计偏差。</p>
+
+      <div class="callout callout-success">
+        <strong>策略：取最早出现的显著峰（而非全局最大峰）</strong>
+        <p>对互相关结果做 onset detection：找到超过噪声基底 6dB 以上的<strong>第一个峰</strong>。如果两路 mic 到声源的距离差很小，反射路径通常在主峰之后出现——直达峰仍然清晰可辨。</p>
+        <p>此外，建议<strong>重复测量 3 次</strong>并取中位数（median），以降低偶发噪声和反射峰误选的概率。</p>
+      </div>
+
+      <!-- 7.4 置信度门控 -->
+      <h3 id="sec7-4">7.4 置信度门控</h3>
+
+      <p>校准结果必须通过置信度检查，才能用于正式混音。以下为关键门控条件：</p>
+
+      <div class="callout callout-warn">
+        <strong>置信度门控清单</strong>
+        <ul>
+          <li>相关峰 <code>peak / second_peak</code> 大于阈值（如 1.5-2.5）</li>
+          <li>两路都能检测到探针，且峰值能量高于噪声底</li>
+          <li>估计 delay 落在设备先验范围内（如 -200ms 到 +200ms）</li>
+          <li>重复探针的 delay 方差小于阈值（如 1-2ms）</li>
+          <li>失败时<strong>不要硬用错误值</strong>：降副麦、单主麦，或进入 fallback</li>
+        </ul>
+      </div>
+
+    </section>
+
+    <!-- =================== §8 心理声学与用户体验设计 =================== -->
+    <section id="sec8">
+      <h2>8. 心理声学与用户体验设计</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 最佳用户体验：将校准 Chirp 嵌入"录音开始"提示音或倒计时音效中</strong>— 用户听到的是自然提示音，算法看到的是可定位探针。校准信号段保留在预滚缓存中，不写入最终素材。
+      </div>
+
+      <!-- 8.1 三种频谱整形策略 -->
+      <h3 id="sec8-1">8.1 三种频谱整形策略</h3>
+
+      <p>用户体验的关键——校准信号不能让用户觉得刺耳或突兀。以下三种策略各有取舍：</p>
+
+      <div class="grid-3">
+        <div class="card">
+          <h4>策略 A：高频偏好</h4>
+          <p>将校准信号集中在 <strong>8-16kHz</strong> 频段。成年人对 &gt;12kHz 的感知显著下降，年轻人感知略好但总体弱于中低频。</p>
+          <p><strong>代价</strong>：带宽减半，但时延分辨率仍有 ~140μs。</p>
+        </div>
+        <div class="card">
+          <h4>策略 B：宽带 + 低振幅 + 渐变</h4>
+          <p>200Hz-16kHz 宽带，振幅 30-40% 满量程，前后 10ms 余弦淡入淡出。</p>
+          <p>总感知约 50-55 dB SPL，接近正常对话音量——用户会注意到但不刺耳。</p>
+        </div>
+        <div class="card">
+          <h4>策略 C：掩蔽效应嵌入 <span class="tag tag-rec">⭐最佳UX</span></h4>
+          <p>利用 UI 提示音的<strong>前向掩蔽窗口</strong>（~20ms），将校准信号紧跟在提示音之后播放，感知降低 10-20dB。</p>
+          <p>用户几乎无感知，算法仍可定位。来源：Amazon Science</p>
+        </div>
+      </div>
+
+      <!-- 8.2 用户可接受性设计 -->
+      <h3 id="sec8-2">8.2 用户可接受性设计</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>设计方案</th><th>用户感知</th><th>校准精度</th><th>推荐场景</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>50ms "嘀"声</td><td>明确知道在校准</td><td>高</td><td>专业用户</td></tr>
+            <tr><td>100ms chirp "嗖"声</td><td>注意到轻微声音</td><td>高</td><td>普通用户可接受</td></tr>
+            <tr class="highlight"><td><strong>嵌入"录音开始"提示音中</strong></td><td><strong>几乎无感知</strong></td><td><strong>中-高</strong></td><td><strong>⭐最佳UX</strong></td></tr>
+            <tr><td>完全无声（超声/时间戳）</td><td>零感知</td><td>中</td><td>理想但有局限</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 8.3 产品化策略 -->
+      <h3 id="sec8-3">8.3 产品化策略</h3>
+
+      <div class="callout callout-success">
+        <strong>产品默认策略</strong>
+        <p>默认播放一个短、可解释的 UI 声音，其中嵌入 2-8kHz log chirp。两路麦克风分别对已知探针做匹配滤波，取相关峰位置相减，得到输入链路相对 delay。探针段保留在预滚缓存里，但<strong>不写入最终素材</strong>。</p>
+      </div>
+
+      <div class="callout callout-warn">
+        <strong>失败兜底策略</strong>
+        <p>如果相关峰低置信，先不要双路满幅混音；用单主麦或低电平副麦进入录制，同时提示用户说"开始"完成口部源校准。这条路线的优势是工程可控：不依赖第一次自然说话，不强依赖近超声频响，也不会把失败静默地带进正式录音。</p>
+      </div>
+
+    </section>
+
+    <!-- =================== §9 关键工程约束 =================== -->
+    <section id="sec9">
+      <h2>9. 关键工程约束</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 三个最容易被忽略的工程陷阱：</strong>1) 蓝牙编码延迟不是固定的，抖动可达 ±5-20ms；2) 独立时钟漂移 ~0.1ms/s，100 秒后累积 10ms；3) 手机 DSP（AEC/NS/AGC）会主动消除校准信号。必须用 <code>UNPROCESSED</code>/<code>measurement</code> 模式获取原始音频。
+      </div>
+
+      <!-- 9.1 蓝牙编码延迟抖动 -->
+      <h3>9.1 蓝牙编码延迟抖动</h3>
+
+      <p>原报告将 DJI Mic 的延迟视为<strong>固定偏移</strong>（~15ms），但实际蓝牙编码延迟是<strong>时变的</strong>：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>延迟来源</th><th>典型值</th><th>抖动范围</th><th>触发条件</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>SBC 编解码</td><td>~30ms</td><td>±2-5ms</td><td>bitpool 动态调整</td></tr>
+            <tr><td>AAC 编解码</td><td>~25ms</td><td>±3-8ms</td><td>编码器复杂度波动</td></tr>
+            <tr><td>aptX / aptX LL</td><td>~15ms</td><td>±1-3ms</td><td>相对稳定</td></tr>
+            <tr><td>aptX Adaptive</td><td>8-20ms 动态</td><td>±5-12ms</td><td>根据信道质量自适应</td></tr>
+            <tr><td>蓝牙重传</td><td>0-20ms</td><td>0-20ms</td><td>2.4GHz 干扰</td></tr>
+            <tr><td>USB 传输</td><td>~3ms</td><td>±0.5ms</td><td>USB 调度抖动</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-warn">
+        <strong>对方案设计的影响</strong>
+        <p>即使初始校准完美，延迟可能在录制过程中漂移 ±5-20ms — <strong>超出 10ms 精度要求</strong>。必须实现自适应跟踪（连续或半连续），而非离散重校准事件。增加看门狗机制：如果两次校准之间延迟变化 >5ms，立即触发重校准。检查 DJI Mic 是否暴露了编码协商参数（如 codec 类型、bitpool），可用于约束延迟变化范围。</p>
+      </div>
+
+      <!-- 9.2 时钟漂移 -->
+      <h3>9.2 时钟漂移</h3>
+
+      <p>手机和无线麦克风有<strong>独立的采样时钟</strong>，即使蓝牙延迟完全稳定，两个 ADC 的采样率差异也会导致对齐逐渐漂移：</p>
+
+      <div class="formula">典型消费级晶振精度: ±20-50 ppm
+
+最坏情况 (两端各 50ppm, 反向偏差):
+  相对偏差 = 100 ppm = 0.01%
+  @48kHz: 4.8 样本/秒 漂移 = 0.1 ms/s
+  → 10 秒后累积 1ms，100 秒后 10ms
+
+典型情况 (两端各 20ppm):
+  → ~40 秒后累积 1ms，400 秒后 10ms</div>
+
+      <div class="callout callout-warn">
+        <strong>时钟漂移是方案 B（持续水印）的核心价值所在</strong>
+        <p>对于超过 20 秒的录音，持续或周期性重估计是<strong>必须的</strong>，与校准方法无关。方案 B 的扩频水印天然提供持续跟踪能力，这是它作为长期方案的根本优势之一。方案 A 的一次性校准只能解决冷启动，无法应对时钟漂移 — 必须搭配持续跟踪机制。</p>
+      </div>
+
+      <!-- 9.3 手机音频 DSP 管线 -->
+      <h3>9.3 手机音频 DSP 管线</h3>
+
+      <p>现代手机对麦克风输入施加了<strong>激进的 DSP 处理</strong>，这些处理专为去除"非语音信号"设计，会主动抑制或破坏校准信号和水印：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>DSP 模块</th><th>行为</th><th>对水印的影响</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>噪声抑制 (NS)</strong></td><td>检测并衰减非语音成分</td><td>2-8kHz 水印可能被识别为"噪声"</td></tr>
+            <tr><td><strong>自动增益 (AGC)</strong></td><td>动态调整增益</td><td>水印幅度不稳定</td></tr>
+            <tr><td><strong>回声消除 (AEC)</strong></td><td>去除扬声器回放信号</td><td><strong>致命！</strong> 可能直接消除校准信号</td></tr>
+            <tr><td><strong>波束成形</strong></td><td>空间滤波</td><td>改变相位关系</td></tr>
+            <tr><td><strong>带宽限制</strong></td><td>8kHz/16kHz 截止</td><td>高频水印直接丢失</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-danger">
+        <strong>关键对策</strong>
+        <ol>
+          <li><strong>获取原始音频</strong>：通过平台特定 API 绕过 DSP 处理
+            <ul>
+              <li>Android: <code>AudioSource.UNPROCESSED</code> 或 <code>VOICE_RECOGNITION</code> 模式</li>
+              <li>iOS: <code>AVAudioSession.Mode.measurement</code>（禁用 AEC/NS/AGC）</li>
+            </ul>
+          </li>
+          <li><strong>关闭 AEC</strong>：如果 App 同时播放校准信号和录音，必须确保 AEC 不会消除校准信号</li>
+          <li><strong>测试水印存活率</strong>：通过常见 DSP 链（WebRTC NS, RNNoise, 厂商特定）测试水印是否存活</li>
+          <li><strong>频带选择</strong>：将水印放在 NS 不太激进的频段（通常 6-8kHz 边缘），或使用频率跳变避免窄带抑制器</li>
+        </ol>
+      </div>
+
+      <!-- 9.4 多径反射 -->
+      <h3>9.4 多径反射</h3>
+
+      <p>桌面、墙面、手持姿态都可能带来反射峰。如果简单地取全局最大峰，可能选中反射路径而非直达路径，导致时延估计偏差。室内环境下校准信号通过多条路径到达两路 mic，互相关输出会出现主峰（直达路径）和次峰（反射路径，通常在主峰后 5-50ms）。</p>
+
+      <div class="callout callout-success">
+        <strong>策略：取"最早且足够强"的峰</strong>
+        <p>对互相关结果做 onset detection：找到超过噪声基底 6dB 以上的<strong>第一个峰</strong>，而非绝对最大峰。此外，建议<strong>重复探针取 median</strong>（3 次），以降低偶发噪声和反射峰误选的概率。</p>
+      </div>
+
+      <!-- 9.5 不要把主动探针当唯一真相 -->
+      <h3>9.5 不要把主动探针当唯一真相</h3>
+
+      <div class="callout callout-danger">
+        <strong>探针只测量探针声源位置下的相对 delay</strong>
+        <p>主动探针估计的是"探针声源位置下的相对 delay"。正式说话开始后，仍应把语音 TDE 作为<strong>二次确认和微调来源</strong>。产品上可以把主动校准视为首句保护层，把持续语音估计视为长期稳定层。</p>
+      </div>
+
+    </section>
+
+    <!-- =================== §10 持续跟踪与漂移对策 =================== -->
+    <section id="sec10">
+      <h2>10. 持续跟踪与漂移对策</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 初始对齐后仍会漂移（时钟 + 蓝牙）：</strong>三条持续跟踪路线 — 扩频水印（每 500ms 更新）、NLMS 自适应滤波器（语音段持续适应）、BFM 二值化特征匹配（极低计算量）。搭配看门狗：延迟变化 >5ms 时立即重校准。
+      </div>
+
+      <!-- 10.1 扩频水印持续跟踪 -->
+      <h3>10.1 扩频水印持续跟踪</h3>
+
+      <p>一次性校准解决"录音开始时"的冷启动问题。如果时延在录音过程中漂移（蓝牙编码抖动、时钟漂移），扩频水印可以提供<strong>持续、无缝的跟踪</strong>：</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>参数</th><th>推荐值</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>水印信号</td><td>CSS chirp, 12-18kHz, 重复周期 500ms</td></tr>
+            <tr><td>水印功率</td><td>低于内容信号 25-30dB</td></tr>
+            <tr><td>检测方法</td><td>滑动互相关，每 500ms 更新</td></tr>
+            <tr><td>跟踪精度</td><td>±2-5ms</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>来源：MDPI 2024 "Audio Watermarking System in Real-Time" + Amazon Science 感知水印论文</p>
+
+      <!-- 10.2 NLMS 自适应滤波器 -->
+      <h3>10.2 NLMS 自适应滤波器</h3>
+
+      <p>初始对齐完成后启动 NLMS 自适应滤波器，在语音段持续适应漂移变化：</p>
+
+      <pre><code><span class="cmt">// NLMS 自适应滤波器跟踪流程</span>
+<span class="kw">初始化</span>:  用校准信号的时延值设置初始补偿延迟
+<span class="kw">运行</span>:    NLMS 滤波器在语音段持续适应
+<span class="kw">检测</span>:    每 100ms 检查滤波器系数峰值位置
+          如果偏移 > 阈值(<span class="num">2ms</span>) → 更新补偿
+<span class="kw">重校准</span>:  如果滤波器发散 → 重新播放校准信号</code></pre>
+
+      <p>来源：XMOS ADEC (XVF3610) 自适应时延估计完整实现</p>
+
+      <!-- 10.3 BFM 二值化特征匹配 -->
+      <h3>10.3 BFM 二值化特征匹配</h3>
+
+      <p>Interspeech 2024 Gao &amp; Su (Tencent) 提出的 <strong>Binary Feature Matching (BFM)</strong> 方法：将音频特征二值化后用 XOR 位运算匹配，<strong>计算量极低</strong>，适合作为移动端持续追踪器。BFM-FP（音频指纹）变体可在任何音频内容上工作（含环境噪声），不需要专门的校准信号。</p>
+
+      <!-- 10.4 周期性重校准 + 看门狗 -->
+      <h3>10.4 周期性重校准 + 看门狗</h3>
+
+      <div class="callout callout-warn">
+        <strong>看门狗机制</strong>
+        <p>如果连续两次校准延迟差 >5ms → 立即触发一次 Chirp 重校准。每 10s 播放超声 Chirp Burst（20ms, 16-19kHz）持续跟踪漂移（蓝牙抖动 + 时钟漂移），在语音间歇期也可校准。</p>
+      </div>
+
+    </section>
+
+    <!-- =================== §11 实施与实验路线 =================== -->
+    <section id="sec11">
+      <h2>11. 实施与实验路线</h2>
+
+      <div class="quick-take">
+        <strong>⚡ 建议分 4 个阶段实施：</strong>Phase 1 可听 Chirp（1-2周，最快上线）→ Phase 2 近超声升级（需硬件验证）→ Phase 3 扩频水印（1-3月）→ Phase 4 产品级优化。每个阶段都有明确的成功标准和失败处理。
+      </div>
+
+      <!-- 11.1 Phase 时间线 -->
+      <h3>11.1 Phase 时间线</h3>
+
+      <div class="phase-timeline">
+
+        <div class="phase-item">
+          <div class="phase-item-title">Phase 1（1-2 周）: 可听 Chirp 校准 <span class="tag tag-rec">P0 最快上线</span></div>
+          <div class="phase-item-desc">
+            <ul>
+              <li>功能开启 → 播放语音提示"协同拾音已开启" → 尾部叠加 50ms LFM Chirp (200Hz→8kHz)</li>
+              <li>匹配滤波 + 对数域抛物线插值</li>
+              <li>确保获取 <code>UNPROCESSED</code>/<code>measurement</code> 模式的原始音频</li>
+              <li>验证精度 &lt;10ms（至少 10 次重复测量，标准差 &lt;2ms）</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="phase-item">
+          <div class="phase-item-title">Phase 2（2-4 周）: 近超声升级 + 延迟跟踪 <span class="tag tag-new">需硬件验证</span></div>
+          <div class="phase-item-desc">
+            <ul>
+              <li>在目标设备矩阵上测试 16-20kHz 频率响应</li>
+              <li>SNR &gt;6dB → 升级为近超声 Chirp</li>
+              <li>SNR &lt;6dB → 保持可听 Chirp</li>
+              <li>增加周期性校准 + 看门狗</li>
+              <li>运行时回退协议</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="phase-item">
+          <div class="phase-item-title">Phase 3（1-3 月）: 扩频水印持续校准 <span class="tag tag-rec">P2 高级版</span></div>
+          <div class="phase-item-desc">
+            <ul>
+              <li>手机端音频输出流中嵌入扩频水印</li>
+              <li>频段: 2-8kHz（抗蓝牙编码）+ 16-19kHz（近超声辅助，如硬件支持）</li>
+              <li>自相关扩频检测做持续延迟跟踪</li>
+              <li>与 GCC-PHAT 做互补融合</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="phase-item">
+          <div class="phase-item-title">Phase 4（3-6 月）: 产品级优化</div>
+          <div class="phase-item-desc">
+            <ul>
+              <li>心理声学自适应嵌入</li>
+              <li>多设备延迟预测模型</li>
+              <li>A/B 测试不同校准策略</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 11.2 实验矩阵 -->
+      <h3>11.2 实验矩阵</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>阶段</th><th>实验</th><th>成功标准</th><th>失败处理</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Phase 1</td><td>160ms 2-8kHz log chirp</td><td>静室 delay 方差 &lt;2ms</td><td>增加长度到 250ms 或改 1-10kHz</td></tr>
+            <tr><td>Phase 2</td><td>3 次短 chirp 取 median</td><td>嘈杂环境误检率下降</td><td>加入"最早可靠峰"策略</td></tr>
+            <tr><td>Phase 3</td><td>MLS/PN 序列低音量测试</td><td>低于提示音响度仍可估计</td><td>仅作为静音友好模式</td></tr>
+            <tr><td>Phase 4</td><td>18-20kHz 近超声跨设备测试</td><td>覆盖 80%+ 目标机型</td><td>改为白名单功能</td></tr>
+            <tr><td>Phase 5</td><td>"请说开始"口部源校准</td><td>困难姿态下仍稳定</td><td>作为低置信用户引导 fallback</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 11.3 方案组合推荐 -->
+      <h3>11.3 方案组合推荐</h3>
+
+      <div class="card">
+  <h4>完整工作流程</h4>
+  <ol style="padding-left:1.5rem; margin:0.5rem 0;">
+    <li>播放语音提示："协同拾音已开启"（~1.5 秒）</li>
+    <li>语音提示最后 50ms，叠加 Chirp 信号（2kHz→8kHz, -15dBFS）</li>
+    <li>Chirp 结束后立即开始录音</li>
+    <li>两路 MIC 做匹配滤波 → 得到初始时延 τ₀</li>
+    <li>用 τ₀ 做初始对齐</li>
+    <li>切换到 GCC-PHAT / Interspeech TDE 做持续精细对齐</li>
+    <li>每 10s 播放超声 Chirp Burst（20ms, 16-19kHz）持续跟踪漂移</li>
+    <li>看门狗：连续两次校准延迟差 &gt;5ms → 立即重校准</li>
+  </ol>
+</div>
+
+    </section>
+
+    <!-- ==================== SECTION 12: 参考代码 ==================== -->
+    <section id="sec12">
+      <div class="quick-take">⚡ 完整可运行的 Python 参考实现：Chirp 信号生成 + 匹配滤波延迟估计 + Golay 序列生成 + Android AudioTimestamp 粗估。最小可行方案约 100 行代码。</div>
+
+      <h2>12. 参考代码与伪代码</h2>
+
+      <h3>12.1 Chirp 信号生成</h3>
+
+      <div class="callout callout-info">
+        <strong>推荐版本（Tukey 窗线性扫频）</strong>
+        <p>以下为简洁版，使用 scipy.signal.tukey 窗函数，适合快速实现：</p>
+      </div>
+
+      <pre><code><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> scipy.signal <span class="kw">import</span> tukey
+
+<span class="kw">def</span> <span class="fn">generate_chirp</span>(f0, f1, T, fs):
+    <span class="str">"""生成线性扫频信号 + Tukey 窗"""</span>
+    t = np.<span class="fn">arange</span>(<span class="num">0</span>, T, <span class="num">1.0</span>/fs)
+    k = (f1 - f0) / T
+    chirp = np.<span class="fn">sin</span>(<span class="num">2</span> * np.pi * f0 * t + np.pi * k * t**<span class="num">2</span>)
+    window = <span class="fn">tukey</span>(<span class="fn">len</span>(chirp), alpha=<span class="num">0.5</span>)
+    <span class="kw">return</span> chirp * window</code></pre>
+
+      <div class="callout callout-warn">
+        <strong>替代版本（Hamming 窗 + 余弦平方淡入淡出）</strong>
+        <p>以下版本来自 R2 §9.3，使用 Hamming 窗和余弦平方淡入淡出，更精细地控制信号边界：</p>
+      </div>
+
+      <pre><code><span class="kw">def</span> <span class="fn">generate_calibration_chirp</span>(fs=<span class="num">48000</span>, duration=<span class="num">0.1</span>, f_low=<span class="num">200</span>, f_high=<span class="num">16000</span>, amplitude=<span class="num">0.35</span>, fade_ms=<span class="num">5</span>):
+    <span class="str">"""生成校准用加窗线性 chirp 信号（含余弦平方淡入淡出）"""</span>
+    N = <span class="fn">int</span>(fs * duration)
+    t = np.<span class="fn">arange</span>(N) / fs
+
+    <span class="cmt"># 线性 chirp: 频率从 f_low 线性扫到 f_high</span>
+    k = (f_high - f_low) / duration
+    phase = <span class="num">2</span> * np.pi * (f_low * t + <span class="num">0.5</span> * k * t**<span class="num">2</span>)
+    signal = np.<span class="fn">cos</span>(phase)
+
+    <span class="cmt"># Hamming 窗 (旁瓣 -42.7 dB)</span>
+    window = np.<span class="fn">hamming</span>(N)
+    signal *= window
+
+    <span class="cmt"># 余弦平方淡入淡出 (避免咔嗒声)</span>
+    fade_samples = <span class="fn">int</span>(fs * fade_ms / <span class="num">1000</span>)
+    fade_in  = np.<span class="fn">sin</span>(np.<span class="fn">linspace</span>(<span class="num">0</span>, np.pi/<span class="num">2</span>, fade_samples))**<span class="num">2</span>
+    fade_out = np.<span class="fn">cos</span>(np.<span class="fn">linspace</span>(<span class="num">0</span>, np.pi/<span class="num">2</span>, fade_samples))**<span class="num">2</span>
+    signal[:fade_samples] *= fade_in
+    signal[-fade_samples:] *= fade_out
+
+    <span class="cmt"># 归一化到目标振幅</span>
+    signal = amplitude * signal / np.<span class="fn">max</span>(np.<span class="fn">abs</span>(signal))
+    <span class="kw">return</span> signal</code></pre>
+
+      <h3>12.2 延迟估计算法</h3>
+
+      <div class="callout callout-info">
+        <strong>推荐版本（频域匹配滤波 + 对数域抛物线插值）</strong>
+        <p>使用频域 FFT 实现匹配滤波（比时域 correlate 更高效），并在对数幅度域做抛物线插值以获得亚采样精度：</p>
+      </div>
+
+      <pre><code><span class="kw">def</span> <span class="fn">estimate_delay_chirp</span>(y1, y2, chirp_template, fs):
+    <span class="str">"""用匹配滤波估计两路麦克风的时延差"""</span>
+    n = <span class="fn">max</span>(<span class="fn">len</span>(y1), <span class="fn">len</span>(y2))
+    Y1 = np.fft.<span class="fn">rfft</span>(y1, n=n)
+    Y2 = np.fft.<span class="fn">rfft</span>(y2, n=n)
+    X  = np.fft.<span class="fn">rfft</span>(chirp_template, n=n)
+
+    <span class="cmt"># 匹配滤波: 互相关 = IFFT(Y * conj(X))</span>
+    c1 = np.fft.<span class="fn">irfft</span>(Y1 * np.<span class="fn">conj</span>(X))
+    c2 = np.fft.<span class="fn">irfft</span>(Y2 * np.<span class="fn">conj</span>(X))
+
+    <span class="cmt"># 整数峰值检测</span>
+    k1 = np.<span class="fn">argmax</span>(np.<span class="fn">abs</span>(c1))
+    k2 = np.<span class="fn">argmax</span>(np.<span class="fn">abs</span>(c2))
+
+    <span class="cmt"># 对数域抛物线插值 (亚采样精度)</span>
+    <span class="kw">def</span> <span class="fn">sub_sample_peak</span>(c, k):
+        <span class="kw">if</span> k <= <span class="num">0</span> <span class="kw">or</span> k >= <span class="fn">len</span>(c) - <span class="num">1</span>: <span class="kw">return</span> <span class="fn">float</span>(k)
+        a = np.<span class="fn">log</span>(np.<span class="fn">abs</span>(c[k-<span class="num">1</span>]) + <span class="num">1e-10</span>)
+        b = np.<span class="fn">log</span>(np.<span class="fn">abs</span>(c[k]) + <span class="num">1e-10</span>)
+        g = np.<span class="fn">log</span>(np.<span class="fn">abs</span>(c[k+<span class="num">1</span>]) + <span class="num">1e-10</span>)
+        denom = a - <span class="num">2</span>*b + g
+        <span class="kw">if</span> <span class="fn">abs</span>(denom) < <span class="num">1e-10</span>: <span class="kw">return</span> <span class="fn">float</span>(k)
+        delta = (a - g) / (<span class="num">2</span> * denom)
+        <span class="kw">return</span> k + delta
+
+    tau1 = <span class="fn">sub_sample_peak</span>(c1, k1)
+    tau2 = <span class="fn">sub_sample_peak</span>(c2, k2)
+    <span class="kw">return</span> (tau1 - tau2) / fs</code></pre>
+
+      <h3>12.3 Golay 序列生成</h3>
+
+      <div class="callout callout-info">
+        <strong>Golay 互补序列对</strong>
+        <p>Golay 序列的独特优势：两序列的互相关之和具有零旁瓣，适合高精度延迟估计。递归构造法保证序列长度为 2 的幂。</p>
+      </div>
+
+      <pre><code><span class="kw">def</span> <span class="fn">generate_golay_pair</span>(N=<span class="num">16384</span>):
+    <span class="str">"""递归构造 Golay 互补序列对"""</span>
+    <span class="kw">assert</span> N & (N-<span class="num">1</span>) == <span class="num">0</span> <span class="kw">and</span> N > <span class="num">0</span>, <span class="str">"N 必须为 2 的幂"</span>
+    a, b = np.<span class="fn">array</span>([<span class="num">1</span>]), np.<span class="fn">array</span>([<span class="num">1</span>])
+    <span class="kw">while</span> <span class="fn">len</span>(a) < N:
+        a, b = np.<span class="fn">concatenate</span>([a, b]), np.<span class="fn">concatenate</span>([a, -b])
+    <span class="kw">return</span> a, b
+
+<span class="kw">def</span> <span class="fn">estimate_delay_golay</span>(yA_ch1, yB_ch1, yA_ch2, yB_ch2, A, B, fs=<span class="num">48000</span>):
+    <span class="str">"""使用 Golay 对估计时延（零旁瓣特性）"""</span>
+    <span class="cmt"># Channel 1: 合并两序列的相关结果 → 完美脉冲</span>
+    h1 = np.<span class="fn">correlate</span>(yA_ch1, A, <span class="str">'full'</span>) + np.<span class="fn">correlate</span>(yB_ch1, B, <span class="str">'full'</span>)
+    <span class="cmt"># Channel 2</span>
+    h2 = np.<span class="fn">correlate</span>(yA_ch2, A, <span class="str">'full'</span>) + np.<span class="fn">correlate</span>(yB_ch2, B, <span class="str">'full'</span>)
+
+    tau1 = np.<span class="fn">argmax</span>(np.<span class="fn">abs</span>(h1))
+    tau2 = np.<span class="fn">argmax</span>(np.<span class="fn">abs</span>(h2))
+    <span class="kw">return</span> (tau1 - tau2) / fs * <span class="num">1000</span>  <span class="cmt"># ms</span></code></pre>
+
+      <h3>12.4 Android AudioTimestamp 粗估</h3>
+
+      <div class="callout callout-info">
+        <strong>Layer 1: 系统级时延粗估</strong>
+        <p>利用 Android AudioTimestamp API 直接获取两路 AudioRecord 的时间戳关系，耗时 &lt;1ms，精度约 ±5ms。适合作为初始补偿的即时方案。</p>
+      </div>
+
+      <pre><code><span class="cmt">// Java/Kotlin: 两个 AudioRecord 实例取时间戳</span>
+AudioTimestamp ts1 = <span class="kw">new</span> AudioTimestamp();
+AudioTimestamp ts2 = <span class="kw">new</span> AudioTimestamp();
+
+recordInternal.<span class="fn">getTimestamp</span>(ts1, AudioTimestamp.TIMEBASE_BOOTTIME);
+recordUSB.<span class="fn">getTimestamp</span>(ts2, AudioTimestamp.TIMEBASE_BOOTTIME);
+
+<span class="cmt">// 计算两路的采样点对齐关系</span>
+<span class="kw">double</span> timeDiffNs = ts1.nanoTime - ts2.nanoTime;
+<span class="kw">long</span> frameDiff = ts2.framePosition - ts1.framePosition;
+<span class="kw">double</span> delaySamples = timeDiffNs / <span class="num">1e9</span> * sampleRate + frameDiff;
+<span class="kw">double</span> delayMs = delaySamples / sampleRate * <span class="num">1000</span>;</code></pre>
+
+      <h3>12.5 最小可行方案 vs 完美方案</h3>
+
+      <div class="grid-2">
+        <div class="card">
+          <h4>🏃 最小可行方案（1-2天）</h4>
+          <ol>
+            <li>录音开始时播放 <strong>100ms Hamming 窗线性 chirp</strong>（200Hz-16kHz）</li>
+            <li>两路 mic 录音 → 匹配滤波 → 抛物线插值</li>
+            <li>得到精确时延 → 立即应用补偿</li>
+          </ol>
+          <p><strong>预期效果：第一句话开头即无重音</strong></p>
+          <p>代码量：约 <strong>100 行</strong></p>
+        </div>
+        <div class="card">
+          <h4>🏆 完美方案（完整实现）</h4>
+          <ol>
+            <li><strong>AudioTimestamp 粗估</strong>（0ms, ±5ms）→ 立即应用</li>
+            <li><strong>100ms chirp 精修</strong>（~150ms, ±0.1ms）→ 更新</li>
+            <li><strong>NLMS 自适应滤波器</strong>持续追踪漂移</li>
+            <li><strong>语音 TDE</strong>（现有算法）最终精修</li>
+            <li>静音间隙周期性重校准（可选）</li>
+          </ol>
+          <p><strong>精度 &lt;0.1ms，鲁棒性极高</strong></p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== SECTION 13: 参考文献与审查 ==================== -->
+    <section id="sec13">
+      <div class="quick-take">⚡ 本报告综合 35+ 篇学术论文、工业文档和开源项目。核心技术经独立 DSP 工程师审查，修正 3 项关键问题。</div>
+
+      <h2>13. 参考文献与审查</h2>
+
+      <h3>13.1 校准信号文献</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>文献</th><th>链接</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Farina (2000) — ESS swept-sine 基奠论文</td><td><a href="https://www.melaudia.net/zdoc/sweepSine.PDF">PDF</a></td></tr>
+            <tr><td>2</td><td>Novák et al. (2020) — Synchronized Swept-Sine</td><td><a href="https://hal.science/hal-02504321v1/document">PDF</a></td></tr>
+            <tr><td>3</td><td>Farina — AES 122 Impulse Response Advancements</td><td><a href="https://www.angelofarina.it/Public/Presentations/AES122-Farina.pdf">PDF</a></td></tr>
+            <tr><td>4</td><td>Gil et al. (2025) — MLS-Based Round-Trip Latency</td><td><a href="https://hal.science/hal-05154354v2/file/Gil_Richard_David_MLS_Based_Roundtrip_Latency_Reviewed.pdf">PDF</a></td></tr>
+            <tr><td>5</td><td>Raykar et al. (ICASSP 2004) — Auto Position Calibration</td><td><a href="https://www.umiacs.umd.edu/~ramani/pubs/raykar_icassp2004.pdf">PDF</a></td></tr>
+            <tr><td>6</td><td>Stan et al. — Comparison of IR Measurement Techniques</td><td><a href="https://gstan.bg-research.cc.ic.ac.uk/JAES_Online_version.pdf">PDF</a></td></tr>
+            <tr><td>7</td><td>Foster — Golay Codes for IR Measurement</td><td><a href="https://www.semanticscholar.org/paper/0a95c2ef8379c6f4c43551b391ce8c1fb756b0d5">Link</a></td></tr>
+            <tr><td>8</td><td>Lai et al. — Interpolation for TDE</td><td><a href="https://htorp.folk.ntnu.no/publ/Paper/96-00/InterpXlUffc99.pdf">PDF</a></td></tr>
+            <tr><td>9</td><td>CMU — Ultrasonic Pseudo-ranging on Mobile Devices</td><td><a href="https://users.ece.cmu.edu/~agr/resources/publications/p99-lazik.pdf">PDF</a></td></tr>
+            <tr><td>10</td><td>CMU — Ultrasonic Time Sync on Smartphones</td><td><a href="https://users.ece.cmu.edu/~agr/resources/publications/rtas15.pdf">PDF</a></td></tr>
+            <tr><td>11</td><td>EURASIP 2021 — Near-Ultrasonic Communication with Consumer Devices</td><td><a href="https://eurasip.org/Proceedings/Eusipco/Eusipco2021/pdfs/0001681.pdf">PDF</a></td></tr>
+            <tr><td>12</td><td>IEEE — Ultrasonic Communication Using Consumer Hardware</td><td><a href="https://ieeexplore.ieee.org/iel7/6046/4456689/08080245.pdf">PDF</a></td></tr>
+            <tr><td>13</td><td>Frequency Response of Smartphones at Upper Audible Limit</td><td><a href="https://www.researchgate.net/publication/362094978">Link</a></td></tr>
+            <tr><td>14</td><td>PowerPhone (PMC 2026) — Acoustic Sensing on Smartphones</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12765216/">Link</a></td></tr>
+            <tr><td>15</td><td>gilpanal/weblatencytest — MLS-based Web Audio Latency</td><td><a href="https://github.com/gilpanal/weblatencytest">GitHub</a></td></tr>
+            <tr><td>16</td><td>AOSP — Audio Latency Measurements</td><td><a href="https://source.android.com/docs/core/audio/latency/measurements">Link</a></td></tr>
+            <tr><td>17</td><td>DSP StackExchange — Pulse Compression SNR Gain</td><td><a href="https://dsp.stackexchange.com/questions/35072/pulse-compressionchirp-snr-gain">Link</a></td></tr>
+            <tr><td>18</td><td>DSP StackExchange — Subsample TDE</td><td><a href="https://dsp.stackexchange.com/questions/24654/subsample-time-delay-estimation">Link</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>13.2 水印文献</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>文献</th><th>链接</th></tr></thead>
+          <tbody>
+            <tr><td>19</td><td>Kirovski & Malvar — Spread-Spectrum Watermarking of Audio</td><td><a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/KirovskiMalvarTSPApr03.pdf">PDF</a></td></tr>
+            <tr><td>20</td><td>Cox et al. — Secure Spread Spectrum Watermarking for Multimedia</td><td><a href="https://www.ee.columbia.edu/~ywang/MSS/HW2/CoxSpectrumWatermarking.pdf">PDF</a></td></tr>
+            <tr><td>21</td><td>Nadeau & Sharma (2014) — Self-Sync SS Watermark</td><td><a href="https://hajim.rochester.edu/ece/sites/gsharma/papers/NadeauSelfSyncSSWMIDSEI2014.pdf">PDF</a></td></tr>
+            <tr><td>22</td><td>Agaskar et al. (Interspeech 2022) — Practical Over-the-Air Watermarking</td><td><a href="https://www.isca-archive.org/interspeech_2022/agaskar22_interspeech.pdf">PDF</a></td></tr>
+            <tr><td>23</td><td>Amazon Science — Audio Watermarking with Modulated Self-Correlation</td><td><a href="https://cdn.amazon.science/b5/ac/64968dc64c53bc9dbc3807979ac1/audio-watermarking-over-the-air-with-modulated-self-correlation.pdf">PDF</a></td></tr>
+            <tr><td>24</td><td>MDPI 2024 — Audio Watermarking in Real-Time</td><td><a href="https://www.mdpi.com/2227-9709/12/1/1">Link</a></td></tr>
+            <tr><td>25</td><td>Looney (Interspeech 2024) — Robust SS Speech Watermarking</td><td><a href="https://www.isca-archive.org/interspeech_2024/looney24_interspeech.pdf">PDF</a></td></tr>
+            <tr><td>26</td><td>MIT Media Lab — Psychoacoustic Model Watermarking</td><td><a href="https://sound.media.mit.edu/Papers/ragoAES1999.pdf">PDF</a></td></tr>
+            <tr><td>27</td><td>Fraunhofer IIS — Digital Watermarking and Audio Quality</td><td><a href="https://www.iis.fraunhofer.de/content/dam/iis/de/doc/ame/conference/AES4823_Digital_Watermarking_and_its_Influence_on_Audio_Quality.pdf">PDF</a></td></tr>
+            <tr><td>28</td><td>Hartung et al. — SS Watermarking Attacks and Counterattacks</td><td><a href="https://web.cs.ucla.edu/~miodrag/cs259-security/hartung99spread.pdf">PDF</a></td></tr>
+            <tr><td>29</td><td>DeepMark 2026 — WebRTC and Audio Watermarking</td><td><a href="https://www.deepmark.me/blog/webrtc-and-audio-watermarking-in-real-time-systems">Link</a></td></tr>
+            <tr><td>30</td><td>ARM940T Real-Time Watermark Extractor (2003)</td><td><a href="https://ui.adsabs.harvard.edu/abs/2003sics....2...68M/abstract">Link</a></td></tr>
+            <tr><td>31</td><td>US Patent 20070217626A1 — Watermark Synchronization</td><td><a href="https://patents.google.com/patent/US20070217626A1/en">Link</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>13.3 TDE / GCC-PHAT 文献</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>文献</th><th>链接</th></tr></thead>
+          <tbody>
+            <tr><td>32</td><td>Berg et al. (Interspeech 2022) — Neural GCC-PHAT</td><td><a href="https://www.isca-archive.org/interspeech_2022/berg22_interspeech.pdf">PDF</a></td></tr>
+            <tr><td>33</td><td>ICASSP 1997 — Robust Speech TDE in Reverberant Rooms</td><td><a href="https://www2.spsc.tugraz.at/people/franklyn/ICASSP97/pdf/scan/ic970375.pdf">PDF</a></td></tr>
+            <tr><td>34</td><td>MathWorks — gccphat documentation</td><td><a href="https://www.mathworks.com/help/phased/ref/gccphat.html">Link</a></td></tr>
+            <tr><td>35</td><td>arXiv:2208.04654 — Neural GCC-PHAT detailed</td><td><a href="https://arxiv.org/abs/2208.04654">Link</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>13.4 约束与工程文献</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>文献</th><th>链接</th></tr></thead>
+          <tbody>
+            <tr><td>36</td><td>WebRTC AEC3 documentation</td><td><a href="https://switchboard.audio/hub/how-webrtc-aec3-works/">Link</a></td></tr>
+            <tr><td>37</td><td>Amazon — Async AEC Over Wireless</td><td><a href="https://cdn.amazon.science/10/d9/f1bd1ff942ec991cf5ff04adb882/asynchronous-acoustic-echo-cancellation-over-wireless-channels.pdf">PDF</a></td></tr>
+            <tr><td>38</td><td>Google Nearby Ultrasonic Signal RE</td><td><a href="https://nihal-pasham.medium.com/dsp-hacking-reversing-g-pay-s-ultrasound-signal-part-1-fa7f6d93320b">Medium</a></td></tr>
+            <tr><td>39</td><td>DJI Mic Sync Issues (Reddit)</td><td><a href="https://www.reddit.com/r/SonyFX6/comments/1odl915/dji_mic_sync_issues/">Link</a></td></tr>
+            <tr><td>40</td><td>Julian Schroden — DJI Mic Review</td><td><a href="https://julianschroden.com/post/2022-11-19-dji-mic-review/">Link</a></td></tr>
+            <tr><td>41</td><td>Android NDK Audio Latency Guide</td><td><a href="https://developer.android.com/ndk/guides/audio/audio-latency">Link</a></td></tr>
+            <tr><td>42</td><td>Apple Core Audio Essentials</td><td><a href="https://developer.apple.com/library/archive/documentation/MusicAudio/Conceptual/CoreAudioOverview/CoreAudioEssentials/CoreAudioEssentials.html">Link</a></td></tr>
+            <tr><td>43</td><td>arXiv:2506.19612 — Wireless Self-Calibrating Ultrasound Mic Array (2025)</td><td><a href="https://arxiv.org/pdf/2506.19612">PDF</a></td></tr>
+            <tr><td>44</td><td>arXiv:2403.05791 — Async Mic Array Calibration using Hybrid TDOA</td><td><a href="https://arxiv.org/html/2403.05791v4">Link</a></td></tr>
+            <tr><td>45</td><td>DJI Mic 2 Specifications</td><td><a href="https://www.dji.com/id/mic-2/specs">Link</a></td></tr>
+            <tr><td>46</td><td>Android MediaRecorder.AudioSource.UNPROCESSED</td><td><a href="https://developer.android.com/reference/android/media/MediaRecorder.AudioSource#UNPROCESSED">Link</a></td></tr>
+            <tr><td>47</td><td>Apple AVAudioSession.Mode.measurement</td><td><a href="https://developer.apple.com/documentation/avfaudio/avaudiosession/mode-swift.struct/measurement">Link</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>13.5 独立审查摘要</h3>
+
+      <div class="review-section">
+        <p>本报告经独立技术审查人（资深音频 DSP 工程师）审查后，发现并修正了 <strong>3 项关键问题</strong> 和 <strong>5 项重要改进建议</strong>。</p>
+
+        <div class="review-grid">
+          <div class="review-card">
+            <div class="grade">A-</div>
+            <div class="label">技术准确性</div>
+          </div>
+          <div class="review-card">
+            <div class="grade">B+ → A-</div>
+            <div class="label">完整性<br>(修订后)</div>
+          </div>
+          <div class="review-card">
+            <div class="grade">B+ → A-</div>
+            <div class="label">实用性<br>(修订后)</div>
+          </div>
+          <div class="review-card">
+            <div class="grade">A</div>
+            <div class="label">结构组织</div>
+          </div>
+        </div>
+
+        <h4>已修正的关键问题</h4>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>问题</th><th>修正</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span class="tag tag-fix">C1</span></td>
+                <td>缺少 GCC-PHAT 基线对比</td>
+                <td>新增 §6 GCC-PHAT 章节，明确被动 TDE 基线的定位及其与主动方案的互补关系</td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-fix">C2</span></td>
+                <td>蓝牙编码延迟抖动未考虑</td>
+                <td>新增 §9.1 详细分析各编码的抖动范围，增加看门狗机制和自适应跟踪建议</td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-fix">C3</span></td>
+                <td>近超声硬件可靠性被高估</td>
+                <td>增加设备兼容矩阵验证要求、运行时回退协议</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>已纳入的重要改进</h4>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>建议</th><th>处理方式</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span class="tag tag-new">I1</span></td>
+                <td>抛物线插值偏差校正</td>
+                <td>补充偏差量级说明和 Quinn/Macleod 替代方案</td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-new">I2</span></td>
+                <td>ESS 逆滤波器归一化</td>
+                <td>补充归一化常数 A<sub>norm</sub></td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-new">I3</span></td>
+                <td>手机 DSP 管线对抗水印</td>
+                <td>新增 §9.3 详细分析 NS/AGC/AEC 对水印的影响和对策</td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-new">I4</span></td>
+                <td>Golay 实际时间开销</td>
+                <td>量化保护间隔和总校准时间</td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-new">I5</span></td>
+                <td>时钟漂移</td>
+                <td>新增 §9.2 量化漂移速率，强调持续跟踪的必要性</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>审查人认可的优点</h4>
+        <ul>
+          <li>方案分类体系清晰，帮助从业者按复杂度/性能权衡导航选项</li>
+          <li>核心数学正确——处理增益公式、旁瓣电平、自相关特性与标准文献一致</li>
+          <li>分阶段路线图务实——从最低风险（可听 chirp）到最高复杂度（ML 预测）</li>
+          <li>蓝牙编码影响的标注体现了工程思维，很多学术综述忽略了这一点</li>
+          <li>对比表真正有用——信号类型和水印方案的表格可直接用于设计评审</li>
+        </ul>
+      </div>
+
+    </section>
+
+
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    <div class="container">
+      <p><strong>AI Disclosure</strong>: 本报告使用 AI 辅助文献检索和技术分析综合。所有引用论文均指向真实出版物，建议工程实现前独立验证关键技术参数。</p>
+      <p>生成日期: 2026-06-10 | 版本: v3.0 Ultimate（三报告整合版）| 综合自三份独立深度调研报告</p>
+    </div>
+  </footer>
+
+</body>
+</html>
