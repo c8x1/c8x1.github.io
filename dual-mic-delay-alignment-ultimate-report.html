@@ -1107,22 +1107,35 @@
         <strong>⚡ 方案分三大族</strong>：A 主动校准信号（一次性播放已知信号）、B 音频水印（持续嵌入不可感知信号）、C 被动 TDE 基线（GCC-PHAT）。注入架构有 4 种选择，推荐 MVP 是短 Chirp。
       </div>
 
-      <div class="diagram">
-┌─────────────────────────────────────────────────────────────────┐
-│                    双路麦克风时延对齐方案分类                       │
-├─────────────┬───────────────────┬───────────────────────────────┤
-│  方案 A      │    方案 B          │     方案 C（被动基线）         │
-│  主动校准信号 │    音频水印嵌入     │     GCC-PHAT                 │
-│             │                   │                               │
-│ 播放已知信号 │ 不可感知信号嵌入   │  利用环境音/噪声的            │
-│ → 两MIC拾取 │ 音频流中           │  互相关做延迟估计             │
-│ → 互相关检测 │ → 持续检测水印位置 │                               │
-│             │                   │  = 你现有方案的基线            │
-├─────────────┼───────────────────┼───────────────────────────────┤
-│ 一次性/周期 │ 持续无缝          │  依赖环境声源                 │
-│ 精度:&lt;1ms  │ 精度:1-5ms       │  精度:5-50ms                │
-│ 解决冷启动  │ 解决冷启动+持续   │  冷启动问题所在               │
-└─────────────┴───────────────────┴───────────────────────────────┘</div>
+      <div class="grid-3">
+  <div class="card">
+    <h4>方案 A：主动校准信号</h4>
+    <p>播放已知信号 → 两 MIC 拾取 → 互相关检测</p>
+    <ul>
+      <li>一次性/周期性播放</li>
+      <li>精度: &lt;1ms</li>
+      <li><span class="badge badge-green">解决冷启动</span></li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>方案 B：音频水印嵌入</h4>
+    <p>不可感知信号嵌入音频流 → 持续检测水印位置</p>
+    <ul>
+      <li>持续无缝</li>
+      <li>精度: 1-5ms</li>
+      <li><span class="badge badge-green">解决冷启动 + 持续跟踪</span></li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>方案 C：GCC-PHAT 被动基线</h4>
+    <p>利用环境音/噪声的互相关做延迟估计</p>
+    <ul>
+      <li>依赖环境声源</li>
+      <li>精度: 5-50ms</li>
+      <li><span class="badge badge-orange">冷启动问题所在</span></li>
+    </ul>
+  </div>
+</div>
 
       <div class="table-wrap">
         <table>
@@ -1328,12 +1341,20 @@ x_inv(t) = (1/A_norm) · x(T - t) · e^(t/T · ln(f₁/f₀))
 
       <h4>非线性失真分离 — ESS 独有优势</h4>
       <p>如果手机扬声器在大音量下播放时产生非线性失真（削波），产生的各阶谐波失真在反卷积后会出现在主脉冲的<strong>负时间区域</strong>，可以干净地分离：</p>
-      <div class="diagram">
-反卷积结果：
-  ...[3次谐波]...[2次谐波].....[主脉冲(线性IR)]...
-  ←── 负时间 ────────────────── 0 ─── 正时间 ──→
-
-→ 主脉冲不受谐波失真污染，延迟检测更可靠</div>
+      <div class="callout callout-success">
+  <strong>ESS 独有优势：非线性失真分离</strong>
+  <p>反卷积后，各阶谐波失真出现在主脉冲的<strong>负时间区域</strong>，可以干净地分离：</p>
+  <div style="display:flex; align-items:center; gap:0; font-family:monospace; font-size:0.85rem; margin:1rem 0; flex-wrap:wrap;">
+    <span style="background:#fee2e2; padding:6px 10px; border-radius:4px; color:#991b1b;">3次谐波</span>
+    <span style="color:var(--text-dim); padding:0 4px;">···</span>
+    <span style="background:#fef3c7; padding:6px 10px; border-radius:4px; color:#92400e;">2次谐波</span>
+    <span style="color:var(--text-dim); padding:0 4px;">·····</span>
+    <span style="background:#d1fae5; padding:6px 14px; border-radius:4px; color:#065f46; font-weight:700;">主脉冲(线性IR)</span>
+    <span style="color:var(--text-dim); padding:0 4px;">···</span>
+  </div>
+  <p style="font-size:0.85rem; color:var(--text-dim);">← 负时间 ──────────── 0 ──── 正时间 →</p>
+  <p>主脉冲不受谐波失真污染，延迟检测更可靠。</p>
+</div>
 
       <h4>LFM vs ESS 对比</h4>
       <div class="table-wrap">
@@ -1516,14 +1537,24 @@ TBP: <span class="num">0.05</span> × <span class="num">3000</span> = <span clas
       <!-- 5.1 核心原理差异 -->
       <h3 id="sec5-1">5.1 核心原理差异</h3>
 
-      <div class="diagram">
-方案 A：播放 → 等待 → 检测（一次性或周期性）
-  → 校准信号和用户信号在时间上是分离的
-
-方案 B：水印信号与用户信号始终共存
-  → 校准信息嵌入在正常音频流中
-  → 任何时候都可以提取对齐信息
-  → 不仅解决冷启动，还能持续、无缝地跟踪延迟变化</div>
+      <div class="grid-2">
+  <div class="card">
+    <h4>方案 A：时间分离</h4>
+    <p>播放 → 等待 → 检测（一次性或周期性）</p>
+    <p>校准信号和用户信号在<strong>时间上分离</strong></p>
+    <p><span class="badge badge-blue">解决冷启动</span></p>
+  </div>
+  <div class="card">
+    <h4>方案 B：持续共存</h4>
+    <p>水印信号与用户信号<strong>始终共存</strong></p>
+    <ul>
+      <li>校准信息嵌入在正常音频流中</li>
+      <li>任何时候都可以提取对齐信息</li>
+      <li>不仅解决冷启动，还能持续、无缝地跟踪延迟变化</li>
+    </ul>
+    <p><span class="badge badge-green">解决冷启动 + 持续跟踪</span></p>
+  </div>
+</div>
 
       <!-- 5.2 扩频水印 DSSS -->
       <h3 id="sec5-2">5.2 扩频水印（DSSS）</h3>
@@ -1787,25 +1818,25 @@ PHAT 加权将所有频率分量等权化，抑制噪声频谱的影响，
       <!-- 6.3 与主动方案的互补关系 -->
       <h3 id="sec6-3">6.3 与主动方案的互补关系</h3>
 
-      <div class="diagram">
-┌──────────────────────────────────────────────────────┐
-│         GCC-PHAT 在方案体系中的角色                    │
-├──────────────────────────────────────────────────────┤
-│                                                      │
-│  你现有的 Interspeech TDE ≈ GCC-PHAT 或其改进版       │
-│  ↓                                                   │
-│  它是你的 "持续精细对齐" 引擎                         │
-│  但它在静默期失效 = 冷启动问题                        │
-│                                                      │
-│  方案 A/B 的角色：                                    │
-│  = 在 GCC-PHAT "失灵" 的时段提供初始/备用延迟估计     │
-│  = 不是替代 GCC-PHAT，而是互补                        │
-│                                                      │
-│  理想流程：                                           │
-│  1. 方案 A/B 给出初始延迟 τ₀                         │
-│  2. 一旦检测到语音 → 切换到 GCC-PHAT 做精细跟踪       │
-│  3. 语音间歇期 → 方案 B 的水印持续提供延迟更新        │
-└──────────────────────────────────────────────────────┘</div>
+      <div class="callout callout-info">
+  <strong>GCC-PHAT 的角色定位</strong>
+  <p>你现有的 Interspeech TDE ≈ GCC-PHAT 或其改进版。它是你的"持续精细对齐"引擎，但在静默期失效（= 冷启动问题）。方案 A/B 不是替代它，而是互补。</p>
+</div>
+
+<div class="flow-steps" style="grid-template-columns: repeat(3, 1fr);">
+  <div class="flow-step">
+    <strong>1. 初始对齐</strong>
+    <p>方案 A/B 给出初始延迟 τ₀，在冷启动期间提供可靠的延迟估计</p>
+  </div>
+  <div class="flow-step">
+    <strong>2. 语音精细跟踪</strong>
+    <p>一旦检测到语音 → 切换到 GCC-PHAT / Interspeech TDE 做精细跟踪</p>
+  </div>
+  <div class="flow-step">
+    <strong>3. 间歇期持续更新</strong>
+    <p>语音间歇期 → 方案 B 的水印持续提供延迟更新，补偿时钟漂移</p>
+  </div>
+</div>
 
       <!-- 6.4 参考文献 -->
       <h3 id="sec6-4">6.4 参考文献</h3>
@@ -1830,25 +1861,28 @@ PHAT 加权将所有频率分量等权化，抑制噪声频谱的影响，
 
       <p>手机扬声器播放已知校准信号 <code>s(t)</code>，两路麦克风分别拾取后对原始信号做互相关（匹配滤波），找到各自的到达时间，两者之差即为时延差。</p>
 
-      <div class="diagram">
-       播放校准信号 s(t)
-            │
-  ┌─────────┼─────────┐
-  ↓                   ↓
-手机 mic 录音        DJI Mic 录音
-  r₁(t)              r₂(t)
-  │                   │
-  ↓                   ↓
-匹配滤波/相关        匹配滤波/相关
-  p₁(τ) = r₁⋆s      p₂(τ) = r₂⋆s
-  │                   │
-  ↓                   ↓
-峰值检测              峰值检测
-  τ₁ = argmax(p₁)   τ₂ = argmax(p₂)
-  │                   │
-  └─────────┬─────────┘
-            ↓
-    Δτ = τ₁ − τ₂   ← 两路时延差</div>
+      <div class="flow-steps">
+  <div class="flow-step">
+    <strong>1. 播放</strong>
+    <p>手机扬声器播放已知校准信号 s(t)</p>
+  </div>
+  <div class="flow-step">
+    <strong>2. 双路拾取</strong>
+    <p>手机 MIC 拾取 r₁(t)<br>DJI MIC 拾取 r₂(t)</p>
+  </div>
+  <div class="flow-step">
+    <strong>3. 匹配滤波</strong>
+    <p>两路各自与 s(t) 做互相关：<br>p₁(τ) = r₁⋆s<br>p₂(τ) = r₂⋆s</p>
+  </div>
+  <div class="flow-step">
+    <strong>4. 峰值检测</strong>
+    <p>τ₁ = argmax|p₁|<br>τ₂ = argmax|p₂|</p>
+  </div>
+  <div class="flow-step">
+    <strong>5. 时延差</strong>
+    <p><strong>Δτ = τ₁ − τ₂</strong><br>即两路时延差</p>
+  </div>
+</div>
 
       <p>因为 <code>s(t)</code> 是自定义信号，其自相关特性可以被优化到极其尖锐（近似 delta 函数），互相关峰的 SNR 远高于被动方案。</p>
 
@@ -2240,15 +2274,19 @@ delay_seconds = τ / fs</div>
       <!-- 11.3 方案组合推荐 -->
       <h3>11.3 方案组合推荐</h3>
 
-      <div class="diagram">功能开启时：
-1. 播放语音提示："协同拾音已开启"（~1.5秒）
-2. 语音提示最后 50ms，叠加 Chirp 信号（2kHz→8kHz, -15dBFS）
-3. Chirp 结束后立即开始录音
-4. 两路 MIC 做匹配滤波 → 得到初始时延 τ₀
-5. 用 τ₀ 做初始对齐
-6. 切换到 GCC-PHAT / Interspeech TDE 做持续精细对齐
-7. 每 10s 播放超声 Chirp Burst（20ms, 16-19kHz）持续跟踪漂移
-8. 看门狗：连续两次校准延迟差 >5ms → 立即重校准</div>
+      <div class="card">
+  <h4>完整工作流程</h4>
+  <ol style="padding-left:1.5rem; margin:0.5rem 0;">
+    <li>播放语音提示："协同拾音已开启"（~1.5 秒）</li>
+    <li>语音提示最后 50ms，叠加 Chirp 信号（2kHz→8kHz, -15dBFS）</li>
+    <li>Chirp 结束后立即开始录音</li>
+    <li>两路 MIC 做匹配滤波 → 得到初始时延 τ₀</li>
+    <li>用 τ₀ 做初始对齐</li>
+    <li>切换到 GCC-PHAT / Interspeech TDE 做持续精细对齐</li>
+    <li>每 10s 播放超声 Chirp Burst（20ms, 16-19kHz）持续跟踪漂移</li>
+    <li>看门狗：连续两次校准延迟差 &gt;5ms → 立即重校准</li>
+  </ol>
+</div>
 
     </section>
 
