@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>05 - Agent Harness 工程</title>
+    <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a href="index.html">← 返回目录</a>
+        <span>报告 05/09</span>
+        <a href="06-commercial.html">下一篇 →</a>
+    </nav>
+
+    <div class="container">
+        <header class="report-header">
+            <span class="report-num">REPORT 05</span>
+            <h1>🏗️ Agent Harness 工程</h1>
+            <p class="report-subtitle">新兴工程学科的核心理念、架构模式与在音频领域的应用前景</p>
+        </header>
+
+        <section class="content-section">
+            <h2>1. 什么是 Agent Harness？</h2>
+            <p>
+                <strong>Agent Harness</strong> 是围绕 AI 模型构建的<strong>独立逻辑控制层</strong>，
+                负责处理确定性检查、治理、自主边界和自定义护栏。它是一个正在形成中的工程学科，
+                将 Agent 的可靠性、安全性和可治理性提升到了与模型能力同等重要的地位。
+            </p>
+            <div class="quote-block">
+                <p>"The agent harness is the logic layer around the model: deterministic checks alongside non-deterministic iterations, autonomy boundaries, and custom guardrails."</p>
+                <div class="source">— Ona, <a href="https://ona.com/guides/background-agents" target="_blank">An engineering leader's guide to background agents</a></div>
+            </div>
+
+            <h3>核心组件</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h4>治理层 (Governance)</h4>
+                    <p>权限控制、审计日志、操作审批流程。确保 Agent 不会执行超出授权的操作。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📋</div>
+                    <h4>控制平面 (Control Plane)</h4>
+                    <p>Agent 的生命周期管理、任务编排、状态追踪和错误恢复。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h4>护栏 (Guardrails)</h4>
+                    <p>输入/输出验证、安全边界、速率限制、防止 Agent 做出破坏性操作。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h4>上下文管理 (Context)</h4>
+                    <p>AGENTS.md / CLAUDE.md 等指令文件、外部化记忆、虚拟文件系统。</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>2. Agent Harness 理论发展</h2>
+
+            <div class="project-card">
+                <h3>📄 "Agent Harness Engineering: A Survey" (OpenReview, 2026.01)</h3>
+                <p>
+                    这篇综述论文确立了 Agent Harness 作为<strong>独立系统层</strong>的学科地位。
+                    核心论点：
+                </p>
+                <ul>
+                    <li>Agent Harness 是一个<strong>独立的系统层</strong>，其工程质量直接驱动了
+                        实际应用中很大比例的可靠性</li>
+                    <li>Agent Harness 与底层 LLM 模型是<strong>可分离的</strong>——
+                        同一个 Harness 可以搭配不同的模型，反之亦然</li>
+                    <li>上下文与记忆管理（Context & Memory Management）是 Harness 的核心子系统之一</li>
+                </ul>
+                <ul>
+                    <li>论文: <a href="https://openreview.net/pdf/f358711a95aaaf61fdeffd4ef3fc60fba9b8da57.pdf" target="_blank">OpenReview PDF</a></li>
+                </ul>
+            </div>
+
+            <div class="project-card">
+                <h3>📝 "Agent Harness Engineering — The Rise of the AI Control Plane" (Medium, 2026.04)</h3>
+                <p>
+                    Adnan Masood 的这篇博文讨论了 Agent Harness 控制平面的实际实现，包括：
+                </p>
+                <ul>
+                    <li><strong>AGENTS.md / todo.md</strong>: 通过外部化文件实现 Agent 记忆和指令管理</li>
+                    <li><strong>Virtualized Filesystem</strong>: 虚拟文件系统作为 Agent 的工作空间</li>
+                    <li><strong>确定性执行</strong>: 在 LLM 非确定性之上叠加确定性的检查和控制</li>
+                    <li><strong>治理框架</strong>: 审计、合规和权限控制</li>
+                </ul>
+                <ul>
+                    <li>文章: <a href="https://medium.com/@adnanmasood/agent-harness-engineering-the-rise-of-the-ai-control-plane-938ead884b1d" target="_blank">Medium</a></li>
+                </ul>
+            </div>
+
+            <div class="project-card">
+                <h3>🔧 "Hidden Technical Debt of AI Systems: Agent Runtime" (2026.04)</h3>
+                <p>
+                    Lee Han-chung 的文章讨论了 Agent Harness + Model 组合带来的隐性技术债务：
+                </p>
+                <ul>
+                    <li>Agent Harness 与模型的组合测试是一个主要挑战</li>
+                    <li>对生产环境影响不大，但对<strong>研发和实验</strong>影响巨大</li>
+                    <li>需要 Azure Container 级别的隔离来管理不同 Harness-Model 组合</li>
+                </ul>
+                <ul>
+                    <li>文章: <a href="https://leehanchung.github.io/blogs/2026/04/24/hidden-technical-debt-agent-runtime/" target="_blank">leehanchung.github.io</a></li>
+                </ul>
+            </div>
+
+            <div class="project-card">
+                <h3>🏢 Enterprise Agent Control Plane (Penligent AI, 2026.05)</h3>
+                <p>
+                    讨论了<strong>可插拔的 AI Agent 后端</strong>作为新的企业控制平面。核心观点：
+                </p>
+                <ul>
+                    <li>Agent Harness 正在成为<strong>持久层</strong>——模型可以替换，但 Harness 保持不变</li>
+                    <li>Anthropic 自己的 managed agents 文档描述了类似的解耦架构</li>
+                    <li>企业需要一个统一的控制平面来管理来自不同供应商的 AI Agent</li>
+                </ul>
+                <ul>
+                    <li>文章: <a href="https://www.penligent.ai/hackinglabs/swappable-ai-agent-backends-are-the-new-enterprise-control-plane/" target="_blank">Penligent AI</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>3. AGENTS.md 与 CLAUDE.md</h2>
+            <p>
+                Agent Harness 理论在实践中最重要的体现之一是<strong>指令文件标准化</strong>：
+            </p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <h4>AGENTS.md</h4>
+                    <p>放在代码仓库根目录的指令文件，告诉 AI Agent 该项目的约定、测试命令、架构说明等。
+                    被多个 AI Agent 框架识别。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <h4>CLAUDE.md</h4>
+                    <p>Claude Code 使用的类似机制，定义项目特定的指令和偏好。
+                    被 Agent Harness Survey 引用为上下文管理的典型实现。</p>
+                </div>
+            </div>
+
+            <p>
+                这些文件本质上是 Agent Harness 的<strong>上下文管理子系统</strong>——
+                它们为 Agent 提供了项目级别的知识和约束，而不需要修改模型本身。
+            </p>
+        </section>
+
+        <section class="content-section">
+            <h2>4. Agent Harness 在 DAW/音频领域的应用前景</h2>
+            <p>
+                将 Agent Harness 工程的原则应用到 DAW Agent 化中，有几个关键的应用方向：
+            </p>
+
+            <div class="phase-block">
+                <h3>4.1 音频操作护栏</h3>
+                <ul>
+                    <li><strong>破坏性操作保护</strong>: Agent 执行删除轨道、覆盖文件等操作前需要用户确认</li>
+                    <li><strong>参数范围限制</strong>: 限制 Agent 调整增益的范围（如不超过 +6dB），防止削波</li>
+                    <li><strong>Undo 堆栈管理</strong>: 确保所有 Agent 操作都可以原子化回退</li>
+                    <li><strong>实时性保证</strong>: 防止 Agent 在录音或播放时执行可能导致音频中断的操作</li>
+                </ul>
+            </div>
+
+            <div class="phase-block">
+                <h3>4.2 音乐创作治理</h3>
+                <ul>
+                    <li><strong>风格一致性检查</strong>: 验证 Agent 生成的 MIDI 是否符合当前项目的调性和节奏</li>
+                    <li><strong>版权合规</strong>: 防止 Agent 生成与已知作品过于相似的内容</li>
+                    <li><strong>创作意图保持</strong>: 确保 Agent 的操作服务于用户的创作目标，而非偏离</li>
+                </ul>
+            </div>
+
+            <div class="phase-block">
+                <h3>4.3 DAW Agent 控制平面</h3>
+                <ul>
+                    <li><strong>多 Agent 编排</strong>: 混音 Agent、编曲 Agent、母带 Agent 的协同工作</li>
+                    <li><strong>会话状态管理</strong>: Agent 需要维护对当前 DAW 会话状态的准确理解</li>
+                    <li><strong>操作审计</strong>: 记录 Agent 的所有操作，便于回溯和调试</li>
+                    <li><strong>性能监控</strong>: 确保 Agent 操作不会导致 DAW 的实时性能劣化</li>
+                </ul>
+            </div>
+
+            <div class="insight-box">
+                <h4>🔑 Agent Harness 关键洞察</h4>
+                <ul>
+                    <li><strong>Agent Harness 的工程质量决定了 DAW Agent 的实际可用性</strong>——
+                        模型能力已经足够，但缺乏可靠的 Harness 是阻碍 Agent 进入专业音频工作流的主要瓶颈。</li>
+                    <li><strong>DAWZY 的可逆操作设计是 Harness 思维的体现</strong>——
+                        它通过确保所有操作可回退来建立用户信任。</li>
+                    <li><strong>SnappySnap 的 MCP 集成是一种轻量级 Harness</strong>——
+                        插件作为 Agent 和 DAW 之间的控制平面，管理参数访问和操作执行。</li>
+                    <li><strong>AGENTS.md 模式可以应用到 DAW 项目中</strong>——
+                        想象一个 "MIXING.md" 文件，定义混音的约定、限制和偏好。</li>
+                </ul>
+            </div>
+        </section>
+
+        <div class="nav-footer">
+            <a href="04-ai-agents.html">← 上一篇：AI Agent</a>
+            <a href="06-commercial.html">下一篇：商业产品 →</a>
+        </div>
+    </div>
+</body>
+</html>

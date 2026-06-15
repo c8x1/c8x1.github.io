@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>03 - MCP Server 生态系统</title>
+    <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a href="index.html">← 返回目录</a>
+        <span>报告 03/09</span>
+        <a href="04-ai-agents.html">下一篇 →</a>
+    </nav>
+
+    <div class="container">
+        <header class="report-header">
+            <span class="report-num">REPORT 03</span>
+            <h1>🔌 MCP Server 生态系统</h1>
+            <p class="report-subtitle">全面盘点 DAW/音频领域的 MCP Server 实现，分析协议层技术选型</p>
+        </header>
+
+        <section class="content-section">
+            <h2>1. MCP 协议概述</h2>
+            <p>
+                <strong>Model Context Protocol (MCP)</strong> 是由 Anthropic 于 2024 年提出的开放标准协议，
+                旨在为 AI 应用（如 Claude）提供与外部系统安全、双向连接的能力。MCP 定义了统一的接口规范，
+                使 AI Agent 可以通过标准化方式读取数据、调用工具和执行操作。
+            </p>
+            <div class="quote-block">
+                <p>"MCP is an open standard that enables secure, two-way connections between data sources and AI-powered tools."</p>
+                <div class="source">— Anthropic, <a href="https://www.anthropic.com/news/model-context-protocol" target="_blank">Introducing MCP</a></div>
+            </div>
+            <p>
+                在 DAW/音频领域，MCP 正在成为 <strong>AI Agent 与 DAW 交互的事实标准协议</strong>。
+                几乎所有 2025-2026 年间出现的 DAW-AI 集成项目都选择了 MCP 作为通信层。
+            </p>
+        </section>
+
+        <section class="content-section">
+            <h2>2. DAW 级 MCP Server</h2>
+
+            <div class="project-card">
+                <h3>🎛️ AbletonMCP (Siddharth Ahuja)</h3>
+                <div class="project-meta">
+                    <span class="meta-item">📦 <strong>ahujasid/ableton-mcp</strong></span>
+                    <span class="meta-item">📅 2025 年 3 月</span>
+                    <span class="meta-item">⭐ <strong>最成熟的 DAW MCP</strong></span>
+                </div>
+                <div class="tech-tags">
+                    <span class="tech-tag">Python</span>
+                    <span class="tech-tag">Ableton Live</span>
+                    <span class="tech-tag">Claude AI</span>
+                    <span class="tech-tag">MCP</span>
+                </div>
+                <p>
+                    AbletonMCP 是第一个获得广泛关注的 DAW MCP Server，由 Siddharth Ahuja 开发。
+                    它将 Ableton Live 连接到 Claude AI，使 Claude 可以通过自然语言直接控制 Ableton Live
+                    的会话、轨道、Clip、效果器等。
+                </p>
+                <h4>核心能力</h4>
+                <ul>
+                    <li>设置 Tempo、创建轨道、加载乐器/效果器</li>
+                    <li>生成 MIDI 并自动化效果</li>
+                    <li>操控轨道、效果和 Clip</li>
+                    <li>与 Claude Desktop 和 Cursor IDE 集成</li>
+                </ul>
+                <h4>链接</h4>
+                <ul>
+                    <li>GitHub: <a href="https://github.com/ahujasid/ableton-mcp" target="_blank">ahujasid/ableton-mcp</a></li>
+                    <li>Reddit: <a href="https://www.reddit.com/r/mcp/comments/1jgbi6q/" target="_blank">r/mcp 讨论</a></li>
+                    <li>YouTube: <a href="https://www.youtube.com/watch?v=QXSImhfS15k" target="_blank">Demo 视频</a></li>
+                    <li>Jamu Blog: <a href="https://www.jamu.ai/blog/ableton-mcp" target="_blank">深度分析</a></li>
+                </ul>
+            </div>
+
+            <div class="project-card">
+                <h3>🎛️ AbletonMCP Extended (uisato)</h3>
+                <div class="project-meta">
+                    <span class="meta-item">📦 <strong>uisato/ableton-mcp-extended</strong></span>
+                    <span class="meta-item">📅 2025 年 7 月</span>
+                </div>
+                <p>
+                    ableton-mcp-extended 在原版基础上提供了更强大的 MCP Server 实现，
+                    将自然语言命令转化为 Ableton Live 中的精确操作。增加了更多的控制粒度和错误处理。
+                </p>
+                <ul>
+                    <li>GitHub: <a href="https://github.com/uisato/ableton-mcp-extended" target="_blank">uisato/ableton-mcp-extended</a></li>
+                    <li>YouTube: <a href="https://www.youtube.com/watch?v=7ZKPIrJuuKk" target="_blank">Extended Release 视频</a></li>
+                </ul>
+            </div>
+
+            <div class="project-card">
+                <h3>🎙️ REAPER MCP (reaper-reapy-mcp)</h3>
+                <div class="project-meta">
+                    <span class="meta-item">📦 <strong>wegitor/reaper-reapy-mcp</strong></span>
+                    <span class="meta-item">📅 2025-2026</span>
+                </div>
+                <div class="tech-tags">
+                    <span class="tech-tag">Python</span>
+                    <span class="tech-tag">python-reapy</span>
+                    <span class="tech-tag">REAPER</span>
+                    <span class="tech-tag">pip installable</span>
+                </div>
+                <p>
+                    基于 python-reapy 模块的 REAPER DAW MCP Server，可通过 pip 安装。
+                    允许 AI Agent 通过 MCP 协议控制 REAPER 的各个方面。
+                </p>
+                <ul>
+                    <li>GitHub: <a href="https://github.com/wegitor/reaper-reapy-mcp" target="_blank">wegitor/reaper-reapy-mcp</a></li>
+                    <li>LobeHub: <a href="https://lobehub.com/mcp/wegitor-reaper-reapy-mcp" target="_blank">MCP 注册</a></li>
+                </ul>
+            </div>
+
+            <div class="project-card">
+                <h3>🍎 Logic Pro MCP</h3>
+                <div class="project-meta">
+                    <span class="meta-item">📦 <strong>jamubc/logic-pro-mcp-website</strong></span>
+                    <span class="meta-item">📅 2026 年 5 月</span>
+                    <span class="meta-item">🧪 <strong>实验阶段</strong></span>
+                </div>
+                <p>
+                    社区开发者发布的 Logic Pro MCP Server 实验版本。通过 AppleScript 桥接实现 AI Agent
+                    与 Logic Pro 的交互。这补全了 Apple 生态中 DAW Agent 化的关键一环。
+                </p>
+                <ul>
+                    <li>GitHub: <a href="https://github.com/jamubc/logic-pro-mcp-website" target="_blank">jamubc/logic-pro-mcp-website</a></li>
+                    <li>Reddit: <a href="https://www.reddit.com/r/LogicPro/comments/1t6y2j5/" target="_blank">r/LogicPro 讨论</a></li>
+                </ul>
+            </div>
+
+            <div class="project-card">
+                <h3>🎹 FL Studio MCP</h3>
+                <div class="project-meta">
+                    <span class="meta-item">📅 2025-2026</span>
+                    <span class="meta-item">👥 <strong>多个社区项目</strong></span>
+                </div>
+                <p>
+                    FL Studio 已有多个社区 MCP Server 实现，支持 AI Agent 通过 MCP 协议控制 FL Studio
+                    的混音、钢琴卷帘、增益级等功能。Image-Line 社区论坛也已正式向官方请求原生 MCP 支持 (2026.04)。
+                </p>
+                <ul>
+                    <li><strong>rosasynthesiz/flstudio-mcp</strong>: 全功能 FL Studio MCP，含 Mix Doctor、增益级</li>
+                    <li><strong>calvinw/fl-studio-mcp</strong>: 开源 MCP Server，LLM 与钢琴卷帘交互</li>
+                    <li><strong>szichedelic/fl-studio-mcp</strong>: 通过 Claude/MCP 自然语言控制 FL Studio</li>
+                    <li>MCP Market: <a href="https://mcpmarket.com/server/fl-studio" target="_blank">FL Studio MCP 列表</a></li>
+                    <li>GitHub: <a href="https://github.com/calvinw/fl-studio-mcp" target="_blank">calvinw/fl-studio-mcp</a></li>
+                </ul>
+            </div>
+
+            <div class="project-card">
+                <h3>🎚️ Pro Tools MCP</h3>
+                <div class="project-meta">
+                    <span class="meta-item">📦 <strong>skrul/protools-mcp-server</strong></span>
+                    <span class="meta-item">📅 2025-2026</span>
+                </div>
+                <p>
+                    通过 PTSL (Pro Tools Scripting Library) 和 gRPC API 实现的 Pro Tools MCP Server，
+                    支持会话管理、时间线导航、音频编辑和导出等操作。
+                </p>
+                <ul>
+                    <li>GitHub: <a href="https://github.com/skrul/protools-mcp-server" target="_blank">skrul/protools-mcp-server</a></li>
+                    <li>MCP Market: <a href="https://mcpmarket.com/server/pro-tools" target="_blank">Pro Tools MCP</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>2.5 平台级 MCP 集成</h2>
+
+            <div class="project-card">
+                <h3>⭐ Splice MCP Server — 官方 Beta</h3>
+                <div class="project-meta">
+                    <span class="meta-item">📦 <strong>Splice (官方)</strong></span>
+                    <span class="meta-item">📅 2026 年 4 月 28 日</span>
+                    <span class="meta-item">🏆 <strong>最具商业影响力</strong></span>
+                </div>
+                <div class="tech-tags">
+                    <span class="tech-tag">Official Beta</span>
+                    <span class="tech-tag">Anthropic Partnership</span>
+                    <span class="tech-tag">Sample Search</span>
+                    <span class="tech-tag">Sound Stacks</span>
+                </div>
+                <p>
+                    Splice——行业最大的采样市场平台——作为 Anthropic "Claude for Creative Work" 计划的一部分，
+                    于 2026 年 4 月 28 日发布了<strong>官方 MCP Server Beta</strong>。这是目前音频领域
+                    <strong>最具商业意义的 MCP Server</strong>，因为它来自拥有数百万用户的成熟行业平台。
+                </p>
+                <h4>核心能力</h4>
+                <ul>
+                    <li>搜索 Splice 采样目录（百万级声音库）</li>
+                    <li>构建 Sound Stacks（声音堆叠组合）</li>
+                    <li>下载声音到本地</li>
+                    <li>音频分析和声音匹配</li>
+                </ul>
+                <ul>
+                    <li>官方: <a href="https://splice.com/tools/mcp-server" target="_blank">splice.com/tools/mcp-server</a></li>
+                    <li>文档: <a href="https://support.splice.com/en/articles/14442749" target="_blank">Getting Started</a></li>
+                    <li>端点: <code>mcp.splice.com/mcp</code></li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>3. 音频处理 MCP Server</h2>
+
+            <div class="list-cards">
+                <div class="list-card-item">
+                    <div class="lc-icon">🔊</div>
+                    <div class="lc-content">
+                        <h4>Audio MCP Server (gongrzhe)</h4>
+                        <p>基于 MCP 协议的音频处理服务器，使用 sounddevice 和 soundfile 库进行音频处理。</p>
+                        <a href="https://lobehub.com/mcp/gongrzhe-audio-mcp-server" target="_blank">lobehub.com/mcp</a>
+                    </div>
+                </div>
+                <div class="list-card-item">
+                    <div class="lc-icon">🎚️</div>
+                    <div class="lc-content">
+                        <h4>MCP Audio Tweaker (DeveloperZo)</h4>
+                        <p>使用 FFmpeg 进行批量音频处理和优化的 MCP Server，支持基于参数的音频修改。</p>
+                        <a href="https://mcpservers.org/servers/DeveloperZo/mcp-audio-tweaker" target="_blank">mcpservers.org</a>
+                    </div>
+                </div>
+                <div class="list-card-item">
+                    <div class="lc-icon">🎵</div>
+                    <div class="lc-content">
+                        <h4>AI Music MCP Server (amcharlie)</h4>
+                        <p>允许 MCP 客户端（Claude Desktop、OpenAI Agents 等）通过自然语言生成 AI 音乐。支持灵感模式和自定义模式。</p>
+                        <a href="https://mcpservers.org/servers/amcharlie/aimusic-mcp-tool" target="_blank">mcpservers.org</a>
+                    </div>
+                </div>
+                <div class="list-card-item">
+                    <div class="lc-icon">🎹</div>
+                    <div class="lc-content">
+                        <h4>MIDI Bridge</h4>
+                        <p>Electron 桌面应用，通过 MCP 将 AI 生成或编辑的音乐内容无缝桥接到任何 DAW。</p>
+                        <a href="https://mcpmarket.com/server/midi-bridge" target="_blank">mcpmarket.com</a>
+                    </div>
+                </div>
+                <div class="list-card-item">
+                    <div class="lc-icon">🎶</div>
+                    <div class="lc-content">
+                        <h4>Music Assistant Provider</h4>
+                        <p>赋能 Claude Code 和 Cursor 等 AI Agent 控制 Music Assistant 的音乐库、播放和队列。</p>
+                        <a href="https://mcpmarket.com/zh/server/music-assistant-provider" target="_blank">mcpmarket.com</a>
+                    </div>
+                </div>
+                <div class="list-card-item">
+                    <div class="lc-icon">🍏</div>
+                    <div class="lc-content">
+                        <h4>Apple Music Control</h4>
+                        <p>通过 AppleScript 使用 FastMCP 控制 macOS 上的 Apple Music，自动化播放、搜索和创建播放列表。</p>
+                        <a href="https://mcpmarket.com/server/apple-music-control" target="_blank">mcpmarket.com</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>4. 插件级 MCP 集成</h2>
+
+            <div class="project-card">
+                <h3>🔌 SnappySnap — 首个原生 MCP VST3/AU 插件</h3>
+                <div class="project-meta">
+                    <span class="meta-item">📦 <strong>Electric Smudge</strong></span>
+                    <span class="meta-item">📅 2026 年 2 月</span>
+                    <span class="meta-item">🏆 <strong>首个商业化 MCP 原生插件</strong></span>
+                </div>
+                <div class="tech-tags">
+                    <span class="tech-tag">VST3</span>
+                    <span class="tech-tag">AU</span>
+                    <span class="tech-tag">MCP Native</span>
+                    <span class="tech-tag">Plugin Host</span>
+                </div>
+                <p>
+                    SnappySnap 是一个 VST3/AU "元插件"（插件宿主），可以在其内部加载其他 VST3/AU 插件，
+                    并通过 <strong>原生 MCP 协议</strong>让 AI（如 Claude）直接控制任何已加载插件的参数。
+                    这被称为"首个商业化原生支持 MCP 的音频插件"（此前的 Simply Droplets 为原型阶段）。
+                </p>
+                <h4>关键意义</h4>
+                <p>
+                    SnappySnap 证明了 <strong>VST/AU 插件可以作为 MCP 协议的载体</strong>。
+                    这意味着<strong>任何支持 VST3 或 AU 的 DAW</strong>（即几乎所有主流 DAW）都可以通过
+                    加载 SnappySnap 来获得 AI Agent 控制能力——无需 DAW 本身做任何修改。
+                    这是一种优雅的"旁路集成"方案。
+                </p>
+                <ul>
+                    <li>官网: <a href="https://electricsmudge.com/" target="_blank">electricsmudge.com</a></li>
+                    <li>YouTube Demo: <a href="https://www.youtube.com/watch?v=SmFBfI3s2wM" target="_blank">Claude + SnappySnap</a></li>
+                </ul>
+            </div>
+
+            <div class="project-card">
+                <h3>🎹 "Simply Droplets" — VST3/CLAP MCP Server</h3>
+                <div class="project-meta">
+                    <span class="meta-item">📅 2025 年 12 月</span>
+                    <span class="meta-item">🧪 <strong>原型</strong></span>
+                </div>
+                <p>
+                    一个将 MCP Server 嵌入 VST3/CLAP 插件的原型项目。AI 模型可以通过 MCP 协议
+                    <strong>实时流式发送 MIDI 音符</strong>到 DAW 轨道。这是 MCP 协议首次以
+                    VST/CLAP 插件形式实现，开创了"AI 通过插件通道控制 DAW"的新模式。
+                </p>
+                <ul>
+                    <li>Reddit: <a href="https://www.reddit.com/r/Bitwig/comments/1pjb3y1/" target="_blank">r/Bitwig 讨论</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>5. MCP Server 总览表</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>MCP Server</th>
+                        <th>目标</th>
+                        <th>类型</th>
+                        <th>状态</th>
+                        <th>开源</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>ableton-mcp</strong></td>
+                        <td>Ableton Live</td>
+                        <td>独立应用</td>
+                        <td>✅ 成熟</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ableton-mcp-extended</strong></td>
+                        <td>Ableton Live (扩展)</td>
+                        <td>独立应用</td>
+                        <td>✅ 成熟</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td><strong>reaper-reapy-mcp</strong></td>
+                        <td>REAPER</td>
+                        <td>pip 包</td>
+                        <td>✅ 可用</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td><strong>logic-pro-mcp</strong></td>
+                        <td>Logic Pro</td>
+                        <td>独立应用</td>
+                        <td>🧪 实验</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SnappySnap</strong></td>
+                        <td>任何 VST3/AU DAW</td>
+                        <td>VST3/AU 插件</td>
+                        <td>✅ 已发布</td>
+                        <td>❌ 商业</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Simply Droplets</strong></td>
+                        <td>任何 VST3/CLAP DAW</td>
+                        <td>VST3/CLAP 插件</td>
+                        <td>🧪 原型</td>
+                        <td>部分</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Splice MCP</strong></td>
+                        <td>Splice 平台</td>
+                        <td>官方 Beta</td>
+                        <td>✅ 官方</td>
+                        <td>❌ 商业</td>
+                    </tr>
+                    <tr>
+                        <td><strong>flstudio-mcp</strong></td>
+                        <td>FL Studio</td>
+                        <td>独立应用</td>
+                        <td>✅ 社区</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td><strong>protools-mcp-server</strong></td>
+                        <td>Pro Tools</td>
+                        <td>gRPC/PTSL</td>
+                        <td>✅ 社区</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td><strong>audio-mcp-server</strong></td>
+                        <td>通用音频处理</td>
+                        <td>独立应用</td>
+                        <td>✅ 可用</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td><strong>mcp-audio-tweaker</strong></td>
+                        <td>FFmpeg 音频处理</td>
+                        <td>独立应用</td>
+                        <td>✅ 可用</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td><strong>aimusic-mcp-tool</strong></td>
+                        <td>AI 音乐生成</td>
+                        <td>独立应用</td>
+                        <td>✅ 可用</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td><strong>midi-bridge</strong></td>
+                        <td>MIDI 桥接</td>
+                        <td>Electron 应用</td>
+                        <td>✅ 可用</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td><strong>music-assistant-provider</strong></td>
+                        <td>Music Assistant</td>
+                        <td>FastMCP</td>
+                        <td>✅ 可用</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td><strong>apple-music-control</strong></td>
+                        <td>Apple Music</td>
+                        <td>FastMCP</td>
+                        <td>✅ 可用</td>
+                        <td>✅</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="content-section">
+            <div class="insight-box">
+                <h4>🔑 MCP 生态关键洞察</h4>
+                <ul>
+                    <li><strong>MCP 正在音频领域快速渗透</strong>：从 2025 年 3 月 AbletonMCP 首发到 2026 年中，已有 12+ 个音频相关 MCP Server。</li>
+                    <li><strong>插件级集成是最具扩展性的方案</strong>：SnappySnap 和 Simply Droplets 证明了通过 VST/AU/CLAP 插件承载 MCP 协议的模式，可让任何 DAW "零改造" 获得 Agent 能力。</li>
+                    <li><strong>REAPER 的 MCP 生态最为丰富</strong>：得益于其开放的 ReaScript API，REAPER 拥有最多的 Agent 集成项目。</li>
+                    <li><strong>FL Studio 和 Pro Tools 已有社区 MCP Server</strong>：FL Studio 有 rosasynthesiz/flstudio-mcp、calvinw/fl-studio-mcp 等项目；Pro Tools 有 skrul/protools-mcp-server。但尚无官方原生实现。</li>
+                </ul>
+            </div>
+        </section>
+
+        <div class="nav-footer">
+            <a href="02-open-source-daws.html">← 上一篇：开源 DAW</a>
+            <a href="04-ai-agents.html">下一篇：AI Agent →</a>
+        </div>
+    </div>
+</body>
+</html>
