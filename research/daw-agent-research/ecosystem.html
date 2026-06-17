@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DAW Agent 化生态总览</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header><div class="site">
+    <div class="eyebrow">Ecosystem</div>
+    <h1>生态总览</h1>
+    <p class="lede">DAW agent 化不是单一技术，而是 LLM tool use、宿主脚本 API、音频/乐理生成、插件/模型供应链、工程安全和创作 UX 的交会。</p>
+    <nav><a href="index.html">首页</a><a href="projects.html">项目矩阵</a><a href="dawzy-deep-dive.html">DAWZY 深挖</a><a href="dawzy-code-architecture.html">代码解剖</a><a href="architecture.html">架构</a><a href="harness.html">Harness</a><a href="roadmap.html">路线图</a><a href="sources.html">来源</a></nav>
+  </div></header>
+  <main class="site">
+    <h2>研究问题</h2>
+    <p>当 LLM 被接进 DAW，它究竟应该做什么？本调研把任务拆成五层：读取 session 状态、生成可审批的操作计划、运行 DAW mutation、回传可验证结果、把结果纳入创作者下一轮意图。</p>
+
+    <h2>时间线</h2>
+    <table>
+      <tr><th>时间</th><th>节点</th><th>含义</th></tr>
+      <tr><td>2024-11</td><td>Anthropic 发布 MCP；官方描述为让 AI 工具与数据源建立安全双向连接的开放标准。</td><td>工具调用从 bespoke API 走向标准协议。</td></tr>
+      <tr><td>2025</td><td>Ableton/REAPER MCP 仓库大量出现，早期多为播放、音量、track/clip 操作。</td><td>「自然语言控制 DAW」成为可快速 demo 的方向。</td></tr>
+      <tr><td>2025-11 / 2025-12</td><td>DAWZY OpenReview demo 于 2025-11 上线；arXiv 预印本于 2025-12 发布，总结 voice/text/hum → reversible REAPER actions，强调 live state、脚本化 action 与 undo。</td><td>开始从 demo 转向人机共创与可回滚控制。</td></tr>
+      <tr><td>2026-06</td><td>Ableton Extensions SDK public beta 出现，官方称可用 JavaScript/TypeScript 读写 Live Set 的 tracks、clips、MIDI、devices、tempo 等。</td><td>Ableton agent 化有望从非官方 Remote Script/OSC 过渡到更正式的 extension 入口。</td></tr>
+    </table>
+
+    <h2>技术地图</h2>
+    <div class="grid">
+      <article class="card"><h3>Host API 层</h3><p>REAPER ReaScript/API、Ableton Live Object Model/Remote Script、Ableton Extensions SDK、FL Studio Python MIDI scripting、Bitwig controller extension API、Logic/Cubase 的 AppleScript/MIDI/control surface 通道。</p></article>
+      <article class="card"><h3>Transport 层</h3><p>MCP stdio/HTTP、OSC、MIDI、WebSocket、local socket、filesystem/project-file diff。传输层不能替代领域安全层。</p></article>
+      <article class="card"><h3>Agent 能力层</h3><p>session 查询、arrangement 生成、clip/MIDI 编辑、mixing macro、device parameter editing、render/export、素材检索与 reference matching。</p></article>
+      <article class="card"><h3>Plugin / Model 层</h3><p>VST3、AUv3、AAX、CLAP、JUCE 与神经音频插件会把 agent 风险带到插件扫描、模型权重、即时延迟、离线 render 一致性、版权与供应链。</p></article>
+      <article class="card"><h3>Harness 层</h3><p>state snapshot、tool schema、dry-run、mutation log、undo transaction、audio render diff、human approval、evaluation corpus。</p></article>
+    </div>
+
+    <h2>成熟度判断</h2>
+    <table>
+      <tr><th>类型</th><th>代表</th><th>成熟度</th><th>主要缺口</th></tr>
+      <tr><td>Ableton MCP</td><td>ahujasid/ableton-mcp、producer-pal、LivePilot、ableton-mcp-extended</td><td><span class="score">高活跃 / 中等工程化</span></td><td>很多工具包仍缺少标准 fixture、可重放测试、权限模型。</td></tr>
+      <tr><td>REAPER MCP/assistant</td><td>bonfire-audio/reaper-mcp、dschuler36/reaper-mcp-server、DAWZY</td><td><span class="score">中高</span></td><td>API 覆盖高，但自然语言到可听成果的评估仍弱。</td></tr>
+      <tr><td>其他宿主</td><td>Bitwig、Logic Pro、FL Studio、Cubase MCP</td><td><span class="score">早期</span></td><td>项目少、宿主限制多、跨平台困难。</td></tr>
+      <tr><td>后期制作 / 开源 / live-coding</td><td>Pro Tools Scripting SDK、Ardour Lua/OSC、Sonic Pi MCP、Strudel MCP</td><td><span class="score">早期但重要</span></td><td>与传统 DAW 编曲不同，更偏 post-production、自动化控制或 live-coding 即兴。</td></tr>
+      <tr><td>插件与神经音频</td><td>Neutone SDK、DDSP-VST、RAVE、VST3 SDK、CLAP</td><td><span class="score">邻近基础设施</span></td><td>不是 DAW agent 本身，但会影响 agent 能否安全加载、调参、渲染和评估模型插件。</td></tr>
+      <tr><td>通用音乐 I/O</td><td>MIDI MCP、OSC bridge、DAWProject、openDAW</td><td><span class="score">互补</span></td><td>能生成/交换数据，但不等于能安全操作复杂 DAW session。</td></tr>
+    </table>
+
+    <div class="callout warn">本页成熟度是基于来源与仓库 metadata 的工程推论；未逐一运行仓库，也未验证 README 中全部工具数量。</div>
+  </main>
+  <footer><div class="site">Generated 2026-06-15 · AI-assisted synthesis · See sources.html for links and limitations.</div></footer>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DAWZY 代码解剖：入口、状态与动态脚本</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header><div class="site">
+    <div class="eyebrow">DAWZY Code Reading</div>
+    <h1>入口、状态与动态脚本</h1>
+    <p class="lede">这一页从源码角度拆 DAWZY 的主链路：Electron 侧边栏如何把用户输入交给 Python，Python 如何读取 REAPER 状态并提示 LLM，最后如何提取 Lua 代码并触发 REAPER action。</p>
+    <nav><a href="index.html">首页</a><a href="dawzy-deep-dive.html">DAWZY 深挖</a><a href="dawzy-code-mcp.html">MCP 与 ReaPy</a><a href="dawzy-code-audio.html">语音/哼唱/生成</a><a href="architecture.html">架构</a><a href="harness.html">Harness</a><a href="sources.html">来源</a></nav>
+  </div></header>
+
+  <main class="site">
+    <section class="callout">
+      <strong>代码基准：</strong>本页依据 <a href="https://github.com/Redtri-git/Dawzy-chatbot">Redtri-git/Dawzy-chatbot</a> 的 `origin/main`，提交 `6a7132fa545b7ecc76f9fed733a534a64dce386f`，提交时间 2026-05-21。片段为分析性短摘录，未复制完整文件。
+    </section>
+
+    <div class="mini-nav">
+      <a href="#electron">Electron 入口</a>
+      <a href="#chat">chat.py 中枢</a>
+      <a href="#state">状态快照</a>
+      <a href="#lua">动态 Lua</a>
+      <a href="#risks">工程风险</a>
+    </div>
+
+    <h2 id="electron">Electron 入口</h2>
+    <p>DAWZY 的桌面层不是复杂 planner，而是非常直接的“输入转发器”：UI 收到用户消息后，经 IPC 到主进程，主进程用 `execFile` 启动 `chat.py`。这让 Python 侧可以复用 ReaPy、MCP SDK 和 LLM client，但也意味着每轮请求是一个外部进程调用。</p>
+
+    <div class="snippet">
+      <div class="meta">`src/index.js`：把用户消息交给 Python</div>
+      <pre><code>async function queryAI(_event, user_msg) {
+  return new Promise((resolve, reject) =&gt; {
+    execFile(pythonPath, ['chat.py', user_msg], (error, stdout, stderr) =&gt; {
+      if (error) reject(`Error: ${stderr}`);
+      else resolve(stdout.trim());
+    });
+  });
+}
+
+ipcMain.handle('takeScreenshot', async (_event, user_msg) =&gt;
+  queryAI(_event, user_msg)
+);</code></pre>
+    </div>
+    <p>这里的 IPC 名字叫 `takeScreenshot`，但实际没有截图，承担的是“查询 AI 助手”的职责。这是研究原型常见的命名残留，产品化时应重命名为 `query-assistant` 或 `run-agent-turn`，否则后续维护很容易误判数据流。</p>
+
+    <div class="snippet">
+      <div class="meta">`src/index.js`：把聊天窗口贴到 DAW 窗口旁</div>
+      <pre><code>function findDAWWindow() {
+  const windows = windowManager.getWindows();
+  const dawKeywords = ['FL Studio', 'Ableton', 'Reaper', 'Logic Pro'];
+  return windows.find(win =&gt;
+    dawKeywords.some(keyword =&gt;
+      win.getTitle().toLowerCase().includes(keyword.toLowerCase()))
+  );
+}</code></pre>
+    </div>
+    <p>窗口匹配看起来支持多 DAW，但执行层实际绑定 REAPER。这说明 DAWZY 的 UI 架子有跨 DAW 意图，adapter 层还没有抽象出来。</p>
+
+    <h2 id="chat">`chat.py` 中枢</h2>
+    <p>`chat.py` 是 DAWZY 的真正中心：先运行 `get_state.lua`，把状态读回；再把状态和用户请求拼到 prompt；然后连上 MCP server；最后把 LLM 输出中的 Lua 代码块写入 REAPER 脚本目录并执行。</p>
+
+    <div class="snippet">
+      <div class="meta">`chat.py`：通过 REAPER action 触发状态脚本</div>
+      <pre><code>def run_get_state():
+    with reapy.inside_reaper():
+        cid = reapy.reascript_api.NamedCommandLookup(
+            '_RS61e36837be3b165b26ecbb73bd32311cfaaea9ac'
+        )
+        reapy.reascript_api.Main_OnCommand(cid, 0)
+
+        path = os.path.join(script_dir, 'get_state_output.txt')
+        return open(path, "r").read()</code></pre>
+    </div>
+    <p>这里的 action command ID 是安装时手动从 REAPER action list 复制出来的。它能跑通 demo，但不是可迁移安装方式：不同机器、不同脚本注册状态下 ID 会变，harness 应该检查 ID 是否存在，并提供自动安装/重新绑定流程。</p>
+
+    <div class="snippet">
+      <div class="meta">`chat.py`：把 REAPER 状态放进 prompt</div>
+      <pre><code>msg = f"""
+Instructions:
+  You are a REAPER ReaScript assistant...
+  If the task can be automated, include a short Lua script.
+  Don't include Lua code if adjusting FX parameters;
+  call the set_fx_param tool instead.
+  ReaScript uses 0-indexing, but the GUI uses 1-indexing.
+
+State:
+  {lua_output}
+
+Query: {user_msg}
+"""</code></pre>
+    </div>
+    <p>这段 prompt 暴露了 DAW agent 的一个核心原则：不能只把用户命令丢给模型，还要明确告诉模型哪些事情走工具、哪些事情走脚本、GUI 编号和 API 编号如何换算。DAWZY 把“状态接地”和“工具选择规则”都塞进单轮 prompt，而不是做独立 planner。</p>
+
+    <h2 id="state">状态快照</h2>
+    <p>`get_state.lua` 是整个系统最关键的工程组件之一。它枚举项目级状态、track、instrument、FX、parameter、media item、envelope，并把文本快照写到文件，供下一轮 prompt 使用。</p>
+
+    <div class="snippet">
+      <div class="meta">`Lua_ReaScripts/get_state.lua`：track 和 FX 参数枚举</div>
+      <pre><code>local track_count = reaper.CountTracks(0)
+for t = 0, track_count - 1 do
+  local track = reaper.GetTrack(0, t)
+  local fx_count = reaper.TrackFX_GetCount(track)
+  for j = 0, fx_count - 1 do
+    local _, fx_name = reaper.TrackFX_GetFXName(track, j, "")
+    local param_count = reaper.TrackFX_GetNumParams(track, j)
+    for p = 0, param_count - 1 do
+      local _, param_name = reaper.TrackFX_GetParamName(track, j, p, "")
+      local norm_val = reaper.TrackFX_GetParamNormalized(track, j, p)
+      local _, formatted_curr =
+        reaper.TrackFX_FormatParamValueNormalized(track, j, p, norm_val, "")
+    end
+  end
+end</code></pre>
+    </div>
+    <p>这段逻辑说明 DAWZY 不是凭用户说“第一个压缩器”去猜，而是先列出真实 FX chain 和参数。论文里模型失败常见于参数索引和 ReaScript 错误，这个状态快照正是为降低这类错误服务的。</p>
+
+    <div class="snippet">
+      <div class="meta">`Lua_ReaScripts/get_state.lua`：原型中的硬编码输出路径</div>
+      <pre><code>local path =
+  '/Users/sawyer/development/electron/Dawzy-chatbot/get_state_output.txt'
+
+local result = table.concat(buffer)
+local file = io.open(path, "w")
+file:write(result)
+file:close()</code></pre>
+    </div>
+    <p>这也是 DAWZY 最明显的原型痕迹：路径写死在作者机器上。做成可复用系统时，状态输出应走配置、临时目录、MCP resource 返回值，或通过 ReaScript extstate/IPC 管道传回，而不是写固定路径。</p>
+
+    <h2 id="lua">动态 Lua</h2>
+    <p>DAWZY 的长尾能力来自动态 Lua：LLM 可以生成 ReaScript，`chat.py` 提取后写入 `dynamic.lua`，再通过 REAPER action 运行。这解释了 README 中“可以运行大量 ReaScript API”的说法。</p>
+
+    <div class="snippet">
+      <div class="meta">`chat.py`：提取 Lua 代码块并执行</div>
+      <pre><code>lua_match = re.search(r"```lua(.*?)```", output, re.DOTALL)
+lua_code = lua_match.group(1).strip() if lua_match else None
+
+if lua_code:
+    path = os.path.join(reaper_scripts_dir, 'dynamic.lua')
+    with open(path, 'w') as f:
+        f.write(lua_code)
+    run_dynamic_lua_script()</code></pre>
+    </div>
+    <p>这个机制很强，也很危险。强在它覆盖了 MCP 工具没有建模的长尾操作；危险在于模型输出可以直接变成宿主脚本执行。生产版必须加 dry-run、Lua allowlist、危险 API 拦截、用户确认、撤销 ledger 和项目备份。</p>
+
+    <div class="snippet">
+      <div class="meta">`Lua_ReaScripts/octave_higher.lua`：可撤销动作的雏形</div>
+      <pre><code>reaper.Undo_BeginBlock()
+
+local track = reaper.GetSelectedTrack(0, 0)
+local fx_index = reaper.TrackFX_AddByName(
+  track, "ReaPitch (Cockos)", false, -1
+)
+reaper.TrackFX_SetParam(track, fx_index, 3, 1)
+
+reaper.Undo_EndBlock("Shift selected track up one octave", -1)</code></pre>
+    </div>
+    <p>示例脚本使用了 REAPER 的 undo block，这是 DAW agent 化必须保留的习惯。动态生成脚本也应该被强制包进 undo block，否则“每一步可撤回”的体验会断掉。</p>
+
+    <h2 id="risks">工程风险</h2>
+    <table>
+      <tr><th>风险</th><th>源码证据</th><th>应补的 harness</th></tr>
+      <tr><td>命令 ID 绑定脆弱</td><td>`NamedCommandLookup('_RS...')` 写在 `chat.py` 和 `mcpserver.py`。</td><td>启动自检、脚本自动安装、缺失时引导重绑。</td></tr>
+      <tr><td>动态脚本无审计</td><td>LLM 输出的 Lua 直接写入 `dynamic.lua` 并执行。</td><td>AST/正则 allowlist、危险 API denylist、用户确认、dry-run。</td></tr>
+      <tr><td>状态文件路径不可移植</td><td>`get_state.lua` 写死本地路径。</td><td>配置化、临时目录、MCP resource 直接返回、跨平台路径测试。</td></tr>
+      <tr><td>进程级调用较粗糙</td><td>Electron 每次用 `execFile(pythonPath, ['chat.py', user_msg])`。</td><td>长驻 agent service、超时、取消、结构化错误、日志关联 ID。</td></tr>
+    </table>
+  </main>
+
+  <footer><div class="site">Last updated 2026-06-16 Asia/Shanghai · Source baseline: Redtri-git/Dawzy-chatbot commit 6a7132f.</div></footer>
+</body>
+</html>

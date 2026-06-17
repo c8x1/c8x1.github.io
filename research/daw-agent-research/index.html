@@ -1,604 +1,66 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+<!doctype html>
+<html lang="zh-Hans">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DAW Agent 化深度调研报告</title>
-    <style>
-        :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-card: #1a1a2e;
-            --bg-card-hover: #222240;
-            --text-primary: #e8e8f0;
-            --text-secondary: #a0a0b8;
-            --text-muted: #6a6a80;
-            --accent-blue: #4a9eff;
-            --accent-purple: #8b5cf6;
-            --accent-green: #10b981;
-            --accent-orange: #f59e0b;
-            --accent-red: #ef4444;
-            --accent-pink: #ec4899;
-            --border: #2a2a3e;
-            --gradient-1: linear-gradient(135deg, #4a9eff, #8b5cf6);
-            --gradient-2: linear-gradient(135deg, #10b981, #4a9eff);
-            --gradient-3: linear-gradient(135deg, #f59e0b, #ef4444);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.7;
-            min-height: 100vh;
-        }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
-
-        /* Hero Section */
-        .hero {
-            padding: 6rem 0 4rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(ellipse at center, rgba(74, 158, 255, 0.08) 0%, transparent 60%);
-            animation: pulse 8s ease-in-out infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 0.5; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.1); }
-        }
-        .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 1rem;
-            position: relative;
-        }
-        .hero .subtitle {
-            font-size: 1.3rem;
-            color: var(--text-secondary);
-            max-width: 700px;
-            margin: 0 auto 2rem;
-        }
-        .hero .meta {
-            display: flex;
-            gap: 2rem;
-            justify-content: center;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-        .hero .meta span { display: flex; align-items: center; gap: 0.4rem; }
-
-        /* Executive Summary */
-        .exec-summary {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 3rem;
-            margin-bottom: 4rem;
-            position: relative;
-        }
-        .exec-summary::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            background: var(--gradient-1);
-            border-radius: 16px 16px 0 0;
-        }
-        .exec-summary h2 {
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-            color: var(--accent-blue);
-        }
-        .exec-summary p {
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
-            font-size: 1.05rem;
-        }
-        .key-stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-        .stat-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-        }
-        .stat-card .number {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .stat-card .label {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            margin-top: 0.3rem;
-        }
-
-        /* Report Cards Grid */
-        .reports-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 4rem;
-        }
-        .report-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .report-card:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--accent-blue);
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(74, 158, 255, 0.1);
-        }
-        .report-card .card-number {
-            font-size: 3rem;
-            font-weight: 900;
-            position: absolute;
-            top: 1rem;
-            right: 1.5rem;
-            opacity: 0.06;
-        }
-        .report-card .card-icon {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-        .report-card h3 {
-            font-size: 1.2rem;
-            margin-bottom: 0.8rem;
-            color: var(--text-primary);
-        }
-        .report-card p {
-            color: var(--text-secondary);
-            font-size: 0.92rem;
-            line-height: 1.6;
-        }
-        .report-card .tag {
-            display: inline-block;
-            padding: 0.2rem 0.7rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-top: 1rem;
-        }
-        .tag-blue { background: rgba(74, 158, 255, 0.15); color: var(--accent-blue); }
-        .tag-purple { background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); }
-        .tag-green { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
-        .tag-orange { background: rgba(245, 158, 11, 0.15); color: var(--accent-orange); }
-        .tag-pink { background: rgba(236, 72, 153, 0.15); color: var(--accent-pink); }
-        .tag-red { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
-
-        /* Timeline */
-        .timeline-section {
-            margin-bottom: 4rem;
-        }
-        .timeline-section h2 {
-            font-size: 1.8rem;
-            margin-bottom: 2rem;
-            color: var(--text-primary);
-        }
-        .timeline {
-            position: relative;
-            padding-left: 3rem;
-        }
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: var(--border);
-        }
-        .timeline-item {
-            position: relative;
-            margin-bottom: 2rem;
-            padding: 1.5rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-        }
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -3rem;
-            top: 1.8rem;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: var(--accent-blue);
-            border: 2px solid var(--bg-primary);
-            margin-left: -5px;
-        }
-        .timeline-item .time {
-            font-size: 0.8rem;
-            color: var(--accent-blue);
-            font-weight: 600;
-            margin-bottom: 0.3rem;
-        }
-        .timeline-item h4 {
-            font-size: 1.05rem;
-            margin-bottom: 0.4rem;
-        }
-        .timeline-item p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        /* Architecture Diagram */
-        .arch-section {
-            margin-bottom: 4rem;
-        }
-        .arch-section h2 {
-            font-size: 1.8rem;
-            margin-bottom: 2rem;
-        }
-        .arch-diagram {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 3rem;
-            text-align: center;
-        }
-        .arch-layers {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .arch-layer {
-            padding: 1.2rem 2rem;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        .arch-layer .layer-label {
-            font-weight: 700;
-            font-size: 0.85rem;
-            min-width: 120px;
-            text-align: right;
-        }
-        .arch-layer .layer-items {
-            display: flex;
-            gap: 0.8rem;
-            flex-wrap: wrap;
-        }
-        .arch-layer .item {
-            padding: 0.4rem 0.8rem;
-            background: rgba(255,255,255,0.05);
-            border-radius: 6px;
-            font-size: 0.82rem;
-            color: var(--text-secondary);
-        }
-        .layer-user { border-color: var(--accent-green); }
-        .layer-user .layer-label { color: var(--accent-green); }
-        .layer-agent { border-color: var(--accent-blue); }
-        .layer-agent .layer-label { color: var(--accent-blue); }
-        .layer-protocol { border-color: var(--accent-purple); }
-        .layer-protocol .layer-label { color: var(--accent-purple); }
-        .layer-daw { border-color: var(--accent-orange); }
-        .layer-daw .layer-label { color: var(--accent-orange); }
-        .layer-audio { border-color: var(--accent-pink); }
-        .layer-audio .layer-label { color: var(--accent-pink); }
-
-        .arrow-down {
-            font-size: 1.5rem;
-            color: var(--text-muted);
-            text-align: center;
-        }
-
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 3rem 0;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            border-top: 1px solid var(--border);
-        }
-
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 2.2rem; }
-            .key-stats { grid-template-columns: repeat(2, 1fr); }
-            .reports-grid { grid-template-columns: 1fr; }
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DAW Agent 化深度调研</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Hero -->
-        <section class="hero">
-            <h1>🎛️ DAW Agent 化深度调研</h1>
-            <p class="subtitle">
-                数字音频工作站（DAW）正在经历从传统工具到 AI Agent 驱动平台的范式转变。
-                本报告全面梳理了开源项目、MCP 生态、Agent Harness 工程、商业产品及未来趋势。
-            </p>
-            <div class="meta">
-                <span>📅 2026 年 6 月 15 日</span>
-                <span>📊 9 份专题报告</span>
-                <span>🔗 60+ 参考来源</span>
-            </div>
-        </section>
-
-        <!-- Executive Summary -->
-        <section class="exec-summary">
-            <h2>📋 Executive Summary</h2>
-            <p>
-                2025-2026 年间，DAW（Digital Audio Workstation）领域正经历一场深刻的"Agent 化"变革。
-                以 LLM（大语言模型）为核心的 AI Agent 正在从辅助工具演变为能够直接控制 DAW 会话、插件参数、
-                MIDI 编排和混音流程的自主协作伙伴。
-            </p>
-            <p>
-                <strong>Model Context Protocol (MCP)</strong> 作为 Anthropic 提出的开放标准，
-                成为连接 AI Agent 与 DAW 的核心协议层——Ableton Live、REAPER、Logic Pro 等主流 DAW
-                均已出现 MCP Server 实现。与此同时，<strong>Agent Harness Engineering</strong>
-                作为新兴工程学科，为 AI Agent 的可靠性、治理和控制平面提供了理论基础。
-            </p>
-            <p>
-                商业领域，<strong>Riff (YC S25)</strong> 和 <strong>Producer.ai</strong> 等创业公司
-                明确提出"Cursor for DAW"的愿景；开源社区则涌现出 <strong>DAWZY</strong>、
-                <strong>MAGDA</strong>、<strong>openDAW</strong> 等项目，从学术研究到工程实践
-                全面探索 DAW Agent 化的可能性。
-            </p>
-            <div class="key-stats">
-                <div class="stat-card">
-                    <div class="number">15+</div>
-                    <div class="label">MCP Server 实现</div>
-                </div>
-                <div class="stat-card">
-                    <div class="number">5</div>
-                    <div class="label">开源 DAW 项目</div>
-                </div>
-                <div class="stat-card">
-                    <div class="number">$300M</div>
-                    <div class="label">Suno ARR (2026)</div>
-                </div>
-                <div class="stat-card">
-                    <div class="number">3</div>
-                    <div class="label">核心学术论文</div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Architecture Diagram -->
-        <section class="arch-section">
-            <h2>🏗️ DAW Agent 化技术栈架构</h2>
-            <div class="arch-diagram">
-                <div class="arch-layers">
-                    <div class="arch-layer layer-user">
-                        <div class="layer-label">用户层</div>
-                        <div class="layer-items">
-                            <span class="item">自然语言指令</span>
-                            <span class="item">语音输入</span>
-                            <span class="item">哼唱/演奏</span>
-                            <span class="item">GUI 交互</span>
-                        </div>
-                    </div>
-                    <div class="arrow-down">⬇</div>
-                    <div class="arch-layer layer-agent">
-                        <div class="layer-label">Agent 层</div>
-                        <div class="layer-items">
-                            <span class="item">Claude / GPT</span>
-                            <span class="item">DAWZY Agent</span>
-                            <span class="item">Producer.ai</span>
-                            <span class="item">Multi-Agent</span>
-                            <span class="item">RAG + 文档检索</span>
-                        </div>
-                    </div>
-                    <div class="arrow-down">⬇</div>
-                    <div class="arch-layer layer-protocol">
-                        <div class="layer-label">协议层</div>
-                        <div class="layer-items">
-                            <span class="item">MCP (Model Context Protocol)</span>
-                            <span class="item">OSC</span>
-                            <span class="item">MIDI</span>
-                            <span class="item">ReaScript</span>
-                            <span class="item">Ableton API</span>
-                        </div>
-                    </div>
-                    <div class="arrow-down">⬇</div>
-                    <div class="arch-layer layer-daw">
-                        <div class="layer-label">DAW 层</div>
-                        <div class="layer-items">
-                            <span class="item">REAPER</span>
-                            <span class="item">Ableton Live</span>
-                            <span class="item">Logic Pro</span>
-                            <span class="item">Bitwig</span>
-                            <span class="item">MAGDA</span>
-                            <span class="item">openDAW</span>
-                        </div>
-                    </div>
-                    <div class="arrow-down">⬇</div>
-                    <div class="arch-layer layer-audio">
-                        <div class="layer-label">音频层</div>
-                        <div class="layer-items">
-                            <span class="item">VST3/AU 插件</span>
-                            <span class="item">音频引擎</span>
-                            <span class="item">MIDI 设备</span>
-                            <span class="item">硬件接口</span>
-                            <span class="item">SnappySnap</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Reports Grid -->
-        <h2 style="font-size: 1.8rem; margin-bottom: 2rem;">📚 专题报告</h2>
-        <div class="reports-grid">
-            <a href="01-landscape.html" class="report-card">
-                <div class="card-number">01</div>
-                <div class="card-icon">🌍</div>
-                <h3>全景概览：DAW Agent 化生态图谱</h3>
-                <p>从宏观视角梳理 DAW Agent 化的技术演进脉络、核心玩家分布、市场规模和产业格局。涵盖学术、开源、商业三大维度。</p>
-                <span class="tag tag-blue">全景分析</span>
-            </a>
-
-            <a href="02-open-source-daws.html" class="report-card">
-                <div class="card-number">02</div>
-                <div class="card-icon">🔓</div>
-                <h3>开源 DAW 项目深度分析</h3>
-                <p>深入剖析 MAGDA、openDAW、Open-DAW 等开源 DAW 项目的架构设计、AI 集成方案、技术栈选择和社区发展状况。</p>
-                <span class="tag tag-green">开源项目</span>
-            </a>
-
-            <a href="03-mcp-ecosystem.html" class="report-card">
-                <div class="card-number">03</div>
-                <div class="card-icon">🔌</div>
-                <h3>MCP Server 生态系统</h3>
-                <p>全面盘点 Ableton MCP、REAPER MCP、Logic Pro MCP、Audio MCP 等 10+ 个 MCP Server 实现，分析协议层的技术选型和集成模式。</p>
-                <span class="tag tag-purple">MCP 协议</span>
-            </a>
-
-            <a href="04-ai-agents.html" class="report-card">
-                <div class="card-number">04</div>
-                <div class="card-icon">🤖</div>
-                <h3>AI Agent 与 DAW 控制</h3>
-                <p>深入分析 DAWZY、ReaperAI、AI DAW (Johannes Naylor) 等项目的 Agent 架构、LLM 集成策略、Human-in-the-Loop 设计模式。</p>
-                <span class="tag tag-blue">Agent 架构</span>
-            </a>
-
-            <a href="05-agent-harness.html" class="report-card">
-                <div class="card-number">05</div>
-                <div class="card-icon">🏗️</div>
-                <h3>Agent Harness 工程</h3>
-                <p>Agent Harness Engineering 作为新兴学科的核心理念、架构模式和在音频领域的应用前景。涵盖控制平面、治理框架和可靠性工程。</p>
-                <span class="tag tag-orange">工程学科</span>
-            </a>
-
-            <a href="06-commercial.html" class="report-card">
-                <div class="card-number">06</div>
-                <div class="card-icon">🚀</div>
-                <h3>商业产品与创业公司</h3>
-                <p>Riff (YC S25)、Producer.ai、SnappySnap、Riffusion 等商业产品的产品形态、融资状况、技术路线和竞争格局。</p>
-                <span class="tag tag-pink">商业分析</span>
-            </a>
-
-            <a href="07-ai-music-gen.html" class="report-card">
-                <div class="card-number">07</div>
-                <div class="card-icon">🎵</div>
-                <h3>AI 音乐生成与 DAW 工作流</h3>
-                <p>Suno、Udio、Stable Audio 等 AI 音乐生成平台与 DAW 工作流的融合方式，包括 Stem 导出、时间线编排和混音集成。</p>
-                <span class="tag tag-green">生成式 AI</span>
-            </a>
-
-            <a href="08-future.html" class="report-card">
-                <div class="card-number">08</div>
-                <div class="card-icon">🔮</div>
-                <h3>未来展望与趋势分析</h3>
-                <p>"Cursor for DAW" 愿景分析、Agentic AI 对音乐生产的颠覆性影响、技术挑战与机遇，以及对音频行业从业者的影响。</p>
-                <span class="tag tag-red">趋势预测</span>
-            </a>
-
-            <a href="09-references.html" class="report-card">
-                <div class="card-number">09</div>
-                <div class="card-icon">📖</div>
-                <h3>完整参考资料与链接</h3>
-                <p>所有引用来源的分类索引，包括学术论文、GitHub 仓库、技术博客、视频演示和社区讨论的完整链接列表。</p>
-                <span class="tag tag-blue">参考资料</span>
-            </a>
-
-            <a href="deep-dive-dawzy.html" class="report-card" style="grid-column: span 2; border-color: var(--accent-green);">
-                <div class="card-number">⭐</div>
-                <div class="card-icon">🔬</div>
-                <h3>深度解析：DAWZY — LLM Agent 如何控制 REAPER DAW</h3>
-                <p>首个经 NeurIPS 2025 同行评审的 DAW Agent 系统全面剖析：三层架构设计、State-Grounded 代码生成原理、
-                    幻觉缓解策略、Electron/MCP/ReaScript 技术栈、评估实验结果、与 AbletonMCP 的对比分析。
-                    包含代码示例、架构图和用户评估数据。</p>
-                <span class="tag tag-green">深度解析</span>
-            </a>
-        </div>
-
-        <!-- Timeline -->
-        <section class="timeline-section">
-            <h2>⏱️ DAW Agent 化关键时间线</h2>
-            <div class="timeline">
-                <div class="timeline-item">
-                    <div class="time">2025 年 12 月</div>
-                    <h4>DAWZY 论文发表 (NeurIPS 2025 Workshop)</h4>
-                    <p>首个将 LLM Agent 与 DAW (REAPER) 深度集成的学术论文 (arXiv:2512.03289)，提出 "Human-in-the-Loop" 音乐协作范式。</p>
-                </div>
-                <div class="timeline-item">
-                    <div class="time">2025 年 1 月</div>
-                    <h4>Johannes Naylor: Build a Simple AI DAW (Part 1)</h4>
-                    <p>使用 Python + LangChain + Claude + FFmpeg 构建 AI 音频处理 Agent 的技术教程发布。</p>
-                </div>
-                <div class="timeline-item">
-                    <div class="time">2025 年 3 月</div>
-                    <h4>AbletonMCP 发布</h4>
-                    <p>Siddharth Ahuja 发布首个 Ableton Live MCP Server，实现 Claude AI 直接控制 Ableton Live。</p>
-                </div>
-                <div class="timeline-item">
-                    <div class="time">2025 年 7 月</div>
-                    <h4>Riff (YC S25) 正式发布</h4>
-                    <p>Y Combinator 孵化的 "Cursor for Music Production" 产品正式上线，重新定义 DAW UX。</p>
-                </div>
-                <div class="timeline-item">
-                    <div class="time">2025 年 8 月</div>
-                    <h4>AI DAW Part 2: MCP and Agents</h4>
-                    <p>Johannes Naylor 发布 AI DAW 系列第二部分，引入 Rust 流式引擎和 MCP 协议集成。</p>
-                </div>
-                <div class="timeline-item">
-                    <div class="time">2025 年 12 月</div>
-                    <h4>VST/CLAP MCP Plugin 原型</h4>
-                    <p>"Simply Droplets" 发布首个将 MCP Server 嵌入 VST3/CLAP 插件的原型，AI 可直接向 DAW 轨道流式发送 MIDI。</p>
-                </div>
-                <div class="timeline-item">
-                    <div class="time">2026 年 1 月</div>
-                    <h4>"Agent Harness Engineering: A Survey" 论文</h4>
-                    <p>OpenReview 发表 Agent Harness 工程综述论文，确立其作为独立系统层的工程学科地位。</p>
-                </div>
-                <div class="timeline-item">
-                    <div class="time">2026 年 2 月</div>
-                    <h4>SnappySnap MCP 集成</h4>
-                    <p>首个支持原生 MCP 协议的 VST3/AU 元插件发布，AI 可控制 DAW 内任何已加载插件。</p>
-                </div>
-                <div class="timeline-item">
-                    <div class="time">2026 年 2-5 月</div>
-                    <h4>MAGDA v0.5-v0.9 快速迭代</h4>
-                    <p>开源 DAW MAGDA 基于 C++/JUCE/Tracktion Engine，集成 AI 控制台，版本快速迭代。</p>
-                </div>
-                <div class="timeline-item">
-                    <div class="time">2026 年 5 月</div>
-                    <h4>Logic Pro MCP Server</h4>
-                    <p>社区开发者发布 Logic Pro MCP Server 实验版本，补全了 Apple 生态的 DAW Agent 化拼图。</p>
-                </div>
-            </div>
-        </section>
-
-        <footer>
-            <p>DAW Agent 化深度调研 · 2026 年 6 月 · Deep Research Series</p>
-            <p style="margin-top: 0.5rem;">Generated with AI-assisted research tools · All sources linked and verified</p>
-        </footer>
+  <header>
+    <div class="site">
+      <div class="eyebrow">Deep Research · 2026-06-15</div>
+      <h1>DAW Agent 化：从 MCP demo 到可控音乐生产系统</h1>
+      <p class="lede">本报告整理 DAW agent 化的开源项目、宿主 API、MCP/OSC/MIDI 桥接模式与 harness 工程。重点不是「LLM 能不能控制 DAW」，而是如何让它在真实创作工程中可观测、可回滚、可评估、可被人接管。</p>
+      <nav>
+        <a href="ecosystem.html">生态总览</a>
+        <a href="projects.html">开源项目矩阵</a>
+        <a href="dawzy-deep-dive.html">DAWZY 深挖</a>
+        <a href="dawzy-code-architecture.html">DAWZY 代码解剖</a>
+        <a href="architecture.html">架构模式</a>
+        <a href="harness.html">Harness 工程</a>
+        <a href="roadmap.html">路线图</a>
+        <a href="sources.html">来源与方法</a>
+      </nav>
     </div>
+  </header>
+
+  <main class="site">
+    <section class="callout">
+      <strong>一句话结论：</strong>本次样本显示，2025-2026 年的 DAW agent 化已从「自然语言控制播放/音量」扩展到多宿主 MCP server、REAPER 可逆脚本案例、AbletonOSC/Remote Script、Ableton Extensions SDK、Logic/Cubase/Bitwig/FL Studio/Pro Tools/Ardour/live-coding 等桥接路线。下一步更可能卡在 harness：状态快照、undo/rollback、工具权限、MCP 授权边界、评估语料、音频差分与人类审批。
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h3>核心趋势</h3>
+        <p>Ableton 和 REAPER 是最活跃的两条路。Ableton 侧已有 Remote Script、AbletonOSC、Max for Live、Extensions SDK 等多种入口；REAPER 侧依赖 ReaScript、Lua/Python、OSC 和 reapy，较容易做可逆脚本与完整工程自动化。</p>
+      </article>
+      <article class="card">
+        <h3>MCP 的角色</h3>
+        <p>MCP 适合承载工具发现、资源读取、结构化输出和 agent client 对接；但 DAW 写入操作必须另加领域 rollback、授权边界、安全沙箱与状态校验。</p>
+      </article>
+      <article class="card">
+        <h3>Harness 的角色</h3>
+        <p>DAW agent 需要像编译器/机器人控制系统一样测试：fixture 工程、干跑模式、动作 diff、可重放计划、声学指标、人工 gate 和崩溃恢复。</p>
+      </article>
+    </section>
+
+    <h2>建议阅读顺序</h2>
+    <table>
+      <tr><th>页面</th><th>用途</th><th>适合谁先看</th></tr>
+      <tr><td><a href="ecosystem.html">生态总览</a></td><td>判断 DAW agent 化现在处于哪个阶段。</td><td>产品/研究负责人</td></tr>
+      <tr><td><a href="projects.html">开源项目矩阵</a></td><td>快速扫描 Ableton、REAPER、Logic、Bitwig、FL Studio、MIDI/OSC 项目。</td><td>工程选型</td></tr>
+      <tr><td><a href="dawzy-deep-dive.html">DAWZY 深挖</a></td><td>深入理解一个代表性开源项目的架构、实现、实验与局限。</td><td>要开始实现原型的人</td></tr>
+      <tr><td><a href="dawzy-code-architecture.html">DAWZY 代码解剖</a></td><td>从源码看 Electron 入口、MCP/ReaPy 工具、动态 Lua、语音/哼唱/生成链路。</td><td>要照着搭工程骨架的人</td></tr>
+      <tr><td><a href="architecture.html">架构模式</a></td><td>比较 Remote Script、OSC、Extensions SDK、MIDI、文件级 DAW 操作。</td><td>系统设计</td></tr>
+      <tr><td><a href="harness.html">Harness 工程</a></td><td>给出可实现的测试与安全工程框架。</td><td>要开始做原型的人</td></tr>
+      <tr><td><a href="roadmap.html">路线图</a></td><td>把调研转成 30/60/90 天交付计划。</td><td>团队落地</td></tr>
+    </table>
+
+    <h2>本次调研边界</h2>
+    <p>资料来源以官方文件、GitHub 仓库 metadata/README、arXiv/OpenReview、DAW 厂商文件为主。GitHub stars 和更新时间是 2026-06-15 抓取的快照，这类项目变动很快，后续应以仓库实时状态为准。未直接打开 README 的小型 fork/clone 被标为低成熟度或待验证，不把其声称能力视为已证实能力。</p>
+  </main>
+
+  <footer><div class="site">AI-assisted research report. Claims are linked to sources where available; project maturity remains an engineering inference, not a runtime evaluation.</div></footer>
 </body>
 </html>

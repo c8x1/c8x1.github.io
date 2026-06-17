@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DAWZY 代码解剖：语音、哼唱与生成素材</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header><div class="site">
+    <div class="eyebrow">DAWZY Code Reading</div>
+    <h1>语音、哼唱与生成素材</h1>
+    <p class="lede">DAWZY 最有意思的地方不只是“文本控制 DAW”，而是把语音、哼唱转 MIDI、AI beat 生成都接进同一个 REAPER 工作流。这一页拆这些多模态入口的代码路径。</p>
+    <nav><a href="index.html">首页</a><a href="dawzy-deep-dive.html">DAWZY 深挖</a><a href="dawzy-code-architecture.html">入口与动态脚本</a><a href="dawzy-code-mcp.html">MCP 与 ReaPy</a><a href="harness.html">Harness</a><a href="sources.html">来源</a></nav>
+  </div></header>
+
+  <main class="site">
+    <section class="callout">
+      <strong>本页重点：</strong>多模态不是额外按钮，而是 DAW agent 的核心输入设计。音乐人经常通过说、唱、哼、拖音频、弹 MIDI 来表达意图；DAWZY 把其中三类接到了同一条 agent 执行链里。
+    </section>
+
+    <div class="mini-nav">
+      <a href="#ui">Renderer 分流</a>
+      <a href="#speech">语音转文本</a>
+      <a href="#hum">哼唱转 MIDI</a>
+      <a href="#musicgen">Beat 生成</a>
+      <a href="#evaluation">可测试点</a>
+    </div>
+
+    <h2 id="ui">Renderer 分流</h2>
+    <p>前端 UI 将三种输入合流到聊天界面：文本直接发给 agent；语音先录音、转录，再当文本消息发送；哼唱则绕过 LLM，对音频做 pitch tracking，直接导入 MIDI。</p>
+
+    <div class="snippet">
+      <div class="meta">`src/renderer.js`：文本与哼唱的分支</div>
+      <pre><code>async function sendMessage(message, whistle=false) {
+  addMessageToChat('user', message, true, null, whistle);
+
+  let response;
+  if (whistle) {
+    await window.electronAPI.humToMIDI();
+    response = 'Added MIDI track to REAPER';
+  } else {
+    response = await window.electronAPI.takeScreenshot(message);
+  }
+
+  addMessageToChat('assistant', response, true, messageIndex, whistle);
+}</code></pre>
+    </div>
+    <p>这个设计有一个微妙点：哼唱路径并不让 LLM 解释旋律或决定编曲，而是直接生成 MIDI 并导入。它很务实，但如果要更 agent 化，可以在导入后让 LLM 读取新 track 状态，解释旋律、建议和声或自动配器。</p>
+
+    <div class="snippet">
+      <div class="meta">`src/renderer.js`：按钮绑定</div>
+      <pre><code>queryBtn.addEventListener('click', () =&gt; {
+  const message = chatInput.value.trim();
+  if (!message) return;
+  chatInput.value = '';
+  sendMessage(message);
+});
+
+micBtn.addEventListener('click', () =&gt;
+  toggleRecording(sendAudioMsg, false)
+);
+
+whistleBtn.addEventListener('click', () =&gt;
+  toggleRecording(humToMIDI, true)
+);</code></pre>
+    </div>
+
+    <h2 id="speech">语音转文本</h2>
+    <p>语音路径由 JS 启动 Python 录音脚本，生成 `input.wav`，停止后用 OpenAI Whisper API 转录。转录结果会回到 `sendMessage()`，因此后续完全复用文本 agent 链路。</p>
+
+    <div class="snippet">
+      <div class="meta">`src/speech_to_text.js`：启动/停止录音</div>
+      <pre><code>export function startRecording(filename = 'input.wav') {
+  const recordScript = path.join(process.cwd(), 'ReaPy_Utils', 'record.py');
+  recordingProcess = spawn('python', [recordScript, filename]);
+}
+
+export function stopRecording() {
+  if (!recordingProcess) return;
+  recordingProcess.kill('SIGINT');
+  recordingProcess = null;
+}</code></pre>
+    </div>
+
+    <div class="snippet">
+      <div class="meta">`src/speech_to_text.js`：Whisper 转写</div>
+      <pre><code>export async function transcribeFromMic(filename = 'input.wav') {
+  const transcription = await openai.audio.transcriptions.create({
+    file: fs.createReadStream(filename),
+    model: 'whisper-1'
+  });
+  return transcription.text.trim();
+}</code></pre>
+    </div>
+    <p>语音路径的工程风险主要是文件名固定、录音进程异常、转录延迟和隐私。产品化应让用户看到录音状态、转录文本可编辑，并避免把所有录音写到同一个 `input.wav`。</p>
+
+    <h2 id="hum">哼唱转 MIDI</h2>
+    <p>哼唱路径使用 Spotify 的 Basic Pitch CLI，把 `input.wav` 转成 `input_basic_pitch.mid`，然后调用 `add_media.py` 导入 REAPER。这里没有 LLM 参与，属于确定性音频工具链。</p>
+
+    <div class="snippet">
+      <div class="meta">`src/hum_to_midi.js`：Basic Pitch 转 MIDI 并导入</div>
+      <pre><code>export async function humToMIDI() {
+  const inputMidiPath = path.join(projectRoot, 'input_basic_pitch.mid');
+  const inputWavPath = path.join(projectRoot, 'input.wav');
+  const addMediaScript = path.join(projectRoot, 'ReaPy_Utils', 'add_media.py');
+
+  await exec(`rm -f "${inputMidiPath}"`);
+  await exec(`basic-pitch "${projectRoot}" "${inputWavPath}"`);
+  await exec(`python "${addMediaScript}" "${inputMidiPath}" true`);
+}</code></pre>
+    </div>
+
+    <div class="snippet">
+      <div class="meta">`ReaPy_Utils/add_media.py`：MIDI 导入后的音色补丁</div>
+      <pre><code>if len(sys.argv) &gt; 2 and sys.argv[2] == 'true':
+    project = reapy.Project()
+    track = project.tracks[track_index]
+    params = track.fxs[0].params
+    params[5] = 1.41421356237</code></pre>
+    </div>
+    <p>`true` 参数会给导入的 MIDI track 设置 ReaSynth 相关参数。这里的 magic number 需要注释和抽象：至少应标明它对应哪个插件参数、为什么设到这个值、是否跟 REAPER/插件版本有关。</p>
+
+    <h2 id="musicgen">Beat 生成</h2>
+    <p>Beat 生成路径由 MCP 工具触发，而不是 UI 直接触发。模型可以在理解用户描述后调用 `generate_beat(description)`，生成 wav 并导入工程。</p>
+
+    <div class="snippet">
+      <div class="meta">`ReaPy_Utils/beat_generation.py`：MusicGen-small 生成音频</div>
+      <pre><code>import audiocraft
+import sys
+
+model = audiocraft.models.MusicGen.get_pretrained(
+    'facebook/musicgen-small'
+)
+descriptions = sys.argv[1:]
+wav_tensor = model.generate(descriptions, progress=True)
+
+audiocraft.data.audio.audio_write(
+    'beat', wav_tensor[0].cpu(), model.sample_rate
+)</code></pre>
+    </div>
+    <p>这个实现很短，但说明 DAW agent 的素材生成可以被工具化：LLM 不直接生成音频，而是选择一个生成器、传入描述、等待 artifact，再把 artifact 导入宿主。</p>
+
+    <h2 id="evaluation">可测试点</h2>
+    <table>
+      <tr><th>链路</th><th>当前实现</th><th>建议测试</th></tr>
+      <tr><td>语音转文本</td><td>`input.wav` -> Whisper -> 文本消息。</td><td>录音中断、空音频、噪声、转录错误可编辑、API 失败降级。</td></tr>
+      <tr><td>哼唱转 MIDI</td><td>`basic-pitch` 输出固定 MIDI 文件，再导入 REAPER。</td><td>无音高输入、多音输入、节奏偏移、输出 MIDI 是否包含 note、导入后 track 数变化。</td></tr>
+      <tr><td>Beat 生成</td><td>MusicGen-small 生成固定 `beat.wav`。</td><td>生成超时、采样率/长度检查、重复 job 覆盖、导入后媒体 item 校验。</td></tr>
+      <tr><td>Agent 合流</td><td>文本/语音走 LLM，哼唱走确定性链路。</td><td>每条链路都应写 action log，并在 REAPER 状态变化后刷新快照。</td></tr>
+    </table>
+
+    <section class="warn callout">
+      <strong>一个可迁移的产品点：</strong>哼唱导入后，可以自动追加一个 agent turn：“我已经把你的哼唱放到新 MIDI track。要不要我根据它生成和弦、低音线或鼓组？”这样多模态输入就不是孤立工具，而会自然进入创作对话。
+    </section>
+  </main>
+
+  <footer><div class="site">Last updated 2026-06-16 Asia/Shanghai · Source baseline: Redtri-git/Dawzy-chatbot commit 6a7132f.</div></footer>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>来源与方法</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header><div class="site">
+    <div class="eyebrow">Sources &amp; Method</div>
+    <h1>来源与方法</h1>
+    <p class="lede">本页列出主要来源、搜索策略与可信度限制。项目数量多、变化快，所以把「已验证来源」和「工程推论」分开。</p>
+    <nav><a href="index.html">首页</a><a href="ecosystem.html">生态</a><a href="projects.html">项目</a><a href="dawzy-deep-dive.html">DAWZY 深挖</a><a href="dawzy-code-architecture.html">代码解剖</a><a href="architecture.html">架构</a><a href="harness.html">Harness</a><a href="roadmap.html">路线图</a></nav>
+  </div></header>
+  <main class="site">
+    <h2>搜索策略</h2>
+    <p>搜索关键词包括：<code>Ableton MCP</code>、<code>REAPER MCP</code>、<code>DAW MCP</code>、<code>Bitwig MCP</code>、<code>FLStudio MCP</code>、<code>Logic Pro MCP</code>、<code>Cubase MCP</code>、<code>Pro Tools MCP</code>、<code>Ardour MCP</code>、<code>Sonic Pi MCP</code>、<code>Strudel MCP</code>、<code>MIDI MCP</code>、<code>AbletonOSC</code>、<code>Ableton Extensions SDK</code>、<code>DAWZY REAPER</code>、<code>DAW agent test harness</code>、<code>neural audio plugin SDK</code>。GitHub metadata 透过 <code>gh search repos</code> 与部分 GitHub API 查询取得。</p>
+
+    <h2>官方/一手来源</h2>
+    <table>
+      <tr><th>来源</th><th>用途</th></tr>
+      <tr><td><a href="https://modelcontextprotocol.io/docs/getting-started/intro">Model Context Protocol docs</a>、<a href="https://modelcontextprotocol.io/specification">MCP latest specification</a>（截至 2026-06-15 指向 2025-11-25）、<a href="https://modelcontextprotocol.io/specification/2025-11-25">MCP 2025-11-25 specification</a>、<a href="https://github.com/modelcontextprotocol/modelcontextprotocol">modelcontextprotocol/modelcontextprotocol</a></td><td>MCP 定义、tools/resources/prompts、规格版本和官方仓库状态。</td></tr>
+      <tr><td><a href="https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization">MCP Authorization</a>、<a href="https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices">MCP Security Best Practices</a>、<a href="https://modelcontextprotocol.io/specification/2025-11-25/changelog">2025-11-25 changelog</a></td><td>OAuth/resource indicators、token passthrough、SSRF、session hijacking、本地 MCP server 安全边界。</td></tr>
+      <tr><td><a href="https://www.anthropic.com/news/model-context-protocol">Anthropic MCP announcement</a></td><td>MCP 最初发布背景。</td></tr>
+      <tr><td><a href="https://www.ableton.com/en/live/extensions/">Ableton Extensions</a>、<a href="https://ableton.github.io/extensions-sdk/">Ableton Extensions SDK public beta docs</a>、<a href="https://help.ableton.com/hc/en-us/articles/27303428331420-Ableton-Extensions-FAQ">Ableton Extensions FAQ</a></td><td>Ableton Extensions SDK 能力、Live 12.4.5 Suite beta 要求、Node.js/JS/TS 路线、安全提示；FAQ 对自动化抓取可能返回 403，优先以 Extensions 主页与 SDK docs 为可审计来源。</td></tr>
+      <tr><td><a href="https://www.reaper.fm/sdk/reascript/reascript.php">REAPER ReaScript</a>、<a href="https://www.reaper.fm/sdk/reascript/reascripthelp.html">REAPER API functions</a>、<a href="https://www.reaper.fm/sdk/osc/osc.php">REAPER OSC</a></td><td>REAPER 脚本和 OSC 控制能力。</td></tr>
+      <tr><td><a href="https://github.com/bitwig/bitwig-extensions">bitwig/bitwig-extensions</a>、<a href="https://www.bitwig.com/support/technical_support/community-controller-extensions-and-scripts-29/">Bitwig community controller extensions</a></td><td>Bitwig controller extension API 与社区脚本入口。</td></tr>
+      <tr><td><a href="https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/html/midi_scripting.htm">FL Studio MIDI Scripting</a>；辅助参考：<a href="https://il-group.github.io/FL-Studio-API-Stubs/">FL Studio API Stubs</a></td><td>FL Studio Python/MIDI scripting 能力边界；API Stubs 为 community/unmaintained 辅助来源，需二次核验。</td></tr>
+      <tr><td><a href="https://developer.avid.com/scripting/">Avid Pro Tools Scripting SDK</a>、<a href="https://manual.ardour.org/lua-scripting/">Ardour Lua scripting</a>、<a href="https://manual.ardour.org/using-control-surfaces/controlling-ardour-with-osc/">Ardour OSC</a></td><td>非 Ableton/REAPER 宿主的 automation 与 open-source DAW 控制入口。</td></tr>
+    </table>
+
+    <h2>研究/论文来源</h2>
+    <table>
+      <tr><th>来源</th><th>用途</th></tr>
+      <tr><td><a href="https://arxiv.org/abs/2512.03289">DAWZY: A New Addition to AI powered Human-in-the-Loop Music Co-creation</a>、<a href="https://openreview.net/forum?id=GUgut5mO52">OpenReview DAWZY demo</a>、<a href="https://github.com/Redtri-git/Dawzy-chatbot">Redtri-git/Dawzy-chatbot</a></td><td>REAPER 中自然语言、voice/hum、live state、reversible actions、脚本化 action 和 undo 的核心案例；代码解剖页以 `origin/main` 提交 `6a7132fa545b7ecc76f9fed733a534a64dce386f` 为基准。</td></tr>
+      <tr><td><a href="https://arxiv.org/abs/2508.09126">Neutone SDK: An Open Source Framework for Neural Audio Processing</a></td><td>神经音频模型进 DAW/插件生态的邻近工程背景。</td></tr>
+    </table>
+
+    <h2>插件、文件与评估来源</h2>
+    <table>
+      <tr><th>来源</th><th>用途</th></tr>
+      <tr><td><a href="https://github.com/Neutone/neutone_sdk">Neutone SDK</a>、<a href="https://github.com/magenta/ddsp-vst">DDSP-VST</a>、<a href="https://github.com/acids-ircam/RAVE">RAVE</a>、<a href="https://juce.com/">JUCE</a>、<a href="https://github.com/steinbergmedia/vst3sdk">VST3 SDK</a>、<a href="https://github.com/free-audio/clap">CLAP</a>、<a href="https://developer.apple.com/documentation/audiotoolbox/audio-unit-v3-plug-ins">Apple AUv3</a>、<a href="https://developer.avid.com/aax/">Avid AAX</a></td><td>插件与神经音频模型层：扫描、加载、参数 automation、模型权重、render consistency、供应链风险。</td></tr>
+      <tr><td><a href="https://github.com/bitwig/dawproject">DAWProject</a>、<a href="https://www.bitwig.com/support/technical_support/dawproject-file-format-faqs-62/">Bitwig DAWproject FAQ</a>、<a href="https://support.presonus.com/hc/en-us/articles/19743606863629-Introducing-DAW-Project">PreSonus DAW Project</a>、<a href="https://ableton.github.io/export/">Ableton Live Set Export</a>、<a href="https://github.com/Perlence/rpp">Perlence/rpp</a>、<a href="https://github.com/DBraun/AbletonParsing">AbletonParsing</a></td><td>Project file/versioning、跨 DAW exchange、fixture diff 与静态分析。</td></tr>
+      <tr><td><a href="https://amaai-lab.github.io/mustango/">MusicBench/Mustango</a>、<a href="https://github.com/haoheliu/audioldm_eval">audioldm_eval</a>、<a href="https://github.com/Stability-AI/stable-audio-metrics">Stable Audio Metrics</a>、<a href="https://www.microsoft.com/en-us/research/publication/adapting-frechet-audio-distance-for-generative-music-evaluation/">FAD for generative music</a>、<a href="https://music-ir.org/mirex/wiki/MIREX_HOME">MIREX</a>、<a href="https://proceedings.neurips.cc/paper_files/paper/2023/file/7cbeec46f979618beafb4f46d8f39f36-Paper-Datasets_and_Benchmarks.pdf">MARBLE</a></td><td>音频生成/MIR 评估传统，用于设计 DAW agent 的结构、音频安全、prompt adherence 与人工偏好评估。</td></tr>
+      <tr><td><a href="https://modelcontextprotocol.io/registry/moderation-policy">MCP Registry moderation</a>、<a href="https://github.com/modelcontextprotocol/registry">MCP Registry repo</a>、<a href="https://modelcontextprotocol.io/community/server-card/charter">Server Card charter</a>、<a href="https://blog.modelcontextprotocol.io/posts/2026-01-26-mcp-apps/">MCP Apps</a></td><td>MCP server 发现、安装、server card、moderation 与供应链风险背景。</td></tr>
+    </table>
+
+    <h2>GitHub 项目来源</h2>
+    <p>Ableton：<a href="https://github.com/ahujasid/ableton-mcp">ahujasid/ableton-mcp</a>、<a href="https://github.com/uisato/ableton-mcp-extended">uisato/ableton-mcp-extended</a>、<a href="https://github.com/adamjmurray/producer-pal">producer-pal</a>、<a href="https://github.com/dreamrec/LivePilot">LivePilot</a>、<a href="https://github.com/jpoindexter/ableton-mcp">jpoindexter/ableton-mcp</a>、<a href="https://github.com/xiaolaa2/ableton-copilot-mcp">ableton-copilot-mcp</a>、<a href="https://github.com/ideoforms/AbletonOSC">AbletonOSC</a>、<a href="https://github.com/OthmanAdi/loophole">loophole</a>、<a href="https://github.com/jasper-zheng/ableton-sdk-mcp">ableton-sdk-mcp</a>。</p>
+    <p>REAPER：<a href="https://github.com/bonfire-audio/reaper-mcp">bonfire-audio/reaper-mcp</a>、<a href="https://github.com/dschuler36/reaper-mcp-server">dschuler36/reaper-mcp-server</a>、<a href="https://github.com/shiehn/total-reaper-mcp">total-reaper-mcp</a>、<a href="https://github.com/TwelveTake-Studios/reaper-mcp">TwelveTake-Studios/reaper-mcp</a>、<a href="https://github.com/xDarkzx/Reaper-MCP">xDarkzx/Reaper-MCP</a>、<a href="https://github.com/Redtri-git/Dawzy-chatbot">Dawzy-chatbot</a>。</p>
+    <p>其他宿主与 I/O：<a href="https://github.com/WeModulate/bitwig-mcp-server">bitwig-mcp-server</a>、<a href="https://github.com/veenastudio/flstudio-mcp">flstudio-mcp</a>、<a href="https://github.com/ohhalim/flstudio-mcp">ohhalim/flstudio-mcp</a>、<a href="https://github.com/koltyj/logic-pro-mcp">logic-pro-mcp</a>、<a href="https://github.com/MongLong0214/logic-pro-mcp">MongLong0214/logic-pro-mcp</a>、<a href="https://github.com/hedidjs/cubase-mcp">cubase-mcp</a>、<a href="https://github.com/yokadeeds-dev/yoka-cubase-mcp">yoka-cubase-mcp</a>、<a href="https://github.com/skrul/protools-mcp-server">protools-mcp-server</a>、<a href="https://github.com/raibid-entertainment/ardour-mcp">ardour-mcp</a>、<a href="https://github.com/abhishekjairath/sonic-pi-mcp">sonic-pi-mcp</a>、<a href="https://github.com/williamzujkowski/live-coding-music-mcp">live-coding-music-mcp</a>、<a href="https://github.com/tubone24/midi-mcp-server">midi-mcp-server</a>、<a href="https://github.com/mikeborozdin/vibe-composer-midi-mcp">vibe-composer-midi-mcp</a>、<a href="https://github.com/roomi-fields/osc-bridge">osc-bridge</a>、<a href="https://github.com/bitwig/dawproject">dawproject</a>、<a href="https://github.com/andremichelle/openDAW">openDAW</a>。</p>
+
+    <h2>限制</h2>
+    <ul>
+      <li>本次未逐一 clone 和运行所有仓库，因此「功能可用性」只在有官方/README/论文证据时描述；成熟度属工程推论。</li>
+      <li>GitHub stars、updatedAt 是 2026-06-15 快照，后续会变。</li>
+      <li>DAW agent 的音乐质量无法只靠静态仓库资料判定，必须搭配 fixture、render 和人工听感评测。</li>
+    </ul>
+
+    <h2>AI Disclosure</h2>
+    <p>本调研由 AI-assisted research workflow 产生，包含网络搜索、来源整理、交叉核验、证据综合与 HTML 报告生成。所有具体项目与官方能力声明均附链接；无法直接验证的成熟度判断以推论方式呈现。</p>
+  </main>
+  <footer><div class="site">Last updated 2026-06-15 Asia/Shanghai.</div></footer>
+</body>
+</html>

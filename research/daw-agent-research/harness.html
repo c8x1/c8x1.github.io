@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DAW Agent Harness 工程</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header><div class="site">
+    <div class="eyebrow">Harness Engineering</div>
+    <h1>Harness 工程</h1>
+    <p class="lede">如果要把 DAW agent 做成能长期迭代的工程，harness 比模型 prompt 更关键。它负责把创作任务变成可重放、可比较、可恢复的实验。</p>
+    <nav><a href="index.html">首页</a><a href="ecosystem.html">生态</a><a href="projects.html">项目</a><a href="dawzy-deep-dive.html">DAWZY 深挖</a><a href="dawzy-code-architecture.html">代码解剖</a><a href="architecture.html">架构</a><a href="roadmap.html">路线图</a><a href="sources.html">来源</a></nav>
+  </div></header>
+  <main class="site">
+    <h2>最小可用 Harness</h2>
+    <table>
+      <tr><th>模组</th><th>职责</th><th>第一版交付</th></tr>
+      <tr><td>Fixture Manager</td><td>维护可重放工程：空工程、pop vocal、多轨鼓、MIDI 编曲、混音 session。</td><td>每个 fixture 有 project copy、expected state、render reference。</td></tr>
+      <tr><td>State Snapshot</td><td>序列化 track、clip、MIDI notes、devices、parameters、routing、tempo、markers。</td><td>JSON snapshot + hash + readable summary。</td></tr>
+      <tr><td>Action Ledger</td><td>记录 agent plan、工具调用、DAW response、warnings、undo token。</td><td>单次 run 产生一个 ledger.json。</td></tr>
+      <tr><td>Dry-run/Diff</td><td>写入前预览 affected objects、风险和可回滚性。</td><td>HTML diff report。</td></tr>
+      <tr><td>Undo / Rollback</td><td>把多个低阶 API call 分组，并准备可恢复策略。</td><td>REAPER: undo block + snapshot；Ableton: host undo/backup project；通用: fixture copy rollback。</td></tr>
+      <tr><td>Render &amp; Audio Diff</td><td>对变更前后 render 做 loudness、peak、spectral、silence、duration 检查。</td><td>基础 LUFS/peak/duration + waveform hash。</td></tr>
+      <tr><td>Human Gate</td><td>审批 destructive/expensive/opaque 操作。</td><td>CLI/HTML approval prompt，含 diff 和 rollback。</td></tr>
+    </table>
+
+    <h2>Evaluation Protocol</h2>
+    <table>
+      <tr><th>层级</th><th>指标</th><th>外部参考</th></tr>
+      <tr><td>结构正确</td><td>track/clip/device/marker 是否符合 typed plan；schema validation；snapshot diff。</td><td>自建 fixture corpus、DAWProject/RPP/Ableton parser。</td></tr>
+      <tr><td>音频安全</td><td>duration、peak、LUFS、silence、clipping、NaN/denormal、render reproducibility。</td><td>audioldm_eval、Stable Audio Metrics、FAD 类方法。</td></tr>
+      <tr><td>Prompt adherence</td><td>是否满足 bar count、style、instrumentation、mix intent。</td><td>MusicBench/Mustango、CLAP-style audio-text similarity 可作辅助，不可替代人工听感。</td></tr>
+      <tr><td>音乐质量</td><td>节奏、和声、编曲、混音自然度、过度处理。</td><td>MIREX/MARBLE 等 MIR 评估传统 + 人类偏好评测。</td></tr>
+      <tr><td>可恢复性</td><td>undo 成功率、rollback 成功率、失败后 project 可打开。</td><td>每次 release 的 fixture regression。</td></tr>
+    </table>
+
+    <h2>评估任务集</h2>
+    <table>
+      <tr><th>任务</th><th>成功条件</th><th>自动检查</th><th>人工检查</th></tr>
+      <tr><td>建立 8-bar drum groove</td><td>指定 tempo、bar length、kick/snare/hihat pattern 存在。</td><td>MIDI note grid、clip length、track count。</td><td>节奏是否像 prompt 要求。</td></tr>
+      <tr><td>把 vocal 做得更暖</td><td>新增或调整 EQ/saturation/compression，保留可撤销操作。</td><td>device/parameter diff、peak 不爆、undo 成功。</td><td>声音是否符合「warm」语义。</td></tr>
+      <tr><td>生成 song arrangement</td><td>Intro/Verse/Chorus/Bridge marker 和 clips 分布合理。</td><td>marker names、bar ranges、clip density。</td><td>段落是否有音乐逻辑。</td></tr>
+      <tr><td>整理 session</td><td>track 命名、分组、颜色、路由符合规则。</td><td>naming lint、routing graph、no orphan tracks。</td><td>是否提高可读性。</td></tr>
+      <tr><td>reference mix matching</td><td>朝 reference 的 loudness/spectrum 靠近，但不破坏素材。</td><td>LUFS、spectral centroid、dynamic range。</td><td>是否过度处理。</td></tr>
+    </table>
+
+    <h2>安全分级</h2>
+    <table>
+      <tr><th>等级</th><th>例子</th><th>策略</th></tr>
+      <tr><td>Low</td><td>读取 track list、播放状态、tempo、clip metadata。</td><td>允许自动运行，记录即可。</td></tr>
+      <tr><td>Medium</td><td>新增 MIDI clip、调整非破坏性 device parameter、建立 markers。</td><td>dry-run + 可撤销 transaction。</td></tr>
+      <tr><td>High</td><td>删除 track、覆盖 audio file、批量 normalize、下载外部素材、运行任意脚本。</td><td>人类审批 + project backup + allowlist。</td></tr>
+      <tr><td>Blocked by default</td><td>shell 任意命令、读取私人目录、上传 stems、安装插件。</td><td>禁用，除非明确授权并隔离运行。</td></tr>
+    </table>
+
+    <h2>Security Harness</h2>
+    <table>
+      <tr><th>测试</th><th>目标</th><th>范例</th></tr>
+      <tr><td>MCP authorization</td><td>验证 resource/audience、scope、per-client consent；拒绝 token passthrough。</td><td>素材服务 token 不得被 DAW MCP server 当成自身 token 使用。</td></tr>
+      <tr><td>Local sandbox</td><td>限制 project root、plugin path、render output、shell 命令。</td><td>agent 只能读写 fixture 目录，不能扫描使用者整个音频库。</td></tr>
+      <tr><td>SSRF / URL policy</td><td>外部素材、参考曲、plugin installer URL 需 allowlist/denylist。</td><td>拒绝 localhost metadata、file://、私有网段下载。</td></tr>
+      <tr><td>组合风险</td><td>检查多个低风险工具连用后是否变成数据外泄或 RCE。</td><td>filesystem + Git + plugin install + DAW script 需要更高 gate。</td></tr>
+    </table>
+
+    <h2>Versioning Fixture Policy</h2>
+    <p>每个 fixture 应包含 project copy、media manifest、plugin manifest、preset manifest、expected snapshot、render reference 与最小可重放命令。大型 stems 用 Git LFS 或外部 artifact store，project file diff 只作静态信号，最终仍需宿主加载和 render 验证。</p>
+
+    <h2>Plugin / Model Regression</h2>
+    <p>插件与模型工具应测试 scan/load/unload、参数 automation、offline render determinism、CPU/GPU fallback、missing plugin fallback、模型权重 hash、license/provenance 和 crash recovery。这一层尤其适合把 VST3/AUv3/AAX/CLAP/JUCE 与 Neutone/DDSP/RAVE 类模型分开建 fixture。</p>
+
+    <h2>DAW 特定落地</h2>
+    <div class="two">
+      <section class="card">
+        <h3>REAPER</h3>
+        <p>较适合先做 harness。ReaScript 可用 Lua/Python/EEL 编写单次 mutation 脚本，官方文档说脚本可呼叫 REAPER action 和多数 REAPER API functions；是否具备 atomic/rollback 语义，取决于 harness 的错误处理、状态快照和恢复策略。</p>
+      </section>
+      <section class="card">
+        <h3>Ableton</h3>
+        <p>AbletonOSC/Remote Script 路线可快速 demo；Extensions SDK 路线更值得长期押注，但截至 2026-06 仍是 Live 12.4.5 Suite beta。harness 应保留多 bridge adapter，避免过早绑死。</p>
+      </section>
+    </div>
+
+    <h2>建议目录结构</h2>
+    <pre><code>daw-agent/
+  mcp_server/
+    tools/
+    resources/
+    permissions.yaml
+  daw_adapters/
+    reaper/
+    ableton_remote/
+    ableton_extensions/
+    flstudio/
+  harness/
+    fixtures/
+    snapshots/
+    ledgers/
+    renders/
+    evals/
+  tests/
+    contract/
+    fixture_regression/
+    audio_metrics/
+  docs/
+    tool_cards/
+    risk_policy.md</code></pre>
+  </main>
+  <footer><div class="site">Harness recommendations are engineering synthesis, not a claim that all listed projects implement them. Security guidance follows MCP latest specification and best-practice sources where linked.</div></footer>
+</body>
+</html>

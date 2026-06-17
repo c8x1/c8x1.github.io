@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DAW Agent 架构模式</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header><div class="site">
+    <div class="eyebrow">Architecture</div>
+    <h1>架构模式</h1>
+    <p class="lede">DAW agent 的稳定性取决于「模型决策」和「宿主 mutation」之间的契约。MCP 是入口，不是安全边界本身。</p>
+    <nav><a href="index.html">首页</a><a href="ecosystem.html">生态</a><a href="projects.html">项目</a><a href="dawzy-deep-dive.html">DAWZY 深挖</a><a href="dawzy-code-architecture.html">代码解剖</a><a href="harness.html">Harness</a><a href="roadmap.html">路线图</a><a href="sources.html">来源</a></nav>
+  </div></header>
+  <main class="site">
+    <h2>推荐分层</h2>
+    <pre><code>LLM / Agent Client
+  └─ Planner: user intent → typed edit plan
+      └─ MCP Protocol Layer: session + capability negotiation
+          └─ MCP Server Features: tools/resources/prompts
+              └─ Deployment Auth: OAuth/resource indicators for HTTP where applicable
+                  └─ Domain Guard: permissions, dry-run, schema validation, rollback strategy
+                      └─ DAW Bridge: ReaScript / Ableton SDK / OSC / MIDI / AppleScript / sockets
+                          └─ Host DAW: project/session state + audio engine</code></pre>
+
+    <h2>桥接模式比较</h2>
+    <table>
+      <tr><th>模式</th><th>代表</th><th>优势</th><th>限制</th><th>适合任务</th></tr>
+      <tr><td>REAPER ReaScript/API</td><td>Lua、Python、EEL scripts；REAPER actions/API functions</td><td>较适合完整工程自动化、状态快照、RPP diff 与 undo block。</td><td>脚本本身不是数据库式 atomic transaction；错误恢复需要 harness 设计。</td><td>project inspection、track/item/MIDI/FX automation、render。</td></tr>
+      <tr><td>Controller scripting</td><td>FL Studio Python MIDI scripting、Bitwig controller extensions</td><td>适合控制器、即时互动、transport/mixer/clip 触发。</td><td>官方定位偏 controller integration；完整 project/session editing 能力需按具体 API 与项目验证。</td><td>live control、hardware mapping、低风险 macro。</td></tr>
+      <tr><td>Ableton Remote Script/LOM</td><td>ableton-mcp 类仓库、ableton-js</td><td>社区已有大量实现；可控制 Live Object Model。</td><td>非官方路径容易受版本影响；headless 测试困难。</td><td>Live session 操作、Arrangement View、device params。</td></tr>
+      <tr><td>AbletonOSC</td><td>ideoforms/AbletonOSC、AbletonOSC MCP wrappers</td><td>OSC 成熟，适合即时控制、跨语言。</td><td>OSC message grammar 和状态同步需要自建；错误型别较弱。</td><td>transport、track/mixer、live performance control。</td></tr>
+      <tr><td>Ableton Extensions SDK</td><td>loophole、ableton-sdk-mcp、extension skills</td><td>官方 public beta，JS/TS，能直接和 Live Set 结构互动。</td><td>截至 2026-06 仍是 Live 12.4.5 Suite beta；安全与发布模式还在演化。</td><td>workflow automation、project analysis、structured edit tools。</td></tr>
+      <tr><td>MIDI/Control Surface</td><td>Logic/Cubase/Mackie Control、MIDI MCP</td><td>宿主兼容面广，对即时 performance 友好。</td><td>语义层弱，不容易知道「第 3 个旋钮其实是什么」。</td><td>硬体/混音台式控制、低风险宏。</td></tr>
+      <tr><td>文件/交换格式</td><td>DAWProject、.als/.flp parser、openDAW</td><td>最利于 diff、versioning、offline harness。</td><td>专有格式逆向风险；离线变更不代表 DAW 会接受。</td><td>模板生成、跨 DAW exchange、静态分析。</td></tr>
+    </table>
+
+    <h2>MCP 授权与信任边界</h2>
+    <p>截至 2026-06-15，MCP latest specification 指向 2025-11-25。对 DAW agent 而言，安全设计应按「MCP 只是协议入口，DAW mutation 另需领域安全层」处理。</p>
+    <table>
+      <tr><th>风险</th><th>要求</th><th>DAW agent 含义</th></tr>
+      <tr><td>Token passthrough</td><td>MCP server 不应接受未明确签发给自身的 token；HTTP 部署需验证 audience/resource。</td><td>不能把 DAW MCP server 当作通用 API proxy；插件下载、云素材、Git、文件系统需分 scope。</td></tr>
+      <tr><td>SSRF / session hijack</td><td>对远端资源、回调 URL、session id 和重连做校验。</td><td>防止模型透过素材 URL、project path 或 plugin installer 间接读私有数据或劫持 session。</td></tr>
+      <tr><td>Local MCP compromise</td><td>本地 server 最小权限、明确 allowlist、隔离工作目录。</td><td>DAW project、音频 stems、插件扫描目录、shell/render 命令要分开授权。</td></tr>
+      <tr><td>Per-client consent</td><td>client/使用者需看到工具风险、资源范围与操作预览。</td><td>删 track、覆盖 audio、安装插件、上传 stems 应进 human gate。</td></tr>
+    </table>
+
+    <h2>Project File / Versioning</h2>
+    <p>项目文件可以成为 agent 状态源，但不能简化成「直接改档」。REAPER `.rpp` 较适合文本 diff；Ableton Live Set / export 工具与解析器可做静态分析；DAWProject 可做跨宿主交换，但要评估插件、automation、media path、preset 和 routing 的信息损失。</p>
+    <table>
+      <tr><th>格式/来源</th><th>适用</th><th>注意事项</th></tr>
+      <tr><td>REAPER RPP</td><td>fixture diff、版本控制、离线检查。</td><td>仍需让 REAPER 加载验证；外部媒体和插件 state 需一起封存。</td></tr>
+      <tr><td>Ableton Live Set / Export</td><td>静态分析、版本回归、clip/warp metadata 抽取。</td><td>版本兼容与专有内容要保守处理；不要把 parser 成功等同于 DAW 可接受。</td></tr>
+      <tr><td>DAWProject</td><td>跨宿主 fixture、交换格式、agent 中间表示。</td><td>跨宿主转换可能丢失插件、automation 或宿主特有 routing。</td></tr>
+      <tr><td>openDAW / Web DAW</td><td>headless 或 browser-native harness 参考。</td><td>可控性高，但不代表商用 DAW session 的全部约束。</td></tr>
+    </table>
+
+    <h2>工具设计原则</h2>
+    <div class="grid">
+      <article class="card"><h3>少即是多</h3><p>不要把宿主 API 一比一暴露给 LLM。先暴露音乐语义工具，例如 <code>create_drum_pattern</code>、<code>apply_reference_mix_profile</code>、<code>insert_arrangement_markers</code>，再由 guard 层翻译成低阶 API。</p></article>
+      <article class="card"><h3>读写分离</h3><p>读取资源可宽，写入工具要窄。所有 mutation 工具都应支持 dry-run、preview diff、undo token、affected object list。</p></article>
+      <article class="card"><h3>显式状态</h3><p>每次写入前都 refresh state；工具输出必须包含 pre-state hash、post-state hash、warnings、render/eval hooks。</p></article>
+      <article class="card"><h3>人类审批</h3><p>大范围 destructive 操作、插件新增、音频覆盖、外部下载、运行任意脚本都应有人类 gate。</p></article>
+    </div>
+
+    <h2>工具 schema 范例</h2>
+    <pre><code>{
+  "tool": "apply_track_edit_plan",
+  "input": {
+    "project_id": "fixture_pop_vocal_01",
+    "plan": [
+      {"op": "set_volume", "track": "Lead Vocal", "db": -2.0},
+      {"op": "add_device", "track": "Lead Vocal", "device": "Compressor"},
+      {"op": "set_parameter", "device": "Compressor", "name": "Ratio", "value": 3.0}
+    ],
+    "mode": "dry_run"
+  },
+  "output": {
+    "pre_state_hash": "...",
+    "diff": ["Lead Vocal volume -0.0dB → -2.0dB", "added Compressor"],
+    "risk": "medium",
+    "requires_approval": true,
+    "undo_strategy": "single_host_undo_block"
+  }
+}</code></pre>
+  </main>
+  <footer><div class="site">Architecture is synthesized from project metadata and official docs; bridge capability is host-specific and must be verified in harness.</div></footer>
+</body>
+</html>

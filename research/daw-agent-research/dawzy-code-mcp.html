@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DAWZY 代码解剖：MCP、ReaPy 与参数工具</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header><div class="site">
+    <div class="eyebrow">DAWZY Code Reading</div>
+    <h1>MCP、ReaPy 与参数工具</h1>
+    <p class="lede">这一页拆 DAWZY 为什么没有把 700 多个 ReaScript API 全部暴露成工具，而是把少数高风险能力做成 MCP tool/resource：状态读取、FX 参数设置、beat 生成。</p>
+    <nav><a href="index.html">首页</a><a href="dawzy-deep-dive.html">DAWZY 深挖</a><a href="dawzy-code-architecture.html">入口与动态脚本</a><a href="dawzy-code-audio.html">语音/哼唱/生成</a><a href="harness.html">Harness</a><a href="sources.html">来源</a></nav>
+  </div></header>
+
+  <main class="site">
+    <section class="callout">
+      <strong>核心判断：</strong>DAWZY 的 MCP 层不是“大而全 API 网关”，而是“少量稳定操作 + 动态 Lua 长尾”。这对 DAW agent 更现实：工具负责易错、可参数化、可验证的动作；脚本生成负责稀疏长尾。
+    </section>
+
+    <div class="mini-nav">
+      <a href="#server">MCP server</a>
+      <a href="#fx">FX 参数</a>
+      <a href="#client">MCP client</a>
+      <a href="#beat">生成工具</a>
+      <a href="#design">设计启发</a>
+    </div>
+
+    <h2 id="server">MCP server</h2>
+    <p>DAWZY 使用 FastMCP，最终通过 stdio transport 运行。`chat.py` 启动 MCP client 后，会把 `mcpserver.py` 作为子进程 server 连接起来。</p>
+
+    <div class="snippet">
+      <div class="meta">`mcpserver.py`：创建 server 并用 stdio 启动</div>
+      <pre><code>from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("demo-server", version="1.0.0")
+
+if __name__ == "__main__":
+    mcp.run(transport="stdio")</code></pre>
+    </div>
+    <p>stdio 适合本机桌面工具：不需要开放端口，生命周期跟随 client。缺点是每轮连接/启动成本、错误恢复和日志观测都比较原始，后续可以改成长驻本地 service。</p>
+
+    <div class="snippet">
+      <div class="meta">`mcpserver.py`：把 REAPER 状态暴露成 MCP resource</div>
+      <pre><code>@mcp.resource("resource://state")
+def get_project_state() -&gt; str:
+    with reapy.inside_reaper():
+        cid = reapy.reascript_api.NamedCommandLookup(
+            '_RS61e36837be3b165b26ecbb73bd32311cfaaea9ac'
+        )
+        reapy.reascript_api.Main_OnCommand(cid, 0)
+
+    return run_get_state()</code></pre>
+    </div>
+    <p>值得注意的是，`chat.py` 当前自己也会先跑一次 `run_get_state()`，所以 resource 更像是给模型工具调用备用的能力。更干净的实现应让所有状态读取都走 resource，并返回结构化 JSON，而不是大段文本。</p>
+
+    <h2 id="fx">FX 参数工具</h2>
+    <p>`set_fx_param` 是 DAWZY 最能说明“为什么需要工具”的地方。REAPER 插件参数通常有 normalized slider、显示单位、真实范围等多套表示；让 LLM 自己换算，失败概率很高。</p>
+
+    <div class="snippet">
+      <div class="meta">`mcpserver.py`：读取参数名、当前值、最小值、最大值</div>
+      <pre><code>def get_param(track_index, fx_index, param_index):
+    project = reapy.Project()
+    track = project.tracks[track_index]
+    params = track.fxs[fx_index].params
+    p = params[param_index]
+
+    param_name = p.name
+    norm = p.normalized
+    formatted_curr = norm.format_value(norm)
+    formatted_min = norm.format_value(0.0)
+    formatted_max = norm.format_value(1.0)
+    return param_name, formatted_curr, formatted_min, formatted_max, params</code></pre>
+    </div>
+
+    <div class="snippet">
+      <div class="meta">`mcpserver.py`：dB 和普通范围的 slider 映射</div>
+      <pre><code>def db_to_slider(db):
+    return math.pow(2, db/6)
+
+def set_param(track_index, fx_index, param_index, target_value):
+    param_name, curr, minv, maxv, params = get_param(
+        track_index, fx_index, param_index
+    )
+    if 'dB' in curr:
+        slider = db_to_slider(target_value)
+    else:
+        true_mi, true_ma = formatted_to_num(minv), formatted_to_num(maxv)
+        percent = (target_value - true_mi) / (true_ma - true_mi)
+        slider = percent * (slider_ma - slider_mi)
+    params[param_index] = slider</code></pre>
+    </div>
+    <p>这段代码把“人类单位”转成 REAPER 可写入的 slider 值。它还不完美：非 dB 分支依赖 `slider_mi/slider_ma` 的参数范围，边界检查、单位解析、异常提示都可以更强；但方向正确，属于应该工具化的 DAW 操作。</p>
+
+    <div class="snippet">
+      <div class="meta">`mcpserver.py`：暴露给模型的 typed tool</div>
+      <pre><code>@mcp.tool()
+def set_fx_param(track_index: int, fx_index: int,
+                 param_index: int, target_value: float):
+    try:
+        set_param(track_index, fx_index, param_index, target_value)
+        return f"Successfully set FX {fx_index}, Param {param_index}."
+    except Exception as e:
+        return f"Failed to set FX Param: {str(e)}"</code></pre>
+    </div>
+    <p>对 LLM 来说，这个接口把复杂 DAW 操作压成四个 typed 参数。真正产品化时还应返回 before/after、单位、目标 track/FX 名称，并把失败分成“找不到轨道”“参数越界”“插件不可写”等结构化错误。</p>
+
+    <h2 id="client">MCP client</h2>
+    <p>DAWZY 仓库里有 Claude 路径和 OpenAI/GPT 路径。两者共同点是：先 `list_tools()`，把工具 schema 传给模型；如果模型返回 tool call，就调用 MCP server，再把 tool result 喂回模型继续生成最终回答。</p>
+
+    <div class="snippet">
+      <div class="meta">`mcpclient_gpt.py`：把 MCP tools 转成 OpenAI function tools</div>
+      <pre><code>response = await self.session.list_tools()
+available_tools = [{
+    "type": "function",
+    "function": {
+        "name": tool.name,
+        "description": tool.description,
+        "parameters": tool.inputSchema
+    }
+} for tool in response.tools]
+
+response = self.openai.chat.completions.create(
+    model='gpt-5',
+    messages=messages,
+    tools=available_tools,
+    tool_choice="auto",
+)</code></pre>
+    </div>
+
+    <div class="snippet">
+      <div class="meta">`mcpclient_gpt.py`：执行 tool call 并回填结果</div>
+      <pre><code>for tool_call in reply.tool_calls:
+    tool_name = tool_call.function.name
+    parsed_args = json.loads(tool_call.function.arguments)
+    result = await self.session.call_tool(tool_name, parsed_args)
+
+    messages.append({
+        "role": "tool",
+        "tool_call_id": tool_call.id,
+        "name": tool_name,
+        "content": tool_output_str,
+    })</code></pre>
+    </div>
+    <p>这就是 DAWZY 的 agent loop。它没有显式 plan/execute/verify 三阶段，也没有 action diff；模型调用工具后，系统相信工具返回值并继续对话。后续 harness 可以在 `call_tool` 外层包一层审计器，记录 action、参数、状态前后快照和可撤销命令。</p>
+
+    <h2 id="beat">生成工具</h2>
+    <p>`generate_beat` 显示了 DAW agent 不只是控制宿主，也可以生成素材再导入宿主。DAWZY 用 Audiocraft/MusicGen-small 生成 `beat.wav`，再调用导入脚本插进 REAPER。</p>
+
+    <div class="snippet">
+      <div class="meta">`mcpserver.py`：MusicGen 子环境 + 导入 REAPER</div>
+      <pre><code>async def generate(description: str):
+    py_path = os.path.expanduser('~/miniconda/envs/audiocraft/bin/python')
+    beat_path = os.path.join(script_dir, 'beat.wav')
+
+    await asyncio.create_subprocess_exec(
+        py_path, os.path.join('ReaPy_Utils', 'beat_generation.py'), description
+    )
+    if os.path.exists(beat_path):
+        await asyncio.create_subprocess_exec(
+            sys.executable, os.path.join('ReaPy_Utils', 'add_media.py'), beat_path
+        )
+        return "Successfully generated beat."</code></pre>
+    </div>
+
+    <div class="snippet">
+      <div class="meta">`ReaPy_Utils/add_media.py`：导入媒体并加 ReaSynth</div>
+      <pre><code>media_filename = sys.argv[1]
+reapy.reascript_api.InsertMedia(media_filename, 1)
+track_index = reapy.reascript_api.CountTracks(0) - 1
+track = reapy.reascript_api.GetTrack(0, track_index)
+reapy.reascript_api.TrackFX_AddByName(
+    track, 'ReaSynth (Cockos)', False, -1
+)</code></pre>
+    </div>
+    <p>这里也有原型痕迹：MusicGen Python 路径写死在用户目录，生成文件名固定为 `beat.wav`。更可靠的 harness 应该使用 job ID、临时输出路径、生成参数记录、音频长度/采样率校验和导入后 track 验证。</p>
+
+    <h2 id="design">设计启发</h2>
+    <table>
+      <tr><th>DAWZY 现状</th><th>更稳的工程形态</th></tr>
+      <tr><td>MCP tool 返回自然语言成功/失败。</td><td>返回结构化 JSON：`ok`、`action_id`、`before`、`after`、`undo_hint`、`error_code`。</td></tr>
+      <tr><td>状态以文本快照进入 prompt。</td><td>状态分层：完整 JSON 给工具/验证器，摘要文本给 LLM。</td></tr>
+      <tr><td>工具直接写 DAW。</td><td>增加 `plan -> dry_run -> approve -> apply -> verify` 五步。</td></tr>
+      <tr><td>长尾靠动态 Lua。</td><td>动态 Lua 必须受权限模型限制，并在执行前生成 diff/影响范围说明。</td></tr>
+    </table>
+  </main>
+
+  <footer><div class="site">Last updated 2026-06-16 Asia/Shanghai · Source baseline: Redtri-git/Dawzy-chatbot commit 6a7132f.</div></footer>
+</body>
+</html>

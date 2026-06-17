@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DAWZY 深挖：一个代表性的 DAW Agent 项目</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header><div class="site">
+    <div class="eyebrow">Representative Case</div>
+    <h1>DAWZY 深挖</h1>
+    <p class="lede">DAWZY 是一个面向 REAPER 的开源 DAW assistant。它把文本、语音和哼唱输入接到 LLM、MCP 工具、ReaScript 与 ReaPy 上，让用户用自然语言完成参数调整、脚本自动化、音频/MIDI 导入和解释式学习。</p>
+    <nav><a href="index.html">首页</a><a href="ecosystem.html">生态</a><a href="projects.html">项目矩阵</a><a href="dawzy-code-architecture.html">代码解剖</a><a href="architecture.html">架构</a><a href="harness.html">Harness</a><a href="roadmap.html">路线图</a><a href="sources.html">来源</a></nav>
+  </div></header>
+
+  <main class="site">
+    <section class="callout">
+      <strong>为什么选 DAWZY：</strong>它不是 GitHub stars 最高的项目，但最适合作为代表案例，因为它同时具备开源仓库、论文、demo、MCP 工具、REAPER 实现、用户实验和与 Ableton-MCP 的对比。换句话说，它不只是“能控制 DAW”的 demo，而是把 agent 化 DAW 的核心问题——状态、工具、脚本、撤销、学习和人类控制——摆到了同一个系统里。
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h3><a href="dawzy-code-architecture.html">代码解剖 1：入口、状态、动态脚本</a></h3>
+        <p>从 `src/index.js`、`chat.py`、`get_state.lua` 看用户消息如何变成 REAPER action，以及动态 Lua 为什么既强又危险。</p>
+      </article>
+      <article class="card">
+        <h3><a href="dawzy-code-mcp.html">代码解剖 2：MCP 与 ReaPy</a></h3>
+        <p>拆 `mcpserver.py`、`mcpclient_gpt.py`，重点看 FX 参数工具、resource、tool call loop 和生成素材导入。</p>
+      </article>
+      <article class="card">
+        <h3><a href="dawzy-code-audio.html">代码解剖 3：语音、哼唱、生成</a></h3>
+        <p>拆 Whisper、Basic Pitch、MusicGen-small 和 `add_media.py` 如何把多模态输入接进 DAW 工作流。</p>
+      </article>
+    </section>
+
+    <h2>项目画像</h2>
+    <table>
+      <tr><th>维度</th><th>信息</th></tr>
+      <tr><td>仓库</td><td><a href="https://github.com/Redtri-git/Dawzy-chatbot">Redtri-git/Dawzy-chatbot</a>；截至 2026-06-15 抓取为 3 stars，Python 为主，未声明 license。</td></tr>
+      <tr><td>论文 / Demo</td><td><a href="https://arxiv.org/abs/2512.03289">arXiv:2512.03289</a> 与 <a href="https://openreview.net/forum?id=GUgut5mO52">OpenReview DAWZY demo</a>。OpenReview demo 于 2025-11 上线，arXiv 预印本于 2025-12 发布。</td></tr>
+      <tr><td>目标 DAW</td><td>REAPER。核心执行路径依赖 REAPER ReaScript、ReaPy 和 REAPER action command ID。</td></tr>
+      <tr><td>用户输入</td><td>文本、语音、哼唱。语音经 Whisper 转文本；哼唱经 Basic Pitch 转 MIDI。</td></tr>
+      <tr><td>模型与工具</td><td>论文写作版本以 GPT-5 作为主要 LLM；仓库当前代码也保留 Claude Sonnet 4.5、OpenAI client、Qwen 注释路径。MCP server 提供 state query、FX 参数设置、beat generation。</td></tr>
+    </table>
+
+    <h2>总体架构</h2>
+    <p>论文把 DAWZY 分成三层：User Interaction、Processing、Execution。这个分层很贴近 DAW agent 的通用工程形态：前端收集音乐人意图，中间层把意图变成带状态约束的计划，执行层再把计划落到宿主 DAW。</p>
+    <pre><code>用户：文本 / 语音 / 哼唱
+  └─ Electron 侧边栏：贴在 DAW 窗口旁，负责输入、历史、按钮、IPC
+      └─ chat.py：读取 REAPER 当前状态，拼接 prompt，调用 MCP client
+          └─ LLM：解释意图，选择 MCP 工具，或生成 Lua ReaScript
+              ├─ MCP tools/resources：set_fx_param、generate_beat、resource://state
+              ├─ ReaPy：调用 REAPER API、导入媒体、设置 FX 参数
+              └─ Lua ReaScripts：get_state.lua、dynamic.lua、自动化脚本
+                  └─ REAPER project：track、item、FX、parameter、MIDI、audio</code></pre>
+
+    <h2>用户交互层</h2>
+    <p>DAWZY 的 Electron 应用会寻找 DAW 窗口，并把聊天窗口贴在同一屏幕右侧。代码中 `findDAWWindow()` 会匹配 FL Studio、Ableton、Reaper、Logic Pro、Cubase、Studio One、GarageBand 等窗口名，但实际执行链主要面向 REAPER。</p>
+    <table>
+      <tr><th>入口</th><th>实现</th><th>意义</th></tr>
+      <tr><td>文本</td><td>用户在 Electron UI 中输入，`renderer.js` 调用 IPC，主进程运行 `python chat.py 用户消息`。</td><td>最直接的自然语言 DAW 控制。</td></tr>
+      <tr><td>语音</td><td>`speech_to_text.js` 启动 Python 录音脚本生成 `input.wav`，再用 OpenAI Whisper API 转录。</td><td>减少在 DAW 操作时切换鼠标/键盘的负担。</td></tr>
+      <tr><td>哼唱</td><td>`hum_to_midi.js` 调用 `basic-pitch` 把 `input.wav` 转成 `input_basic_pitch.mid`，再通过 ReaPy 插入 REAPER。</td><td>把旋律草图变成 MIDI track，体现音乐生产里非文本输入的重要性。</td></tr>
+      <tr><td>撤销</td><td>Electron 主进程中有 `undo-last-action` handler，调用 `reapy.reascript_api.Undo_DoUndo2(0)`。</td><td>这不是完整 transaction 系统，但体现“可回滚”是 DAW agent 的核心 UX。</td></tr>
+    </table>
+
+    <h2>处理层：为什么需要 MCP</h2>
+    <p>DAWZY 没有把所有 REAPER API 暴露成几百个独立工具，而是选了少数高价值能力：状态读取、FX 参数设置、beat 生成。这样做的核心原因是：LLM 直接写脚本很容易在索引、单位转换和实时状态上犯错；MCP 工具可以把某些高风险/高重复操作做成更稳定的接口。</p>
+    <table>
+      <tr><th>MCP 能力</th><th>仓库实现</th><th>解决的问题</th></tr>
+      <tr><td>状态读取</td><td>`resource://state` 和 `get_project_state()` 触发 `get_state.lua`，再读取 `get_state_output.txt`。</td><td>给 LLM track index、FX index、parameter index、当前值、item 和 envelope 等上下文，减少“凭空猜索引”。</td></tr>
+      <tr><td>FX 参数设置</td><td>`set_fx_param(track_index, fx_index, param_index, target_value)` 通过 reapy 找到参数，并把 dB/ms 等人类单位映射到 slider/range。</td><td>论文明确指出，单位到 REAPER slider range 的换算是 LLM 容易失败的地方，因此适合变成工具。</td></tr>
+      <tr><td>Beat 生成</td><td>`generate_beat(description)` 调用 Audiocraft/MusicGen-small 生成 `beat.wav`，再用 ReaPy `InsertMedia` 导入 REAPER。</td><td>把“控制 DAW”和“生成素材”放进同一交互循环。</td></tr>
+    </table>
+
+    <h2>执行层：ReaScript 与 ReaPy</h2>
+    <p>DAWZY 的执行层有两条路线。第一条是工具化路线：MCP server 用 Python/reapy 直接调用 REAPER API，例如设置 FX 参数、插入媒体。第二条是脚本生成路线：`chat.py` 要求 LLM 在回答中嵌入 Lua 代码块，程序提取代码并写入 REAPER Scripts 目录的 `dynamic.lua`，再触发 REAPER action 执行。</p>
+    <div class="grid">
+      <article class="card">
+        <h3>状态脚本</h3>
+        <p>`get_state.lua` 枚举系统、播放状态、播放位置、BPM、track、instrument、FX chain、每个 FX 的参数名/当前值/范围、media item 属性、envelope 等，最后写到 `get_state_output.txt`。</p>
+      </article>
+      <article class="card">
+        <h3>动态脚本</h3>
+        <p>`chat.py` 从 LLM 输出中提取 ```lua``` 代码块，写到 REAPER 的 `dynamic.lua`，再通过 `Main_OnCommand` 执行。这个机制让模型可生成任意 ReaScript，但也需要 sandbox、审计和撤销策略。</p>
+      </article>
+      <article class="card">
+        <h3>工具脚本</h3>
+        <p>`add_media.py` 用 `InsertMedia` 导入 wav/MIDI，并可给新 track 加 ReaSynth；`beat_generation.py` 用 MusicGen-small 生成音频。</p>
+      </article>
+    </div>
+
+    <h2>关键原理</h2>
+    <table>
+      <tr><th>原理</th><th>DAWZY 的做法</th><th>可迁移经验</th></tr>
+      <tr><td>状态接地</td><td>每次查询前触发 `get_state.lua`，把当前工程状态放进 prompt。</td><td>DAW agent 不能只靠用户一句话；必须知道当前 session 的真实 track/FX/parameter。</td></tr>
+      <tr><td>高风险能力工具化</td><td>把 FX 参数换算做成 `set_fx_param`，避免模型自己算 slider 值。</td><td>对“单位换算、索引选择、文件导入、渲染”这类易错操作，应优先做 typed tool。</td></tr>
+      <tr><td>代码生成补足长尾</td><td>README 声称 LLM 可通过 Lua 运行大量 ReaScript API；代码中也确实支持动态 Lua。</td><td>少量工具覆盖核心路径，动态脚本覆盖长尾，但必须加 dry-run、diff、allowlist。</td></tr>
+      <tr><td>人类在环</td><td>Electron UI 保留聊天、说明、按钮和撤销；论文强调解释式反馈。</td><td>音乐创作不适合黑盒自动化，agent 应解释它做了什么、为什么这么做、如何撤销。</td></tr>
+      <tr><td>多模态草图</td><td>语音控制和哼唱转 MIDI 都进同一个 DAW 工作流。</td><td>DAW agent 不应只服务文本 prompt，也应接住音乐人的旋律、节奏、参考音频等输入。</td></tr>
+    </table>
+
+    <h2>实验设计</h2>
+    <p>DAWZY 的论文评估分为三类：客观任务、与 Ableton-MCP 的对比、主观 MOS 用户评分。它的评估不是严格的工业 benchmark，但比多数 GitHub demo 更完整。</p>
+    <table>
+      <tr><th>实验</th><th>设计</th><th>结果</th></tr>
+      <tr><td>客观任务</td><td>4 个可复现任务，每个任务 3 次 trial，跨 4 个 LLM：多指令 FX 参数处理、打开 FX browser、复制/升八度/20% 混入、解释 compressor attack。</td><td>开源基线 Qwen-480B、GPT-OSS-120B、GPT-OSS-20B 总体成功率约 25%-50%，常见失败是无效 ReaScript 函数和参数索引错误；教育解释任务各模型都通过 3 次。</td></tr>
+      <tr><td>Ableton-MCP 对比</td><td>使用 Claude Sonnet 4.5，对比 DAWZY + REAPER 与 Ableton-MCP + Claude Desktop；任务为 Wavy、Bouncy、Fade，各 3 次。</td><td>表格结果显示 DAWZY 为 4/9（44%），Ableton-MCP 为 0/9。论文解释为 Ableton-MCP 在修改现有音符/音量等 API 能力上受限，且模型对 REAPER 公开文档更熟悉。</td></tr>
+      <tr><td>MOS 主观评分</td><td>21 名参与者对 Enjoyment、Learning、Collaboration、Usability、Control 打分，满分 5。</td><td>Enjoyment 4.48，Learning 4.38，Collaboration 4.29，Usability 4.14，Control 3.81；所有类别高于中立值 3。</td></tr>
+    </table>
+
+    <h2>达成效果</h2>
+    <div class="grid">
+      <article class="card"><h3>能做真实 DAW mutation</h3><p>不是只生成 MIDI 文件或外部音频，而是在 REAPER 内读取状态、改 FX、导入媒体、运行 Lua 脚本。</p></article>
+      <article class="card"><h3>解释与操作结合</h3><p>系统 prompt 要求先用简短语言解释，再在可自动化任务中给 Lua 脚本。这让“做事”和“教学”在同一轮交互中发生。</p></article>
+      <article class="card"><h3>用工具补模型短板</h3><p>FX 参数单位换算由工具处理，而不是让模型自由生成，降低了 dB/ms/slider range 错误。</p></article>
+      <article class="card"><h3>证明 REAPER 路线可行</h3><p>REAPER 的公开 ReaScript 文档、Lua/Python/EEL 脚本和 ReaPy，使它天然适合做 DAW agent 的早期 harness。</p></article>
+    </div>
+
+    <h2>局限和风险</h2>
+    <table>
+      <tr><th>局限</th><th>具体表现</th><th>工程启示</th></tr>
+      <tr><td>原型路径硬编码</td><td>`get_state.lua` 中写死了本地输出路径；README 要求手动复制 REAPER action command ID 到代码。</td><td>产品化需要自动安装脚本、发现 command ID、配置 project root。</td></tr>
+      <tr><td>动态脚本安全</td><td>LLM 生成 Lua 后直接写入并运行；这适合研究 demo，但不适合无审计生产环境。</td><td>需要 dry-run、Lua AST/allowlist、权限分级、人类审批和 undo/rollback ledger。</td></tr>
+      <tr><td>评估规模有限</td><td>任务集和参与者规模都偏小，MOS 反映可用性倾向，不等于专业制作质量。</td><td>后续应引入 fixture regression、渲染 diff、人工听感盲评和更大任务集。</td></tr>
+      <tr><td>跨 DAW 迁移难</td><td>系统强依赖 REAPER ReaScript 和 ReaPy；论文也承认不同音乐软件需要适配。</td><td>应该把语义工具、状态模型、宿主 adapter 分离，避免把 REAPER 细节写死在 planner。</td></tr>
+      <tr><td>插件/路由覆盖有限</td><td>论文结论称原型聚焦核心功能，而不是高级插件特性。</td><td>未来 harness 应补插件扫描、routing、sidechain、automation envelope 和 render regression。</td></tr>
+    </table>
+
+    <h2>对 DAW Agent 工程的启发</h2>
+    <ol>
+      <li><strong>选 REAPER 做第一宿主是合理的。</strong>它的脚本生态、公开 API、RPP 可分析性和 undo 机制让实验闭环更快。</li>
+      <li><strong>MCP 工具要少而准。</strong>DAWZY 不是暴露 700 个 ReaScript 函数，而是把状态、参数换算、生成导入做成工具；长尾再交给脚本生成。</li>
+      <li><strong>状态快照比 prompt 更重要。</strong>没有 track/FX/parameter 的实时上下文，模型容易 mis-index；DAWZY 的 `get_state.lua` 是最关键的工程组件之一。</li>
+      <li><strong>撤销不是可选功能。</strong>音乐创作需要试错，agent 每次改动都应可撤回、可解释、可复现。</li>
+      <li><strong>真正的下一步是 harness。</strong>DAWZY 证明了可行性，但要成为可靠系统，还需要权限、dry-run、diff、测试语料、渲染检查和安全审计。</li>
+    </ol>
+
+    <h2>来源</h2>
+    <p>本页依据 <a href="https://github.com/Redtri-git/Dawzy-chatbot">Redtri-git/Dawzy-chatbot</a> 仓库源码、<a href="https://arxiv.org/abs/2512.03289">DAWZY arXiv 论文</a>、<a href="https://openreview.net/forum?id=GUgut5mO52">OpenReview demo 页面</a>、以及仓库 README/代码中 `mcpserver.py`、`mcpclient.py`、`chat.py`、`src/index.js`、`src/renderer.js`、`src/speech_to_text.js`、`src/hum_to_midi.js`、`Lua_ReaScripts/get_state.lua` 等文件整理。未实际运行 REAPER demo，所有效果描述以论文实验和源码可见路径为依据。</p>
+  </main>
+
+  <footer><div class="site">Last updated 2026-06-16 Asia/Shanghai · DAWZY is treated as a research prototype, not production-ready DAW automation.</div></footer>
+</body>
+</html>

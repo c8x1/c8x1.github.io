@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DAW Agent 落地路线图</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header><div class="site">
+    <div class="eyebrow">Roadmap</div>
+    <h1>落地路线图</h1>
+    <p class="lede">一个务实的 DAW agent 原型应先证明「可控修改」而不是「看起来聪明」。下面是 30/60/90 天工程路线。</p>
+    <nav><a href="index.html">首页</a><a href="ecosystem.html">生态</a><a href="projects.html">项目</a><a href="dawzy-deep-dive.html">DAWZY 深挖</a><a href="dawzy-code-architecture.html">代码解剖</a><a href="architecture.html">架构</a><a href="harness.html">Harness</a><a href="sources.html">来源</a></nav>
+  </div></header>
+  <main class="site">
+    <h2>30 天：可观测 MVP</h2>
+    <table>
+      <tr><th>交付</th><th>内容</th><th>验收</th></tr>
+      <tr><td>选宿主</td><td>建议先选 REAPER 或 Ableton。REAPER 便于 harness；Ableton 便于社区/产品展示。</td><td>能读取 project/session state。</td></tr>
+      <tr><td>10 个高语义工具</td><td>create track、create MIDI clip、set tempo、insert marker、set volume、add simple device、render、snapshot、dry-run、undo。</td><td>每个工具有 schema、风险等级、单元测试。</td></tr>
+      <tr><td>授权与沙箱</td><td>MCP scope、resource/audience、tool allowlist、project root sandbox、外部 URL policy。</td><td>高风险工具预设被 gate；token passthrough/越权路径测试失败即阻断。</td></tr>
+      <tr><td>Fixture harness</td><td>3 个 project fixture + snapshot/diff/ledger。</td><td>CI 或本地命令可重放 5 个任务。</td></tr>
+    </table>
+
+    <h2>60 天：创作工作流</h2>
+    <table>
+      <tr><th>交付</th><th>内容</th><th>验收</th></tr>
+      <tr><td>Planner</td><td>自然语言 → typed edit plan；禁止模型直接运行低阶 API。</td><td>计划可 dry-run 和人工 approve。</td></tr>
+      <tr><td>音乐任务集</td><td>drum groove、bassline、arrangement、mix cleanup、vocal warm-up。</td><td>自动 metrics + 人工评分表。</td></tr>
+      <tr><td>权限模型</td><td>tool allowlist、project sandbox、外部 IO policy。</td><td>高风险操作必须被 gate 挡住。</td></tr>
+    </table>
+
+    <h2>90 天：多宿主/产品化</h2>
+    <table>
+      <tr><th>交付</th><th>内容</th><th>验收</th></tr>
+      <tr><td>Adapter abstraction</td><td>把 host-specific code 藏在 adapter，工具语义保持一致。</td><td>同一任务可在两个宿主或一个宿主 + openDAW fixture 上跑。</td></tr>
+      <tr><td>Evaluation dashboard</td><td>显示任务成功率、undo/rollback 成功率、音频安全、prompt adherence、人工评分。</td><td>每次 release 有结构、音频、偏好三层 regression report。</td></tr>
+      <tr><td>Creative UX</td><td>preview、accept/reject、explain changes、before/after render。</td><td>创作者能安全迭代，不需要信任黑盒 agent。</td></tr>
+    </table>
+
+    <h2>优先级建议</h2>
+    <ol>
+      <li><strong>先做 REAPER harness。</strong>DAWZY 和 REAPER MCP 生态提供了可逆脚本路线的初步可行性证据，ReaScript 的工程可控性也相对好。</li>
+      <li><strong>同步跟 Ableton Extensions SDK。</strong>它可能成为 Ableton agent 化的长期官方入口，但 beta 期不要把核心架构绑死。</li>
+      <li><strong>避免工具爆炸。</strong>与其暴露 400 个低阶工具，不如 20 个高语义工具 + 可靠 planner + 可重放 eval。</li>
+      <li><strong>把「听起来好」拆成两层。</strong>先用客观 audio metrics 防止坏结果，再用人工或偏好模型评估音乐审美。</li>
+    </ol>
+  </main>
+  <footer><div class="site">Roadmap built from ecosystem findings and harness risk analysis; priorities are recommendations, not proof of production readiness.</div></footer>
+</body>
+</html>
