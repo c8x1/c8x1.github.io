@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>04 - AI Agent 与 DAW 控制</title>
+    <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a href="index.html">← 返回目录</a>
+        <span>报告 04/09</span>
+        <a href="05-agent-harness.html">下一篇 →</a>
+    </nav>
+
+    <div class="container">
+        <header class="report-header">
+            <span class="report-num">REPORT 04</span>
+            <h1>🤖 AI Agent 与 DAW 控制</h1>
+            <p class="report-subtitle">DAWZY、ReaperAI、AI DAW 等项目的 Agent 架构深度分析</p>
+        </header>
+
+        <!-- DAWZY -->
+        <section class="content-section">
+            <div class="project-card">
+                <h3>⭐ DAWZY — 学术级 DAW Agent 先驱</h3>
+                <div class="project-meta">
+                    <span class="meta-item">📦 <strong>San Diego State University / JSBAI Center</strong></span>
+                    <span class="meta-item">👤 <strong>Aaron Elkins et al.</strong></span>
+                    <span class="meta-item">📅 2025 年 12 月</span>
+                    <span class="meta-item">📄 <strong>学术论文 (NeurIPS 2025 Workshop)</strong></span>
+                </div>
+                <div class="tech-tags">
+                    <span class="tech-tag">LLM Code Generation</span>
+                    <span class="tech-tag">REAPER / ReaScript</span>
+                    <span class="tech-tag">Electron Gateway</span>
+                    <span class="tech-tag">MCP Tools</span>
+                    <span class="tech-tag">Voice-first</span>
+                </div>
+                <p>
+                    DAWZY 是目前最重要的 DAW Agent 学术研究项目 (NeurIPS 2025 Workshop)。它提出了一种新颖的方法：
+                    使用 <strong>LLM 代码生成</strong>（而非直接的 API 调用）来控制 REAPER DAW，
+                    从而显著减少了 LLM 幻觉（hallucination）问题。
+                </p>
+
+                <h4>核心架构</h4>
+                <div class="phase-block">
+                    <h3>Processing Layer</h3>
+                    <p>
+                        用户意图（文本/语音/哼唱）通过 <strong>Electron Gateway</strong> 流向 LLM 和 MCP Tools，
+                        然后以<strong>可逆的 ReaScript 脚本</strong>在 REAPER 中执行。
+                    </p>
+                    <ul>
+                        <li><strong>输入层</strong>: 支持文本、语音、哼唱等多种输入方式</li>
+                        <li><strong>Electron Gateway</strong>: 作为用户界面和协议层</li>
+                        <li><strong>LLM 引擎</strong>: 理解用户意图并生成 ReaScript 代码</li>
+                        <li><strong>MCP Tools</strong>: 提供 DAW 状态查询和上下文信息</li>
+                        <li><strong>执行层</strong>: 将生成的代码作为可逆操作在 REAPER 中执行</li>
+                    </ul>
+                </div>
+
+                <h4>关键创新</h4>
+                <ul>
+                    <li><strong>LLM 代码生成减少幻觉</strong>: 相比直接调用 API，让 LLM 生成可执行的 ReaScript 代码，
+                        可以更容易验证操作的正确性，显著降低了 "幻觉命令" 和 "错误索引" 问题。</li>
+                    <li><strong>可逆操作</strong>: 所有 Agent 执行的操作都是可逆的（可通过 Undo 回退），
+                        给用户安全感，鼓励实验性使用。</li>
+                    <li><strong>上下文感知</strong>: Agent 可以查询当前 DAW 会话状态，
+                        使操作更加精确和相关。</li>
+                    <li><strong>Voice-first 设计</strong>: 优先考虑语音交互，适合音乐制作场景。</li>
+                    <li><strong>权限化函数</strong>: DAW 能力被暴露为显式的、有权限控制的功能接口。</li>
+                </ul>
+
+                <h4>与其他项目的对比</h4>
+                <div class="quote-block">
+                    <p>"DAWZY primarily interacts with REAPER through LLM code generation — a more powerful approach than similar tools like Ableton-MCP."</p>
+                    <div class="source">— DAWZY 论文, arXiv:2512.03289</div>
+                </div>
+
+                <h4>链接</h4>
+                <ul>
+                    <li>论文: <a href="https://arxiv.org/html/2512.03289v1" target="_blank">arXiv HTML</a> | <a href="https://arxiv.org/pdf/2512.03289" target="_blank">PDF</a></li>
+                    <li>ResearchGate: <a href="https://www.researchgate.net/publication/398312610" target="_blank">Publication Page</a></li>
+                    <li>OpenReview: <a href="https://openreview.net/pdf?id=l3tVN08tyh" target="_blank">Review</a></li>
+                    <li>Emergent Mind: <a href="https://www.emergentmind.com/topics/reaperai" target="_blank">ReaperAI Topic</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ReaperAI -->
+        <section class="content-section">
+            <div class="project-card">
+                <h3>🔧 ReaperAI</h3>
+                <div class="project-meta">
+                    <span class="meta-item">📅 2026 年 1 月</span>
+                    <span class="meta-item">🧪 <strong>社区项目</strong></span>
+                </div>
+                <p>
+                    ReaperAI 是一个专注于 REAPER DAW 的 LLM 自动化助手项目。
+                    它的目标是减少 REAPER 中复杂/重复操作的摩擦，包括：
+                </p>
+                <ul>
+                    <li>轨道组织和命名管理</li>
+                    <li>信号路由配置</li>
+                    <li>Action/脚本编排</li>
+                    <li>项目配置自动化</li>
+                </ul>
+                <p>
+                    项目强调通过 RAG（Retrieval-Augmented Generation）加载 REAPER 文档，
+                    使 Agent 能够准确理解 REAPER 的 API 和功能，适合初学者使用。
+                </p>
+                <ul>
+                    <li>Emergent Mind: <a href="https://www.emergentmind.com/topics/reaperai" target="_blank">Topic Page</a></li>
+                    <li>Reddit: <a href="https://www.reddit.com/r/Reaper/comments/1iren5u/" target="_blank">r/Reaper Discussion</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Johannes Naylor AI DAW -->
+        <section class="content-section">
+            <div class="project-card">
+                <h3>🏗️ Building a Simple AI DAW (Johannes Naylor)</h3>
+                <div class="project-meta">
+                    <span class="meta-item">👤 <strong>Johannes Naylor</strong></span>
+                    <span class="meta-item">📅 Part 1: 2025.01 | Part 2: 2025.08</span>
+                </div>
+                <div class="tech-tags">
+                    <span class="tech-tag">Python</span>
+                    <span class="tech-tag">Rust</span>
+                    <span class="tech-tag">LangChain</span>
+                    <span class="tech-tag">Claude</span>
+                    <span class="tech-tag">FFmpeg</span>
+                    <span class="tech-tag">MCP</span>
+                </div>
+                <p>
+                    这是一个技术教程系列，展示了从零构建 AI 音频 Agent 的完整过程。
+                </p>
+
+                <h4>Part 1: Python + LangChain 方案 (2025.01)</h4>
+                <p>
+                    使用 Python + LangChain 构建一个 AI 音频操作 Agent。Agent 接收用户的自然语言请求，
+                    让 Claude 生成 FFmpeg 命令来处理音频文件。这是一个简单但有效的起点。
+                </p>
+
+                <h4>Part 2: Rust 流式引擎 + MCP (2025.08)</h4>
+                <p>
+                    第二部分是技术深度的飞跃。核心升级包括：
+                </p>
+                <ul>
+                    <li><strong>Rust 流式引擎</strong>: 替换 Python/FFmpeg 方案，用 Rust 实现高性能、
+                        低延迟的实时音频流处理</li>
+                    <li><strong>MCP 协议集成</strong>: 将 Agent 能力暴露为标准 MCP 接口，
+                        可与 Claude Desktop、Cursor 等 MCP 客户端集成</li>
+                    <li><strong>更健壮的 Agent 架构</strong>: 从简单的"生成命令"模式升级为
+                        具有状态管理和错误恢复的完整 Agent</li>
+                </ul>
+                <ul>
+                    <li>Part 1: <a href="https://jonaylor.com/blog/build-a-simple-ai-daw/" target="_blank">Build a Simple AI DAW</a></li>
+                    <li>Part 2: <a href="https://jonaylor.com/blog/building-a-simple-ai-daw-part-2-mcp-and-agents/" target="_blank">MCP and Agents</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Cursor for DAW -->
+        <section class="content-section">
+            <div class="project-card">
+                <h3>🖱️ "Cursor for DAW" 概念实验</h3>
+                <div class="project-meta">
+                    <span class="meta-item">👤 <strong>Xiaohan Tian</strong></span>
+                    <span class="meta-item">📅 2025 年 8 月</span>
+                </div>
+                <p>
+                    一篇探索性文章，讨论如果将 Cursor（AI 代码编辑器）的理念应用到 DAW 中会是什么样子。
+                    作者构建了一个轻量级浏览器 DAW 实验原型，内嵌 AI 音乐家助手。
+                </p>
+                <h4>核心理念</h4>
+                <ul>
+                    <li>AI 助手理解当前项目的音乐上下文（和弦进行、节奏、音色）</li>
+                    <li>可以像 Cursor 的 "Tab 补全" 一样，建议下一个音符、和弦或编曲元素</li>
+                    <li>支持自然语言指令来修改音乐内容</li>
+                    <li>AI 和人类在同一时间线上协作</li>
+                </ul>
+                <ul>
+                    <li>文章: <a href="https://ai.gopubby.com/exploring-what-cursor-for-a-daw-could-look-like-532e2df36791" target="_blank">Exploring What "Cursor for a DAW" Could Look Like</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- AI Mixing Assistant Prototype -->
+        <section class="content-section">
+            <div class="project-card">
+                <h3>🎚️ AI Mixing Assistant Prototype (REAPER)</h3>
+                <div class="project-meta">
+                    <span class="meta-item">📅 2026 年 3 月</span>
+                    <span class="meta-item">🧪 <strong>工作原型</strong></span>
+                </div>
+                <p>
+                    在 Steinberg 论坛上（讨论 Cubase 的 AI 集成缺口时），有开发者提到了一个
+                    <strong>针对 REAPER 的 AI 混音助手工作原型</strong>，具备以下能力：
+                </p>
+                <ul>
+                    <li><strong>音频分析</strong>: 自动分析轨道音频的频率特征、动态范围等</li>
+                    <li><strong>插件视觉</strong>: 能够 "看到" 当前加载的插件及其参数设置</li>
+                    <li><strong>迭代式混音问题解决</strong>: Agent 能够识别混音问题（如频率冲突、过度压缩），
+                        提出修复建议并自动执行调整</li>
+                </ul>
+                <ul>
+                    <li>Forum: <a href="https://forums.steinberg.net/t/full-scripting-api-for-cubase-the-ai-integration-gap-is-now-a-competitive-threat/1026258" target="_blank">Steinberg Forum Discussion</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>Agent 架构模式对比</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>项目</th>
+                        <th>Agent 架构</th>
+                        <th>LLM 用法</th>
+                        <th>执行方式</th>
+                        <th>可逆性</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>DAWZY</strong></td>
+                        <td>Processing Layer + MCP</td>
+                        <td>代码生成 (ReaScript)</td>
+                        <td>Lua/Python 脚本</td>
+                        <td>✅ Undo</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ReaperAI</strong></td>
+                        <td>RAG + ReaScript</td>
+                        <td>文档检索 + 代码生成</td>
+                        <td>ReaScript</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AI DAW (Naylor)</strong></td>
+                        <td>Rust Engine + MCP</td>
+                        <td>工具调用 (FFmpeg)</td>
+                        <td>Rust 流式引擎</td>
+                        <td>部分</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AbletonMCP</strong></td>
+                        <td>MCP Server</td>
+                        <td>直接 API 调用</td>
+                        <td>Ableton API</td>
+                        <td>部分</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mixing Assistant</strong></td>
+                        <td>分析-建议-执行</td>
+                        <td>音频分析 + 决策</td>
+                        <td>ReaScript</td>
+                        <td>✅</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="insight-box">
+                <h4>🔑 Agent 架构关键洞察</h4>
+                <ul>
+                    <li><strong>LLM 代码生成是最可靠的 DAW 控制方式</strong>：DAWZY 的实验证明，让 LLM 生成脚本代码比直接调用 API 更不容易产生幻觉。</li>
+                    <li><strong>RAG + 文档检索提升了 Agent 的领域知识</strong>：ReaperAI 通过加载 REAPER 文档，使 Agent 能准确理解 DAW 的复杂 API。</li>
+                    <li><strong>Rust 引擎代表了性能升级方向</strong>：Johannes Naylor 的 Part 2 展示了从 Python/FFmpeg 到 Rust 流式引擎的演进路径。</li>
+                    <li><strong>可逆操作是用户体验的关键</strong>：所有 Agent 操作都应该可以通过 Undo 回退，这大大降低了用户对 AI 错误的焦虑。</li>
+                </ul>
+            </div>
+        </section>
+
+        <div class="nav-footer">
+            <a href="03-mcp-ecosystem.html">← 上一篇：MCP 生态</a>
+            <a href="05-agent-harness.html">下一篇：Agent Harness →</a>
+        </div>
+    </div>
+</body>
+</html>

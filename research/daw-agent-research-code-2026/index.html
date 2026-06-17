@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DAW Agent 化深度调研</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="site">
+      <div class="eyebrow">Deep Research · 2026-06-15</div>
+      <h1>DAW Agent 化：从 MCP demo 到可控音乐生产系统</h1>
+      <p class="lede">本报告整理 DAW agent 化的开源项目、宿主 API、MCP/OSC/MIDI 桥接模式与 harness 工程。重点不是「LLM 能不能控制 DAW」，而是如何让它在真实创作工程中可观测、可回滚、可评估、可被人接管。</p>
+      <nav>
+        <a href="ecosystem.html">生态总览</a>
+        <a href="projects.html">开源项目矩阵</a>
+        <a href="dawzy-deep-dive.html">DAWZY 深挖</a>
+        <a href="dawzy-code-architecture.html">DAWZY 代码解剖</a>
+        <a href="architecture.html">架构模式</a>
+        <a href="harness.html">Harness 工程</a>
+        <a href="roadmap.html">路线图</a>
+        <a href="sources.html">来源与方法</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site">
+    <section class="callout">
+      <strong>一句话结论：</strong>本次样本显示，2025-2026 年的 DAW agent 化已从「自然语言控制播放/音量」扩展到多宿主 MCP server、REAPER 可逆脚本案例、AbletonOSC/Remote Script、Ableton Extensions SDK、Logic/Cubase/Bitwig/FL Studio/Pro Tools/Ardour/live-coding 等桥接路线。下一步更可能卡在 harness：状态快照、undo/rollback、工具权限、MCP 授权边界、评估语料、音频差分与人类审批。
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h3>核心趋势</h3>
+        <p>Ableton 和 REAPER 是最活跃的两条路。Ableton 侧已有 Remote Script、AbletonOSC、Max for Live、Extensions SDK 等多种入口；REAPER 侧依赖 ReaScript、Lua/Python、OSC 和 reapy，较容易做可逆脚本与完整工程自动化。</p>
+      </article>
+      <article class="card">
+        <h3>MCP 的角色</h3>
+        <p>MCP 适合承载工具发现、资源读取、结构化输出和 agent client 对接；但 DAW 写入操作必须另加领域 rollback、授权边界、安全沙箱与状态校验。</p>
+      </article>
+      <article class="card">
+        <h3>Harness 的角色</h3>
+        <p>DAW agent 需要像编译器/机器人控制系统一样测试：fixture 工程、干跑模式、动作 diff、可重放计划、声学指标、人工 gate 和崩溃恢复。</p>
+      </article>
+    </section>
+
+    <h2>建议阅读顺序</h2>
+    <table>
+      <tr><th>页面</th><th>用途</th><th>适合谁先看</th></tr>
+      <tr><td><a href="ecosystem.html">生态总览</a></td><td>判断 DAW agent 化现在处于哪个阶段。</td><td>产品/研究负责人</td></tr>
+      <tr><td><a href="projects.html">开源项目矩阵</a></td><td>快速扫描 Ableton、REAPER、Logic、Bitwig、FL Studio、MIDI/OSC 项目。</td><td>工程选型</td></tr>
+      <tr><td><a href="dawzy-deep-dive.html">DAWZY 深挖</a></td><td>深入理解一个代表性开源项目的架构、实现、实验与局限。</td><td>要开始实现原型的人</td></tr>
+      <tr><td><a href="dawzy-code-architecture.html">DAWZY 代码解剖</a></td><td>从源码看 Electron 入口、MCP/ReaPy 工具、动态 Lua、语音/哼唱/生成链路。</td><td>要照着搭工程骨架的人</td></tr>
+      <tr><td><a href="architecture.html">架构模式</a></td><td>比较 Remote Script、OSC、Extensions SDK、MIDI、文件级 DAW 操作。</td><td>系统设计</td></tr>
+      <tr><td><a href="harness.html">Harness 工程</a></td><td>给出可实现的测试与安全工程框架。</td><td>要开始做原型的人</td></tr>
+      <tr><td><a href="roadmap.html">路线图</a></td><td>把调研转成 30/60/90 天交付计划。</td><td>团队落地</td></tr>
+    </table>
+
+    <h2>本次调研边界</h2>
+    <p>资料来源以官方文件、GitHub 仓库 metadata/README、arXiv/OpenReview、DAW 厂商文件为主。GitHub stars 和更新时间是 2026-06-15 抓取的快照，这类项目变动很快，后续应以仓库实时状态为准。未直接打开 README 的小型 fork/clone 被标为低成熟度或待验证，不把其声称能力视为已证实能力。</p>
+  </main>
+
+  <footer><div class="site">AI-assisted research report. Claims are linked to sources where available; project maturity remains an engineering inference, not a runtime evaluation.</div></footer>
+</body>
+</html>
