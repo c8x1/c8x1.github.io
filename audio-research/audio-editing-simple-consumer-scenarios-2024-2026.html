@@ -1,0 +1,2649 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>消费级语音简单编创·场景驱动报告（2024–2026）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,800&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* ============================================================
+     语音编创·场景驱动报告 v2 — 单文件样式
+     设计隐喻：实验室笔记本 × 频谱分析仪 × 10 场景矩阵
+     - 暖米纸主背景 + 墨黑正文，单一信号琥珀强调色
+     - 主线＝用户场景（不是技术路线）
+     - 成熟度三色红绿灯贯穿：🟢成熟 墨绿 / 🟡部分 琥珀 / 🔴缺口 朱红
+     - 每场景一个醒目编号 + 色条 + 缺口朱红突出
+     - 8 场景（S1–S8）+ 发散核实新增 S9/S10（匿名化 / 病理重建）
+     ============================================================ */
+
+  :root {
+    --paper:        #f1ece1;
+    --paper-2:       #e8e1d2;
+    --paper-deep:    #ddd4c1;
+    --paper-warm:    #fff8ec;
+    --ink:           #1b1a17;
+    --ink-soft:      #4a463d;
+    --ink-mute:      #7c7666;
+    --rule:          #c8bfac;
+    --rule-soft:     #d9d1bf;
+
+    --amber:        #c2410c;
+    --amber-deep:   #9a3208;
+    --amber-glow:   rgba(194, 65, 12, 0.12);
+    --amber-soft:   rgba(194, 65, 12, 0.06);
+
+    /* maturity traffic-light language, used everywhere */
+    --go:           #2f6f4f;   /* 🟢 mature  */
+    --go-glow:      rgba(47, 111, 79, 0.14);
+    --caution:      #c2410c;   /* 🟡 partial */
+    --caution-glow: rgba(194, 65, 12, 0.14);
+    --stop:         #b3261e;   /* 🔴 gap     */
+    --stop-glow:    rgba(179, 38, 30, 0.14);
+    --neutral:      #6b5d3f;
+    --gold:         #8a6d1f;
+
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --serif: 'Newsreader', 'Source Serif Pro', Georgia, serif;
+    --display: 'Fraunces', 'Newsreader', Georgia, serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--serif);
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(1200px 600px at 12% -8%, rgba(194,65,12,0.05), transparent 60%),
+      radial-gradient(900px 500px at 100% 8%, rgba(47,111,79,0.04), transparent 55%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.11 0 0 0 0 0.10 0 0 0 0 0.09 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    background-size: cover, cover, 160px 160px;
+  }
+
+  .shell {
+    position: relative;
+    z-index: 1;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 40px 0 96px;
+  }
+
+  /* left signal rail */
+  .signal-rail {
+    position: fixed;
+    left: 40px;
+    top: 0;
+    bottom: 0;
+    width: 28px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .signal-rail::before {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%;
+    width: 1px;
+    background: var(--rule);
+    transform: translateX(-50%);
+  }
+  .signal-rail svg {
+    position: absolute;
+    top: 96px;
+    left: -8px;
+    width: 44px;
+    height: 220px;
+    overflow: visible;
+  }
+  .rail-tag {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    color: var(--ink-mute);
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    margin-top: auto;
+    margin-bottom: 48px;
+  }
+
+  section { padding: 72px 0 8px; border-top: 1px solid var(--rule); }
+  section:first-of-type { border-top: none; }
+
+  .pillar-head { margin-bottom: 30px; }
+  .pillar-head h2 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(28px, 3.6vw, 40px);
+    line-height: 1.08;
+    letter-spacing: -0.012em;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .pillar-head h2 em { font-style: italic; font-weight: 500; color: var(--amber-deep); }
+  .pillar-head .ph-sub {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  .pillar-head .ph-sub .lchip {
+    display: inline-block; width: 8px; height: 8px;
+    background: var(--amber); margin-right: 8px; vertical-align: 1px;
+  }
+
+  p.lede {
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    max-width: 66ch;
+    margin-bottom: 22px;
+  }
+  p.lede strong { color: var(--ink); font-weight: 600; }
+
+  /* ============================================================
+     HERO
+     ============================================================ */
+  header.hero {
+    position: relative;
+    z-index: 1;
+    padding: 76px 0 48px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .hero .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .hero .eyebrow .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--amber);
+    box-shadow: 0 0 0 4px var(--amber-glow);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 4px var(--amber-glow); opacity: 1; }
+    50%      { box-shadow: 0 0 0 7px rgba(194,65,12,0.04); opacity: 0.7; }
+  }
+
+  .framework-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    padding: 7px 14px 7px 10px;
+    background: var(--ink);
+    color: var(--paper-warm);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .framework-badge .pill { width: 6px; height: 6px; border-radius: 50%; }
+  .framework-badge .g { background: var(--go); }
+  .framework-badge .y { background: var(--caution); }
+  .framework-badge .r { background: var(--stop); }
+
+  .hero h1 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(38px, 6vw, 64px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 22px;
+    max-width: 16ch;
+  }
+  .hero h1 em {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--amber-deep);
+  }
+
+  .hero .deck {
+    font-family: var(--serif);
+    font-size: 18.5px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    max-width: 64ch;
+    margin-bottom: 28px;
+  }
+  .hero .deck .strike {
+    text-decoration: line-through;
+    text-decoration-color: var(--stop);
+    text-decoration-thickness: 2px;
+    color: var(--ink-mute);
+  }
+  .hero .deck strong { color: var(--ink); font-weight: 600; }
+
+  /* hero stat band */
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-top: 8px;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .hero-stats .stat {
+    padding: 18px 22px 18px 0;
+    border-right: 1px dashed var(--rule-soft);
+  }
+  .hero-stats .stat:last-child { border-right: none; }
+  .hero-stats .stat .v {
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: clamp(22px, 2.6vw, 30px);
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+  .hero-stats .stat .v .unit {
+    font-size: 0.55em;
+    color: var(--ink-mute);
+    font-weight: 400;
+    margin-left: 4px;
+  }
+  .hero-stats .stat .k {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-top: 8px;
+  }
+
+  /* ============================================================
+     SCENARIO BOARD (overview dashboard)
+     ============================================================ */
+  .board-intro {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 18px;
+    display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
+  }
+  .legend { display: inline-flex; gap: 10px; align-items: center; }
+  .legend .lk {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px; letter-spacing: 0.1em;
+  }
+  .legend .ldot { width: 9px; height: 9px; border-radius: 50%; }
+  .legend .ldot.go { background: var(--go); box-shadow: 0 0 0 3px var(--go-glow); }
+  .legend .ldot.ca { background: var(--caution); box-shadow: 0 0 0 3px var(--caution-glow); }
+  .legend .ldot.st { background: var(--stop); box-shadow: 0 0 0 3px var(--stop-glow); }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .scard {
+    position: relative;
+    background: var(--paper-warm);
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--ink-mute);
+    padding: 16px 16px 14px;
+    text-decoration: none;
+    color: var(--ink);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s;
+    display: flex;
+    flex-direction: column;
+    min-height: 158px;
+  }
+  .scard:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px -12px rgba(27,26,23,0.28);
+    border-color: var(--amber);
+  }
+  .scard .sn {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--ink-mute);
+    margin-bottom: 6px;
+  }
+  .scard .sname {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 16.5px;
+    line-height: 1.18;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .scard .suser {
+    font-size: 12.5px;
+    color: var(--ink-mute);
+    line-height: 1.4;
+    margin-bottom: auto;
+  }
+  .scard .smeta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--rule-soft);
+  }
+  .scard .count {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .scard .count b { color: var(--amber-deep); font-weight: 600; }
+  .scard .lamp {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px; letter-spacing: 0.06em;
+    color: var(--ink-soft);
+  }
+  .scard .lamp .ld {
+    width: 11px; height: 11px; border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.04);
+  }
+  /* maturity variants drive the top border color */
+  .scard.m-go { border-top-color: var(--go); }
+  .scard.m-go .lamp .ld { background: var(--go); box-shadow: 0 0 0 3px var(--go-glow); }
+  .scard.m-ca { border-top-color: var(--caution); }
+  .scard.m-ca .lamp .ld { background: var(--caution); box-shadow: 0 0 0 3px var(--caution-glow); }
+  .scard.m-st { border-top-color: var(--stop); }
+  .scard.m-st .lamp .ld { background: var(--stop); box-shadow: 0 0 0 3px var(--stop-glow); }
+
+  /* ============================================================
+     SCENARIO DETAIL SECTIONS (S1–S8)
+     ============================================================ */
+  .scene {
+    position: relative;
+  }
+  .scene-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 26px;
+  }
+  .scene-num {
+    flex: 0 0 auto;
+    width: 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .scene-num .tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    color: var(--ink-mute);
+  }
+  .scene-num .big {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 52px;
+    line-height: 0.92;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .scene-bar {
+    width: 4px;
+    align-self: stretch;
+    min-height: 70px;
+    border-radius: 2px;
+    background: var(--ink-mute);
+    flex: 0 0 4px;
+  }
+  .scene.m-go  .scene-bar { background: var(--go); }
+  .scene.m-ca  .scene-bar { background: var(--caution); }
+  .scene.m-st  .scene-bar { background: var(--stop); }
+
+  .scene-title { flex: 1; }
+  .scene-title h2 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .scene-title h2 em { font-style: italic; color: var(--amber-deep); font-weight: 500; }
+  .scene-title .meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-mute);
+    display: flex; gap: 16px; flex-wrap: wrap;
+  }
+  .scene-title .meta .m-lamp {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-weight: 600; letter-spacing: 0.08em;
+  }
+  .scene.m-go  .m-lamp { color: var(--go); }
+  .scene.m-ca  .m-lamp { color: var(--caution); }
+  .scene.m-st  .m-lamp { color: var(--stop); }
+
+  /* pain block — bold, bordered */
+  .pain {
+    background: var(--ink);
+    color: var(--paper-warm);
+    padding: 18px 22px;
+    margin-bottom: 30px;
+    border-left: 4px solid var(--amber);
+    position: relative;
+  }
+  .pain .plabel {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 8px;
+  }
+  .pain .ptext {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: 19px;
+    line-height: 1.45;
+  }
+  .pain .puser {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--rule-soft);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.14);
+  }
+
+  /* sub-block labels */
+  .sub-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--amber-deep);
+    margin: 6px 0 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sub-label::before {
+    content: ""; width: 14px; height: 1px; background: var(--amber);
+  }
+
+  /* paper→problem mapping cards */
+  .papers { display: grid; grid-template-columns: 1fr; gap: 0; margin-bottom: 30px; }
+  .paper {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 20px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule-soft);
+    align-items: baseline;
+  }
+  .paper:last-child { border-bottom: none; }
+  .paper .pname {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 15.5px;
+    color: var(--ink);
+    line-height: 1.25;
+  }
+  .paper .pid {
+    display: block;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 400;
+    margin-top: 4px;
+    letter-spacing: 0.02em;
+  }
+  .paper .pid a {
+    color: var(--amber-deep);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1px;
+    transition: color .15s, border-color .15s;
+  }
+  .paper .pid a:hover { color: var(--amber); border-color: var(--amber); }
+  .paper .pdesc {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+  .paper .pdesc strong { color: var(--ink); font-weight: 600; }
+  /* author-self-reported superscript */
+  .self {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    border-radius: 3px;
+    padding: 1px 4px;
+    margin-left: 4px;
+    vertical-align: 2px;
+    white-space: nowrap;
+  }
+  .self::before { content: "↑"; margin-right: 2px; }
+  /* scope-leak warning chip */
+  .leak {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--stop);
+    border: 1px solid var(--stop);
+    background: var(--stop-glow);
+    border-radius: 3px;
+    padding: 1px 5px;
+    margin-left: 5px;
+    vertical-align: 1px;
+    white-space: nowrap;
+  }
+
+  /* tech-point badges */
+  .tech {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 30px;
+  }
+  .tech .b {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    color: var(--ink-soft);
+    background: var(--paper-warm);
+    border: 1px solid var(--rule);
+    border-left: 2px solid var(--amber);
+    padding: 5px 10px;
+    line-height: 1.3;
+  }
+
+  /* maturity & gap block */
+  .gap {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 22px;
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    padding: 18px 22px;
+    margin-bottom: 8px;
+  }
+  .gap .glamp {
+    display: flex; flex-direction: column; gap: 8px;
+    border-right: 1px dashed var(--rule);
+    padding-right: 16px;
+  }
+  .gap .glamp .light {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+  }
+  .scene.m-go  .gap .glamp .light { background: var(--go); }
+  .scene.m-ca  .gap .glamp .light { background: var(--caution); }
+  .scene.m-st  .gap .glamp .light { background: var(--stop); }
+  .gap .glamp .ltag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  .scene.m-go  .gap .glamp .ltag { color: var(--go); }
+  .scene.m-ca  .gap .glamp .ltag { color: var(--caution); }
+  .scene.m-st  .gap .glamp .ltag { color: var(--stop); }
+  .gap .gtext {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+  .gap .gtext strong { color: var(--ink); }
+  .gap .gtext .hot { color: var(--stop); font-weight: 600; }
+  .gap .gtext .bench {
+    display: block;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--rule);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-mute);
+    line-height: 1.5;
+  }
+  .gap .gtext .bench b { color: var(--amber-deep); }
+
+  /* ============================================================
+     NARRATIVE SUB-BLOCKS (诉求细化 / 现状解决情况 / 落地情况)
+     —— 场景卡内清晰分区的叙事段落
+     ============================================================ */
+  .narr {
+    margin-bottom: 28px;
+    padding: 16px 20px 14px;
+    border: 1px solid var(--rule-soft);
+    border-left: 3px solid var(--rule);
+    background: rgba(255,255,255,0.42);
+  }
+  .narr.narr-asks { border-left-color: var(--amber); }
+  .narr.narr-state { border-left-color: var(--neutral); background: rgba(255,255,255,0.30); }
+  .narr-head {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .narr.narr-asks .narr-head { color: var(--amber-deep); }
+  .narr.narr-state .narr-head { color: var(--neutral); }
+  .narr .narr-lead {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  .narr .narr-lead:last-child { margin-bottom: 0; }
+  .narr .narr-lead strong { color: var(--ink); font-weight: 600; }
+  .narr .narr-lead .hot { color: var(--stop); font-weight: 600; }
+  .narr .narr-lead .go { color: var(--go); font-weight: 600; }
+  .narr ul.asks { list-style: none; margin-top: 4px; }
+  .narr ul.asks li {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    padding: 5px 0 5px 14px;
+    position: relative;
+    border-bottom: 1px dashed var(--rule-soft);
+  }
+  .narr ul.asks li:last-child { border-bottom: none; }
+  .narr ul.asks li::before {
+    content: "▸";
+    position: absolute; left: 0; top: 5px;
+    color: var(--amber);
+    font-family: var(--mono);
+    font-size: 10px;
+  }
+  .narr ul.asks li b { color: var(--ink); font-weight: 600; }
+  .narr .state-note {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--rule-soft);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    color: var(--ink-mute);
+    line-height: 1.5;
+  }
+  .narr .state-note b { color: var(--amber-deep); }
+
+  /* 落地情况 sub-panel —— 商业产品 / 部署状态, 醒目边框 */
+  .deploy {
+    margin-top: 22px;
+    margin-bottom: 8px;
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--gold);
+    background: var(--paper-warm);
+    padding: 16px 20px 14px;
+  }
+  .deploy-head {
+    display: flex; align-items: baseline; gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--rule-soft);
+  }
+  .deploy-head .dh-tag {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--ink);
+  }
+  .deploy-head .dh-tag em { font-style: italic; color: var(--amber-deep); font-weight: 500; }
+  .deploy-head .dh-sub {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  .deploy ul { list-style: none; }
+  .deploy ul li {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    padding: 6px 0 6px 14px;
+    position: relative;
+    border-bottom: 1px dashed var(--rule-soft);
+  }
+  .deploy ul li:last-child { border-bottom: none; }
+  .deploy ul li::before {
+    content: "·";
+    position: absolute; left: 2px; top: 5px;
+    color: var(--gold);
+    font-weight: 700;
+    font-family: var(--mono);
+  }
+  .deploy ul li b { color: var(--ink); font-weight: 600; }
+  .deploy ul li.gap-note {
+    margin-top: 6px;
+    padding: 9px 12px;
+    border: 1px dashed var(--stop);
+    background: var(--stop-glow);
+    border-radius: 2px;
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+  }
+  .deploy ul li.gap-note::before { content: "⚠"; color: var(--stop); left: 4px; top: 9px; }
+  .deploy ul li.gap-note b { color: var(--stop); }
+
+  /* scope 注 —— S9/S10 顶部范围说明（琥珀/斜体警告子块） */
+  .scope-note {
+    margin: -8px 0 26px;
+    padding: 12px 16px 11px;
+    border: 1px solid var(--caution);
+    border-left: 4px solid var(--caution);
+    background: var(--caution-glow);
+    font-style: italic;
+    font-family: var(--serif);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--amber-deep);
+  }
+  .scope-note .sn-tag {
+    font-family: var(--mono);
+    font-style: normal;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--paper-warm);
+    background: var(--caution);
+    padding: 2px 7px;
+    border-radius: 2px;
+    margin-right: 8px;
+    vertical-align: 1px;
+  }
+  .scope-note b { font-style: normal; color: var(--amber-deep); font-weight: 600; }
+
+  @media (max-width: 860px) {
+    .narr, .deploy { padding: 14px 16px 12px; }
+  }
+
+  /* caveat block */
+  .caveat {
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--gold);
+    background: var(--paper-2);
+    padding: 20px 24px 16px;
+    margin: 8px 0 0;
+  }
+  .caveat .cv-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+  .caveat ol {
+    list-style: none;
+    counter-reset: cv;
+    margin: 0;
+  }
+  .caveat ol li {
+    counter-increment: cv;
+    position: relative;
+    padding: 6px 0 6px 30px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    border-bottom: 1px dashed var(--rule-soft);
+  }
+  .caveat ol li:last-child { border-bottom: none; }
+  .caveat ol li::before {
+    content: counter(cv, decimal-leading-zero);
+    position: absolute;
+    left: 0; top: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gold);
+  }
+  .caveat ol li b { color: var(--ink); font-weight: 600; }
+  .caveat ol li .hot { color: var(--stop); font-weight: 600; }
+
+  /* cross-cutting appendix */
+  .appendix { background: rgba(0,0,0,0.015); }
+  .appendix-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+  .ax {
+    border: 1px solid var(--rule);
+    background: var(--paper-warm);
+    padding: 18px 18px 16px;
+  }
+  .ax .ax-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 6px;
+  }
+  .ax h3 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 18px;
+    color: var(--ink);
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+  .ax ul { list-style: none; }
+  .ax ul li {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    padding: 7px 0;
+    border-bottom: 1px dashed var(--rule-soft);
+  }
+  .ax ul li:last-child { border-bottom: none; }
+  .ax ul li b { color: var(--ink); font-weight: 600; }
+  .ax ul li .id {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--amber-deep); text-decoration: none; border-bottom: 1px solid var(--rule);
+  }
+  .ax ul li .id:hover { color: var(--amber); border-color: var(--amber); }
+  .ax .route {
+    font-size: 13px; line-height: 1.5; color: var(--ink-soft); margin: 8px 0 0;
+  }
+  .ax .route b { color: var(--ink); }
+  .ax .route .rarrow { color: var(--amber); font-family: var(--mono); }
+
+  /* 横切附录 D —— 全宽约束维度块 */
+  .ax-full {
+    grid-column: 1 / -1;
+    border: 1px solid var(--rule);
+    background: var(--paper-warm);
+    padding: 18px 20px 16px;
+    margin-top: 4px;
+  }
+  .ax-full .ax-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 6px; }
+  .ax-full h3 { font-family: var(--display); font-weight: 500; font-size: 18px; color: var(--ink); margin-bottom: 6px; line-height: 1.2; }
+  .ax-full > p.ax-note {
+    font-style: italic; font-size: 13px; line-height: 1.55; color: var(--ink-mute);
+    border-left: 3px solid var(--amber); background: var(--amber-soft);
+    padding: 8px 12px; margin: 0 0 12px;
+  }
+  .ax-full .ax-dim { padding: 9px 0; border-bottom: 1px dashed var(--rule-soft); font-size: 13.5px; line-height: 1.6; color: var(--ink-soft); }
+  .ax-full .ax-dim:last-child { border-bottom: none; }
+  .ax-full .ax-dim .dkey { font-family: var(--display); font-weight: 600; color: var(--ink); }
+  .ax-full .ax-dim .did { font-family: var(--mono); font-size: 11px; color: var(--amber-deep); text-decoration: none; border-bottom: 1px solid var(--rule); }
+  .ax-full .ax-dim .did:hover { color: var(--amber); border-color: var(--amber); }
+  .ax-full .ax-dim .hot { color: var(--stop); font-weight: 600; }
+  .ax-full .ax-dim .go { color: var(--go); font-weight: 600; }
+  .ax-full .ax-dim .warn-chip {
+    display: inline-block; font-family: var(--mono); font-size: 9px; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase; color: var(--stop);
+    border: 1px solid var(--stop); background: var(--stop-glow); border-radius: 3px; padding: 1px 5px; margin-left: 4px; vertical-align: 1px;
+  }
+  .ax-full .ax-merged {
+    margin-top: 8px; padding: 10px 12px; border: 1px dashed var(--rule); background: rgba(255,255,255,0.4);
+    font-size: 12.5px; line-height: 1.6; color: var(--ink-mute);
+  }
+  .ax-full .ax-merged b { color: var(--ink-soft); font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; }
+
+  /* key insights */
+  .insights {
+    background: var(--ink);
+    color: var(--paper-warm);
+    padding: 36px 36px 30px;
+    margin: 8px 0;
+  }
+  .insights .in-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 6px;
+  }
+  .insights h2 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(24px, 2.8vw, 32px);
+    color: var(--paper-warm);
+    margin-bottom: 24px;
+  }
+  .insights h2 em { font-style: italic; color: var(--amber); font-weight: 500; }
+  .insights ol {
+    list-style: none;
+    counter-reset: ins;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 28px;
+  }
+  .insights ol li {
+    counter-increment: ins;
+    position: relative;
+    padding-left: 42px;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--rule-soft);
+    border-top: 1px solid rgba(255,255,255,0.12);
+    padding-top: 14px;
+  }
+  .insights ol li::before {
+    content: counter(ins, decimal-leading-zero);
+    position: absolute;
+    left: 0; top: 14px;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--amber);
+  }
+  .insights ol li b { color: var(--paper-warm); font-weight: 600; }
+  .insights ol li .hot { color: var(--amber); font-weight: 600; }
+
+  /* footer */
+  footer.ftr {
+    padding: 40px 0 64px;
+    border-top: 1px solid var(--rule);
+    margin-top: 24px;
+  }
+  footer.ftr .fmeta {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    display: flex; flex-wrap: wrap; gap: 14px;
+    margin-bottom: 14px;
+  }
+  footer.ftr .fmeta span { display: inline-flex; align-items: center; gap: 6px; }
+  footer.ftr .fmeta .sep { color: var(--rule); }
+  footer.ftr .fline {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink-soft);
+    max-width: 60ch;
+  }
+
+  /* responsive */
+  @media (max-width: 860px) {
+    .shell { padding: 0 22px; }
+    .signal-rail { display: none; }
+    .hero-stats { grid-template-columns: repeat(2, 1fr); }
+    .hero-stats .stat { border-right: none; border-bottom: 1px dashed var(--rule-soft); }
+    .hero-stats .stat:nth-last-child(-n+2) { border-bottom: none; }
+    .board { grid-template-columns: repeat(2, 1fr); }
+    .appendix-grid { grid-template-columns: 1fr; }
+    .insights { padding: 28px 22px; }
+    .insights ol { grid-template-columns: 1fr; }
+    .paper { grid-template-columns: 1fr; gap: 6px; }
+    .gap { grid-template-columns: 1fr; }
+    .gap .glamp { border-right: none; border-bottom: 1px dashed var(--rule); padding-bottom: 12px; padding-right: 0; flex-direction: row; align-items: center; gap: 12px; }
+    .gap .glamp .light { width: 60px; height: 8px; }
+    .scene-head { flex-wrap: wrap; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+    html { scroll-behavior: auto; }
+  }
+
+  /* ============================================================
+     STRATEGY LAYER · 五看三定 (华为战略读法)
+     - 看自己 = 醒目留白占位块（虚线框 / 待填）
+     - 三定 = 6 级战略控制点阶梯 + 留白标注依赖看自己
+     ============================================================ */
+  #strategy {
+    background:
+      linear-gradient(180deg, rgba(194,65,12,0.02), transparent 240px),
+      var(--paper);
+  }
+  .strat-intro {
+    font-size: 16px;
+    line-height: 1.62;
+    color: var(--ink-soft);
+    max-width: 72ch;
+    margin-bottom: 26px;
+    padding: 16px 20px;
+    border-left: 3px solid var(--amber);
+    background: var(--amber-soft);
+  }
+  .strat-intro strong { color: var(--ink); font-weight: 600; }
+  .strat-intro .warn { color: var(--stop); font-weight: 600; }
+
+  /* 五看 grid */
+  .look-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .look {
+    position: relative;
+    background: var(--paper-warm);
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--amber);
+    padding: 18px 20px 16px;
+  }
+  .look .lk-num {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 4px;
+  }
+  .look .lk-title {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 19px;
+    color: var(--ink);
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+  .look .lk-title em { font-style: italic; color: var(--amber-deep); font-weight: 500; }
+  .look .lk-body {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+  .look .lk-body strong { color: var(--ink); font-weight: 600; }
+  .look .lk-body .hot { color: var(--stop); font-weight: 600; }
+  .look .lk-body .go { color: var(--go); font-weight: 600; }
+  .look .lk-body ul { list-style: none; margin-top: 6px; }
+  .look .lk-body ul li {
+    padding: 3px 0 3px 16px;
+    position: relative;
+    border-bottom: 1px dashed var(--rule-soft);
+  }
+  .look .lk-body ul li:last-child { border-bottom: none; }
+  .look .lk-body ul li::before {
+    content: "▸";
+    position: absolute; left: 0; top: 3px;
+    color: var(--amber);
+    font-family: var(--mono);
+    font-size: 10px;
+  }
+  .look .lk-body .intel {
+    display: block;
+    margin-top: 8px;
+    padding: 5px 9px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    color: var(--stop);
+    border: 1px solid var(--stop);
+    background: var(--stop-glow);
+    border-radius: 3px;
+  }
+  /* 机会四象限小标签 */
+  .opp { display: inline-block; font-family: var(--mono); font-size: 10px; font-weight: 700;
+    letter-spacing: 0.06em; padding: 2px 7px; border-radius: 3px; margin-right: 5px; vertical-align: 1px; }
+  .opp.big { background: var(--go); color: var(--paper-warm); }
+  .opp.hi  { background: var(--amber); color: var(--paper-warm); }
+  .opp.gap { background: var(--stop-glow); color: var(--stop); border: 1px solid var(--stop); }
+  .opp.red { background: rgba(124,118,102,0.18); color: var(--ink-soft); border: 1px solid var(--rule); }
+
+  /* —— 看自己：醒目留白占位块 —— */
+  .look.look-self {
+    grid-column: span 2;
+    border-top: 3px dashed var(--stop);
+    border: 2px dashed var(--stop);
+    border-top-width: 3px;
+    background:
+      repeating-linear-gradient(
+        135deg,
+        rgba(179,38,30,0.025) 0 14px,
+        transparent 14px 28px
+      ),
+      var(--paper-warm);
+    padding: 22px 24px 20px;
+  }
+  .look.look-self .lk-num { color: var(--stop); }
+  .look.look-self .lk-title { color: var(--stop); }
+  .placeholder-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--paper-warm);
+    background: var(--stop);
+    padding: 3px 9px;
+    margin-left: 8px;
+    vertical-align: 2px;
+    border-radius: 2px;
+  }
+  .placeholder-tag::before { content: "✎ "; }
+  .blank-fields {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .blank-field {
+    border: 1.5px dashed var(--rule);
+    background: rgba(255,255,255,0.5);
+    padding: 10px 12px;
+    min-height: 46px;
+    position: relative;
+  }
+  .blank-field .bf-label {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 4px;
+  }
+  .blank-field .bf-fill {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    color: var(--rule);
+  }
+  .blank-note {
+    margin-top: 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--stop);
+    line-height: 1.55;
+  }
+  .blank-note b { color: var(--stop); }
+
+  /* 三定阶梯 */
+  .ding-block {
+    margin-top: 10px;
+    margin-bottom: 18px;
+    border: 1px solid var(--rule);
+    background: var(--paper-warm);
+    overflow: hidden;
+  }
+  .ding-head {
+    display: flex; align-items: baseline; gap: 14px;
+    padding: 14px 20px 10px;
+    border-bottom: 1px solid var(--rule-soft);
+    background: var(--paper-2);
+  }
+  .ding-head .dh-tag {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .ding-head .dh-tag em { font-style: italic; color: var(--amber-deep); font-weight: 500; }
+  .ding-head .dh-sub {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+  }
+  .ding-body { padding: 16px 20px 18px; font-size: 14.5px; line-height: 1.6; color: var(--ink-soft); }
+  .ding-body strong { color: var(--ink); font-weight: 600; }
+  .ding-body .hot { color: var(--stop); font-weight: 600; }
+  .ding-body ul { list-style: none; margin-top: 6px; }
+  .ding-body ul li { padding: 4px 0 4px 16px; position: relative; border-bottom: 1px dashed var(--rule-soft); }
+  .ding-body ul li:last-child { border-bottom: none; }
+  .ding-body ul li::before { content: "▸"; position: absolute; left: 0; top: 4px; color: var(--amber); font-family: var(--mono); font-size: 10px; }
+
+  /* 6 级战略控制点阶梯 */
+  .ladder {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    margin: 14px 0 8px;
+    height: 150px;
+  }
+  .rung {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: stretch;
+    position: relative;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .rung .bar {
+    width: 100%;
+    border: 1px solid var(--rule);
+    border-bottom: none;
+    background: var(--paper-2);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 6px 4px 8px;
+    transition: transform .15s ease;
+  }
+  .rung:hover .bar { transform: translateY(-3px); }
+  .rung .lvl {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    line-height: 1.15;
+  }
+  .rung .num {
+    position: absolute;
+    top: -18px; left: 50%; transform: translateX(-50%);
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-mute);
+    background: var(--paper);
+    padding: 0 3px;
+  }
+  /* 阶梯高度递增 */
+  .rung:nth-child(1) .bar { height: 32px; }
+  .rung:nth-child(2) .bar { height: 50px; }
+  .rung:nth-child(3) .bar { height: 70px; }
+  .rung:nth-child(4) .bar { height: 92px; }
+  .rung:nth-child(5) .bar { height: 112px; }
+  .rung:nth-child(6) .bar { height: 134px; }
+  /* 高亮：标准级第3 + 生态级第6 */
+  .rung.r-standard .bar {
+    background: var(--go);
+    border-color: var(--go);
+  }
+  .rung.r-standard .lvl { color: var(--paper-warm); font-weight: 700; }
+  .rung.r-standard .num { color: var(--go); font-weight: 700; }
+  .rung.r-eco .bar {
+    background: var(--amber);
+    border-color: var(--amber);
+  }
+  .rung.r-eco .lvl { color: var(--paper-warm); font-weight: 700; }
+  .rung.r-eco .num { color: var(--amber-deep); font-weight: 700; }
+  .ladder-cap {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+    margin-top: 8px;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.04em;
+    color: var(--ink-mute);
+    text-align: center;
+    line-height: 1.3;
+  }
+  .ladder-cap .lc b { display: block; color: var(--ink); font-weight: 600; margin-bottom: 2px; }
+  .ladder-cap .lc.pick b { color: var(--go); }
+  .ladder-cap .lc.eco b { color: var(--amber-deep); }
+
+  /* 部分留白内联块 */
+  .partial-blank {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    color: var(--stop);
+    border: 1px dashed var(--stop);
+    background: rgba(179,38,30,0.05);
+    padding: 2px 8px;
+    border-radius: 2px;
+    vertical-align: 1px;
+  }
+  .partial-blank::before { content: "✎ "; }
+  .target-row {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--rule-soft);
+    align-items: baseline;
+  }
+  .target-row:last-child { border-bottom: none; }
+  .target-row .tr-key {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amber-deep);
+    font-weight: 600;
+  }
+  .target-row .tr-val { font-size: 14.5px; line-height: 1.6; color: var(--ink-soft); }
+  .target-row .tr-val strong { color: var(--ink); }
+  .target-row .tr-blank {
+    display: block;
+    margin-top: 6px;
+    border: 1.5px dashed var(--rule);
+    background: rgba(255,255,255,0.5);
+    padding: 8px 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    color: var(--rule);
+  }
+
+  @media (max-width: 860px) {
+    .look-grid { grid-template-columns: 1fr; }
+    .look.look-self { grid-column: span 1; }
+    .blank-fields { grid-template-columns: 1fr; }
+    .ladder-cap { font-size: 8.5px; }
+    .target-row { grid-template-columns: 1fr; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="signal-rail" aria-hidden="true">
+  <svg viewBox="0 0 44 220" fill="none">
+    <path d="M2 110 Q8 70 14 110 T26 110 T38 110" stroke="#c2410c" stroke-width="1.4" opacity="0.7"/>
+    <path d="M2 140 Q10 118 18 140 T34 140" stroke="#2f6f4f" stroke-width="1" opacity="0.5"/>
+    <path d="M2 80 Q12 100 22 80 T42 80" stroke="#7c7666" stroke-width="0.8" opacity="0.5"/>
+    <circle cx="22" cy="110" r="2" fill="#c2410c"/>
+  </svg>
+  <span class="rail-tag">CONSUMER · C1–C7 · SIMPLE EDITING</span>
+</div>
+
+<div class="shell">
+
+  <!-- ========================= HERO ========================= -->
+  <header class="hero">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      <span>消费级语音简单编创 · 场景驱动</span>
+      <span style="color:var(--ink-mute)">/</span>
+      <span>2024–2026</span>
+    </div>
+
+    <div class="framework-badge">
+      <span class="pill g"></span><span class="pill y"></span><span class="pill r"></span>
+      <span>消费级视角 · 7 场景红绿灯贯穿</span>
+    </div>
+
+    <h1>消费级语音<em>简单编创</em>·场景驱动报告<br/>2024–2026</h1>
+
+    <p class="deck">
+      从消费级用户需求出发，定义 <strong>7 个场景（C1–C7）</strong>，
+      每个场景追溯 2024–2026 学术 SOTA——回答"消费级想做 X，学术侧现在能做到什么程度"。
+      方法：以消费级视角对旧报告 S1–S10 素材 + 综述素材池重扫，
+      逐篇提取"解决了什么消费级问题"，自底向上聚类为 C1–C7；
+      再经一轮发散补扫 + arXiv API 核实，确认覆盖与空白。
+      数据 <strong>~80 篇去重论文 + 经典</strong>，arXiv ID 全部经 arXiv API 逐一核实，能力数字标作者自报。
+    </p>
+
+    <div class="hero-stats">
+      <div class="stat"><div class="v">~80<span class="unit">论文</span></div><div class="k">去重论文 + 经典</div></div>
+      <div class="stat"><div class="v">7<span class="unit">场景</span></div><div class="k">消费级自底向上聚类 · C1–C7</div></div>
+      <div class="stat"><div class="v">100<span class="unit">%</span></div><div class="k">arXiv ID 已核实</div></div>
+      <div class="stat"><div class="v">2<span class="unit">真空白</span></div><div class="k">C4 裁剪拼接 / C7 长内容编辑端</div></div>
+    </div>
+  </header>
+
+  <!-- ========================= SCENARIO BOARD ========================= -->
+  <section id="board">
+    <div class="pillar-head">
+      <h2>场景总览<em>看板</em></h2>
+      <div class="ph-sub"><span class="lchip"></span>7 场景红绿灯 · 全篇导航 · 点击直达详情</div>
+    </div>
+
+    <div class="board-intro">
+      <span>7 SCENES · MATURITY MATRIX</span>
+      <span class="legend">
+        <span class="lk"><span class="ldot go"></span>较成熟</span>
+        <span class="lk"><span class="ldot ca"></span>部分 / 有缺口</span>
+        <span class="lk"><span class="ldot st"></span>空白 / 领域真空白</span>
+      </span>
+      <span style="margin-left:auto"><a href="#strategy" style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--amber);text-decoration:none;border-bottom:1px solid var(--amber);padding-bottom:1px">→ 战略层·五看三定</a></span>
+    </div>
+
+    <div class="board">
+      <a class="scard m-ca" href="#c1">
+        <div class="sn">C1</div>
+        <div class="sname">擦除与对象分离</div>
+        <div class="suser">播客后期 · 语音备忘 · 隐私脱敏</div>
+        <div class="smeta">
+          <span class="count">~<b>24</b> 工作</span>
+          <span class="lamp"><span class="ld"></span>🟡 有原型但可靠度未闭合</span>
+        </div>
+      </a>
+      <a class="scard m-ca" href="#c2">
+        <div class="sn">C2</div>
+        <div class="sname">一键降噪·增强修复</div>
+        <div class="suser">播客野外 · 会议抢救 · 病理变清晰</div>
+        <div class="smeta">
+          <span class="count">~<b>13</b> 工作</span>
+          <span class="lamp"><span class="ld"></span>🟡 ≤1s 可 / >1s 弱</span>
+        </div>
+      </a>
+      <a class="scard m-go" href="#c3">
+        <div class="sn">C3</div>
+        <div class="sname">文字改录音·口误秒改</div>
+        <div class="suser">播客删口误 · 有声书校对 · 课件更新</div>
+        <div class="smeta">
+          <span class="count">~<b>21</b> 工作</span>
+          <span class="lamp"><span class="ld"></span>🟢 主干最密集</span>
+        </div>
+      </a>
+      <a class="scard m-st" href="#c4">
+        <div class="sn">C4</div>
+        <div class="sname">片段裁剪拼接重组</div>
+        <div class="suser">播客裁废话 · 有声书删整段 · 视频精简</div>
+        <div class="smeta">
+          <span class="count">~<b>4</b> 间接</span>
+          <span class="lamp"><span class="ld"></span>🔴 领域真空白</span>
+        </div>
+      </a>
+      <a class="scard m-go" href="#c5">
+        <div class="sn">C5</div>
+        <div class="sname">轻量补一句·换一声</div>
+        <div class="suser">播客补录 · 角色换声 · 匿名化</div>
+        <div class="smeta">
+          <span class="count">~<b>16</b> 工作</span>
+          <span class="lamp"><span class="ld"></span>🟢 零样本 VC 较成熟</span>
+        </div>
+      </a>
+      <a class="scard m-go" href="#c6">
+        <div class="sn">C6</div>
+        <div class="sname">口音归一·方言转标准</div>
+        <div class="suser">ESL 口音归一 · 方言转标准 · 纠专有名词</div>
+        <div class="smeta">
+          <span class="count">~<b>6</b> 工作</span>
+          <span class="lamp"><span class="ld"></span>🟢 2026 最密集</span>
+        </div>
+      </a>
+      <a class="scard m-st" href="#c7">
+        <div class="sn">C7</div>
+        <div class="sname">长内容局部修</div>
+        <div class="suser">有声书校对 · 长播客后期 · 课件更新</div>
+        <div class="smeta">
+          <span class="count">~<b>4</b> 间接</span>
+          <span class="lamp"><span class="ld"></span>🔴 编辑端真空白</span>
+        </div>
+      </a>
+    </div>
+  </section>
+  <!-- ========================= C1 ========================= -->
+  <section id="c1" class="scene m-ca">
+    <div class="scene-head">
+      <div class="scene-num"><span class="tag">SCENARIO</span><span class="big">C1</span></div>
+      <div class="scene-bar"></div>
+      <div class="scene-title">
+        <h2>擦除与<em>对象分离</em></h2>
+        <div class="meta">
+          <span>~24 工作</span>
+          <span class="m-lamp">● 🟡 有原型但可靠度未闭合</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pain">
+      <div class="plabel">场景痛点</div>
+      <div class="ptext">"去掉背景里那个人声""把音乐删了只留说话"——用户要的是<strong>一键指定、一键擦除</strong>，而不是手动调频谱或反复试参数。</div>
+      <div class="puser">用户：播客/视频后期 · 语音备忘/会议纪要整理 · 隐私脱敏</div>
+    </div>
+
+    <div class="narr narr-asks">
+      <div class="narr-head">场景痛点与用户诉求 · 细化</div>
+      <p class="narr-lead">"去掉背景里那个人声""把音乐删了只留说话""这段里有别人插嘴，帮我删掉"——用户要的是<strong>一键指定、一键擦除</strong>，而不是手动调频谱或反复试参数。典型用户与诉求：</p>
+      <ul class="asks">
+        <li><b>播客/视频后期</b>：录制时有人闯入说了半句话、背景有电视声/小孩哭声，要求"一句话说清要删什么，系统自动擦掉不留痕迹"；诉求是<strong>自然语言指定 + 擦除后无缝</strong>。</li>
+        <li><b>语音备忘/会议纪要整理</b>：录音里混进空调嗡声、键盘声、旁边人闲聊，要求"只保留主讲人，其余全清"；诉求是<strong>按描述分离 + 保留目标 + 擦除其余</strong>。</li>
+        <li><b>隐私脱敏</b>：发出去前要去掉录音里能识别"是谁说的"的部分，要求"声音身份变了但内容语气不变"；诉求是<strong>身份擦除保内容情感</strong>。</li>
+        <li><b>共性诉求</b>：①用自然语言指定擦除目标（不说时间戳/不说频率）②擦除后不损伤保留成分③保内容/情感/韵律不变④零样本（不需要提前训练"要删的那个声源"）。</li>
+      </ul>
+    </div>
+
+    <div class="narr narr-state">
+      <div class="narr-head">现状：学术 SOTA 与技术进展</div>
+      <p class="narr-lead">擦除与对象分离是消费级编创的<strong>旗舰场景</strong>，2024–2026 路线已从"先分离再手动删"演进到"一句话指令、端到端擦除保其余"：</p>
+      <p class="narr-lead"><strong>零样本音源分离成为消费级入口</strong>：Separate Anything You Describe 用自然语言描述驱动零样本音源分离——消费级"说要擦什么就分离什么"有了学术原型；Semantically Consistent Dataset 提供语义一致数据集赋能查询式通用音源分离，提升零样本分离泛化。</p>
+      <p class="narr-lead"><strong>指令式 free-form 擦除路线爆发</strong>：Ming-UniAudio-Edit 首个纯自然语言指令驱动 free-form 语音编辑 Speech LLM，可指令擦除特定声源；MMEDIT 统一五类编辑含 removal（擦除）；SAO-Instruct NeurIPS 2025 free-form 指令音频编辑含擦除操作；Guiding ALM 处理声明式编辑支持多声道擦除——"用自然语言说'去掉背景人声'即擦除"已成为 2026 主流范式。</p>
+      <p class="narr-lead"><strong>保无关成分：擦除不碰其余</strong>：AudEdit inversion-free 文本引导编辑保 edit-irrelevant 源成分（擦除不碰其余）；DirectAudioEdit inversion-free diffusion prediction contrast 保擦除无关部分；SeamlessEdit 频带感知噪声抑制 + in-content refinement——"只删该删的，不动不该动的"有了技术保障。</p>
+      <p class="narr-lead"><strong>免训练/低门槛路线</strong>：FreeSonic training-free 借 TangoFlux rectified-flow；Virtual Consistency model-agnostic 绕过 inversion 改扩散采样；RFM-Editing rectified flow matching 精确定位 + 忠实编辑——消费级产品不一定要训模型，推理时即可擦除。</p>
+      <p class="narr-lead"><strong>统一骨干涌现</strong>：UNISON 潜扩散统一 speech gen + sound gen + audio editing 含 speech-in-scene editing；Audio-Omni 统一 audio 理解 + 生成 + 编辑；Unified Joint Condition 联合条件建模统一 TTA 与 instruction-based editing——擦除不再是独立小模型，而是统一生成-编辑骨干的一个操作。</p>
+      <p class="narr-lead"><strong>身份擦除（匿名化侧）</strong>：Zero-VC 零前瞻流式 VC 去 timbre 不丢 prosody；DiffAnon 扩散 + CFG 给匿名化韵律保持控制；EASY 因子化蒸馏保情感的匿名化（擦除身份保情感）——身份擦除保内容情感已有原型。</p>
+      <p class="narr-lead"><strong>Agent 多步擦除</strong>：AudioChat LLM tool-calling agent 多步编辑，可规划"检测 → 分离 → 擦除 → 混回"——复杂擦除场景可自动拆步执行。</p>
+    </div>
+
+    <div class="sub-label">Paper → 问题映射</div>
+    <div class="papers">
+      <div class="paper">
+        <div class="pname">Separate Anything You Describe<span class="pid"><a href="https://arxiv.org/abs/2308.05037" target="_blank" rel="noopener">arXiv:2308.05037</a></span></div>
+        <div class="pdesc">语言描述驱动零样本音源分离，"说要擦什么就分离什么"。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Semantically Consistent Dataset<span class="pid"><a href="https://arxiv.org/abs/2601.22599" target="_blank" rel="noopener">arXiv:2601.22599</a></span></div>
+        <div class="pdesc">语义一致数据集赋能查询式通用音源分离，提升零样本分离泛化。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Ming-UniAudio-Edit<span class="pid"><a href="https://arxiv.org/abs/2511.05516" target="_blank" rel="noopener">arXiv:2511.05516</a></span></div>
+        <div class="pdesc">首个纯自然语言指令驱动 free-form 语音编辑 Speech LLM，可指令擦除特定声源。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">MMEDIT<span class="pid"><a href="https://arxiv.org/abs/2512.20339" target="_blank" rel="noopener">arXiv:2512.20339</a></span></div>
+        <div class="pdesc">Qwen2-Audio + MMDiT 统一五类编辑含 removal（擦除）。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">AudioChat<span class="pid"><a href="https://arxiv.org/abs/2602.17097" target="_blank" rel="noopener">arXiv:2602.17097</a></span></div>
+        <div class="pdesc">LLM tool-calling agent 多步编辑，可规划"检测 → 分离 → 擦除 → 混回"。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">SAO-Instruct<span class="pid"><a href="https://arxiv.org/abs/2510.22795" target="_blank" rel="noopener">arXiv:2510.22795</a></span></div>
+        <div class="pdesc">NeurIPS 2025 free-form 自然语言指令音频编辑，含擦除操作。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Guiding ALM<span class="pid"><a href="https://arxiv.org/abs/2509.21625" target="_blank" rel="noopener">arXiv:2509.21625</a></span></div>
+        <div class="pdesc">audio language model 处理声明式编辑，支持多声道擦除。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">AudEdit<span class="pid"><a href="https://arxiv.org/abs/2606.15149" target="_blank" rel="noopener">arXiv:2606.15149</a></span></div>
+        <div class="pdesc">inversion-free 文本引导编辑保 edit-irrelevant 源成分（擦除不碰其余）。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">DirectAudioEdit<span class="pid"><a href="https://arxiv.org/abs/2606.07356" target="_blank" rel="noopener">arXiv:2606.07356</a></span></div>
+        <div class="pdesc">inversion-free diffusion prediction contrast 保擦除无关部分。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">FreeSonic<span class="pid"><a href="https://arxiv.org/abs/2606.15186" target="_blank" rel="noopener">arXiv:2606.15186</a></span></div>
+        <div class="pdesc">training-free 借 TangoFlux rectified-flow，时间感知解耦注意力。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Virtual Consistency<span class="pid"><a href="https://arxiv.org/abs/2509.17219" target="_blank" rel="noopener">arXiv:2509.17219</a></span></div>
+        <div class="pdesc">model-agnostic 绕过 inversion 改扩散采样做 free-form 文本编辑。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">RFM-Editing<span class="pid"><a href="https://arxiv.org/abs/2509.14003" target="_blank" rel="noopener">arXiv:2509.14003</a></span></div>
+        <div class="pdesc">rectified flow matching 做文本引导 audio editing，精确定位 + 忠实编辑。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">SeamlessEdit<span class="pid"><a href="https://arxiv.org/abs/2505.14066" target="_blank" rel="noopener">arXiv:2505.14066</a></span></div>
+        <div class="pdesc">频带感知噪声抑制 + in-content refinement，擦除噪声保语音。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Audio ControlNet<span class="pid"><a href="https://arxiv.org/abs/2602.04680" target="_blank" rel="noopener">arXiv:2602.04680</a></span></div>
+        <div class="pdesc">细粒度（响度/音高/事件）可控生成与编辑，可擦除特定事件。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">UNISON<span class="pid"><a href="https://arxiv.org/abs/2605.31530" target="_blank" rel="noopener">arXiv:2605.31530</a></span></div>
+        <div class="pdesc">潜扩散统一 speech gen + sound gen + audio editing（含 speech-in-scene editing）。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Audio-Omni<span class="pid"><a href="https://arxiv.org/abs/2604.10708" target="_blank" rel="noopener">arXiv:2604.10708</a></span></div>
+        <div class="pdesc">统一 audio 理解 + 生成 + 编辑多模态框架。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Unified Audio Gen+Editing (Joint Condition)<span class="pid"><a href="https://arxiv.org/abs/2606.16435" target="_blank" rel="noopener">arXiv:2606.16435</a></span></div>
+        <div class="pdesc">联合条件建模 + 渐进训练统一 TTA 与 instruction-based editing。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">SemanticAudio<span class="pid"><a href="https://arxiv.org/abs/2601.21402" target="_blank" rel="noopener">arXiv:2601.21402</a></span></div>
+        <div class="pdesc">在语义空间做 audio 生成与编辑。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Hybrid Diffusion Transformer<span class="pid"><a href="https://arxiv.org/abs/2606.20101" target="_blank" rel="noopener">arXiv:2606.20101</a></span></div>
+        <div class="pdesc">DiT 骨干做 instruction-guided audio editing via rectified flow。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">QuarkAudio<span class="pid"><a href="https://arxiv.org/abs/2512.20151" target="_blank" rel="noopener">arXiv:2512.20151</a></span></div>
+        <div class="pdesc">统一离散 tokenizer H-Codec 下游支持自然语言指令引导 free-form 音频编辑。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Diffusion Timbre Transfer<span class="pid"><a href="https://arxiv.org/abs/2601.01294" target="_blank" rel="noopener">arXiv:2601.01294</a></span></div>
+        <div class="pdesc">免训练推理时音色迁移（擦除原音色换新）。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Zero-VC<span class="pid"><a href="https://arxiv.org/abs/2606.20218" target="_blank" rel="noopener">arXiv:2606.20218</a></span></div>
+        <div class="pdesc">零前瞻流式 VC 去 timbre 不丢 prosody（身份擦除）。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">DiffAnon<span class="pid"><a href="https://arxiv.org/abs/2604.26281" target="_blank" rel="noopener">arXiv:2604.26281</a></span></div>
+        <div class="pdesc">扩散 + CFG 给匿名化韵律保持控制。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">EASY<span class="pid"><a href="https://arxiv.org/abs/2505.15004" target="_blank" rel="noopener">arXiv:2505.15004</a></span></div>
+        <div class="pdesc">因子化蒸馏保情感的匿名化（擦除身份保情感）。</div>
+      </div>
+    </div>
+
+    <div class="sub-label">场景技术点</div>
+    <div class="tech">
+      <span class="b">语言驱动零样本音源分离</span>
+      <span class="b">指令式 free-form 擦除</span>
+      <span class="b">inversion-free 保无关成分</span>
+      <span class="b">training-free rectified-flow</span>
+      <span class="b">统一生成-编辑骨干</span>
+      <span class="b">content/speaker/prosody 解耦匿名化</span>
+      <span class="b">Agent 多步规划</span>
+    </div>
+
+    <div class="sub-label">成熟度与缺口</div>
+    <div class="gap">
+      <div class="glamp">
+        <div class="light"></div>
+        <div class="ltag">🟡 部分</div>
+      </div>
+      <div class="gtext">
+        <strong>擦除操作本身已有多种学术原型</strong>（指令式 / 免训练 / 分离驱动），但<strong>消费级一键可靠擦除仍有明确缺口</strong>：①零样本音源分离在"语音与噪声频带高度重叠"场景下仍不稳定②指令式擦除的可靠性尚未验证——MMAE 评测显示 instruction-based 编辑 EMR&lt;5%，擦除作为其中一种操作类同样受此限制③<strong>擦除后填补</strong>（inpainting 擦除区域）在 &gt;1s 缺口处仍不稳④身份擦除（匿名化）已较成熟但保情感仍是附带短板。
+        <span class="bench"><b>区分</b>：领域真空白——消费级"描述即擦除"的端到端零样本系统尚无专门评测；评测显示未就绪——MMAE 证明 instruction-based 编辑整体可靠率极低。</span>
+      </div>
+    </div>
+  </section>
+  <!-- ========================= C2 ========================= -->
+  <section id="c2" class="scene m-ca">
+    <div class="scene-head">
+      <div class="scene-num"><span class="tag">SCENARIO</span><span class="big">C2</span></div>
+      <div class="scene-bar"></div>
+      <div class="scene-title">
+        <h2>一键降噪·<em>增强修复</em></h2>
+        <div class="meta">
+          <span>~13 工作</span>
+          <span class="m-lamp">● 🟡 ≤1s 可 / >1s 弱</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pain">
+      <div class="plabel">场景痛点</div>
+      <div class="ptext">"录音里有风声/嗡声/回声，帮我一键变干净""这段丢了半秒听不清楚，补回来"——用户要的是<strong>一键操作、可靠变好</strong>，不想学频谱修复也不想反复试参数。</div>
+      <div class="puser">用户：播客/vlogger 野外录音 · 会议/采访录音抢救 · 病理/受损语音变清晰</div>
+    </div>
+
+    <div class="narr narr-asks">
+      <div class="narr-head">场景痛点与用户诉求 · 细化</div>
+      <p class="narr-lead">"录音里有风声/嗡声/回声，帮我一键变干净""这段丢了半秒听不清楚，补回来""这个声音像含着棉花说的，变清晰"——用户要的是<strong>一键操作、可靠变好</strong>，不想学频谱修复也不想反复试参数。典型用户与诉求：</p>
+      <ul class="asks">
+        <li><b>播客/vlogger 野外录音</b>：户外录制有风噪、空调嗡声、桌面震动声，要求"一键去掉所有杂音，说话声不动"；诉求是<strong>一键去噪保语音</strong>。</li>
+        <li><b>会议/采访录音抢救</b>：丢包、clipping、远处人声干扰，要求"缺的地方补回来、嗡声去掉、人声变清晰"；诉求是<strong>修复 + 增强一体</strong>。</li>
+        <li><b>病理/受损语音变清晰</b>：家人说话含糊不清（构音障碍/帕金森/电子喉），要求"还是他的声音但变清楚能听懂"；诉求是<strong>保身份 + 恢复清晰</strong>。</li>
+        <li><b>共性诉求</b>：①一键可靠（不反复试参数）②保说话人身份③保韵律/情感④从短缺口到长缺口⑤适配未见声学条件（不需要针对每段录音训模型）。</li>
+      </ul>
+    </div>
+
+    <div class="narr narr-state">
+      <div class="narr-head">现状：学术 SOTA 与技术进展</div>
+      <p class="narr-lead">一键降噪/增强修复是语音编创中<strong>历史最久</strong>的子领域（信号处理时代已有产品），但 2024–2026 neural inpainting 与病理重建带来新能力边界：</p>
+      <p class="narr-lead"><strong>扩散/流匹配 inpainting 修复缺口</strong>：PGDI 用扩散 inpainting + 音素级 classifier guidance 重建 ≤1s 缺口，保说话人/韵律/混响——消费级"缺半秒补回来"有了可用原型；Token-Based Audio Inpainting 用离散扩散对 tokenized 音频做 inpainting，稳定修复长缺口——尝试突破 &gt;1s 边界但仍不稳；Audio Inpainting TF + Phase-Aware 引入相位感知先验做时频域 inpainting——相位恢复是修复质量的隐藏瓶颈。</p>
+      <p class="narr-lead"><strong>病理语音重建恢复清晰</strong>：UNIT-DSR 把构音障碍语音用 speech-unit normalization 变清晰保身份；DiffDSR 潜扩散 DSR 用 SSL content + speaker encoder；CFM-DSR 条件流匹配 DiT + WavLM 非自回归——从构音障碍到痴呆语音（ClaritySpeech 用 ASR + 文本混淆 + 零样本 TTS 矫正保身份），再到儿童语音障碍（ChiReSSD 生成式重建保身份去错音），<strong>保身份 + 变清晰</strong>这条线已有多个原型。</p>
+      <p class="narr-lead"><strong>局部修复新思路</strong>：AP-GRPO 锚词保留 + 锚间损坏段重建——只修坏的地方，好的不动，消费级"只修这一段"有了对应学术思路；EL-Speech-Enhancement 把电子喉语音转为自然语音——极端受损变清晰有了端到端方案。</p>
+      <p class="narr-lead"><strong>适配未见条件</strong>：Test-Time Training Speech Editing in the Wild 测试时训练适配未见声学条件——消费级"每段录音条件不同"有了泛化思路；PhASE-Flow 语音增强流匹配——增强路线的技术补充。</p>
+      <p class="narr-lead"><strong>Voice banking</strong>：Personalized-TTS-Dysarthric 少量劣化样本个性化 TTS voice banking——"先存本人音色，日后变清晰合成"有了消费级入口。</p>
+    </div>
+
+    <div class="sub-label">Paper → 问题映射</div>
+    <div class="papers">
+      <div class="paper">
+        <div class="pname">PGDI<span class="pid"><a href="https://arxiv.org/abs/2508.08890" target="_blank" rel="noopener">arXiv:2508.08890</a></span></div>
+        <div class="pdesc">扩散 inpainting 重建 ≤1s 缺口，保说话人/韵律/混响，音素级 classifier guidance。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Token-Based Audio Inpainting<span class="pid"><a href="https://arxiv.org/abs/2507.08333" target="_blank" rel="noopener">arXiv:2507.08333</a></span></div>
+        <div class="pdesc">离散扩散对 tokenized 音频做 inpainting，稳定修复长缺口。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Audio Inpainting (TF + Phase-Aware)<span class="pid"><a href="https://arxiv.org/abs/2601.18535" target="_blank" rel="noopener">arXiv:2601.18535</a></span></div>
+        <div class="pdesc">时频域 inpainting，相位感知先验。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">UNIT-DSR<span class="pid"><a href="https://arxiv.org/abs/2401.14664" target="_blank" rel="noopener">arXiv:2401.14664</a></span></div>
+        <div class="pdesc">构音障碍 → 正常 speech-unit normalization，保身份变清晰。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">DiffDSR<span class="pid"><a href="https://arxiv.org/abs/2506.00350" target="_blank" rel="noopener">arXiv:2506.00350</a></span></div>
+        <div class="pdesc">潜扩散 DSR，SSL content + speaker encoder。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">CFM-DSR<span class="pid"><a href="https://arxiv.org/abs/2506.16127" target="_blank" rel="noopener">arXiv:2506.16127</a></span></div>
+        <div class="pdesc">条件流匹配 DiT + WavLM 非自回归。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">ClaritySpeech<span class="pid"><a href="https://arxiv.org/abs/2507.09282" target="_blank" rel="noopener">arXiv:2507.09282</a></span></div>
+        <div class="pdesc">ASR + 文本混淆 + 零样本 TTS 矫正痴呆语音保身份。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">ChiReSSD<span class="pid"><a href="https://arxiv.org/abs/2509.19231" target="_blank" rel="noopener">arXiv:2509.19231</a></span></div>
+        <div class="pdesc">儿童语音障碍生成式重建保身份去错音。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">AP-GRPO<span class="pid"><a href="https://arxiv.org/abs/2606.15540" target="_blank" rel="noopener">arXiv:2606.15540</a></span></div>
+        <div class="pdesc">锚词保留 + 锚间损坏段重建（局部修复）。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">EL-Speech-Enhancement<span class="pid"><a href="https://arxiv.org/abs/2606.01905" target="_blank" rel="noopener">arXiv:2606.01905</a></span></div>
+        <div class="pdesc">电子喉 → 自然语音，speech-text 表示学习。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Personalized-TTS-Dysarthric<span class="pid"><a href="https://arxiv.org/abs/2508.10412" target="_blank" rel="noopener">arXiv:2508.10412</a></span></div>
+        <div class="pdesc">少量劣化样本个性化 TTS voice banking。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Test-Time Training Speech Editing in the Wild<span class="pid"><a href="https://arxiv.org/abs/2506.13295" target="_blank" rel="noopener">arXiv:2506.13295</a></span></div>
+        <div class="pdesc">测试时训练适配未见声学条件。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">PhASE-Flow<span class="pid"><a href="https://arxiv.org/abs/2606.17806" target="_blank" rel="noopener">arXiv:2606.17806</a></span></div>
+        <div class="pdesc">语音增强（流匹配，非编辑但修复能力相关）。</div>
+      </div>
+    </div>
+
+    <div class="sub-label">场景技术点</div>
+    <div class="tech">
+      <span class="b">diffusion inpainting</span>
+      <span class="b">音素级 classifier guidance</span>
+      <span class="b">离散扩散长缺口修复</span>
+      <span class="b">相位感知时频重建</span>
+      <span class="b">speech-unit normalization</span>
+      <span class="b">锚词保留局部修复</span>
+      <span class="b">测试时训练泛化</span>
+      <span class="b">voice banking</span>
+    </div>
+
+    <div class="sub-label">成熟度与缺口</div>
+    <div class="gap">
+      <div class="glamp">
+        <div class="light"></div>
+        <div class="ltag">🟡 部分</div>
+      </div>
+      <div class="gtext">
+        <strong>≤1s 修复较成熟</strong>（PGDI），病理语音变清晰保身份有多个原型（UNIT-DSR/DiffDSR/ClaritySpeech）。缺口：①<strong>&gt;1s 间隔重建</strong>仍不稳定②<strong>端到端一键降噪系统化研究缺失</strong>——各能力散落（去噪归增强、补缺归 inpainting、变清晰归 DSR），消费级需要"一键全修"的集成方案但学术侧无此专门工作③非瞬态连续噪声弱。
+        <span class="bench"><b>区分</b>：评测显示未就绪——&gt;1s inpainting 与连续噪声去除在现有评测中仍不稳；领域真空白——"一键集成降噪+修复+增强"的端到端消费级方案尚无专门论文。</span>
+      </div>
+    </div>
+  </section>
+  <!-- ========================= C3 ========================= -->
+  <section id="c3" class="scene m-go">
+    <div class="scene-head">
+      <div class="scene-num"><span class="tag">SCENARIO</span><span class="big">C3</span></div>
+      <div class="scene-bar"></div>
+      <div class="scene-title">
+        <h2>文字改录音·<em>口误秒改</em></h2>
+        <div class="meta">
+          <span>~21 工作</span>
+          <span class="m-lamp">● 🟢 主干最密集 · 相对成熟</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pain">
+      <div class="plabel">场景痛点</div>
+      <div class="ptext">"改转写字等于改录音""删掉那个口误""补半句不影响前后语气"——用户要的是<strong>改文字 = 改声音</strong>，听不出改过。</div>
+      <div class="puser">用户：播客后期删口误 · 有声书校对改错字 · 教育课件更新术语</div>
+    </div>
+
+    <div class="narr narr-asks">
+      <div class="narr-head">场景痛点与用户诉求 · 细化</div>
+      <p class="narr-lead">"改转写字等于改录音""删掉那个口误""补半句不影响前后语气"——用户要的是<strong>改文字 = 改声音</strong>，听不出改过。典型用户与诉求：</p>
+      <ul class="asks">
+        <li><b>播客后期删口误</b>：说了个"嗯/啊/就是"想删掉，或者把"明天周二"改成"明天周三"，要求"像没改过一样"；诉求是<strong>不可感知 + 保语气</strong>。</li>
+        <li><b>有声书校对改错字</b>：录了几小时发现读错一个专有名词，要求"只改那一处、前后几小时不动"；诉求是<strong>局部手术 + 长内容不漂移</strong>。</li>
+        <li><b>教育课件更新术语</b>：课件改了术语，录音也要跟着改，要求"改这个词但讲课语气不变"；诉求是<strong>改内容保情感</strong>。</li>
+        <li><b>共性诉求</b>：①改文字 = 改声音（操作在转写层面）②不可感知（听不出剪辑点）③保说话人/情感/韵律④真实野外录音（含背景噪）⑤支持删/插/替三种操作。</li>
+      </ul>
+    </div>
+
+    <div class="narr narr-state">
+      <div class="narr-head">现状：学术 SOTA 与技术进展</div>
+      <p class="narr-lead">文字改录音是消费级编创中<strong>主干最密集</strong>的赛道，2024–2026 "编辑即 codec token 填空"范式已成熟收敛：</p>
+      <p class="narr-lead"><strong>范式收敛：编辑即填空</strong>：VoiceCraft token infilling 做真实野外编辑（播客/有声书），引入 RealEdit 基准——消费级"改转写字等于改录音"有了学术范式锚点；CosyEdit/CosyEdit2 从 CosyVoice TTS 骨干经 250h GigaEdit 微调迁移到编辑，CosyEdit2 加 editing-oriented RL——<strong>编辑与 TTS 同构、可复用 TTS 骨干</strong>已成主流范式。</p>
+      <p class="narr-lead"><strong>不可感知性专门优化</strong>：Edit-Content-Preserve-Acoustics Self-Consistency Rewards GRPO + Flow Matching <strong>显式追求"听不出"</strong>——消费级"像没改过"有了技术目标；FluentEditor2 多尺度声学/韵律一致性（帧/音素/词边界）——边界平滑有了工程级方案。</p>
+      <p class="narr-lead"><strong>稳定性与免训练路线</strong>：SSR-Speech CFG 稳定化零样本编辑自报 RealEdit SOTA；AST 免训练潜空间重组合 + AWFG 引导自报 ~70% WER↓——消费级产品不一定要训编辑模型，推理时即可改；DiffEditor 语义增强改善 OOD 自由文本编辑可懂度。</p>
+      <p class="narr-lead"><strong>codec LM 选择性覆写</strong>：SpeechEdit codec LM 默认复刻 + 按指令选择性 override 单属性——"默认不改、只改指定的"消费级思路有了对应实现。</p>
+      <p class="narr-lead"><strong>掩码扩散 TTS→编辑迁移</strong>：LLaDA-TTS 掩码扩散 50h 微调迁移——<strong>编辑成为合成的零成本副产物</strong>；MaskGCT 全非自回归掩码 codec transformer TTS，编辑路线母体；MiMo-Audio-7B-Base 7B 音频 LM，语音编辑作为缩放涌现能力——大模型涌现编辑能力是新方向。</p>
+      <p class="narr-lead"><strong>情感保真连带短板</strong>：文字改动后情感偏移是 C3 的核心难点——EmoCorrector RAG 后修正"改完后情感不对"的问题；Counterfactual Activation Editing 推理期韵律控制；Causal Prosody Mediation 结构因果模型解耦情绪韵律与内容——<strong>改内容保情感</strong>有了技术入口但仍早期。</p>
+    </div>
+
+    <div class="sub-label">Paper → 问题映射</div>
+    <div class="papers">
+      <div class="paper">
+        <div class="pname">VoiceCraft<span class="pid"><a href="https://arxiv.org/abs/2403.16973" target="_blank" rel="noopener">arXiv:2403.16973</a></span></div>
+        <div class="pdesc">token infilling 做真实野外编辑（播客/有声书），引入 RealEdit 基准。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">EditSpeech<span class="pid"><a href="https://arxiv.org/abs/2107.01554" target="_blank" rel="noopener">arXiv:2107.01554</a></span></div>
+        <div class="pdesc">文本驱动编辑鼻祖，部分推理 + 双向融合。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">A3T<span class="pid"><a href="https://arxiv.org/abs/2203.09690" target="_blank" rel="noopener">arXiv:2203.09690</a></span></div>
+        <div class="pdesc">对齐感知预训练，TTS + 编辑统一。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">FluentEditor2<span class="pid"><a href="https://arxiv.org/abs/2410.03719" target="_blank" rel="noopener">arXiv:2410.03719</a></span></div>
+        <div class="pdesc">多尺度声学/韵律一致性（帧/音素/词边界）。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">CosyEdit / CosyEdit2<span class="pid"><a href="https://arxiv.org/abs/2601.05329" target="_blank" rel="noopener">arXiv:2601.05329</a> · <a href="https://arxiv.org/abs/2605.25930" target="_blank" rel="noopener">2605.25930</a></span></div>
+        <div class="pdesc">从 CosyVoice TTS 骨干经 250h GigaEdit 微调迁移到编辑；CosyEdit2 加 editing-oriented RL。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">SSR-Speech<span class="pid"><a href="https://arxiv.org/abs/2409.07556" target="_blank" rel="noopener">arXiv:2409.07556</a></span></div>
+        <div class="pdesc">CFG 稳定化零样本编辑，自报 RealEdit SOTA。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">AST<span class="pid"><a href="https://arxiv.org/abs/2604.16056" target="_blank" rel="noopener">arXiv:2604.16056</a></span></div>
+        <div class="pdesc">免训练精确编辑（潜空间重组合 + AWFG 引导），自报 ~70% WER↓。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">DiffEditor<span class="pid"><a href="https://arxiv.org/abs/2409.12992" target="_blank" rel="noopener">arXiv:2409.12992</a></span></div>
+        <div class="pdesc">语义增强改善 OOD 自由文本编辑可懂度。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Edit-Content-Preserve-Acoustics<span class="pid"><a href="https://arxiv.org/abs/2602.00560" target="_blank" rel="noopener">arXiv:2602.00560</a></span></div>
+        <div class="pdesc">追求不可感知文本编辑（Self-Consistency Rewards GRPO + Flow Matching）。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">SpeechEdit<span class="pid"><a href="https://arxiv.org/abs/2601.12480" target="_blank" rel="noopener">arXiv:2601.12480</a></span></div>
+        <div class="pdesc">codec LM 默认复刻 + 按指令选择性 override 单属性。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">LEMAS-Edit<span class="pid"><a href="https://arxiv.org/abs/2601.04233" target="_blank" rel="noopener">arXiv:2601.04233</a></span></div>
+        <div class="pdesc">masked token infilling，150h 多语种。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">MAVE<span class="pid"><a href="https://arxiv.org/abs/2510.04738" target="_blank" rel="noopener">arXiv:2510.04738</a></span></div>
+        <div class="pdesc">基于 cross-attentive Mamba (SSM) 的 AR 语音编辑。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">LLaDA-TTS<span class="pid"><a href="https://arxiv.org/abs/2603.26364" target="_blank" rel="noopener">arXiv:2603.26364</a></span></div>
+        <div class="pdesc">掩码扩散 50h 微调迁移，编辑成为合成零成本副产物。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">MaskGCT<span class="pid"><a href="https://arxiv.org/abs/2409.00750" target="_blank" rel="noopener">arXiv:2409.00750</a></span></div>
+        <div class="pdesc">全非自回归掩码 codec transformer TTS，编辑路线母体。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">MiMo-Audio-7B-Base<span class="pid"><a href="https://arxiv.org/abs/2512.23808" target="_blank" rel="noopener">arXiv:2512.23808</a></span></div>
+        <div class="pdesc">7B 音频 LM，语音编辑作为缩放涌现能力。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">DiSTAR<span class="pid"><a href="https://arxiv.org/abs/2510.12210" target="_blank" rel="noopener">arXiv:2510.12210</a></span></div>
+        <div class="pdesc">AR 草拟 + 掩码扩散填充混合。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">UAT<span class="pid"><a href="https://arxiv.org/abs/2606.04939" target="_blank" rel="noopener">arXiv:2606.04939</a></span></div>
+        <div class="pdesc">扩散中心框架统一音频生成/编辑/captioning。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Metis<span class="pid"><a href="https://arxiv.org/abs/2502.03128" target="_blank" rel="noopener">arXiv:2502.03128</a></span></div>
+        <div class="pdesc">掩码生成骨干，VC 作为生成能力。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">EmoCorrector<span class="pid"><a href="https://arxiv.org/abs/2505.20341" target="_blank" rel="noopener">arXiv:2505.20341</a></span></div>
+        <div class="pdesc">RAG 后修正——文字改完后情感偏移纠正。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Counterfactual Activation Editing<span class="pid"><a href="https://arxiv.org/abs/2506.00832" target="_blank" rel="noopener">arXiv:2506.00832</a></span></div>
+        <div class="pdesc">模型无关反事实激活编辑推理期韵律控制。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Causal Prosody Mediation<span class="pid"><a href="https://arxiv.org/abs/2603.11683" target="_blank" rel="noopener">arXiv:2603.11683</a></span></div>
+        <div class="pdesc">结构因果模型解耦情绪韵律与内容。</div>
+      </div>
+    </div>
+
+    <div class="sub-label">场景技术点</div>
+    <div class="tech">
+      <span class="b">token infilling (codec-LM 填空)</span>
+      <span class="b">边界声学平滑（多尺度一致性）</span>
+      <span class="b">不可感知性（保声学）</span>
+      <span class="b">CFG 稳定</span>
+      <span class="b">免训练引导 (AWFG)</span>
+      <span class="b">codec LM 选择性覆写</span>
+      <span class="b">掩码扩散 TTS→编辑迁移</span>
+      <span class="b">RL 稳定化</span>
+      <span class="b">情感后修正</span>
+      <span class="b">因果韵律解耦</span>
+    </div>
+
+    <div class="sub-label">成熟度与缺口</div>
+    <div class="gap">
+      <div class="glamp">
+        <div class="light"></div>
+        <div class="ltag">🟢 较成熟</div>
+      </div>
+      <div class="gtext">
+        <strong>主干最密集，相对成熟。</strong>token infilling 范式已收敛，VoiceCraft/CosyEdit/SSR-Speech 在 RealEdit 上已可演示消费级口误修改。缺口：①<strong>&gt;1s 跨句编辑</strong>一致性下降②<strong>文字改动后情感保持</strong>仍是连带短板③噪声环境下④SpeechEditBench 结论"无模型全能"——<strong>组合式多属性编辑仍难</strong>。
+        <span class="bench"><b>区分</b>：评测显示未就绪——组合式编辑在 SpeechEditBench 上无模型可兼顾所有属性；领域非空白但边界未闭合——跨句/情感保持是渐进可解的工程问题而非范式空缺。</span>
+      </div>
+    </div>
+  </section>
+  <!-- ========================= C4 ========================= -->
+  <section id="c4" class="scene m-st">
+    <div class="scene-head">
+      <div class="scene-num"><span class="tag">SCENARIO</span><span class="big">C4</span></div>
+      <div class="scene-bar"></div>
+      <div class="scene-title">
+        <h2>片段裁剪拼接<em>重组</em></h2>
+        <div class="meta">
+          <span>~4 间接工作</span>
+          <span class="m-lamp">● 🔴 领域真空白</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pain">
+      <div class="plabel">场景痛点</div>
+      <div class="ptext">"裁掉这段废话""把这两段拼接起来""把第三段移到开头"——用户要的是<strong>改结构不改内容</strong>（与 C3 改内容区分：C4 改的是"哪段在哪、多长、顺序如何"）。</div>
+      <div class="puser">用户：播客/采访后期 · 有声书校对 · 教学视频精简</div>
+    </div>
+
+    <div class="narr narr-asks">
+      <div class="narr-head">场景痛点与用户诉求 · 细化</div>
+      <p class="narr-lead">"裁掉这段废话""把这两段拼接起来""把第三段移到开头""这段太长缩短一点"——用户要的是<strong>改结构不改内容</strong>（与 C3 改内容区分：C4 改的是"哪段在哪、多长、顺序如何"）。典型用户与诉求：</p>
+      <ul class="asks">
+        <li><b>播客/采访后期</b>：录了两小时，要删掉中间闲聊那段、把精彩部分提前、拼接两段采访，要求"裁完拼完听着自然连贯"；诉求是<strong>裁剪 + 拼接 + 重排 + 自然衔接</strong>。</li>
+        <li><b>有声书校对</b>：录完发现某段整段该删/该移到别处，要求"删整段/移整段但前后衔接不突兀"；诉求是<strong>片段级结构编辑 + 缝合无痕</strong>。</li>
+        <li><b>教学视频精简</b>：录完 40 分钟要缩成 20 分钟，要求"裁掉冗余段、拼接精简版但节奏连贯"；诉求是<strong>自动裁冗 + 智能拼接</strong>。</li>
+        <li><b>共性诉求</b>：①裁/拼/移/缩四种结构操作②拼接点无缝衔接（不突兀）③重组后全局节奏/韵律连贯④不改内容只改结构⑤与 C3 互补（C3 改文字内容，C4 改段落结构）。</li>
+      </ul>
+    </div>
+
+    <div class="narr narr-state">
+      <div class="narr-head">现状：学术 SOTA 与技术进展</div>
+      <p class="narr-lead"><strong>C4 是消费级刚需但学术覆盖极薄的领域真空白</strong>——2024–2026 几乎无专门"裁剪拼接重组"的语音编辑论文：</p>
+      <p class="narr-lead"><strong>arXiv 补扫确认真空白</strong>：搜索 "audio splicing editing" "nonlinear audio editing" "music structure editing" 均未命中专门的裁剪拼接重组论文。AudioShop/AudioEraser 等名称经 arXiv API 搜索未找到对应条目。</p>
+      <p class="narr-lead"><strong>唯一间接覆盖来自指令式 Agent</strong>：MMEDIT 统一五类编辑含 reordering（重组顺序）——但 reordering 只是 MMEDIT 的一个操作类，不是专门的裁剪拼接研究；Ming-UniAudio-Edit free-form 指令编辑含裁剪拼接重组——同样是 Agent 编辑的一个子操作，非专门系统。</p>
+      <p class="narr-lead"><strong>选择性掩码间接覆盖</strong>：LLaDA-TTS 后验选择性掩码做零样本词级插入/删除/替换——可扩展到片段裁剪概念但仍是词级而非段级；AudioChat LLM agent 多步编辑含裁剪拼接重组规划——Agent 可规划"裁 → 拼 → 混回"流程，但裁剪拼接本身不是模型能力而是规划拆解。</p>
+      <p class="narr-lead"><strong>消费级需要的是段级操作</strong>：裁掉一段（段级删除）、拼接两段（段级缝合）、重排顺序（段级排序）、缩短时长（段级压缩）——这些在学术侧<strong>几乎无专门工作</strong>，唯一沾边的是词级/操作级的间接覆盖。</p>
+    </div>
+
+    <div class="scope-note">
+      <span class="sn-tag">⚠ SCOPE NOTE</span>
+      C4 论文映射仅含间接相关工作，无专门裁剪拼接重组论文。
+    </div>
+
+    <div class="sub-label">Paper → 问题映射（间接）</div>
+    <div class="papers">
+      <div class="paper">
+        <div class="pname">MMEDIT<span class="pid"><a href="https://arxiv.org/abs/2512.20339" target="_blank" rel="noopener">arXiv:2512.20339</a></span></div>
+        <div class="pdesc">Qwen2-Audio + MMDiT 统一五类编辑含 reordering（重组顺序），间接覆盖。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Ming-UniAudio-Edit<span class="pid"><a href="https://arxiv.org/abs/2511.05516" target="_blank" rel="noopener">arXiv:2511.05516</a></span></div>
+        <div class="pdesc">free-form 指令编辑含裁剪拼接重组，间接覆盖。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">LLaDA-TTS<span class="pid"><a href="https://arxiv.org/abs/2603.26364" target="_blank" rel="noopener">arXiv:2603.26364</a></span></div>
+        <div class="pdesc">后验选择性掩码做零样本词级插入/删除/替换，可扩展到片段裁剪概念，间接覆盖。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">AudioChat<span class="pid"><a href="https://arxiv.org/abs/2602.17097" target="_blank" rel="noopener">arXiv:2602.17097</a></span></div>
+        <div class="pdesc">LLM agent 多步编辑含裁剪拼接重组规划，间接覆盖。</div>
+      </div>
+    </div>
+
+    <div class="sub-label">场景技术点</div>
+    <div class="tech">
+      <span class="b">段级结构编辑（间接）</span>
+      <span class="b">reordering 操作</span>
+      <span class="b">选择性掩码删除</span>
+      <span class="b">Agent 多步裁-拼-混规划</span>
+    </div>
+
+    <div class="sub-label">成熟度与缺口</div>
+    <div class="gap">
+      <div class="glamp">
+        <div class="light"></div>
+        <div class="ltag">🔴 领域真空白</div>
+      </div>
+      <div class="gtext">
+        <strong>领域真空白</strong>——arXiv 上几乎无专门"裁剪拼接重组"的语音编辑论文，仅有 MMEDIT reordering / LLaDA-TTS selective masking / AudioChat agent 规划间接覆盖。消费级刚需（裁掉废话、拼接精简版、重排顺序）在学术侧<strong>无专门系统化研究</strong>。这不是"评测显示未就绪"而是<strong>领域真空白</strong>——裁剪拼接重组作为独立语音编辑问题尚无人系统研究。拼接点无缝衔接、重组后节奏连贯等消费级核心需求，目前只能靠人工剪辑或通用编辑 Agent 的粗粒度规划，缺乏专门的学术方案。
+      </div>
+    </div>
+  </section>
+  <!-- ========================= C5 ========================= -->
+  <section id="c5" class="scene m-go">
+    <div class="scene-head">
+      <div class="scene-num"><span class="tag">SCENARIO</span><span class="big">C5</span></div>
+      <div class="scene-bar"></div>
+      <div class="scene-title">
+        <h2>轻量补一句·<em>换一声</em></h2>
+        <div class="meta">
+          <span>~16 工作</span>
+          <span class="m-lamp">● 🟢 零样本 VC 较成熟</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pain">
+      <div class="plabel">场景痛点</div>
+      <div class="ptext">"用我的声音补录这句话""换成另一个人的声音""把这段匿名化别人听不出是我"——用户要的是<strong>零样本/实时/保内容的换声或补声</strong>。</div>
+      <div class="puser">用户：播客补录 · 角色换声 · 声音克隆微调 · 隐私匿名化</div>
+    </div>
+
+    <div class="narr narr-asks">
+      <div class="narr-head">场景痛点与用户诉求 · 细化</div>
+      <p class="narr-lead">"用我的声音补录这句话""换成另一个人的声音""把这段匿名化别人听不出是我"——用户要的是<strong>零样本/实时/保内容的换声或补声</strong>。典型用户与诉求：</p>
+      <ul class="asks">
+        <li><b>播客补录一句话</b>：录完发现漏了一句，要求"用我的声音补这句，听起来像同一次录的"；诉求是<strong>零样本 overdub + 保上下文衔接</strong>。</li>
+        <li><b>角色换声</b>：配音演员不可用/换人，要求"新声线贴合原角色人设但台词节奏不变"；诉求是<strong>换声保内容保表演</strong>。</li>
+        <li><b>声音克隆微调</b>：克隆出来的音色"像但不够像"，要求"微调一下年龄/性别/厚度但不破内容"；诉求是<strong>属性级编辑保身份</strong>。</li>
+        <li><b>隐私匿名化</b>：发出去前要求"别人听不出是我说的但内容语气不变"；诉求是<strong>身份擦除保内容情感</strong>。</li>
+        <li><b>共性诉求</b>：①零样本（one-shot 克隆/换声）②保内容不破③属性级可控（改年龄/性别等保身份）④流式可用（实时通话场景）⑤跨语言换声。</li>
+      </ul>
+    </div>
+
+    <div class="narr narr-state">
+      <div class="narr-head">现状：学术 SOTA 与技术进展</div>
+      <p class="narr-lead">零样本 VC 与流式换声是消费级编创中<strong>最成熟</strong>的能力之一，2024–2026 解耦与属性编辑有新进展：</p>
+      <p class="narr-lead"><strong>零样本 VC 成熟线</strong>：FreeVC text-free one-shot VC；AutoVC zero-shot voice style transfer 只用 autoencoder loss——基础换声已可 one-shot 且保内容，工程门槛低、开源生态成熟。</p>
+      <p class="narr-lead"><strong>解耦与属性编辑进步</strong>：Vevo/Vevo2 双 tokenizer（content-style 解耦 + prosody tokenizer）把音色/内容/韵律分轨编辑——"只换音色不动韵律"有了更细粒度解耦；RIVET 用幂等性训练目标 f(f(x))=f(x) 编辑年龄/性别等属性<strong>保说话人身份</strong>抗噪声标签——消费级"微调属性但不变成另一个人"有了学术原型。</p>
+      <p class="narr-lead"><strong>跨语言换声</strong>：VoiceCraft-X 11 语言编辑 + 零样本 TTS 统一——"换个语言但保持原声线"有了跨语言编辑入口；VoiceCraft-Dub 视频配音 lip-sync 换声；UniVoice 统一语音生成含跨语言。</p>
+      <p class="narr-lead"><strong>流式 VC 实时换声</strong>：StreamVC/DualVC3/RT-VC/SynthVC/X-VC——6 篇流式 VC 构成"实时通话换声"完整技术栈；Zero-VC 零前瞻流式 VC——实时场景不需缓冲。</p>
+      <p class="narr-lead"><strong>母体统一骨干</strong>：MaskGCT 掩码生成骨干 VC 出口；Metis 掩码生成 VC；Amphion v0.2 开源工具包含 voice conversion——VC 不再是独立小模型而是统一骨干的一个出口。</p>
+    </div>
+
+    <div class="sub-label">Paper → 问题映射</div>
+    <div class="papers">
+      <div class="paper">
+        <div class="pname">Vevo / Vevo2<span class="pid"><a href="https://arxiv.org/abs/2502.07243" target="_blank" rel="noopener">arXiv:2502.07243</a> · <a href="https://arxiv.org/abs/2508.16332" target="_blank" rel="noopener">2508.16332</a></span></div>
+        <div class="pdesc">零样本 VC + 口音/情感转换；Vevo2 双 tokenizer（content-style 解耦 + prosody tokenizer）。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">FreeVC<span class="pid"><a href="https://arxiv.org/abs/2210.15418" target="_blank" rel="noopener">arXiv:2210.15418</a></span></div>
+        <div class="pdesc">text-free one-shot VC。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">AutoVC<span class="pid"><a href="https://arxiv.org/abs/1905.05879" target="_blank" rel="noopener">arXiv:1905.05879</a></span></div>
+        <div class="pdesc">zero-shot voice style transfer。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">RIVET<span class="pid"><a href="https://arxiv.org/abs/2606.19629" target="_blank" rel="noopener">arXiv:2606.19629</a></span></div>
+        <div class="pdesc">编辑年龄/性别等属性保说话人身份，幂等性训练目标 f(f(x))=f(x) 抗噪声标签。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">VoiceCraft-X<span class="pid"><a href="https://arxiv.org/abs/2511.12347" target="_blank" rel="noopener">arXiv:2511.12347</a></span></div>
+        <div class="pdesc">11 语言编辑 + 零样本 TTS 统一，跨语言换声。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">VoiceCraft-Dub<span class="pid"><a href="https://arxiv.org/abs/2504.02386" target="_blank" rel="noopener">arXiv:2504.02386</a></span></div>
+        <div class="pdesc">视频配音 lip-sync 换声。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">UniVoice<span class="pid"><a href="https://arxiv.org/abs/2606.05852" target="_blank" rel="noopener">arXiv:2606.05852</a></span></div>
+        <div class="pdesc">统一语音生成含跨语言。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Zero-VC<span class="pid"><a href="https://arxiv.org/abs/2606.20218" target="_blank" rel="noopener">arXiv:2606.20218</a></span></div>
+        <div class="pdesc">零前瞻流式 VC，身份替换/擦除。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">StreamVC<span class="pid"><a href="https://arxiv.org/abs/2401.03078" target="_blank" rel="noopener">arXiv:2401.03078</a></span></div>
+        <div class="pdesc">流式 VC（实时换声）。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">DualVC3<span class="pid"><a href="https://arxiv.org/abs/2406.07846" target="_blank" rel="noopener">arXiv:2406.07846</a></span></div>
+        <div class="pdesc">流式 VC。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">RT-VC<span class="pid"><a href="https://arxiv.org/abs/2506.10289" target="_blank" rel="noopener">arXiv:2506.10289</a></span></div>
+        <div class="pdesc">实时 VC。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">SynthVC<span class="pid"><a href="https://arxiv.org/abs/2510.09245" target="_blank" rel="noopener">arXiv:2510.09245</a></span></div>
+        <div class="pdesc">流式 VC。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">X-VC<span class="pid"><a href="https://arxiv.org/abs/2604.12456" target="_blank" rel="noopener">arXiv:2604.12456</a></span></div>
+        <div class="pdesc">流式 VC。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">MaskGCT<span class="pid"><a href="https://arxiv.org/abs/2409.00750" target="_blank" rel="noopener">arXiv:2409.00750</a></span></div>
+        <div class="pdesc">掩码生成骨干 VC 出口。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Metis<span class="pid"><a href="https://arxiv.org/abs/2502.03128" target="_blank" rel="noopener">arXiv:2502.03128</a></span></div>
+        <div class="pdesc">掩码生成 VC。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Amphion v0.2<span class="pid"><a href="https://arxiv.org/abs/2501.15442" target="_blank" rel="noopener">arXiv:2501.15442</a></span></div>
+        <div class="pdesc">开源工具包含 voice conversion。</div>
+      </div>
+    </div>
+
+    <div class="sub-label">场景技术点</div>
+    <div class="tech">
+      <span class="b">content-timbre 解耦</span>
+      <span class="b">零样本 VC</span>
+      <span class="b">属性保持（幂等性约束）</span>
+      <span class="b">流式实时换声</span>
+      <span class="b">跨语言换声</span>
+      <span class="b">双 tokenizer 分轨编辑</span>
+      <span class="b">VQ/互信息解耦</span>
+      <span class="b">统一骨干 VC 出口</span>
+    </div>
+
+    <div class="sub-label">成熟度与缺口</div>
+    <div class="gap">
+      <div class="glamp">
+        <div class="light"></div>
+        <div class="ltag">🟢 较成熟</div>
+      </div>
+      <div class="gtext">
+        <strong>零样本 VC 较成熟</strong>（Vevo/FreeVC/AutoVC 线完整 + 6 篇流式 VC + 跨语言换声），消费级"补一句/换一声"已有完整技术栈。缺口：①<strong>属性级编辑时身份保持的定量指标缺失</strong>——"改了年龄还是不是同一个人"无公认评测②高保真（录音棚级音质）仍是挑战③解耦不完全会"换色带出别的属性漂移"。
+        <span class="bench"><b>区分</b>：领域非空白但评测不足——属性保身份的评测标准缺失导致选型难，但核心换声能力已有多个可用原型。</span>
+      </div>
+    </div>
+  </section>
+  <!-- ========================= C6 ========================= -->
+  <section id="c6" class="scene m-go">
+    <div class="scene-head">
+      <div class="scene-num"><span class="tag">SCENARIO</span><span class="big">C6</span></div>
+      <div class="scene-bar"></div>
+      <div class="scene-title">
+        <h2>口音归一·<em>方言转标准</em></h2>
+        <div class="meta">
+          <span>~6 工作</span>
+          <span class="m-lamp">● 🟢 2026 最密集</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pain">
+      <div class="plabel">场景痛点</div>
+      <div class="ptext">"还是我说的，只是口音变标准""把方言转成普通话""这个词读错了帮我纠正"——用户要的是<strong>改口音不改人</strong>，声音还是自己的但口音变了。</div>
+      <div class="puser">用户：非母语者口音归一 · 方言转标准 · 专有名词发音纠正 · 通话实时口音归一</div>
+    </div>
+
+    <div class="narr narr-asks">
+      <div class="narr-head">场景痛点与用户诉求 · 细化</div>
+      <p class="narr-lead">"还是我说的，只是口音变标准""把方言转成普通话""这个词读错了帮我纠正"——用户要的是<strong>改口音不改人</strong>，声音还是自己的但口音变了。典型用户与诉求：</p>
+      <ul class="asks">
+        <li><b>非母语者口音归一</b>：说外语带口音（中国人说英语带中式口音），要求"变标准但还是我说话的感觉"；诉求是<strong>口音转换保身份</strong>。</li>
+        <li><b>方言转标准</b>：方言录音要转成标准普通话/美音，要求"内容不变、口音变标准、还是本人声音"；诉求是<strong>方言→标准口音归一</strong>。</li>
+        <li><b>专有名词发音纠正</b>：读错了人名/地名/术语，要求"只纠正这个词的发音"；诉求是<strong>局部纠音不需重训</strong>。</li>
+        <li><b>通话实时口音归一</b>：客服/直播要求流式低延迟口音归一化，要求"实时变标准口音但稳定不抖"；诉求是<strong>流式 + 低延迟 ≤40ms</strong>。</li>
+        <li><b>共性诉求</b>：①口音维度单独变（内容/身份/情感不变）②局部可纠（单词级）③流式可用④低资源语言覆盖⑤保说话人身份。</li>
+      </ul>
+    </div>
+
+    <div class="narr narr-state">
+      <div class="narr-head">现状：学术 SOTA 与技术进展</div>
+      <p class="narr-lead">口音归一是 2026 <strong>最密集</strong>的子方向之一（6 篇 + 经典），技术路线已分叉成型且有流式成果：</p>
+      <p class="narr-lead"><strong>流匹配终身发音自适应</strong>：FlowEdit 用流匹配 TTS 做终身发音自适应，自建 312 名词/18 语系 benchmark，自报 92.7% PER↓——"口音变标准"有了大覆盖面自适应方案，且终身学习意味着新口音类型可持续添加不需重训。</p>
+      <p class="narr-lead"><strong>模型编辑纠正专有名词</strong>：SonoEdit 用模型编辑（零空间约束 AlphaEdit 母体）纠正 LLM-TTS 低资源专有名词发音——"只纠这个词、不重训整个模型"的消费级诉求有了对应实现。</p>
+      <p class="narr-lead"><strong>流式口音转换已有原型</strong>：PHONOS 流式口音编辑因果口音翻译器 ≤40ms lookahead——实时通话口音归一有了可用原型；Streaming Accent Conversion NAR 首个流式口音转换 NAR Emformer + 稳定延迟——非自回归流式口音有了稳定延迟方案。</p>
+      <p class="narr-lead"><strong>口音 token 编码研究起步</strong>：SpeechAccentLLM SpeechCodeVAE（CTC 进 codebook）+ 多任务 FAC/TTS——口音在离散编码中的表达有了建模框架；accent token 分析 口音在离散 token 中的编码研究——口音可控性的基础认知刚起步。</p>
+      <p class="narr-lead"><strong>PHONOS 横跨口音与匿名化</strong>：口音归一与去身份共享技术底座（"中性化"同源），C6 与 C1 匿名化侧可共用栈。</p>
+    </div>
+
+    <div class="sub-label">Paper → 问题映射</div>
+    <div class="papers">
+      <div class="paper">
+        <div class="pname">FlowEdit<span class="pid"><a href="https://arxiv.org/abs/2606.20518" target="_blank" rel="noopener">arXiv:2606.20518</a></span></div>
+        <div class="pdesc">流匹配 TTS 的终身发音自适应，自建 312 名词/18 语系 benchmark，自报 92.7% PER↓。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">SonoEdit<span class="pid"><a href="https://arxiv.org/abs/2601.17086" target="_blank" rel="noopener">arXiv:2601.17086</a></span></div>
+        <div class="pdesc">模型编辑（零空间约束）纠正 LLM-TTS 低资源专有名词发音，AlphaEdit 母体。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">SpeechAccentLLM<span class="pid"><a href="https://arxiv.org/abs/2507.01348" target="_blank" rel="noopener">arXiv:2507.01348</a></span></div>
+        <div class="pdesc">SpeechCodeVAE（CTC 进 codebook）+ 多任务 FAC/TTS + SpeechRestorer。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">PHONOS<span class="pid"><a href="https://arxiv.org/abs/2603.27001" target="_blank" rel="noopener">arXiv:2603.27001</a></span></div>
+        <div class="pdesc">流式口音编辑，因果口音翻译器 ≤40ms lookahead（同属 C1 匿名化）。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Streaming Accent Conversion NAR<span class="pid"><a href="https://arxiv.org/abs/2506.16580" target="_blank" rel="noopener">arXiv:2506.16580</a></span></div>
+        <div class="pdesc">首个流式口音转换 NAR，Emformer + 稳定延迟。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">accent token 分析<span class="pid"><a href="https://arxiv.org/abs/2601.19786" target="_blank" rel="noopener">arXiv:2601.19786</a></span></div>
+        <div class="pdesc">口音在离散 token 中的编码研究。</div>
+      </div>
+    </div>
+
+    <div class="sub-label">场景技术点</div>
+    <div class="tech">
+      <span class="b">口音 token 编码</span>
+      <span class="b">流匹配终身发音自适应</span>
+      <span class="b">模型编辑（零空间）纠专有名词</span>
+      <span class="b">流式口音映射（因果翻译器）</span>
+      <span class="b">NAR 流式口音</span>
+      <span class="b">CTC 进 codebook</span>
+      <span class="b">口音与匿名化同源</span>
+    </div>
+
+    <div class="sub-label">成熟度与缺口</div>
+    <div class="gap">
+      <div class="glamp">
+        <div class="light"></div>
+        <div class="ltag">🟢 较成熟</div>
+      </div>
+      <div class="gtext">
+        <strong>2026 最密集</strong>的子方向（6 篇 + 经典），流式口音已有（PHONOS ≤40ms / Streaming NAR 稳定延迟），模型编辑纠专有名词有（SonoEdit），终身发音自适应有大覆盖面（FlowEdit 18 语系）。缺口：①<strong>跨口音编辑的统一评测缺失</strong>——各家自建基准，难比较②口音 token 编码可控性不足（研究刚起步）③方言→标准的端到端评测需覆盖"保身份"维度。
+        <span class="bench"><b>区分</b>：领域非空白但评测不足——核心口音转换能力已有多个可用原型，但统一评测标准缺失导致技术选型与能力量化困难。</span>
+      </div>
+    </div>
+  </section>
+  <!-- ========================= C7 ========================= -->
+  <section id="c7" class="scene m-st">
+    <div class="scene-head">
+      <div class="scene-num"><span class="tag">SCENARIO</span><span class="big">C7</span></div>
+      <div class="scene-bar"></div>
+      <div class="scene-title">
+        <h2>长内容<em>局部修</em></h2>
+        <div class="meta">
+          <span>~4 间接工作</span>
+          <span class="m-lamp">● 🔴 编辑端真空白</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pain">
+      <div class="plabel">场景痛点</div>
+      <div class="ptext">"几小时的有声书改一处不破坏全局""长播客后期改一段""改完第一章但后面的语气还是连贯的"——用户要的是<strong>局部修改保全局一致</strong>。</div>
+      <div class="puser">用户：有声书校对 · 长播客后期编辑 · 讲座/培训更新</div>
+    </div>
+
+    <div class="narr narr-asks">
+      <div class="narr-head">场景痛点与用户诉求 · 细化</div>
+      <p class="narr-lead">"几小时的有声书改一处不破坏全局""长播客后期改一段""改完第一章但后面的语气还是连贯的"——用户要的是<strong>局部修改保全局一致</strong>。典型用户与诉求：</p>
+      <ul class="asks">
+        <li><b>有声书校对</b>：录了 8 小时，发现第 3 章有一句读错，要求"只改这一句，前后几小时音色语气不变"；诉求是<strong>局部手术 + 全局一致性</strong>。</li>
+        <li><b>长播客后期编辑</b>：两小时播客后期删口误/补半句，要求"改完听起来还是同一次录的"；诉求是<strong>多处编辑不累积漂移</strong>。</li>
+        <li><b>讲座/培训更新</b>：40 分钟课件更新术语，要求"改完音色/情感连贯如初"；诉求是<strong>编辑不破坏跨段一致性</strong>。</li>
+        <li><b>共性诉求</b>：①局部改一处不破坏全局（说话人/情感/韵律一致性）②多处编辑不累积漂移③长上下文条件化④编辑端与生成端区分（本场景是"编辑已有长内容"，不是"从文本生成长内容"）。</li>
+      </ul>
+    </div>
+
+    <div class="narr narr-state">
+      <div class="narr-head">现状：学术 SOTA 与技术进展</div>
+      <p class="narr-lead"><strong>C7 编辑端几乎完全空白</strong>——一致性研究集中在生成端，"编辑长内容某段、保持其余一致"无专门论文：</p>
+      <p class="narr-lead"><strong>生成端已进步</strong>：SwanVoice 25Hz VAE + pause-aware + flow-matching DiT 带 speaker-turn conditioning（1-4 说话人对话）——长时段<strong>生成</strong>一致性有了，但这是生成端而非编辑端；MagpieTTS-LF 推理期长时段生成无需长时段训练数据——生成端长时段有了工程级方案；Borderless Long Speech 长时段合成——同样属生成端。这些生成能力可为编辑端提供"编辑后重合成一致段"的底层支撑，但<strong>编辑端本身仍空白</strong>。</p>
+      <p class="narr-lead"><strong>匿名化泄漏防护间接相关</strong>：Content-Anonymization Long-form 时段多句重识别的词法/风格泄漏防护——揭示了长时段编辑的核心难点：跨句泄漏（改一处可能通过韵律/风格泄漏影响别处），但这是匿名化侧而非编辑侧的发现。</p>
+      <p class="narr-lead"><strong>编辑端空白的原因</strong>：现有编辑方法（VoiceCraft/CosyEdit 谱系）默认局部独立性——改一段只看那段上下文，长时段全局一致性不保证。消费级"改一处保全局"需要编辑端有全局条件化能力，但学术界<strong>无人专门研究"编辑长内容某段、保持其余一致"</strong>。</p>
+      <p class="narr-lead"><strong>与 C3 连带叠加</strong>：C3（文字改录音）解决了"改什么"的问题，C7 解决"改一处全局不漂移"的问题——两者叠加时更难：改长内容一处文字后，全局情感连贯必须保证，双重未解决。</p>
+    </div>
+
+    <div class="scope-note">
+      <span class="sn-tag">⚠ SCOPE NOTE</span>
+      C7 编辑端无专门论文，以下均为生成端或匿名化侧间接相关工作。
+    </div>
+
+    <div class="sub-label">Paper → 问题映射（间接）</div>
+    <div class="papers">
+      <div class="paper">
+        <div class="pname">SwanVoice<span class="pid"><a href="https://arxiv.org/abs/2605.30993" target="_blank" rel="noopener">arXiv:2605.30993</a></span></div>
+        <div class="pdesc">25Hz VAE + pause-aware + flow-matching DiT 带 speaker-turn conditioning，1-4 说话人对话（生成端）。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">MagpieTTS-LF<span class="pid"><a href="https://arxiv.org/abs/2606.18485" target="_blank" rel="noopener">arXiv:2606.18485</a></span></div>
+        <div class="pdesc">推理期长时段生成，无需长时段训练数据（生成端）。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Borderless Long Speech<span class="pid"><a href="https://arxiv.org/abs/2603.19798" target="_blank" rel="noopener">arXiv:2603.19798</a></span></div>
+        <div class="pdesc">长时段合成（生成端）。</div>
+      </div>
+      <div class="paper">
+        <div class="pname">Content-Anonymization Long-form<span class="pid"><a href="https://arxiv.org/abs/2510.12780" target="_blank" rel="noopener">arXiv:2510.12780</a></span></div>
+        <div class="pdesc">长时段多句重识别的词法/风格泄漏防护（匿名化侧，间接相关）。</div>
+      </div>
+    </div>
+
+    <div class="sub-label">场景技术点</div>
+    <div class="tech">
+      <span class="b">speaker-turn conditioning</span>
+      <span class="b">pause-aware</span>
+      <span class="b">推理期长时段处理</span>
+      <span class="b">跨句一致性（生成端）</span>
+      <span class="b">长时段泄漏防护（匿名化侧）</span>
+    </div>
+
+    <div class="sub-label">成熟度与缺口</div>
+    <div class="gap">
+      <div class="glamp">
+        <div class="light"></div>
+        <div class="ltag">🔴 领域真空白</div>
+      </div>
+      <div class="gtext">
+        <strong>编辑端空白——领域真空白。</strong>长时段一致性研究集中在生成端（SwanVoice/MagpieTTS-LF），<strong>无专门"编辑长内容某段保持其余一致"的工作</strong>。生成端能生成长且一致的内容，但编辑端缺乏全局条件化能力——改一处只保证局部好，不保证全局不漂移。这是<strong>领域真空白</strong>（区别于"评测显示未就绪"），不是系统弱而是系统不存在。与 C4（裁剪拼接）同为消费级刚需但学术覆盖最薄的两个场景。
+      </div>
+    </div>
+  </section>
+  <!-- ========================= CROSS-CUTTING APPENDIX ========================= -->
+  <section id="appendix" class="appendix">
+    <div class="pillar-head">
+      <h2>横切<em>附录</em></h2>
+      <div class="ph-sub"><span class="lchip"></span>评测基准 · 编辑检测取证 · C↔S 映射 · 技术路线索引</div>
+    </div>
+
+    <div class="appendix-grid">
+      <div class="ax">
+        <div class="ax-label">Appendix A</div>
+        <h3>评测基准</h3>
+        <ul>
+          <li><b>MMAE</b> <a class="id" href="https://arxiv.org/abs/2606.07229" target="_blank" rel="noopener">2606.07229</a>：首个通用 instruction-based 音频编辑基准，7 模态/6 级复杂度/8 操作/2000 样本/17741 rubric；<b style="color:var(--stop)">EMR&lt;5%、复杂混合模态=0%</b>——C1 擦除可靠性受此限制</li>
+          <li><b>SpeechEditBench</b> <a class="id" href="https://arxiv.org/abs/2606.01804" target="_blank" rel="noopener">2606.01804</a>：双语多属性 instruction-guided，结论"无模型全能"——C3 组合式多属性编辑仍难</li>
+          <li><b>ISSE</b> <a class="id" href="https://arxiv.org/abs/2509.24570" target="_blank" rel="noopener">2509.24570</a>：指令式语音风格编辑基准，评测风格编辑保内容/保身份</li>
+          <li><b>Interpretable Audio Editing Eval</b> <a class="id" href="https://arxiv.org/abs/2509.16975" target="_blank" rel="noopener">2509.16975</a>：CoT 可解释评测，辅助理解编辑指令执行链</li>
+          <li><b>MUSDB18 + SiSNR 类</b>：无 arXiv（经典基准），音源分离评测事实标准</li>
+          <li><b>VoicePrivacy Challenge (VPC)</b> <a class="id" href="https://arxiv.org/abs/2601.11846" target="_blank" rel="noopener">2601.11846</a> / <a class="id" href="https://arxiv.org/abs/2504.14183" target="_blank" rel="noopener">2504.14183</a>：匿名化评测事实标准</li>
+          <li><b>DNS Challenge / VoiceBank-DEMAND</b>：无 arXiv（经典基准），语音增强评测事实标准</li>
+          <li><b>RealEdit</b>：见 VoiceCraft <a class="id" href="https://arxiv.org/abs/2403.16973" target="_blank" rel="noopener">2403.16973</a>，真实野外编辑基准（播客/有声书）</li>
+        </ul>
+      </div>
+
+      <div class="ax">
+        <div class="ax-label">Appendix B</div>
+        <h3>编辑检测 / 取证</h3>
+        <ul>
+          <li><b>PartialEdit</b> <a class="id" href="https://arxiv.org/abs/2506.02958" target="_blank" rel="noopener">2506.02958</a>：神经语音编辑产生的局部深度伪造检测数据集</li>
+          <li><b>SED + AiEdit</b> <a class="id" href="https://arxiv.org/abs/2601.21463" target="_blank" rel="noopener">2601.21463</a>：统一语音编辑检测 + 内容定位，~140h AiEdit</li>
+          <li><b>StreamMark</b> <a class="id" href="https://arxiv.org/abs/2604.11917" target="_blank" rel="noopener">2604.11917</a>：半脆弱水印，对 VC/语音编辑脆弱</li>
+          <li><b>Knowledge Editing in LALMs</b> <a class="id" href="https://arxiv.org/abs/2603.14343" target="_blank" rel="noopener">2603.14343</a>：音频 LLM 事实定位 + 编辑（与 SonoEdit 同谱系）</li>
+          <li><b>Fine-Grained Inpainting Forensics</b> <a class="id" href="https://arxiv.org/abs/2605.02223" target="_blank" rel="noopener">2605.02223</a>：多区域篡改定位</li>
+        </ul>
+      </div>
+
+      <div class="ax">
+        <div class="ax-label">Appendix C</div>
+        <h3>C1–C7 ↔ S1–S10 映射表</h3>
+        <ul>
+          <li><b>C1 擦除与对象分离</b> → S2（噪声修复偏分离/擦除）+ S7（指令式编辑）+ S9（匿名化→身份擦除）· 消费视角重述</li>
+          <li><b>C2 一键降噪·增强修复</b> → S2 + S10（病理语音重建→修复类）· 消费视角重述</li>
+          <li><b>C3 文字改录音·口误秒改</b> → S1 · 消费视角重述</li>
+          <li><b>C4 片段裁剪拼接重组</b> → 无直接映射 · <b style="color:var(--stop)">新场景</b></li>
+          <li><b>C5 轻量补一句·换一声</b> → S4 + S1 + S9（换声侧）· 消费视角重述</li>
+          <li><b>C6 口音归一·方言转标准</b> → S6 · 消费视角重述</li>
+          <li><b>C7 长内容局部修</b> → S8 · 消费视角重述</li>
+        </ul>
+      </div>
+
+      <div class="ax-full">
+        <div class="ax-label">Appendix D</div>
+        <h3>技术路线索引</h3>
+        <p class="ax-note">四路线不再独立成章，已融入各场景技术点。演进脉络详见 audio-editing-evolution-lineage 报告。</p>
+
+        <div class="ax-dim">
+          <span class="dkey">AR token-infilling</span>　→ C3 / C5（VoiceCraft 谱系）
+        </div>
+
+        <div class="ax-dim">
+          <span class="dkey">掩码生成 / 双向 infilling</span>　→ C3 / C5 / C7（MaskGCT → Metis → LLaDA-TTS）
+        </div>
+
+        <div class="ax-dim">
+          <span class="dkey">扩散统一中心</span>　→ C1 / C2（PGDI / SeamlessEdit / UNISON）
+        </div>
+
+        <div class="ax-dim">
+          <span class="dkey">免训练推理时</span>　→ C1 / C3 / C5（AST / FreeSonic / RFM-Editing / Diffusion Timbre Transfer）
+        </div>
+
+        <div class="ax-merged">
+          <b>并入子情形：</b> 身份擦除 → C1 匿名化侧　·　流式换声 → C5　·　口音与匿名化同源 → C6/C1　·　DSR 转换 → C2 病理侧　·　long-form 生成 → C7 生成端间接
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ========================= KEY INSIGHTS ========================= -->
+  <section id="insights">
+    <div class="insights">
+      <div class="in-label">关键洞察 · 消费级视角</div>
+      <h2>五条<em>结论</em></h2>
+      <ol>
+        <li><b>消费级旗舰动作是 C1 擦除/分离，但零样本通用分离仍弱：</b>C1 是消费级最直觉的诉求（"去掉那个声音"），学术侧已有指令式擦除+分离+保无关成分多条路线，但 MMAE 评测显示 instruction-based 编辑 EMR&lt;5%，零样本分离在频带重叠场景泛化受限——<span class="hot">消费级"一句话指定擦除"的可靠性尚未验证</span></li>
+        <li><b>消费级"不可感知/局部性"要求比专业更严：</b>专业用户可调参数反复试，消费级用户不会调参数要一键可靠——C3 不可感知性（Edit-Content-Preserve-Acoustics 显式追求"听不出"）、C1 擦除后无缝（SeamlessEdit 频带感知保无关）、C7 改一处全局不漂移——消费级要求的是<span class="hot">无参数、一键、不可感知</span>，比专业场景更严苛</li>
+        <li><b>C4/C7 是消费级刚需但学术双空白：</b>裁剪拼接重组（C4）与长内容局部修（C7）是消费级高频刚需（"裁掉废话""改一处不破全局"），但学术侧几乎无专门工作——这不是"评测显示未就绪"而是<span class="hot">领域真空白</span>（系统不存在）</li>
+        <li><b>消费级需求-能力错配点集中在"集成一键"：</b>旧报告各场景有专门原型，但消费级诉求是"降噪+修复+增强一键全修"(C2)、"分离+擦除+补回一键链路"(C1)、"换声+补声+匿名化零样本"(C5)——学术侧各能力散落不同子领域，<span class="hot">端到端消费级集成方案尚无专门论文</span></li>
+        <li><b>情感保真是消费级跨场景连带短板：</b>C3 文字改后情感偏移（EmoCorrector 后修正仍早期）、C1 擦除保情感（EASY 匿名化保情感但擦除侧未专门验证）、C5 换声保情感——消费级"改什么保其余"的核心难点是<span class="hot">情感维度</span>，一处不保即听感违和</li>
+      </ol>
+    </div>
+  </section>
+  <!-- ========================= STRATEGY LAYER · 五看三定 ========================= -->
+  <section id="strategy">
+    <div class="pillar-head">
+      <h2>战略层 · <em>五看三定</em></h2>
+      <div class="ph-sub"><span class="lchip"></span>华为战略读法 · 对 C1–C7 消费级场景证据做战略推演 · 看自己留白待填</div>
+    </div>
+
+    <div class="strat-intro">
+      用华为「<strong>五看三定</strong>」对 C1–C7 消费级场景证据做一层战略读法。
+      <strong>看自己</strong>我不掌握贵方情况，<span class="warn">相应留白待填</span>；
+      三定里依赖「看自己」的部分也只标注框架与留白，仅给可从场景证据直接推出的方向。
+    </div>
+
+    <!-- ============ 五看 ============ -->
+    <div class="sub-label">五看 · 看趋势 / 看市场 / 看竞争 / 看自己 / 看机会</div>
+    <div class="look-grid">
+
+      <div class="look">
+        <div class="lk-num">一看 · TREND</div>
+        <div class="lk-title">看趋势：<em>三步跃迁 + 两极分化</em></div>
+        <div class="lk-body">
+          消费级编创技术演进：从"先分离再手动删"(2023)到"一句话指令端到端擦除"(2025–26)到"统一骨干+推理时引导"——消费级入口从频谱操作收敛到自然语言。
+          <ul>
+            <li>消费级场景成熟度两极：<span class="go">C3/C5/C6 相对成熟</span>，<span class="hot">C4/C7 领域真空白</span>——<strong>空白即趋势机会</strong></li>
+            <li>价值迁移：消费级从"训练专门编辑模型"向"统一骨干+免训练/指令式编辑"转移——与专业路线同步但门槛更低</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="look">
+        <div class="lk-num">二看 · MARKET</div>
+        <div class="lk-title">看市场 / 客户<em>＝本报告 C1–C7 场景</em></div>
+        <div class="lk-body">
+          <ul>
+            <li>成熟场景（C3 口误修改/C5 换声/C6 口音归一）已可产品化尝试，但消费级"不可感知"比专业更严——<strong>成熟但不等于消费级可靠</strong></li>
+            <li>空白场景（<span class="hot">C4 裁剪拼接 / C7 长内容局部修</span>）是消费级高频刚需但能力为零——<strong>需求-能力错配 = 市场机会</strong></li>
+            <li>C1 擦除/分离是消费级旗舰诉求但可靠性未验证——<strong>最大需求与最大风险并存</strong></li>
+            <li>C2 一键降噪需求极广但学术侧缺端到端集成——<strong>集成是机会</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="look">
+        <div class="lk-num">三看 · COMPETITION</div>
+        <div class="lk-title">看竞争：<em>学术谱系 + 范式两立</em></div>
+        <div class="lk-body">
+          学术团队：
+          <ul>
+            <li><strong>UT Austin</strong> VoiceCraft 谱系</li>
+            <li><strong>CUHK-SZ Amphion</strong>（吴志正组，Vevo/Metis/MaskGCT）</li>
+            <li><strong>Tencent-JHU</strong>（SSR-Speech/CosyEdit）</li>
+            <li><strong>Microsoft</strong>（SpeechEdit）</li>
+            <li><strong>Bar-Ilan</strong>（PGDI）</li>
+          </ul>
+          学术范式竞争：<strong>文本即接口/token infilling 编辑</strong>（VoiceCraft 谱系/CosyEdit/SSR-Speech）vs <strong>频谱+扩散修复与 inpainting</strong>（PGDI/SeamlessEdit/Token-Based Inpainting）——消费级场景下 token infilling 范式因门槛低、可复用 TTS 骨干而更具规模潜力。
+          <span class="intel">⚠ 消费级竞争情报缺口：消费级编创产品（播客后期/有声书后期/视频后期）的市场格局不在本报告 scope</span>
+        </div>
+      </div>
+
+      <div class="look">
+        <div class="lk-num">五看 · OPPORTUNITY</div>
+        <div class="lk-title">看机会：<em>点 / 线 / 面 / 体</em></div>
+        <div class="lk-body">
+          <ul>
+            <li><span class="opp big">大机会</span> C4 裁剪拼接重组（消费级刚需·学术真空白）</li>
+            <li><span class="opp big">大机会</span> C7 长内容局部修编辑端（生成端成熟·编辑端空白）</li>
+            <li><span class="opp big">大机会</span> C1 消费级擦除集成（需求最大·可靠性风险最大）</li>
+            <li><span class="opp hi">高杠杆突破口</span> C3 不可感知性——既是 C3 自身核心诉求，又拖累 C1 擦除无缝与 C7 局部修不漂移</li>
+            <li><span class="opp gap">被忽视空白</span> C4（裁剪拼接无任何专门论文）、C7 编辑端（一致性研究集中在生成端）</li>
+            <li><span class="opp red">已占红海</span> C3 口误修改（主干最多）、C6 口音归一（2026 最密集）——不重复造</li>
+          </ul>
+          <span class="intel">⚠ 机会排序依赖「看自己」（贵方优势场景）——待填</span>
+        </div>
+      </div>
+
+      <div class="look look-self">
+        <div class="lk-num">四看 · SELF</div>
+        <div class="lk-title">看自己：<em>本组织能力盘点</em><span class="placeholder-tag">留白待填</span></div>
+        <div class="lk-body">
+          <strong>我不掌握贵方情况，以下能力盘点待填。</strong>看自己是「五看」中唯一无法从公开场景证据推出的项，必须由贵方内部完成。以下六项留白占位，填完才能确定三定里的目标与资源分配。
+        </div>
+        <div class="blank-fields">
+          <div class="blank-field">
+            <div class="bf-label">现有技术储备</div>
+            <div class="bf-fill">▎▎▎▎▎▎▎▎▎ 哪些路线/骨干已有</div>
+          </div>
+          <div class="blank-field">
+            <div class="bf-label">数据资产</div>
+            <div class="bf-fill">▎▎▎▎▎▎▎▎▎ 语料 / 标注 / 场景数据</div>
+          </div>
+          <div class="blank-field">
+            <div class="bf-label">算力工程能力</div>
+            <div class="bf-fill">▎▎▎▎▎▎▎▎▎ 训练规模 / 推理部署</div>
+          </div>
+          <div class="blank-field">
+            <div class="bf-label">人才结构</div>
+            <div class="bf-fill">▎▎▎▎▎▎▎▎▎ 算法 / 工程 / 产品</div>
+          </div>
+          <div class="blank-field">
+            <div class="bf-label">与 C1–C7 匹配度</div>
+            <div class="bf-fill">▎▎▎▎▎▎▎▎▎ 哪几个场景是优势区</div>
+          </div>
+          <div class="blank-field">
+            <div class="bf-label">短板差距</div>
+            <div class="bf-fill">▎▎▎▎▎▎▎▎▎ 关键能力缺口</div>
+          </div>
+        </div>
+        <div class="blank-note">
+          <b>→ 此处填完后，下方「三定」中标注 <span class="partial-blank">留白</span> 的部分方可闭合。</b>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============ 三定 ============ -->
+    <div class="sub-label">三定 · 定战略控制点 / 定目标 / 定策略</div>
+
+    <div class="ding-block">
+      <div class="ding-head">
+        <div class="dh-tag">定<em>战略控制点</em></div>
+        <div class="dh-sub">华为 6 级阶梯 · 标准级(3) / 生态级(6) 高亮</div>
+      </div>
+      <div class="ding-body">
+        华为 6 级控制点（成本→规模→专利/标准→转换成本→市场份额→生态），本领域可主攻：
+        <div class="ladder">
+          <div class="rung"><span class="num">L1</span><div class="bar"><span class="lvl">成本</span></div></div>
+          <div class="rung"><span class="num">L2</span><div class="bar"><span class="lvl">规模</span></div></div>
+          <div class="rung r-standard"><span class="num">L3 ▲</span><div class="bar"><span class="lvl">标准</span></div></div>
+          <div class="rung"><span class="num">L4</span><div class="bar"><span class="lvl">转换成本</span></div></div>
+          <div class="rung"><span class="num">L5</span><div class="bar"><span class="lvl">市场份额</span></div></div>
+          <div class="rung r-eco"><span class="num">L6 ▲</span><div class="bar"><span class="lvl">生态</span></div></div>
+        </div>
+        <div class="ladder-cap">
+          <div class="lc"><b>成本</b>Level 1</div>
+          <div class="lc"><b>规模</b>Level 2</div>
+          <div class="lc pick"><b>标准级 · 主攻</b>消费级场景化评测(MMAE 式但分 C 场景+消费级不可感知指标)做成事实标准</div>
+          <div class="lc"><b>转换成本</b>Level 4</div>
+          <div class="lc"><b>市场份额</b>Level 5</div>
+          <div class="lc eco"><b>生态级 · 长线</b>消费级一键编创平台(C1–C7 集成)+统一骨干</div>
+        </div>
+        <ul>
+          <li><strong>标准级（L3，可主攻）：</strong>消费级场景化评测（MMAE 式但<strong>分 C 场景+消费级不可感知指标</strong>）做成事实标准</li>
+          <li><strong>专利 / 技术级（L3）：</strong>C4 裁剪拼接或 C7 长内容编辑端的端到端突破（领域真空白=低竞争高壁垒）</li>
+          <li><strong>生态级（L6，长线）：</strong>消费级一键编创平台（C1–C7 集成）+ 统一骨干</li>
+        </ul>
+        <span class="partial-blank">部分留白</span> 具体选哪个控制点，依赖「看自己」——需贵方能力盘点后定。
+      </div>
+    </div>
+
+    <div class="ding-block">
+      <div class="ding-head">
+        <div class="dh-tag">定<em>目标</em></div>
+        <div class="dh-sub">短 / 中 / 长期 · 大部分依赖看自己</div>
+      </div>
+      <div class="ding-body">
+        短/中/长期具体数字依赖贵方战略意图与资源，待「看自己」填后再定。仅给方向性框架：
+        <div class="target-row">
+          <div class="tr-key">短期 · 1 年</div>
+          <div class="tr-val">
+            方向性建议：先 <strong>C4/C7 真空白</strong>（低竞争）或 <strong>C1 擦除集成</strong>（大需求）切入。
+            <span class="tr-blank">▎▎ 选哪个场景切入 · 留白待填</span>
+          </div>
+        </div>
+        <div class="target-row">
+          <div class="tr-key">中期 · 3 年</div>
+          <div class="tr-val">
+            <span class="tr-blank">▎▎▎▎▎▎▎▎▎ 中期量化目标 · 留白待填</span>
+          </div>
+        </div>
+        <div class="target-row">
+          <div class="tr-key">长期 · 5 年</div>
+          <div class="tr-val">
+            <span class="tr-blank">▎▎▎▎▎▎▎▎▎ 长期战略意图 · 留白待填</span>
+          </div>
+        </div>
+        <span class="partial-blank">大部分留白</span> 依赖「看自己」确定战略意图与资源后闭合。
+      </div>
+    </div>
+
+    <div class="ding-block">
+      <div class="ding-head">
+        <div class="dh-tag">定<em>策略</em></div>
+        <div class="dh-sub">产品 / 竞争 / 资源配置</div>
+      </div>
+      <div class="ding-body">
+        <ul>
+          <li><strong>产品策略：</strong>避开 C3/C6 红海，侧翼 C4/C7 空白；先做消费级场景化评测标准(轻、高杠杆)，再一键编创平台</li>
+          <li><strong>竞争策略：</strong>避开频谱修复红海与专业 NLE 红海，消费级用户要"文本即接口+一键不可感知"</li>
+          <li><strong>资源配置：</strong>向高杠杆空白（<span class="hot">C4 裁剪拼接 / C7 编辑端 / C1 擦除集成</span>）倾斜</li>
+        </ul>
+        <span class="partial-blank">部分留白</span> 具体资源分配依赖「看自己」。
+      </div>
+    </div>
+
+  </section>
+  <!-- ========================= CAVEAT ========================= -->
+  <section id="caveat">
+    <div class="pillar-head">
+      <h2>Caveat<em>· 免责与边界</em></h2>
+      <div class="ph-sub"><span class="lchip"></span>能力数字作者自报 · 场景为聚类非互斥 · 缺口分级标注 · 不含产品落地调研</div>
+    </div>
+
+    <div class="caveat">
+      <div class="cv-label">Caveat · 阅读须知</div>
+      <ol>
+        <li>能力数字均<b>作者自报、未经独立验证</b>；仅 VoiceCraft-X（EMNLP 2025）、EmoCorrector（INTERSPEECH 2025）、FlowEdit（自建 benchmark）经评审。</li>
+        <li>场景归类为自底向上聚类，部分 paper 跨场景（如 <span class="hot">PHONOS 同时属 C1/C6</span>、Vevo2 同时属 C5/C6、MMEDIT 同时属 C1/C4），主归类取其最核心解决的问题。</li>
+        <li>C1 含较多 scope 泄漏（纯 TTS/通用音频骨干/匿名化变换），保留作技术点母体并标注。</li>
+        <li><b>广义编辑纳入整段变换式：</b>C1 身份擦除（匿名化变换）、C2 病理语音重建（DSR 转换）的专门论文多为整段变换/转换，<b>属「变换式编辑」非「外科编辑」</b>，已在场景 scope 注中标注。</li>
+        <li>缺口标注区分<b>「领域真空白」</b>（C4 裁剪拼接=0 篇、C7 编辑端=0 篇）与<b>「评测显示未就绪」</b>（C1 MMAE EMR&lt;5%）。</li>
+        <li><b>消费级场景归类为主观自底向上聚类：</b>C1–C7 从消费级用户诉求出发聚类，与旧报告 S1–S10 的专业维度拆分视角不同——部分 paper 在两套场景中归属不同（如音源分离在旧报告归 S2 噪声修复，在本报告归 C1 擦除与对象分离），这是视角差异而非矛盾。</li>
+        <li><b>与同事工业界调研边界划分：</b>本报告只覆盖学术 SOTA（arXiv 核实论文），<span class="hot">不含产品落地调研</span>。消费级产品格局、定价策略、用户画像等归同事负责，本报告不触及。</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ========================= FOOTER ========================= -->
+  <footer class="ftr">
+    <div class="fmeta">
+      <span>消费级语音简单编创 · C1–C7 场景驱动</span><span class="sep">·</span>
+      <span>自底向上聚类 + 发散补扫 + arXiv API 核实</span><span class="sep">·</span>
+      <span>2026-06-23</span>
+    </div>
+    <p class="fline">消费级视角——从"去掉那个人声"到"改口误秒改"到"裁掉废话"——成熟度红绿灯贯穿，空白朱红突出。</p>
+  </footer>
+
+</div>
+</body>
+</html>

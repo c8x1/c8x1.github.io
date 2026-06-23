@@ -242,7 +242,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 浏览器/`grep` 检查：标题正确、七张场景卡齐全、arXiv 链接可点、无占位文字、CSS 未破。
 
-Run: `grep -c "class=\"scenario-card\"" audio-research/audio-editing-simple-consumer-scenarios-2024-2026.html` 期望 `7`。
+Run: `grep -c "class=\"scard\"" audio-research/audio-editing-simple-consumer-scenarios-2024-2026.html` 期望 `7`。
 
 - [ ] **Step 4: 提交**
 
