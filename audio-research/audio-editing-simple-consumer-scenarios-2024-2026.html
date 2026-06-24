@@ -1536,99 +1536,99 @@
     <div class="papers">
       <div class="paper">
         <div class="pname">Separate Anything You Describe<span class="pid"><a href="https://arxiv.org/abs/2308.05037" target="_blank" rel="noopener">arXiv:2308.05037</a></span></div>
-        <div class="pdesc">语言描述驱动零样本音源分离，"说要擦什么就分离什么"。</div>
+        <div class="pdesc">提出 AudioSep——一个用自然语言查询做开域音频源分离的基础模型,在大规模多模态数据上训练,以音频描述或文本标签作为查询实现强零样本泛化,并统一覆盖音频事件分离、乐器分离与语音增强等多任务。 ｜ 意义：让用户用一句自然语言(如"把人声单独提出来""去掉背景吉他")直接从混音中分离目标声音,可落地消费级播客/短视频后期、卡拉OK伴奏提取与会议录音降噪等场景,降低专业音频编辑门槛。 ｜ 局限：依赖大规模多模态数据与高质量文本查询,对模糊或歧义描述的鲁棒性未知,且实时分离的计算开销在端侧消费级设备上可能受限。</div>
       </div>
       <div class="paper">
         <div class="pname">Semantically Consistent Dataset<span class="pid"><a href="https://arxiv.org/abs/2601.22599" target="_blank" rel="noopener">arXiv:2601.22599</a></span></div>
-        <div class="pdesc">语义一致数据集赋能查询式通用音源分离，提升零样本分离泛化。</div>
+        <div class="pdesc">提出自动化流水线,通过语义一致的合成协议从野外数据集中挖掘高纯度单事件片段以消除事件共现,据此构建2.4k小时合成数据集Hive,用纯净监督信号训练query-based通用声音分离模型。 ｜ 意义：用远小于SOTA(SAM-Audio数据量的约1/500)的数据即可让开源模型取得有竞争力的分离精度与感知质量,并具备显著零样本泛化能力,为消费级智能听觉设备(TWS耳机、智能音箱等)在低算力、低数据预算下实现复杂环境中精准分离目标声源提供了新的训练范式。 ｜ 局限：仅靠高纯度合成数据训练虽证明数据效率,但构建依赖从野外数据挖掘单事件片段,对罕见事件或低资源场景的覆盖仍受限于源数据分布;且合成数据与现实复杂声学场景之间的域差距可能削弱泛化上限。</div>
       </div>
       <div class="paper">
         <div class="pname">Ming-UniAudio-Edit<span class="pid"><a href="https://arxiv.org/abs/2511.05516" target="_blank" rel="noopener">arXiv:2511.05516</a></span></div>
-        <div class="pdesc">首个纯自然语言指令驱动 free-form 语音编辑 Speech LLM，可指令擦除特定声源。</div>
+        <div class="pdesc">提出统一连续语音分词器 MingTok-Audio,首次将语义与声学特征整合进单一连续表征,基于此构建兼衡理解与生成的语音大模型 Ming-UniAudio,并训练出首个仅凭自然语言指令、无需时间戳即可同时修改语义与声学的自由式语音编辑模型 Ming-UniAudio-Edit。 ｜ 意义：让普通用户用一句自然语言就能对录音做任意修改(如改词、换语气、调音色),无需专业剪辑或对齐时间轴,大幅降低消费级语音内容编辑门槛。 ｜ 局限：摘要未披露编辑精度、长句保真度及推理延迟等细节,且无时间戳条件下的自由式编辑对复杂多段语义/声学协同改写的稳定性仍待新基准进一步验证。</div>
       </div>
       <div class="paper">
         <div class="pname">MMEDIT<span class="pid"><a href="https://arxiv.org/abs/2512.20339" target="_blank" rel="noopener">arXiv:2512.20339</a></span></div>
-        <div class="pdesc">Qwen2-Audio + MMDiT 统一五类编辑含 removal（擦除）。</div>
+        <div class="pdesc">MMEdit 以音频语言模型驱动,将编辑任务扩展为添加/替换/删除/重排/属性修改五类,设计可扩展数据合成管线构建细粒度事件级配对数据,并将 Qwen2-Audio 编码器与 MMDiT 生成器结合实现跨模态对齐与局部编辑。 ｜ 意义：让消费级用户通过自然语言指令对录音中特定声音事件做精准局部增删改而严守非目标区域不劣化,适用于播客/短视频后期去噪、换声、片段重排等场景。 ｜ 局限：依赖大规模合成配对数据与Qwen2-Audio+MMDiT重型架构,推理开销大,且合成数据的真实分布偏差可能限制对复杂真实录音的编辑鲁棒性;摘要未报告算力与延迟指标。</div>
       </div>
       <div class="paper">
         <div class="pname">AudioChat<span class="pid"><a href="https://arxiv.org/abs/2602.17097" target="_blank" rel="noopener">arXiv:2602.17097</a></span></div>
-        <div class="pdesc">LLM tool-calling agent 多步编辑，可规划"检测 → 分离 → 擦除 → 混回"。</div>
+        <div class="pdesc">提出AudioChat框架,用LLM工具调用agent模拟用户-系统多轮对话作为训练数据,并引入Audio Transfusion Forcing目标,使模型能在结构化思维链中分解高层指令并完成交互式多轮音频理解/生成/编辑。 ｜ 意义：使消费级用户能用自然语言一次性完成"多说话人+背景前景音效"复杂音频故事的理解、生成与编辑,降低播客/短视频/有声内容创作门槛。 ｜ 局限：摘要未披露训练数据规模、真实多源场景的定量评测结果及推理延迟,且依赖LLM模拟对话生成训练数据可能引入分布偏移,在真实复杂声学场景下的泛化能力存疑。</div>
       </div>
       <div class="paper">
         <div class="pname">SAO-Instruct<span class="pid"><a href="https://arxiv.org/abs/2510.22795" target="_blank" rel="noopener">arXiv:2510.22795</a></span></div>
-        <div class="pdesc">NeurIPS 2025 free-form 自然语言指令音频编辑，含擦除操作。</div>
+        <div class="pdesc">基于 Stable Audio Open 构建模型，结合 Prompt-to-Prompt、DDPM inversion 与人工编辑流程构建"输入音频-编辑指令-输出音频"三元组数据集进行训练，从而实现用任意自由格式自然语言指令编辑现有音频片段。 ｜ 意义：让普通用户无需写出完整目标音频描述、也不受预设指令限制，直接用日常口语（如"去掉背景人声""把这段雨声变长"）自由编辑自己的录音或素材，降低消费级音频后期门槛。 ｜ 局限：训练数据部分为合成生成，依赖 DDPM inversion 与 Prompt-to-Prompt 构造三元组，对真实复杂音频或指令语义的覆盖仍有限，且未报告计算成本与编辑精度边界。</div>
       </div>
       <div class="paper">
         <div class="pname">Guiding ALM<span class="pid"><a href="https://arxiv.org/abs/2509.21625" target="_blank" rel="noopener">arXiv:2509.21625</a></span></div>
-        <div class="pdesc">audio language model 处理声明式编辑，支持多声道擦除。</div>
+        <div class="pdesc">提出 SmartDJ 框架,用音频语言模型(ALM)的推理能力将高层声明式指令分解为"添加/移除/空间重定位"等原子编辑操作序列,再交由专门训练的立体声潜在扩散模型执行,并配套数据合成管线生成"高层指令-原子操作-编辑前后音频"配对样本。 ｜ 意义：让 VR/AR 沉浸、虚拟会议、声音设计等消费级场景中,用户只需陈述期望结果(如"把左边的脚步声移到右侧并淡出")而无需写模板化指令,即可获得具备空间真实感与语义对齐的立体声编辑效果,降低交互门槛。 ｜ 局限：摘要未报告推理延迟与计算开销,而 ALM 分解加扩散生成双重流程实时性存疑,难以满足 VR/AR 等低延迟交互需求;且声画同步与多事件复杂时序的鲁棒性未见验证。</div>
       </div>
       <div class="paper">
         <div class="pname">AudEdit<span class="pid"><a href="https://arxiv.org/abs/2606.15149" target="_blank" rel="noopener">arXiv:2606.15149</a></span></div>
-        <div class="pdesc">inversion-free 文本引导编辑保 edit-irrelevant 源成分（擦除不碰其余）。</div>
+        <div class="pdesc">利用预训练 rectified-flow 音频生成器(Stable Audio 3)构建音频专属源到目标常微分方程:在每个流步骤于共享的随机源边际下比较目标条件与源条件速度场,用两者差值更新编辑潜变量,从而实现免训练、免配对数据、免优化的反转式无关编辑。 ｜ 意义：让普通用户用一句文字提示直接改写真实音频(音效、音乐)而无需对抗"重提示词 vs 保住节奏与音色"的权衡,降低消费级音频创作与精修门槛。 ｜ 局限：依赖预训练 Stable Audio 3 rectified-flow 生成器,受其1D潜空间与生成能力上限约束;面向通用音频编辑,对超出该模型分布的复杂长曲结构或非音乐内容的保真度尚待验证,且无训练调参可能限制极端编辑强度。</div>
       </div>
       <div class="paper">
         <div class="pname">DirectAudioEdit<span class="pid"><a href="https://arxiv.org/abs/2606.07356" target="_blank" rel="noopener">arXiv:2606.07356</a></span></div>
-        <div class="pdesc">inversion-free diffusion prediction contrast 保擦除无关部分。</div>
+        <div class="pdesc">首个免训练且免反演(inversion-free)的文本引导音频编辑方法,通过在扩散去噪动态中利用预测对比(prediction contrast)直接构建源到目标的编辑路径,免去反演步骤从而降低计算开销与重建误差。 ｜ 意义：在音乐与事件级基准上相比DDPM反演将宏平均FAD与KL分别降低15.9%/15.8%,并获得最高64.5%的编辑加速,使消费级用户在移动或边缘设备上做高质量音频编辑时更快且更省资源。 ｜ 局限：摘要未展示对语音级编辑的细粒度控制能力,且免反演路径在强源-目标语义差异场景下编辑保真度可能受限,实际消费级应用的稳健性需更多实测验证。</div>
       </div>
       <div class="paper">
         <div class="pname">FreeSonic<span class="pid"><a href="https://arxiv.org/abs/2606.15186" target="_blank" rel="noopener">arXiv:2606.15186</a></span></div>
-        <div class="pdesc">training-free 借 TangoFlux rectified-flow，时间感知解耦注意力。</div>
+        <div class="pdesc">提出 FreeSonic,无需训练即在 Rectified Flow 的 TangoFlux 上通过优化的反演-逆向过程与联合文本-音频注意力图精确抽取目标片段,并用调度式注意力解耦把修改限定在目标区、以任务向噪声注入支持音频移除与非刚性替换等任务。 ｜ 意义：让普通创作者无需重训即可对生成音频做局部精确编辑(只改目标段、保住背景与时间一致性),降低 C1 场景下"既要改得准又要背景不破"的剪辑门槛与算力成本。 ｜ 局限：依赖 Rectified Flow 的 TangoFlux 基座,反演-逆向优化的精度与任务向噪声注入的鲁棒性受限于基模型对时序与声学上下文的建模能力,复杂多源重叠场景下的目标段抽取仍可能出现误判或边界泄漏。</div>
       </div>
       <div class="paper">
         <div class="pname">Virtual Consistency<span class="pid"><a href="https://arxiv.org/abs/2509.17219" target="_blank" rel="noopener">arXiv:2509.17219</a></span></div>
-        <div class="pdesc">model-agnostic 绕过 inversion 改扩散采样做 free-form 文本编辑。</div>
+        <div class="pdesc">提出一种绕过缓慢反演过程的虚拟一致性音频编辑系统,通过改造扩散模型的采样流程实现编辑,且与模型无关、无需微调或改动网络结构。 ｜ 意义：让基于文本的自由式音频编辑摆脱反演步骤带来的高延迟,使普通内容创作者能在消费级设备上快速完成高质量音频编辑,显著提升可用性与实时性。 ｜ 局限：摘要未披露对复杂编辑指令或长音频的处理边界,且仅以16人用户研究与量化基准验证,生态与泛化性证据仍较薄弱。</div>
       </div>
       <div class="paper">
         <div class="pname">RFM-Editing<span class="pid"><a href="https://arxiv.org/abs/2509.14003" target="_blank" rel="noopener">arXiv:2509.14003</a></span></div>
-        <div class="pdesc">rectified flow matching 做文本引导 audio editing，精确定位 + 忠实编辑。</div>
+        <div class="pdesc">提出端到端的 rectified flow matching(整流流匹配)扩散框架用于文本引导音频编辑,并构建含重叠多事件音频的数据集支撑复杂场景训练与基准评测。 ｜ 意义：让用户用一句文本指令即可精准修改音频中的目标内容而保留其余部分,无需辅助字幕或掩码标注,降低消费级语音/音频后期编辑门槛。 ｜ 局限：摘要未给出推理延迟、参数量及对非英语/弱文本约束场景的鲁棒性,rectified flow 匹配的端到端训练仍依赖专属多事件数据集,在严重重叠或长音频上的精确局部化能力有待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">SeamlessEdit<span class="pid"><a href="https://arxiv.org/abs/2505.14066" target="_blank" rel="noopener">arXiv:2505.14066</a></span></div>
-        <div class="pdesc">频带感知噪声抑制 + in-content refinement，擦除噪声保语音。</div>
+        <div class="pdesc">提出噪声鲁棒语音编辑框架SeamlessEdit,采用频带感知噪声抑制模块配合内容内精修策略,专门应对语音与背景噪声频带未分离场景。 ｜ 意义：让用户在嘈杂环境下也能直接对录音做语音插入或替换编辑,无需先降噪即可保持生成语音与原音频无缝衔接,贴近消费级手机/会议录音编辑场景。 ｜ 局限：摘要未提供在真实复杂噪声(如多人交谈、强混响)下的泛化能力与计算开销数据,且对编辑区域与原说话人音色一致性的保持效果仍需更充分验证。</div>
       </div>
       <div class="paper">
         <div class="pname">Audio ControlNet<span class="pid"><a href="https://arxiv.org/abs/2602.04680" target="_blank" rel="noopener">arXiv:2602.04680</a></span></div>
-        <div class="pdesc">细粒度（响度/音高/事件）可控生成与编辑，可擦除特定事件。</div>
+        <div class="pdesc">在预训练 T2A backbone 上训练 ControlNet/Adapter(提出 T2A-ControlNet 与更高效的 T2A-Adapter),仅用 38M 参数即可对响度、音高、事件时间轴实现可控生成,并扩展为 T2A-Editor 支持按指令在指定时间删除/插入音频事件。 ｜ 意义：让创作者无需重训整套生成模型,即可对生成的音频片段精细调控音量、音高与事件时序并做局部增删编辑,满足播客/短视频创作者对"生成后微调、局部剪修音轨"的诉求。 ｜ 局限：仅基于预训练 T2A backbone,控制能力受限于其生成质量与可控属性范围(响度/音高/事件),且摘要未说明对细粒度音色与空间声场的控制能力及编辑指令理解的鲁棒性。</div>
       </div>
       <div class="paper">
         <div class="pname">UNISON<span class="pid"><a href="https://arxiv.org/abs/2605.31530" target="_blank" rel="noopener">arXiv:2605.31530</a></span></div>
-        <div class="pdesc">潜扩散统一 speech gen + sound gen + audio editing（含 speech-in-scene editing）。</div>
+        <div class="pdesc">核心创新是逐层深度LLM融合——从冻结MLLM中均匀采样各层隐藏状态，经可学习投影注入到对应MM-DiT块，提供深度对齐的语义条件以改善指令遵循;并以通道掩码编码任务身份、通过VAE编码的通道拼接提供源音频,在单一权重下统一语音/声音生成与音频编辑。 ｜ 意义：用单套权重覆盖文本转语音、零样本声音克隆、混合语音与声音生成及场景级音频编辑,使普通创作者/内容生产者无需切换多个专用模型,即可在一个系统中完成配音、声音设计与音轨编辑的全流程创作。 ｜ 局限：单一权重承担语音、声音生成与编辑等多任务，且依赖在线多任务数据合成管线与两阶段课程，多任务协同在边界任务(如精细零样本克隆质量)上可能仍逊于专用模型，摘要亦未给出客观评测指标与具体数据集细节。</div>
       </div>
       <div class="paper">
         <div class="pname">Audio-Omni<span class="pid"><a href="https://arxiv.org/abs/2604.10708" target="_blank" rel="noopener">arXiv:2604.10708</a></span></div>
-        <div class="pdesc">统一 audio 理解 + 生成 + 编辑多模态框架。</div>
+        <div class="pdesc">首个端到端统一框架，将冻结的多模态大语言模型（负责高层推理）与可训练的扩散Transformer（负责高保真合成）协同，并构建百万级编辑对数据集AudioEdit以缓解音频编辑数据稀缺，从而在单一框架内打通通用声音、音乐、语音三类域的理解、生成与编辑。 ｜ 意义：让消费级用户可用自然语言一句话完成跨域音频的生成与编辑（如对播客语音去噪改写、为短视频配乐、生成环境音效），无需切换多个专用工具即可实现知识增强、上下文及零样本跨语言控制。 ｜ 局限：摘要未披露推理延迟、显存占用与可部署性，端到端联合训练的frozen-MLLM+DiT架构在消费级设备上实时编辑的算力门槛可能较高；且音频编辑能力依赖自建AudioEdit数据集的覆盖范围，泛化到长片段或复杂多声学场景的边界尚不明确。</div>
       </div>
       <div class="paper">
         <div class="pname">Unified Audio Gen+Editing (Joint Condition)<span class="pid"><a href="https://arxiv.org/abs/2606.16435" target="_blank" rel="noopener">arXiv:2606.16435</a></span></div>
-        <div class="pdesc">联合条件建模 + 渐进训练统一 TTA 与 instruction-based editing。</div>
+        <div class="pdesc">提出 AudioWeave 统一模型,采用因式分解位置嵌入的联合条件建模,使扩散 Transformer 主干能在 TTA 与指令式音频编辑的异构输入下统一运行,并辅以多阶段渐进式训练策略缓解多任务竞争与灾难性遗忘。 ｜ 意义：单模型同时支撑文本生成音频与指令式音频编辑,降低消费级创作工具(如短视频配音、播客后期、有声内容制作)部署成本,让普通用户用一套模型即可"生成+改音频"。 ｜ 局限：统一模型仅达到与专用模型"竞争性"持平而未全面超越,多任务联合训练仍存在任务竞争与灾难性遗忘风险,且摘要未给出延迟、显存及对长音频/复杂多轨场景的泛化表现。</div>
       </div>
       <div class="paper">
         <div class="pname">SemanticAudio<span class="pid"><a href="https://arxiv.org/abs/2601.21402" target="_blank" rel="noopener">arXiv:2601.21402</a></span></div>
-        <div class="pdesc">在语义空间做 audio 生成与编辑。</div>
+        <div class="pdesc">提出SemanticAudio框架,在高层语义空间(捕捉声音事件的全局身份与时序序列、区别于细粒度声学细节)中进行音频生成与编辑,采用两阶段Flow Matching架构——Semantic Planner先生成紧凑语义特征勾勒全局语义布局,Acoustic Synthesizer再据此合成高保真声学latent,并借此解耦设计实现无需训练的文本引导编辑(通过源/目标文本的速度场差引导语义生成轨迹)。 ｜ 意义：让普通创作者无需重训即可对通用音频做精准属性级文本引导编辑(如改变音色/时序/风格),解决现有T2A模型因直接在VAE声学latent空间操作导致的生成音频与文本描述对齐不佳的问题,降低消费级音频创作的修改门槛。 ｜ 局限：摘要仅报告语义对齐指标优势,未说明编辑精度边界、对复杂多事件场景或长时长音频的鲁棒性,且两阶段架构可能带来语义计划与声学合成间的级联误差累积。</div>
       </div>
       <div class="paper">
         <div class="pname">Hybrid Diffusion Transformer<span class="pid"><a href="https://arxiv.org/abs/2606.20101" target="_blank" rel="noopener">arXiv:2606.20101</a></span></div>
-        <div class="pdesc">DiT 骨干做 instruction-guided audio editing via rectified flow。</div>
+        <div class="pdesc">提出基于整流流匹配的两阶段混合扩散Transformer:低分辨率阶段对音频与文本token做联合注意力建立粗语义对齐,高分辨率阶段交替使用联合注意力与交叉注意力块细化编辑细节,以由粗到细策略兼顾编辑精度与对token长度的二次复杂度效率。 ｜ 意义：让普通用户用一句话指令精准修改已有音频(如"把重叠的人声与背景乐中的狗叫去掉、保留讲话"),在重叠事件与复杂指令场景下编辑更准、模型更小更快,落地到移动端播客/短视频后期剪辑工具。 ｜ 局限：摘要未报告模型规模、推理延迟及对未见复杂指令的泛化边界,且两阶段固定切换的粗细分配可能在不同音频时长或编辑粒度下需重新调参,难以一劳永逸适配任意编辑场景。</div>
       </div>
       <div class="paper">
         <div class="pname">QuarkAudio<span class="pid"><a href="https://arxiv.org/abs/2512.20151" target="_blank" rel="noopener">arXiv:2512.20151</a></span></div>
-        <div class="pdesc">统一离散 tokenizer H-Codec 下游支持自然语言指令引导 free-form 音频编辑。</div>
+        <div class="pdesc">采用 decoder-only 自回归语言模型统一多任务框架,核心创新为引入 SSL 表示的离散音频分词器 H-Codec(含动态帧率机制与 48kHz 采样率扩展),并以任务特定条件信息作为条件序列、自回归预测离散目标音频 token 来统一语音恢复、目标说话人提取、语音分离、语音转换、LASS 及自然语言引导的自由形式音频编辑等任务。 ｜ 意义：意义在于用单一统一模型替代分散的专项音频工具,让普通用户用一句自然语言指令即可完成语音修复、说话人提取、变声与音频事件编辑等操作,降低消费级音频创作与处理的门槛与部署成本。 ｜ 局限：摘要未披露参数规模、推理延迟与实测数据集细节,且统一框架在多项任务上的性能多为"comparable"而非全面超越专项SOTA,自由形式音频编辑的实际可控性与鲁棒性仍有待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">Diffusion Timbre Transfer<span class="pid"><a href="https://arxiv.org/abs/2601.01294" target="_blank" rel="noopener">arXiv:2601.01294</a></span></div>
-        <div class="pdesc">免训练推理时音色迁移（擦除原音色换新）。</div>
+        <div class="pdesc">无需额外训练,在预训练潜扩散模型推理期施加两步轻量控制:按维度向最携带乐器身份信息的潜通道注入噪声,并在逆向扩散早期步骤用 clamping 重新施加输入的旋律与节奏结构,直接作用于音频潜空间且兼容 CLAP 等文本/音频条件。 ｜ 意义：使普通用户无需重新训练、无需专业音色库即可在消费级音乐创作工具中把已有音频"换音色"而不丢失旋律节奏,降低风格迁移的算力与门槛。 ｜ 局限：方法依赖强预训练潜扩散模型且效果受所选模型能力制约;音色改变与结构保持之间的折中需人工调节超参,可能仍难兼顾复杂多变演奏或多种乐器同时迁移。</div>
       </div>
       <div class="paper">
         <div class="pname">Zero-VC<span class="pid"><a href="https://arxiv.org/abs/2606.20218" target="_blank" rel="noopener">arXiv:2606.20218</a></span></div>
-        <div class="pdesc">零前瞻流式 VC 去 timbre 不丢 prosody（身份擦除）。</div>
+        <div class="pdesc">将说话人匿名化(SA)引入为新型扰动机制，在抑制音色泄漏的同时保留韵律(F0等)实用性，借由SA的鲁棒表征消除生成器对未来帧的依赖，构建严格因果、零前瞻的流式零样本声纹转换网络，规避信息瓶颈(IB)法需注入并缓冲未来帧的算法前瞻延迟。 ｜ 意义：为实时语音通话、直播变声与隐私匿名等消费级低延迟场景提供零前瞻流式零样本变声方案，用户无需缓冲即可即时变声并保护音色隐私，兼顾低延迟、自然韵律与隐私安全。 ｜ 局限：摘要未给出量化指标与跨语种/噪声鲁棒性结果，作为扰动类方法其音色匿名化强度与转换自然度之间的权衡仍可能受限于源说话人特征复杂度，且零前瞻因果网络在极端韵律重构场景下的稳定性有待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">DiffAnon<span class="pid"><a href="https://arxiv.org/abs/2604.26281" target="_blank" rel="noopener">arXiv:2604.26281</a></span></div>
-        <div class="pdesc">扩散 + CFG 给匿名化韵律保持控制。</div>
+        <div class="pdesc">采用扩散模型结合无分类器引导(CFG),在 RVQ 编解码器的语义嵌入上逐步精修声学细节,实现单一模型内可在推理时连续插值匿名强度与韵律保真度的显式可控匿名化。 ｜ 意义：为隐私通话、采访匿名化等消费级场景提供"一条龙可调"的语音匿名方案——用户不再被固定档位限制,可按需在保护说话人身份与保留情感韵律之间滑动权衡,满足既想隐匿身份又想保持语气表达的真实诉求。 ｜ 局限：摘要未报告具体隐私指标数值与说话人验证攻击下的鲁棒性,且推理时扩散采样与CFG可能带来计算开销,影响实时性;连续控制维度下的可逆性与对抗攻击防御仍有待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">EASY<span class="pid"><a href="https://arxiv.org/abs/2505.15004" target="_blank" rel="noopener">arXiv:2505.15004</a></span></div>
-        <div class="pdesc">因子化蒸馏保情感的匿名化（擦除身份保情感）。</div>
+        <div class="pdesc">采用顺序解耦依次分离说话人身份、语言内容与情感表征,通过因子化蒸馏将各属性建模于独立子空间,分别约束身份与情感以最小化信息泄漏。 ｜ 意义：面向语音隐私保护场景(如会议录音匿名化、客服数据脱敏),在隐藏说话人身份的同时保留原文与情绪,使脱敏语音仍可用于情感分析或个性化服务,而非抹平情绪成为平淡机器音。 ｜ 局限：仅在VoicePrivacy官方数据集上验证,对真实嘈杂场景与多语种情感的泛化能力未知;三阶段顺序解耦带来更高的计算开销与实时性挑战,且情感子空间建模依赖情感标签质量,跨域时易退化。</div>
       </div>
     </div>
 
@@ -1700,55 +1700,55 @@
     <div class="papers">
       <div class="paper">
         <div class="pname">PGDI<span class="pid"><a href="https://arxiv.org/abs/2508.08890" target="_blank" rel="noopener">arXiv:2508.08890</a></span></div>
-        <div class="pdesc">扩散 inpainting 重建 ≤1s 缺口，保说话人/韵律/混响，音素级 classifier guidance。</div>
+        <div class="pdesc">PGDI 以扩散模型语音修复为骨架,创新点在引入音素级分类器引导(phoneme-level classifier guidance)作为去噪采样约束,以说话人无关方式重建最长约1秒的缺失/被强瞬态噪声完全掩蔽片段,同时保持说话人身份、韵律与混响等环境特性。 ｜ 意义：可让消费级场景(手机/相机录像被鞭炮、关门、敲击、施工等瞬态噪声打断的人声)在不重录的前提下恢复清晰连续语音,直接满足用户"噪声毁掉关键一段也能救回"的诉求。 ｜ 局限：扩散模型推理需多步迭代,实时性差,且长间隙与强噪声下的鲁棒性虽增强但摘要未报告计算成本与延迟,落地上实时处理仍受限。</div>
       </div>
       <div class="paper">
         <div class="pname">Token-Based Audio Inpainting<span class="pid"><a href="https://arxiv.org/abs/2507.08333" target="_blank" rel="noopener">arXiv:2507.08333</a></span></div>
-        <div class="pdesc">离散扩散对 tokenized 音频做 inpainting，稳定修复长缺口。</div>
+        <div class="pdesc">首个在预训练音频分词器输出的离散音乐 token 上做离散扩散的方法,并以导数正则化损失约束时间平滑性、span 吸收态转移提供结构化噪声,从而稳定填补长缺口。 ｜ 意义：能稳定修复音乐录音中长达数百毫秒的缺失片段,解决消费级音乐修复/降噪场景中现有扩散模型长缺口失效、用户难以获得语义连贯补全的痛点。 ｜ 局限：仅在 MusicNet 与 MAESTRO 古典音乐数据集上验证,对语音及复杂混音场景的泛化未明,且依赖预训练音频分词器质量,750 ms 以上更长缺口恢复能力存疑。</div>
       </div>
       <div class="paper">
         <div class="pname">Audio Inpainting (TF + Phase-Aware)<span class="pid"><a href="https://arxiv.org/abs/2601.18535" target="_blank" rel="noopener">arXiv:2601.18535</a></span></div>
-        <div class="pdesc">时频域 inpainting，相位感知先验。</div>
+        <div class="pdesc">提出一种相位感知的信号先验方法，利用瞬时频率估计来约束时频域缺失频谱的填补，并将其建模为优化问题用广义Chambolle-Pock算法求解。 ｜ 意义：在音频修复质量大幅超越既有方法的同时显著降低计算开销，使消费级场景下受损或丢包音频的实时高质量重建成为可能，直接满足用户对清晰连贯听感的需求。 ｜ 局限：依赖瞬时频率估计的精度，且摘要未说明对大范围连续缺失或非平稳复杂信号（如音乐多声部）的恢复能力，泛化边界尚不明确。</div>
       </div>
       <div class="paper">
         <div class="pname">UNIT-DSR<span class="pid"><a href="https://arxiv.org/abs/2401.14664" target="_blank" rel="noopener">arXiv:2401.14664</a></span></div>
-        <div class="pdesc">构音障碍 → 正常 speech-unit normalization，保身份变清晰。</div>
+        <div class="pdesc">用 HuBERT 提取离散语音单元,在离散语言学空间中约束内容恢复,系统仅由语音单元归一化器和 Unit HiFi-GAN 声码器组成,去除了级联子模块与辅助任务,提升训练效率与结构简洁性。 ｜ 意义：为构音障碍患者的语音辅助沟通提供更清晰可懂的重建输出,有望落地到消费级助听/语音辅助设备,帮助听障或运动障碍用户实现更顺畅的日常口语交流。 ｜ 局限：摘要未提供音色保真度、说话人身份保留及实时性的数据,且依赖 HuBERT 离散单元,在极端构音障碍或未见过的噪声条件下可能受限。</div>
       </div>
       <div class="paper">
         <div class="pname">DiffDSR<span class="pid"><a href="https://arxiv.org/abs/2506.00350" target="_blank" rel="noopener">arXiv:2506.00350</a></span></div>
-        <div class="pdesc">潜扩散 DSR，SSL content + speaker encoder。</div>
+        <div class="pdesc">采用潜在扩散模型重构构音障碍语音,通过 SSL 语音基础模型恢复音素嵌入、用上下文学习实现说话人身份保持,再由扩散生成器基于恢复的音素与身份重建语音。 ｜ 意义：可为构音障碍患者等发音不清的辅助沟通场景将含糊语音转为清晰可懂且保留本人音色的语音,提升听者理解与交流效率。 ｜ 局限：摘要未报告实时性与计算开销,扩散模型通常推理慢、对严重构音障碍的泛化能力待更多数据集验证,且对轻噪声/情感表达的恢复可能不足。</div>
       </div>
       <div class="paper">
         <div class="pname">CFM-DSR<span class="pid"><a href="https://arxiv.org/abs/2506.16127" target="_blank" rel="noopener">arXiv:2506.16127</a></span></div>
-        <div class="pdesc">条件流匹配 DiT + WavLM 非自回归。</div>
+        <div class="pdesc">采用完全非自回归的 Conditional Flow Matching(CFM)结合 Diffusion Transformer,以 WavLM 提取的离散声学单元(量化 SSL 特征)替代 mel 频谱图,直接学习构音障碍语音到干净语音的映射,并用 WavLM 特征生成单一说话人音色以缓解说话人差异。 ｜ 意义：为神经性构音障碍患者提供"含糊语音→清晰可懂语音"的实时转换,使日常设备(手机、助听终端)能将重度不清的语音转译为他人可理解的输出,帮助患者恢复有效的口头沟通能力。 ｜ 局限：摘要把说话人统一为单一音色,牺牲了说话人个性化(难以保留原说话人身份),且生成单说话人声音在多说话人/多人对话场景适用性受限;非自回归映射对极端变速/缺音的构音障碍样本的鲁棒性尚需验证。</div>
       </div>
       <div class="paper">
         <div class="pname">ClaritySpeech<span class="pid"><a href="https://arxiv.org/abs/2507.09282" target="_blank" rel="noopener">arXiv:2507.09282</a></span></div>
-        <div class="pdesc">ASR + 文本混淆 + 零样本 TTS 矫正痴呆语音保身份。</div>
+        <div class="pdesc">将 ASR、文本混淆与零样本 TTS 串联,在低数据、免微调条件下对受痴呆症影响的语音进行转写纠错并用零样本 TTS 重建,以在不改音色的前提下矫正异常语音。 ｜ 意义：面向认知障碍等非典型语音用户,在矫正口齿不清、降低隐私泄漏的同时保留说话人身份,满足助听与无障碍沟通场景下"听得清、认得出、不泄隐私"的诉求。 ｜ 局限：摘要仅报告 ADReSS/ADReSSo 两数据集结果且说话人相似度仅维持约 50%,在多方言、重度构音障碍及更广真实居家噪声场景下的泛化能力与说话人保真度仍待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">ChiReSSD<span class="pid"><a href="https://arxiv.org/abs/2509.19231" target="_blank" rel="noopener">arXiv:2509.19231</a></span></div>
-        <div class="pdesc">儿童语音障碍生成式重建保身份去错音。</div>
+        <div class="pdesc">采用解耦的、基于风格的TTS重建框架,通过分离说话人身份与发音内容、并着重适配儿童语音障碍(SSD)的音高与韵律,在抑制错误发音的同时保留说话人身份。 ｜ 意义：可让构音障碍/儿童SSD群体在消费级语音评测场景中获得自动化可懂度与PCC评分(自动与人工Pearson 0.63),减少听障筛查与言语康复中的人工转写负担。 ｜ 局限：相关性仅0.63,自动化评分距临床诊断级精度仍有差距,且跨年龄/病种(TORGO成人构音障碍)的泛化能力需更大规模与多样性临床数据进一步验证。</div>
       </div>
       <div class="paper">
         <div class="pname">AP-GRPO<span class="pid"><a href="https://arxiv.org/abs/2606.15540" target="_blank" rel="noopener">arXiv:2606.15540</a></span></div>
-        <div class="pdesc">锚词保留 + 锚间损坏段重建（局部修复）。</div>
+        <div class="pdesc">在GRPO强化学习框架内为语音语言模型设计两种音素奖励:锚点门控奖励匹配清晰区域中可靠的听觉锚点,跨锚点音素对齐奖励验证恢复内容是否被对应受损语音段在音素层面支持,实现以可听锚点保留+锚点间音素兼容性对齐原始语音信号。 ｜ 意义：为听障/神经退行性疾病患者家庭场景提供病理语音重建能力,可让患者含混不清的口述被准确还原为可读文本或可懂语音,直接满足助听、字幕转写与日常语音交互的可懂度诉求。 ｜ 局限：依赖录音中存在可靠"锚点"词且其可检测性受噪声/语种影响,GRPO强化学习训练成本高且语音奖励信号本身难以精确建模,跨语种与重度失语患者的泛化能力仍需验证。</div>
       </div>
       <div class="paper">
         <div class="pname">EL-Speech-Enhancement<span class="pid"><a href="https://arxiv.org/abs/2606.01905" target="_blank" rel="noopener">arXiv:2606.01905</a></span></div>
-        <div class="pdesc">电子喉 → 自然语音，speech-text 表示学习。</div>
+        <div class="pdesc">在 seq2seq 声学模型中融合语音与文本表征进行 EL2SP 转换,提出中层、输入层与混合层三种渐进式融合策略,以多模态表征对齐改善映射与重建质量。 ｜ 意义：为依赖电子喉发声的喉切除患者提升 EL 语音的自然度、音素变化与韵律质量,使其日常沟通更可懂、更接近正常语音,改善生活质量。 ｜ 局限：摘要未报告具体自然度/可懂度指标提升幅度,且依赖文本输入可能在噪声或无文本场景下受限,对喉切除者个体差异的鲁棒性也待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">Personalized-TTS-Dysarthric<span class="pid"><a href="https://arxiv.org/abs/2508.10412" target="_blank" rel="noopener">arXiv:2508.10412</a></span></div>
-        <div class="pdesc">少量劣化样本个性化 TTS voice banking。</div>
+        <div class="pdesc">将构音障碍语音个性化合成建模为域迁移任务,提出知识锚定框架,采用师生模型结合音频增广的课程学习机制,引导零样本多说话人TTS在保留说话人音色与韵律自然度的同时降低发音错误。 ｜ 意义：使零样本TTS能直接适配构音障碍目标说话人,减少发音错误、维持高保真音色,从而为听障/言语康复等C2消费场景中"保留患者本人音色、提升可懂度"的个性化语音重建诉求提供可行路径。 ｜ 局限：摘要未报告可懂度的客观量化提升幅度及在重度构音障碍上的泛化表现,且域迁移对训练数据量与增广策略的依赖可能限制其在数据稀缺患者上的鲁棒性。</div>
       </div>
       <div class="paper">
         <div class="pname">Test-Time Training Speech Editing in the Wild<span class="pid"><a href="https://arxiv.org/abs/2506.13295" target="_blank" rel="noopener">arXiv:2506.13295</a></span></div>
-        <div class="pdesc">测试时训练适配未见声学条件。</div>
+        <div class="pdesc">实例特定的测试时训练:未编辑区域用ground-truth声学特征做直接监督,编辑区域用时长约束和音素预测的辅助损失做间接监督,缓解带宽不连续问题,并通过mask长度调整精确控制语速。 ｜ 意义：在真实多变录音环境下也能流畅编辑语音并精确控制语速,解决消费级用户修改片段后音色不一致、过渡不自然的痛点。 ｜ 局限：测试时训练需逐样本计算,推理开销大且对延迟敏感;摘要未报告计算成本与实时性数据,对编辑区域较长的场景处理能力可能受限。</div>
       </div>
       <div class="paper">
         <div class="pname">PhASE-Flow<span class="pid"><a href="https://arxiv.org/abs/2606.17806" target="_blank" rel="noopener">arXiv:2606.17806</a></span></div>
-        <div class="pdesc">语音增强（流匹配，非编辑但修复能力相关）。</div>
+        <div class="pdesc">提出PhASE-Flow,首个完全在自监督学习(SSL)潜空间内进行流匹配的语音增强框架,以音素级SSL表征为条件建模干净声学表征的条件分布,再经神经声码器重建波形,而非像以往方法仅在频谱域生成、把SSL特征当外部条件。 ｜ 意义：四步采样即可达SOTA级感知质量与可懂度,使高质量降噪/去混响有望在手机通话、耳机拾音等实时消费级场景中低延迟落地,提升嘈杂环境下语音通话清晰度。 ｜ 局限：摘要未披露在SSL潜空间建模与依赖神经声码器重建波形带来的额外计算/延迟代价,且仅在四步采样下与基线相当,极端噪声或低信噪比场景下的鲁棒性及与端到端谱域方法的效率对比仍有待验证。</div>
       </div>
     </div>
 
@@ -1822,87 +1822,87 @@
     <div class="papers">
       <div class="paper">
         <div class="pname">VoiceCraft<span class="pid"><a href="https://arxiv.org/abs/2403.16973" target="_blank" rel="noopener">arXiv:2403.16973</a></span></div>
-        <div class="pdesc">token infilling 做真实野外编辑（播客/有声书），引入 RealEdit 基准。</div>
+        <div class="pdesc">VoiceCraft是一个token填充式神经编解码器语言模型,采用Transformer解码器架构,创新点在于提出结合因果掩蔽与延迟堆叠的token重排机制,使模型能在已有音频序列内部完成生成式填充。 ｜ 意义：使普通用户无需重新录制即可对真实录音(含多种口音、风格、背景噪声与音乐)进行高质量零样本语音编辑和TTS,编辑后自然度接近原录音,大幅降低播客、短视频、有声书等消费级内容的后期门槛。 ｜ 局限：作为基于神经编解码器语言模型的token填充方法,对长序列编辑的稳定性及复杂背景音/口音下与真人录音仍有差距,且编辑区域外的全局一致性受编解码器量化精度约束。</div>
       </div>
       <div class="paper">
         <div class="pname">EditSpeech<span class="pid"><a href="https://arxiv.org/abs/2107.01554" target="_blank" rel="noopener">arXiv:2107.01554</a></span></div>
-        <div class="pdesc">文本驱动编辑鼻祖，部分推理 + 双向融合。</div>
+        <div class="pdesc">在神经TTS框架上做文本驱动的语音编辑(删除/插入/替换),创新点是部分推断(partial inference)只对编辑区及其上下文重新合成,并配合双向融合(bidirectional fusion)将左右边界上下文信息融入以实现平滑过渡,同时尽量不改未受影响片段以减少失真。 ｜ 意义：让播客/有声书/口播后期等消费级内容创作用户可直接修改文稿即可局部改音,无需重录整句,降低录制返工成本并保持自然听感。 ｜ 局限：摘要未给出编辑长度上限、跨语言迁移与实时性指标,且基于NTTS框架,编辑区过大或韵剧差异显著时双向融合的拼接平滑度可能下降,中英多说话人场景外泛化能力存疑。</div>
       </div>
       <div class="paper">
         <div class="pname">A3T<span class="pid"><a href="https://arxiv.org/abs/2203.09690" target="_blank" rel="noopener">arXiv:2203.09690</a></span></div>
-        <div class="pdesc">对齐感知预训练，TTS + 编辑统一。</div>
+        <div class="pdesc">在预训练阶段以文本输入与声学-文本对齐为约束,对被掩码的声学信号进行重建,使同一预训练模型直接输出高质量重建频谱图,无需外接说话人验证模块即可驱动语音编辑与未见说话人 TTS。 ｜ 意义：单一预训练模型同时胜任语音编辑与多说话人合成,降低消费级语音内容创作(如播客/有声内容编辑、个性化角色配音)中多模型串联与显式说话人建模带来的门槛与延迟。 ｜ 局限：摘要未提及实时性与多语言鲁棒性,且自回归/掩码重建推测仍依赖大量成对语料与算力,对资源受限的端侧语音编创部署与未见过的复杂噪声场景仍有待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">FluentEditor2<span class="pid"><a href="https://arxiv.org/abs/2410.03719" target="_blank" rel="noopener">arXiv:2410.03719</a></span></div>
-        <div class="pdesc">多尺度声学/韵律一致性（帧/音素/词边界）。</div>
+        <div class="pdesc">提出层次化局部声学平滑约束(在帧、音素、词三层边界对齐声学属性)与对比式全局韵律一致性约束,联合建模多尺度声学与韵律一致性。 ｜ 意义：让用户仅改文本即可编辑录音、且编辑区与原声在音色与韵律上无缝衔接,直接满足消费级场景中"改字不改音、听不出被剪过"的播客/配音后期诉求。 ｜ 局限：仅在朗读语料 VCTK/LibriTTS 上验证,对真实嘈杂录音及大幅改写长段落的语义连贯性泛化能力摘要未涉及,且多尺度约束的计算开销未知。</div>
       </div>
       <div class="paper">
         <div class="pname">CosyEdit / CosyEdit2<span class="pid"><a href="https://arxiv.org/abs/2601.05329" target="_blank" rel="noopener">arXiv:2601.05329</a> · <a href="https://arxiv.org/abs/2605.25930" target="_blank" rel="noopener">2605.25930</a></span></div>
-        <div class="pdesc">从 CosyVoice TTS 骨干经 250h GigaEdit 微调迁移到编辑；CosyEdit2 加 editing-oriented RL。</div>
+        <div class="pdesc">通过对 CosyVoice TTS 骨干解耦"编辑/生成"目标并配 250h GigaEdit 监督数据微调,实现端到端编辑而免级联预处理与显式外部时间对齐；CosyEdit2 进一步加 editing-oriented RL 显式优化编辑质量。 ｜ 意义：摆脱级联系统复杂预处理与显式外部时间对齐依赖,让普通创作者用文本指令即可高质量修改已录语音,显著降低消费级语音后期编辑的门槛与成本。 ｜ 局限：仅用 250 小时监督数据微调,对编辑指令覆盖范围外的复杂时序/语义改写或非中英文语种可能泛化不足,端到端对齐对长篇及噪声录音的鲁棒性也需进一步验证；CosyEdit2 的 RL 奖励设计依赖明确编辑目标,开放场景泛化待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">SSR-Speech<span class="pid"><a href="https://arxiv.org/abs/2409.07556" target="_blank" rel="noopener">arXiv:2409.07556</a></span></div>
-        <div class="pdesc">CFG 稳定化零样本编辑，自报 RealEdit SOTA。</div>
+        <div class="pdesc">基于 Transformer 解码器的神经编解码器自回归模型,引入 classifier-free guidance 增强生成稳定性,并提出 watermark Encodec 在编辑区域嵌入帧级水印以可检测性,同时波形重建复用原始未编辑片段实现优于 Encodec 的恢复质量。 ｜ 意义：面向消费级播客/视频创作者的文本化语音编辑与零-shot 合成场景,让用户无需重录即可稳定、安全地修改口误或多段内容,并能在含背景声的录音中稳健编辑,降低后期门槛。 ｜ 局限：摘要未披露推理延迟、训练数据规模与版权细节,且对背景噪声鲁棒性虽强但零-shot克隆长跨段编辑时音色一致性及水印抗攻击性的边界条件仍待实测验证。</div>
       </div>
       <div class="paper">
         <div class="pname">AST<span class="pid"><a href="https://arxiv.org/abs/2604.16056" target="_blank" rel="noopener">arXiv:2604.16056</a></span></div>
-        <div class="pdesc">免训练精确编辑（潜空间重组合 + AWFG 引导），自报 ~70% WER↓。</div>
+        <div class="pdesc">基于预训练自回归TTS模型,提出Latent Recomposition在隐空间选择性拼接保留的源片段与新合成目标以实现精确语音/风格编辑,并引入Adaptive Weak Fact Guidance(AWFG)在mel空间动态调制引导信号,仅在必要处施加结构约束以消除编辑边界伪影且不破坏生成流形;同时构建LibriSpeech-Edit数据集并提出词级动态时间规整(WDTW)度量未编辑区时间一致性。 ｜ 意义：无需额外训练即可解决语音编辑的可控性与质量权衡,使普通用户在播客剪辑、有声书修改、口误修补等场景下能精准替换或调整特定片段,同时保持说话人音色与未编辑段落的时间一致性,显著降低WER近70%。 ｜ 局限：依赖预训练自回归TTS模型,编辑质量受其上限约束;摘要未评估多说话人重叠场景、跨语种及强情感/噪声条件下的鲁棒性,且AWFG仅施加mel空间结构约束,对深层语义连贯性可能不足。</div>
       </div>
       <div class="paper">
         <div class="pname">DiffEditor<span class="pid"><a href="https://arxiv.org/abs/2409.12992" target="_blank" rel="noopener">arXiv:2409.12992</a></span></div>
-        <div class="pdesc">语义增强改善 OOD 自由文本编辑可懂度。</div>
+        <div class="pdesc">通过将预训练语言模型抽取的词嵌入融合进音素嵌入以丰富语义信息,并引入一阶损失函数建模帧间平滑特性,促进编辑边界处过渡平滑、提升声学一致性。 ｜ 意义：解决文本式语音编辑在领域外(OOD)文本下可懂度与声学一致性下降的问题,使普通用户在播客剪辑、配音修改等场景下可自由替换生僻词或外文专名而保持自然流畅。 ｜ 局限：摘要未披露对非英文/低资源语言及极端编辑长度(如整句替换)的泛化能力,且依赖预训练语言模型抽取词嵌入,引入额外计算开销与对语言一致性的潜在约束。</div>
       </div>
       <div class="paper">
         <div class="pname">Edit-Content-Preserve-Acoustics<span class="pid"><a href="https://arxiv.org/abs/2602.00560" target="_blank" rel="noopener">arXiv:2602.00560</a></span></div>
-        <div class="pdesc">追求不可感知文本编辑（Self-Consistency Rewards GRPO + Flow Matching）。</div>
+        <div class="pdesc">在稳定语义空间中执行编辑、由 Flow Matching 解码器负责声学实现,并用 Self-Consistency Rewards GRPO 以预训练 TTS 作为隐式评论家、配合可懂度与时长约束进行强化学习优化,解耦内容与声学风格以避免边界伪影。 ｜ 意义：让普通用户仅通过修改转写文本即可无感改写口播内容、保持原音色与声学连续,显著优化播客/口播/有声内容后期修订这一 C3 场景下"改文字而不破坏原声"的诉求。 ｜ 局限：摘要未报告编辑保真度/说话人一致性的量化指标与推理开销,且依赖预训练 TTS 作隐式评论家可能在多说话人或强情感语音下评估失准,鲁棒性待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">SpeechEdit<span class="pid"><a href="https://arxiv.org/abs/2601.12480" target="_blank" rel="noopener">arXiv:2601.12480</a></span></div>
-        <div class="pdesc">codec LM 默认复刻 + 按指令选择性 override 单属性。</div>
+        <div class="pdesc">方法是在统一神经编解码语言模型上引入选择性控制机制——默认整体复刻语音提示的声学画像(音色、韵律、副语言),仅在显式控制指令指定时覆盖对应属性,并用LibriHeavy派生的差异感知(delta)训练对构成LibriEdit数据集做可控建模。 ｜ 意义：面向消费者级零样本语音创作场景,使用户无需重录即可对生成语音的单一属性(如音色、韵律)做局部定向修改,解决传统零样本TTS只能整体克隆、无法精细化编辑的痛点。 ｜ 局限：依赖LibriHeavy派生的LibriEdit数据集构造delta训练对，可控属性的范围与粒度受限于数据集覆盖的属性对类型，且摘要未报告多属性同时覆盖时的稳定性与跨语种泛化。</div>
       </div>
       <div class="paper">
         <div class="pname">LEMAS-Edit<span class="pid"><a href="https://arxiv.org/abs/2601.04233" target="_blank" rel="noopener">arXiv:2601.04233</a></span></div>
-        <div class="pdesc">masked token infilling，150h 多语种。</div>
+        <div class="pdesc">LEMAS-Edit 采用自回归 decoder-only 架构,将语音编辑建模为掩码 token 填充任务,利用词级时间戳构造训练掩码并结合自适应解码策略,实现平滑边界的语音编辑。 ｜ 意义：能让用户像文字编辑一样对录好的语音做局部改词、删句或替换,无需重录整段,满足播客、视频旁白等消费级场景中"改一处口误、补一句话"的高效口播修正诉求。 ｜ 局限：摘要信息有限且标题与正文存在不一致,实际为数据集+生成模型综合工作;语音编辑依赖高质量词级时间戳对齐,对齐误差或数据偏少的语言仍可能产生边界瑕疵,且自回归解码在长片段编辑时实时性受限。</div>
       </div>
       <div class="paper">
         <div class="pname">MAVE<span class="pid"><a href="https://arxiv.org/abs/2510.04738" target="_blank" rel="noopener">arXiv:2510.04738</a></span></div>
-        <div class="pdesc">基于 cross-attentive Mamba (SSM) 的 AR 语音编辑。</div>
+        <div class="pdesc">采用交叉注意力Mamba主干做自回归语音编辑与TTS:Mamba结构化状态空间建模负责高效音频序列建模(线性复杂度、低显存),交叉注意力负责精确的文本-声学对齐,二者协同实现上下文感知的编辑与高音质合成,且无需多轮推理或后处理即可在零样本TTS上取得强结果。 ｜ 意义：在消费级语音编辑场景中(如播客/短视频创作者对录制音频做局部改词、修音、换语气的"听不出剪辑"式编辑),以约1/6的推理显存、相近延迟交付接近原声自然度的编辑结果,使高保真语音编辑可在单卡甚至更轻量设备上落地,降低创作者的算力与剪辑门槛。 ｜ 局限：自回归序列生成仍受逐token解码的延迟约束(摘要虽强调显存优势但承认与VoiceCraft延迟相当),且评测仅基于RealEdit一个基准的40样本子集,跨语言/口音与长时编辑的鲁棒性及训练数据依赖未在摘要中体现。</div>
       </div>
       <div class="paper">
         <div class="pname">LLaDA-TTS<span class="pid"><a href="https://arxiv.org/abs/2603.26364" target="_blank" rel="noopener">arXiv:2603.26364</a></span></div>
-        <div class="pdesc">掩码扩散 50h 微调迁移，编辑成为合成零成本副产物。</div>
+        <div class="pdesc">用双向注意力的掩码扩散模型替换自回归LLM解码,将N步串行生成解耦为固定并行步数,仅用50小时数据即可从预训练AR检查点微调迁移,且双向架构天然支持零样本词级插入/删除/替换编辑。 ｜ 意义：让消费级语音编创在保持CosyVoice 3级自然度(CER 0.98%)的同时降低长文本合成延迟并原生支持按词级零样本编辑,直接满足普通用户快速修稿、改词重录的高频诉求。 ｜ 局限：64步并行解码仍较AR有2x加速但非实时级,且迁移依赖预训练AR检查点,零样本编辑鲁棒性与长文本一致性在摘要中未充分验证。</div>
       </div>
       <div class="paper">
         <div class="pname">MaskGCT<span class="pid"><a href="https://arxiv.org/abs/2409.00750" target="_blank" rel="noopener">arXiv:2409.00750</a></span></div>
-        <div class="pdesc">全非自回归掩码 codec transformer TTS，编辑路线母体。</div>
+        <div class="pdesc">完全非自回归的两阶段 TTS:先用文本从 SSL 模型预测语义 token,再以语义 token 为条件预测声学 token,全程采用 mask-and-predict 学习,摒弃显式对齐与音素级时长预测。 ｜ 意义：免对齐、免时长预测使其能稳定克隆任意说话人音色并快速批量生成高质量语音,满足消费级场景中"用少量参考音即可生成自然、相似、可懂语音"的低门槛个性化合成诉求。 ｜ 局限：非自回归的 mask-and-predict 在强韵律、长篇情感控制及细粒度停顿/重音编辑上仍弱于自回归方案,且语义与声学两阶段链路对算力要求较高,摘要未给出实时推理延迟数据,消费端部署成本存疑。</div>
       </div>
       <div class="paper">
         <div class="pname">MiMo-Audio-7B-Base<span class="pid"><a href="https://arxiv.org/abs/2512.23808" target="_blank" rel="noopener">arXiv:2512.23808</a></span></div>
-        <div class="pdesc">7B 音频 LM，语音编辑作为缩放涌现能力。</div>
+        <div class="pdesc">将MiMo-Audio预训练数据规模扩展至超1亿小时,涌现出跨多种音频任务的少样本学习能力,并在指令版本中引入"思考机制"统一音频理解与生成。 ｜ 意义：让普通用户无需专业工具即可完成语音转换、风格迁移、语音编辑乃至生成脱口秀、朗诵、直播辩论等长篇连贯语音内容,显著降低语音创作门槛。 ｜ 局限：摘要未披露推理成本、延迟与可控性细节,7B参数规模在端侧消费级设备上难以实时部署,且few-shot泛化到未训练任务时质量稳定性存疑。</div>
       </div>
       <div class="paper">
         <div class="pname">DiSTAR<span class="pid"><a href="https://arxiv.org/abs/2510.12210" target="_blank" rel="noopener">arXiv:2510.12210</a></span></div>
-        <div class="pdesc">AR 草拟 + 掩码扩散填充混合。</div>
+        <div class="pdesc">DiSTAR 在离散残差向量量化(RVQ)码空间中工作,先用自回归语言模型起草块级RVQ token,再基于该草稿做并行掩码扩散填充补全下一块,无需强制对齐或时长预测器,并通过块级并行缓解经典AR曝光偏差。 ｜ 意义：为零样本长篇章TTS提供高质量、高鲁棒性且可控的合成,支持分类器无关引导、鲁棒-多样性折中与测试时RVQ层剪枝实现可变码率与算力可控,契合消费级语音助手/有声内容生成对长文本稳定发音与按需调节算力的诉求。 ｜ 局限：完全依赖离散RVQ码本,对码本质量与重建保真度敏感,且两阶段AR+扩散耦合的训练与推理复杂度可能高于单阶段系统,长篇章与极端鲁棒性边界仍需验证。</div>
       </div>
       <div class="paper">
         <div class="pname">UAT<span class="pid"><a href="https://arxiv.org/abs/2606.04939" target="_blank" rel="noopener">arXiv:2606.04939</a></span></div>
-        <div class="pdesc">扩散中心框架统一音频生成/编辑/captioning。</div>
+        <div class="pdesc">采用双流共享骨干架构，将音频的连续潜空间扩散与文本的掩码离散扩散耦合，实现统一的音频-文本双向建模，支撑生成、编辑与字幕三类任务。 ｜ 意义：单一模型即可完成"生成-编辑-字幕"全链路，省去多模型切换与对齐成本，适合消费级用户一句话生成音频、按需微调编辑并自动加字幕的一站式语音编创场景。 ｜ 局限：摘要未披露具体评测数据集、模型规模与推理效率，连续与离散双流耦合的训练稳定性、captioning 相对专用模型的差距，以及音质保真度等关键指标仍待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">Metis<span class="pid"><a href="https://arxiv.org/abs/2502.03128" target="_blank" rel="noopener">arXiv:2502.03128</a></span></div>
-        <div class="pdesc">掩码生成骨干，VC 作为生成能力。</div>
+        <div class="pdesc">采用预训练+微调的统一语音生成基础模型范式,在SSL tokens上做掩码生成式预训练(30万小时无标注语音),配合SSL与声学双离散表征,微调时以不到20M可训练参数适配零样本TTS、语音转换、目标说话人提取、语音增强、唇语转语音等多任务。 ｜ 意义：单一模型即可覆盖语音编创场景中语音克隆、变声、降噪、说话人分离、唇音同步等多样化用户诉求,以极小参数与数据量实现任务统一,显著降低消费级创作工具的部署门槛与多模型切换成本。 ｜ 局限：统一建模需在多任务间权衡音质与说话人相似度,且双离散表征依赖大量无标注预训练语料,落地时数据成本与推理开销仍待优化。</div>
       </div>
       <div class="paper">
         <div class="pname">EmoCorrector<span class="pid"><a href="https://arxiv.org/abs/2505.20341" target="_blank" rel="noopener">arXiv:2505.20341</a></span></div>
-        <div class="pdesc">RAG 后修正——文字改完后情感偏移纠正。</div>
+        <div class="pdesc">提出基于检索增强生成(RAG)的TSE后校正方案,先抽取编辑文本的情感特征,再从样本库检索匹配该情感的语音,最终合成与目标情感对齐且保留原说话人身份的语音。 ｜ 意义：解决用户在文本编辑改词后语音情感与内容脱节的问题,使播客、有声书、配音等场景无需重录即可让修改后的语音自然带有所需情绪。 ｜ 局限：依赖外部情感语音样本库进行检索,对稀有或复合情感的覆盖与匹配质量受库规模限制,且摘要未说明跨语言、强噪声环境及说话人保真度的鲁棒性表现。</div>
       </div>
       <div class="paper">
         <div class="pname">Counterfactual Activation Editing<span class="pid"><a href="https://arxiv.org/abs/2506.00832" target="_blank" rel="noopener">arXiv:2506.00832</a></span></div>
-        <div class="pdesc">模型无关反事实激活编辑推理期韵律控制。</div>
+        <div class="pdesc">通过反事实激活编辑直接干预预训练 TTS 模型的内部表征（模型无关），在推理时对韵律与发音进行事后调控，无需专用模块、额外训练或依赖 G2P 字典。 ｜ 意义：让用户在推理阶段即可对合成语音做韵律微调与发音纠错，满足消费级场景中低资源语言/个性化语音"不重训即精修"的诉求，降低定制门槛。 ｜ 局限：摘要未说明可控粒度与稳定性，反事实激活编辑的语义边界、对多说话人/情感叠加等复杂场景的鲁棒性及对底层预训练模型架构的依赖程度仍待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">Causal Prosody Mediation<span class="pid"><a href="https://arxiv.org/abs/2603.11683" target="_blank" rel="noopener">arXiv:2603.11683</a></span></div>
-        <div class="pdesc">结构因果模型解耦情绪韵律与内容。</div>
+        <div class="pdesc">在 FastSpeech2 上构建文本/情感/说话人影响韵律的结构因果模型,引入间接路径约束(IPC,限定情感仅经韵律影响语音)与反事实韵律约束(CPC,鼓励不同情感产生差异化韵律)两项因果损失,实现情感韵律与语言内容的解耦。 ｜ 意义：为消费级语音内容创作(如短视频配音、有声书、虚拟人)提供可控的"同一句话不同情绪"反事实韵律编辑,在不牺牲自然度前提下让普通用户精细调节表达情感且跨说话人保持音色一致。 ｜ 局限：摘要自身指出局限:假设情感效果完全可由音高、时长、能量三者捕获,未覆盖音色、气息、共鸣等其他韵律维度,因果结构对真实情感机制的刻画仍偏简化。</div>
       </div>
     </div>
 
@@ -1981,19 +1981,19 @@
     <div class="papers">
       <div class="paper">
         <div class="pname">MMEDIT<span class="pid"><a href="https://arxiv.org/abs/2512.20339" target="_blank" rel="noopener">arXiv:2512.20339</a></span></div>
-        <div class="pdesc">Qwen2-Audio + MMDiT 统一五类编辑含 reordering（重组顺序），间接覆盖。</div>
+        <div class="pdesc">方法将编辑任务系统扩展为添加/替换/移除/重排/属性修改五类,设计可扩展数据合成管线生成带事件级细粒度标注的大规模配对数据,并以Qwen2-Audio编码器耦合MMDiT生成器实现跨模态对齐与局部编辑。 ｜ 意义：让普通用户用自然语言指令对录音做精准局部编辑(如去噪、替换背景声、调整事件顺序),无需专业音频软件即可保留非目标内容、保证高保真,降低播客与Vlog后期门槛。 ｜ 局限：依赖大规模合成配对数据与Qwen2-Audio编码器,算力与数据构建成本高;摘要未报告实时性与长音频处理表现,实际复杂多事件场景下的鲁棒性仍待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">Ming-UniAudio-Edit<span class="pid"><a href="https://arxiv.org/abs/2511.05516" target="_blank" rel="noopener">arXiv:2511.05516</a></span></div>
-        <div class="pdesc">free-form 指令编辑含裁剪拼接重组，间接覆盖。</div>
+        <div class="pdesc">free-form 自然语言指令编辑含裁剪拼接重组动作,作为 C4 裁剪拼接的间接覆盖（完整方法见 C1）。 ｜ 意义：说明裁剪拼接重组可被统一到指令式 free-form 编辑框架内,无需专门裁剪模型即可由自然语言驱动,为消费级"一句话剪音频"提供可行路径。 ｜ 局限：裁剪拼接仅是其多操作能力之一,无针对结构编辑的专门评测与优化,精确边界/无缝拼接质量无独立验证。</div>
       </div>
       <div class="paper">
         <div class="pname">LLaDA-TTS<span class="pid"><a href="https://arxiv.org/abs/2603.26364" target="_blank" rel="noopener">arXiv:2603.26364</a></span></div>
-        <div class="pdesc">后验选择性掩码做零样本词级插入/删除/替换，可扩展到片段裁剪概念，间接覆盖。</div>
+        <div class="pdesc">将AR LLM解码替换为掩码扩散模型,仅通过双向注意力掩码和训练目标改造、复用预训练AR检查点,在固定并行步数内完成生成。 ｜ 意义：用固定并行步替代N步自回归解码,显著降低长文本TTS的推理延迟,并天然支持零样本词级插入/删除/替换式语音编辑,满足用户快速生成与局部改稿的诉求。 ｜ 局限：摘要未报告语音自然度与说话人相似度等量化指标,且仅用50小时数据迁移,扩散解码质量可能不及大规模AR基线,编辑精度在长句插入场景下待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">AudioChat<span class="pid"><a href="https://arxiv.org/abs/2602.17097" target="_blank" rel="noopener">arXiv:2602.17097</a></span></div>
-        <div class="pdesc">LLM agent 多步编辑含裁剪拼接重组规划，间接覆盖。</div>
+        <div class="pdesc">方法是用 LLM 工具调用 agent 模拟用户-系统交互对话作为训练数据，并提出 Audio Transfusion Forcing 目标，使单一模型同时通过结构化思维链分解高层指令并完成多轮交互式音频理解与生成。 ｜ 意义：让消费级内容创作者无需专业 DAW 技能，即可通过自然语言对话在一段多说话人+音效的复杂音频故事中实现生成、编辑与理解一体化，解决现有音频基础模型难以处理复杂多源声学场景的问题。 ｜ 局限：摘要未披露模型规模与推理开销，且其多智能体模拟对话训练数据可能引入合成偏差，三类任务性指标尚未在开放复杂场景验证泛化能力。</div>
       </div>
     </div>
 
@@ -2062,67 +2062,67 @@
     <div class="papers">
       <div class="paper">
         <div class="pname">Vevo / Vevo2<span class="pid"><a href="https://arxiv.org/abs/2502.07243" target="_blank" rel="noopener">arXiv:2502.07243</a> · <a href="https://arxiv.org/abs/2508.16332" target="_blank" rel="noopener">2508.16332</a></span></div>
-        <div class="pdesc">零样本 VC + 口音/情感转换；Vevo2 双 tokenizer（content-style 解耦 + prosody tokenizer）。</div>
+        <div class="pdesc">两阶段架构(自回归 Transformer 做 Content-Style 建模、流匹配 Transformer 做声学建模),通过 VQ-VAE 对 HuBERT 连续特征分词并将码本词表作为信息瓶颈逐级解耦音色/风格/内容,实现全自监督零样本 VC；Vevo2 用双 tokenizer(content-style 解耦 + prosody tokenizer)进一步分轨编辑。 ｜ 意义：仅靠 60K 小时有声书自监督训练、无需风格语料微调即可零样本完成口音/情绪转换与 VC/TTS,使消费级场景中"一句话克隆目标音色与说话风格"无需录制大量目标人语料即可达成。 ｜ 局限：解耦依赖 VQ-VAE 码本大小这一信息瓶颈的人工调参,且仅在有声书单一域数据上训练,对噪声/跨域/真实复杂录音下的鲁棒性与解耦质量摘要未验证；Vevo2 的多 tokenizer 分轨在重叠音色下可能互相干扰。</div>
       </div>
       <div class="paper">
         <div class="pname">FreeVC<span class="pid"><a href="https://arxiv.org/abs/2210.15418" target="_blank" rel="noopener">arXiv:2210.15418</a></span></div>
-        <div class="pdesc">text-free one-shot VC。</div>
+        <div class="pdesc">采用 VITS 端到端框架重建波形以消除转换模型与声码器失配，通过对 WavLM 特征施加信息瓶颈解耦出无说话人泄露的干净内容信息，并提出基于频谱图缩放的数据增强进一步提升内容纯度，实现免文本标注的一次性语音转换。 ｜ 意义：仅需单条目标音色参考、无需文本标注即可高质量换声，适配消费级场景下用户想用自己的声音克隆他人音色或个性化 TTS 配音（如短视频配音、语音变声器）却无大规模标注数据的诉求。 ｜ 局限：摘要未给出具体数值评估与跨语言/极端相似音色的鲁棒性边界，信息瓶颈可能损失部分语言细节，且单样本音色建模对噪声/口音差异大或情感强烈的目标音色仍可能存在还原不稳的局限。</div>
       </div>
       <div class="paper">
         <div class="pname">AutoVC<span class="pid"><a href="https://arxiv.org/abs/1905.05879" target="_blank" rel="noopener">arXiv:1905.05879</a></span></div>
-        <div class="pdesc">zero-shot voice style transfer。</div>
+        <div class="pdesc">仅用一个自编码器配合精心设计的瓶颈(bottleneck),在自重建损失上训练即可实现分布匹配式风格迁移,从而用同一网络完成非平行多对多与零样本语音转换。 ｜ 意义：让用户无需录制海量平行语料、只需少量目标音色参考即可将任意输入语音转换成他人音色,支撑消费级的个性化变声、虚拟形象配音与有声内容定制。 ｜ 局限：依赖精心设计的瓶颈结构且仅以自重建损失训练,对未见说话人的音色建模与生成语音的自然度/稳定性在数据稀缺时仍可能受限,且摘要未提供感知质量或鲁棒性的量化证据。</div>
       </div>
       <div class="paper">
         <div class="pname">RIVET<span class="pid"><a href="https://arxiv.org/abs/2606.19629" target="_blank" rel="noopener">arXiv:2606.19629</a></span></div>
-        <div class="pdesc">编辑年龄/性别等属性保说话人身份，幂等性训练目标 f(f(x))=f(x) 抗噪声标签。</div>
+        <div class="pdesc">RIVET 在语音属性编辑模型训练中引入幂等性目标 f(f(x))=f(x),将其作为隐式正则项降低对噪声标签的敏感度,从而在标注噪声下稳定年龄、性别等属性编辑。 ｜ 意义：让普通用户在真实世界标注质量参差不齐的语音数据上仍能可靠地修改音色属性而不破坏说话人身份,支撑消费级语音变声/角色塑造类应用的稳健落地。 ｜ 局限：幂等约束仅缓解标签噪声带来的不稳定,对标签系统性错误或属性与说话人身份强耦合时的编辑冲突帮助有限,且摘要未报告额外计算开销与多属性联合编辑的泛化表现。</div>
       </div>
       <div class="paper">
         <div class="pname">VoiceCraft-X<span class="pid"><a href="https://arxiv.org/abs/2511.12347" target="_blank" rel="noopener">arXiv:2511.12347</a></span></div>
-        <div class="pdesc">11 语言编辑 + 零样本 TTS 统一，跨语言换声。</div>
+        <div class="pdesc">该工作基于Qwen3大语言模型做无音素跨语言文本处理,并提出时间对齐的文本-语音token重排序机制,将多语言零样本TTS与语音编辑统一为单一自回归codec语言模型的序列生成问题。 ｜ 意义：单一模型即可用少量语音克隆音色并直接编辑既有录音,降低多语种语音内容创作与后期改稿的门槛,满足创作者一站式生成与修改多语言配音的用户诉求。 ｜ 局限：摘要未披露客观评测指标与编辑稳定性细节,作为自回归codec语言模型其推理延迟较高,且在声学复杂或噪声场景下的鲁棒性、语音克隆的安全与防滥用问题仍待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">VoiceCraft-Dub<span class="pid"><a href="https://arxiv.org/abs/2504.02386" target="_blank" rel="noopener">arXiv:2504.02386</a></span></div>
-        <div class="pdesc">视频配音 lip-sync 换声。</div>
+        <div class="pdesc">基于 Neural Codec Language Models,设计 adapter 将人脸特征对齐到 NCLM token 空间并引入音视频融合层,使合成语音在时间上与面部运动同步且保留自然韵律。 ｜ 意义：针对自动视频配音(C5)场景,实现音画同步的高质量语音合成,让译制视频的口型对齐与表达自然度显著提升,优于现有方法。 ｜ 局限：依赖自建 CelebV-Dub 数据集,跨语言/多人脸/复杂光照的泛化能力存疑,且实时推理开销未在摘要中说明。</div>
       </div>
       <div class="paper">
         <div class="pname">UniVoice<span class="pid"><a href="https://arxiv.org/abs/2606.05852" target="_blank" rel="noopener">arXiv:2606.05852</a></span></div>
-        <div class="pdesc">统一语音生成含跨语言。</div>
+        <div class="pdesc">基于条件流匹配(conditional flow matching)构建统一框架,将条件分解为内容、旋律(MIDI序列)、音色三类并由模态适配编码器分别编码,再送入共享 Diffusion Transformer(DiT)骨干;语音时用学习的 null melody token 替代旋律条件,使模型从语言与声学上下文推断韵律,从而在歌唱保留显式旋律控制的同时不对语音韵律施加旋律约束。 ｜ 意义：单一模型同时生成自然语音与可控歌唱,使消费级创作类应用(如虚拟歌手、AI 翻唱、有声/音乐内容生成)无需维护两套系统即可在说话与唱歌间自由切换,降低部署成本并提升创作者体验。 ｜ 局限：摘要未报告歌唱音质/自然度主观评测与多语言/情感控制能力,且 null melody token 仅是旋律边际化的近似,可能在跨域音色迁移等复杂场景下限制表现力。</div>
       </div>
       <div class="paper">
         <div class="pname">Zero-VC<span class="pid"><a href="https://arxiv.org/abs/2606.20218" target="_blank" rel="noopener">arXiv:2606.20218</a></span></div>
-        <div class="pdesc">零前瞻流式 VC，身份替换/擦除。</div>
+        <div class="pdesc">将说话人匿名化(SA)作为一种新型扰动机制引入零样本流式语音转换,以SA的鲁棒表征在抑制音色泄露的同时保留韵律(如基频)效用,从而显著缓解生成器对未来帧的依赖,构建严格因果、零前瞻(无算法超前延迟)的网络,规避信息瓶颈丢弃韵律需缓冲未来帧导致的延迟问题。 ｜ 意义：使实时变声(直播主播变声、游戏语音伪装、客服隐私保护)可在零前瞻下低延迟运行,无需缓冲未来帧即可保留原话韵律与情感,满足消费级场景对端到端低延迟与音色可控的诉求。 ｜ 局限：摘要未给出客观音色相似度、韵律保持与抗说话人识别的量化指标,且基于说话人匿名化表征的扰动在目标音色极相近时仍可能残留音色泄露,其零前瞻因果网络的鲁棒性在极端噪声或跨语种场景下有待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">StreamVC<span class="pid"><a href="https://arxiv.org/abs/2401.03078" target="_blank" rel="noopener">arXiv:2401.03078</a></span></div>
-        <div class="pdesc">流式 VC（实时换声）。</div>
+        <div class="pdesc">基于 SoundStream 神经音频编解码器构建流式框架,因果地学习软语音单元保留源内容与韵律,并用白化 F0 信息稳定音高同时避免泄漏源音色,实现低延迟匹配目标音色的波形合成。 ｜ 意义：在通话、视频会议等实时通信中实现低延迟(移动端可用)的语音匿名化与音色转换,直接满足用户隐私保护与实时变声的消费级诉求。 ｜ 局限：基于 SoundStream 流式设计,对训练数据规模与算力要求较高,且摘要未涉及跨语种/情感保真度及在强噪声环境下的鲁棒性,移动端低延迟仍依赖专用压缩 codec 折中音质。</div>
       </div>
       <div class="paper">
         <div class="pname">DualVC3<span class="pid"><a href="https://arxiv.org/abs/2406.07846" target="_blank" rel="noopener">arXiv:2406.07846</a></span></div>
-        <div class="pdesc">流式 VC。</div>
+        <div class="pdesc">用说话人无关的语义Token引导内容编码器训练以去除对ASR的依赖并支持极小分块运行,消除级联误差;同时用语言模型迭代预测未来帧产生伪上下文,提升流式转换质量。 ｜ 意义：将流式变声延迟从约180ms压到50ms,使实时直播配音、语音聊天变声等低延迟消费场景中说话者能自然接话、避免明显迟滞感。 ｜ 局限：摘要未披露模型参数量、算力需求及在噪声/多人混叠等复杂场景下的鲁棒性,且50ms低延迟仍依赖迭代预测未来帧,在边缘设备上的实时性与稳定性有待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">RT-VC<span class="pid"><a href="https://arxiv.org/abs/2506.10289" target="_blank" rel="noopener">arXiv:2506.10289</a></span></div>
-        <div class="pdesc">实时 VC。</div>
+        <div class="pdesc">基于发音特征(articulatory feature)空间自然解耦内容与说话人特征,并引入可微数字信号处理(DDSP)直接从发音特征高效声码化,从而显著降低转换延迟。 ｜ 意义：将零样本实时变声的CPU延迟压至61.4ms(降13.3%),使消费级助听/辅助沟通、游戏语音变声等对延迟敏感的实时交互场景可在普通CPU上流畅运行。 ｜ 局限：摘要仅报告CPU 61.4ms与质量持平SOTA,未给出GPU/移动端实测、鲁棒性(噪声/口音)及目标说话人样本质量对转换稳定性的影响,且发音特征空间在极端音色差异下的泛化能力仍待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">SynthVC<span class="pid"><a href="https://arxiv.org/abs/2510.09245" target="_blank" rel="noopener">arXiv:2510.09245</a></span></div>
-        <div class="pdesc">流式 VC。</div>
+        <div class="pdesc">基于神经音频编解码器构建流式端到端VC框架,利用预训练零样本VC模型生成合成平行数据直接学习音色变换,从而省去ASR模块与显式内容-说话人解耦,规避音色泄漏问题。 ｜ 意义：实现仅77.1ms端到端延迟的高保真流式变声,满足直播连麦、语音社交等场景下用户对实时变声且自然度与音色相似度俱佳的诉求。 ｜ 局限：依赖预训练零样本VC模型生成合成平行数据的质量,且作为端到端流式框架,在复杂噪声环境或情感迁移等非音色维度的鲁棒性仍有待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">X-VC<span class="pid"><a href="https://arxiv.org/abs/2604.12456" target="_blank" rel="noopener">arXiv:2604.12456</a></span></div>
-        <div class="pdesc">流式 VC。</div>
+        <div class="pdesc">在预训练神经编解码器的潜空间中一步完成转换,采用双条件声学转换器联合建模源编解码潜变量与帧级声学条件,并通过自适应归一化注入话语级目标说话人信息,配合分块推断与重叠平滑实现流式零样本VC。 ｜ 意义：以流式低延迟、低离线实时因子实现高说话人相似度的零样本变声,让实时直播/通话类消费级用户在低端设备上即可即时切换为任意未见过目标音色。 ｜ 局限：摘要未涉及对噪声/跨语种源音及情感保真的评估,且流式分块推断与重叠平滑可能带来边界伪影,对未见说话人的极端音色泛化仍有待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">MaskGCT<span class="pid"><a href="https://arxiv.org/abs/2409.00750" target="_blank" rel="noopener">arXiv:2409.00750</a></span></div>
-        <div class="pdesc">掩码生成骨干 VC 出口。</div>
+        <div class="pdesc">提出全非自回归两阶段TTS模型MaskGCT:第一阶段由文本预测语音SSL模型提取的语义token,第二阶段在该语义token条件下预测声学token,全程采用mask-and-predict范式(训练预测被遮蔽token,推理按指定长度并行生成),从而彻底消除文本-语音显式对齐与音素级时长预测的依赖。 ｜ 意义：在10万小时野生语音上于质量、音色相似度与可懂度超越当前SOTA零样本TTS,使消费级内容创作/配音只需几秒参考音频即可零样本克隆自然、稳定且可并行快速合成的语音。 ｜ 局限：两阶段需大量野生语音(100K小时)训练且依赖外部SSL语义编解码器,显式长度仍需外部指定,模型规模与算力需求偏高,端侧/低资源场景落地受限。</div>
       </div>
       <div class="paper">
         <div class="pname">Metis<span class="pid"><a href="https://arxiv.org/abs/2502.03128" target="_blank" rel="noopener">arXiv:2502.03128</a></span></div>
-        <div class="pdesc">掩码生成 VC。</div>
+        <div class="pdesc">采用大规模无标注语音(300K小时)做掩码生成式预训练,联合自监督SSL tokens与声学tokens,再以极少量可训练参数(<20M)微调统一适配多任务。 ｜ 意义：单一基础模型即可在手机/桌面端低成本复用同一套权重完成语音克隆、变声、降噪及唇语转语音,降低普通用户多场景创作工具的部署与切换成本。 ｜ 局限：摘要未披露多任务统一后各子任务相对专用模型的精度差距,且zero-shot克隆与跨语种鲁棒性在消费端嘈杂场景下仍待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">Amphion v0.2<span class="pid"><a href="https://arxiv.org/abs/2501.15442" target="_blank" rel="noopener">arXiv:2501.15442</a></span></div>
-        <div class="pdesc">开源工具包含 voice conversion。</div>
+        <div class="pdesc">构建统一开源工具链,核心创新在于配套10万小时多语种数据集与端到端数据准备流水线,并在此基础上发布针对TTS、音频编解码、语音转换的新模型,辅以教程降低使用门槛。 ｜ 意义：让中小团队与个人研究者无需从零搭建数据与训练管线即可快速试验TTS/语音转换/编解码,显著降低消费级语音内容创作(如个性化配音、播客、有声读物)的研发与上手成本。 ｜ 局限：摘要未给出模型推理开销、实时性及与闭源系统(如商用TTS/VC)的质量对比,作为开源工具链其前沿模型能力与工程稳定性仍依赖社区持续维护,且对端侧/低资源部署的支持尚不明确。</div>
       </div>
     </div>
 
@@ -2196,27 +2196,27 @@
     <div class="papers">
       <div class="paper">
         <div class="pname">FlowEdit<span class="pid"><a href="https://arxiv.org/abs/2606.20518" target="_blank" rel="noopener">arXiv:2606.20518</a></span></div>
-        <div class="pdesc">流匹配 TTS 的终身发音自适应，自建 312 名词/18 语系 benchmark，自报 92.7% PER↓。</div>
+        <div class="pdesc">对冻结的 flow-matching TTS 不更新权重,而是在文本嵌入空间优化 token 级扰动作为"隐式条件编辑",并用 Modern Hopfield Network 作为内容寻址情景记忆存储纠正,推理时经带相似度门的 soft attention 模糊形态匹配检索复用。 ｜ 意义：让已部署的零样本 TTS 无需重训即可就地修正专有名词发音错误,直接解决消费级场景中用户名、地名等冷僻词被念错的痛点,且 15 秒内单 GPU 完成纠正、通用语音质量不变。 ｜ 局限：仅基于离线反馈校正的 token 级嵌入扰动,依赖已有纠正监督信号,且相似门控的模糊匹配存在误检/过拟合到特定专有名词的风险,长期累积下记忆库检索质量与稀疏罕见词泛化能力未经验证。</div>
       </div>
       <div class="paper">
         <div class="pname">SonoEdit<span class="pid"><a href="https://arxiv.org/abs/2601.17086" target="_blank" rel="noopener">arXiv:2601.17086</a></span></div>
-        <div class="pdesc">模型编辑（零空间约束）纠正 LLM-TTS 低资源专有名词发音，AlphaEdit 母体。</div>
+        <div class="pdesc">通过改编 Acoustic Causal Tracing 定位 TTS 模型中负责文本到发音映射的 Transformer 层,再以 Null-Space Constrained Editing 求出闭式权重更新,对目标词发音做单次外科式修正,并保证该更新正交于通用语音生成子空间、对保留语料零一阶扰动。 ｜ 意义：让消费级 TTS 无需重训或采集昂贵多语数据即可纠正常被念错的人名、品牌、地名等低资源专有名词,使个性化语音助手/有声内容在跨语种、跨地域用户场景下发音更准、部署更轻。 ｜ 局限：摘要未给出在大量专有名词上批量修正后的鲁棒性、口音/韵律保真度及与基线系统的客观评测对比;null-space 约束为零阶近似,对深层非线性扰动与分布外长尾词的泛化能力存疑,且修正仍依赖少量发音范例。</div>
       </div>
       <div class="paper">
         <div class="pname">SpeechAccentLLM<span class="pid"><a href="https://arxiv.org/abs/2507.01348" target="_blank" rel="noopener">arXiv:2507.01348</a></span></div>
-        <div class="pdesc">SpeechCodeVAE（CTC 进 codebook）+ 多任务 FAC/TTS + SpeechRestorer。</div>
+        <div class="pdesc">提出SpeechCodeVAE将CTC直接嵌入码本离散化实现具局部性的语音内容分词,并以多任务联合训练FAC与TTS,辅以SpeechRestorer后处理架构修正LLM生成输出的随机错误、增强韵律连续性。 ｜ 意义：为外语口音转换(FAC)提供更高内容保真与韵律连续的方案,让非母语用户在跨语言视频会议、播客等消费级场景中输出更自然流畅、接近目标母语口音的语音。 ｜ 局限：摘要未报告转换自然度与说话人保持的客观指标,且CTC集成与SpeechRestorer后处理可能增加推理延迟,在端侧实时口音转换场景下落地成本存疑。</div>
       </div>
       <div class="paper">
         <div class="pname">PHONOS<span class="pid"><a href="https://arxiv.org/abs/2603.27001" target="_blank" rel="noopener">arXiv:2603.27001</a></span></div>
-        <div class="pdesc">流式口音编辑，因果口音翻译器 ≤40ms lookahead（同属 C1 匿名化）。</div>
+        <div class="pdesc">用silence-aware DTW对齐结合零样本语音转换预生成保留音色与节奏但替换为母语段位的golden speaker话语，再以联合交叉熵与CTC损失监督一个最多40ms前视的因果口音翻译器，将非母语内容token映射为母语等价物，实现流式实时匿名化。 ｜ 意义：为消费级实时语音通话/直播场景提供口音中性化，让带地方或非母语口音的用户在保护隐私(降低说话人可链接性)的同时获得母语般表达，扩展了匿名集合提升隐私安全。 ｜ 局限：实时流式处理依赖单GPU且延迟约241ms，难以直接部署到边缘或低算力设备；摘要未报告音质自然度退化及多语种/方言覆盖情况，accent neutralization可能损失说话人原本的语言文化身份。</div>
       </div>
       <div class="paper">
         <div class="pname">Streaming Accent Conversion NAR<span class="pid"><a href="https://arxiv.org/abs/2506.16580" target="_blank" rel="noopener">arXiv:2506.16580</a></span></div>
-        <div class="pdesc">首个流式口音转换 NAR，Emformer + 稳定延迟。</div>
+        <div class="pdesc">在前代口音转换架构上引入Emformer编码器实现流式处理、配合优化的推理机制,并用原生TTS生成理想ground-truth数据进行高效训练,构成首个可流式的口音转换系统。 ｜ 意义：让非母语者在实时通话/直播中即时获得近母语口音并改善发音,满足跨语言沟通场景下低延迟、保说话人音色与韵律的用户诉求。 ｜ 局限：流式框架对Emformer上下文窗口与边界音素建模敏感,口音转换质量可能弱于离线顶尖模型,且依赖TTS合成数据的训练范式在覆盖真实非母语口音多样性上存在偏差风险。</div>
       </div>
       <div class="paper">
         <div class="pname">accent token 分析<span class="pid"><a href="https://arxiv.org/abs/2601.19786" target="_blank" rel="noopener">arXiv:2601.19786</a></span></div>
-        <div class="pdesc">口音在离散 token 中的编码研究。</div>
+        <div class="pdesc">提出统一评测框架,以新颖的 Accent ABX 任务度量口音信息的可访问性,并通过跨口音语音转换(VC)重合成度量可恢复性,系统分析多种主流语音表征导出的 DSRT。 ｜ 意义：为消费级 TTS/VC 应用实现地道口音迁移与个性化发音提供诊断依据,帮助用户在合成语音时保留目标口音特征、避免"机器腔"。 ｜ 局限：仅作为分析评估框架,未提出改进 DSRT 以更好编码口音的具体方案,且摘要未报告口音生成质量与跨语种泛化效果。</div>
       </div>
     </div>
 
@@ -2292,19 +2292,19 @@
     <div class="papers">
       <div class="paper">
         <div class="pname">SwanVoice<span class="pid"><a href="https://arxiv.org/abs/2605.30993" target="_blank" rel="noopener">arXiv:2605.30993</a></span></div>
-        <div class="pdesc">25Hz VAE + pause-aware + flow-matching DiT 带 speaker-turn conditioning，1-4 说话人对话（生成端）。</div>
+        <div class="pdesc">融合25Hz VAE、带停顿符号与拼音替换的原始文本条件化，以及引入说话人轮次条件的flow-matching DiT，并采用从独白到混合再到真实对话的课程式训练，配合以音素级与说话人相似度为奖励的DiffusionNFT后训练。 ｜ 意义：面向有声书、播客、广播剧等消费级场景，让普通用户用零样本方式生成1-4人、富有层次感的长篇角色对话，解决多说话人富表现力合成的痛点。 ｜ 局限：摘要明确指出内容准确性仍是主要局限，即多说话人长篇对话的文本保真度不足。</div>
       </div>
       <div class="paper">
         <div class="pname">MagpieTTS-LF<span class="pid"><a href="https://arxiv.org/abs/2606.18485" target="_blank" rel="noopener">arXiv:2606.18485</a></span></div>
-        <div class="pdesc">推理期长时段生成，无需长时段训练数据（生成端）。</div>
+        <div class="pdesc">在推理阶段引入三项创新而不重训模型:用软注意力先验引导单调对齐以同时保留过去与未来上下文;用有状态推理算法跨句块维护上下文以保证韵律连续;用历史感知文本编码利用上文文本做篇章级韵律规划。 ｜ 意义：让消费级长篇语音合成(如有声书、播客、长文档朗读)无需重训即可消除韵律漂移、说话人前后不一致与句间拼接痕迹,直接提升用户听感连贯性。 ｜ 局限：摘要未披露推理开销、可处理的最大长文长度及跨句状态内存占用;且作为推理时方法仍依赖原MagpieTTS模型能力,对极长篇章(如整本书)的篇章级规划稳定性与计算可扩展性待验证。</div>
       </div>
       <div class="paper">
         <div class="pname">Borderless Long Speech<span class="pid"><a href="https://arxiv.org/abs/2603.19798" target="_blank" rel="noopener">arXiv:2603.19798</a></span></div>
-        <div class="pdesc">长时段合成（生成端）。</div>
+        <div class="pdesc">提出Borderless Long Speech统一框架,采用连续tokenizer骨干并加入Chain-of-Thought推理与Dimension Dropout以提升复杂指令遵循,同时设计Global-Sentence-Token多层标注体系作为LLM Agent与合成引擎间的结构化语义接口。 ｜ 意义：使长篇播客、有声书与多角色对话等内容能以全局语境驱动合成,真实还原多说话人插话、重叠语音与情感演变,让前端LLM把任意模态输入转成结构化生成命令,显著提升消费级长音频创作的连贯性与可控性。 ｜ 局限：摘要以框架与策略描述为主,未给出与基线对比的客观评测指标,且"标注优于清洗"策略与CoT/Dimension Dropout对长篇语音质量、说话人区分准确率及推理时延的实际增益仍待量化验证。</div>
       </div>
       <div class="paper">
         <div class="pname">Content-Anonymization Long-form<span class="pid"><a href="https://arxiv.org/abs/2510.12780" target="_blank" rel="noopener">arXiv:2510.12780</a></span></div>
-        <div class="pdesc">长时段多句重识别的词法/风格泄漏防护（匿名化侧，间接相关）。</div>
+        <div class="pdesc">采用 ASR-TTS 流水线对转写文本做上下文改写(paraphrasing),消除说话人特定的词汇、句法与措辞风格同时保留语义,以此抵御针对语音匿名化后的内容驱动重识别攻击。 ｜ 意义：解决长时段通话(采访/电话/会议)中匿名化语音仍可被借个体用语习惯重新识别的隐私风险,满足 C 场景用户对长音频录音既要可用又要真正匿名的诉求。 ｜ 局限：改写虽能抵御内容攻击,但语义保真与语音自然度会受损,且依赖 ASR 转写质量;摘要仅验证电话对话设定,泛化到其他域与更强的自适应攻击者仍存疑。</div>
       </div>
     </div>
 
