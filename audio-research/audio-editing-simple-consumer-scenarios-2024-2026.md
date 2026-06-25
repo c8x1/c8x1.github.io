@@ -558,3 +558,149 @@ SwanVoice(2605.30993) · MoonCast(2503.14345) · MultiActor-Audiobook(2505.13082
 ## 代表论文
 
 SeamlessEdit(2505.14066) · PGDI(2508.08890) · TTT-SpeechEdit(2506.13295) · MPol(2601.14770) · PAS-SE(2509.20875) · FlowSE-GRPO(2601.16483) · ClaritySpeech(2507.09282) · Metis(2502.03128)
+
+# 横切附录
+
+## A. 评测基准
+
+| 基准 | arXiv ID | 服务原语/维度 | 说明 |
+|------|----------|-------------|------|
+| MMAE | [2606.07229](https://arxiv.org/abs/2606.07229) | P2/P4/P7 / D2/D3 | 首个通用 instruction-based 音频编辑基准，7 模态/6 级复杂度/8 操作/2000 样本/17741 rubric；**EMR<5%、复杂混合模态=0%**——P2 擦除可靠性受此限制 |
+| SpeechEditBench | [2606.01804](https://arxiv.org/abs/2606.01804) | P4/P5 | 双语多属性 instruction-guided，结论"无模型全能"——P4 组合式多属性编辑仍难 |
+| ISSE | [2509.24570](https://arxiv.org/abs/2509.24570) | P4/P5/P6 | 指令式语音风格编辑基准，评测风格编辑保内容/保身份 |
+| Interpretable Audio Editing Eval | [2509.16975](https://arxiv.org/abs/2509.16975) | P1–P7 / D1–D3 | CoT 可解释评测，辅助理解编辑指令执行链 |
+| MUSDB18 + SiSNR 类 | 无 arXiv（经典基准） | P1 | 音源分离评测事实标准；消费级"描述即分离"需在此类基准上验证零样本分离泛化——目前无专门消费级分离评测 |
+| VoicePrivacy Challenge (VPC) | [2601.11846](https://arxiv.org/abs/2601.11846) / [2504.14183](https://arxiv.org/abs/2504.14183) | P5（匿名化侧）/ P2（擦除侧） | 匿名化评测事实标准（含 Attacker Challenge 抗重识别）；P5/P2 身份擦除保内容情感需在此验证 |
+| DNS Challenge / VoiceBank-DEMAND | 无 arXiv（经典基准） | P3 / D3 | 语音增强评测事实标准；消费级一键降噪需在此验证 + inpainting 修复联合评测 |
+| RealEdit | 见 VoiceCraft [2403.16973](https://arxiv.org/abs/2403.16973) | P4 | VoiceCraft 引入的真实野外编辑基准（播客/有声书）；P4 不可感知性在此评测 |
+| SAKE | [2510.16917](https://arxiv.org/abs/2510.16917) | P4 | 首个面向 LALM 的听觉感知属性知识编辑基准，可靠性/泛化性/局部性/可移植性四维度 |
+
+> **评测缺口**：消费级场景缺乏专门评测——MMAE/SpeechEditBench 是通用编辑基准但非消费级专门；音源分离/增强有经典基准但无"消费级描述即操作"评测；P7 无任何专门基准（领域真空白连带评测空白）。
+
+## B. 编辑检测 / 取证
+
+- **PartialEdit**（[2506.02958](https://arxiv.org/abs/2506.02958)）：神经语音编辑产生的局部深度伪造检测数据集
+- **SED + AiEdit**（[2601.21463](https://arxiv.org/abs/2601.21463)）：统一语音编辑检测+内容定位，~140h AiEdit
+- **StreamMark**（[2604.11917](https://arxiv.org/abs/2604.11917)）：半脆弱水印，对 VC/语音编辑脆弱
+- **Knowledge Editing in LALMs**（[2603.14343](https://arxiv.org/abs/2603.14343)）：音频 LLM 事实定位+编辑（与 SonoEdit 同谱系）
+- **Fine-Grained Inpainting Forensics**（[2605.02223](https://arxiv.org/abs/2605.02223)）：多区域篡改定位
+
+> 消费级擦除/编辑普及后取证需求上升：P2 擦除与 P4 口误修改的消费级普及意味着"听不出改过"将成为常态——这既是用户诉求（不可感知性），也是取证挑战。当编辑变得不可感知，检测与水印必须同步进步。当前取证研究仍以检测为主，水印/可验证性方向薄。
+
+## C. 重点论文总表（🔑 全报告精选，按 P1–P7 原语分组）
+
+> 按研究机构声誉、顶会评审、开创性/代表性精选 42 篇重点论文（与各原语 🔑 标记一致），建议优先精读。venue 列：经评审的顶会 > arXiv 预印；能力数字均作者自报。跨原语论文按其核心操作原语归组，副原语以斜体标注。
+
+### P1 分离提取（4 篇）
+
+| 论文 | arXiv | venue | 机构 | 入选理由 |
+|------|-------|-------|------|---------|
+| AudioSep: Separate Anything You Describe | 2308.05037 | arXiv | Meta+CUHK-SZ | 语言驱动开域音源分离开创，高引 |
+| ZeroSep: Separate Anything w/ Zero Training | 2505.23625 | arXiv | — | 零训练扩散反演分离，分离性能超越监督方法 |
+| CodeSep: Low-Bitrate Codec-Driven Speech Separation | 2601.12757 | arXiv | — | codec 驱动联合分离+1 kbps 低码率压缩，省带宽保清晰 |
+| TSE-Noisy: Target Speaker Extraction via Noisy Enrollments | 2502.16611 | arXiv | — | 正负注册含噪目标说话人提取，SI-SNRi +2.1 dB |
+
+### P2 擦除（5 篇）
+
+| 论文 | arXiv | venue | 机构 | 入选理由 |
+|------|-------|-------|------|---------|
+| MMEDIT | 2512.20339 | arXiv | Qwen2-Audio 系 | 五类编辑统一框架（含 removal + *P7 reordering*），Qwen2-Audio+MMDiT |
+| Ming-UniAudio-Edit | 2511.05516 | arXiv | 小米 | 首个指令式 free-form 语音编辑 LLM（含 *P7 裁剪拼接*） |
+| SAO-Instruct | 2510.22795 | NeurIPS 2025 | — | free-form 自然语言指令音频编辑 |
+| Object-AVEdit | 2510.00050 | ICLR 2026 | — | 对象级音视频联合擦除，inversion-regeneration 范式 |
+| Zero-VC | 2606.20218 | arXiv | — | 零前瞻流式匿名化擦除身份保韵律（*P5 VC 跨原语*），隐私旗舰 |
+
+### P3 修复增强（9 篇）
+
+| 论文 | arXiv | venue | 机构 | 入选理由 |
+|------|-------|-------|------|---------|
+| PGDI | 2508.08890 | arXiv | Bar-Ilan | 扩散 inpainting + 音素级 classifier guidance 保说话人/韵律旗舰 |
+| Token-Based Audio Inpainting | 2507.08333 | ICLR 2026 | — | 离散扩散长缺口修复 |
+| FlowSE-GRPO | 2601.16483 | ICASSP 2026 | — | 首个在线 GRPO 流匹配 SE，RL 多指标感知对齐 |
+| DisContSE | 2601.21940 | ICASSP 2026 | — | 首个 codec 单步扩散 SE，推到接近实时 |
+| MAGE | 2509.19881 | ICASSP 2026 | — | 掩码生成式 SE SOTA，200M 轻量 |
+| UNIT-DSR | 2401.14664 | arXiv | — | HuBERT 离散单元 DSR，结构简洁 |
+| DiffDSR | 2506.00350 | Interspeech 2025 | — | 潜扩散 DSR 保身份 |
+| ClaritySpeech | 2507.09282 | arXiv | — | 痴呆语音 ASR-TTS 串联矫正+隐私 |
+| Personalized-TTS-Dysarthric | 2508.10412 | Interspeech 2025 | — | 构音障碍 voice banking，知识锚定域迁移 |
+
+### P4 token 编辑（8 篇）
+
+| 论文 | arXiv | venue | 机构 | 入选理由 |
+|------|-------|-------|------|---------|
+| VoiceCraft | 2403.16973 | arXiv | UT Austin | token infilling 旗舰 + RealEdit 基准 |
+| CosyEdit / CosyEdit2 | 2601.05329 | arXiv | 阿里 | editing-oriented RL，复用 TTS 骨干迁移 |
+| SSR-Speech | 2409.07556 | arXiv | Tencent-JHU | CFG 稳定化 + 帧级水印 |
+| AST | 2604.16056 | arXiv | — | 免训练潜空间重组合 + AWFG，~70% WER↓ |
+| LLaDA-TTS | 2603.26364 | arXiv | — | 掩码扩散双向注意力天然支持编辑（*P7 间接覆盖*） |
+| MaskGCT | 2409.00750 | arXiv | — | 全非自回归掩码 codec TTS 旗舰，10 万小时 SOTA（*P5 VC 跨原语*） |
+| Metis | 2502.03128 | NeurIPS 2025 | — | 统一语音生成基础模型，<20M 微调参数多任务（*P5 VC 跨原语*） |
+| SAKE | 2510.16917 | ICLR 2026 | — | LALM 属性知识编辑基准，四维度评估八种方法 |
+
+### P5 VC 与匿名（10 篇）
+
+| 论文 | arXiv | venue | 机构 | 入选理由 |
+|------|-------|-------|------|---------|
+| AutoVC | 1905.05879 | arXiv | — | 经典，zero-shot VC 奠基，瓶颈自重建损失 |
+| FreeVC | 2210.15418 | arXiv | — | 高引，text-free one-shot VC，WavLM 信息瓶颈解耦 |
+| Vevo / Vevo2 | 2502.07243 | arXiv | CUHK-SZ | 双 tokenizer content-style 解耦，全自监督零样本 VC |
+| VoiceCraft-X | 2511.12347 | EMNLP 2025 | UT Austin 系 | 跨语言编辑+零样本 TTS 统一 |
+| SwanVoice | 2605.30993 | arXiv | — | 1-4 说话人角色对话长内容 VC |
+| MoonCast | 2503.14345 | NeurIPS 2025 | — | 零样本播客长对话生成 |
+| PHONOS | 2603.27001 | arXiv | — | 流式口音中性化+匿名化，≤40ms 前视因果翻译器 |
+| Streaming Accent Conversion NAR | 2506.16580 | arXiv | — | 首个可流式口音转换系统，Emformer NAR |
+| SonoEdit | 2601.17086 | arXiv | — | Null-Space 模型编辑纠专有名词，闭式权重更新 |
+| FlowEdit | 2606.20518 | arXiv | — | 流匹配终身发音自适应，Hopfield 情景记忆纠正 |
+
+### P6 情感韵律（5 篇）
+
+| 论文 | arXiv | venue | 机构 | 入选理由 |
+|------|-------|-------|------|---------|
+| EmoSteer-TTS | 2508.03543 | ICLR 2026 | — | 免训练激活 steering 情感控制新范式，已集成 F5-TTS/CosyVoice2/E2-TTS |
+| EmoCorrector | 2505.20341 | Interspeech 2025 | — | 唯一 squarely 做情感编辑（RAG 后修正） |
+| UDDETTS | 2505.10599 | ICLR 2026 | — | 离散+连续 ADV 三维度情感，非线性量化双驱动 |
+| Causal Prosody Mediation | 2603.11683 | arXiv | — | 结构因果模型 IPC+CPC 解耦情绪韵律与内容 |
+| emotion2vec | 2312.15185 | arXiv | — | 高引，自监督通用情感表征锚点 |
+
+### P7 裁剪拼接（1 篇）
+
+| 论文 | arXiv | venue | 机构 | 入选理由 |
+|------|-------|-------|------|---------|
+| ThinkSound | 2506.21448 | NeurIPS 2025 | — | CoT 链式推理驱动分步式音频生成与编辑，唯一间接覆盖裁剪拼接的原语锚点 |
+
+> **P7 仅 1 篇间接覆盖**——ThinkSound 本质是视频到音频的生成/编辑而非纯裁剪拼接操作，说明 P7 裁剪拼接是领域真空白。
+
+## D. 技术路线索引
+
+四路线不再独立成章，已融入各原语技术点与维度章节。演进脉络详见 `audio-editing-evolution-lineage` 报告。
+
+---
+
+# 关键洞察（正交分层视角）
+
+1. **P1 分离独立后仍弱**：分离提取虽已独立为操作原语且有顶会原型（AudioSep/ZeroSep/CodeSep），但消费级 zero-shot 分离在频带重叠场景仍不稳——>2 说话人严重重叠的分离精度不稳定、端侧实时分离（扩散反演多步迭代）的计算开销受限、零样本语音与噪声频带高度重叠场景下的分离保真度未经专项评测。正交分层让"分离能力本身"独立评估而非被场景混合淹没，但也更清晰地暴露了其独立能力未闭合。
+
+2. **正交分层消除场景重叠**：初版 C3↔C7（文字改录音 vs 长内容局部修）在"编辑操作"层面高度重叠、C3↔C8（改内容 vs 改情感）在"改内容保情感"上交叉纠缠，导致同一论文同时归属 3+ 场景。正交分层将每篇论文归入核心操作原语（7 选 1–2）+维度标签（D1/D2/D3 可叠加），消除重叠——VoiceCraft 归 P4（核心操作：token infilling 编辑）+ D1/D2/D3，而非 C3+C5+C7 三个场景；Ming-UniAudio-Edit 归 P2+P7而非 C1+C4。读者定位论文能力原语更精准。
+
+3. **P7 裁剪/P6 情感是缺口**：P7 裁剪拼接是 7 原语中唯一无专门系统化研究的原语（领域真空白），仅 ThinkSound 间接覆盖；P6 情感韵律是公认缺口——核心能力"改情感不改内容音色"的可靠解耦仍未闭合，生成侧已有突破（EmoSteer 免训练激活引导）但编辑既有录音仍薄。两原语成熟度均 🔴，且 P6 是高杠杆点——突破 P6 可同时缓解 P4 的"改完词情感不对"连带短板。
+
+4. **D2 长内容编辑端真空白**：D2 维度下生成端充实（SwanVoice/MoonCast/MultiActor/FastLongSpeech/Borderless Long Speech），但编辑端真空白——消费级"录了几小时只改一处"的跨篇章一致性编辑尚无专门模型。生成端解决的是"从文本生成长内容"，编辑端解决的是"在已有长内容中局部修改保全局一致"——两者是不同问题，正交分层（P4×D2）明确标注了这一空白。
+
+5. **P3 病理子段保身份 vs 可懂度权衡**：P3 修复增强含两个子域（修外部噪声 vs 修发声机能），后者（病理发声重建）的核心张力是保说话人身份与恢复可懂度的权衡——ClaritySpeech 保身份仅 ~50%、CFM-DSR 统一为单音色牺牲个体性。正交分层将病理重建归入 P3（操作原语：修复增强）而非单独场景，但子域拆分清晰暴露了"修噪声 vs 修机能"的不同权衡结构。
+
+6. **维度标签揭示跨原语共性约束**：D1 实时横跨 P5/P3/P6——P5 VC 流式延迟已压至 50–80ms 级，P3 单步扩散 SE 推到接近实时，P6 情感实时编辑仍是真空白；D3 噪声横跨 P1/P2/P3/P4/P5——各原语噪声鲁棒的成熟度极不均衡（P3 有 21 篇覆盖，P7 仅 1 篇）。维度标签让跨原语的共性约束（如"实时"或"噪声鲁棒"）不再是各原语内部的局部困难，而是整个编创体系的系统性瓶颈——解决 D1/D3 的某一共性约束可同时推进多个原语。
+
+---
+
+# Caveat
+
+1. 能力数字均作者自报、未经独立验证；仅 VoiceCraft-X（EMNLP 2025）、EmoCorrector（INTerspeech 2025）、FlowEdit（自建 benchmark）、SAO-Instruct（NeurIPS 2025）等少数经评审
+2. 正交分层仍非完全正交——部分 paper 跨原语（如 MaskGCT 跨 P4/P5、Zero-VC 跨 P2/P5、Ming-UniAudio-Edit 跨 P2/P7、MMEDIT 跨 P2/P7、LLaDA-TTS 跨 P4/P7），主归类取其最核心解决的操作原语，副原语以斜体标注
+3. 维度标签为主观判定——D1/D2/D3 的归属基于论文自报延迟/长内容处理/噪声评测范围，而非统一标准；部分论文未报告延迟/长内容/噪声指标，维度标签可能缺失或判定偏差
+4. 缺口标注区分"领域真空白"（P7 裁剪拼接=0 篇专门论文）与"评测显示未就绪"（P2 MMAE EMR<5%、P4 SpeechEditBench"无模型全能"）与"公认缺口"（P6 情感韵律——生成侧已有突破但编辑侧仍远未解决）
+5. P3 含两个子域（修外部噪声 vs 修发声机能），技术线与用户群截然不同；修发声机能子域（病理发声重建）多为整段变换/转换，属"变换式编辑"非"外科编辑"，已在原语 scope 注中标注
+6. **与同事工业界调研边界划分**：本报告只覆盖学术 SOTA（arXiv 核实论文），不含产品落地调研。消费级产品格局、定价策略、用户画像等归同事负责，本报告不触及
+
+---
+
+*消费级语音简单编创·正交分层报告 · 7 原语×3 维度自底向上构建 + arXiv API 核实 · 2026-06-25*
