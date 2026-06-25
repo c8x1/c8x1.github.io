@@ -500,3 +500,61 @@ token infilling（codec-LM 填空）·边界声学平滑（多尺度一致性）
 ## 成熟度与缺口
 
 🔴 **领域真空白**——裁剪拼接是 7 原语中唯一无专门系统化研究的原语。现有论文均为间接覆盖：MMEDIT 的重排仅限事件级短片段，LLaDA-TTS 的选择性掩码仅限词级短段，ThinkSound 的 CoT 分步是生成/编辑而非纯结构操作，AudioChat 的 Agent 规划未验证裁剪拼接。**消费级"段落级裁剪/重排/拼接+跨段落一致性"的专门模型与评测基准尚不存在**。区分：**领域真空白**——无专门论文、无专门评测基准、无端到端系统；**间接覆盖但不闭合**——MMEDIT/LLaDA-TTS/AudioChat/ThinkSound 各贡献一个侧面（重排/选择性裁剪/多步规划/分步编辑），但均非裁剪拼接原语的系统性解决方案。
+
+---
+
+# D1 · 实时/流式
+
+> **维度定义**：消费级端侧低延迟场景（通话/直播/流式交互），要求算法延迟 <200ms。D1 可叠加于任意原语——同一论文可同时归入某原语 + D1。
+
+## 技术路线
+
+实时/流式约束下，学术侧沿四条路线推进：①**因果网络/零前瞻**——严格因果架构消除未来帧依赖，Zero-VC 以说话人匿名化(SA)扰动作为信息瓶颈消除前瞻缓冲需求，构建零前瞻流式 VC 网络；②**一步蒸馏/整流流**——FasterVoiceGrad 对抗扩散转换蒸馏(ADCD)将 VC 压为单步扩散、GPU 加速 6.6-6.9 倍，ReFlow-VC rectified flow ODE 大幅减少采样步数；③**流式 NAR/非自回归**——Streaming Accent NAR 引入 Emformer 编码器实现首个可流式口音转换系统，DisContSE/MAGE 单步扩散/掩码生成式 SE 推到接近实时推理速度；④**极小分块+伪上下文**——DualVC3 语义 Token 引导+LM 迭代预测未来帧产生伪上下文，将流式变声延迟压至 50ms。
+
+## 跨原语影响
+
+- **P5 VC**：流式路线最密集——StreamVC/DualVC3/RT-VC/SynthVC/X-VC 延迟已压至 50-80ms 级，CPU 可运行；口音归一子线 PHONOS/Streaming Accent NAR 延迟约 241ms 可部署但仍受限；Zero-VC 零前瞻匿名化是唯一消除算法超前延迟的方案。
+- **P3 修复增强**：单步扩散 SE(DisContSE)与掩码生成式 SE(MAGE)将降噪推到接近实时，但端侧实时闭合仍缺最后一程；PhASE-Flow 四步采样流匹配 SE 向实时低延迟推进。
+- **P6 情感韵律**：EmoSteer-TTS 免训练激活引导已可推理时连续控制情感，CausalPM 因果解耦限定情感仅经韵律影响语音——**消费级通话/直播中即时调情绪尚无端到端系统**，情感实时编辑仍是真空白。
+
+## 代表论文
+
+StreamVC(2401.03078) · DualVC3(2406.07846) · PHONOS(2603.27001) · Zero-VC(2606.20218) · FasterVoiceGrad(2508.17868) · Streaming Accent NAR(2506.16580) · DisContSE(2601.21940) · MAGE(2509.19881) · EmoSteer-TTS(2508.03543) · CausalPM(2603.11683)
+
+---
+
+# D2 · 长内容一致
+
+> **维度定义**：消费级长篇章场景（播客/有声书/多角色对话），要求跨句/跨段落一致性与篇章级规划。D2 可叠加于任意原语——同一论文可同时归入某原语 + D2。
+
+## 技术路线
+
+长内容约束下，学术侧沿三条路线推进：①**长上下文 LM 驱动**——MoonCast 长上下文语言模型+播客生成模块合成多分钟级自然对话播客，Borderless Long Speech CoT 推理+Dimension Dropout+Global-Sentence-Token 语义接口实现篇章级全局语境驱动；②**说话人轮次条件化**——SwanVoice 25Hz VAE+flow-matching DiT+说话人轮次条件+课程式训练，零样本生成 1-4 人长篇角色对话（但内容准确性仍是主要局限）；MultiActor-Audiobook 零-shot 有声书多角色生成；③**推理期长时段缓解漂移**——MagpieTTS-LF 软注意力先验+有状态跨句推理+历史感知文本编码在推理期缓解韵律漂移，FastLongSpeech 迭代融合+动态压缩训练让大语音模型高效处理长时语音。
+
+## 跨原语影响
+
+- **P4 token 编辑在长内容上即旧 C7 诉求**：消费级"录了几小时只改一处"的跨篇章一致性编辑，仍缺专门编辑模型。**明确标注：旧 C7"长内容局部修" = P4（操作：改文字=改录音）+ D2（约束：长内容一致）**。SwanVoice/MoonCast/MultiActor/FastLongSpeech/Borderless Long Speech 解决的是长内容**生成**而非长内容**局部修改**——编辑端仍真空白。
+- **P5 VC**：长内容 VC/TTS 的音色一致性在多小时尺度仍会漂移，MaskGCT/Vevo 全非自回归 10 万小时训练达 SOTA 零样本 TTS 为长内容音色克隆提供可用基座，但跨篇章漂移是渐进可解的工程问题而非已闭合。
+
+## 代表论文
+
+SwanVoice(2605.30993) · MoonCast(2503.14345) · MultiActor-Audiobook(2505.13082) · FastLongSpeech(2507.14815) · Borderless Long Speech(2603.19798) · MaskGCT(2409.00750) · Vevo/Vevo2(2502.07243) · MagpieTTS-LF(2606.18485)
+
+---
+
+# D3 · 噪声鲁棒
+
+> **维度定义**：消费级野外噪声场景（户外/会议/可穿戴），要求对未见声学条件鲁棒。D3 可叠加于任意原语——同一论文可同时归入某原语 + D3。
+
+## 技术路线
+
+噪声鲁棒约束下，学术侧沿三条路线推进：①**频带感知**——SeamlessEdit 频带感知噪声抑制+内容内精修，专门应对语音与背景噪声频带未分离场景，在嘈杂环境下直接做语音插入/替换编辑无需先降噪；②**测试时适配**——MPol 掩码极化测试时自适应免额外参数适配未见环境，TTT-SpeechEdit 测试时训练逐样本适配真实多变录音；③**inpainting 补缺**——PGDI 扩散 inpainting+音素级 classifier guidance 重建 ≤1s 缺口保说话人/韵律/混响，Token-Based Audio Inpainting 离散扩散稳定修复长缺口。
+
+## 跨原语影响
+
+- **P2 擦除**：野外录音下擦除受约束——SeamlessEdit 是唯一专门应对噪声场景的语音编辑框架，频带感知噪声抑制让擦除后无缝衔接有了噪声鲁棒原型，但真实复杂噪声泛化与计算开销数据缺失；MMEDIT/Audio-Omni 等统一编辑框架声称 D3 鲁棒但未专项评测。
+- **P3 修复增强**：噪声鲁棒论文最密集——FlowSE-GRPO 在线 GRPO 流匹配 SE、ClaritySpeech ASR-TTS 串联重建、PAS-SE 可穿戴个性化+辅助传感器、MPol 测试时适配等，21 篇论文覆盖但"一键全修"的端到端集成方案仍是领域真空白。
+
+## 代表论文
+
+SeamlessEdit(2505.14066) · PGDI(2508.08890) · TTT-SpeechEdit(2506.13295) · MPol(2601.14770) · PAS-SE(2509.20875) · FlowSE-GRPO(2601.16483) · ClaritySpeech(2507.09282) · Metis(2502.03128)
