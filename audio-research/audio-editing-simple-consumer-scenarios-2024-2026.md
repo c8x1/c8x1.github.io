@@ -2,7 +2,7 @@
 
 > **定位**：本报告从消费级用户需求出发，以 **7 原语（P1–P7）× 3 维度（D1/D2/D3）** 的正交分层结构追溯 2024–2026 学术 SOTA——回答"消费级想做 X，学术侧现在能做到什么程度"。不含产品落地调研（产品调研归同事负责）。
 >
-> **本次重构说明**：初版报告以场景驱动定义 C1–C9，但 C3（文字改录音）与 C7（长内容局部修）在"编辑操作"层面高度重叠，C3 与 C8（情感/韵律编辑）在"改内容保情感"上交叉纠缠，导致同一论文（如 VoiceCraft）同时归属 C3+C5+C7、Ming-UniAudio-Edit 同时归属 C1+C4，读者难以定位该论文到底解决什么能力原语。本次重构将 9 场景打散为 **7 操作原语**（擦除·改写·修复·文字编辑·换声·情感/韵律·Agent/统一）与 **3 跨场景维度**（实时·长内容·噪声），原语之间正交无重叠（每论文仅归入其核心操作原语），维度之间可叠加（同一论文可跨 D1+D2+D3），消除 C3↔C7/C3↔C8 等场景边界模糊问题。
+> **本次重构说明**：初版报告以场景驱动定义 C1–C9，但 C3（文字改录音）与 C7（长内容局部修）在"编辑操作"层面高度重叠，C3 与 C8（情感/韵律编辑）在"改内容保情感"上交叉纠缠，导致同一论文（如 VoiceCraft）同时归属 C3+C5+C7、Ming-UniAudio-Edit 同时归属 C1+C4，读者难以定位该论文到底解决什么能力原语。本次重构将 9 场景打散为 **7 操作原语**（分离提取·擦除·修复增强·token 编辑·VC 与匿名·情感韵律·裁剪拼接）与 **3 跨场景维度**（实时·长内容·噪声），原语之间正交无重叠（每论文仅归入其核心操作原语），维度之间可叠加（同一论文可跨 D1+D2+D3），消除 C3↔C7/C3↔C8 等场景边界模糊问题。
 >
 > **方法**：以初版 C1–C9 素材池为基础，逐篇重新判定核心操作原语（7 选 1–2）与维度标签（D1/D2/D3 可叠加），自底向上构建正交分层体系；经一轮 arXiv API 补扫与交叉验证，确认覆盖与空白。
 >
@@ -16,13 +16,13 @@
 
 | 原语 | 定义 | D1 实时 | D2 长内容 | D3 噪声 | 成熟度 |
 |------|------|---------|----------|---------|--------|
-| **P1 擦除·分离** | 从混音中指定并移除/提取目标声源 | 1 篇 · CodeSep | 2 篇 · AudioSep, ZeroSep | 5 篇 · AudioSep, ZeroSep, TSE-Noisy | 🟡 |
-| **P2 改写·属性编辑** | 用自然语言/指令修改音频属性（音色/风格/布局） | 2 篇 · Zero-VC | 8 篇 · MMEDIT, SAO-Instruct | 8 篇 · MMEDIT, Zero-VC | 🟡 |
-| **P3 修复·增强·重建** | 填补缺口、降噪增强、病理重建 | 5 篇 · DisContSE, MAGE | 3 篇 · PGDI, TokenInpaint | 21 篇 · PGDI, TokenInpaint | 🟡 |
-| **P4 文字编辑** | 改转写文字 = 改声音（删/插/替） | 5 篇 · VoiceCraft, LLaDA-TTS | 19 篇 · VoiceCraft, SSR-Speech | 6 篇 · VoiceCraft, SSR-Speech | 🟢 |
-| **P5 换声·克隆** | 零样本/流式语音转换与音色克隆 | 11 篇 · Zero-VC, SonoEdit | 8 篇 · MaskGCT, Vevo | 8 篇 · Zero-VC, Metis | 🟢 |
-| **P6 情感·韵律编辑** | 改情绪/韵律/风格而不改内容与音色 | 2 篇 · EmoSteer, CausalPM | 4 篇 · EmoCorrector, CausalPM | 6 篇 · EmoCorrector | 🔴 公认缺口 |
-| **P7 Agent·统一** | 多步规划/跨模态/统一生成-编辑框架 | 1 篇 · LLaDA-TTS | 4 篇 · ThinkSound, MMEDIT | 1 篇 · MMEDIT | 🔴 领域真空白 |
+| **P1 分离提取** | 从混音中分离/提取目标声源 | 1 篇 · 🔑CodeSep | 2 篇 · 🔑AudioSep, 🔑ZeroSep | 5 篇 · 🔑AudioSep, 🔑CodeSep, 🔑TSE-Noisy, 🔑ZeroSep | 🟡 |
+| **P2 擦除** | 删除指定声源/对象，保其余不变 | 2 篇 · 🔑Zero-VC | 8 篇 · 🔑MMEDIT, 🔑Object-AVEdit, 🔑SAO-Instruct | 8 篇 · 🔑MMEDIT, 🔑Zero-VC | 🟡 |
+| **P3 修复增强** | 降噪/去混响/inpainting 补缺 + 病理发声重建 | 5 篇 · 🔑DisContSE, 🔑MAGE | 3 篇 · 🔑PGDI, 🔑TokenInpaint | 21 篇 · 🔑ClaritySpeech, 🔑DiffDSR, 🔑DisContSE, 🔑FlowSE-GRPO, 🔑MAGE, 🔑PGDI | 🟡 |
+| **P4 token 编辑** | 改文字=改录音/口误秒改 | 5 篇 · 🔑VoiceCraft, 🔑LLaDA-TTS | 19 篇 · 🔑VoiceCraft, 🔑SSR-Speech, 🔑LLaDA-TTS, 🔑MaskGCT, 🔑AST | 6 篇 · 🔑VoiceCraft, 🔑SSR-Speech, 🔑Metis | 🟢 |
+| **P5 VC 与匿名** | 换声/克隆/隐私匿名化/口音归一 | 11 篇 · 🔑Zero-VC, 🔑SonoEdit | 8 篇 · 🔑MaskGCT, 🔑Vevo/Vevo2 | 8 篇 · 🔑Zero-VC, 🔑Metis | 🟢 |
+| **P6 情感韵律** | 改情绪/韵律不改内容音色 | 2 篇 · 🔑EmoSteer, 🔑CausalPM | 4 篇 · 🔑EmoCorrector, 🔑CausalPM | 6 篇 · 🔑EmoCorrector | 🔴 公认缺口 |
+| **P7 裁剪拼接** | 改结构/重排/拼接 | 1 篇 · 🔑LLaDA-TTS | 4 篇 · 🔑ThinkSound, 🔑MMEDIT, 🔑LLaDA-TTS | 1 篇 · 🔑MMEDIT | 🔴 领域真空白 |
 
 > **维度定义**：
 > - **D1 实时**：消费级端侧低延迟场景（通话/直播/流式交互），要求 <200ms 算法延迟
