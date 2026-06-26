@@ -1004,7 +1004,7 @@ arXiv: <a href="https://arxiv.org/abs/2510.00771" target="_blank" rel="noopener"
 </ul>
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>                  ┌──────────────────────────────────────┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>                  ┌──────────────────────────────────────┐
                   │  训练阶段 (Flow Matching CFM)          │
                   └──────────────────────────────────────┘
   LR波形 s_lr ──sinc插值到HR长度──&gt; STFT ──&gt; 复值谱 R^(F×T×2)
@@ -1037,7 +1037,7 @@ arXiv: <a href="https://arxiv.org/abs/2510.00771" target="_blank" rel="noopener"
        x_0 ~ N(0,I) ──4步midpoint ODE求解(ω=1.5 CFG)──&gt; x̂_1(高带谱)
                                               │
        低带谱 X_l ⊕ 裁剪后 x̂_1 ──&gt; 全带谱 X̂ ──inverse power压缩──&gt; iSTFT ──&gt; HR波形 ŝ_hr
-</code></pre>
+</code></pre></figure>
 <p><strong>关键超参</strong>：STFT 512 bin（丢弃最后 bin）、窗 1024、50% overlap；α=0.2（power 压缩）；σ_min=0.1；VFE 编码器/解码器 4 级，ConvNeXt 深度 [2,2,4,2]，初始通道 96；特征编码器 ~5M + VFE ~52M = 57M。AdamW(β=0.9,0.999)，lr=2e-4 cosine 衰减+10k warmup；统一模型 500k 迭代，VCTK 专训 100k。训练时每 batch 输入率从 8/12/16/24kHz 按 0.7/0.1/0.1/0.1 概率选（F1=80/128/170/256）。CFG dropout 0.1，推理 ω=1.5，4 步 midpoint ODE 求解器。</p>
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>

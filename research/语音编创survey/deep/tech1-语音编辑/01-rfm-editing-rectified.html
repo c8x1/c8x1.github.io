@@ -914,7 +914,7 @@
 <p><div class="callout callout-info"><strong>笔者解读</strong>：本文最大卖点不是&quot;RFM 比 DDPM 好&quot;这个常识（flow matching 在 TTA 已被 TangoFlux 验证），而是&quot;<strong>把保真机制 (x_orig concat + t_start) 与 RFM 的确定性轨迹绑定</strong>，从而无需推理期 null-text 优化就能保未编辑区&quot;。AudioEditor 慢 9 倍的根因是 null-text optimization，本文用训练期就把保真学到模型里——这是<strong>工程-范式混合胜利</strong>，不是纯架构胜利。但 IS 只得 4.90-5.27（AUDIT 6.59、AudioEditor 8.40）说明<strong>多样性显著落后</strong>，论文用&quot;任务强调 faithful 而非 diversity&quot;圆过去——笔者认为这是真实代价，不是辩解：保真过强会牺牲生成多样性。</div></p>
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>                       TRAINING
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>                       TRAINING
   ┌─────────────┐   VAE Enc   ┌──────────┐
   │ X_original  │────────────&gt;│ x_orig   │──────┐ (channel concat)
   └─────────────┘             └──────────┘      │
@@ -952,7 +952,7 @@
         │                                            VAE Dec → edited mel
         │                                                    │
         │                                            BigVGAN → edited wav
-</code></pre>
+</code></pre></figure>
 <p><strong>训练细节</strong>：log-mel (1024 frames × 64 bins, 10s @16kHz)，UNet cross-attn to Flan-T5，classifier-free guidance，velocity-based RFM linear 插值，100 epochs A100，lr 5e-5。
 <strong>推理细节</strong>：Euler solver 200 步，从 <code>t_start=0.01</code> 起步（保留 1% 原始信息）。验证集 1000 样本按 CLAP 选 best ckpt。</p>
 <hr />

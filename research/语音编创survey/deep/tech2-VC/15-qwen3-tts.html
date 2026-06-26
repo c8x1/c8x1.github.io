@@ -888,7 +888,7 @@
 <p><div class="callout callout-info">4. <strong>概率激活 thinking 用于指令跟随</strong>: 借鉴 Qwen3 文本模型的 thinking, 在 Voice Design (Table 8: Qwen3-TTS-12Hz-1.7B-VD DSD 81.1/RP 65.1 中文) 拿到开源 SOTA, 超 Mimo-Audio-7B-Instruct (74.3/61.5) 与 VoiceSculptor。笔者解读: 把 thinking 用在 TTS 指令跟随是新点, 但论文只给最终数, 没给&quot;开/关 thinking&quot;的消融, 无法确认收益。</div></p>
 <p><div class="callout callout-info">笔者解读: 本文真正的贡献是<strong>工程整合 + 多码本延迟优化 (MTP) + 把文本 LM 的对齐范式搬进 TTS</strong>。它不是某一项突破, 而是把现有最佳实践 (Mimi 解耦、WavLM 蒸馏、DPO/GSPO、thinking) 系统化组装, 配合 5M 小时数据与 Qwen3 主干, 做出开源 SOTA。这和 MiMo-Audio 的&quot;范式验证&quot;不同, Qwen3-TTS 是&quot;产品级整合&quot;。</div></p>
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>=== Tokenizer-25Hz (单码本, 语义为主, 流式 block-wise DiT) ===
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>=== Tokenizer-25Hz (单码本, 语义为主, 流式 block-wise DiT) ===
 [24kHz wav] -&gt; Qwen2-Audio encoder (继续预训 ASR) + 中间 VQ 层 (Stage1) 
            -&gt; Stage2: 加 mel decoder 微调, 注入声学 -&gt; 25Hz 单码本 token
 解码: token -&gt; block-wise DiT (Flow Matching, 感受野4块: 当前+3回看+1前看) -&gt; mel -&gt; BigVGAN -&gt; wav
@@ -909,7 +909,7 @@
 预训练: S1 通用(5M小时,10语,8192 ctx) -&gt; S2 高质量 CPT -&gt; S3 长上下文(32768 ctx, 上采样长语音)
 后训练: DPO(多语偏好对) -&gt; GSPO(规则奖励) -&gt; 轻量 speaker SFT (特定音色, 单语数据也能跨语泛化)
 所有数据 ChatML 格式
-</code></pre>
+</code></pre></figure>
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p>Table 4 (12Hz tokenizer 重建, LibriSpeech test-clean):</p>
 <table class="gfm-table">

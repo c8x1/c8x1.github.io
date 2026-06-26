@@ -936,7 +936,7 @@ Code&amp;data: https://github.com/MH-Sameti/Accent invariant ASR
 </ol>
 <p>笔者批判声音：方法的新颖性有限——Grad-CAM 引导掩码在图像领域已有先例，本文是迁移到频谱图；且&quot;掩掉口音敏感区&quot;的假设（口音特征与语言内容特征在频谱上可分离）未必成立——口音本就体现在音素发音差异上，掩掉口音敏感区很可能同时掩掉语言内容线索，这解释了为何英语 LibriSpeech 标准 WER 几乎不变（6.8 vs 8.0，但相对 SpecAug 7.3 仅微降）——即收益主要在加重音、对标准语音无提升甚至略损，暗示掩码可能伤及内容。</p>
 <h2 id="4-方法流程ascii">4. 方法流程（ASCII）</h2>
-<pre class="ascii-block"><code>========== 1. 口音分类器训练 (CNN on spectrogram) ==========
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程（ASCII）</figcaption><pre class="ascii"><code>========== 1. 口音分类器训练 (CNN on spectrogram) ==========
  输入: 频谱图 80×3000 (80 freq bins × 3000 time frames)
  CNN: 4 conv层(32/64/128/256, 3×3, ReLU) + max-pool(2×2) + dropout
       → flatten → FC(128,ReLU,dropout) → FC(#accents)
@@ -965,7 +965,7 @@ Code&amp;data: https://github.com/MH-Sameti/Accent invariant ASR
  微调 Whisper (tiny/base/medium), AdamW, lr=1e-5(tiny)/3e-6(b/m), 10 epochs, RTX3090
    → 口音中性表征 → 部署 (推理时无需掩码, 模型已学得鲁棒)
  (消融: Grad-CAM vs Grad-CAM++ 两种显著性策略)
-</code></pre>
+</code></pre></figure>
 <p>关键：掩码只在训练增广阶段用，推理时直接用原频谱图——模型被&quot;逼&quot;出口音中性表征后无需运行时开销。</p>
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>
 <p><strong>英语 (Table 3, WER/CER)：</strong></p>

@@ -886,7 +886,7 @@ arXiv：<a href="https://arxiv.org/abs/2603.09307" target="_blank" rel="noopener
 </ol>
 <p><strong>批判</strong>：从架构层面看，没有任何一个是 paradigm shift；全部是已知件重组。但这是一篇 5 页短文（疑似 ICASSP/Interspeech 投稿），其价值定位本就是&quot;验证一个假设 + 干净的消融&quot;，而非架构突破。按此标准衡量是合格的。</p>
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>                  ┌──────── MELD-ST (日语音频+情感标签) ────────┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>                  ┌──────── MELD-ST (日语音频+情感标签) ────────┐
                   │                                              │
    Audio ───────► Japanese HuBERT-Large ──mean-pool──► dropout ──► [emotion 7-way CE(class-weighted)]
                   │        (骨干)                  ¯h∈R^d         │ [sentiment 3-way CE]
@@ -901,7 +901,7 @@ arXiv：<a href="https://arxiv.org/abs/2603.09307" target="_blank" rel="noopener
 
    融合: 各支路 mean-pool(非pad帧) → 线性投影到 256 维 + GELU + dropout0.1 → Concat → 线性 → [validate / not] CE
    下游: TESC 微调, lr 1e-5, batch1×16-grad-accum, 早停 patience5, 非验证类下采样 579→329 平衡
-</code></pre>
+</code></pre></figure>
 <p>训练细节：所有微调在单张 RTX 6000 Ada 上完成；seed=42 固定；TESC 划分 7:1.5:1.5（train 340 validate / 579 non-validate，下采样后 329/329）。情感支路单独训练得 emotion UA/WA 30.43/46.13、sentiment 52.06/54.81——这俩数本身偏低，但作为下游验证时机的辅助表征已足够。</p>
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>主结果（Table 2，TESC 验证时机检测，%）</strong>：</p>

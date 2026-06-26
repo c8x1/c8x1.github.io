@@ -899,7 +899,7 @@ arXiv: <a href="https://arxiv.org/abs/2603.24385" target="_blank" rel="noopener"
 <p><strong>真正范式级新意 vs 渐进</strong>：综合看是<strong>渐进式但切口漂亮</strong>的工程+方法组合。范式（DPS+FCP+扩散先验）来自 ArrayDPS，本文贡献是&quot;用判别输出反推噪声 SCM&quot;这一关键应用创新 + &quot;中间步启动 + 单帧 FCP 对齐&quot;两个工程细节。不是架构胜利，是<strong>任务切口 + 似然建模</strong>的胜利。</p>
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>        ┌──────────────────────────────────────────────────────────────┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>        ┌──────────────────────────────────────────────────────────────┐
         │  多通道含噪混响混音 Y ∈ C^{L×K×C}                              │
         └────────────────────┬─────────────────────────────────────────┘
                              │
@@ -947,7 +947,7 @@ arXiv: <a href="https://arxiv.org/abs/2603.24385" target="_blank" rel="noopener"
                   ┌──────────▼──────────┐
                   │ 精炼输出 H_align ∗ X_0│
                   └─────────────────────┘
-</code></pre>
+</code></pre></figure>
 <p><strong>关键组件具体说明</strong>：</p>
 <ul>
 <li><strong>压缩域扩散</strong>：先验训在 X′=|X|^0.5·exp(j∠X) 上（magnitude compression，沿用 [28] Edmsound 的发现），输入是压缩域 STFT 的实/虚部双通道，所以 Algorithm 1 里噪声方差写成 2（实+虚各一份 N(0,I)）。</li>

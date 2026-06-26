@@ -892,7 +892,7 @@
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
 <p><strong>CL 两阶段</strong>:</p>
-<pre class="ascii-block"><code>Stage 1: Speaker-Contrastive Adaptation (on LRL Common Voice, 无 emotion label)
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>Stage 1: Speaker-Contrastive Adaptation (on LRL Common Voice, 无 emotion label)
   每句两视图: clean + augmented(Gaussian noise SNR 10-20dB / polarity invert / gain / speed perturb / spectral stretch / SpecAugment)
   正对 = 同说话人两视图; 负对 = 不同说话人
   NT-Xent: li,j = -log[ exp(sim(zi,zj)/τ) / Σk exp(sim(zi,zk)/τ) ], sim=cosine
@@ -903,16 +903,16 @@ Stage 2: Emotion Fine-tuning (on English HRL only: MSP-Podcast + IEMOCAP)
   cross-entropy, 每类等量采样平衡
         │
         ▼  zero-shot 评测于 LRL (URDU/EMO-DB/SUBESCO)
-</code></pre>
+</code></pre></figure>
 <p><strong>BYOL 单阶段混合</strong>:</p>
-<pre class="ascii-block"><code>            ┌── Online network (θ) ── predictor ──┐
+<figure class="ascii-diagram"><figcaption>图2 · 方法流程</figcaption><pre class="ascii"><code>            ┌── Online network (θ) ── predictor ──┐
 HRL+LRL ───►│                                    │ Lmixed = (1-λ)LCE(HRL) + λ LBYOL
             └── Target network (ξ, momentum) ◄───┘
   CE on HRL emotion labels (label ignored in BYOL branch for HRL)
   BYOL on all (HRL+LRL, 无标签)
   λ: 0.8 → 0.2 linear decay
   推理用 target network + HRL 训的分类头
-</code></pre>
+</code></pre></figure>
 <p><strong>底座与训练</strong>:</p>
 <ul>
 <li>Whisper.small.en encoder；CL 裁到 4 秒(改 positional encoding 长度)，BYOL 裁到 3 秒；conv + pos encoding 层冻结(更稳)；加两层 FC+Dropout 分类头(time-average pooling)</li>

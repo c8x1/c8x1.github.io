@@ -945,7 +945,7 @@
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
 <h3 id="pipeline-ascii">Pipeline ASCII</h3>
-<pre class="ascii-block"><code>┌─────────────────────────────────────────────────────────────────────┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>┌─────────────────────────────────────────────────────────────────────┐
 │  STAGE 1: Visual VAD (VVAD)                                          │
 │  唇视频 25fps → 灰度 1×32×32/Tv                                      │
 │    Conv3D(k=5,7,7 s=1,2,2, ch=32)+BN+Swish+MaxPool(1,3,3,s=1,2,2)   │
@@ -970,7 +970,7 @@
 │  推理: 只用目标 CRM ⊙ Y → iSTFT → 目标语音                           │
 └─────────────────────────────────────────────────────────────────────┘
 训练: 损失 = 幅度谱MSE + (-SI-SNR);  VAD增强: 训练时人为加检测延迟+标签翻转
-</code></pre>
+</code></pre></figure>
 <h3 id="关键组件细节">关键组件细节</h3>
 <ul>
 <li><strong>视听帧对齐</strong>：音频 100 帧/秒（STFT shift=160 样本 @16kHz），视频 25 fps，故 1 视频帧 = 4 音频帧。VVAD 输出 argmax 后每元素重复 4 次，reshape 到 <code>1×T×1</code>，与 <code>Y</code> 逐元素乘后再 concat——这把 VAD 从&quot;标签&quot;变成&quot;门控特征&quot;，让网络在 T-F 域直接看到&quot;哪些帧属于目标&quot;。</li>

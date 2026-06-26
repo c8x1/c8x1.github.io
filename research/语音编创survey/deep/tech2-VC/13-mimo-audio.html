@@ -886,7 +886,7 @@
 </ol>
 <p><div class="callout callout-info">笔者解读: 本文真正的贡献是<strong>把&quot;语音基础模型&quot;的规模化范式跑通并开源</strong>, 而非某个架构突破。它的位置类似 LLaMA 之于文本——证明可行、给蓝图、开源, 而不是提出新范式。</div></p>
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>[24kHz wav] -&gt; mel(100Hz) -&gt; Audio Encoder(32L, 双向) --25Hz--&gt; 20层RVQ(8 codebooks used downstream)
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>[24kHz wav] -&gt; mel(100Hz) -&gt; Audio Encoder(32L, 双向) --25Hz--&gt; 20层RVQ(8 codebooks used downstream)
                                                                     |
                                                      [stage1: A2T LLM loss + recon + commit]
                                                      [stage2: 冻结 enc/disc, GAN fine-tune dec+vocoder]
@@ -900,7 +900,7 @@
                                               hidden state -&gt; Patch Decoder(16L, 因果, 8个输出头)
                                                                     |
                               delay 0-1-2-3-4-5-6-7 展开自回归 -&gt; 25Hz RVQ -&gt; Vocos-style vocoder -&gt; 24kHz wav
-</code></pre>
+</code></pre></figure>
 <p>训练细节 (Table 2/3):</p>
 <ul>
 <li>LLM: 4096 dim, 32 heads, 36 层, ctx 8192; Patch Enc/Dec: 1024 dim, 64 heads, 6/16 层。</li>

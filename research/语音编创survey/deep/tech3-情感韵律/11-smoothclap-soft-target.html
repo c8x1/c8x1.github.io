@@ -889,7 +889,7 @@
 <p><strong>是否范式转换</strong>：否。是&quot;把视觉 SoftCLIP 的 softer alignment 思路 + SupCon 的 intra-class 软目标，搬到 CLAP 并用 CP 特征丰富 tag&quot;的组合创新。属于训练目标工程胜利，非架构胜利。</p>
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>   音频 A_i ──[wav2vec2-large-12-ft-em（冻结）]──&gt; 局部帧特征 ℓ_i ─┐─mean-pool─&gt; ℓ̄_i
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>   音频 A_i ──[wav2vec2-large-12-ft-em（冻结）]──&gt; 局部帧特征 ℓ_i ─┐─mean-pool─&gt; ℓ̄_i
                               │                                     │
                               └─[proj_A]─&gt; z_a_i (ℓ2-norm)          │
                                                                     │
@@ -907,7 +907,7 @@
           y_ij = (1−β)·δ_ij + β·q_ij                (式8, β=0.1, δ=one-hot)            │
                                                                                          │
         L_soft = (1/2B) Σ_i [KL(y_i‖p^a2t_i)+KL(p^a2t_i‖y_i) + KL(y_i‖p^t2a_i)+KL(p^t2a_i‖y_i)]  (式11, 对称KL)
-</code></pre>
+</code></pre></figure>
 <p><strong>Tag 生成</strong>（与 ParaCLAP [7] 同协议）：</p>
 <ul>
 <li>数据集标签：categorical 情感 + 维度（arousal/valence/dominance）+ gender。维度按经验分布 30/40/30 分箱映射模板（&quot;low/mid/high arousal&quot;）。</li>

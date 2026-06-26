@@ -917,7 +917,7 @@ arXiv：<a href="https://arxiv.org/abs/2506.00628" target="_blank" rel="noopener
 <p>笔者批判：phoneseqs 单独表现很差（FLEURS 52.9 vs ECAPA 89.3），说明音素序列信息虽抗口音但整体判别力弱；增益主要来自&quot;声学 + 音素&quot;互补，而非音素序列本身强。duseqs 落后于 phoneseqs，作者归因可能&quot;离散单元编码口音偏置&quot;或&quot;池化/聚类损失信息&quot;——这是推测，未深入验证。此外，最佳模型在 FLEURS 上 macro 掉 3.1 点（89.5→86.4），并非&quot;完全无损&quot;，论文标题式宣传需打折。</p>
 <hr />
 <h2 id="4-方法流程ascii">4. 方法流程（ASCII）</h2>
-<pre class="ascii-block"><code> ┌──────────────────────────────── 训练数据 ─────────────────────────────┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程（ASCII）</figcaption><pre class="ascii"><code> ┌──────────────────────────────── 训练数据 ─────────────────────────────┐
  │ VL-107 (VoxLingua-107): 6628h, 107 语, YouTube, 切 6s 段              │
  └──────────────────────────────┬─────────────────────────────────────────┘
                                 │
@@ -940,7 +940,7 @@ arXiv：<a href="https://arxiv.org/abs/2506.00628" target="_blank" rel="noopener
                  线性分类层 → N 语种分数 s(l_i)
                           │
                 (phoneseqs/duseqs 20 ep; ET+* 10 ep, lr=1e-4)
-</code></pre>
+</code></pre></figure>
 <p><strong>探针实验（分析用，非训练）</strong>：</p>
 <ul>
 <li>块置换：10s+ 音频 → 切 T 秒块（0.25/0.5/1/2/4）→ 逆序 → 测精度退化（Table 3）。</li>

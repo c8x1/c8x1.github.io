@@ -911,7 +911,7 @@ Table 3 最干净的对比：14 模型上，Majority Voting F1 0.439、Soft Voti
 <p><strong>笔者批判</strong>：四点里，创新点 1（N 模态 transformer 化）其实只是 DHF 的工程升级，算法上无新意（作者也只说“extension”）。真正有信息量的是消融结论——<strong>软目标 &gt; 深融合 &gt; MixUp &gt; 多任务 &gt; Stage 2</strong>（按 F1 降幅排序：8.23% &gt; 6.31% &gt; 2.93% &gt; 2.18% &gt; 1.20%）。但这个排序本身有点意外：抗不平衡的 Stage 2 只值 1.20%，而抗不平衡本该是这篇的核心卖点（挑战赛主问题）。这暗示<strong>对自然条件 SER，数据利用（软目标）比数据重采样（均衡）重要得多</strong>——这个结论论文没有显式点出，但它其实比“拿了冠军”更值得传播。另外，14 个模型的配置表（Table 1）里很多是冗余的（ID 5/6/7/8 都是 WavLM+RoBERTa 两模态），模型多样性其实是靠“不同 SSL 组合”而非“不同架构”，作者引 [19] 说“model diversity 有用”但没量化多样性本身。</p>
 <hr />
 <h2 id="4-方法流程ascii">4. 方法流程（ASCII）</h2>
-<pre class="ascii-block"><code>   ┌──────── MSP-Podcast Interspeech 2025 SER Challenge 版 (8 类: anger/happiness/.../neutral + V/A/D 1-7) ────┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程（ASCII）</figcaption><pre class="ascii"><code>   ┌──────── MSP-Podcast Interspeech 2025 SER Challenge 版 (8 类: anger/happiness/.../neutral + V/A/D 1-7) ────┐
    │  软目标: 完整标注者投票向量 (含 ~20K 无共识样本)    属性: valence/arousal/dominance (多任务 MSE)            │
    └─────────────────────────────────────────────────────────────────────────────────────────────────────────┘
         │ 音频(raw)                      │ 文本(Whisper-v3 ASR 统一转写, 防分布漂移)
@@ -938,7 +938,7 @@ Table 3 最干净的对比：14 模型上，Majority Voting F1 0.439、Soft Voti
         ▼
    挑战赛 held-out: Macro-F1 0.4316 / Micro-F1 0.4319 / Acc 0.4319  (1st place)
    内部集: MEDUSA 0.472  vs  Top-DeepSER 0.440 (+7.23%)  vs  Avg-DeepSER 0.413 (+14.3%)
-</code></pre>
+</code></pre></figure>
 <hr />
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>
 <ul>

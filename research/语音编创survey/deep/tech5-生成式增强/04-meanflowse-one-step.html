@@ -972,26 +972,26 @@ arXiv：<a href="https://arxiv.org/abs/2509.14858" target="_blank" rel="noopener
 <p></div></p>
 <h3 id="31-创新点-1条件-meanflow-恒等式式-16-17">3.1 创新点 1：条件 MeanFlow 恒等式（式 16-17）</h3>
 <p>原始 MeanFlow（式 6-9）是无条件边际场。作者把它<strong>条件化到 y（带噪观测）</strong>，导出：</p>
-<pre class="ascii-block"><code>u(x_t, r, t | y) = v(x_t, t | y) − (t−r)·[ v(x_t,t|y)·∇_x u + ∂_t u ]
+<pre class="code"><code>u(x_t, r, t | y) = v(x_t, t | y) − (t−r)·[ v(x_t,t|y)·∇_x u + ∂_t u ]
 </code></pre>
 <p>关键洞察：右端全是<strong>局部项</strong>（在 (x_t, t) 处可算），把不可解的路径积分 <code>∫v dτ</code> 替换掉了。对角线 r=t 时 (t−r)=0，退化为 u=v，即与 CFM 一致——这保证了&quot;平均场&quot;与&quot;瞬时场&quot;在边界处自洽。</p>
 <h3 id="32-创新点-2一阶目标--稳定系数-c05式-18">3.2 创新点 2：一阶目标 + 稳定系数 c=0.5（式 18）</h3>
 <p>作者并未直接套用恒等式（c=1），而是引入<strong>减半一阶校正</strong>：</p>
-<pre class="ascii-block"><code>u_tgt = v_t − c·(t−r)·[ v_t·∇_x u_θ + ∂_t u_θ ],  c = 0.5
+<pre class="code"><code>u_tgt = v_t − c·(t−r)·[ v_t·∇_x u_θ + ∂_t u_θ ],  c = 0.5
 </code></pre>
 <p><div class="callout callout-info">笔者解读：这是一个工程妥协。c=1 在理论上保持不动点，但 JVP 项的梯度噪声大、易发散；c=0.5&quot;削弱二阶效应但不改不动点&quot;。文中未给 c 的消融数据，是这篇短文的一处遗憾（见局限 7.2）。</div></p>
 <h3 id="33-创新点-3stop-gradient-阻断高阶反传">3.3 创新点 3：stop-gradient 阻断高阶反传</h3>
 <p>对 u_tgt 施加 stop-gradient（sg），避免通过 JVP 项做高阶反向传播，使损失成为&quot;良性不动点&quot;。这与一致性模型（consistency models）的 sg 技巧同源。</p>
 <h3 id="34-创新点-4单步反向位移推理式-20-21">3.4 创新点 4：单步反向位移推理（式 20-21）</h3>
 <p>训练好的 u_θ 不再积分 ODE，而是直接做位移：</p>
-<pre class="ascii-block"><code>x̂_{tε} = x_{Trev} − (Trev − tε)·u_θ(x_{Trev}, r=tε, t=Trev | y)
+<pre class="code"><code>x̂_{tε} = x_{Trev} − (Trev − tε)·u_θ(x_{Trev}, r=tε, t=Trev | y)
 </code></pre>
 <p>一次前向出结果。多步细化只是把该位移沿单调递减网格 T_rev=t_0&gt;t_1&gt;...&gt;t_N=t_ε 重复，本质是把 Euler 的&quot;小步极限&quot;作为可选 refinement。</p>
 <h3 id="35-笔者总评">3.5 笔者总评</h3>
 <p>真正的&quot;创新浓度&quot;集中在式 16-18 三式。架构（NCSN++）、路径（线性-高斯）、前端（复 STFT）全沿用前人。这是一篇典型的&quot;以数学换效率&quot;的工作——不靠更大模型、不靠蒸馏，靠改写监督目标把 NFE=1 做实。</p>
 <hr />
 <h2 id="4-方法流程ascii">4. 方法流程（ASCII）</h2>
-<pre class="ascii-block"><code>┌─────────────────────────── 训练 ───────────────────────────┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程（ASCII）</figcaption><pre class="ascii"><code>┌─────────────────────────── 训练 ───────────────────────────┐
 
   配对样本 (x_1 干净, y 带噪) ──复 STFT──&gt; |z|^0.5·exp(j∠z), scale=0.15
 
@@ -1031,7 +1031,7 @@ arXiv：<a href="https://arxiv.org/abs/2509.14858" target="_blank" rel="noopener
 
   RTF = 0.11 (V100, batch=1, 端到端)
 └──────────────────────────────────────────────────────────────┘
-</code></pre>
+</code></pre></figure>
 <hr />
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>
 <h3 id="table-1vb-dmd-系统级对比同一前端归一化">Table 1：VB-DMD 系统级对比（同一前端/归一化）</h3>

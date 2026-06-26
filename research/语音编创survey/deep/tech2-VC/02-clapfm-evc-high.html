@@ -926,7 +926,7 @@
 <p><strong>批判性总评</strong>：真正的新东西是 EVC-CLAP 的 soft-label 双引导 + AIG 的意外音质稳定作用。但论文把它们包装成三大并列创新，有 overselling 嫌疑——CFM 部分严格说不算创新。整体属&quot;组合 + 一个关键 trick (AIG)&quot;的工程胜利。</p>
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>                       训练阶段
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>                       训练阶段
    ┌───────────────────────────────────────────────────────┐
    │  EVC-CLAP 训练 (symKL + soft-label)                    │
    │    音频 Xa ──[HuBERT-large 音频编码器]──&gt; Za (D=512)   │
@@ -964,7 +964,7 @@
                           ▼
    源语音 ──[HybridFormer PPG]──+──[FuEncoder+AIG]──[CFM 25步 Euler]--&gt; Mel --&gt; [BigVGAN] --&gt; 转换语音
                                 ↑强度门 γ(可调)
-</code></pre>
+</code></pre></figure>
 <p>关键细节：</p>
 <ul>
 <li>EVC-CLAP：8×RTX3090，Adam lr=1e-5，batch=16，40 epochs。</li>

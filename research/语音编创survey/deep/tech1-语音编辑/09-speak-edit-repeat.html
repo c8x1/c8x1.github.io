@@ -924,7 +924,7 @@
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
 <h3 id="mave-架构总览">MAVE 架构总览</h3>
-<pre class="ascii-block"><code>═══════════════════════════════════════════════════════════════
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>═══════════════════════════════════════════════════════════════
  输入: 音频波形 X ∈ R^{T×fs} (fs=16kHz)
        + 文本 transcript
 ═══════════════════════════════════════════════════════════════
@@ -979,9 +979,9 @@
  说话人条件 (zero-shot TTS): 参考话语 X-Codec token 前置到序列
    → Mamba 长程递归记忆音色 (无需 speaker embedding)
    编辑时参考可省 (周围未掩码音频已提供说话人上下文)
-</code></pre>
+</code></pre></figure>
 <h3 id="训练与推理关键参数">训练与推理关键参数</h3>
-<pre class="ascii-block"><code>训练: GigaSpeech 9k 小时 (16kHz)
+<pre class="code"><code>训练: GigaSpeech 9k 小时 (16kHz)
   ScaledAdam + Eden Scheduler, base lr 0.01
   batch 400k 帧 (133.2 分钟), 50k 步, 梯度累积
   830M 参数, 4×A100, 4 天

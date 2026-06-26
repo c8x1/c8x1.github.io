@@ -947,7 +947,7 @@
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
 <h3 id="lemas-dataset-构建-pipeline4-阶段">LEMAS-Dataset 构建 pipeline（4 阶段）</h3>
-<pre class="ascii-block"><code>[GigaSpeech / GigaSpeech2 / WenetSpeech4TTS / Emilia / MLS / TEDx / Alcaim / Golos / YODAS]
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>[GigaSpeech / GigaSpeech2 / WenetSpeech4TTS / Emilia / MLS / TEDx / Alcaim / Golos / YODAS]
         |
   Stage 1: Data Ingestion &amp; Unification
         |  - 归一化到统一 JSON schema (key/audio/txt/dur/align)
@@ -973,7 +973,7 @@
   Stage 4: Final Construction -&gt; JSONL, MP3 存储 (保留原始采样率)
         v
    LEMAS-Dataset (150k h, 10 lang, 词级时间戳 + 置信度)
-</code></pre>
+</code></pre></figure>
 <p>关键设计决策（论文明确说）：<strong>不做显式语音增强或背景噪声去除</strong>，故意保留 in-the-wild 特征，赌&quot;更先进的生成模型能利用这种变异性&quot;，且编辑模型能在噪声录音上工作甚至复现参考音频的环境声。这是反直觉但有道理的选择——保真度优先于干净度。</p>
 <h3 id="lemas-tts-训练推理">LEMAS-TTS 训练/推理</h3>
 <p>训练：F5-TTS DiT + flow-matching。改动：(1) 统一音素前端——中文用带调声韵母拼音，其他语言用 eSpeak-NG 出 IPA，所有音素加语言标识符 <code>&lt;zh&gt;</code>/<code>&lt;en&gt;</code> 投影到共享 latent 空间；用词级时间戳插入 pause tag (#1-#4) 控制停顿。(2) CTC 对齐损失——decoder 输出经轻量 projection head 映射到 phone 序列，强制单调性。(3) accent-adversarial——conditioning 通路接 accent 分类器 + GRL，用现成语种识别模型出伪标签，逼 encoder 学 accent-invariant 表示。(4) prosody encoder（借 Seamless Expressive）——子句切分后提 80-bin filterbank，ECAPA-TDNN 编成 512 维 prosody embedding，注入 mel 和 text 流。</p>

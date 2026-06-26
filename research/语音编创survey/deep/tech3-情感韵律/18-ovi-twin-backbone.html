@@ -921,7 +921,7 @@ arXiv：<a href="https://arxiv.org/abs/2510.01284" target="_blank" rel="noopener
 <p>批判声音：OVI 的&quot;无 face mask / 无辅助 sync loss&quot;是亮点，但<strong>代价是 5B×2 的对称双塔 + 从零训音频塔</strong>——这是用算力换优雅。对没有 Character AI 级算力的团队，UniVerse-1 的&quot;拼现成 backbone&quot;反而是更可复现的路线。论文未讨论算力-优雅的权衡。</p>
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>================= 数据管线 =================
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>================= 数据管线 =================
 [配对 AV 语料 + 纯音频语料]
   AV: 场景检测切 121帧@24fps → RAFT 光流滤静帧 + aesthetic 去低质
       → 人脸检测保证单/多人/无人混合
@@ -951,7 +951,7 @@ Stage1 音频塔: pretrain(≤12s, 50k步, bs2880, lr1e-4) → finetune(5.04s, +
 Stage2 fusion: 冻FFN, 训 self/cross-attn (5.7B/11B可训, 40k步, bs768, lr5e-5)
               loss: L_total = 0.85·L_v_FM + 0.15·L_a_FM  (共享t, 配对采样, 无sync loss)
               推理: 双塔共享 t 调度, 单 ODE(UniPC) 联合积分
-</code></pre>
+</code></pre></figure>
 <p>关键数字：11B 总参（5B 视频 + 5B 音频 + 融合层），fusion 阶段 5.7B 可训；λ_v=0.85/λ_a=0.15 视频主导；音频 RoPE 缩放 31/157≈0.197。</p>
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>

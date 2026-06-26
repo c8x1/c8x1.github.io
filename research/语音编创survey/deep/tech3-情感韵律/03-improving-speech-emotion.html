@@ -908,7 +908,7 @@
 <p><strong>批判声音</strong>：整套系统是&quot;12 个模型 + RF 元模型&quot;的暴力堆叠，单模型间差异主要是 SSL backbone 与是否三模态、是否加 SML 的组合，缺乏对这些设计点的强消融（如只去 SML、只去跨模态注意力、只去 RF 换成 logit 平均的独立贡献并未全部报告）。<strong>F1 0.409 在 8 类上并不算高</strong>（随机基线 12.5%，但基线 WavLM 也才 0.329），说明自然条件 SER 本身极难，本文靠&quot;多模态 + 集成 + 平衡&quot;把数字推到 0.409，工程扎实但理论增量有限。三模态（含 FACodec）在单模型档反而不是最强（Whisper+Roberta+NS3 的 BS-F1 0.374–0.391，低于双模态 Whisper+Roberta 的 0.417），说明 FACodec 副语言在当前框架下边际贡献可疑，作者也承认&quot;三模态在 accuracy 上最佳但 F1 不是&quot;。</p>
 <hr />
 <h2 id="4-方法流程ascii">4. 方法流程（ASCII）</h2>
-<pre class="ascii-block"><code>                      ┌── 单模型训练（12个变体，SSL特征冻结）──┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程（ASCII）</figcaption><pre class="ascii"><code>                      ┌── 单模型训练（12个变体，SSL特征冻结）──┐
 
   语音波形 ──&gt; [Whisper L-v3 / HuBERT-XL / WavLM-Large] ──&gt; 语音帧特征 SF(Fs×Ds)
   转录文本 ──&gt; [Whisper-L3 ASR生成] ──&gt; [RoBERTa-L / DeBERTa-XXL-v2] ──&gt; 文本token特征 TL(L×Dt)
@@ -944,7 +944,7 @@
                       最终8类预测
 
   评估: Macro-F1(官方); dev上做100次bootstrap平衡子集-&gt;BS-F1均值与范围
-</code></pre>
+</code></pre></figure>
 <p>训练细节：单卡 NVIDIA Quadro RTX 8000 48GB/模型，每模型约 24h；lr 1e-4 或 1e-5（cosine annealing），batch=64，20–30 epoch。文本转录用 Whisper-L3 生成（测试集无转录）。SSL 模型从 HuggingFace 加载，FACodec 用官方仓库。</p>
 <hr />
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>

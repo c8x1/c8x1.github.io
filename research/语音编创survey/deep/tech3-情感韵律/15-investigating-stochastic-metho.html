@@ -898,7 +898,7 @@ arXiv：<a href="https://arxiv.org/abs/2507.00227" target="_blank" rel="noopener
 </ol>
 <p><strong>批判</strong>：五条结论里，真正有新意的是 (2)(3) 与&quot;RF 用于显式韵律&quot;。(1)(4) 更像把已知工程经验做了正式验证。整体是 thorough 的实证研究而非范式突破；但其&quot;含人类上界 + 主观多样性&quot;的评测设计比前人都完整，这是其价值支柱。</p>
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>   文本 ──► articulatory features 输入表征 [24]
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>   文本 ──► articulatory features 输入表征 [24]
                 │
         Conformer Encoder
                 │
@@ -924,7 +924,7 @@ arXiv：<a href="https://arxiv.org/abs/2507.00227" target="_blank" rel="noopener
         CFM PostNet (MatchaTTS 式, 推理温度=0 隔离方差) → 频谱
                 │
         声码器 → 音频
-</code></pre>
+</code></pre></figure>
 <p>训练：LibriTTS 100k 步 batch32 收敛；RF 额外 10k 步 ReFlow（无额外数据）；推理用 Euler solver，ODE 法 12 时间步。客观评测 RAVDESS（24 演员两句多情感/强度，便于估计人类实现分布），主观评测 ADEPT topical emphasis（3 样本/说话人，强调位置变化，多样性类似 RAVDESS 但不如情感 salient，利于无偏多样性评估）。主观：40 名 Prolific 英语母语者，3 音频/2 问题×8 条件×2 说话人×2 句 = 7680 评分，960/条件。</p>
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>客观：预测器顺序/级联 vs 联合（Table 1，JS 散度↓，CFM 系统，vs RAVDESS 人类分布）</strong>：</p>

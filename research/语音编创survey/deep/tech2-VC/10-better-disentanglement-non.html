@@ -927,7 +927,7 @@ arXiv:<a href="https://arxiv.org/abs/2506.04013" target="_blank" rel="noopener">
 <p><strong>总评</strong>：范式转变×，已知件的新组合✓。真正能立住的 novelty 是&quot;多语言离散单元 + cross-attention F0 注入&quot;这一组合，其余是成熟件的迁移。论文写作把这些都平列为&quot;contributions&quot;，略有 oversell。</p>
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>                  ┌──────────────── mHuBERT-147 (frozen) ──────────────┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>                  ┌──────────────── mHuBERT-147 (frozen) ──────────────┐
                   │  waveform y → discrete units → embedding layer e    │
                   └────────────────────────┬───────────────────────────┘
                                            │
@@ -958,7 +958,7 @@ arXiv:<a href="https://arxiv.org/abs/2506.04013" target="_blank" rel="noopener">
                           │  Generator   │
                           └──────┬───────┘
                                  ▼  waveform ŷ
-</code></pre>
+</code></pre></figure>
 <p><strong>训练</strong>：LibriTTS-100 + ESD(英文) + GigaSpeech 子集 + Expresso，共约 228 小时、920+ 说话人；2× NVIDIA A600，batch 64，1M steps（ablation 300k）。损失 = L_adv(G)+L_adv(D)+L_fm+L_kl+L_rec+L_sim。</p>
 <p><strong>推理</strong>：源语音 → mHuBERT-147 单元 → 内容编码器（Mix-LN 用目标风格 s）→ cross-attn 注入目标 F0 → prior → <strong>reverse normalizing flow</strong> 把内容映到 posterior → HiFi-GAN 出波形。目标风格 s 与目标 F0 直接来自目标音频，实现 zero-shot。</p>
 <p><div class="callout callout-warn"><strong>笔者补充</strong>：流程图里有个容易看漏的点——训练时 posterior 走 x_spec、prior 走 c，flow 学 q→p 的映射；推理时没有 x_spec（只有源内容），靠 reverse flow 把 c 拉到 posterior 空间再解码。这正是 FreeVC 的&quot;先验-后验对齐&quot;套路，本文没改 flow 本身，只改了进 prior 之前的内容表征。</div></p>

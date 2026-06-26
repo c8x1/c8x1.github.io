@@ -937,7 +937,7 @@
 <p><strong>批判声音</strong>：这套评估堆叠了大量 LLM（DeepSeek-V3.1 当用户、GPT-4o 选情绪、Gemini 2.5 Pro 打分、DeepSeek 打对话分），<strong>整个回路里 LLM 既是被试环境又是裁判，存在系统性耦合</strong>——例如用户 LLM 的&quot;情绪表达&quot;风格会直接影响哪些 SDM 占优；裁判模型与用户模型同属大模型家族时偏好可能被放大。0.885 的人评相关性虽高但仅基于 10 位评估者、且是&quot;排名相关&quot;而非&quot;分数绝对一致&quot;，未必能支撑&quot;声学裁判可信&quot;的强结论。另外，&quot;38 个情绪 prompt&quot;覆盖的情绪类别（sadness/fear/happiness/relaxation/excitement/humor/hesitation/empathy）既非正交叉非完备，更像是工程便利选择。</p>
 <hr />
 <h2 id="4-方法流程ascii">4. 方法流程（ASCII）</h2>
-<pre class="ascii-block"><code>┌────────────── 多轮交互评估回路（per dialogue, ≤10 轮）──────────────┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程（ASCII）</figcaption><pre class="ascii"><code>┌────────────── 多轮交互评估回路（per dialogue, ≤10 轮）──────────────┐
 
   [离线] 用户画像构造
    中英对话 --GPT-4o/DeepSeek-R1--&gt; 提取属性(场景/目标/角色)
@@ -972,7 +972,7 @@
     - Style Inference (StyleTalk, 586, 单选, ACC)
     - Emotion Inference (NVSpeech, 360, 半开放)
     - Interactive Dialogue (PsyQA250/PsyDT250/MultiDialog500/NVSpeech500, 多轮, ALLM judge)
-</code></pre>
+</code></pre></figure>
 <p>数据集组合：UnderEmotion（URO 的子集，216 中英对话）、NVSpeech（词级 18 类副语言标注）、StyleTalk（同内容不同风格、不同回复的配对）、PsyQA/PsyDTCorpus（中文心理支持）、MultiDialog（日常闲聊）。交互对话 4 数据集共 1500 对话、产生 <strong>157,262 轮</strong>、平均 8 轮/对话。</p>
 <hr />
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>

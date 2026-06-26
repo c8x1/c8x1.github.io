@@ -902,7 +902,7 @@
 <p><strong>是否范式转换</strong>：否，是&quot;扩散 RL + 逐步 reward + CLAP 域自适应&quot;的组合工程创新。但&quot;逐步候选 + 随机续推&quot;这一设计有方法论价值，可迁移到其他扩散生成对齐（图像/视频）。</p>
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>                                  EASPM 训练（先训，再冻结）
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>                                  EASPM 训练（先训，再冻结）
    (x^w_0, x^l_0) 目标情感 vs 干扰情感（同文本）──采 t──前向扩散──&gt; (x^w_t, x^l_t, t, c)
         └─[CLEP-Audio + time-aware norm 层]─&gt; s_w, s_l
             L_pref = log(1 + exp(−τ·(s_w−s_l)))   (式3, pairwise logistic)
@@ -921,7 +921,7 @@
             else: 标准转移 x_{t-1} ~ p_θ(·|x_t,c)
    最终: L(θ) = E_{c,x_T,τ~U[1,T−κ],win/lose} [ (β_τ(ρ^w_τ−ρ^l_τ) − (s(x^w_τ-1,c,τ)−s(x^l_τ-1,c,τ)))^2 ]  (式7)
         随机打乱 τ 优化，跳过前 κ=0.25T 高噪步
-</code></pre>
+</code></pre></figure>
 <p><strong>关键设计点</strong>：</p>
 <ul>
 <li><strong>k=4 候选</strong>（Table 5 最优，k=8 引入 artifact）。</li>

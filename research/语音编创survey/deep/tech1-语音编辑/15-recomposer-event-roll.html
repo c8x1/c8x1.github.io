@@ -928,7 +928,7 @@
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
 <h3 id="模型架构figure-2">模型架构（Figure 2）</h3>
-<pre class="ascii-block"><code>输入侧:
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>输入侧:
 [input audio (16kHz)] -&gt; SoundStream encoder (frozen) -&gt; (ds, t) 连续编码
                                                                     |
 [edit instructions: &quot;insert door&quot; / &quot;enhance liquid&quot; / &quot;delete click&quot;]
@@ -946,10 +946,10 @@ Encoder-Decoder RQ-Transformer (390M, BERT-large 配置):
    - 3 层 depth transformer: 每帧内逐 RVQ token 顺序生成, 依赖 temporal 编码 + 同帧前序 token
    v
 RVQ token 序列 -&gt; SoundStream dequantizer (frozen) -&gt; SoundStream decoder (frozen) -&gt; 输出波形
-</code></pre>
+</code></pre></figure>
 <p>关键设计：text encoder (Sentence-T5)、audio encoder/decoder (SoundStream) 全部预训练冻结，只有中间 transformer 可训。depth transformer 改编自 Moshi 的音频解码思路。SoundStream 在 LibriVox 语音 + Freesound 非语音背景 + 音乐上训，16kHz。</p>
 <h3 id="训练数据合成figure-3">训练数据合成（Figure 3）</h3>
-<pre class="ascii-block"><code>背景: AudioSet strong-labeled 段
+<figure class="ascii-diagram"><figcaption>图2 · 方法流程</figcaption><pre class="ascii"><code>背景: AudioSet strong-labeled 段
   过滤: 无大静音段(≤10% 时间线未标注) + 至少 2 类声音 -&gt; 167,961 个 10s 背景片段
 前景目标: Freesound 单源片段
   (a) 关键词 tag 检索 (&quot;door&quot;)
@@ -969,7 +969,7 @@ Enhance-only 模型: 每例恰好 1 个 Enhance, TBR 均匀 -30~0 dB
   desired 输出目标恒 15 dB TBR (减模型不确定性)
 评测: 冻结合成 mixtures, 每操作 10,000 例
   背景/目标来自不同池(AudioSet + FSD50K eval): 24,098 背景 + 1,697 目标
-</code></pre>
+</code></pre></figure>
 <h3 id="评测指标">评测指标</h3>
 <ul>
 <li><strong>MSD (Multiscale Spectral Distortion)</strong>：多时间分辨率谱图逐格差异，线性+对数域平均。信号级，对时序小差异容差。适合 Delete（精确预测波形）和弱输入 Enhance。</li>

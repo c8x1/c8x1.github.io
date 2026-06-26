@@ -915,7 +915,7 @@ arXiv：<a href="https://arxiv.org/abs/2601.22873" target="_blank" rel="noopener
 <p>总体：<strong>范式迁移胜利（文本 activation steering → 语音 TTS）+ 参数高效工程胜利</strong>，非全新架构。同期 EmoSteer-TTS [27] 已做了类似迁移（training-free 路线），EmoShift 的差异点在&quot;可训练 steering 层&quot;——这个差异是否实质大于&quot;训练-free vs 训练&quot;的工程权衡，论文未充分论证。</p>
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>================= 训练（teacher-forcing）=================
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>================= 训练（teacher-forcing）=================
 输入序列: [S] , s(speaker emb) , {q_i}(emotion prompt &quot;happy&quot;)
         , [P] , {x_j}(text emb) , [T] , {y_k}(gt speech tokens) , [E]
                               │
@@ -938,7 +938,7 @@ EmoSteer 注入: h' = h + α·ϵ·v_e   （α≥1，强度可调，α=1 默认 /
                               │
                               ▼
               speech tokens → flow matching vocoder → 波形 Y'
-</code></pre>
+</code></pre></figure>
 <p>要点：</p>
 <ul>
 <li>EmoSteer 层是<strong>每情感一个 W_e</strong>（含 neutral 共 5 个，对应 ESD 的 5 情感）。</li>

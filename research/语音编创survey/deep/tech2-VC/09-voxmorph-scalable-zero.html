@@ -909,7 +909,7 @@ arXiv: <a href="https://arxiv.org/abs/2601.20883" target="_blank" rel="noopener"
 <p><strong>总评</strong>: 这是一次<strong>任务定义 + 工程集成</strong>的胜利。它真正打开的是&quot;voice morphing 可规模化&quot;这件事,以及对 ASV 系统的暴露面。技术新颖性中等 (组合已有部件),但任务意义和数字冲击力高。作为安全研究,它的价值在&quot;暴露漏洞 + 提供反制数据集&quot;,而非&quot;提供新算法&quot;。</p>
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>身份 A 语音 (≥5s) ──► GE2E encoder ──► prosody emb eP_A (节奏/音高)
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>身份 A 语音 (≥5s) ──► GE2E encoder ──► prosody emb eP_A (节奏/音高)
                   └─► CAM++ encoder ──► timbre emb  eT_A (身份)
 身份 B 语音 (≥5s) ──► GE2E           ──► eP_B
                   └─► CAM++         ──► eT_B
@@ -926,7 +926,7 @@ arXiv: <a href="https://arxiv.org/abs/2601.20883" target="_blank" rel="noopener"
           │   (两阶段均用 Classifier-Free Guidance CFG)
           │ Stage3 波形: HiFTNet vocoder(mel) → morphed 波形 W_α
           └──────────────────────┘
-</code></pre>
+</code></pre></figure>
 <p>实现细节:</p>
 <ul>
 <li>数据: LibriSpeech clean (&gt;100h 训练用源语音), 选 female-female 和 male-male 对, <strong>500 随机对</strong> (不做 ViM 那种相似度预筛选,以证明泛化)。</li>

@@ -972,7 +972,7 @@ arXiv：<a href="https://arxiv.org/abs/2601.16483" target="_blank" rel="noopener
 <p></div></p>
 <h3 id="31-创新点-1se-方向的-odesde-转换式-2-6">3.1 创新点 1：SE 方向的 ODE→SDE 转换（式 2-6）</h3>
 <p>Flow-GRPO 原始针对图像（时间 1→0）。SE 流匹配的时间方向相反（0→1，见 2.1 节&quot;x_t=(1-t)x_0+t·x_1, v=x_1−x_0&quot;）。作者做符号替换：<code>v_new = −v_se, t_new = 1−t_se, x_0=x_{se,t=1}, x_1=x_{se,t=0}, Δt=−Δt_se</code>，导出 SE 版 SDE 更新（式 6）：</p>
-<pre class="ascii-block"><code>x_{t,mean} = x_t + [ v_θ + (σ_t²/(2(1−t)))·(−x_t + t·v_θ) ]·Δt
+<pre class="code"><code>x_{t,mean} = x_t + [ v_θ + (σ_t²/(2(1−t)))·(−x_t + t·v_θ) ]·Δt
 x_{t+Δt}  = x_{t,mean} + σ_t·√Δt·ε ,  ε~N(0,I), σ_t = a·√((1−t)/t)
 </code></pre>
 <p><div class="callout callout-info">a 是控制随机性强度的超参。笔者解读：这步是&quot;机械但必要&quot;的符号适配，理论含金量低，但工程上必须做对，否则 on-policy 无从谈起。</div></p>
@@ -994,7 +994,7 @@ x_{t+Δt}  = x_{t,mean} + σ_t·√Δt·ε ,  ε~N(0,I), σ_t = a·√((1−t)/t
 <p>创新浓度分布：经验洞察（reward hacking + 多指标）&gt; 工程整合（ODE→SDE 适配 SE 方向 + LoRA）&gt; 理论。它不是新算法，而是把已有 GRPO 工具链在 SE 上跑通并给出&quot;怎么做才不崩&quot;的实操指南。</p>
 <hr />
 <h2 id="4-方法流程ascii">4. 方法流程（ASCII）</h2>
-<pre class="ascii-block"><code>┌──────────────────── 阶段一：预训练 Flow-Matching SE ───────────────┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程（ASCII）</figcaption><pre class="ascii"><code>┌──────────────────── 阶段一：预训练 Flow-Matching SE ───────────────┐
 
   干净 mel x_1 ~ X_1 , 噪声 x_0 ~ N(0,I) , 带噪 mel c
   x_t = (1-t)·x_0 + t·x_1 ,  目标 v = x_1 − x_0
@@ -1040,7 +1040,7 @@ x_{t+Δt}  = x_{t,mean} + σ_t·√Δt·ε ,  ε~N(0,I), σ_t = a·√((1−t)/t
   (推理用 CFG, 不用 SDE 随机性)
 
 └────────────────────────────────────────────────────────────────────┘
-</code></pre>
+</code></pre></figure>
 <hr />
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>
 <h3 id="table-1dns2020-系统级对比no-reverb">Table 1：DNS2020 系统级对比（No Reverb）</h3>

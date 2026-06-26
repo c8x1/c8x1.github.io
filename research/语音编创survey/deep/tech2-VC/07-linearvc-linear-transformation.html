@@ -900,7 +900,7 @@ arXiv: <a href="https://arxiv.org/abs/2506.01510" target="_blank" rel="noopener"
 <p><strong>总评</strong>: 这不是架构胜利也不是工程胜利,而是一次<strong>表征几何学的胜利</strong>——用一个 5 页的短文,把&quot;SSL 特征里 content/speaker 解耦&quot;从&quot;假说&quot;推进到&quot;有 rank 数字的实证&quot;。范式贡献中等,但洞察密度高。</p>
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>                    ┌──── Learning (per speaker pair) ────┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>                    ┌──── Learning (per speaker pair) ────┐
 source speech ──► WavLM-Large layer6 ──► X (N×1024, 20ms/帧, 16kHz)
                                               │
 target speech ──► WavLM-Large layer6 ──► Y (M×1024)
@@ -923,7 +923,7 @@ unseen source ──► WavLM layer6 ──► X_src · W = X_tgt ──► HiFi
   K 个说话人特征矩阵 X_k = [X_1..X_K] (block)
   SVD:  X_k ≈ UΣ·S_k ,  其中 UΣ = 共享内容 C (rank r), S_k = 说话人特定变换
   转换:  X_tgt = X_src · S_src⁺ · S_tgt        (伪逆投到 content 子空间再投出去)
-</code></pre>
+</code></pre></figure>
 <p>训练/推理细节:</p>
 <ul>
 <li>数据: LibriSpeech, dev-clean 做开发、test-clean 报最终分,每子集 40 说话人。</li>

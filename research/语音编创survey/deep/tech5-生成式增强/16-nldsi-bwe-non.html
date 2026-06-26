@@ -943,7 +943,7 @@ arXiv: <a href="https://arxiv.org/abs/2510.01109" target="_blank" rel="noopener"
 </ul>
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>                  ┌──────────────────────────────────┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>                  ┌──────────────────────────────────┐
                   │  生成器（沿用 AP-BWE，不变）        │
                   └──────────────────────────────────┘
   带限波形 x_lr ──sinc插值──&gt; x_hr_len ──ConvNeXt criss-cross双流──&gt; 重建波形 x_hat
@@ -966,7 +966,7 @@ arXiv: <a href="https://arxiv.org/abs/2510.01109" target="_blank" rel="noopener"
                 ▼
   L_D = Σ L_MRLD + Σ L_MSRD + Σ L_MRAD + Σ L_MRPD  (hinge loss)
   L_G = L_mag + L_pha + L_com + L_stft + L_fm + L_adv  (六项，沿用AP-BWE)
-</code></pre>
+</code></pre></figure>
 <p><strong>训练细节</strong>：VCTK v0.92（110 说话人，16/48kHz），batch 16，AdamW(β1=0.8,β2=0.99,wd=0.01)，lr=2e-4 指数衰减(0.999/epoch)，50 epochs，每 epoch ~25 min，4×RTX 4090 + Xeon Silver 4310。</p>
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>

@@ -969,7 +969,7 @@ arXiv: <a href="https://arxiv.org/abs/2601.14356" target="_blank" rel="noopener"
 </ul>
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>                  ┌──────────────────────────────────────┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>                  ┌──────────────────────────────────────┐
                   │  FlowHigh 框架（本作扩展）              │
                   └──────────────────────────────────────┘
   窄带/退化音频 ──mel谱──&gt; 低带mel ──FlowHigh VFE(transformer,35.4M)──&gt; 全带mel
@@ -990,15 +990,15 @@ arXiv: <a href="https://arxiv.org/abs/2601.14356" target="_blank" rel="noopener"
                          ▼  后处理(沿用FlowHigh):
                   输入信号低频带(到cutoff)拷贝到输出
                   (仅用模型预测的高频部分)
-</code></pre>
+</code></pre></figure>
 <p><strong>DSC 计算流程</strong>（独立于生成）：</p>
-<pre class="ascii-block"><code>输入音频 → STFT(n_fft=2048, hop=512) → 幅度谱
+<figure class="ascii-diagram"><figcaption>图2 · 方法流程</figcaption><pre class="ascii"><code>输入音频 → STFT(n_fft=2048, hop=512) → 幅度谱
   → 二值掩码(阈值 q=10^-1.6)
   → 频率轴1D高斯平滑(σ_f=9)
   → 每帧找平滑掩码首次&lt;γ=0.07的频率bin(频谱边缘)
   → 中值滤波(m_f=9, 时序平滑)
   → DSC时变曲线
-</code></pre>
+</code></pre></figure>
 <p><strong>训练细节</strong>：商业音乐目录 8503 曲（425h），44.1kHz，1.5s 片段，8:1:1 划分。在线数据增强：每干净样本配退化版（低通滤波从 FIR/Biquad/Chebyshev Type I/理想砖墙 4 族随机选，阶/纹波/cutoff 3-18kHz 1kHz 间隔随机），400+ 唯一滤波器。FlowHigh VFE 35.4M（2 层 16 头 self-attention，embedding 1024，FFN 4096）。冻结 BigVGAN vocoder。</p>
 <p><strong>评测</strong>：FAD_CLAP（LAION-CLAP 嵌入，48kHz，参考无关）、LSD（对数谱距离）、LKR-PI（谱峰度变化，检测音乐伪影/谱洞）、控制 adherence（|log(ĉ)-log(c)| 中位数）。</p>
 <hr />

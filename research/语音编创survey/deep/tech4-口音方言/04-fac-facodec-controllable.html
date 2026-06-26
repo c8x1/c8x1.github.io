@@ -936,7 +936,7 @@ Demo: https://claussss.github.io/accent_control_demo/
 </ol>
 <p>笔者批判声音：所谓 &quot;first AC with explicit control&quot; 略有营销色彩——SDEdt/EdiTTS 的噪声量本质上已是控制旋钮，本文是在 FACodec 口音场景下重新命名了它；真正新的是&quot;把它绑定到 FACodec content 残差 + 母语先验训练 + 无平行数据&quot;这套组合。</p>
 <h2 id="4-方法流程ascii">4. 方法流程（ASCII）</h2>
-<pre class="ascii-block"><code>========== 训练阶段 (仅母语 LJSpeech + 转写) ==========
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程（ASCII）</figcaption><pre class="ascii"><code>========== 训练阶段 (仅母语 LJSpeech + 转写) ==========
  native audio ──FACodec enc──► h ──factorize──► z_c1(=x0), z_c2, z_p, z_d, g
  text ──text norm(NeMo)── phoneme (eSpeak-ng en-us) ──Wav2Vec2 XLSR 对齐── π
                                                   └─nearest-neighbor 上采样到 20ms 帧
@@ -960,7 +960,7 @@ Demo: https://claussss.github.io/accent_control_demo/
             ẑ_c = ẑ_c1' + ẑ_c2   (z_p, z_d, g 全程不变)
                                                 ▼
             FACodec decode ──► 转换后波形 (口音力度随 t_start 平滑变化)
-</code></pre>
+</code></pre></figure>
 <p>关键点：t_start 同时是后验似然方差 (1-ᾱ_{t_start})I 的开关——小→窄似然→锚定非母语；大→宽似然→偏母语先验。逐帧独立采样保证平滑梯度。</p>
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>
 <p><strong>可控性主表 (L2-Arctic, Table 1, 平均)：</strong></p>

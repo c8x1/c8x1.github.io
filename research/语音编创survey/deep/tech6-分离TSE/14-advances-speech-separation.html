@@ -951,14 +951,14 @@
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
 <p>综述无单一方法，但刻画了<strong>语音分离的统一管线</strong>（Section IV，Figure 6）：</p>
-<pre class="ascii-block"><code>        ┌─────────┐   ┌──────────┐   ┌────────────────┐   ┌─────────┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>        ┌─────────┐   ┌──────────┐   ┌────────────────┐   ┌─────────┐
 音频 x →│ Encoder │→→│ Separator │→→│ Audio Estimate │→→│ Decoder │→ 分离信号 ŝ_i
         └─────────┘   └──────────┘   └────────────────┘   └─────────┘
            三类：          四类：           两类：              三类同 encoder
         STFT/iSTFT      RNN/CNN/         mask / mapping
         可学习卷积      Attention/       (式6 vs 式7)
         预训练模型/codec Mixture
-</code></pre>
+</code></pre></figure>
 <h3 id="encoderdecoder-三类section-iv-afigure-7">Encoder/Decoder 三类（Section IV-A，Figure 7）</h3>
 <ol>
 <li><strong>STFT/iSTFT</strong>：固定不可学，物理可解释，但时频分辨率受窗函数限制，低延迟场景大窗口引入延迟；重建常只用幅度谱，相位靠 Griffin-Lim 或直接取混合信号相位，质量受限。近期有方法联合估计实部虚部（TF-GridNet/TIGER）。</li>

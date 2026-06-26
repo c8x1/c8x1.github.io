@@ -943,7 +943,7 @@
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
 <h3 id="模型架构figure-1">模型架构（Figure 1）</h3>
-<pre class="ascii-block"><code>训练/推理 (continuous latent 路径):
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>训练/推理 (continuous latent 路径):
 [input audio x(t), 16kHz]
    |
    冻结 DAC encoder Enc(·) -&gt; codec latent Z ∈ R^{d×T}  (d=64, T=50/1s, hop M=320)
@@ -962,12 +962,12 @@
    逐元素掩码: Ẑ_s = M_s ⊙ Z
    |
    冻结 DAC decoder Dec(·) -&gt; 估计波形 ŷ_s(t)  (bypass RVQ lookup)
-</code></pre>
+</code></pre></figure>
 <p>关键设计：CLAP 文本编码器冻结；DAC 编解码器冻结；只训 FiLM masker + query network。文本嵌入 e_τ ∈ R^{dt} 由 CLAP 出。</p>
 <h3 id="训练目标">训练目标</h3>
 <p>L = -Σ_s SI-SDR(y_s, ŷ_s) - SI-SDR(x, x̂)，其中 x̂ = g(Σ_s Ẑ_s)（混合一致性：解码求和的 latent 估计，逼模型让分离的源加回去≈原混合）。Adam + plateau LR schedule。两个变体：CodecSep+dnr-v2 和 CodecSep+AudioCaps。</p>
 <h3 id="部署codes-in--codes-out34-figure-2">部署：codes-in / codes-out（§3.4, Figure 2）</h3>
-<pre class="ascii-block"><code>边缘设备: x(t) -&gt; DAC Quant(Enc(·)) -&gt; 码 A = [a_t ∈ [1024]^8]  (传码流)
+<figure class="ascii-diagram"><figcaption>图2 · 方法流程</figcaption><pre class="ascii"><code>边缘设备: x(t) -&gt; DAC Quant(Enc(·)) -&gt; 码 A = [a_t ∈ [1024]^8]  (传码流)
    |
 服务器端 codes-in:
    codebook lookup: e_t = Σ_{i=1}^{8} lookup(a_t^{(i)}), E = [e_t] ≈ Z
@@ -976,7 +976,7 @@
    |
    可选 codes-out: Ẑ_s -&gt; Quant(·) -&gt; Â_s (re-quantize 回码)
    或解码: Dec(Ẑ_s) -&gt; ŷ_s(t)
-</code></pre>
+</code></pre></figure>
 <p>计算成本对比（code-stream 输入）：AudioSep = C_Dec + C_Spec + C_Enc；CodecSep = C_Mask（lookup 和 quant 视为 ≈0）。C_Enc=12.28 GMACs, C_Dec=27.82 GMACs（codec 本身不便宜），但 CodecSep 在 code-stream 模式下省掉这俩。</p>
 <h3 id="评测协议">评测协议</h3>
 <ul>

@@ -928,7 +928,7 @@ Demo: https://p1ping.github.io/CosyAccent-Demo · Code&amp;data: https://github.
 </ol>
 <p>笔者批判声音：source-synthesis 的&quot;不依赖真实 L2&quot;是<strong>训练阶段</strong>不依赖，但数据构造仍需 L2-ARCTIC 做 prompt（accent 来源），且口音分类器打分过滤 (score&gt;0.5) 仍依赖真实 L2 样本——所以严格说是&quot;不直接用真实 L2 做训练对的目标端/源端，但仍需少量 L2 做 prompt 与过滤&quot;。此外合成 L2 的口音真实性受限于 CosyVoice2 对口音的建模能力，论文未评估合成 L2 与真实 L2 的口音分布差距对泛化的影响（只在结果处承认&quot;domain gap&quot;）。</p>
 <h2 id="4-方法流程ascii">4. 方法流程（ASCII）</h2>
-<pre class="ascii-block"><code>========== 1. 数据构造 (source-synthesis, 不用真实L2做训练对) ==========
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程（ASCII）</figcaption><pre class="ascii"><code>========== 1. 数据构造 (source-synthesis, 不用真实L2做训练对) ==========
  L2-ARCTIC ──split── train/valid(50句)/test(80句) ──accent classifier(&gt;0.5)── 每说话人≥200条
                                                                           │ 过滤后 L2 prompt 池
  LibriTTS-R (真实母语) ──随机配对 L2 prompt──► 配对(L1文本, L1音色, L2口音)
@@ -952,7 +952,7 @@ Demo: https://p1ping.github.io/CosyAccent-Demo · Code&amp;data: https://github.
 
  推理 CFG:  v̄ = v(c,s) + w1·[v(c,s)-v(∅,∅)] + w2·[v(c,s)-v(∅,s)]   w1=w2=1.0
    32步 Euler 采样 ──► Mel ──HiFTNet vocoder(CosyVoice2)──► 波形
-</code></pre>
+</code></pre></figure>
 <p>关键：position scaling 是 NAR 下&quot;指定任意目标长度仍能连贯生成&quot;的机制；CTC 辅助 + speaker embedding 是内容/音色保真的双保险（消融显示缺一即 WER 升或 SECS 暴跌）。</p>
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>
 <p><strong>主表 (Table 1, 扩展 L2-ARCTIC, 7口音, 80句, 24 评听人)：</strong></p>

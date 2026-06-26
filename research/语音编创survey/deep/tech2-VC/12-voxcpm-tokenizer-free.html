@@ -913,7 +913,7 @@ arXiv:<a href="https://arxiv.org/abs/2509.24650" target="_blank" rel="noopener">
 <p><strong>总评</strong>：这是<strong>架构创新 + 大规模工程</strong>双重胜利。核心架构创新是&quot;FSQ 当正则瓶颈 + 残差分工&quot;这一可微半离散设计，不是单纯堆料。但它也是 1.8M 小时 + 40×H100 的算力产物，架构红利的可复现性要打折扣（VoxCPM-Emilia 在 95K 小时上能复现部分优势，说明架构本身有效，但绝对 SOTA 数字靠数据量）。</p>
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>  文本 T ──BPE(中文字符级)──► TSLM (24层, MiniCPM-4-0.5B 初始化)
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>  文本 T ──BPE(中文字符级)──► TSLM (24层, MiniCPM-4-0.5B 初始化)
                                    │
    历史音频 Z_&lt;i ─► LocEnc(4层)──► E_&lt;i  (轻量压缩 latent patch)
                                    │
@@ -950,7 +950,7 @@ arXiv:<a href="https://arxiv.org/abs/2509.24650" target="_blank" rel="noopener">
                           │ (640x 下采样,     │  (stride [2,5,8,8], DAC-like 因果CNN)
                           │  单独预训练)      │  GAN+Mel+KL(5e-5)
                           └──────────────────┘
-</code></pre>
+</code></pre></figure>
 <p><strong>训练</strong>：</p>
 <ul>
 <li>主目标 L_FM（流匹配，式5）+ λ·L_Stop（BCE，式6），端到端，梯度穿过 FSQ（straight-through）。</li>

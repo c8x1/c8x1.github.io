@@ -903,7 +903,7 @@ arXiv: <a href="https://arxiv.org/abs/2506.02414" target="_blank" rel="noopener"
 <p><strong>总评</strong>: 这是一次<strong>训练策略 + 任务定义的工程胜利</strong>,不是架构胜利。它的真正卖点不是&quot;VC 质量碾压&quot;(主观分和 CosyVoice/OpenVoice V2 在置信区间内重叠),而是&quot;VC 同时白送一份准确转录&quot;。这个卖点是否值 180 GPU·小时,取决于应用是否需要同步文本。</p>
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>源语音 ──mel──► Whisper-small encoder ──semantic adapter──► S (T×dim 语义特征)
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>源语音 ──mel──► Whisper-small encoder ──semantic adapter──► S (T×dim 语义特征)
 目标语音 ──FBank──► ERes2Net-large ──speaker adapter──► S' (1×dim 说话人向量)
                                             │
               concat [S ; S'] ──►  LM (24层 Transformer, Qwen2.5-0.5B 架构)
@@ -924,7 +924,7 @@ arXiv: <a href="https://arxiv.org/abs/2506.02414" target="_blank" rel="noopener"
                               (ASR 样本不更新 speaker adapter)
 
 数据增强: OpenVoice V2 合成多说话人平行数据, Stage2 50%/50% 真实/合成, Stage3 80%/20%
-</code></pre>
+</code></pre></figure>
 <p>关键超参:</p>
 <ul>
 <li>LM: 24 层, intermediate=4864, embed=896, 14 heads (Qwen2.5-0.5B 同构); smaller=12 层。</li>

@@ -950,7 +950,7 @@
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
 <h3 id="pipeline-ascii">Pipeline ASCII</h3>
-<pre class="ascii-block"><code>┌─────────────────────────────────────────────────────────────────────┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>┌─────────────────────────────────────────────────────────────────────┐
 │  视觉输入 (15fps, 与16kHz音频同步)                                    │
 │   ├─ 手势: 上身10个3D关节(head,neck,nose,spine,L/R肩,L/R肘,L/R腕)    │
 │   │    2D pose → 3D lift → vg(t)                                      │
@@ -973,7 +973,7 @@
           κ=0.07, 唇embedding detach(单向:手势→唇, 不反向)
   模态dropout: 训练时20%可见脸视频随机丢手势(保证每样本至少一视觉模态)
   带InfoNCE的模型: 从纯SI-SNR checkpoint初始化再微调
-</code></pre>
+</code></pre></figure>
 <h3 id="关键组件细节">关键组件细节</h3>
 <ul>
 <li><strong>手势表征</strong>：10 个脊柱中心 3D 关节，先用 2D pose 算法 [26] 提取再用 3D pose 估计器 [27] 提升。BLSTM 建模手势时序动态。hidden 仅 32，远小于唇编码器——手势信息量低，不需要大容量。</li>

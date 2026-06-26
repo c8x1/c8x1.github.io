@@ -12,6 +12,11 @@
   --accent-soft: #eaf0ff;
   --code-bg: #f6f8fa;
   --code-text: #1f2328;
+  --ascii-bg: #fbfcfe;
+  --ascii-cap-bg: #f3f6fb;
+  --ascii-text: #2b3340;
+  --ascii-grid: radial-gradient(rgba(47,109,246,.05) 1px, transparent 1px);
+  --ascii-grid-size: 11px 11px;
   --table-head: #f3f5f8;
   --table-hover: #f0f4ff;
   --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
@@ -34,6 +39,11 @@
   --accent-soft: #16223a;
   --code-bg: #161b22;
   --code-text: #e6edf3;
+  --ascii-bg: #131820;
+  --ascii-cap-bg: #0f141b;
+  --ascii-text: #c8d3e0;
+  --ascii-grid: radial-gradient(rgba(77,141,255,.06) 1px, transparent 1px);
+  --ascii-grid-size: 11px 11px;
   --table-head: #161b22;
   --table-hover: #1a2233;
   --shadow: 0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
@@ -155,15 +165,40 @@ a:hover { text-decoration: underline; }
   font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: .88em;
   background: var(--code-bg); padding: .15em .4em; border-radius: 4px; color: var(--code-text);
 }
-.md-body pre {
+/* 真(代码)块: 灰色 code 背景, 与 ascii 图区分 */
+.md-body pre.code {
   font-family: 'JetBrains Mono', ui-monospace, monospace; background: var(--code-bg);
   border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto;
   font-size: 12.5px; line-height: 1.55; margin: 1em 0;
 }
-.md-body pre code { background: none; padding: 0; font-size: inherit; }
-.md-body pre.ascii-block { white-space: pre; }
+.md-body pre.code code { background: none; padding: 0; font-size: inherit; }
+.md-body pre { font-family: 'JetBrains Mono', ui-monospace, monospace; }
 .md-body a code { color: inherit; }
 .md-body strong { font-weight: 700; }
+
+/* ===== ASCII 流程图 (figure) ===== */
+.md-body figure.ascii-diagram {
+  margin: 1.4em auto; max-width: 920px; padding: 0; border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden; background: var(--ascii-bg);
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  background-image: var(--ascii-grid);
+  background-size: var(--ascii-grid-size);
+}
+.md-body figure.ascii-diagram > figcaption {
+  margin: 0; padding: 7px 14px; text-align: center; font-size: 12px;
+  color: var(--text-muted); background: var(--ascii-cap-bg);
+  border-bottom: 1px solid var(--border-soft); letter-spacing: .02em;
+}
+.md-body figure.ascii-diagram > pre.ascii {
+  margin: 0; padding: 14px 18px; overflow-x: auto; background: none; border: none;
+  font-family: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', 'Menlo', monospace;
+  font-size: .93rem; line-height: 1.45; white-space: pre;
+  font-variant-ligatures: none; letter-spacing: 0; word-spacing: 0; tab-size: 4;
+  color: var(--ascii-text);
+}
+.md-body figure.ascii-diagram > pre.ascii code {
+  background: none; padding: 0; font-size: inherit; color: inherit;
+}
 
 /* 表格 */
 .md-body table.gfm-table {

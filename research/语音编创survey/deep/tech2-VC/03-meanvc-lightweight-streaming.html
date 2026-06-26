@@ -941,7 +941,7 @@
 <p><strong>批判性总评</strong>：三贡献里 A 是缝合创新、B 是迁移应用、C 是迁移+小改。<strong>没有一个是范式原创</strong>，但组合起来确实击中了&quot;流式+轻量+高质量&quot;这个长期空缺。属&quot;集成工程胜利&quot;，价值在落地而非学术突破。批判声音：14M 的极致轻量部分来自&quot;DiT 只用 4 层、hidden 512、2 注意力头&quot;这种极小配置——这是否以&quot;上限低&quot;为代价？论文未报大模型版 ablation，无法判断 mean flows 在 VC 上的 scaling 行为。</p>
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>              推理 (流式)
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>              推理 (流式)
  源语音 ──[流式 ASR: Fast-U2++]──&gt; BNF (40ms帧, 160ms chunk)
                                         │
  参考语音 ──[ECAPA-TDNN]──&gt; 说话人嵌入 ──┤
@@ -976,7 +976,7 @@
     G = DiT (1-NFE 生成); D = DiT初始化 + 第2/4层插 cross-attn-only块
     L_Adv(G) = E[‖D(G(ε,c),c) - 1‖²]
     L_Adv(D) = E[‖D(x,c)-1‖²] + E[‖D(G(ε,c),c)‖²]
-</code></pre>
+</code></pre></figure>
 <p>关键细节：</p>
 <ul>
 <li>训练数据：Emilia 10,000h 中文（DNSMOS≥3.4 过滤），16kHz。</li>

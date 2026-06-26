@@ -891,14 +891,14 @@
 <p><strong>这是范式转变还是组合？</strong> 组合。本文的价值不在&quot;提出新架构&quot;，而在&quot;给 SER 池化这件事画了一张清晰的能力表 + 一张可解释性地图&quot;，让后续工作知道 attention pooling 不仅涨点还自带解释。</p>
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>Audio (16kHz) ──► W2V-BERT 2.0 (frozen→unfreeze upper→all) ─┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>Audio (16kHz) ──► W2V-BERT 2.0 (frozen→unfreeze upper→all) ─┐
                                                                 ├─► Custom Pooler ─► pooled audio emb ─┐
 Transcript (Whisper-lv3 生成) ──► DeBERTa v3 (同三阶段) ─► Custom Pooler ─► pooled text emb ─┤
                                                                                               │
                                             concat ─► MLP classifier ─► emotion logits
                                                                                               │
                                        class-weighted focal loss (γ=2, αc=1/freq)
-</code></pre>
+</code></pre></figure>
 <p><strong>Custom Pooler 候选</strong>(论文核心变量):</p>
 <ul>
 <li>Basic: max / average / statistics([μ, σ])</li>

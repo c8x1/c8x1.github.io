@@ -911,7 +911,7 @@
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
 <h3 id="整体架构三件套">整体架构（三件套）</h3>
-<pre class="ascii-block"><code>═══════════════════════════════════════════════════════════════
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>═══════════════════════════════════════════════════════════════
  参考音频 / 输入音频
         │
         ▼
@@ -937,9 +937,9 @@
         ▼
    编辑/合成后的音频
 ═══════════════════════════════════════════════════════════════
-</code></pre>
+</code></pre></figure>
 <h3 id="后训练两阶段">后训练两阶段</h3>
-<pre class="ascii-block"><code>阶段1: SFT (监督微调)                       阶段2: RL (强化学习)
+<figure class="ascii-diagram"><figcaption>图2 · 方法流程</figcaption><pre class="ascii"><code>阶段1: SFT (监督微调)                       阶段2: RL (强化学习)
 ─────────────────────────────              ─────────────────────────────
 数据四类:                                   偏好数据两类:
 • zero-shot TTS   (60k 说话人,中英为主)      • 人工标注: 20候选→5分制→margin&gt;3
@@ -952,24 +952,24 @@ chat格式:                                    PPO训练:
 • 编辑: 统一system prompt, user=原音频+      • lr 1e-6, cosine→2e-7
   描述命令, response=编辑后token              • clip ε=0.2, KL β=0.05
 1 epoch, lr 1e-5→1e-6
-</code></pre>
+</code></pre></figure>
 <h3 id="情感风格大间隔数据构造核心">情感/风格大间隔数据构造（核心）</h3>
-<pre class="ascii-block"><code>1. Voice Actor Recording: 每个演员 × 每种情感/风格 ≈10s 单条
+<figure class="ascii-diagram"><figcaption>图3 · 方法流程</figcaption><pre class="ascii"><code>1. Voice Actor Recording: 每个演员 × 每种情感/风格 ≈10s 单条
 2. Zero-shot Cloning: 三元组 ⟨text_prompt, audio_neutral, audio_emotion/style⟩
    同一说话人, 同一文本, 仅情感/风格 prompt 不同 → StepTTS 克隆
 3. Margin Scoring: 小评分模型给对比对打 1-10 分
 4. Margin Selection: 阈值≥6 (不同情感/风格可调), 只留大间隔样本
 5. 训练时 triplet 用同一情感/风格文本 prompt → 模型只能关注属性差异本身
-</code></pre>
+</code></pre></figure>
 <h3 id="迭代编辑推理">迭代编辑推理</h3>
-<pre class="ascii-block"><code>Iter0: zero-shot clone (初始音频)
+<figure class="ascii-diagram"><figcaption>图4 · 方法流程</figcaption><pre class="ascii"><code>Iter0: zero-shot clone (初始音频)
   ↓ 第1轮编辑 (按情感/风格指令)
 Iter1
   ↓ 第2轮编辑
 Iter2
   ↓ 第3轮编辑
 Iter3   ← N=3, 论文说多数场景2轮即够
-</code></pre>
+</code></pre></figure>
 <hr />
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>
 <p><strong>Table 1 — Step-Audio-EditX 自身迭代编辑</strong>：</p>

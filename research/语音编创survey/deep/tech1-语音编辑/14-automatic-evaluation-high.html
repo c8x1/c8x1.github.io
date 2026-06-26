@@ -923,7 +923,7 @@
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
 <h3 id="auditscore-数据集构建">AuditScore 数据集构建</h3>
-<pre class="ascii-block"><code>[AudioCaps 原始音频 + captions]
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>[AudioCaps 原始音频 + captions]
    |
    GTE-large 文本嵌入 -&gt; 聚成 100 语义簇 -&gt; 每簇手选 2-3 条音频
    |
@@ -940,14 +940,14 @@
    5 位领域专家 × 三维度(Q/R/F) × 1-5 分独立打分 -&gt; 取均值
    v
 AuditScore: 6360 对, 35.3h, 200+ 事件类型, 编辑引入 150+ 新事件
-</code></pre>
+</code></pre></figure>
 <p>三维度评分尺度（Appendix A 详述）：Quality（5=与原齐平或更好 ... 1=严重损坏不可懂）；Relevance（5=完美匹配意图 ... 1=不匹配）；Faithfulness（5=未编辑部分完全保留 ... 1=未编辑内容严重改动/缺失）。关键设计：Faithfulness 明确&quot;不要因为 target_caption 要求的语义改动而扣分&quot;——只评应保持部分是否被保持。</p>
 <h3 id="auditeval-ssl">AuditEval-ssl</h3>
 <p>输入：原始音频 + 编辑音频 + 原始 caption + 目标 caption。ms-clap backbone 提音频嵌入和文本嵌入，三个独立 regression head（FC classifier + FFN + FFN）分别出 Q/R/F 分。训练：Adam, lr=5e-5, ReduceLROnPlateau, batch 256, 三 head 分别训 50/30/35 epochs，单 H800。</p>
 <h3 id="auditeval-llm">AuditEval-llm</h3>
 <p>输入同上 + 结构化文本证据集。Qwen2.5-Omni-7B（保留 Thinker 模块）+ LoRA（rank 8, alpha 32, 全线性层，冻结 ViT）+ 三个 post regression head 预测连续分。ms-swift 框架，6 epochs, lr=1e-4, warmup 0.05, bf16, grad accum 8, max len 4096。chat template 关闭保证统一输入格式。评分 prompt（Appendix H）让模型扮&quot;专业音频编辑质量评测员&quot;，输出三个 1-5 整数（但 regression head 出连续值，这是设计上的张力——prompt 说整数，head 出浮点，论文没解释怎么调和，笔者推测是 head 直接回归连续值、prompt 的整数描述只是给 Thinker 的语义指引）。</p>
 <h3 id="伪并行数据过滤">伪并行数据过滤</h3>
-<pre class="ascii-block"><code>[AudioCaps 45k+ A 音频] + [B/C 单事件 8 大类 100+ 声音类型, 4950 对]
+<figure class="ascii-diagram"><figcaption>图2 · 方法流程</figcaption><pre class="ascii"><code>[AudioCaps 45k+ A 音频] + [B/C 单事件 8 大类 100+ 声音类型, 4950 对]
    | TangoFlux 生成 (step 50, guide 4.5): A=10s, B/C=3-6s
    | sliding window(步长0.1s) 找 A 中最低能量段插入 B -&gt; A+B; 同理 A+C
    | peak amplitude 归一化 B 匹配 A 的最大幅值
@@ -964,7 +964,7 @@ AuditScore: 6360 对, 35.3h, 200+ 事件类型, 编辑引入 150+ 新事件
      Round 3: 按 Relevance 降序取 top 30000
    v
 高质量伪并行数据集: 每任务 30k, 共 90k
-</code></pre>
+</code></pre></figure>
 <p>阈值（ssl：Q 3.40，F 3.216/3.281/3.266，R 3.159/3.484/3.344；llm：Q 3.70，F 3.578/3.641/3.453，R 3.500/3.609/3.469）。注意三轮的 faithfulness/relevance 阈值递增——越往后越严，逐步收紧质量。</p>
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>

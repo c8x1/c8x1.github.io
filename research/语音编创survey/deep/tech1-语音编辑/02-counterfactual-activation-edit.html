@@ -908,7 +908,7 @@
 <p><div class="callout callout-info"><strong>笔者解读</strong>：本文真正价值不在&quot;CAE 能调 prosody&quot;（这是 probing + steering 的必然推论），而在&quot;<strong>如何让梯度编辑不毁掉语音内容</strong>&quot;——β-VAE 限流形 + VQ prototype 锚内容这个两段约束，是 activation editing 从图像迁移到语音时必须解决的真实工程难点（语音对扰动远比图像敏感，一点噪声就吞音）。论文 6 节 Discussion 自己承认&quot;manipulates entire vectors, overlooks individual dimension contributions&quot;且&quot;controlling duration slightly affects pitch&quot;——即特征纠缠未解开。笔者认为这是<strong>方法的天花板</strong>，不是调参问题：整个激活向量级编辑必然纠缠，要解纠缠得做 dimension/neuron 级编辑（论文也承认这是 future work）。</div></p>
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>        ACOUSTIC CORRELATION ANALYSIS (probing, 离线)
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>        ACOUSTIC CORRELATION ANALYSIS (probing, 离线)
   Tacotron2 encoder activations x_i
         │
         ├─&gt; prosody: ASR(CTC)+backtranslation+MAS 对齐 → dur/pitch/energy
@@ -947,7 +947,7 @@
         │
         ▼
   edited x'_i ──&gt; Tacotron2 decoder + WaveGlow ──&gt; edited wav
-</code></pre>
+</code></pre></figure>
 <p><strong>训练细节</strong>：Tacotron2 (NVIDIA 实现) on LJSpeech (12.5k/0.5k/0.1k)，phoneme 输入控 prosody、grapheme 输入控 pronunciation。探针：linear/logistic regression，lr=0.01，elastic net λ1=λ2=0.001。β-VAE: β=0.04, latent=16, lr=0.0002。vocoder=预训练 WaveGlow。
 <strong>推理细节</strong>：对每个待编辑 phoneme 的最后一层激活迭代梯度上升，直到分类器输出超阈值；可局部化到指定 phoneme/word。</p>
 <hr />

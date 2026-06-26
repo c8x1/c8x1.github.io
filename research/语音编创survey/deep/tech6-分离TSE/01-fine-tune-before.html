@@ -891,7 +891,7 @@
 <p><div class="callout callout-info">笔者解读：三步里真正&quot;立功&quot;的是第 1 步的 insight（剪枝前微调），第 2、3 步是标准做法。作者的诚实之处在于——他们没宣称发明新剪枝算法，而是指出&quot;前人失败可能不是因为剪枝方法不行，而是因为没先微调就剪&quot;。这对想复用 SSL 做端侧 diarization 的工程师是直接可用的经验。</div></p>
 <hr />
 <h2 id="4-方法流程ascii">4. 方法流程（ASCII）</h2>
-<pre class="ascii-block"><code>              ┌─────────────────────────────────────────────────────┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程（ASCII）</figcaption><pre class="ascii"><code>              ┌─────────────────────────────────────────────────────┐
               │  预训练 WavLM (Base+ 94.4M / Large 316.6M)          │
               │  + DiariZen pipeline: WavLM → 加权求和(SUPERB) →    │
               │    Conformer(4 block) → powerset loss(≤4spk,≤2ovl)  │
@@ -920,7 +920,7 @@
               │  最终紧凑模型 → EEND + pyannote 聚类 → DER 评估      │
               │  评估: AMI / AISHELL-4 / AliMeeting (far-field, 1ch) │
               └─────────────────────────────────────────────────────┘
-</code></pre>
+</code></pre></figure>
 <p>关键超参（论文 Sec.2.1/3.2）：Conformer 4 block，FFN in/out 256/1024，MHA 4 head，conv kernel 31，dropout 0.1；powerset 假设最多 4 说话人、2 人重叠；蒸馏匹配层 Base+ 取 {0,4,8,12}、Large 取 {0,8,16,24}；优化器 AdamW，θ 学习率 2e-4，α/λ1/λ2 学习率 2e-2。</p>
 <hr />
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>

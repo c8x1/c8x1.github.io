@@ -956,10 +956,10 @@ arXiv：<a href="https://arxiv.org/abs/2506.02908" target="_blank" rel="noopener
 <p></div></p>
 <h3 id="31-创新点-1扩散时间轴--物理时间轴核心直觉">3.1 创新点 1：扩散时间轴 = 物理时间轴（核心直觉）</h3>
 <p>在 buffer 内，第 k 帧的扩散时间步 t_{g(k)} 随其在 buffer 中的位置递增（式 5）：</p>
-<pre class="ascii-block"><code>V_{t→}(l,k) := S(l,k)              if k &lt; K−B      (buffer 外，已干净)
+<figure class="ascii-diagram"><figcaption>图1 · 核心创新（笔者解读）</figcaption><pre class="ascii"><code>V_{t→}(l,k) := S(l,k)              if k &lt; K−B      (buffer 外，已干净)
             := X_{t_{g(k)}}(l,k)   if k ≥ K−B      (buffer 内，越靠后越噪)
 g(k) = k − (K−B) + 1
-</code></pre>
+</code></pre></figure>
 <p><div class="callout callout-info">笔者解读：这是把&quot;扩散去噪的 N 步&quot;沿物理时间铺开成&quot;N 个连续帧&quot;。每帧在被接收后，要经过 B 次&quot;每 hop 一次 score 调用&quot;才被输出——等价于走了 B 个反向步，但<strong>每个 hop 只调一次 score</strong>（同时推进所有 buffer 内帧各一步）。这是延迟换算力的优雅拆分。</div></p>
 <h3 id="32-创新点-2单次-score-调用的在线推理algorithm-1">3.2 创新点 2：单次 score 调用的在线推理（Algorithm 1）</h3>
 <p>每个 hop：</p>
@@ -972,8 +972,8 @@ g(k) = k − (K−B) + 1
 <p>关键：score 输入是 F×K（全部 chunk），输出是 F×B（只对 buffer 帧），与训练损失（式 7，只监督 buffer 内）对齐。</p>
 <h3 id="33-创新点-3训练目标的buffer-only监督式-7">3.3 创新点 3：训练目标的&quot;buffer-only&quot;监督（式 7）</h3>
 <p>损失只对 buffer 内 B 帧算 denoising score matching：</p>
-<pre class="ascii-block"><code>argmin_θ E || s_θ(V_{t→}, Y, t) + Z/Σ ||²
-</code></pre>
+<figure class="ascii-diagram"><figcaption>图2 · 核心创新（笔者解读）</figcaption><pre class="ascii"><code>argmin_θ E || s_θ(V_{t→}, Y, t) + Z/Σ ||²
+</code></pre></figure>
 <p><div class="callout callout-info">注意输入 V_{t→}, Y ∈ C^{F×K}，输出 ∈ C^{F×B}——网络要&quot;看全局 K 帧、只补 buffer 内 B 帧的 score&quot;。笔者解读：这隐含了&quot;已干净帧作为上下文条件&quot;的设计，buffer 外帧充当 buffer 内帧的去噪参照，是滑窗能 work 的隐含假设。</div></p>
 <p><div class="callout callout-info"></p>
 <h3 id="34-创新点-4ncsn-裁剪65m18m">3.4 创新点 4：NCSN++ 裁剪（65M→18M）</h3>
@@ -982,7 +982,7 @@ g(k) = k − (K−B) + 1
 <p>创新浓度：范式迁移直觉（时间轴对齐）&gt; 系统工程（裁剪 + 单次调用 + buffer-only 监督）&gt; 数学。它没造新 SDE，但把视频生成的滑窗思想与语音 SE 的复 STFT 评分扩散严丝合缝地缝合，并给出了可复现的算法-训练-推理三件套。</p>
 <hr />
 <h2 id="4-方法流程ascii">4. 方法流程（ASCII）</h2>
-<pre class="ascii-block"><code>┌────────────────────────── 训练 ──────────────────────────┐
+<figure class="ascii-diagram"><figcaption>图3 · 方法流程（ASCII）</figcaption><pre class="ascii"><code>┌────────────────────────── 训练 ──────────────────────────┐
 
   配对 (干净 S=X_0, 带噪 Y) ──复 STFT──&gt; 510样本窗/256 hop/16ms, 16kHz
                                        幅度压缩 β|v|^α·exp(j∠v), α=0.5, β=0.15
@@ -1025,7 +1025,7 @@ g(k) = k − (K−B) + 1
   输入-输出延迟 ≈ 算法延迟 + hop
 
 └────────────────────────────────────────────────────────────────────┘
-</code></pre>
+</code></pre></figure>
 <hr />
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>
 <h3 id="fig-2db-vs-基线ears-wham过滤后-16khz不同反向步数">Fig. 2：DB vs 基线（EARS-WHAM，过滤后 16kHz），不同反向步数</h3>

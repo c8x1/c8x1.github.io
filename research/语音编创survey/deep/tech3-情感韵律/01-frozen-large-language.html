@@ -909,7 +909,7 @@
 <p><strong>批判声音</strong>：这个范式高度依赖&quot;基座 LLM 对情绪 prompt 的响应质量&quot;。如果换成对情绪不敏感、或拒绝扮演情绪的 LLM（如某些经过严格 RLHF 对齐、拒绝&quot;假装被这样说话&quot;的模型），整个 ground-truth 生成会塌掉。论文未在 Llama 3 之外验证该范式的可迁移性，泛化性存疑。另外，所谓&quot;15 类&quot;里有 laughing/projected/sleepy/whisper 这类更像&quot;风格/发声方式&quot;而非&quot;情绪&quot;的类别，类目设计偏工程化、缺乏统一情绪理论支撑。</p>
 <hr />
 <h2 id="4-方法流程ascii">4. 方法流程（ASCII）</h2>
-<pre class="ascii-block"><code>                        ┌─── 训练阶段（编码器+adapter 可训，LLM 冻结）───┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程（ASCII）</figcaption><pre class="ascii"><code>                        ┌─── 训练阶段（编码器+adapter 可训，LLM 冻结）───┐
 
   语音(16kHz) ──&gt; 80维mel(25ms窗/10ms移) ──&gt; 4帧堆叠 ──&gt; Conformer(24层,1B,BEST-RQ预训练)
                                                                  │
@@ -932,7 +932,7 @@
                         ┌─── 推理阶段 ───┐
   语音 ──&gt; 编码器 ──&gt; speech token(含副语言) ──&gt; 冻结 Llama3 ──&gt; 共情/情绪感知回复
   (不加任何情绪系统prompt; 情绪已内化在token中)
-</code></pre>
+</code></pre></figure>
 <p>训练规模：64×A100 80GB，batch=4/GPU，Adam(β1=0.9,β2=0.98)，lr=3e-5，5 epoch，20k warmup，各任务等步数。预训练语音编码器用约 15M 小时多语种语音；行为对齐用 230K 小时 ASR + 90K 小时 AST + 25K 小时对话（均为 Meta 私有数据）。</p>
 <hr />
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>

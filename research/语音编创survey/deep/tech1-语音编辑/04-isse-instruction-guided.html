@@ -935,7 +935,7 @@
 <hr />
 <h2 id="4-方法流程">4. 方法流程</h2>
 <h3 id="数据流水线三阶段">数据流水线（三阶段）</h3>
-<pre class="ascii-block"><code>源数据: Ears(100h) + Expresso(42h) ── 带转写 + 风格描述
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>源数据: Ears(100h) + Expresso(42h) ── 带转写 + 风格描述
                     │
                     ▼
   采样: anchor 语音(固定内容+音色) + n 条 style reference(不同风格)
@@ -963,9 +963,9 @@
         └───────────┬────────────┘
                     ▼
         ISSE: ~382h(真声90h + 生成292h), &gt;10万对, 28风格
-</code></pre>
+</code></pre></figure>
 <h3 id="基线模型-llasaedit推理">基线模型 LlasaEdit（推理）</h3>
-<pre class="ascii-block"><code>源语音 x_i ──XCodec2 Enc──&gt; 源token ─┐
+<figure class="ascii-diagram"><figcaption>图2 · 方法流程</figcaption><pre class="ascii"><code>源语音 x_i ──XCodec2 Enc──&gt; 源token ─┐
 风格指令 c_i ──文本token化────────── ┼─&gt; Llasa(自回归, teacher forcing训)
 目标语音 y_i ──XCodec2 Enc──&gt; 目标token─┘     │
                                               ▼
@@ -976,7 +976,7 @@
                                           编辑后波形
 训练: LoRA(r=64,α=128) on Llasa-1B, AdamW lr=1e-4, 5ep, bs=2, 8×A100
 评估: WER / SIMsty / SIMspk / UTMOS
-</code></pre>
+</code></pre></figure>
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>表2：LlasaEdit 在 ISSE vs ESD 上的训练对比（同域+跨域）</strong></p>

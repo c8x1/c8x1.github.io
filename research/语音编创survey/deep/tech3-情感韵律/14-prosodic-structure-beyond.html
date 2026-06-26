@@ -904,7 +904,7 @@ arXiv：<a href="https://arxiv.org/abs/2506.02584" target="_blank" rel="noopener
 </ol>
 <p><strong>批判</strong>：MPM 在 RAVDESS 情感上 UA 0.36（Conformer probe）远低于 HuBERT 0.63——作者诚实承认&quot;全语音在情感上碾压韵律子集&quot;，这反而增强了其结论的可信度（不是无脑自夸）。但 MPM 在 BURNC 上&quot;略胜&quot;的幅度很小（boundary F1 0.53 vs 0.52），统计显著性未报告，不宜过度解读。</p>
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>   原始音频
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>   原始音频
      │
      ├─ WORLD vocoder → F0 (pitch)         ┐
      ├─ Mel 谱每帧 RMS → energy           ├─ 各 ~10ms 分辨率, 按句归一化(去说话人相对值)
@@ -929,7 +929,7 @@ arXiv：<a href="https://arxiv.org/abs/2506.02584" target="_blank" rel="noopener
    └───────────────┴─────────────────────┘
         │
    评测: TIMIT音节分割(SER,Corr) / BURNC prominence&amp;boundary(F1) / RAVDESS情感(WA,UA)
-</code></pre>
+</code></pre></figure>
 <p>预训练：LibriTTS 500h，10k 步，batch 256，截断到 6s，TPUv3 30 分钟。掩码策略扫 m∈{4,16,128} + random；codebook 扫 c∈{4..512}，<strong>c=128 全任务最佳</strong>。下游 probe 训 1000 步，AdamW，lr 4e-5，100 warmup。</p>
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>linear probe（Table 1a，最值得看的几行）</strong>：</p>

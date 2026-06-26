@@ -894,7 +894,7 @@
 </li>
 </ol>
 <h2 id="4-方法流程">4. 方法流程</h2>
-<pre class="ascii-block"><code>                          训练时冻结: caption enc(Qwen2.5-7B) / speaker enc / video VAE / audio VAE
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程</figcaption><pre class="ascii"><code>                          训练时冻结: caption enc(Qwen2.5-7B) / speaker enc / video VAE / audio VAE
                                                                  |
    (video caption, audio caption, G2P phoneme) -&gt; instruction encoder -&gt; instruction+phoneme embeddings
    reference audio -&gt; speaker encoder -&gt; S (B×D) -&gt; 上采样到 phoneme 长度 S(B×L×D)        |
@@ -913,7 +913,7 @@
    训练: stochastic modality masking, 每模态按概率置为可学习 placeholder;
          10% 全丢近似无条件分布 (为 CFG); 5 种任务 (T2VA/TI2VA/TA2VA/TIA2VA) 同一批训
    推理 CFG: eps_tilde = eps_uncond + w*(eps_cond - eps_uncond), 负 speaker emb = 真实噪声过 speaker enc
-</code></pre>
+</code></pre></figure>
 <p>关键配置: 20B 参数, flow matching ffwd 4096, 32 层 joint DiT + RoPE; phoneme encoder ffwd 512; Qwen2.5-7B 当 caption encoder; 视频 VAE 16× 空间, 3Hz; 音频 mel encoder 44.1kHz×1/1024=43Hz。数据: 1 亿对齐音视频对 (3-15s, 16-44.1kHz, 240-720p) + 合成 timbre 集。</p>
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p>Table 1 (音视频联合生成, VerseBench):</p>

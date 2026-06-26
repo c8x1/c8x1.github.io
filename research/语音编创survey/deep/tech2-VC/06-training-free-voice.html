@@ -945,7 +945,7 @@ arXiv:<a href="https://arxiv.org/abs/2506.09709" target="_blank" rel="noopener">
 <p><strong>总体笔者判断</strong>：创新1是范式切换（kNN→OT），创新3是使其可解的工程关键（因子化），创新2是结果卖点（短参考鲁棒）。三者构成完整闭环。但全文最深的贡献是<strong>对 WavLM 嵌入几何的经验刻画</strong>——这一发现的价值超过 MKL-VC 本身，它提示所有基于 WavLM 嵌入距离的方法都该考虑维度方差不均。论文也诚实地把&quot;高斯性不保证普适&quot;列为局限，这是负责任的。</p>
 <hr />
 <h2 id="4-方法流程ascii">4. 方法流程（ASCII）</h2>
-<pre class="ascii-block"><code>                  ┌──────────────────────────────────────────────┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程（ASCII）</figcaption><pre class="ascii"><code>                  ┌──────────────────────────────────────────────┐
                   │          离 线 分 析（验证假设）              │
                   └──────────────────────────────────────────────┘
    WavLM 嵌入(1024维) 沿时间轴算每维标准差
@@ -996,7 +996,7 @@ arXiv:<a href="https://arxiv.org/abs/2506.09709" target="_blank" rel="noopener">
    唯一超参: K (MKL维度) — 权衡内容 vs 说话人相似度
      K小 → 内容好(WER/CER低), K=2最优(Total 0.105)
      K大 → 相似度高(SIM升), 但内容差(K=256灾难0.827)
-</code></pre>
+</code></pre></figure>
 <p><strong>关键参数</strong>：N=1024（WavLM-Large 嵌入维度），K∈{2,4,8,16,64,256}（消融），最优 K=2；编码器 WavLM-Large，声码器 HiFi-GAN；训练-free（无任何训练，仅用预训练 WavLM/HiFi-GAN）。</p>
 <hr />
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>

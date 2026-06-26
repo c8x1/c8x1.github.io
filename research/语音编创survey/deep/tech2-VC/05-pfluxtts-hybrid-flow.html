@@ -979,7 +979,7 @@ Demo: https://braskai.github.io/pfluxtts/
 <p><strong>总体笔者判断</strong>：三点创新里，<strong>推理时融合是最有传播力的</strong>（免训练、可移植到任何双解码器 FM 系统），序列 prompt 条件是<strong>克隆质量的主要来源</strong>，PeriodWave 超分是<strong>面向产品音质的工程补丁</strong>。论文的真正价值在&quot;把这三件事拧成一个跨语言真实噪声场景能扛的系统&quot;，而非单点突破。</p>
 <hr />
 <h2 id="4-方法流程ascii">4. 方法流程（ASCII）</h2>
-<pre class="ascii-block"><code>                         ┌──────────────────────────────────────────┐
+<figure class="ascii-diagram"><figcaption>图1 · 方法流程（ASCII）</figcaption><pre class="ascii"><code>                         ┌──────────────────────────────────────────┐
                          │           训 练（DG 与 AF 独立、不共享）   │
                          └──────────────────────────────────────────┘
 
@@ -1036,7 +1036,7 @@ Demo: https://braskai.github.io/pfluxtts/
                       │
                       ▼
                   最终语音(48kHz)
-</code></pre>
+</code></pre></figure>
 <p><strong>关键超参</strong>：4×A100，1.5M 步，batch=128，AdamW lr 1e-4→1e-6(最后100k线性衰减)，DG d=768/head48，AF d=1024/head128，推理 30 步 FP16，α=0.7 前 20 步，CFG=1.34，~50k 小时训练数据（28% 通过率），声码器 3.4k 小时 48kHz。</p>
 <hr />
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>
