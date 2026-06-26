@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>12-InstructAudio: Unified speech and music generation with natural language instruction — 深读分析 · 语音编创 survey</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="app">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar(false)"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a class="brand" href="../../index.html">语音编创 survey</a>
+      <span class="brand-sub">2025H2 ~ 2026H1 · 97 篇</span>
+    </div>
+
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="搜索论文 / 标题 / 关键词…" autocomplete="off">
+      <ul class="search-results" id="search-results" hidden></ul>
+    </div>
+
+    <nav class="nav-tree" id="nav-tree">
+      <a class="nav-item nav-overview" href="../../index.html" data-target="index.html">📘 总览</a>
+      
+      <div class="nav-group" data-tech="tech1">
+        <a class="nav-item nav-tech" href="../../tech1-语音编辑.html" data-target="tech1-语音编辑.html">
+          <span class="nav-caret">▸</span>
+          <span class="nav-title">语音编辑 (16)</span>
+        </a>
+        <ul class="nav-children" hidden>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech1-语音编辑/01-rfm-editing-rectified.html" data-target="deep/tech1-语音编辑/01-rfm-editing-rectified.html">
+              <span class="nav-nn">01</span>
+              <span class="nav-deep-title">rfm-editing-rectified</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech1-语音编辑/02-counterfactual-activation-edit.html" data-target="deep/tech1-语音编辑/02-counterfactual-activation-edit.html">
+              <span class="nav-nn">02</span>
+              <span class="nav-deep-title">counterfactual-activation-edit</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech1-语音编辑/03-emotionally-consistent-text.html" data-target="deep/tech1-语音编辑/03-emotionally-consistent-text.html">
+              <span class="nav-nn">03</span>
+              <span class="nav-deep-title">emotionally-consistent-text</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech1-语音编辑/04-isse-instruction-guided.html" data-target="deep/tech1-语音编辑/04-isse-instruction-guided.html">
+              <span class="nav-nn">04</span>
+              <span class="nav-deep-title">ISSE: An Instruction-Guided Speech Style Editing Dataset and Benchmark —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech1-语音编辑/05-speecheditbench-bilingual-mult.html" data-target="deep/tech1-语音编辑/05-speecheditbench-bilingual-mult.html">
+              <span class="nav-nn">05</span>
+              <span class="nav-deep-title">SpeechEditBench: A Bilingual Multi-Attribute Benchmark for Instruction-Guided Speech Editing —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech1-语音编辑/06-edit-content-preserve.html" data-target="deep/tech1-语音编辑/06-edit-content-preserve.html">
+              <span class="nav-nn">06</span>
+              <span class="nav-deep-title">Edit Content, Preserve Acoustics: Imperceptible Text-Based Speech Editing via Self-Consistency Rewards —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech1-语音编辑/07-step-audio-editx.html" data-target="deep/tech1-语音编辑/07-step-audio-editx.html">
+              <span class="nav-nn">07</span>
+              <span class="nav-deep-title">Step-Audio-EditX Technical Report —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech1-语音编辑/08-mmedit-unified-framework.html" data-target="deep/tech1-语音编辑/08-mmedit-unified-framework.html">
+              <span class="nav-nn">08</span>
+              <span class="nav-deep-title">MMEDIT: A Unified Framework for Multi-Type Audio Editing via Audio Language Model —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech1-语音编辑/09-speak-edit-repeat.html" data-target="deep/tech1-语音编辑/09-speak-edit-repeat.html">
+              <span class="nav-nn">09</span>
+              <span class="nav-deep-title">Speak, Edit, Repeat: High-Fidelity Voice Editing and Zero-Shot TTS with Cross-Attentive Mamba —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech1-语音编辑/10-audio-multichallenge-multi.html" data-target="deep/tech1-语音编辑/10-audio-multichallenge-multi.html">
+              <span class="nav-nn">10</span>
+              <span class="nav-deep-title">Audio MultiChallenge: A Multi-Turn Evaluation of Spoken Dialogue Systems on Natural Human Interaction —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech1-语音编辑/11-salm-spatial-audio.html" data-target="deep/tech1-语音编辑/11-salm-spatial-audio.html">
+              <span class="nav-nn">11</span>
+              <span class="nav-deep-title">SALM: Spatial Audio Language Model with Structured Embeddings for Understanding and Editing —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="" data-target="deep/tech1-语音编辑/12-instructaudio-unified-speech.html">
+              <span class="nav-nn">12</span>
+              <span class="nav-deep-title">InstructAudio: Unified speech and music generation with natural language instruction —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech1-语音编辑/13-lemas-large-150k.html" data-target="deep/tech1-语音编辑/13-lemas-large-150k.html">
+              <span class="nav-nn">13</span>
+              <span class="nav-deep-title">LEMAS-</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech1-语音编辑/14-automatic-evaluation-high.html" data-target="deep/tech1-语音编辑/14-automatic-evaluation-high.html">
+              <span class="nav-nn">14</span>
+              <span class="nav-deep-title">Auto-Eval-Audio-Editing-</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech1-语音编辑/15-recomposer-event-roll.html" data-target="deep/tech1-语音编辑/15-recomposer-event-roll.html">
+              <span class="nav-nn">15</span>
+              <span class="nav-deep-title">Recomposer-</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech1-语音编辑/16-codecsep-prompt-driven.html" data-target="deep/tech1-语音编辑/16-codecsep-prompt-driven.html">
+              <span class="nav-nn">16</span>
+              <span class="nav-deep-title">CodecSep-</span>
+            </a>
+          </li>
+          
+        </ul>
+      </div>
+      
+      <div class="nav-group" data-tech="tech2">
+        <a class="nav-item nav-tech" href="../../tech2-VC-声音克隆.html" data-target="tech2-VC-声音克隆.html">
+          <span class="nav-caret">▸</span>
+          <span class="nav-title">VC/声音克隆 (18)</span>
+        </a>
+        <ul class="nav-children" hidden>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech2-VC/01-private-knn-vc.html" data-target="deep/tech2-VC/01-private-knn-vc.html">
+              <span class="nav-nn">01</span>
+              <span class="nav-deep-title">private-knn-vc</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech2-VC/02-clapfm-evc-high.html" data-target="deep/tech2-VC/02-clapfm-evc-high.html">
+              <span class="nav-nn">02</span>
+              <span class="nav-deep-title">clapfm-evc-high</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech2-VC/03-meanvc-lightweight-streaming.html" data-target="deep/tech2-VC/03-meanvc-lightweight-streaming.html">
+              <span class="nav-nn">03</span>
+              <span class="nav-deep-title">meanvc-lightweight-streaming</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech2-VC/04-discl-vc-disentangled.html" data-target="deep/tech2-VC/04-discl-vc-disentangled.html">
+              <span class="nav-nn">04</span>
+              <span class="nav-deep-title">Discl-VC：解耦离散令牌与上下文学习的可控零样本声音转换 —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech2-VC/05-pfluxtts-hybrid-flow.html" data-target="deep/tech2-VC/05-pfluxtts-hybrid-flow.html">
+              <span class="nav-nn">05</span>
+              <span class="nav-deep-title">PFluxTTS：混合 Flow-Matching TTS 与鲁棒跨语言声音克隆及推理时模型融合 —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech2-VC/06-training-free-voice.html" data-target="deep/tech2-VC/06-training-free-voice.html">
+              <span class="nav-nn">06</span>
+              <span class="nav-deep-title">Training-Free MKL-VC：因子化最优传输的免训练声音转换 —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech2-VC/07-linearvc-linear-transformation.html" data-target="deep/tech2-VC/07-linearvc-linear-transformation.html">
+              <span class="nav-nn">07</span>
+              <span class="nav-deep-title">LinearVC</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech2-VC/08-starvc-unified-auto.html" data-target="deep/tech2-VC/08-starvc-unified-auto.html">
+              <span class="nav-nn">08</span>
+              <span class="nav-deep-title">StarVC</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech2-VC/09-voxmorph-scalable-zero.html" data-target="deep/tech2-VC/09-voxmorph-scalable-zero.html">
+              <span class="nav-nn">09</span>
+              <span class="nav-deep-title">VoxMorph</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech2-VC/10-better-disentanglement-non.html" data-target="deep/tech2-VC/10-better-disentanglement-non.html">
+              <span class="nav-nn">10</span>
+              <span class="nav-deep-title">better-disentanglement-non —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech2-VC/11-fairness-dysarthric-speech.html" data-target="deep/tech2-VC/11-fairness-dysarthric-speech.html">
+              <span class="nav-nn">11</span>
+              <span class="nav-deep-title">fairness-dysarthric-speech —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech2-VC/12-voxcpm-tokenizer-free.html" data-target="deep/tech2-VC/12-voxcpm-tokenizer-free.html">
+              <span class="nav-nn">12</span>
+              <span class="nav-deep-title">voxcpm-tokenizer-free —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech2-VC/13-mimo-audio.html" data-target="deep/tech2-VC/13-mimo-audio.html">
+              <span class="nav-nn">13</span>
+              <span class="nav-deep-title">MiMo-Audio</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech2-VC/14-mm-sonate.html" data-target="deep/tech2-VC/14-mm-sonate.html">
+              <span class="nav-nn">14</span>
+              <span class="nav-deep-title">MM-Sonate</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech2-VC/15-qwen3-tts.html" data-target="deep/tech2-VC/15-qwen3-tts.html">
+              <span class="nav-nn">15</span>
+              <span class="nav-deep-title">Qwen3-TTS</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech2-VC/16-ming-uniaudio-speech.html" data-target="deep/tech2-VC/16-ming-uniaudio-speech.html">
+              <span class="nav-nn">16</span>
+              <span class="nav-deep-title">Ming-UniAudio：统一连续 tokenizer 驱动的语音理解/生成/自由编辑大模型</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech2-VC/17-diemo-tts-disentangled.html" data-target="deep/tech2-VC/17-diemo-tts-disentangled.html">
+              <span class="nav-nn">17</span>
+              <span class="nav-deep-title">DiEmo-TTS：自监督蒸馏驱动的跨说话人情感解耦迁移</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech2-VC/18-mgm-omni-scaling.html" data-target="deep/tech2-VC/18-mgm-omni-scaling.html">
+              <span class="nav-nn">18</span>
+              <span class="nav-deep-title">MGM-Omni：双轨 Omni LLM 与长时段个性化语音生成的分块并行解码</span>
+            </a>
+          </li>
+          
+        </ul>
+      </div>
+      
+      <div class="nav-group" data-tech="tech3">
+        <a class="nav-item nav-tech" href="../../tech3-情感-韵律.html" data-target="tech3-情感-韵律.html">
+          <span class="nav-caret">▸</span>
+          <span class="nav-title">情感/韵律 (18)</span>
+        </a>
+        <ul class="nav-children" hidden>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech3-情感韵律/01-frozen-large-language.html" data-target="deep/tech3-情感韵律/01-frozen-large-language.html">
+              <span class="nav-nn">01</span>
+              <span class="nav-deep-title">Frozen Large Language Models Can Perceive Paralinguistic Aspects of Speech —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech3-情感韵律/02-multi-bench-multi.html" data-target="deep/tech3-情感韵律/02-multi-bench-multi.html">
+              <span class="nav-nn">02</span>
+              <span class="nav-deep-title">MULTI-Bench: A Multi-Turn Interactive Benchmark for Assessing Emotional Intelligence of Spoken Dialogue Models —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech3-情感韵律/03-improving-speech-emotion.html" data-target="deep/tech3-情感韵律/03-improving-speech-emotion.html">
+              <span class="nav-nn">03</span>
+              <span class="nav-deep-title">Improving Speech Emotion Recognition Through Cross Modal Attention Alignment and Balanced Stacking Model —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech3-情感韵律/04-token-level-logits.html" data-target="deep/tech3-情感韵律/04-token-level-logits.html">
+              <span class="nav-nn">04</span>
+              <span class="nav-deep-title">Token-Level Logits Matter：用语音基础模型的 Token 级 Logits 做歧义情感识别 —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech3-情感韵律/05-emotionrankclap-bridging-natur.html" data-target="deep/tech3-情感韵律/05-emotionrankclap-bridging-natur.html">
+              <span class="nav-nn">05</span>
+              <span class="nav-deep-title">EmotionRankCLAP：用 Rank-N-Contrast 把自然语言说话风格与序数语音情感对齐 —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech3-情感韵律/06-medusa-multimodal-deep.html" data-target="deep/tech3-情感韵律/06-medusa-multimodal-deep.html">
+              <span class="nav-nn">06</span>
+              <span class="nav-deep-title">Medusa：多模态深度融合 + 四阶段训练，Interspeech 2025 自然条件 SER 挑战赛 Task 1 冠军 —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech3-情感韵律/07-explainable-speech-emotion.html" data-target="deep/tech3-情感韵律/07-explainable-speech-emotion.html">
+              <span class="nav-nn">07</span>
+              <span class="nav-deep-title">Explainable-SER-Attentive-Pooling</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech3-情感韵律/08-learning-more-less.html" data-target="deep/tech3-情感韵律/08-learning-more-less.html">
+              <span class="nav-nn">08</span>
+              <span class="nav-deep-title">Learning-More-with-Less</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech3-情感韵律/09-scaling-ambiguity-augmenting.html" data-target="deep/tech3-情感韵律/09-scaling-ambiguity-augmenting.html">
+              <span class="nav-nn">09</span>
+              <span class="nav-deep-title">Scaling-Ambiguity-Augmenting</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech3-情感韵律/10-amber-dual-ambiguity.html" data-target="deep/tech3-情感韵律/10-amber-dual-ambiguity.html">
+              <span class="nav-nn">10</span>
+              <span class="nav-deep-title">AmbER²-</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech3-情感韵律/11-smoothclap-soft-target.html" data-target="deep/tech3-情感韵律/11-smoothclap-soft-target.html">
+              <span class="nav-nn">11</span>
+              <span class="nav-deep-title">SmoothCLAP-</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech3-情感韵律/12-emotion-aligned-generation.html" data-target="deep/tech3-情感韵律/12-emotion-aligned-generation.html">
+              <span class="nav-nn">12</span>
+              <span class="nav-deep-title">EASPO-</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech3-情感韵律/13-paralinguistic-emotion-aware.html" data-target="deep/tech3-情感韵律/13-paralinguistic-emotion-aware.html">
+              <span class="nav-nn">13</span>
+              <span class="nav-deep-title">paralinguistic-emotion-aware —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech3-情感韵律/14-prosodic-structure-beyond.html" data-target="deep/tech3-情感韵律/14-prosodic-structure-beyond.html">
+              <span class="nav-nn">14</span>
+              <span class="nav-deep-title">prosodic-structure-beyond —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech3-情感韵律/15-investigating-stochastic-metho.html" data-target="deep/tech3-情感韵律/15-investigating-stochastic-metho.html">
+              <span class="nav-nn">15</span>
+              <span class="nav-deep-title">investigating-stochastic-metho —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech3-情感韵律/16-cameo-collection-multilingual.html" data-target="deep/tech3-情感韵律/16-cameo-collection-multilingual.html">
+              <span class="nav-nn">16</span>
+              <span class="nav-deep-title">CAMEO</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech3-情感韵律/17-emoshift-lightweight-activatio.html" data-target="deep/tech3-情感韵律/17-emoshift-lightweight-activatio.html">
+              <span class="nav-nn">17</span>
+              <span class="nav-deep-title">EmoShift</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech3-情感韵律/18-ovi-twin-backbone.html" data-target="deep/tech3-情感韵律/18-ovi-twin-backbone.html">
+              <span class="nav-nn">18</span>
+              <span class="nav-deep-title">Ovi</span>
+            </a>
+          </li>
+          
+        </ul>
+      </div>
+      
+      <div class="nav-group" data-tech="tech4">
+        <a class="nav-item nav-tech" href="../../tech4-口音-方言.html" data-target="tech4-口音-方言.html">
+          <span class="nav-caret">▸</span>
+          <span class="nav-title">口音/方言 (9)</span>
+        </a>
+        <ul class="nav-children" hidden>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech4-口音方言/01-advanced-modeling-interlanguag.html" data-target="deep/tech4-口音方言/01-advanced-modeling-interlanguag.html">
+              <span class="nav-nn">01</span>
+              <span class="nav-deep-title">advanced-modeling-interlanguag</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech4-口音方言/02-lid-models-are.html" data-target="deep/tech4-口音方言/02-lid-models-are.html">
+              <span class="nav-nn">02</span>
+              <span class="nav-deep-title">lid-models-are</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech4-口音方言/03-adi-20-arabic.html" data-target="deep/tech4-口音方言/03-adi-20-arabic.html">
+              <span class="nav-nn">03</span>
+              <span class="nav-deep-title">adi-20-arabic</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech4-口音方言/04-fac-facodec-controllable.html" data-target="deep/tech4-口音方言/04-fac-facodec-controllable.html">
+              <span class="nav-nn">04</span>
+              <span class="nav-deep-title">FAC-FACodec-Controllable</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech4-口音方言/05-cosyaccent-duration-controllab.html" data-target="deep/tech4-口音方言/05-cosyaccent-duration-controllab.html">
+              <span class="nav-nn">05</span>
+              <span class="nav-deep-title">CosyAccent-Duration-Controllab</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech4-口音方言/06-accent-invariant-automatic.html" data-target="deep/tech4-口音方言/06-accent-invariant-automatic.html">
+              <span class="nav-nn">06</span>
+              <span class="nav-deep-title">Accent-Invariant-Automatic</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech4-口音方言/07-wenetspeech-chuan-large.html" data-target="deep/tech4-口音方言/07-wenetspeech-chuan-large.html">
+              <span class="nav-nn">07</span>
+              <span class="nav-deep-title">WenetSpeech-Chuan</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech4-口音方言/08-activation-steering-accent.html" data-target="deep/tech4-口音方言/08-activation-steering-accent.html">
+              <span class="nav-nn">08</span>
+              <span class="nav-deep-title">Activation Steering for Accent Adaptation</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech4-口音方言/09-psp-interpretable-per.html" data-target="deep/tech4-口音方言/09-psp-interpretable-per.html">
+              <span class="nav-nn">09</span>
+              <span class="nav-deep-title">PSP: Interpretable Per-Dimension Accent Benchmark</span>
+            </a>
+          </li>
+          
+        </ul>
+      </div>
+      
+      <div class="nav-group" data-tech="tech5">
+        <a class="nav-item nav-tech" href="../../tech5-生成式增强.html" data-target="tech5-生成式增强.html">
+          <span class="nav-caret">▸</span>
+          <span class="nav-title">生成式增强 (22)</span>
+        </a>
+        <ul class="nav-children" hidden>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/01-interspeech-2025-urgent.html" data-target="deep/tech5-生成式增强/01-interspeech-2025-urgent.html">
+              <span class="nav-nn">01</span>
+              <span class="nav-deep-title">01 - Interspeech 2025 URGENT Speech Enhancement Challenge</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/02-icassp-2026-urgent.html" data-target="deep/tech5-生成式增强/02-icassp-2026-urgent.html">
+              <span class="nav-nn">02</span>
+              <span class="nav-deep-title">02 - ICASSP 2026 URGENT Speech Enhancement Challenge</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/03-flowse-efficient-high.html" data-target="deep/tech5-生成式增强/03-flowse-efficient-high.html">
+              <span class="nav-nn">03</span>
+              <span class="nav-deep-title">03 - FlowSE: Efficient and High-Quality Speech Enhancement via Flow Matching</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/04-meanflowse-one-step.html" data-target="deep/tech5-生成式增强/04-meanflowse-one-step.html">
+              <span class="nav-nn">04</span>
+              <span class="nav-deep-title">MeanFlowSE：基于条件均流（Conditional Mean Flow）的单步生成式语音增强 —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/05-flowse-grpo-training.html" data-target="deep/tech5-生成式增强/05-flowse-grpo-training.html">
+              <span class="nav-nn">05</span>
+              <span class="nav-deep-title">FlowSE-GRPO：用在线强化学习（GRPO）后训练流匹配语音增强 —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/06-diffusion-buffer-online.html" data-target="deep/tech5-生成式增强/06-diffusion-buffer-online.html">
+              <span class="nav-nn">06</span>
+              <span class="nav-deep-title">Diffusion Buffer：亚秒级延迟的在线扩散语音增强 —</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/07-discontse-single-step.html" data-target="deep/tech5-生成式增强/07-discontse-single-step.html">
+              <span class="nav-nn">07</span>
+              <span class="nav-deep-title">DisContSE：基于离散-连续联合嵌入的单步扩散语音增强</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/08-deepfiltergan-full-band.html" data-target="deep/tech5-生成式增强/08-deepfiltergan-full-band.html">
+              <span class="nav-nn">08</span>
+              <span class="nav-deep-title">DeepFilterGAN：基于 GAN 随机再生的全带实时语音增强</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/09-universal-speech-enhancement.html" data-target="deep/tech5-生成式增强/09-universal-speech-enhancement.html">
+              <span class="nav-nn">09</span>
+              <span class="nav-deep-title">USEMamba：回归与生成 Mamba 的通用语音增强</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/10-unise-unified-framework.html" data-target="deep/tech5-生成式增强/10-unise-unified-framework.html">
+              <span class="nav-nn">10</span>
+              <span class="nav-deep-title">10 - UniSE: A Unified Framework for Decoder-only Autoregressive LM-based Speech Enhancement</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/11-high-fidelity-speech.html" data-target="deep/tech5-生成式增强/11-high-fidelity-speech.html">
+              <span class="nav-nn">11</span>
+              <span class="nav-deep-title">11 - High-Fidelity Speech Enhancement via Discrete Audio Tokens (DAC-SE1)</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/12-hybrid-discriminative-generative.html" data-target="deep/tech5-生成式增强/12-hybrid-discriminative-generative.html">
+              <span class="nav-nn">12</span>
+              <span class="nav-deep-title">12 - A Hybrid Discriminative and Generative System for Universal Speech Enhancement</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/13-arraydps-refine-generative.html" data-target="deep/tech5-生成式增强/13-arraydps-refine-generative.html">
+              <span class="nav-nn">13</span>
+              <span class="nav-deep-title">ArrayDPS-Refine</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/14-ts-urgenet-three.html" data-target="deep/tech5-生成式增强/14-ts-urgenet-three.html">
+              <span class="nav-nn">14</span>
+              <span class="nav-deep-title">TS-URGENet</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/15-daras-dynamic-audio.html" data-target="deep/tech5-生成式增强/15-daras-dynamic-audio.html">
+              <span class="nav-nn">15</span>
+              <span class="nav-deep-title">DARAS</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/16-nldsi-bwe-non.html" data-target="deep/tech5-生成式增强/16-nldsi-bwe-non.html">
+              <span class="nav-nn">16</span>
+              <span class="nav-deep-title">16 - NLDSI-BWE: Non Linear Dynamical Systems-Inspired Multi Resolution Discriminators for Speech Bandwidth Extension</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/17-universr-unified-versatile.html" data-target="deep/tech5-生成式增强/17-universr-unified-versatile.html">
+              <span class="nav-nn">17</span>
+              <span class="nav-deep-title">17 - UniverSR: Unified and Versatile Audio Super-Resolution via Vocoder-Free Flow Matching</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/18-single-step-controllable.html" data-target="deep/tech5-生成式增强/18-single-step-controllable.html">
+              <span class="nav-nn">18</span>
+              <span class="nav-deep-title">18 - Single-step Controllable Music Bandwidth Extension With Flow Matching</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/19-fast-ulcnet-fast.html" data-target="deep/tech5-生成式增强/19-fast-ulcnet-fast.html">
+              <span class="nav-nn">19</span>
+              <span class="nav-deep-title">Fast-ULCNet</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/20-test-time-adaptation.html" data-target="deep/tech5-生成式增强/20-test-time-adaptation.html">
+              <span class="nav-nn">20</span>
+              <span class="nav-deep-title">MPol (Test-Time Adaptation via Mask Polarization)</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/21-flowse-flow-matching.html" data-target="deep/tech5-生成式增强/21-flowse-flow-matching.html">
+              <span class="nav-nn">21</span>
+              <span class="nav-deep-title">FlowSE (Flow Matching-based Speech Enhancement)</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech5-生成式增强/22-lessons-learned-urgent.html" data-target="deep/tech5-生成式增强/22-lessons-learned-urgent.html">
+              <span class="nav-nn">22</span>
+              <span class="nav-deep-title">URGENT 2024 Challenge Lessons Learned</span>
+            </a>
+          </li>
+          
+        </ul>
+      </div>
+      
+      <div class="nav-group" data-tech="tech6">
+        <a class="nav-item nav-tech" href="../../tech6-分离-TSE.html" data-target="tech6-分离-TSE.html">
+          <span class="nav-caret">▸</span>
+          <span class="nav-title">分离/TSE (14)</span>
+        </a>
+        <ul class="nav-children" hidden>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech6-分离TSE/01-fine-tune-before.html" data-target="deep/tech6-分离TSE/01-fine-tune-before.html">
+              <span class="nav-nn">01</span>
+              <span class="nav-deep-title">Fine-tune Before Structured Pruning</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech6-分离TSE/02-leveraging-self-supervised.html" data-target="deep/tech6-分离TSE/02-leveraging-self-supervised.html">
+              <span class="nav-nn">02</span>
+              <span class="nav-deep-title">Leveraging Self-Supervised Learning for Speaker Diarization</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech6-分离TSE/03-longspeech-scalable-benchmark.html" data-target="deep/tech6-分离TSE/03-longspeech-scalable-benchmark.html">
+              <span class="nav-nn">03</span>
+              <span class="nav-deep-title">LongSpeech: A Scalable Benchmark for Transcription, Translation and Understanding in Long Speech</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech6-分离TSE/04-streaming-sortformer-speaker.html" data-target="deep/tech6-分离TSE/04-streaming-sortformer-speaker.html">
+              <span class="nav-nn">04</span>
+              <span class="nav-deep-title">Streaming Sortformer</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech6-分离TSE/05-flowtse-target-speaker.html" data-target="deep/tech6-分离TSE/05-flowtse-target-speaker.html">
+              <span class="nav-nn">05</span>
+              <span class="nav-deep-title">FlowTSE</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech6-分离TSE/06-sdbench-comprehensive-benchmar.html" data-target="deep/tech6-分离TSE/06-sdbench-comprehensive-benchmar.html">
+              <span class="nav-nn">06</span>
+              <span class="nav-deep-title">SDBench</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech6-分离TSE/07-pushing-limits-end.html" data-target="deep/tech6-分离TSE/07-pushing-limits-end.html">
+              <span class="nav-nn">07</span>
+              <span class="nav-deep-title">Pushing-the-Limits-of-End-to-End-Diarization</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech6-分离TSE/08-spatio-spectral-diarization.html" data-target="deep/tech6-分离TSE/08-spatio-spectral-diarization.html">
+              <span class="nav-nn">08</span>
+              <span class="nav-deep-title">Spatio-Spectral-Diarization</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech6-分离TSE/09-attractor-based-speech.html" data-target="deep/tech6-分离TSE/09-attractor-based-speech.html">
+              <span class="nav-nn">09</span>
+              <span class="nav-deep-title">Attractor-Based-Speech-Separation</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech6-分离TSE/10-two-stage-audio.html" data-target="deep/tech6-分离TSE/10-two-stage-audio.html">
+              <span class="nav-nn">10</span>
+              <span class="nav-deep-title">two-stage-audio-</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech6-分离TSE/11-beyond-lips-integrating.html" data-target="deep/tech6-分离TSE/11-beyond-lips-integrating.html">
+              <span class="nav-nn">11</span>
+              <span class="nav-deep-title">beyond-lips-integrating-</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech6-分离TSE/12-qwen3-5-omni.html" data-target="deep/tech6-分离TSE/12-qwen3-5-omni.html">
+              <span class="nav-nn">12</span>
+              <span class="nav-deep-title">qwen3-5-omni-</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech6-分离TSE/13-speakerlm-end-end.html" data-target="deep/tech6-分离TSE/13-speakerlm-end-end.html">
+              <span class="nav-nn">13</span>
+              <span class="nav-deep-title">SpeakerLM：端到端多模态 LLM 的说话人日志与识别</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-item nav-deep" href="../../deep/tech6-分离TSE/14-advances-speech-separation.html" data-target="deep/tech6-分离TSE/14-advances-speech-separation.html">
+              <span class="nav-nn">14</span>
+              <span class="nav-deep-title">Advances in Speech Separation：语音分离综述</span>
+            </a>
+          </li>
+          
+        </ul>
+      </div>
+      
+    </nav>
+    <div class="sidebar-footer">共 104 页 · markdown-it + Jinja2 + flexsearch</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" id="menu-btn" onclick="toggleSidebar(true)" aria-label="菜单">☰</button>
+      <nav class="breadcrumb">
+        
+        
+        <a href="../../index.html">总览</a><span class="sep">›</span>
+        
+        
+        
+        <a href="../../tech1-语音编辑.html">语音编辑</a><span class="sep">›</span>
+        
+        
+        
+        <span class="crumb-current">InstructAudio: Unified speech and music generation with natural language instruction —</span>
+        
+        
+      </nav>
+      <div class="topbar-right">
+        <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="切换主题">🌙</button>
+      </div>
+    </header>
+
+    <div class="content-wrap">
+      
+      <aside class="toc" id="toc">
+        <div class="toc-title">本页目录</div>
+        <ul>
+          
+          <li class="toc-l2"><a href="#1-整体摘要">1. 整体摘要</a></li>
+          
+          <li class="toc-l2"><a href="#2-背景与前置工作">2. 背景与前置工作</a></li>
+          
+          <li class="toc-l2"><a href="#3-核心创新笔者的理解">3. 核心创新（笔者的理解）</a></li>
+          
+          <li class="toc-l2"><a href="#4-方法流程">4. 方法流程</a></li>
+          
+          <li class="toc-l3"><a href="#41-输入标准化section-22">4.1 输入标准化（Section 2.2）</a></li>
+          
+          <li class="toc-l3"><a href="#42-架构section-24">4.2 架构（Section 2.4）</a></li>
+          
+          <li class="toc-l3"><a href="#43-latent-audio-codecsection-23">4.3 Latent Audio Codec（Section 2.3）</a></li>
+          
+          <li class="toc-l3"><a href="#44-训练设定">4.4 训练设定</a></li>
+          
+          <li class="toc-l3"><a href="#45-评测">4.5 评测</a></li>
+          
+          <li class="toc-l2"><a href="#5-关键证据">5. 关键证据</a></li>
+          
+          <li class="toc-l2"><a href="#6-解决的场景">6. 解决的场景</a></li>
+          
+          <li class="toc-l2"><a href="#7-局限">7. 局限</a></li>
+          
+          <li class="toc-l2"><a href="#8-意义总结">8. 意义总结</a></li>
+          
+          <li class="toc-l2"><a href="#9-可借鉴的地方">9. 可借鉴的地方</a></li>
+          
+        </ul>
+      </aside>
+      
+
+      <main class="content">
+        <article class="md-body">
+        <h1 id="12-instructaudio-unified-speech-and-music-generation-with-natural-language-instruction--深读分析">12-InstructAudio: Unified speech and music generation with natural language instruction — 深读分析</h1>
+<blockquote>
+<p>论文：InstructAudio: Unified speech and music generation with natural language instruction
+作者：Chunyu Qiang¹²(通讯), Kang Yin², Xiaopeng Wang², Yuzhe Liang², Jiahui Zhao¹, Ruibo Fu³, Tianrui Wang¹, Cheng Gong¹, Chen Zhang², Longbiao Wang¹, Jianwu Dang¹（¹天津大学；²快手；³中科院自动化所）
+arXiv：<a href="https://arxiv.org/abs/2511.18487" target="_blank" rel="noopener">2511.18487v1</a> [eess.AS]，2025-11-23
+PDF 直读全文 5 页（短文，ICASSP 风格）。元数据以 PDF 为准，与任务表一致。</p>
+</blockquote>
+<hr />
+<h2 id="1-整体摘要">1. 整体摘要</h2>
+<p>TTS 与 text-to-music（TTM）长期分头发展，输入控制条件高度异质：TTS 靠参考音频定音色、文本层属性控制弱、几乎不支持对话；TTM 依赖专家标注的条件。本文提出 <strong>InstructAudio</strong>，号称<strong>首个用自然语言指令统一控制语音与音乐生成</strong>的框架。它用基于 Stable Diffusion 3 的 **MM-DiT（多模态扩散 Transformer）**架构：N₂ 个 Joint Diffusion Transformer 层处理“文本模态（指令嵌入+音素嵌入时间拼接）↔ 音频模态（加噪 Mel-VAE latent）”的联合注意力，N₁ 个 Single Diffusion Transformer 层只处理音频 latent（自注意力）。训练用 conditional flow matching，推理用 ODE solver 解出目标 VAE latent。</p>
+<p>输入格式标准化为“<strong>指令描述 + 音素序列</strong>”：语音指令含性别/年龄/情感/风格/口音（对话时为两位说话人分别给描述并加 [S0]/[S1] 特殊 token）；音乐指令含歌手性别年龄/流派/乐器/旋律/情绪。统一用 G2P 转音素，使单模型无缝处理语音与音乐输入。音频表示用自研 SecoustiCodec（Mel-VAE，44.1kHz 输入、43Hz 嵌入、1024× 下采样）。模型 1.34B 参数（14 joint + 6 single 层，ffn 1024，RoPE），phoneme 编码器 Zipformer，instruct 编码器 Qwen2.5-7B（冻结）。</p>
+<p>在 50K 小时语音 + 20K 小时音乐数据上训练。结果：Seed-TTS WER 上 EN 1.52% / ZH 1.35%（优于 F5-TTS、ZipVoice、CosyVoice2 等，且数据量最小）；指令控制 TTS 上分类控制准确率 gender 100% / age 86.67% / emotion 83.33% / style 86.67% / accent 100% / dialog 90%，speaker 相似度 0.76、emotion 相似度 0.71，全面超 CosyVoice2；TTM 上 SongEval 各项最佳（Coh 3.08 / Mus 2.98 / Mem 3.00 / Cla 2.89 / Nat 2.82），MMOS 2.91 最佳，但 QMOS（2.82）低于 ACE-Step（3.30）。</p>
+<p><div class="callout callout-info"></p>
+<blockquote>
+<p>笔者解读：核心卖点是“用自然语言指令同时控制语音和音乐的所有属性，且不需要参考音频”。这把 TTS 从“需参考音色”和 TTM 从“需专家标注条件”两边都解放出来，统一进一个文本指令接口。但代价是 text-only 控制引入 one-to-many 映射歧义，导致音频质量/自然度（NMOS）低于参考音频方法——这是论文自己承认的硬伤。</div></p>
+</blockquote>
+<hr />
+<h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
+<ul>
+<li><strong>TTS</strong>：zero-shot voice cloning（VALL-E、CosyVoice、E2-TTS、F5-TTS、ZipVoice、MaskGCT）或风格控制（ControlSpeech、PromptTTS、CosyVoice）二选一；缺乏自然语言多属性控制，CosyVoice 仍需参考音频定音色、不支持文本控制对话。</li>
+<li><strong>TTM</strong>：MusicGen、ACE-Step（SOTA 开源）、Suno/Udio（商用）、DiffRhythm+（文本控流派/乐器/节奏/氛围，缺歌手音色）。ACE-Step 全属性可控但只做音乐、无统一语音建模。</li>
+<li><strong>统一尝试</strong>：
+<ul>
+<li>Vevo2：首个统一语音+演唱，靠参考音频控属性、只出人声无乐器。</li>
+<li>UniAudio：基于 VALL-E 多任务，但输入格式跨任务不一致、需任务专属微调。</li>
+<li>AudioBox：flow-matching 统一，预训练含语音/音乐/音效，最终只支持语音+音效生成。</li>
+<li>AudioLDM 2：两阶段通用，但每任务需不同架构超参。</li>
+<li>MM-Audio：MM-DiT 视频转音频，本文架构灵感来源。</li>
+</ul>
+</li>
+<li><strong>共性短板</strong>：以上都缺 text-based（自然语言描述）控制机制，无法真正统一语音与音乐生成。</li>
+</ul>
+<p><div class="callout callout-warn"></p>
+<blockquote>
+<p>笔者补充：作者把“异质输入条件难联合建模”作为核心痛点，这确实是 TTS×TTM 统一的真实障碍——TTS 控音色/副语言，TTM 控流派/乐器/节奏，两套属性空间几乎不交叠。用自然语言做统一抽象层是合理选择，但也把“属性精确控制”问题转嫁给了“LLM 能否把自然语言稳准映射到声学属性”这个新问题。</div></p>
+</blockquote>
+<hr />
+<h2 id="3-核心创新笔者的理解">3. 核心创新（笔者的理解）</h2>
+<ol>
+<li><strong>首个自然语言指令统一 TTS+TTM 框架</strong>：用“指令描述 + 音素”标准化输入，单模型同时做语音、音乐、对话，无需参考音频。</li>
+<li><strong>Joint + Single Diffusion Transformer 分层</strong>：N₂ joint 层做文本-音频联合注意力（Q/K/V 跨模态拼接）、N₁ single 层只对音频 latent 自注意力。前者管跨模态条件、后者专攻音频生成质量。</li>
+<li><strong>时间拼接的文本模态、免上采样对齐</strong>：指令嵌入 ∈R^{B×L1×D} 与音素嵌入 ∈R^{B×L2×D} 时间拼接成 C_text ∈R^{B×(L1+L2)×D}，不像传统非自回归需文本-音频上采样对齐。</li>
+<li><strong>SecoustiCodec Mel-VAE 高压缩</strong>：44.1kHz → 43Hz 嵌入（1024× 下采样），连续完整 latent 分布，提训练效率与重建质量。</li>
+<li><strong>对话生成 [S0]/[S1] 机制</strong>：两位说话人各给指令描述，文本前加 [S0]/[S1] 区分，支持文本控制双说话人对话（90% 准确率，他模型无此能力）。</li>
+<li><strong>多任务 + 跨模态对齐训练</strong>：50K 语音 + 20K 音乐同模型共训，互为正则。</li>
+</ol>
+<p><div class="callout callout-info"></p>
+<blockquote>
+<p>笔者解读：创新 2（joint/single 分层）和 3（时间拼接免对齐）是工程上最实的。把“跨模态交互”和“音频自求精”分到两类层，是 MM-DiT 范式在音频上的合理移植；时间拼接免去了 TTS 里折磨人的时长对齐。但这些都不算底层原创，更像把 MM-Audio/SD3 的范式适配到语音+音乐。</div></p>
+</blockquote>
+<hr />
+<h2 id="4-方法流程">4. 方法流程</h2>
+<h3 id="41-输入标准化section-22">4.1 输入标准化（Section 2.2）</h3>
+<ul>
+<li>指令描述（自然语言 prompt）：语音→gender/age/emotion/style/accent；对话→两位说话人各一段描述 + 文本加 [S0]/[S1]；音乐→歌手 gender/age + 流派 + 乐器 + 旋律 + 情绪（例：pop ballad, male 30s, piano+strings, 120 BPM, F major, nostalgic）。</li>
+<li>文本/歌词经 G2P 转音素序列。</li>
+<li>两段嵌入时间拼接成文本模态输入。</li>
+</ul>
+<h3 id="42-架构section-24">4.2 架构（Section 2.4）</h3>
+<ul>
+<li>基于 SD3 的 MM-DiT：N₂=14 joint 层 + N₁=6 single 层，ffn 1024，RoPE 位置编码。</li>
+<li>文本模态：指令嵌入（Qwen2.5-7B instruct encoder，冻结）+ 音素嵌入（Zipformer ffn=512）时间拼接。</li>
+<li>音频模态：x_t = Gaussian noise 与 VAE latent 间的线性插拔。</li>
+<li>Joint 层：两模态 Q/K/V 拼接做 scaled dot-product attention，输出拆回各模态。</li>
+<li>Single 层：仅音频 latent，退化成自注意力。</li>
+<li>训练：flow matching 目标 E‖v_θ(t, C_text, x_t) − u(t, x_t)‖²。推理：ODE solver 出目标 VAE latent。</li>
+</ul>
+<h3 id="43-latent-audio-codecsection-23">4.3 Latent Audio Codec（Section 2.3）</h3>
+<ul>
+<li>扩展自 SecoustiCodec：mel-encoder + mel-decoder + 判别器（VAE），学连续完整 latent 分布；44.1kHz 输入、43Hz 嵌入、1024× 下采样。细节指向 Kling-Foley 第 4.5 节。</li>
+</ul>
+<h3 id="44-训练设定">4.4 训练设定</h3>
+<ul>
+<li>1.34B 参数，32× NVIDIA Tesla A800 80GB，batch 16/GPU，Adam，lr 1e-4。</li>
+<li>数据：50K 语音 + 20K 音乐（互联网），内部管线生成指令描述与文本/歌词标注；2–20s clip，中英 1:1、男女 1:1，90%+ 中性情绪，0.5% 对话，44.1kHz。</li>
+</ul>
+<h3 id="45-评测">4.5 评测</h3>
+<ul>
+<li>TTS 基础能力（Table 1）：对比 MaskGCT/E2-TTS/F5-TTS/ZipVoice/CosyVoice1/2，WER 用 Seed-TTS（条件用 neutral+calm，CosyVoice2 给匹配音色参考音频并映射到其短文本控制）。</li>
+<li>指令 TTS（Table 2）：对比 CosyVoice2，500 样本人工标注测试集（100 主观），分类控制准确率由人听测选感知一致类别。</li>
+<li>TTM（Table 3）：对比 DiffRhythm+/ACE-Step，500 样本（100 主观）；DiffRhythm+ 不支持&lt;90s 生成故生成长序列截断（可能引入偏差）。</li>
+<li>指标：WER、Speaker Similarity(Resemblyzer)、Emotion Similarity(emotion2vec)、LSD/MCD/MSEP/MR、SongEval、分类控制准确率、QMOS/NMOS/MMOS。</li>
+</ul>
+<p><div class="callout callout-warn"></p>
+<blockquote>
+<p>笔者补充：评测设计里有几处“对己有利但欠公平”的设定——(a) 给 CosyVoice2 喂匹配音色参考音频再比，等于让对手在自己不擅长的设定下跑；(b) DiffRhythm+ 被迫生成长序列再截断，明显不利于它；(c) 音乐评测只用 5–20s 短段匹配语音时长，对优化长音乐的 ACE-Step/DiffRhythm+ 不利。作者有承认这些 bias，但仍把“SOTA”写进结论，需打折看。</div></p>
+</blockquote>
+<hr />
+<h2 id="5-关键证据">5. 关键证据</h2>
+<p><strong>Table 1（TTS 基础 WER）</strong>：InstructAudio EN 1.52% / ZH 1.35%，优于 F5-TTS(1.89/1.53)、ZipVoice(1.70/1.40)、CosyVoice2(2.57/1.45)，且数据量最小（50K 语音+20K 音乐 vs 其他 100K+ 纯语音），参数 1.3B。Ground Truth 2.14/1.25。</p>
+<p><strong>Table 2（指令 TTS vs CosyVoice2）</strong>：</p>
+<table class="gfm-table">
+<thead>
+<tr>
+<th>指标</th>
+<th>CosyVoice2</th>
+<th>InstructAudio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gender/Age/Dialog 控制</td>
+<td>–/–/–</td>
+<td>100/86.67/90</td>
+</tr>
+<tr>
+<td>Emotion/Style/Accent</td>
+<td>58.33/65.00/100</td>
+<td>83.33/86.67/100</td>
+</tr>
+<tr>
+<td>Speaker Sim</td>
+<td>0.68</td>
+<td>0.76</td>
+</tr>
+<tr>
+<td>Emotion Sim</td>
+<td>0.53</td>
+<td>0.71</td>
+</tr>
+<tr>
+<td>LSD/MCD/MSEP/MR</td>
+<td>2.57/7.11/547.87/0.46</td>
+<td>1.88/5.71/437.58/0.33</td>
+</tr>
+<tr>
+<td>QMOS/NMOS</td>
+<td>3.90/3.65</td>
+<td>3.73/3.46</td>
+</tr>
+</tbody>
+</table>
+<p>→ InstructAudio 控制准确率/相似度/失真全胜，但 MOS 输（因 text-only one-to-many 歧义降平均质量）。CosyVoice2 用参考音频致 emotion leakage。</p>
+<p><strong>Table 3（TTM）</strong>：</p>
+<ul>
+<li>控制准确率：InstructAudio 在 gender(98.89)/age(97.22)/rhythm(94.44)/atmosphere(95.00) 胜；ACE-Step 在 genre(94.44)/instrument(85.56) 胜；DiffRhythm+ gender/age 极低（缺歌手音色）。</li>
+<li>SongEval：InstructAudio 全项最佳（Coh 3.08/Mus 2.98/Mem 3.00/Cla 2.89/Nat 2.82），超 ACE-Step(2.89/2.87/2.83/2.77/2.71)。</li>
+<li>QMOS：ACE-Step 3.30 &gt; InstructAudio 2.82；MMOS：InstructAudio 2.91 &gt; ACE-Step 2.88。</li>
+</ul>
+<p><div class="callout callout-warn"></p>
+<blockquote>
+<p>笔者补充：几组关键数——WER 1.52/1.35（数据量最小却最佳，说明 50K 语音+20K 音乐的联合训练对语音本身有正则化收益）；dialog 控制 90%（独有能力，但测试集 0.5% 对话数据，泛化存疑）；TTM 的 QMOS 输 ACE-Step 0.48 分，是 text-only 控制代价的直接体现。SongEval 全胜但评测用的是 5–20s 短段，对 ACE-Step 不公平，这个“全胜”要打折。</div></p>
+</blockquote>
+<hr />
+<h2 id="6-解决的场景">6. 解决的场景</h2>
+<ul>
+<li><strong>无参考音频的多属性语音生成</strong>：性别/年龄/情感/风格/口音全用自然语言控制，免去录制/检索参考音色。</li>
+<li><strong>文本控制双说话人对话</strong>：[S0]/[S1] 机制，TTS 模型普遍缺失。</li>
+<li><strong>统一语音+音乐生成</strong>：单模型两任务，共享声学建模与控制机制。</li>
+<li><strong>多属性音乐生成</strong>：歌手音色 + 流派 + 乐器 + 旋律 + 情绪一并控制（DiffRhythm+ 缺歌手音色）。</li>
+<li><strong>中英双语</strong>：1:1 中英数据，支持双语生成。</li>
+</ul>
+<hr />
+<h2 id="7-局限">7. 局限</h2>
+<ol>
+<li><strong>text-only one-to-many 歧义 → 质量/自然度下降</strong>：NMOS 在 TTS、TTM 都低于参考音频方法，作者自承这是“信息损失 + 平均化”所致，是框架根本代价。</li>
+<li><strong>音乐限定 5–20s 短段</strong>：为联合建模把音乐裁短，牺牲长音乐能力，且评测对 ACE-Step/DiffRhythm+ 不公平。</li>
+<li><strong>对话数据极少（0.5%）</strong>：dialog 90% 准确率基于极稀疏训练数据，泛化到真实多轮对话存疑。</li>
+<li><strong>评测 bias 偏己</strong>：给 CosyVoice2 喂匹配参考音频、DiffRhythm+ 长序列截断、音乐短段评测——三处都利于 InstructAudio，“SOTA”结论需折扣。</li>
+<li><strong>QMOS 输 ACE-Step</strong>：音乐感知质量未达 SOTA，统一带来的不是全面胜而是“控制胜、质量平/负”。</li>
+<li><strong>无音效生成</strong>：统一只覆盖语音+音乐，未含 sound effect（AudioBox 覆盖语音+音效），作者列为未来工作。</li>
+<li><strong>细节缺失（短文限制）</strong>：SecoustiCodec 的表示效果分析被略去（指向 Kling-Foley），G2P 模型、数据标注管线细节不足，复现难度高。</li>
+<li><strong>1.34B + 32×A800 训练成本</strong>：对学术复现不友好；instruct encoder 用 Qwen2.5-7B（冻结），实际部署参数与延迟未报。</li>
+<li><strong>无参考音频的代价未充分量化</strong>：没给“同属性下 text-only vs reference-audio 的 MOS 差距”的对照实验，难以判断 text-only 的质量损失有多大。</li>
+</ol>
+<p><div class="callout callout-warn"></p>
+<blockquote>
+<p>笔者补充：第 1、4、9 条合起来是核心质疑。统一框架的真正考验是“在不牺牲质量的前提下获得控制便利性”，而本文恰恰在质量上让步（NMOS/QMOS 都输），又用利于己的评测设定宣称 SOTA。若剥掉评测 bias，InstructAudio 更准确的定位是“控制能力领先、生成质量次优、统一性首创”的折中方案，而非全面 SOTA。</div></p>
+</blockquote>
+<hr />
+<h2 id="8-意义总结">8. 意义总结</h2>
+<p>InstructAudio 首次证明“自然语言指令可统一控制语音与音乐的全属性生成且无需参考音频”，把 TTS 与 TTM 从异质条件输入统一到文本接口，是音频生成“指令化”趋势的代表性工作。它揭示了统一建模的收益（小数据量达 WER SOTA、跨任务正则）与代价（one-to-many 歧义降质量、短段限定牺牲长音乐）。</p>
+<p><div class="callout callout-info"></p>
+<blockquote>
+<p>笔者解读：对工业音频团队，这篇的价值是“指令接口即产品形态”——用户用一句话描述想要的声音（不论语音/音乐/对话）即可生成，这对 To-C 创作工具极具吸引力。但落地前必须解决质量让步：要么补参考音频可选回退、要么用更大模型/更长音乐训练补 one-to-many 歧义。作为研究基线，它给后续“多模态控制（文本+参考音频+视频）”留了明确入口。</div></p>
+</blockquote>
+<hr />
+<h2 id="9-可借鉴的地方">9. 可借鉴的地方</h2>
+<ul>
+<li><strong>标准化指令-音素输入格式</strong>：把异质控制条件统一成“自然语言描述 + 音素”，是任何多任务音频生成统一框架的可复用抽象层。</li>
+<li><strong>Joint + Single Diffusion Transformer 分层</strong>：跨模态联合注意力层与音频自注意力层分离，兼顾条件注入与生成质量，是 MM-DiT 在音频的工程范式。</li>
+<li><strong>时间拼接免上采样对齐</strong>：指令+音素时间拼接作文本模态，绕开 TTS 经典的时长对齐难题，值得在非自回归 TTS 中借鉴。</li>
+<li><strong>[S0]/[S1] 对话 token 机制</strong>：为多说话人对话生成提供轻量可控接口，可推广到多角色配音/播客生成。</li>
+<li><strong>Mel-VAE 高压缩 latent（1024×）</strong>：43Hz latent 大幅降扩散训练成本，是音频扩散模型工程优化的关键杠杆。</li>
+<li><strong>跨任务数据互正则</strong>：50K 语音+20K 音乐共训得 WER SOTA，示证“统一训练对小任务有正则收益”。</li>
+<li><strong>分类控制准确率人听测</strong>：用感知一致性人工选择测属性控制有效性，比单纯相似度更贴人类感知，可作可控生成评测补充。</li>
+<li><strong>负面教训：评测公平性</strong>：给对手喂不利设定（CosyVoice2 强制参考音频、DiffRhythm+ 截断、短段评测）会削弱“SOTA”可信度——复用此评测范式时务必设公平对照臂。</li>
+</ul>
+<p><div class="callout callout-warn"></p>
+<blockquote>
+<p>笔者补充：若沿此路线推进，优先补三件——(a) text-only vs reference-audio 的同属性质量对照，量化 text-only 代价；(b) 长音乐生成（解除 5–20s 限定）与短语音解耦的双模式；(c) 真实多轮对话评测（当前 0.5% 对话数据不足以支撑 dialog 90% 的泛化结论）。这三项补齐后，统一框架的“控制胜、质量负”才有望翻成“控制与质量双胜”。</div></p>
+</blockquote>
+
+        </article>
+
+        
+        <nav class="prev-next">
+          
+          <a class="pn pn-prev" href="../../deep/tech1-语音编辑/11-salm-spatial-audio.html">
+            <span class="pn-label">← 上一篇</span>
+            <span class="pn-title">SALM: Spatial Audio Language Model with Structured Embeddings for Understanding and Editing —</span>
+          </a>
+          
+          
+          <a class="pn pn-next" href="../../deep/tech1-语音编辑/13-lemas-large-150k.html">
+            <span class="pn-label">下一篇 →</span>
+            <span class="pn-title">LEMAS-</span>
+          </a>
+          
+        </nav>
+        
+      </main>
+    </div>
+  </div>
+</div>
+
+<script src="../../assets/flexsearch.min.js"></script>
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/search.js"></script>
+</body>
+</html>

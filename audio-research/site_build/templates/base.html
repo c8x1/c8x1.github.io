@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{[ title ]} · 语音编创 survey</title>
+<link rel="stylesheet" href="{[ rel('assets/style.css') ]}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="app">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar(false)"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a class="brand" href="{[ rel('index.html') ]}">语音编创 survey</a>
+      <span class="brand-sub">2025H2 ~ 2026H1 · 97 篇</span>
+    </div>
+
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="搜索论文 / 标题 / 关键词…" autocomplete="off">
+      <ul class="search-results" id="search-results" hidden></ul>
+    </div>
+
+    <nav class="nav-tree" id="nav-tree">
+      <a class="nav-item nav-overview" href="{[ rel('index.html') ]}" data-target="index.html">📘 总览</a>
+      {% for t in nav_tree["techs"] %}
+      <div class="nav-group" data-tech="{[ t['key'] ]}">
+        <a class="nav-item nav-tech" href="{[ rel(t['html']) ]}" data-target="{[ t['html'] ]}">
+          <span class="nav-caret">▸</span>
+          <span class="nav-title">{[ t['title'] ]} ({[ t['children'] | length ]})</span>
+        </a>
+        <ul class="nav-children" hidden>
+          {% for c in t['children'] %}
+          <li>
+            <a class="nav-item nav-deep" href="{[ rel(c['html']) ]}" data-target="{[ c['html'] ]}">
+              <span class="nav-nn">{[ c['nn'] ]}</span>
+              <span class="nav-deep-title">{[ c['title'] ]}</span>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endfor %}
+    </nav>
+    <div class="sidebar-footer">共 104 页 · markdown-it + Jinja2 + flexsearch</div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" id="menu-btn" onclick="toggleSidebar(true)" aria-label="菜单">☰</button>
+      <nav class="breadcrumb">
+        {% for c in crumbs %}
+        {% if c['html'] %}
+        <a href="{[ c['html'] ]}">{[ c['title'] ]}</a><span class="sep">›</span>
+        {% else %}
+        <span class="crumb-current">{[ c['title'] ]}</span>
+        {% endif %}
+        {% endfor %}
+      </nav>
+      <div class="topbar-right">
+        <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="切换主题">🌙</button>
+      </div>
+    </header>
+
+    <div class="content-wrap">
+      {% if page_toc %}
+      <aside class="toc" id="toc">
+        <div class="toc-title">本页目录</div>
+        <ul>
+          {% for h in page_toc %}
+          <li class="toc-l{[ h['level'] ]}"><a href="#{[ h['id'] ]}">{[ h['text'] ]}</a></li>
+          {% endfor %}
+        </ul>
+      </aside>
+      {% endif %}
+
+      <main class="content">
+        <article class="md-body">
+        {[ body_html ]}
+        </article>
+
+        {% if prev_link or next_link %}
+        <nav class="prev-next">
+          {% if prev_link %}
+          <a class="pn pn-prev" href="{[ prev_link['html'] ]}">
+            <span class="pn-label">← 上一篇</span>
+            <span class="pn-title">{[ prev_link['title'] ]}</span>
+          </a>
+          {% else %}
+          <span></span>
+          {% endif %}
+          {% if next_link %}
+          <a class="pn pn-next" href="{[ next_link['html'] ]}">
+            <span class="pn-label">下一篇 →</span>
+            <span class="pn-title">{[ next_link['title'] ]}</span>
+          </a>
+          {% else %}
+          <span></span>
+          {% endif %}
+        </nav>
+        {% endif %}
+      </main>
+    </div>
+  </div>
+</div>
+
+<script src="{[ rel('assets/flexsearch.min.js') ]}"></script>
+<script src="{[ rel('assets/nav.js') ]}"></script>
+<script src="{[ rel('assets/search.js') ]}"></script>
+</body>
+</html>
