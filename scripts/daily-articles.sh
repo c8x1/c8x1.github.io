@@ -46,10 +46,10 @@ git stash pop -q 2>/dev/null || true
 
 # 使用 claude -p 非交互模式执行归档
 # --allowedTools: 预授权所需工具，避免交互确认
-# --model sonnet: 平衡速度与成本
+# --model opus: 最高质量，确保寓言严格遵循概念揭示格式
 echo "运行 /translate-articles archive 执行每日文章归档。完成后报告结果。" \
   | "$CLAUDE" -p \
-    --model sonnet \
+    --model opus \
     --allowedTools "Bash,Read,Write,Edit,Agent,WebSearch,mcp__web_reader__webReader" \
   2>&1 | tee -a "$LOG_FILE"
 

@@ -88,10 +88,10 @@ no_cache: true
 
 ### 归档第三步：翻译
 
-使用 1 个 sonnet Agent 批量翻译 2 篇文章：
+使用 1 个 opus Agent 批量翻译 2 篇文章：
 
 ```
-Agent({ model: "sonnet", description: "Translate 2 articles EN->CN",
+Agent({ model: "opus", description: "Translate 2 articles EN->CN",
   prompt: `你是专业英译中翻译。翻译以下 2 篇文章的段落。
 
 文章 1: {title1}
@@ -124,7 +124,7 @@ translations 数组长度必须与输入段落数完全一致。仔细数。` })
 
 与翻译 Agent **并行**执行（两个 Agent 同时跑）。
 
-使用 Amanda Askell 的寓言提示技巧，用 sonnet Agent 生成第 3 篇原创寓言文章：
+使用 Amanda Askell 的寓言提示技巧，用 opus Agent 生成第 3 篇原创寓言文章：
 
 1. **选择概念**（队列优先，随机兜底）：
 
@@ -197,7 +197,7 @@ translations 数组长度必须与输入段落数完全一致。仔细数。` })
 2. 使用 Amanda Askell 原始 prompt 格式生成寓言：
 
 ```
-Agent({ model: "sonnet", description: "Generate parable article for [concept]",
+Agent({ model: "opus", description: "Generate parable article for [concept]",
   prompt: `Write a parable that fully explains [concept] but indirectly, the way good parables do. Only at the very end should it become clear what the concept was. Then write a plain explanation.
 
 MANDATORY STRUCTURE — your output MUST follow this exact format:
@@ -399,7 +399,7 @@ data.articles.forEach((a, i) => {
 
 ## 翻译模式
 
-对指定索引的文章进行并行 sonnet 翻译。
+对指定索引的文章进行并行 opus 翻译。
 
 ### 数据结构
 
@@ -427,11 +427,11 @@ data.articles.forEach((a, i) => {
 ### 翻译流程
 
 1. 从用户输入解析文章索引（逗号/空格分隔）
-2. Spawn 3-5 个 sonnet Agent 并行，每个处理 2-4 篇文章：
+2. Spawn 3-5 个 opus Agent 并行，每个处理 2-4 篇文章：
 
 ```
 Agent({
-  model: "sonnet",
+  model: "opus",
   description: "Translate articles X,Y,Z CN->EN",
   prompt: `你是专业中英翻译。读取 articles.json。
 对索引 X, Y, Z 的文章：提取每个 paragraphs 数组条目中的 CN 段落文本。
