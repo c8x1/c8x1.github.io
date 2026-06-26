@@ -126,73 +126,85 @@ translations 数组长度必须与输入段落数完全一致。仔细数。` })
 
 使用 Amanda Askell 的寓言提示技巧，用 opus Agent 生成第 3 篇原创寓言文章：
 
-1. **选择概念**（队列优先，随机兜底）：
+1. **选择概念**（队列优先，LLM 语义判断兜底）：
 
    **先读 `$SITE_DIR/parable-queue.json`**：
    - 如果 `queue` 数组非空 → 取第一个元素作为本次概念（`concept` + `concept_cn`）
    - 用完后从 `queue` 中移除该元素，将 `concept` 追加到 `used` 数组
    - 用 Write 写回 `parable-queue.json`
-   - **跳过下面的随机选择逻辑，直接用队列概念进入第 2 步**
+   - **跳过下面的 LLM 判断逻辑，直接用队列概念进入第 2 步**
 
-   **如果 `queue` 为空或文件不存在** → 从以下概念池中选一个**尚未用过**的概念：
-   - 检查 `parable-queue.json` 的 `used` 数组 + articles.json 中已有 tags
-   - 排除所有已用过的概念（**按概念英文名去重，已用的绝不重选**），从剩余中随机选取
-   - **如果池中所有概念都已用过**（剩余为空）：在 `parable-queue.json` 里把 `used` 数组清空（保留原内容到一个 `archived` 字段以备查），然后从全池重新选取。这样保证一轮用完后才有序重用，而非短期内静默重复
-   - 选中后，将概念英文名追加到 `parable-queue.json` 的 `used` 数组（如文件存在）
+   **如果 `queue` 为空** → 用 **LLM 语义判断**选新概念（不要靠字符串匹配，中英文别名要等价对待）：
+
+   **第一步：建立权威「已用」集合**
+   - Read `$SITE_DIR/articles.json`
+   - 筛出所有 `category` 含「寓言故事」的文章
+   - 收集它们的 `tags`（去掉 `Amanda Askell` 和 `寓言故事`）→ 这是权威已用集合
+   - 同时合并 `parable-queue.json` 的 `used` 数组
+   - 注意中英文等价：`道德运气` = `moral luck`，`自然选择` = `natural selection`，等
+
+   **第二步：LLM 判断选新概念**
+   - 你（opus）本身就是判断 LLM。对照下面的科学概念池，**逐一语义比对**已用集合：
+     - 若池中某概念的中文或英文名与任一已用 tag **语义相同**（含同义词、中英对照、变体），视为已用
+     - 从**语义上未用过**的概念里随机选一个
+   - 推理过程要显式写出：列出已用集合 → 逐个排除池中已用项 → 从剩余里选
+   - 若池中所有概念都已用过：把 `parable-queue.json` 的 `used` 数组清空（原内容移到 `archived` 字段），然后从全池重选
+   - 选中后，将概念英文名追加到 `parable-queue.json` 的 `used` 数组并 Write 回写
 
 ```
-概念池（哲学/科学/AI/经济学/心理学）：
-1. the alignment problem (AI对齐)
-2. Nash equilibrium (纳什均衡)
-3. tragedy of the commons (公地悲剧)
-4. the butterfly effect (蝴蝶效应)
-5. the Chinese room argument (中文房间论证)
-6. Gödel's incompleteness theorem (哥德尔不完备定理)
-7. the trolley problem (电车难题)
-8. emergence (涌现)
-9. the experience machine (体验机器)
-10. philosophical zombies (哲学僵尸)
-11. Pascal's wager (帕斯卡赌注)
-12. the Ship of Theseus (忒修斯之船)
-13. the Veil of Ignorance (无知之幕)
-14. information asymmetry (信息不对称)
-15. the halting problem (停机问题)
-16. natural selection (自然选择)
-17. the Prisoner's Dilemma (囚徒困境)
-18. qualia (感受质)
-19. the Sorites paradox (谷堆悖论)
-20. the simulation hypothesis (模拟假说)
-21. moral luck (道德运气)
-22. the categorical imperative (定言命令)
-23. Occam's razor (奥卡姆剃刀)
-24. the problem of induction (归纳问题)
-25. solipsism (唯我论)
-26. Plato's Cave (洞穴寓言)
-27. the Memory Palace (记忆宫殿)
-28. problem of other minds (他心问题)
-29. Quantum Entanglement (量子纠缠)
-30. Hilbert's infinite hotel (希尔伯特无限旅馆)
-31. the infinite regress (无限回溯)
-32. Buridan's ass (布里丹之驴)
-33. the Münchhausen trilemma (明希豪森三难)
-34. Schrödinger's cat (薛定谔的猫)
-35. the trolley problem variant: the fat man (胖子变体)
-36. free will vs determinism (自由意志与决定论)
-37. the social contract (社会契约)
-38. utilitarianism vs deontology (功利主义与义务论)
-39. epistemic injustice (认知不正义)
-40. the anthropic principle (人择原理)
-41. the hard problem of consciousness (意识的难题)
-42. eliminative materialism (取消主义唯物论)
-43. the ticking time bomb scenario (定时炸弹情境)
-44. virtue ethics (美德伦理学)
-45. the tragedy of the commons variant: enclosed (公地悲剧变体)
-46. the unexpected hanging paradox (意外绞刑悖论)
-47. the boat race paradox (船赛悖论)
-48. Newcomb's paradox (纽康姆悖论)
-49. the prisoner's dilemma variant: iterated (重复囚徒困境)
-50. the experience machine variant: the experience of others (体验机器变体)
+概念池（基础科学 · 物理/数学/生物/化学，大学本科级别）：
+
+物理：
+1. entropy (熵)
+2. the Heisenberg uncertainty principle (海森堡不确定性原理)
+3. Brownian motion (布朗运动)
+4. resonance (共振)
+5. escape velocity (逃逸速度)
+6. conservation of energy (能量守恒定律)
+7. the second law of thermodynamics (热力学第二定律)
+8. wave-particle duality (波粒二象性)
+9. time dilation (时间膨胀)
+10. Maxwell's demon (麦克斯韦妖)
+11. the Doppler effect (多普勒效应)
+12. absolute zero (绝对零度)
+13. Newton's third law (牛顿第三定律)
+14. the equivalence principle (等效原理)
+
+数学：
+15. Bayes' theorem (贝叶斯定理)
+16. the normal distribution (正态分布)
+17. fractal self-similarity (分形自相似)
+18. proof by contradiction (反证法)
+19. the Fibonacci sequence (斐波那契数列)
+20. the Monty Hall problem (蒙提霍尔问题)
+21. Euler paths (欧拉路径)
+22. the concept of infinity (无穷)
+23. modular arithmetic (模运算)
+24. the limit (极限)
+
+生物：
+25. symbiosis (共生)
+26. trophic cascade (营养级联)
+27. keystone species (关键物种)
+28. apoptosis (细胞凋亡)
+29. circadian rhythm (昼夜节律)
+30. mimicry (拟态)
+31. genetic drift (遗传漂变)
+32. the Red Queen hypothesis (红皇后假说)
+33. homeostasis (稳态)
+34. horizontal gene transfer (水平基因转移)
+35. convergent evolution (趋同进化)
+
+化学：
+36. Le Chatelier's principle (勒夏特列原理)
+37. activation energy (活化能)
+38. catalysis (催化)
+39. chirality (手性)
+40. the hydrophobic effect (疏水效应)
+41. buffer solutions (缓冲溶液)
+42. periodicity (元素周期律)
 ```
+
 
 2. 使用 Amanda Askell 原始 prompt 格式生成寓言：
 
