@@ -1,6 +1,6 @@
 ---
 name: translate-articles
-description: "Translate and align bilingual CN/EN paragraphs for blog articles. Use 'archive' keyword for non-interactive daily pipeline: fetch 2 English philosophy/classics articles + generate 1 AI parable (Amanda Askell prompt technique), translate to Chinese, generate bilingual pages, update homepage, and git push. Also use for fixing paragraph alignment, re-translating, or any bilingual content work on c8x1.github.io."
+description: "Translate and align bilingual CN/EN paragraphs for blog articles. Use 'archive' keyword for non-interactive daily pipeline: fetch 1 English philosophy/classics article + generate 2 AI parables (Amanda Askell prompt technique), translate to Chinese, generate bilingual pages, update homepage, and git push. Also use for fixing paragraph alignment, re-translating, or any bilingual content work on c8x1.github.io."
 argument-hint: "[archive] [scan] [article indices] — e.g. 'archive' or '0,2,4'"
 allowed-tools:
   - WebSearch
@@ -35,13 +35,13 @@ user-invocable: true
 
 归档模式是**非交互式**的：不需要用户确认，自动完成搜索 → 翻译 → 生成 → 推送全流程。
 
-目标：每天获取 2 篇英文哲学/经典文章 + 生成 1 篇 AI 寓言 → 翻译为中文 → 生成双语页面 → git push。
+目标：每天获取 1 篇英文哲学/经典文章 + 生成 2 篇 AI 寓言 → 翻译为中文 → 生成双语页面 → git push。
 
-每天共 3 篇新文章：2 篇翻译 + 1 篇寓言。
+每天共 3 篇新文章：1 篇翻译 + 2 篇寓言。
 
 ### 归档第一步：搜索英文文章
 
-使用 WebSearch 搜索高质量英文文章。每次从以下搜索词池中选 2 个不同类别的词：
+使用 WebSearch 搜索高质量英文文章。每次从以下搜索词池中选 1 个词：
 
 ```
 搜索词池：
@@ -64,7 +64,7 @@ user-invocable: true
 
 ### 归档第二步：抓取文章内容
 
-对选中的 2 篇文章，用 `mcp__web_reader__webReader` 获取正文：
+对选中的 1 篇文章，用 `mcp__web_reader__webReader` 获取正文：
 
 ```
 url: 文章 URL
@@ -88,19 +88,15 @@ no_cache: true
 
 ### 归档第三步：翻译
 
-使用 1 个 opus Agent 批量翻译 2 篇文章：
+使用 1 个 opus Agent 翻译 1 篇文章：
 
 ```
-Agent({ model: "opus", description: "Translate 2 articles EN->CN",
-  prompt: `你是专业英译中翻译。翻译以下 2 篇文章的段落。
+Agent({ model: "opus", description: "Translate 1 article EN->CN",
+  prompt: `你是专业英译中翻译。翻译以下文章的段落。
 
-文章 1: {title1}
+文章: {title}
 段落:
-{en_paragraphs_json_1}
-
-文章 2: {title2}
-段落:
-{en_paragraphs_json_2}
+{en_paragraphs_json}
 
 规则:
 - 每个英文段落翻译为自然流畅的中文
@@ -112,27 +108,25 @@ Agent({ model: "opus", description: "Translate 2 articles EN->CN",
 - **中文引号必须使用「」（U+300C/U+300D），绝对不要使用 ""（ASCII 双引号）或 ""（弯引号），否则会破坏 JSON 格式**
 
 输出 ONLY valid JSON（无 markdown 围栏，无解释）:
-[
-  {"articleIndex": 0, "title_cn": "中文标题", "translations": ["CN段0", "CN段1", ...]},
-  {"articleIndex": 1, "title_cn": "中文标题", "translations": ["CN段0", "CN段1", ...]}
-]
+{"title_cn": "中文标题", "translations": ["CN段0", "CN段1", ...]}
 
 translations 数组长度必须与输入段落数完全一致。仔细数。` })
 ```
 
-### 归档第三步半：生成 AI 寓言（第 3 篇文章）
+### 归档第三步半：生成 AI 寓言（第 2、3 篇文章）
 
-与翻译 Agent **并行**执行（两个 Agent 同时跑）。
+与翻译 Agent **并行**执行（1 个翻译 Agent + 2 个寓言 Agent 同时跑，共 3 个 Agent）。两个寓言 Agent 用**不同概念**，各自独立写入 `/tmp/parable_article_1.json` 和 `/tmp/parable_article_2.json`。
 
-使用 Amanda Askell 的寓言提示技巧，用 opus Agent 生成第 3 篇原创寓言文章：
+使用 Amanda Askell 的寓言提示技巧，用 opus Agent 生成 2 篇原创寓言文章：
 
-1. **选择概念**（队列优先，LLM 语义判断兜底）：
+1. **选择概念**（队列优先，LLM 语义判断兜底）— **本次需选 2 个不同概念，对每个概念独立执行下面的流程**：
 
    **先读 `$SITE_DIR/parable-queue.json`**：
    - 如果 `queue` 数组非空 → 取第一个元素作为本次概念（`concept` + `concept_cn`）
    - 用完后从 `queue` 中移除该元素，将 `concept` 追加到 `used` 数组
    - 用 Write 写回 `parable-queue.json`
    - **跳过下面的 LLM 判断逻辑，直接用队列概念进入第 2 步**
+   - **选第 2 个概念时重复本流程**（若 queue 还有元素就再取一个；否则走下面的 LLM 判断，且必须与第 1 个不同）
 
    **如果 `queue` 为空** → 用 **LLM 语义判断**选新概念（不要靠字符串匹配，中英文别名要等价对待）：
 
@@ -227,10 +221,10 @@ AI / 机器学习（具时效性）：
 
 
 
-2. 使用 Amanda Askell 原始 prompt 格式生成寓言：
+2. 使用 Amanda Askell 原始 prompt 格式生成寓言（**对 2 个概念各跑一次，并行**，把下面 prompt 里的 `N` 分别替换为 `1` 和 `2`）：
 
 ```
-Agent({ model: "opus", description: "Generate parable article for [concept]",
+Agent({ model: "opus", description: "Generate parable N for [concept]",
   prompt: `Write a parable that fully explains [concept] but indirectly, the way good parables do. Only at the very end should it become clear what the concept was. Then write a plain explanation.
 
 MANDATORY STRUCTURE — your output MUST follow this exact format:
@@ -247,7 +241,7 @@ The --- separator and concept reveal paragraph are NOT optional. Every parable M
 2. 为每个段落提供中文翻译
 3. 将所有内容组织为 JSON
 
-JSON 格式（纯 JSON，无 markdown 围栏，用 Write 工具写入 /tmp/parable_article.json）:
+JSON 格式（纯 JSON，无 markdown 围栏，用 Write 工具写入 /tmp/parable_article_N.json）:
 {
   "title_en": "英文标题",
   "title_cn": "中文标题",
@@ -264,10 +258,10 @@ JSON 格式（纯 JSON，无 markdown 围栏，用 Write 工具写入 /tmp/parab
 - EN 和 CN 段落数量必须完全一致
 - 去掉 "---" 分隔线本身，但保留概念揭示段落作为最后一个段落（这是故事的核心部分，不能删）
 
-重要：必须用 Write 工具把 JSON 写入 /tmp/parable_article.json。` })
+重要：必须用 Write 工具把 JSON 写入 /tmp/parable_article_N.json。` })
 ```
 
-3. 读取 `/tmp/parable_article.json`，**验证概念揭示**：
+3. 对每个寓言（N=1, 2）读取 `/tmp/parable_article_N.json`，**验证概念揭示**：
    - 检查最后一个段落的 `cn` 是否包含概念名称（如「量子纠缠」「囚徒困境」等）
    - 如果最后一段没有明确提及概念名称，说明寓言 Agent 没有遵循格式要求，必须重新生成
    - 验证通过后，构建寓言 article 对象：
@@ -331,7 +325,7 @@ JSON 格式（纯 JSON，无 markdown 围栏，用 Write 工具写入 /tmp/parab
 
 slug 生成规则：取英文标题，去掉特殊字符，空格转连字符，截断 60 字符。
 
-3. 追加 3 篇新文章（2 篇翻译 + 1 篇寓言）到 `data.articles` 数组末尾
+3. 追加 3 篇新文章（1 篇翻译 + 2 篇寓言）到 `data.articles` 数组末尾
 4. 更新 `data.meta.totalArticles` += 3
 5. 更新 `data.meta.updated` = 当天日期
 6. 用 Write 写回 articles.json
@@ -354,7 +348,7 @@ cd ~/Workspace/trySth/c8x1.github.io
 # articles/ 按年/月组织（articles/YYYY/MM/），-u 暂存 build-all.js 重新生成的旧页面
 git add articles.json articles-index.json articles/ feed.xml sitemap.xml parable-queue.json
 git add -u '*.html'
-git commit -m "archive: YYYY-MM-DD +3 articles (category1, category2, 寓言故事)"
+git commit -m "archive: YYYY-MM-DD +3 articles (category1, 寓言故事, 寓言故事)"
 # 先同步远端（trending cron 可能已推送 data/ 改动）
 git stash -q || true
 git pull --rebase origin master
@@ -375,13 +369,13 @@ cd ~/Workspace/trySth/c8x1.github.io && https_proxy=http://127.0.0.1:7897 http_p
 [归档完成]
 
 日期: YYYY-MM-DD
-新增: 3 articles (2 翻译 + 1 寓言)
+新增: 3 articles (1 翻译 + 2 寓言)
 总计: N articles
 
 文章:
   1. 中文标题1 (哲学) — Aeon
-  2. 中文标题2 (科学哲学) — The Atlantic
-  3. 寓言标题 (寓言故事) — AI Parable
+  2. 寓言标题1 (寓言故事) — AI Parable
+  3. 寓言标题2 (寓言故事) — AI Parable
 
 文件:
   articles.json ✓
