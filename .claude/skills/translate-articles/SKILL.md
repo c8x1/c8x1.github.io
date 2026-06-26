@@ -136,8 +136,9 @@ translations 数组长度必须与输入段落数完全一致。仔细数。` })
 
    **如果 `queue` 为空或文件不存在** → 从以下概念池中选一个**尚未用过**的概念：
    - 检查 `parable-queue.json` 的 `used` 数组 + articles.json 中已有 tags
-   - 排除所有已用过的概念，从剩余中随机选取
-   - 选中后，将概念名追加到 `parable-queue.json` 的 `used` 数组（如文件存在）
+   - 排除所有已用过的概念（**按概念英文名去重，已用的绝不重选**），从剩余中随机选取
+   - **如果池中所有概念都已用过**（剩余为空）：在 `parable-queue.json` 里把 `used` 数组清空（保留原内容到一个 `archived` 字段以备查），然后从全池重新选取。这样保证一轮用完后才有序重用，而非短期内静默重复
+   - 选中后，将概念英文名追加到 `parable-queue.json` 的 `used` 数组（如文件存在）
 
 ```
 概念池（哲学/科学/AI/经济学/心理学）：
@@ -161,6 +162,36 @@ translations 数组长度必须与输入段落数完全一致。仔细数。` })
 18. qualia (感受质)
 19. the Sorites paradox (谷堆悖论)
 20. the simulation hypothesis (模拟假说)
+21. moral luck (道德运气)
+22. the categorical imperative (定言命令)
+23. Occam's razor (奥卡姆剃刀)
+24. the problem of induction (归纳问题)
+25. solipsism (唯我论)
+26. Plato's Cave (洞穴寓言)
+27. the Memory Palace (记忆宫殿)
+28. problem of other minds (他心问题)
+29. Quantum Entanglement (量子纠缠)
+30. Hilbert's infinite hotel (希尔伯特无限旅馆)
+31. the infinite regress (无限回溯)
+32. Buridan's ass (布里丹之驴)
+33. the Münchhausen trilemma (明希豪森三难)
+34. Schrödinger's cat (薛定谔的猫)
+35. the trolley problem variant: the fat man (胖子变体)
+36. free will vs determinism (自由意志与决定论)
+37. the social contract (社会契约)
+38. utilitarianism vs deontology (功利主义与义务论)
+39. epistemic injustice (认知不正义)
+40. the anthropic principle (人择原理)
+41. the hard problem of consciousness (意识的难题)
+42. eliminative materialism (取消主义唯物论)
+43. the ticking time bomb scenario (定时炸弹情境)
+44. virtue ethics (美德伦理学)
+45. the tragedy of the commons variant: enclosed (公地悲剧变体)
+46. the unexpected hanging paradox (意外绞刑悖论)
+47. the boat race paradox (船赛悖论)
+48. Newcomb's paradox (纽康姆悖论)
+49. the prisoner's dilemma variant: iterated (重复囚徒困境)
+50. the experience machine variant: the experience of others (体验机器变体)
 ```
 
 2. 使用 Amanda Askell 原始 prompt 格式生成寓言：
