@@ -115,7 +115,7 @@ translations 数组长度必须与输入段落数完全一致。仔细数。` })
 
 ### 归档第三步半：生成 AI 寓言（第 2、3 篇文章）
 
-与翻译 Agent **并行**执行（1 个翻译 Agent + 2 个寓言 Agent 同时跑，共 3 个 Agent）。两个寓言 Agent 用**不同概念**，各自独立写入 `/tmp/parable_article_1.json` 和 `/tmp/parable_article_2.json`。
+与翻译 Agent **并行**执行：1 个翻译 Agent + 2 条寓言链（每条内部串行：调研→写作→验证）。两条寓言链用**不同概念**，各自独立写入 `/tmp/parable_article_1.json` 和 `/tmp/parable_article_2.json`。
 
 使用 Amanda Askell 的寓言提示技巧，用 opus Agent 生成 2 篇原创寓言文章：
 
@@ -174,18 +174,13 @@ translations 数组长度必须与输入段落数完全一致。仔细数。` })
 21. Conway's Game of Life (康威生命游戏)
 22. the four-color theorem (四色定理)
 
-生物：
-23. trophic cascade (营养级联)
-24. keystone species (关键物种)
-25. apoptosis (细胞凋亡)
-26. genetic drift (遗传漂变)
-27. the Red Queen hypothesis (红皇后假说)
-28. horizontal gene transfer (水平基因转移)
-29. convergent evolution (趋同进化)
-30. endosymbiosis (内共生学说)
-31. epigenetics (表观遗传)
-32. the fitness landscape (适应度地形)
-33. the central dogma of molecular biology (中心法则)
+生物（已移除难寓言的过程类：trophic cascade / Red Queen / endosymbiosis / fitness landscape / central dogma；保留的若为过程类，brief 会标 is_process_type=true，由 V7/V8 严格校验）：
+23. keystone species (关键物种)
+24. apoptosis (细胞凋亡)
+25. genetic drift (遗传漂变)
+26. horizontal gene transfer (水平基因转移)
+27. convergent evolution (趋同进化)
+28. epigenetics (表观遗传)
 
 化学：
 34. Le Chatelier's principle (勒夏特列原理)
@@ -221,50 +216,91 @@ AI / 机器学习（具时效性）：
 
 
 
-2. 使用 Amanda Askell 原始 prompt 格式生成寓言（**对 2 个概念各跑一次，并行**，把下面 prompt 里的 `N` 分别替换为 `1` 和 `2`）：
+2. **概念调研（grounding，新增）**——对每个选定的概念，先产出一份 brief 作为写作与校验的唯一事实基准，**不得凭记忆编造**。概念理解必须 grounded 于外部权威源。
+
+   主循环：先 Read `$SITE_DIR/concept-briefs.json`（形如 `{"briefs": {"Noether's theorem": {...}}}`）；概念命中则复用；未命中跑下面的调研 Agent，append 写回。
 
 ```
-Agent({ model: "opus", description: "Generate parable N for [concept]",
-  prompt: `Write a parable that fully explains [concept] but indirectly, the way good parables do. Only at the very end should it become clear what the concept was. Then write a plain explanation.
+Agent({ model: "opus", description: "Ground concept [concept_cn]",
+  prompt: `为科学概念 [concept]（[concept_cn]）做调研，产出 brief，作为寓言写作与校验的唯一事实基准。不得凭记忆编造。
 
-MANDATORY STRUCTURE — your output MUST follow this exact format:
+步骤:
+1. 用 Bash curl 抓 Wikipedia（走代理 https_proxy=http://127.0.0.1:7897）。先 https://en.wikipedia.org/wiki/[concept_下划线小写]，再 https://zh.wikipedia.org/wiki/[concept_cn]。WebSearch 兜底（本环境常不可靠，仅作 fallback）。
+2. 从正文提炼，不照搬。
 
-1. The story itself (multiple paragraphs, never naming the concept directly)
-2. A separator line: exactly "---" on its own line
-3. A concept reveal paragraph that starts with "This story reveals the essence of [concept] —" followed by a plain, clear explanation of the concept in everyday language (3-5 sentences)
-
-The --- separator and concept reveal paragraph are NOT optional. Every parable MUST end with an explicit concept explanation. Do NOT end with literary prose alone.
-
-等你写完上面的英文 parable + plain explanation 后：
-
-1. 为整个文章起一个英文标题（不要直接提及概念名称）
-2. 为每个段落提供中文翻译
-3. 将所有内容组织为 JSON
-
-JSON 格式（纯 JSON，无 markdown 围栏，用 Write 工具写入 /tmp/parable_article_N.json）:
+输出 JSON（用 Write 写入 /tmp/concept_brief_N.json 并返回）:
 {
-  "title_en": "英文标题",
-  "title_cn": "中文标题",
-  "paragraphs": [
-    {"en": "英文段落1", "cn": "中文翻译1"},
-    ...
-  ]
-}
-
-翻译规则:
-- 中文翻译自然流畅
-- 人名、专有名词第一次出现时标注英文原文
-- 中文引号必须使用「」（U+300C/U+300D），绝对不要使用 "" 或 ""
-- EN 和 CN 段落数量必须完全一致
-- 去掉 "---" 分隔线本身，但保留概念揭示段落作为最后一个段落（这是故事的核心部分，不能删）
-
-重要：必须用 Write 工具把 JSON 写入 /tmp/parable_article_N.json。` })
+  "concept": "英文概念名",
+  "concept_cn": "中文概念名",
+  "definition_cn": "一句话定义",
+  "definition_en": "one-sentence definition",
+  "core_mechanism": "核心机制一句话，注明是否非意愿过程（selection-driven / mechanical / deterministic 等）",
+  "key_relations": ["如诺特: 时间平移对称→能量守恒", "空间平移对称→动量守恒"],
+  "common_misconceptions": ["..."],
+  "literal_domain_to_avoid": "故事不得设在此领域，如内共生→早期海洋/细胞/细菌；定理类填 null",
+  "is_process_type": true/false,
+  "canonical_sentence_cn": "标准一句话陈述",
+  "canonical_sentence_en": "..."
+}` })
 ```
 
-3. 对每个寓言（N=1, 2）读取 `/tmp/parable_article_N.json`，**验证概念揭示**：
-   - 检查最后一个段落的 `cn` 是否包含概念名称（如「量子纠缠」「囚徒困境」等）
-   - 如果最后一段没有明确提及概念名称，说明寓言 Agent 没有遵循格式要求，必须重新生成
-   - 验证通过后，构建寓言 article 对象：
+3. **选视角（perspective rotation，新增）**——Read `$SITE_DIR/parable-queue.json` 的 `perspectiveCursor`（整数，默认 0）。视角池：
+
+```
+["全知旁观", "第一人称亲历", "对话体", "倒叙揭示"]
+```
+
+两篇寓言分别取 `pool[cursor % 4]` 与 `pool[(cursor+1) % 4]`，写回 `cursor = (cursor+2) % 4`，避免连续两篇同视角。
+
+4. **生成寓言**——对 2 个概念各跑一次 opus Agent（**与翻译 Agent 并行**，寓言臂内部串行：调研→写作→验证），把下面 prompt 里 `N` 分别替换为 `1` 和 `2`，`[PERSPECTIVE]` 替换为上一步选定的视角，`{BRIEF_JSON}` 替换为该概念的 brief JSON：
+
+```
+Agent({ model: "opus", description: "Generate parable N for [concept_cn]",
+  prompt: `写一则寓言，揭示科学概念 [concept_cn]（[concept]）。你拿到的不是裸概念名，而是下面这份 brief，它是你唯一的事实源——所有科学声明必须与 brief 一致，不得凭记忆编造。
+
+BRIEF:
+{BRIEF_JSON}
+
+硬约束:
+1. 隐喻距离: 故事世界不得设在 brief.literal_domain_to_avoid 或概念字面科学领域。找一个 disparate 的人/日常/社会境况，其结构（角色关系、张力、抉择）镜像 brief.core_mechanism 与 key_relations。映射必须结构性（关系同构），不得词法改名（禁止 cell→host、ATP→fire 这类换皮）。
+2. 赌注/两难: 必须有角色面临真实代价或两难抉择，不得是过程的平铺直叙。
+3. 视角: 本次用 [PERSPECTIVE]。
+4. 概念名不得在故事正文出现，只在末尾「注解」中给出。
+5. 结尾格式（强制）: 故事讲完后另起一段，以「注解：」开头，1-2 句日常语言点明概念名(CN+EN)与核心机制（与 brief.key_relations 一致）。此段是作者注解，坦白跳出寓言，不得伪装成故事，禁止用「这则故事揭示了…的本质」这类伪叙事。
+6. 体例: 译名 中文（English）全角括号；全角标点 ，。；：「」。
+7. 标题: 英文标题，不提概念名；标题核心名词/意象必须在中译文正文出现 ≥1 次。
+
+输出 JSON（用 Write 写入 /tmp/parable_article_N.json）:
+{ "title_en": "...", "title_cn": "...", "paragraphs": [{"en":"...","cn":"..."}, ...] }
+段落数 5-8。注解段作为最后一个 paragraph。EN/CN 段数完全一致。` })
+```
+
+5. **验证（V1-V8，替换原「验证概念揭示」）**——对每个寓言（N=1,2）读取 `/tmp/parable_article_N.json`，跑验证 Agent，brief 为基准。任一 fail 则重生成一次（把 `failed` 列表与 `reasons` 回灌 writer prompt 再跑），再不过则当天跳过该概念并在日志记 `skip: concept (reason)`，不影响另一篇与翻译篇。
+
+   `recent_names`：主循环从 `articles.json` 末 5 篇寓言 `paragraphs[0].cn` 中抽取人名（取 `（...）` 括号前的中文 token，或括号内的 Capitalized token），去重为数组传入。
+
+```
+Agent({ model: "opus", description: "Verify parable N",
+  prompt: `校验寓言是否合格。概念 brief 为事实基准。
+
+BRIEF: {BRIEF_JSON}
+PARABLE: {PARABLE_JSON}
+最近5篇寓言主角名: {RECENT_NAMES}
+
+逐项 pass/fail + 一句理由:
+V1 概念名(CN或EN)在末两段(含注解)出现
+V2 标题核心意象在正文 cn 出现 ≥1 次
+V3 科学准确: 注解段及正文声明是否与 brief.key_relations/core_mechanism 矛盾
+V4 命名: 主角名与最近5篇不撞
+V5 标点: cn 段全角标点(，。；：「」)，无半角逗号/句号
+V6 译名格式: 统一 中文（English）全角括号
+V7 距离: 故事设定未落在 brief.literal_domain_to_avoid 或概念字面领域
+V8 软目的论: 若 brief.core_mechanism 为非意愿过程，故事是否给它塞了意愿/品德/耐心
+
+输出 ONLY JSON: 任一 fail → {"reject":true,"failed":["V3"],"reasons":["..."]}；全 pass → {"reject":false}。` })
+```
+
+6. 验证通过后，构建寓言 article 对象：
 
 ```json
 {
@@ -276,7 +312,7 @@ JSON 格式（纯 JSON，无 markdown 围栏，用 Write 工具写入 /tmp/parab
   "date": "YYYY-MM-DD",
   "category": ["寓言故事"],
   "tags": ["概念英文名 或 中文概念名", "Amanda Askell"],
-  "summary": "中文摘要（取第一段翻译前150字）",
+  "summary": "中文摘要（取第一段翻译前150字，不含注解段）",
   "file": "articles/YYYY/MM/YYYY-MM-DD-slug.html",
   "originalUrl": "",
   "stats": { "wordCount": EN字数, "readTime": Math.max(1, EN字数/300) },
@@ -287,11 +323,12 @@ JSON 格式（纯 JSON，无 markdown 围栏，用 Write 工具写入 /tmp/parab
 ```
 
 注意事项：
-- 过滤掉结构性行（如 `---`、`Plain Explanation` 等纯标记段落）
+- 注解段作为最后一个 paragraph 保留（不再有 `---` 分隔行或 `Plain Explanation` 标记需要过滤）
 - category 固定为 `["寓言故事"]`
 - author 固定为 `"AI Parable (inspired by Amanda Askell)"`
 - source 固定为 `"每日精选"`
 - originalUrl 为空字符串（非抓取文章）
+- summary 只取故事正文第一段，不含注解段
 
 ### 归档第四步：构建 article 对象并追加到 articles.json
 
