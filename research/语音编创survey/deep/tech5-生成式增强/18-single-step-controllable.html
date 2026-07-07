@@ -862,7 +862,7 @@ arXiv: <a href="https://arxiv.org/abs/2601.14356" target="_blank" rel="noopener"
 <h3 id="范式背景">范式背景</h3>
 <p>音乐修复从信号处理（EQ/降噪）→ GAN（BEHM-GAN [1] 历史音乐 BWE）→ diffusion（1D-DIFF/CQT-DIFF 钢琴/人声修复）→ flow matching（FlowHigh 单步）。可控制性方面，音乐/foley 生成域已探索时变属性（loudness/pitch/spectral centroid [10,11,12]）与多模态控制 [13]，但音频修复域控制信号探索少。</p>
 <h3 id="前置工作对比表">前置工作对比表</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>方法</th>
@@ -939,7 +939,7 @@ arXiv: <a href="https://arxiv.org/abs/2601.14356" target="_blank" rel="noopener"
 <td><strong>-</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="本作在谱系中的位置">本作在谱系中的位置</h3>
 <p><strong>继承自</strong>：(a) FlowHigh [8] 的 CFM 框架（transformer VFE 35.4M，2 层 16 头 self-attention，embedding 1024，FFN 4096；Adaptive CFM 与 Mixed CFM 两种路径；单步推理）；(b) FlowHigh 的后处理（输入信号低频带拷贝到输出，仅用模型预测的高频）；(c) BigVGAN [14] 冻结 vocoder 从 mel 重建波形；(d) CFG-ZERO⋆ [16] 的自适应 scale s⋆（条件速度到无条件速度的投影）；(e) librosa [15] 的 spectral centroid/rolloff。</p>
 <p><strong>新增为本作独有</strong>：(a) <strong>FlowHigh 转置到音乐域</strong>——首次把单步 flow matching SR 用于音乐 BWE；(b) <strong>CFG-ZERO⋆ + 音频特征条件</strong>——把 FlowHigh 的无条件扩展为可控，用 s⋆ 自适应调无条件速度；(c) <strong>DSC 特征</strong>——时变&quot;频谱上沿&quot;，专为 BWE 控制设计，解决 centroid/rolloff 在静音区取值异常的问题。</p>
@@ -1004,7 +1004,7 @@ arXiv: <a href="https://arxiv.org/abs/2601.14356" target="_blank" rel="noopener"
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <h3 id="table-1-无控制信号的全带-bwe-对比">Table 1: 无控制信号的全带 BWE 对比</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>Method</th>
@@ -1057,7 +1057,7 @@ arXiv: <a href="https://arxiv.org/abs/2601.14356" target="_blank" rel="noopener"
 <td>0.12</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>最醒目数字</strong>：</p>
 <ul>
 <li><strong>1 步 vs 35 步</strong>：FlowHigh 单步推理，diffusion 基线 35 步——35x 步数缩减，且 FAD/LSD 全面更优。</li>
@@ -1065,7 +1065,7 @@ arXiv: <a href="https://arxiv.org/abs/2601.14356" target="_blank" rel="noopener"
 <li><strong>8kHz LSD：FlowHigh Mixed 1.42 vs 1D-DIFF 1.64</strong>（优 0.22）——高带信息多时优势缩小但仍优。</li>
 </ul>
 <h3 id="table-2-控制信号对比4khz-退化gt-控制信号">Table 2: 控制信号对比（4kHz 退化，GT 控制信号）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>Control</th>
@@ -1133,7 +1133,7 @@ arXiv: <a href="https://arxiv.org/abs/2601.14356" target="_blank" rel="noopener"
 <td>0.20</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>最醒目数字</strong>：</p>
 <ul>
 <li><strong>DSC 全面最优</strong>：FAD 0.12（centroid 0.41，rolloff 0.19）、LSD 0.99（centroid 4.04，rolloff 1.69）、adherence 0.18（centroid 1.41，rolloff 0.30）——重建质量与控制遵循双优。</li>
@@ -1141,7 +1141,7 @@ arXiv: <a href="https://arxiv.org/abs/2601.14356" target="_blank" rel="noopener"
 <li><strong>w=1 vs w=3</strong>：DSC 在 w=1 时 FAD 0.12 优于 w=3 的 0.14，但 w=3 guidance 时 centroid/rolloff 改善（centroid FAD 0.41→0.40）——guidance 对弱控制信号帮助大，对强控制信号（DSC）帮助小。</li>
 </ul>
 <h3 id="table-3-dsc-缩放因子操控mixed-cfm">Table 3: DSC 缩放因子操控（Mixed CFM）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>Control</th>
@@ -1181,7 +1181,7 @@ arXiv: <a href="https://arxiv.org/abs/2601.14356" target="_blank" rel="noopener"
 <td><strong>9.21</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>最醒目</strong>：</p>
 <ul>
 <li><strong>factor 0.5：adherence 0.35-0.46，FAD 0.12-0.16 不显著退化</strong>——可控工作，用户可缩小带宽。</li>

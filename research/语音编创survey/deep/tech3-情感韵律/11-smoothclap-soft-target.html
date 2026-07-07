@@ -838,7 +838,7 @@
 <hr />
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p>子领域范式背景：计算副语言学（CP）从手工 eGeMAPS 特征 → 通用监督 SER → CLAP 范式的零样本语言-音频对齐。CLAP [5] 是分水岭，把音频表征学习和自然语言描述对齐，摆脱了固定类别标签依赖。</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>工作</th>
@@ -873,7 +873,7 @@
 <td><strong>用 intra-modal 自相似构造软目标，替换 one-hot</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：SmoothCLAP 是本组（Schuller/TUM）ParaCLAP 的直接延续，把&quot;软标签&quot;思想从视觉 SoftCLIP [10] 搬到音频-语言预训练，并塞进 CP 特征当辅助 tag。真正的新机制是&quot;用 batch 内 intra-modal 相似度矩阵当软目标&quot;——这其实和 SupCon（supervised contrastive）、和 SoftCLIP 的 softer alignment 同源，新颖度中等。CP 特征当 tag 这步更像是工程包装。</div></p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -918,7 +918,7 @@
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>Table 1 — 8 任务 UAR（零样本）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>数据集</th>
@@ -986,7 +986,7 @@
 <td>.496</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info">笔者解读：8 个任务 5 最佳 2 次佳，但增益幅度普遍很小——IEMOCAP +0.006（0.600→0.606）、ALC +0.004、FAU-Aibo 2cl +0.029 是相对大的。<strong>RAVDESS 反而从 0.228 掉到 0.175</strong>（明显退步），论文承认&quot;3/8 任务变差 = no free lunch&quot;。这个坦诚好，但也说明方法稳定性存疑——为什么 RAVDESS 掉这么多？论文没解释。对一个声称&quot;consistently achieving superior performance&quot;（摘要）的方法，3/8 退步包括一个大幅退步，&quot;consistently&quot;措辞偏夸大。</div></p>
 <p><strong>跨语种零样本</strong>：训练纯英文，德文 FAU-Aibo/ALC/SLD 仍优于 ParaCLAP（除 SLD）——这是软目标泛化的有力证据，因为 CP 特征（pitch/jitter 等）跨语种通用。</p>
 <p><div class="callout callout-info"><strong>Table 2 — 局部特征提取器消融</strong>：wav2vec2-Emo 在 IEMOCAP(.606)/CREMA-D(.266)/TESS(.275) 最佳，但 RAVDESS 上 HuBERT(.260) 更好，TESS 上 HuBERT(.433) 远超 wav2vec2-Emo(.275)。<strong>笔者解读</strong>：没有单一编码器通吃，TESS 上 HuBERT 比 wav2vec2-Emo 高 0.158——这说明 SmoothCLAP 的增益里，&quot;选哪个音频编码器&quot;可能比&quot;软目标机制&quot;影响还大，方法本身的贡献被编码器选择掩盖了。</div></p>

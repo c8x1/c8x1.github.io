@@ -836,7 +836,7 @@ arXiv：<a href="https://arxiv.org/abs/2601.14770" target="_blank" rel="noopener
 <p>实验在 EARS-WHAM! 源域训练，跨 9 个目标域（EARS-DEMAND、VoiceBank-WHAM!、VoiceBank-DEMAND、DNS 的英/德/意/俄/西/法 6 语言）评测，覆盖噪声偏移、语音偏移、双重偏移。模型选 AM（简单幅度掩蔽）与 CMGAN（Conformer+MetricGAN，SOTA）。结果：MPol 在不引入任何额外参数（仅适配 AM 的 8% / CMGAN 的 0.5% 参数：归一化层与输出层）下，<strong>PESQ 与 LaDen（带 4M WavLM 编码器）持平或接近、全面优于 RemixIT；增益跨数据集极一致（Fig.3/4）</strong>；RTF 在 VBD 上 AM 源模型 0.005、RemixIT 0.011、LaDen 0.068、MPol 0.007——<strong>比 LaDen 快约 10 倍</strong>。CMGAN 上 MPol 取得所有方法中最高平均 PESQ（2.64）。</p>
 <hr />
 <h2 id="2-背景与前置工作对比表">2. 背景与前置工作（对比表）</h2>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>方法</th>
@@ -895,7 +895,7 @@ arXiv：<a href="https://arxiv.org/abs/2601.14770" target="_blank" rel="noopener
 <td>Wasserstein 恢复掩蔽双峰</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>动机：TTA for SE 是新兴方向，现有方法（RemixIT/LaDen）要么师生框架复杂、要么带大预训练编码器，<strong>都不适合边缘部署</strong>。作者反向问&quot;SE 模型在域偏移下到底怎么坏的&quot;，发现掩蔽变平这一可解释现象，据此设计极简适配信号。</p>
 <hr />
 <p><div class="callout callout-info"></p>
@@ -951,7 +951,7 @@ arXiv：<a href="https://arxiv.org/abs/2601.14770" target="_blank" rel="noopener
 <li><strong>算力</strong>：Nvidia A6000 GPU。</li>
 </ul>
 <p><strong>关键结果（Table 1，跨 9 数据集平均 µ±2σ）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1046,7 +1046,7 @@ arXiv：<a href="https://arxiv.org/abs/2601.14770" target="_blank" rel="noopener
 <td>11.78±.01</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>RTF（VBD，AM）</strong>：Source 0.005 / RemixIT 0.011 / LaDen 0.068 / MPol 0.007（≈LaDen 的 1/10）。</p>
 <p><strong>消融（Table 2，AM）</strong>：仅 L_W 在 VBD/DNS_GE 的 SI-SDR 从 11.487/11.665 跌到 10.462/7.462；+L_S 回升到 10.811/9.367；+Ensemble 进一步到 11.741/11.855——证明权重集成对信号级指标的关键稳定作用。</p>
 <hr />

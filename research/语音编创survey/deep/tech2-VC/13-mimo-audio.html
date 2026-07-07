@@ -836,7 +836,7 @@
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p>语音 LM 的 next-token prediction 路线可追溯到 AudioLM、SpeechGPT; 之后 GLM-4-Voice / Kimi-Audio / Baichuan-Audio / Step-Audio2 / Qwen2.5-Omni 把它做成可对话的语音基础模型。但它们都还在&quot;理解-生成解耦 + 任务微调&quot;的窠臼里。</p>
 <p>tokenizer 路线的谱系: 纯语义 token (HuBERT/W2v-BERT/ASR) 语义强但重建差; 纯声学 token (EnCodec/SoundStream) 重建好但语义弱; 中间路线是 SpeechTokenizer/Mimi/X-Codec/XY-Tokenizer 用语义蒸馏或双流结构折中。MiMo-Audio-Tokenizer 自我定位是&quot;从零训、单流、放大参数与数据来缓解语义-声学冲突&quot;, 与 XY-Tokenizer 的双编码器路线不同。</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>组件</th>
@@ -866,7 +866,7 @@
 <td>给理解与生成都造 thinking 数据; MiMo-TTS-7B (7M小时) 把文本对话转语音做对话数据</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2 id="3-核心创新我的理解">3. 核心创新(我的理解)</h2>
 <p>论文自报三条贡献: &quot;GPT-3 moment&quot;实证、可复现蓝图、把 thinking 引入语音理解与生成。逐条批判:</p>
 <p><div class="callout callout-info"></p>
@@ -911,7 +911,7 @@
 <p>推理侧的 text-guided interleaving: 先交错生成 5:5 的文本与音频 patch, 文本生成完再续完音频, 用以稳质量。</p>
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p>Table 1 (Tokenizer, Seed-TTS-Eval, 1.55 kBps, ZH 分):</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>系统</th>
@@ -956,9 +956,9 @@
 <td>0.88</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Table 6 (Base 模型 few-shot, 关键差距):</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1008,10 +1008,10 @@
 <td>39.2</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Modality gap 3.4 vs Step 22.3 / Kimi 58.9——这是本文最醒目的数字之一, 说明 MiMo 把&quot;语音-文本能力鸿沟&quot;压到极小。</p>
 <p>Table 8 (Instruct, 与闭源对比的关键项):</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1051,7 +1051,7 @@
 <td>68.50</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info">笔者解读: InstructTTS-EN 上 72.59 超 GPT-4o-mini-tts 4 个点是真本事; 但 BigBenchAudio-S2S 60.20 仍输 GPT-4o-Audio 的 67.20, 且 MultiChallenge Audio 绝对值很低 (S2T 15.15 / S2S 10.10), 说明复杂多轮对话仍是短板。MMAU-Pro 53.35 输 Gemini 2.5 Flash 6 个点, 离闭源还有距离。</div></p>
 <h2 id="6-解决的场景">6. 解决的场景</h2>
 <ul>

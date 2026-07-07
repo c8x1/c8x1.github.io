@@ -842,7 +842,7 @@ arXiv：<a href="https://arxiv.org/abs/2603.09307" target="_blank" rel="noopener
 <li><strong>范式背景</strong>：情感对话系统的共情实现路径有三类——常识推理（CEM）、情绪原因抽取、人格条件化。这些大多是文本路线。另一条独立脉络是语音副语言/韵律与 backchannel 时机研究（Ward &amp; Tsukahara 的英日 backchannel 韵律线索、Gravano &amp; Hirschberg 的轮换线索），这些证明了韵律能预示&quot;该接话了&quot;但从未被直接接到&quot;该验证了&quot;这个心理治疗概念上。</li>
 <li><strong>前置工作对比</strong>：</li>
 </ul>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>维度</th>
@@ -871,7 +871,7 @@ arXiv：<a href="https://arxiv.org/abs/2603.09307" target="_blank" rel="noopener
 <td>MELD-ST（情感）+ JVNV（副语言）持续预训练 + TESC 微调</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li><strong>在谱系中的位置</strong>：本文是 line [14,15]（同组 Pang et al. 2023/2024 文本验证工作）的&quot;语音补完版&quot;。组件上几乎没有发明新结构——HuBERT 持续预训练、多任务情感头、mean-pool 拼接融合都是已知件；<strong>真正的新意在于把这些已知件重组到&quot;非语言语音线索是否足以承载验证时机&quot;这个具体科研问题上，并给出肯定回答</strong>。</li>
 </ul>
@@ -905,7 +905,7 @@ arXiv：<a href="https://arxiv.org/abs/2603.09307" target="_blank" rel="noopener
 <p>训练细节：所有微调在单张 RTX 6000 Ada 上完成；seed=42 固定；TESC 划分 7:1.5:1.5（train 340 validate / 579 non-validate，下采样后 329/329）。情感支路单独训练得 emotion UA/WA 30.43/46.13、sentiment 52.06/54.81——这俩数本身偏低，但作为下游验证时机的辅助表征已足够。</p>
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>主结果（Table 2，TESC 验证时机检测，%）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型类别</th>
@@ -974,7 +974,7 @@ arXiv：<a href="https://arxiv.org/abs/2603.09307" target="_blank" rel="noopener
 <td><strong>62.37</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>消融（Table 3）</strong>：单独 Para. HuBERT V-Pre. 最高（52.54）但 V-F1 仅 46.27；单独 Emo. HuBERT V-F1 较好（52.81）但 V-Pre. 低（45.63）；融合后 V-F1/M-F1 最高。说明两支信息互补：副语言支路偏保守高精度，情感支路补召回。</p>
 <p><strong>融合策略（Table 4）</strong>：Concat 47.96/54.34/70.41/62.37 全面优于 Attention(43.81/51.11)、Gated(44.00/50.29)、MHA(46.67/50.91)。低数据下简单胜复杂。</p>
 <p><strong>训练策略（Table 5）</strong>：双支路全微调最佳；冻结双支路 V-Pre/V-F1 归零（只有 NV-F1 79.45）；冻结副语言只微调情感 → V-Pre. 飙到 61.90 但 V-F1 仅 27.08（过度保守、召回崩塌）。</p>

@@ -839,7 +839,7 @@ arXiv: <a href="https://arxiv.org/abs/2603.24385" target="_blank" rel="noopener"
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p><strong>范式背景</strong>：多通道语音增强的判别式路线（波形域/STFT 域 DNN + 可选 MVDR 后处理）和生成式路线（扩散）长期对立。判别式客观强但失真大；MVDR 无失真但残余噪声多需后处理；扩散感知好但 WER/客观弱。ArrayDPS-Refine 属于&quot;判别式打底 + 生成式精炼&quot;的第三条路。</p>
 <p><strong>前置工作谱系（论文明确点名的）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>工作</th>
@@ -879,7 +879,7 @@ arXiv: <a href="https://arxiv.org/abs/2603.24385" target="_blank" rel="noopener"
 <td>被&quot;精炼&quot;的对象</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读——本文在谱系里的位置</strong>：这本质上是 ArrayDPS [21] 的一个<strong>应用变体</strong>而非全新范式。ArrayDPS 原本是无监督盲分离（从含噪多通道混响混音里直接用扩散先验+FCP 分出干净语音），本文把它改造成&quot;已知一个判别模型的粗估计 X̃，用 X̃ 去估噪声 SCM，再用噪声 SCM 当似然去精炼&quot;。新东西只有两块：(1) 用判别输出+FCP 反推噪声 SCM 的那条链（Eq.16 的指数平滑递推）；(2) 最后那个 NH=1 的 FCP 对齐步骤（因为扩散采样出来的 X₀ 没有约束保证和参考通道对齐）。骨架是借的，应用切口是新的。</div></p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -960,7 +960,7 @@ arXiv: <a href="https://arxiv.org/abs/2603.24385" target="_blank" rel="noopener"
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>Table 1 最醒目的数字（精炼 vs 原始判别模型，挑 4/8 通道各几个）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>判别模型</th>
@@ -1037,7 +1037,7 @@ arXiv: <a href="https://arxiv.org/abs/2603.24385" target="_blank" rel="noopener"
 <td>+0.10</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>几个关键观察（论文自己点出的）</strong>：</p>
 <ol>
 <li>

@@ -840,7 +840,7 @@ arXiv:<a href="https://arxiv.org/abs/2506.04013" target="_blank" rel="noopener">
 <hr />
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p>EVC 的范式演进大致是：<strong>有监督 seq2seq（需平行情感语料）→ 非并行自监督重建（无需对齐）→ 离散单元 + 风格编码器</strong>。本文正落在第三段。</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>代表工作</th>
@@ -895,7 +895,7 @@ arXiv:<a href="https://arxiv.org/abs/2506.04013" target="_blank" rel="noopener">
 <td>&quot;扰动降泄漏&quot;同类思想</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：本文几乎每一个&quot;创新点&quot;都能在上表中找到原型——FreeVC 给骨架、Generspeech 给 Mix-LN、Hierspeech++ 给 Transformer flow、扰动相似度损失在 Expressive-VC/voice privacy 工作里有影子、ECAPA-TDNN 是 speaker verification 通用件。真正第一次出现的组合是 <strong>mHuBERT-147 离散单元首次进 VC 设置</strong>（论文自称 first），以及把&quot;局部 F0 用 cross-attention 而非求和注入&quot;这个小改动。所以这是一篇<strong>组合工程论文</strong>，不是范式突破，但组合得相当工整。</div></p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -965,7 +965,7 @@ arXiv:<a href="https://arxiv.org/abs/2506.04013" target="_blank" rel="noopener">
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>表 1 主结果（多数据集 setting，对照 Hierspeech++）——LibriTTS unseen speaker</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -988,10 +988,10 @@ arXiv:<a href="https://arxiv.org/abs/2506.04013" target="_blank" rel="noopener">
 <td><strong>7.4%</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>EER 从 14.6% 砍到 7.4% 是本文最硬的数字——直接说明源说话人身份被剥得更干净。但 WER 从 3.48% 涨到 8.84%，可懂度明显退步。</p>
 <p><strong>表 2 消融（LibriTTS）</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>配置</th>
@@ -1038,10 +1038,10 @@ arXiv:<a href="https://arxiv.org/abs/2506.04013" target="_blank" rel="noopener">
 <td><strong>9.3%</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>最醒目的是 <strong>w/ MMS（连续特征）那行 EER 飙到 16.5%</strong>——说明离散 vs 连续内容表征对泄漏影响巨大，离散单元是&quot;剥源音色&quot;的关键。但代价是 WER 同步升高（ESD 5.01% → Proposed 9.25%），论文自己也承认离散单元&quot;也消掉了一些语言线索，产生发音伪影&quot;。</p>
 <p><strong>表 4 跨语言 EVC（英→德 / 德→英，unseen language）</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1067,7 +1067,7 @@ arXiv:<a href="https://arxiv.org/abs/2506.04013" target="_blank" rel="noopener">
 <td>30.84%</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>情绪保持（ECA 76.1 vs 61.7）和说话人保持（SSIM 74.8 vs 72.8）赢，但德→英 WER 30.84% 灾难性——只在英文上训，反向跨语言可懂度崩盘。</p>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：把表 1 和表 4 放一起看，本文的权衡画像很清楚：<strong>用可懂度换风格迁移质量</strong>。这是离散单元路线的固有代价，论文没有解决，只是把权衡点推得比别人靠前。sMOS（表 3）Ours proposed 3.65 低于 Hierspeech++ 之外的 ESD-only 对照（4.5-4.73 量级），主观听感也没能完全翻身。</div></p>
 <hr />

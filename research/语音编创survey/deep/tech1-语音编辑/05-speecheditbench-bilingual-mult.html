@@ -849,7 +849,7 @@
 <li>SpeechLLM 统一编辑（Ming-UniAudio/Step-Audio-EditX）——能编辑但无统一评测。</li>
 <li>数据/评测向：ISSE（数据集+细粒度指标）、LibriSpeech-Edit（词级时间对齐）、Ming-Freeform-Audio-Edit/Step-Audio-Edit-Benchmark——后两者只覆盖简单音频编辑、数据量小，远不全面。</li>
 </ul>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>已有资源</th>
@@ -896,7 +896,7 @@
 <td><strong>✓(英中)</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>SpeechEditBench 在 lineage 中的位置</strong>：它是把图像域成熟的&quot;anchor-based 双约束评测&quot;范式<strong>迁移到语音编辑</strong>的工作。组件非全新（anchor 概念来自图像编辑 benchmark、多属性分类来自 ISSE 的风格维度），但<strong>首次把语音编辑的&quot;改对&quot;和&quot;保住&quot;拆开量化</strong>，并系统化覆盖 7 维 + 组合 + 双语。</p>
 <hr />
 <h2 id="3-核心创新笔者的理解">3. 核心创新（笔者的理解）</h2>
@@ -951,7 +951,7 @@
         └──────────────────────────────────────────┘
 </code></pre></figure>
 <h3 id="各任务的目标判定器表12">各任务的目标判定器（表12）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>任务</th>
@@ -996,13 +996,13 @@
 <td>≤10%</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="数据构造">数据构造</h3>
 <p>4700 样本，源自 LibriTTS/AISHELL-3/WenetSpeech/VCTK/IEMOCAP/CSEMOTIONS/NonverbalTTS/DisfluencySpeech/LibriQuote/NaturalVoices/Aishell6-whisper/MagicData-RAMC/StoryTTS/Emilia + MUSAN/RIRS 噪声。GPT-4o 做语义编辑提案/文本过滤/指令生成，Gemini-2.5-pro 辅助风格/副语言音频标注。</p>
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>表2：主结果（joint success%，括号为 target/component success%）</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1117,7 +1117,7 @@
 <td>N/T</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>最醒目的几个数字（笔者解读）</strong>：</p>
 <ul>
 <li><strong>GPT-Realtime 内容编辑 96.67%、风格 68.67%</strong>——闭源在内容/风格上接近可用，但情感只有 14.57%、组合只有 10.05%。即&quot;能改字、能换风格，但改情感和多重编辑还很差&quot;。</li>
@@ -1126,7 +1126,7 @@
 <li><strong>说话人编辑 N/T</strong>：所有 SpeechLLM 都不测，因为它们不接受&quot;源+参考&quot;双音频输入——这暴露了 SpeechLLM 接口设计对说话人编辑的结构性不支持，Seed-VC（专用）却能到 80.50%。</div></li>
 </ul>
 <p><strong>表3：target-preservation 权衡（两开源代表）</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>任务</th>
@@ -1161,7 +1161,7 @@
 <td>22.89/40.96/48.80</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info">两种失败模式清晰可见：Ming-UniAudio 保得多改得少，Step-Audio-EditX 改得多保得少。<strong>笔者解读</strong>：这暗示开源 Speech LLM 普遍在&quot;改&quot;和&quot;保&quot;之间二选一，尚未学到同时满足双约束的能力——这正是 SpeechEditBench 要暴露的核心瓶颈。</div></p>
 <p><strong>表5/6 语言偏置与情感冲突集</strong>：情感 challenging 集（文本本身带情感 polarity 与目标冲突）把平均 target 从 22.48% 拉到 17.59%，但模型差异大（Gemini-Live 跌 17.58pp，Step/Qwen 反而升）——说明部分&quot;升&quot;可能是子集组成或判官敏感度，而非真变强。<strong>这点论文自己也诚实承认了</strong>。</p>
 <hr />

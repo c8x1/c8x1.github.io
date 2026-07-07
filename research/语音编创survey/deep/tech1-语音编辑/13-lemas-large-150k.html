@@ -852,7 +852,7 @@
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p><strong>Paradigm 背景</strong>：生成式语音模型正从任务特定模型走向统一基础模型，分三条路线——离散 codec token 自回归/mask infilling（VALL-E、AudioLM、MaskGCT、VoiceCraft）、连续 flow-matching/diffusion（NaturalSpeech 2、VoiceBox、F5-TTS）、混合（CosyVoice 1-3、FireRed-TTS、IndexTTS 2）。多语言方面从 XTTS-v2 (17 语言) 到 OpenAudio-S1-mini (13 语言, 100k+ 小时) 到 CosyVoice 3 (百万小时, 9 语言 + 18 方言)。瓶颈已从架构设计转向数据规模/多样性/粒度。</p>
 <p><strong>前置工作对比表</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>数据集</th>
@@ -929,7 +929,7 @@
 <td>本文</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>本文在 lineage 中的位置</strong>：LEMAS 本质是 &quot;WenetSpeech4TTS 的精细标注方法论 × YODAS 的多语言规模&quot; 的合体——把 WenetSpeech4TTS 证明有效的&quot;重清洗 + 词级时间戳&quot;做法，借助 MMS 对齐器的 1100+ 语言泛化能力，推广到真正多语言场景。LEMAS-TTS 几乎全盘继承 F5-TTS（DiT + flow-matching + fill-in-middle），新增的是 CTC loss（来自 wav2vec/CTC 传统）、accent-adversarial（借自 IndexTTS2 的 GRL 思路 + Seamless Expressive 的 prosody encoder）。LEMAS-Edit 几乎全盘继承 VoiceCraft（masked token infilling + delayed stacking），新增的是推理端的 repetition penalty 和 re-generation 反馈环 + 前端 Whisper/MMS 对齐 + UVR5/DeepFilterNet 降噪。所以本文真正的新东西是<strong>数据 pipeline 与置信度分数</strong>，两个模型更多是&quot;在已有架构上做工程加固&quot;。</p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -989,7 +989,7 @@
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <h3 id="lemas-tts-客观评测table-410-语言对比-openaudio-s1-mini">LEMAS-TTS 客观评测（Table 4，10 语言，对比 OpenAudio-S1-mini）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>语言</th>
@@ -1058,7 +1058,7 @@
 <td><strong>0.547</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>最醒目的几个数：</p>
 <ul>
 <li><strong>印尼语 (id) WER 从 32.77% 砍到 6.38%</strong>——降 5 倍多，是全表最夸张的提升，直接证明多语言数据规模的价值。</li>

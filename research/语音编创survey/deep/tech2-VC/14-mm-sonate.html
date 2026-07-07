@@ -836,7 +836,7 @@
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p>音视频联合生成谱系: MM-Diffusion (耦合 U-Net, 仅10h数据) → JavisDiT/SyncFlow/AV-DiT (DiT化, 双塔或层次先验) → Ovi (对称双主干, 当前开源 SOTA) → MM-Sonate。另一支是级联 (OpenSora+FoleyGen/See&amp;Hear, AudioLDM+TemoTkn), 视频先出再配音, 时间对不齐。问题都卡在: 不会说话人级语音, 更不会克隆。</p>
 <p>VC 谱系 (论文 §2.2 归纳三范式): (1) 纯音频 prompt in-context (CosyVoice/F5/MaskGCT, 特征全保留但纠缠不可控); (2) speaker embedding 全局引导 (CosyVoice2/ControlSpeech, 部分可控); (3) 文本指令描述 (PromptTTS2/InstructTTS, 灵活但欠探索)。MM-Sonate 把 (2)+(3) 塞进联合生成, 属首次。</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>组件</th>
@@ -876,7 +876,7 @@
 <td>1 亿对齐音视频 + 合成高保真 timbre 集 (DMP-TTS + WavLM 过滤)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2 id="3-核心创新我的理解">3. 核心创新(我的理解)</h2>
 <p>论文自报四条贡献, 逐条批判:</p>
 <p><div class="callout callout-info"></p>
@@ -917,7 +917,7 @@
 <p>关键配置: 20B 参数, flow matching ffwd 4096, 32 层 joint DiT + RoPE; phoneme encoder ffwd 512; Qwen2.5-7B 当 caption encoder; 视频 VAE 16× 空间, 3Hz; 音频 mel encoder 44.1kHz×1/1024=43Hz。数据: 1 亿对齐音视频对 (3-15s, 16-44.1kHz, 240-720p) + 合成 timbre 集。</p>
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p>Table 1 (音视频联合生成, VerseBench):</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>方法</th>
@@ -982,10 +982,10 @@
 <td><strong>0.27</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info">笔者解读: WER 0.020 比 Ovi 0.035 低一个数量级、比 JavisDiT 0.256 低两个数量级, 这是因为 phoneme-guided 架构; SNC 6.51 vs Ovi 4.28 是唇同步的代际差。但要注意 MS(运动真实度) 0.48 输 Ovi 0.58——<strong>视频动态质量反而让步于音频/同步</strong>, 这是联合建模的代价。</div></p>
 <p>Table 2 (零样本 VC, vs 专精 TTS):</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1038,7 +1038,7 @@
 <td>2.768</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info">笔者解读: MM-Sonate 中文 SIM-o 0.691 接近 MaskGCT 0.773 但差一截; 英文 0.604 只追平 M3-TTS, 离 MaskGCT 0.713 差 11 个点。<strong>克隆保真度仍是专精 TTS 更强</strong>, 论文用&quot;我还同时生成了视频&quot;来辩护 (acceptable cost), 站得住但别夸大。中文 WER 2.768 反而比多数 TTS 差 (CosyVoice2 1.45, M3-TTS 1.31), 这是硬伤, 论文回避了。</div></p>
 <p>Table 3 (音乐, SongEval): MM-Sonate 在 Cohesion 3.00 / Musicality 3.01 超 ACE-Step (2.89/2.87) 与 DiffRhythm+——多模态预训练给的结构先验比单模态 TTM 强, 这条结论较可信。</p>
 <p>Fig 6(a) 主观音色一致性: 单人克隆通过率 ZH 91.2% / EN 85.0%; 双人对话 ZH 81.2% / EN 75.0%。</p>

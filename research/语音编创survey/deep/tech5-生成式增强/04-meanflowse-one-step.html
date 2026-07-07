@@ -867,7 +867,7 @@ arXiv：<a href="https://arxiv.org/abs/2509.14858" target="_blank" rel="noopener
 <h3 id="21-问题定位">2.1 问题定位</h3>
 <p>生成式 SE 的痛点不在&quot;质量&quot;，而在&quot;NFE（函数求值次数）&quot;。扩散/流模型质量好，但推理要走 5–200 步 Euler，RTF 0.23–6.94，无法实时。MeanFlowSE 要在不蒸馏的前提下把 NFE 压到 1。</p>
 <h3 id="22-前置工作对比表笔者整理">2.2 前置工作对比表（笔者整理）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>方法</th>
@@ -962,7 +962,7 @@ arXiv：<a href="https://arxiv.org/abs/2509.14858" target="_blank" rel="noopener
 <td>未用于条件 SE</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"></p>
 <h3 id="23-笔者解读与-flowse-的关系">2.3 笔者解读：与 FlowSE 的关系</h3>
 <p>MeanFlowSE 直接&quot;骑在&quot;FlowSE 之上：复用其线性-高斯条件路径、NCSN++ 骨干、复 STFT 表示，但把端点约定翻转（t=0 为干净端、t=1 为带噪端，见式 12-13），并替换学习目标——从瞬时 v_t 改为平均 u。换言之，它不是新架构，而是<strong>新训练目标 + 新推理规则</strong>。这意味着 FlowSE 系后续工作大多可&quot;无痛升级&quot;为单步。</div></p>
@@ -1035,7 +1035,7 @@ arXiv：<a href="https://arxiv.org/abs/2509.14858" target="_blank" rel="noopener
 <hr />
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>
 <h3 id="table-1vb-dmd-系统级对比同一前端归一化">Table 1：VB-DMD 系统级对比（同一前端/归一化）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>System</th>
@@ -1120,7 +1120,7 @@ arXiv：<a href="https://arxiv.org/abs/2509.14858" target="_blank" rel="noopener
 <td><strong>0.11</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li><strong>NFE=1 即达全场最低 RTF 0.11</strong>：比 FlowSE(NFE=5, RTF=0.23) 快约 2.1×，比 CDiffuSE(NFE=200) 快约 63×。</li>
 <li><strong>ESTOI 0.881、SI-SDR 19.975 dB、SpkSim 0.892、BAK 4.073 均为全场最佳</strong>。</li>
@@ -1128,7 +1128,7 @@ arXiv：<a href="https://arxiv.org/abs/2509.14858" target="_blank" rel="noopener
 <li>DNSMOS OVRL 3.207（与 SGMSE 3.488 的对比里不算最高，SIG/BAK/OVRL 中 BAK 4.073 最佳）。</li>
 </ul>
 <h3 id="table-2质量-效率权衡flowse-vs-meanflowse">Table 2：质量-效率权衡（FlowSE vs MeanFlowSE）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>System</th>
@@ -1181,7 +1181,7 @@ arXiv：<a href="https://arxiv.org/abs/2509.14858" target="_blank" rel="noopener
 <td><strong>0.11</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>笔者要点：FlowSE 即使给到 NFE=1，ESTOI/SI-SDR/RTF 三项仍<strong>劣于</strong> MeanFlowSE 的 NFE=1——证明&quot;直接监督有限位移&quot;优于&quot;瞬时场单步 Euler&quot;。</p>
 <hr />
 <h2 id="6-解决的场景">6. 解决的场景</h2>

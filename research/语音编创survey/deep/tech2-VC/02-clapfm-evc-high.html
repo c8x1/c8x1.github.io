@@ -841,7 +841,7 @@
 <hr />
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p>EVC 范式背景：转换源语音情感状态同时保内容与说话人身份。关键技术挑战是情感/内容/音色的提取、解耦与使用。主流路线分两代：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>前置工作</th>
@@ -901,7 +901,7 @@
 <td><strong>借用</strong>做 EECS 评估指标</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>本文在谱系中的位置</strong>：是作者团队 CFM-VC 路线 (StableVC/CTEFM-VC/Takin-VC) 的情感扩展版。组件多为组装件（HuBERT 音频编码器 + XLM-RoBERTa 文本编码器 + CLAP 对比学习 + HybridFormer PPG + CFM + BigVGAN），<strong>新颖性在于&quot;soft-label 双引导的 EVC-CLAP + FuEncoder 的 AIG 强度门&quot;这一组合</strong>，把&quot;自然语言可描述情感 + 强度可调&quot;首次捏合进 any-to-one EVC。</p>
 <hr />
 <p><div class="callout callout-info"></p>
@@ -975,7 +975,7 @@
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>Table 1 参考语音驱动 EVC 主结果</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1030,10 +1030,10 @@
 <td><strong>3.85±0.06</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>相对 MixEmo：EECS +26.2%、eMOS +53.1%、nMOS +37.2%、UTMOS +49.2%。</p>
 <p><strong>Table 2 消融（自然语言 prompt 驱动）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>配置</th>
@@ -1073,7 +1073,7 @@
 <td>3.52±0.05</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>ABX（参考 vs prompt 驱动）</strong>：情感相似度 57.4% 无偏好 / 19.1% 偏 prompt；音质 25.5% 偏参考 / 23.4% 偏 prompt。</p>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：最醒目的不是主表的大幅领先（baseline 太弱，StarGAN nMOS 2.09 属于&quot;送分题&quot;），而是消融里两个反直觉点——(1) 去类别标签<strong>只伤情感不伤音质</strong>（UTMOS 3.63→3.61 几乎不动，EECS 暴跌），证明类别标签是纯情感锚点；(2) 去 AIG <strong>音质崩得比情感还狠</strong>（UTMOS -0.38），强度门实际上是音质稳定器，这点论文没解释透。eMOS 3.85 / 5 分制已属很高水平，但需注意 12 个&quot;专业标注员&quot;的样本量与盲法未交代。</div></p>
 <hr />

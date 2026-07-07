@@ -837,7 +837,7 @@ Demo：https://narrietal.github.io/Fast-ULCNet/</p>
 <p>实验在 DNS Challenge 2020 数据集（1000 小时、10s 切片、SNR −10~30 dB 均匀采样、16kHz）上完成。结果：Fast-ULCNet 与原 ULCNet 性能持平（DNSMOS 几乎一致，PESQ/SI-SDR 略低），<strong>参数量从 0.685M 砍到 0.338M（不到一半）、MACs 从 2.057M 降到 1.691M、在树莓派 Pi3 B+ 与 Arm Cortex-A53 上 RTF 分别降约 33%/35%（平均 34%）</strong>。在扩展的 90s 测试集上，裸 FastGRNN 性能明显跌落（OVRLMOS 2.93、SI-SDR 13.58），而 Comfi-FastGRNN 版本与 ULCNet 持平（OVRLMOS 3.10、SI-SDR 16.48），证明互补滤波有效。</p>
 <hr />
 <h2 id="2-背景与前置工作对比表">2. 背景与前置工作（对比表）</h2>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>方法</th>
@@ -914,7 +914,7 @@ Demo：https://narrietal.github.io/Fast-ULCNet/</p>
 <td>换RNN+互补滤波治漂移</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>动机：ULCNet 已是低复杂度 SOTA，但其 GRU 仍占相当参数与延迟；FastGRNN 以更少参数更快推断，是更优候选。但 FastGRNN 原论文只验证了 1.63s 短序列，长序列推断稳定性未证——本文恰好踩到这个盲区并补上。</p>
 <hr />
 <p><div class="callout callout-info"></p>
@@ -970,7 +970,7 @@ Demo：https://narrietal.github.io/Fast-ULCNet/</p>
 <li><strong>复杂度评估</strong>：参数量、MACs、单线程 RTF（10000 次平均），平台 Pi3 B+ 与 Arm Cortex-A53。</li>
 </ul>
 <p><strong>关键结果表（Table 1 节选）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>测试长度</th>
@@ -1038,7 +1038,7 @@ Demo：https://narrietal.github.io/Fast-ULCNet/</p>
 <td>16.48</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>复杂度（Table 2）</strong>：参数 0.685M→0.338M（降 50.7%）；MACs 2.057M→1.691M（降 0.366M）；RTF Pi3 0.976→0.657（降 32.7%）、ARM 0.927→0.604（降 34.8%）。</p>
 <hr />
 <p><div class="callout callout-warn"></p>

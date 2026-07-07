@@ -839,7 +839,7 @@ arXiv: <a href="https://arxiv.org/abs/2507.08135" target="_blank" rel="noopener"
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p><strong>范式背景</strong>：房间声学的逆问题有两条路：(a) 盲参数估计（估 V/RT60/DRR 等离散参数）——轻量但不完整，AR/VR/混响匹配等高保真场景不够用；(b) 直接盲 RIR 估计——从混响语音直接生成完整 RIR，更实用但更难。DARAS 属 (b)，且明确把 (a) 作为中间特征嵌进 (b) 的流程——&quot;先估参数再融合进 RIR 生成&quot;是它的核心思路。</p>
 <p><strong>前置工作谱系</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>工作</th>
@@ -909,7 +909,7 @@ arXiv: <a href="https://arxiv.org/abs/2507.08135" target="_blank" rel="noopener"
 <td>混合路径融合模块的设计参考</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读——本文在谱系里的位置</strong>：DARAS 是个<strong>集成式创新</strong>——把 FiNS 的&quot;滤波噪声 RIR 建模&quot;、SS-BRPE 的&quot;自监督参数估计&quot;、Mamba 的&quot;高效序列建模&quot;、Cross-attention 的&quot;多源特征融合&quot;、GAN-TTS 的&quot;生成解码器&quot;五块积木，按&quot;先估参数→融合→动态分段生成&quot;的新流程拼起来。每块单看都不新，新的是流程编排 + 两个关键改造：(1) 动态 Bp 替代 FiNS 的固定 50ms；(2) 用房间参数特征当交叉注意力的 query 去引导音频特征。属&quot;系统集成 + 关键模块改造&quot;层面的贡献。</div></p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -1000,7 +1000,7 @@ arXiv: <a href="https://arxiv.org/abs/2507.08135" target="_blank" rel="noopener"
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>Table 1（MASS-BRPE vs CNN vs SS-BRPE，参数估计）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>参数</th>
@@ -1085,9 +1085,9 @@ arXiv: <a href="https://arxiv.org/abs/2507.08135" target="_blank" rel="noopener"
 <td><strong>0.0768</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Table 2（盲 RIR 估计，DARAS vs 基线）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1182,9 +1182,9 @@ arXiv: <a href="https://arxiv.org/abs/2507.08135" target="_blank" rel="noopener"
 <td>3.1372</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Table 3（ablation，挑关键行）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>融合方式</th>
@@ -1245,7 +1245,7 @@ arXiv: <a href="https://arxiv.org/abs/2507.08135" target="_blank" rel="noopener"
 <td>1.2874</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>几个关键观察</strong>：</p>
 <ol>
 <li>

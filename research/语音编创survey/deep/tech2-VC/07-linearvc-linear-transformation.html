@@ -840,7 +840,7 @@ arXiv: <a href="https://arxiv.org/abs/2506.01510" target="_blank" rel="noopener"
 <hr />
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p>VC 子领域的范式背景: 从统计变换 (如 Stylianou 的连续概率变换) → 深度生成 (VAE/Flow/diffusion) → 大口语语言模型 (SoundStorm/VALL-E) → 基于 SSL 特征的&quot;简单方法&quot;路线 (kNN-VC, FragmentVC, Phoneme Hallucinator, soft/hard token 对比)。</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>方法</th>
@@ -880,7 +880,7 @@ arXiv: <a href="https://arxiv.org/abs/2506.01510" target="_blank" rel="noopener"
 <td><strong>最接近的并行工作</strong>, 同期 ACL 2025</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>: 这篇论文的定位非常清楚——它不是来打 SoundStorm 的,而是来&quot;解释 kNN-VC 为什么 work&quot;。借用的部件: WavLM layer-6、HiFi-GAN、最近邻配对、Whisper 评测全来自 kNN-VC 流水线;真正新的只有&quot;把最近邻替换成最小二乘线性回归&quot;这一步,以及后续的几何分析。这是一篇典型的&quot;以方法换洞察&quot;的论文,作者本人 (Kamper) 就是 kNN-VC 的导师,等于自己给自己的方法做几何解释。</div></p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -935,7 +935,7 @@ unseen source ──► WavLM layer6 ──► X_src · W = X_tgt ──► HiFi
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p>Table 1 (test-clean, 客观+主观, %):</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>Model</th>
@@ -996,7 +996,7 @@ unseen source ──► WavLM layer6 ──► X_src · W = X_tgt ──► HiFi
 <td>64.2±3.1</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>最醒目的几点:</p>
 <ul>
 <li>LinearVC 与 kNN-VC / SoundStorm 在自然度和相似度上<strong>无统计显著差异</strong>,但参数量/复杂度天差地别 (SoundStorm 在 60k 小时 LibriLight 上训,LinearVC 只学一个矩阵)。</li>
@@ -1004,7 +1004,7 @@ unseen source ──► WavLM layer6 ──► X_src · W = X_tgt ──► HiFi
 <li>因式分解版 rank=100 反而 WER/CER 略好 (4.7/2.5),EER 也略升到 35.2,证明内容子空间假设成立。</li>
 </ul>
 <p>Table 2 (dev-clean, 约束变换, %) —— <strong>本文最硬的证据</strong>:</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>变换</th>
@@ -1051,7 +1051,7 @@ unseen source ──► WavLM layer6 ──► X_src · W = X_tgt ──► HiFi
 <td>31.8</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>: 从 7.7 (平移) → 27.7 (加旋转) 是 3.6× 跳跃,而从 27.7 → 31.8 (再加缩放/剪切) 只涨 4 个点。这把&quot;旋转是 VC 的主要几何操作&quot;坐实了,直接呼应 [17,18] 的正交子空间假说。Figure 3 还显示不同说话人对的 W 矩阵在维度 35/148 上一致地被改写——这是&quot;speaker 子空间方向跨说话人共性&quot;的定性旁证。</div></p>
 <p>Figure 4 (rank 扫描): CER 在 rank=16 就 &lt;4%、rank=24 最优;EER 随 rank 单调升到 ~200 后回落 (泄漏)。<strong>rank=16 保内容、rank≈100 保 speaker</strong> 这个不对称是本文给后续工作留下的最可引用数字。</p>
 <hr />

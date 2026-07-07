@@ -837,7 +837,7 @@ arXiv：<a href="https://arxiv.org/abs/2506.00628" target="_blank" rel="noopener
 <p>解决方案：把<strong>序列级信息</strong>显式注入模型。用语言无关的音素转录器（wav2vec2-xlsr-53-espeak）生成音素序列 phoneseqs，或用 wav2vec2-base 第 8 层 K-means 离散单元序列 duseqs，送入小 transformer，再与冻结的 ECAPA-TDNN 表征拼接训练。最佳模型 <strong>ET+phoneseqs-train</strong> 在英语 L2 口音上相对 ECAPA-TDNN 最多提升 <strong>+34 LID 点</strong>（CommonVoice L2 en macro 57.0→81.6），同时在标准 LID（FLEURS）上仅微降（89.5→86.4 macro）。代码已开源。</p>
 <hr />
 <h2 id="2-背景与前置工作对比表">2. 背景与前置工作（对比表）</h2>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>维度</th>
@@ -890,7 +890,7 @@ arXiv：<a href="https://arxiv.org/abs/2506.00628" target="_blank" rel="noopener
 <td>首次系统刻画并关联块置换不变性</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>其他相关：wav2vec2 微调发音特征检测改善 LID [19]；naïve Bayes char-gram + 单语 ASR 转录融合 LID [21]（Kukk &amp; Alumäe, Interspeech 2022）；离散 SSL 单元主要编码音素信息 [10-12]。</p>
 <p><div class="callout callout-info">笔者解读：本文定位不是&quot;刷 SOTA&quot;，而是&quot;诊断 + 修复&quot;——先用探针实验给&quot;SOTA LID 在口音上失效&quot;一个机制解释（口音分类器而非语言分类器），再用序列级信息修复。其贡献偏分析与洞察，模型本身（小 transformer + 冻结 ECAPA 表征）并不复杂。</div></p>
 <hr />

@@ -849,7 +849,7 @@ arXiv:<a href="https://arxiv.org/abs/2506.09709" target="_blank" rel="noopener">
 <hr />
 <h2 id="2-背景与前置工作对比表">2. 背景与前置工作（对比表）</h2>
 <p>论文把 any-to-any VC 归为 &quot;analysis-mapping-reconstruction&quot;（即 encoder-converter-vocoder）流水线，mapping 阶段是核心难点（分离身份与内容、无伪影转换）。</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>前置工作</th>
@@ -919,7 +919,7 @@ arXiv:<a href="https://arxiv.org/abs/2506.09709" target="_blank" rel="noopener">
 <td>直接用作 vocoder</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：MKL-VC 的学术血统是&quot;kNN-VC 的免训练血脉 + 图像色彩迁移的 MKL 解 + WavLM 嵌入结构经验发现&quot;三者杂交。它不与需要训练的 SOTA（如 NaturalSpeech 3/FACodec 训练成本巨大）比训练量，而强调&quot;免训练即达 FACodec 级&quot;。这一对标策略聪明但也讨巧——FACodec 是 2024 年的 codec，未必代表 2025 年 VC SOTA。</div></p>
 <hr />
 <p><div class="callout callout-info"></p>
@@ -1001,7 +1001,7 @@ arXiv:<a href="https://arxiv.org/abs/2506.09709" target="_blank" rel="noopener">
 <hr />
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>
 <h3 id="51-librispeech-test-clean单句单句7800-对典型-5-10s-参考">5.1 LibriSpeech test-clean（单句→单句，7800 对，典型 5-10s 参考）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1090,7 +1090,7 @@ arXiv:<a href="https://arxiv.org/abs/2506.09709" target="_blank" rel="noopener">
 <td>93.946</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li><strong>K=2 的 MKL-VC Total 0.105 略胜 FACodec 0.106</strong>，且<strong>完全免训练</strong>；WER 8.131% &lt; FACodec 8.488%；</li>
 <li><strong>kNN-VC Total 0.375 → MKL-VC 0.105，提升 3.6×</strong>；WER 从 32.292% 降到 8.131%（降 4×）；</li>
@@ -1099,7 +1099,7 @@ arXiv:<a href="https://arxiv.org/abs/2506.09709" target="_blank" rel="noopener">
 <li>SinkVC（自实现）Total 0.550 最差——作者暗示熵正则 OT 直接套用不如因子化 MKL。</li>
 </ul>
 <h3 id="52-跨语言德-法fleurs1000-对10s-参考">5.2 跨语言德-法（FLEURS，1000 对，~10s 参考）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1139,14 +1139,14 @@ arXiv:<a href="https://arxiv.org/abs/2506.09709" target="_blank" rel="noopener">
 <td>96.520</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li>MKL-VC 跨语言 Total 0.441 仅次于 FACodec 0.400，<strong>远优于 kNN-VC 1.156（WER 96.662% 灾难）</strong>；</li>
 <li><strong>kNN-VC 跨语言 WER 96.662% 基本不可用</strong>——印证 kNN 会把参考的语言发音注入源内容；</li>
 <li>MKL-VC 与 FACodec 在跨语言上差距（0.441 vs 0.400）比同语言（0.105 vs 0.106）大，说明跨语言仍是 OT 方法的弱项。</li>
 </ul>
 <h3 id="53-主观跨语言6-语言日语参考common-voice-1710s-句六位母语者排名-1-4">5.3 主观跨语言（6 语言→日语参考，Common Voice 17，10s 句，六位母语者排名 1-4）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>语言</th>
@@ -1179,7 +1179,7 @@ arXiv:<a href="https://arxiv.org/abs/2506.09709" target="_blank" rel="noopener">
 <td><strong>4 &gt; 2 &gt; 3 &gt; 1</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li>MKL-VC(4) 在哈/意/雅库特 3 语言排第一，在阿/西排第二（仅次于 FACodec），在孟加拉并列第一；</li>
 <li><strong>标志性反馈</strong>：雅库特语评价&quot;4 更自然，2 有失真（机器人口音），3 和 1 像 uncanny valley&quot;；<strong>MKL-VC 无机器人口音是其差异化特征</strong>；</li>

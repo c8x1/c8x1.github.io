@@ -836,7 +836,7 @@ arXiv：<a href="https://arxiv.org/abs/2505.14465" target="_blank" rel="noopener
 <p>针对 Mel 域丢失相位的问题，作者进一步提出<strong>相位条件化 vocoder</strong>：扩展 Vocos，在 ConvNeXt 块加交叉注意力让 Mel 处理条件于混合信号的复 STFT，并把 iSTFT 头改为预测幅度+相位并与混合相位做复值线性组合 <code>(α⊙sm+β⊙sp)</code>。实验在 Libri2Mix（clean/noisy）上表明 FlowTSE 匹配或超越强基线，PESQ 全场最高；在 Libri2Mix clean max 上 WER 低于 WhisperTSE-S、可比 WhisperTSE-L（尽管后者大得多且用了 ASR 监督）；还能零训练迁移到语音增强任务。</p>
 <hr />
 <h2 id="2-背景与前置工作对比表">2. 背景与前置工作（对比表）</h2>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>方法</th>
@@ -953,7 +953,7 @@ arXiv：<a href="https://arxiv.org/abs/2505.14465" target="_blank" rel="noopener
 <td>极简管线</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>动机：生成式 TSE 潜力大但现有方法管线复杂、预训练依赖重；Mel 域简化管线却丢相位。本文用流匹配在 Mel 域做生成，并补一个可选相位 vocoder。</p>
 <hr />
 <p><div class="callout callout-info"></p>
@@ -1015,7 +1015,7 @@ arXiv：<a href="https://arxiv.org/abs/2505.14465" target="_blank" rel="noopener
 <hr />
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>
 <p><strong>表1 Libri2Mix（min 配置）TSE：</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>指标</th>
@@ -1062,14 +1062,14 @@ arXiv：<a href="https://arxiv.org/abs/2505.14465" target="_blank" rel="noopener
 <td>NCSN++ 0.85</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li>FlowTSE 在 PESQ、OVRL、DNSMOS、SIM 多项最优；mix-clean 下 OVRL/DNSMOS <strong>超越 Clean 基线</strong>（3.27 vs 3.26、3.79 vs 3.73）。</li>
 <li><strong>WER（Libri2Mix clean max，Whisper-small 评测）</strong>：FlowTSE 显著低于 WhisperTSE-S（参数量相近），可比 WhisperTSE-L（后者大得多且用 ASR 转录监督）——图2。</li>
 <li><strong>SE 零训练迁移（表2，mix-single min）</strong>：FlowTSE PESQ <strong>2.18</strong>、OVRL 3.27、DNSMOS 3.77 全场最优，ESTOI 0.83 平最佳。</li>
 </ul>
 <p><strong>相位 vocoder 消融（表3，mix-clean min，vocoder 训 5000 步）：</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>配置</th>
@@ -1095,7 +1095,7 @@ arXiv：<a href="https://arxiv.org/abs/2505.14465" target="_blank" rel="noopener
 <td>3.14</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li>相位 vocoder 把 SI-SDR 从 −25.64 拉到 <strong>+10.81</strong>（提升 ~36dB），但 PESQ/OVRL 略降——印证&quot;相位准确换 SI-SDR、牺牲部分感知指标&quot;的权衡。</li>
 </ul>

@@ -840,7 +840,7 @@ arXiv:<a href="https://arxiv.org/abs/2509.24650" target="_blank" rel="noopener">
 <hr />
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p>TTS 范式分三大阵营，本文要在三者间找第四条路：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>范式</th>
@@ -880,7 +880,7 @@ arXiv:<a href="https://arxiv.org/abs/2509.24650" target="_blank" rel="noopener">
 <td><strong>本文最近的同类</strong>，但本文用可微 FSQ 而非 RVQ</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：本文的定位是&quot;在连续路线内部，用一个可微半离散瓶颈显式分开规划与渲染，但保持端到端、不引外部 tokenizer&quot;。它最直接的对照是 DiTAR [Jia 2025]——DiTAR 用 patch-based：因果 LM 做跨 patch 稳定 + 双向局部扩散做 patch 内精修，但没有显式瓶颈。VoxCPM 在 TSLM 和 LocDiT 之间塞了一个 FSQ 瓶颈 + RALM 残差路径，把&quot;规划&quot;和&quot;渲染&quot;在表征空间显式分工。这是在 DiTAR 思路上加了一层&quot;半离散残差&quot;的归纳偏置。和 HierSpeech++ 的层次变分相比，本文用 FSQ 的标量量化代替 VQ，避开了 RVQ 的码本爆炸（论文专门论证：FSQ/VQ 维度升高会码本指数爆炸，LM 难预测）。</div></p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -963,7 +963,7 @@ arXiv:<a href="https://arxiv.org/abs/2509.24650" target="_blank" rel="noopener">
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>表 3 SEED-TTS-EVAL（开源 SOTA 对照，0.5B 量级）</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1067,10 +1067,10 @@ arXiv:<a href="https://arxiv.org/abs/2509.24650" target="_blank" rel="noopener">
 <td>69.8</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>0.5B 参数下同时拿下 EN-WER 1.85、ZH-CER 0.93、EN-SIM 72.9、ZH-SIM 77.2，开源最强。注意 IndexTTS2 用 1.5B 参数才到 EN-WER 2.23，VoxCPM 用 1/3 参数反超——参数效率明显。但 Hard set（CER 8.87）输给 CosyVoice3（6.08）和 IndexTTS2（7.12），复杂句仍弱。</p>
 <p><strong>表 4 CV3-Eval（表达性/野外克隆，含闭源对照）</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1117,10 +1117,10 @@ arXiv:<a href="https://arxiv.org/abs/2509.24650" target="_blank" rel="noopener">
 <td>64.3(SIM)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>CV3 Hard-EN WER 7.89% 超过闭源 CosyVoice3-1.5B（10.55%）和 IndexTTS2（8.78%）——这是本文最醒目的数字，证明 RALM 补声学细节在野外复杂输入上有效。</p>
 <p><strong>表 6 FSQ 维度消融（Emilia，验证半离散瓶颈必要性）</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>配置</th>
@@ -1161,10 +1161,10 @@ arXiv:<a href="https://arxiv.org/abs/2509.24650" target="_blank" rel="noopener">
 <td><strong>24.92</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>w/o FSQ 时 ZH-hard CER 24.92% 灾难——这是&quot;连续模型纠缠导致长序列误差累积&quot;假设的直接证据，也是全文最关键的消融。最优在 d128/d256，过低过约束、过高不足以分工。</p>
 <p><strong>表 8 WSD 调度两阶段（stable vs decay）</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>阶段</th>
@@ -1190,7 +1190,7 @@ arXiv:<a href="https://arxiv.org/abs/2509.24650" target="_blank" rel="noopener">
 <td><strong>73.0</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>decay 期把 ZH-hard CER 从 13.22 砍到 8.87、SIM 升 4.4 点——&quot;decay + batch 翻倍&quot;对 zero-shot 说话人相似度关键。这个训练 trick 的幅度比很多架构改动还大。</p>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：把表 3、表 6、表 8 放一起看，VoxCPM 的胜利有三个支柱：(1) FSQ 半离散瓶颈（表 6 证明不可少）；(2) 残差分工（表 7 证明 RALM 关键）；(3) WSD decay 训练（表 8 证明大幅提分）。三者缺一不可。但 Hard set 仍弱于 CosyVoice3/IndexTTS2，说明在超复杂输入上，0.5B + 端到端半离散还没完全打过 1.5B + 多阶段管线。</div></p>
 <hr />

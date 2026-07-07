@@ -842,7 +842,7 @@ arXiv：<a href="https://arxiv.org/abs/2507.00227" target="_blank" rel="noopener
 <li><strong>范式背景</strong>：现代 TTS 走两条路——(a) LLM/codec 语言模型路线（VALLM/Tochet/better-synthesis-through-scaling [5]）自然度高但黑盒、细粒度韵律不可控；(b) 显式参数化路线（FastSpeech 2 [13]/FastPitch [14]/ToucanTTS [22,23]）可控但呆板。本文站在 (b) 路线上，用 (a) 时代成熟的生成式随机方法（NF/CFM/RF）去补 (b) 的&quot;一对多&quot;短板。</li>
 <li><strong>前置工作对比</strong>：</li>
 </ul>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>工作</th>
@@ -883,7 +883,7 @@ arXiv：<a href="https://arxiv.org/abs/2507.00227" target="_blank" rel="noopener
 <td>首度系统横评 + RF 首次用于显式韵律</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li><strong>在谱系中的位置</strong>：本文是 [21] 的直接延伸与反驳——[21] 说 CFM 对 pitch 无益，本文用 RF 与更全的评测（含主观多样性）重新检验，结论是&quot;RF 对 pitch/energy 确实有用，关键是自然度-多样性权衡而非单看客观指标&quot;。<strong>组件全部借用</strong>（NF/CFM/RF 都是现成生成方法），新意在于<strong>首次把 RF 用于显式韵律预测、并引入&quot;自然度-多样性权衡&quot;这个被前人忽视的评测维度</strong>。</li>
 </ul>
@@ -928,7 +928,7 @@ arXiv：<a href="https://arxiv.org/abs/2507.00227" target="_blank" rel="noopener
 <p>训练：LibriTTS 100k 步 batch32 收敛；RF 额外 10k 步 ReFlow（无额外数据）；推理用 Euler solver，ODE 法 12 时间步。客观评测 RAVDESS（24 演员两句多情感/强度，便于估计人类实现分布），主观评测 ADEPT topical emphasis（3 样本/说话人，强调位置变化，多样性类似 RAVDESS 但不如情感 salient，利于无偏多样性评估）。主观：40 名 Prolific 英语母语者，3 音频/2 问题×8 条件×2 说话人×2 句 = 7680 评分，960/条件。</p>
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>客观：预测器顺序/级联 vs 联合（Table 1，JS 散度↓，CFM 系统，vs RAVDESS 人类分布）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>配置</th>
@@ -957,7 +957,7 @@ arXiv：<a href="https://arxiv.org/abs/2507.00227" target="_blank" rel="noopener
 <td><strong>0.5621</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>要点：级联 vs 联合的 duration 差距显著（0.48 vs 0.56），pitch/energy 几乎无差。决定用 energy→pitch→duration 级联。</p>
 <p><strong>客观：温度→方差曲线（Fig 2/3）</strong>：方差随温度上升而上升，接近 1.0 时增速加大（近指数）；&gt;1.0 趋势延续但听感不合理被排除。log-温度可线性化。</p>
 <p><strong>客观：合成分布 vs 人类分布（Fig 4，RF@0.8）</strong>：人类分布常很宽甚至双峰；合成多为单峰、众数对齐人类主众数但更窄——<strong>说明模型尚未覆盖人类全部多样性</strong>，作者归因于预测器参数量不足。</p>

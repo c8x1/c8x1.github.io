@@ -837,7 +837,7 @@
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p><strong>范式背景</strong>：TSE (text-based speech editing) 通过改文本改语音，避免重录，用于社交媒体/游戏配音/影视配音纠错。神经 TSE 从 EditSpeech (partial inference) → A3T (alignment-aware pretrain) → FluentSpeech (diffusion masked pred) → VoiceCraft (codec token filling) → SpeechX (codec LM)。情绪方面有 EVC (emotional voice conversion) 独立线 (Cycle-GAN/VAW-GAN/源-滤波)。RAG [9] 与 CLAP [20] 是跨模态检索的通用范式。</p>
 <p><strong>Prior work 对比表</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>方法</th>
@@ -882,7 +882,7 @@
 <td>✅(TSEAcc/TSE-MOS)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>本文在谱系中的位置</strong>：填补&quot;TSE 不处理情绪&quot;这个空白——把 EVC 的情绪转换能力以&quot;RAG 检索 + 解耦注入&quot;形式做成 TSE 的 post-processing 层。EmoCLAP 借 CLAP [20] 架构、emotion2vec [22] 借作 speech enc、RoBERTa [21] 借作 text enc、GRL 对抗解耦借 [11,12]、Generspeech [23] 借作 TTS 合成器 backbone。真正新的是：(1) 把 RAG 思路用到&quot;情绪参考检索&quot;；(2) ECD-TSE 数据集（文本变体 + 三 TTS 合成）；(3) TSEAcc 这个 LLM-assisted 评测指标。</p>
 <hr />
 <p><div class="callout callout-info"></p>
@@ -946,7 +946,7 @@
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>表3 主结果（最醒目：TSEAcc 7.2%→48%，接近 GT 52.1%）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>Method</th>
@@ -987,9 +987,9 @@
 <td>0.71→0.97</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>表4 K 消融（最醒目：K=5 最优，K=10 反而崩）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>K</th>
@@ -1022,7 +1022,7 @@
 <td>44.3%</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>表5 音质保真（Energy/MFCC 余弦相似度 ~0.9+）</strong>：Energy 0.89-0.93、MFCC 0.94-0.96，证明情绪校正不破坏整体音质。</p>
 <p><div class="callout callout-info"><strong>笔者解读三个最醒目数</strong>：</p>
 <ol>

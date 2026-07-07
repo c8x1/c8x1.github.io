@@ -864,7 +864,7 @@ Demo: https://braskai.github.io/pfluxtts/
 <li><strong>声音克隆线</strong>：固定说话人嵌入丢弃时变音色；XTTS 用 Perceiver-Resampler 多 prompt embedding；MegaTTS-2 用多音频 prompt + 解耦音色/韵律/内容；Voicebox/codec AR 用音频填充或续写；</li>
 <li><strong>声码器线</strong>：PeriodWave 用 CFM 做 SOTA 波形生成；NVSR(ResUNet)、NU-Wave2(diffusion) 做超分。</li>
 </ol>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>前置工作</th>
@@ -949,7 +949,7 @@ Demo: https://braskai.github.io/pfluxtts/
 <td>用阈值 70 的 softcap 稳训练</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：PFluxTTS 的定位是&quot;工业级 AI 配音（dubbing）&quot;——所有设计都指向跨语言、对话、噪声 in-the-wild 场景。它不追求学术新架构，而是把已有积木（FLUX 块、F5-TTS 范式、PeriodWave、ECAPA-TDNN）拼成一个能扛真实噪声的流水线，并靠&quot;推理时融合&quot;这个免训练技巧把 DG+AF 的长处叠加。这种工程取向决定其对比对象直接拉到 ElevenLabs 商用模型。</div></p>
 <hr />
 <p><div class="callout callout-info"></p>
@@ -1041,7 +1041,7 @@ Demo: https://braskai.github.io/pfluxtts/
 <hr />
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>
 <h3 id="51-主观评测mtedx-test40-句英语合成非英语-promptprolific-7-评分者1-5-分">5.1 主观评测（mTEDx-test，40 句，英语合成+非英语 prompt，Prolific ≥7 评分者，1-5 分）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>系统</th>
@@ -1071,14 +1071,14 @@ Demo: https://braskai.github.io/pfluxtts/
 <td>3.60±0.13</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li>自然度 MOS <strong>4.11 全场最高</strong>，统计显著优于 FishSpeech；与 ChatterBox(4.05) 持平；</li>
 <li>SMOS <strong>超 ElevenLabs +0.32</strong>（3.51 vs 3.19，统计显著 p&lt;0.05），但略低于 ChatterBox(3.63)；</li>
 <li><strong>笔者注</strong>：ElevenLabs SMOS 反而最低，可能因商用模型在跨语言 prompt→英语合成的身份保持上被开源反超，但这点存疑（评测集小、ElevenLabs 版本为 Multilingual v2）。</li>
 </ul>
 <h3 id="52-客观评测voxlingua-dev33-语种-397-句whisper-medium-估-wercerredimnet-b6-估-spk-sim">5.2 客观评测（VoxLingua-dev，33 语种 397 句，Whisper-medium 估 WER/CER，ReDimNet-B6 估 SPK-SIM）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>系统</th>
@@ -1125,14 +1125,14 @@ Demo: https://braskai.github.io/pfluxtts/
 <td>0.28±0.12</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li><strong>WER 6.9% 全场最低，比 ChatterBox(9.0%) 低 23%</strong>；CER 4.5% 最低；SPK-SIM 0.68 最高；统计显著优于所有对比系统（Wilcoxon + Holm p&lt;0.05）；</li>
 <li><strong>FishSpeech/SparkTTS/F5-TTS 在跨语言噪声 prompt 下 WER 灾难性（45.4%–82.5%）</strong>——印证 AF 类模型跳词问题在真实噪声下爆炸；</li>
 <li><strong>RTF 0.56 vs ChatterBox 0.54 基本持平</strong>，但 F5-TTS(0.25)/SparkTTS(0.28) 更快——PFluxTTS 用约 2× RTF 换来 WER 从 60.2% 降到 6.9%。</li>
 </ul>
 <h3 id="53-消融推理时融合voxlingua-dev--ella-v-hard-文本cer-对-α">5.3 消融：推理时融合（VoxLingua-dev + ELLA-V-hard 文本，CER 对 α）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>α 配置</th>
@@ -1153,14 +1153,14 @@ Demo: https://braskai.github.io/pfluxtts/
 <td><strong>8.6%</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li>融合 CER 8.6% 优于 AF 单独 14.1% 与 DG 单独 10.6%——<strong>证明融合 &gt; 任一单模型</strong>；</li>
 <li>主观 CMOS（24 句×10 评分者）：融合相对 DG-only ∆CMOS=+0.33（p&lt;0.012，融合 79% 胜出）——<strong>证明加 AF 提升自然度</strong>；</li>
 <li>α=0（纯AF）跳词多→CER 升；α=1（纯DG）对齐稳但过正则化→自然度降。</li>
 </ul>
 <h3 id="54-消融flux-序列-prompt-条件-vs-固定-embedding">5.4 消融：FLUX 序列 prompt 条件 vs 固定 embedding</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>prompt 条件</th>
@@ -1180,12 +1180,12 @@ Demo: https://braskai.github.io/pfluxtts/
 <td><strong>+1.19</strong>（p&lt;0.05）</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li><strong>SPK-SIM +0.10、CMOS +1.19</strong>——全文最大单项增益，证明序列 prompt 条件是克隆质量的核心来源。</li>
 </ul>
 <h3 id="55-声码器-lsdvctk-test--mtedx-test">5.5 声码器 LSD（VCTK-test / mTEDx-test）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>方法</th>
@@ -1210,7 +1210,7 @@ Demo: https://braskai.github.io/pfluxtts/
 <td>1.39</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li>域内 VCTK 仅微胜 NVSR（0.66 vs 0.70）；域外 mTEDx 大幅领先（1.01 vs 1.63）。</li>
 </ul>

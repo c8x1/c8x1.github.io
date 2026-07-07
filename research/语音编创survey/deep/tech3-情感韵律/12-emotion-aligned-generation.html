@@ -838,7 +838,7 @@
 <hr />
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p>情感 TTS 范式脉络：style token 跨注意力 [1] → 语义 prompt 引导 [2] → 变分解码器 [3] → 扩散+情感嵌入/噪声条件韵律 [4] → 监督语音 token + chunk-aware flow [5,6]（CosyVoice 系）→ LLM-TTS 并行音素-音频分支 [7]（EmoVoice）。DPO [8] → Diffusion-DPO [9]（端点偏好传播）→ EmoDPO [10]（LLM-TTS 端点对齐）。本文位于&quot;扩散 TTS + 偏好对齐&quot;交叉点。</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>工作</th>
@@ -885,7 +885,7 @@
 <td><strong>reward-difference + 逐步候选</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：EASPO 的真正定位是&quot;把扩散 RL（DDPO/D3PO/Diff-DPO）的端点 reward 改成逐步 reward，并用 CLEP-based EASPM 自动构造偏好对&quot;。机制上新的是：(i) EASPM 加 time-aware normalization 让 CLAP 能给含噪中间态打分；(ii) reward-difference（ΔR̂）与 log-ratio difference（Δρ）做 MSE 对齐（式6-7，源自 [15] PRDP）。teacher-student / DPO / CLAP 全是已有积木，组合度中等偏新。</div></p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -936,7 +936,7 @@
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>Table 1 — 客观指标对比（ESD，7 基线）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>TTS</th>
@@ -1004,10 +1004,10 @@
 <td><strong>4.47</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：四项全最佳。但增益幅度要看清：Emo SIM 99.15 vs 次佳 EmoVoice 98.59 = +0.56 绝对（+0.57% 相对），摘要却写 &quot;notable 2.07% gain over CosyVoice in Emo SIM&quot;——2.07% 是相对 CosyVoice(97.07) 算的，挑了次次佳做分母，有 cherry-picking 嫌疑。Prosody SIM +0.11（3.89 vs 3.78），WER −0.09，UTMOS +0.04——都是边际增益。Emo SIM 在 98-99 区间已近天花板（cosine×100），边际提升意义有限。</div></p>
 <p><strong>Table 2 — 主观（20 评分人，30 clip/人）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>TTS</th>
@@ -1054,10 +1054,10 @@
 <td><strong>85.84</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：主观增益比客观大——Emo MOS 4.28 vs CosyVoice2 3.71（+0.57，约 +15% 相对），这是更有说服力的数字。MOS EC +0.21、Recall +3.74pp。主观&gt;客观增益这个模式，提示 EASPO 改善的是&quot;人能感知但客观指标难捕捉&quot;的情感细粒度，与逐步偏好机制的初衷一致。</div></p>
 <p><strong>Table 7 — 与扩散 RL 方法对比</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>Method</th>
@@ -1104,7 +1104,7 @@
 <td><strong>4.47</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：这是最该看的对比——同为扩散 RL，EASPO vs Diff-DPO：Emo SIM +1.30、Prosody +0.22、WER −0.08、UTMOS +0.10。逐步 reward 相对端点 reward 的真实增益在这里，幅度中等，合理。</div></p>
 <p><strong>消融亮点</strong>：</p>
 <ul>

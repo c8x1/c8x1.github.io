@@ -864,7 +864,7 @@
 <h3 id="范式背景">范式背景</h3>
 <p>全模态大模型（omnimodal LLM）路线：从单模态（文本 LLM、视觉 VLM、音频 LLM）走向原生联合处理文本/图像/音频/视频并生成文本+语音的统一系统（GPT-4o、Gemini 2.5、Qwen-Omni 系列）。核心挑战：多模态对齐、长序列效率、流式低延迟、跨模态推理与智能体行为。</p>
 <h3 id="前置工作对比">前置工作对比</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>工作</th>
@@ -933,7 +933,7 @@
 <td>多语言 TTS 对标</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="在谱系中的位置">在谱系中的位置</h3>
 <p>Qwen3.5-Omni 是 Qwen-Omni 系列第三代迭代（2.5→3→3.5），每一代解决上一代的特定痛点：</p>
 <ul>
@@ -1007,7 +1007,7 @@
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <h3 id="零样本-ttstable-8-seed-tts-test-zhtest-en-wer">零样本 TTS（Table 8, SEED-TTS test-zh|test-en, WER↓）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1047,10 +1047,10 @@
 <td><strong>1.26</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info">笔者解读：test-en WER 1.26 是 SOTA（超 CosyVoice3 的 1.45、MiniMax 的 1.65），但 test-zh 0.99 仍输给 CosyVoice3 的 0.71。<strong>英文超 SOTA、中文未超</strong>，说明在英文上 ARIA + 多码本收益明显，中文可能因 CosyVoice3 的中文数据优势难撼动。</div></p>
 <h3 id="多语言-ttstable-9-29-语-wer-部分">多语言 TTS（Table 9, 29 语 WER, 部分）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>语种</th>
@@ -1103,10 +1103,10 @@
 <td>0.628</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info">笔者解读：29 语中 22 语 WER 最低，且多数语种 SIM 也最高——内容一致性和音色保真度双强。ElevenLabs 在多语上崩溃（泰文 73.9、越南文 73.4 WER），说明其对非拉丁/声调语言覆盖差。Qwen3.5 的优势集中在亚洲语言（中日韩泰越），这与训练数据的中:英:多=3.5:3.5:3 配比和 AuT 的多语言侧重一致。</div></p>
 <h3 id="跨语言克隆table-11-混合错误率">跨语言克隆（Table 11, 混合错误率↓）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>方向</th>
@@ -1146,10 +1146,10 @@
 <td>6.47</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info">笔者解读：12 方向中 10 方向最优。zh-to-ko 从 14.4→4.03（相对降 72%）是最醒目数字。跨语言克隆（保音色换语言）是 TSE/编创里高价值能力——这意味着可以把提取出的目标音色迁移到其他语言生成。</div></p>
 <h3 id="首包延迟与并发table-2-ms">首包延迟与并发（Table 2, ms）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>并发</th>
@@ -1186,10 +1186,10 @@
 <td>0.257</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info">笔者解读：Flash 音频首包 235ms（1 并发）到 352ms（8 并发），延迟增长平缓，RTF&lt;0.26 说明生成速度远超实时，留足流式余量。这是部署级证据，比纯指标 SOTA 更能说明&quot;能用&quot;。视频首包 8 并发下 Flash 1625ms、Plus 1980ms，长视频场景延迟仍偏高。</div></p>
 <h3 id="音频理解table-5-vs-gemini-31-pro">音频理解（Table 5, vs Gemini-3.1 Pro）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>基准</th>
@@ -1224,7 +1224,7 @@
 <td><strong>6.55</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info">笔者解读：音频理解/对话/ASR 全面超 Gemini-3.1 Pro，音乐理解（RUL-MuchoMusic 72.4 vs 59.6）差距尤大。这佐证 AuT + 40M 小时数据的音频表征强度。</div></p>
 <hr />
 <h2 id="6-解决的场景">6. 解决的场景</h2>

@@ -867,7 +867,7 @@ arXiv：<a href="https://arxiv.org/abs/2510.01284" target="_blank" rel="noopener
 <li><strong>Joint AV</strong>：Veo3（闭源 8s）、UniVerse-1（Wan2.1 视频 + ACE-Step 音乐 backbone，深度不对齐靠插块 + 投影 + 语义对齐损失）、Liu et al.（同 backbone 但需 learned prior estimator 注入时空特征）。</li>
 </ol>
 <h3 id="前置工作对照">前置工作对照</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>工作</th>
@@ -902,7 +902,7 @@ arXiv：<a href="https://arxiv.org/abs/2510.01284" target="_blank" rel="noopener
 <td>方法不透明，OVI 是其开源对标</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="本文在谱系中的位置">本文在谱系中的位置</h3>
 <ul>
 <li><strong>借用的组件</strong>：Wan2.2 5B 作视频塔初始化、MMAudio 的 1D VAE（16kHz）作音频 latent、BigVGAN 作 vocoder、flow matching 目标、RoPE、CFG、T5 文本条件、SyncNet 做数据过滤、RAFT 光流 + aesthetic predictor 做数据筛选。</li>
@@ -956,7 +956,7 @@ Stage2 fusion: 冻FFN, 训 self/cross-attn (5.7B/11B可训, 40k步, bs768, lr5e-
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <h3 id="音频塔-ovi-aud-单模态结果table-2">音频塔 OVI-AUD 单模态结果（Table 2）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>类型</th>
@@ -1033,7 +1033,7 @@ Stage2 fusion: 冻FFN, 训 self/cross-attn (5.7B/11B可训, 40k步, bs768, lr5e-
 <td><strong>0.035</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li>OVI-AUD 作为<strong>统一模型同时做 T2A+TTS</strong>，TTS WER 0.035 与专用 CosyVoice（0.034）持平；T2A 指标略逊专用 MMAudio（FD-PANNs 18.03 vs 15.04）但可比。<strong>统一未明显掉点</strong>是核心论据。</li>
 </ul>
@@ -1043,7 +1043,7 @@ Stage2 fusion: 冻FFN, 训 self/cross-attn (5.7B/11B可训, 40k步, bs768, lr5e-
 <li>作者承认<strong>视频质量相对 Wan2.2 base 略有退化</strong>——因 fusion 阶段用更窄的 AV 配对数据，但退化&quot;marginal&quot;。</li>
 </ul>
 <h3 id="combined-prompt-ablationtable-3笔者认为最关键">Combined prompt ablation（Table 3，笔者认为最关键）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>变体</th>
@@ -1072,7 +1072,7 @@ Stage2 fusion: 冻FFN, 训 self/cross-attn (5.7B/11B可训, 40k步, bs768, lr5e-
 <td>0.035</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li>统一文本嵌入让 FD/IS/CLAP 全面提升，WER 仅微升 0.002——<strong>反直觉地证明分离编码反而破坏音频统一性</strong>。</li>
 </ul>

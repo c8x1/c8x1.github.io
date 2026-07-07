@@ -844,7 +844,7 @@
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p><strong>zero-shot TTS 三大流派</strong>（论文第2节）：① LLM 建模离散/连续声学 token（VALL-E/Spark-TTS/MaskGCT）；② 扩散/flow matching 直接文本到语音（Voicebox/F5-TTS/VoiceFlow/Matcha-TTS/Seed-TTS）；③ coarse-to-fine 混合（CosyVoice/FireRedTTS/DiTAR/IndexTTS）。属性解耦传统靠对抗训练（NaturalSpeech 3）、特征工程（DDDM-VC/VoiceShop）、特殊网络（口音伪孪生）。</p>
 <p><strong>属性解耦路线对比</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>路线</th>
@@ -884,7 +884,7 @@
 <td><strong>非真&quot;编辑&quot;而是条件再生成/迁移</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>本作在 lineage 中的位置</strong>：它是 Step-Audio（arXiv:<a href="https://arxiv.org/abs/2502.11946" target="_blank" rel="noopener">2502.11946</a>）的轻量化后训练分支——<strong>保留前作的 dual-codebook tokenizer 和解码器，只换 3B LLM + 重做后训练数据</strong>。dual-codebook 的&quot;解耦不彻底&quot;（仍编码情感/韵律）反而被论文当作卖点，用来验证&quot;LLM + 大间隔数据能克服表示层解耦不足&quot;。RL 部分（reward model + PPO）直接套用文本 LLM 对齐的成熟栈（Bradley-Terry reward、PPO clip、KL penalty）。</p>
 <hr />
 <h2 id="3-核心创新笔者的理解">3. 核心创新（笔者的理解）</h2>

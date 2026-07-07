@@ -859,7 +859,7 @@ arXiv: <a href="https://arxiv.org/abs/2604.25476" target="_blank" rel="noopener"
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p><strong>子领域范式背景</strong>：TTS 评测长期被可懂度+自然度二分法主导——WER/CER（可懂度）、MOS/UTMOS（自然度）、FAD（分布距离单标量）。口音作为独立维度几乎无人系统评测。本文是&quot;口音可分解评测&quot;范式在印度语系的首倡。</p>
 <p><strong>前置工作对比</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>类别</th>
@@ -920,7 +920,7 @@ arXiv: <a href="https://arxiv.org/abs/2604.25476" target="_blank" rel="noopener"
 <td>本文复用做 forced align</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>本文在谱系中的位置</strong>：组件借来的——XLS-R 嵌入、FAD（Fréchet 距离）、forced alignment（torchaudio）、CTC aligner（IndicWav2Vec 系列）、nPVI（Grabe &amp; Low 2002 经典韵律指标）。<strong>真正新的</strong>：(1) 把印度语音系特征（卷舌/送气/长短/zha）形式化为 native vs substitute 音素集对，用声学质心探针测逐位置保真；(2) 用 XLS-R layer-9 的 native vs substitute 质心余弦相似度比做&quot;保真度&quot;——<strong>不依赖目标语 ASR 质量</strong>，这对印度语（ASR 仍易错且错误与口音相关）是关键设计；(3) 5 维韵律特征空间（pitch range、log-F0 均值、语速、nPVI、log-duration）的 Fréchet 距离做 PSD。</p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -989,7 +989,7 @@ arXiv: <a href="https://arxiv.org/abs/2604.25476" target="_blank" rel="noopener"
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <h3 id="卷舌坍塌随难度单调增长signal-1--vig">卷舌坍塌随难度单调增长（Signal 1 + §VI.g）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>语种</th>
@@ -1010,11 +1010,11 @@ arXiv: <a href="https://arxiv.org/abs/2604.25476" target="_blank" rel="noopener"
 <td>~68%</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>匹配社区已知难度排序（Hindi TTS 成熟、Te/Ta 不成熟），且独立于任何单系统声明。</p>
 <h3 id="psp-排序--wer-排序核心signal-3">PSP 排序 ≠ WER 排序（核心，Signal 3）</h3>
 <p>Telugu（Table IV，最完整）：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>系统</th>
@@ -1082,10 +1082,10 @@ arXiv: <a href="https://arxiv.org/abs/2604.25476" target="_blank" rel="noopener"
 <td>—</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读（这表是全文最有力证据）</strong>：ElevenLabs WER 0.041（接近最低）但 PSD 154（最差，比 Sarvam 差 14×）——音高范围窄 40%、节奏类错位（nPVI 92 vs 母语 107），听起来&quot;平直机械&quot;。Cartesia WER 0.029（并列最低）但 FAD 458（最差）。<strong>WER 完全测不出这些口音失败</strong>。无单系统 Pareto 最优：Sarvam 领 FAD、Parler 领 PSD、Praxy 领 intent、Cartesia/Sarvam 并列 WER。</div></p>
 <h3 id="praxy-r5r6-训练尺度案例vic诊断价值示范">Praxy R5→R6 训练尺度案例（§VI.C，诊断价值示范）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>维度</th>
@@ -1120,10 +1120,10 @@ arXiv: <a href="https://arxiv.org/abs/2604.25476" target="_blank" rel="noopener"
 <td>5× 收敛</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：数据 10× 扩容让语义准确度大升但韵律反恶化——单标量永远看不出这个分裂，PSP 逐维分解直接定位&quot;问题在韵律条件路径而非声学&quot;。这是 PSP 范式的最佳广告。</div></p>
 <h3 id="母语-sanity-checktable-i暴露噪声地板">母语 sanity check（Table I，暴露噪声地板）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>语种</th>
@@ -1160,7 +1160,7 @@ arXiv: <a href="https://arxiv.org/abs/2604.25476" target="_blank" rel="noopener"
 <td>5.6</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：Hindi 母语音频 RR/AF 完美 1.0，但 Telugu/Tamil 母语音频反而&quot;坍塌&quot;43-86%——这是 aligner 质量差（Te/Ta 是社区微调非 AI4Bharat 级）+ τ=0.5 严格阈值所致。FAD/PSD 在三语都正常（母语音频得分比商用 TTS 低 5-100×）。<strong>结论：FAD/PSD 绝对值可信，per-phoneme 在 Te/Ta 仅相对排序可信</strong>。这个自曝其短的诚实值得肯定。</div></p>
 <h3 id="语音提示恢复vica工程惊喜">语音提示恢复（§VI.C.a，工程惊喜）</h3>
 <p>Praxy R6 用 9s Sarvam 母语 Telugu 片段做 Chatterbox 零样本语音提示（不改 LoRA token 路径，仅推理时调 sampling：exaggeration 0.7/temp 0.6/min_p 0.1）：</p>

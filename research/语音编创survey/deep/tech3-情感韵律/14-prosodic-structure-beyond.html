@@ -842,7 +842,7 @@ arXiv：<a href="https://arxiv.org/abs/2506.02584" target="_blank" rel="noopener
 <li><strong>范式背景</strong>：认知科学把语言理解看作&quot;利用信号的可预测结构生成预期&quot;。文本侧证据充分，但语音侧&quot;这种可预测性有多少来自词汇、多少来自韵律声学相关量&quot;不清楚。SSL（wav2vec/HuBERT）能在语音里捕获结构，但混入大量音素/词汇信息，难以隔离韵律贡献。</li>
 <li><strong>前置工作对比</strong>：</li>
 </ul>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>表征类型</th>
@@ -889,7 +889,7 @@ arXiv：<a href="https://arxiv.org/abs/2506.02584" target="_blank" rel="noopener
 <td>本文未直接比但同精神</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li><strong>在谱系中的位置</strong>：本文是&quot;声学相关量韵律 + SSL&quot;这条少人走路线的首次系统化。它把 CWT 那条&quot;分层韵律&quot;传统与 SSL 的&quot;掩码重建&quot;范式接上。<strong>组件几乎都是借用</strong>（Conformer [28]、WORLD [29]、SpanBERT 启发的随机 span 掩码 [51]、linear probe [33]），新意在于把它们组合到&quot;韵律声学相关量&quot;这一特定输入上，并系统扫了 mask/codebook 尺度。</li>
 </ul>
@@ -933,7 +933,7 @@ arXiv：<a href="https://arxiv.org/abs/2506.02584" target="_blank" rel="noopener
 <p>预训练：LibriTTS 500h，10k 步，batch 256，截断到 6s，TPUv3 30 分钟。掩码策略扫 m∈{4,16,128} + random；codebook 扫 c∈{4..512}，<strong>c=128 全任务最佳</strong>。下游 probe 训 1000 步，AdamW，lr 4e-5，100 warmup。</p>
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>linear probe（Table 1a，最值得看的几行）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>输入</th>
@@ -973,10 +973,10 @@ arXiv：<a href="https://arxiv.org/abs/2506.02584" target="_blank" rel="noopener
 <td>0.10 / 0.09</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>要点：MPM 相对原始特征与 CWT 在所有任务上有相对增益；情感上 MPM(0.24) ≫ 原始(0.10)、CWT(0.20)。但 linear probe 下全语音 HuBERT 仍全面领先。</p>
 <p><strong>Conformer probe（Table 1b，反直觉结论所在）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>输入</th>
@@ -1023,7 +1023,7 @@ arXiv：<a href="https://arxiv.org/abs/2506.02584" target="_blank" rel="noopener
 <td>0.22 / 0.21</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>要点：<strong>MPM 在 BURNC boundary(0.53) 与 prominence(0.65) 上略胜 HuBERT(0.52/0.61) 与 Wav2Vec(0.51/0.60)</strong>——韵律子集打过全语音。但情感上 HuBERT(0.65) 仍远胜 MPM(0.37)。</p>
 <p><strong>掩码尺度效应</strong>：音节分割小 mask 好（m=4 SER 14.9 vs m=128 SER 16.0），情感大 mask 好（m=128 WA 0.21 vs m=4 WA 0.15），random 全任务接近最佳。</p>
 <h2 id="6-解决的场景">6. 解决的场景</h2>

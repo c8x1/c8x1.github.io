@@ -837,7 +837,7 @@
 <hr />
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p><strong>TSE 子领域范式</strong>：早期谱 inpainting（Voco/EditSpeech/FluentEditor）→ NAR 掩码预测（Campnet/A3T/SpeechPalette/FluentSpeech）→ AR 神经编解码语言模型 NCLM（VoiceCraft/VoiceCraft-X/MAVE/Ming-UniAudio）。NAR 稳但平、AR 自然但幻觉，是经典 trade-off。</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>路线</th>
@@ -877,7 +877,7 @@
 <td><strong>依赖CosyVoice3冻结件、仅英</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>本作在 lineage 中的位置</strong>：它属于&quot;把 AR 编辑从声学 token 挪到语义 token&quot;这条线的代表，且首次给语义 token 编辑加 RL 对齐。组件多借用：语义 tokenizer / Flow Matching 解码器 / HiFiGAN vocoder 全部来自 CosyVoice3（冻结）；GRPO 来自 DeepSeekMath 等 LLM 对齐工作；PSM（Prefix-Suffix-Middle）格式化是 TSE 标准的 token infilling 写法。<strong>真正新的是&quot;用预训练 TTS 的条件似然当编辑一致性奖励&quot;这个 critic 设计</strong>，以及把它和 ASR-WER/时长 gate 组合成 GRPO 奖励。</p>
 <hr />
 <h2 id="3-核心创新笔者的理解">3. 核心创新（笔者的理解）</h2>
@@ -951,7 +951,7 @@
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>表1：主结果（basic|full，红最优/蓝次优，↓越好/↑越好）</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>编辑类型</th>
@@ -1084,7 +1084,7 @@
 <td><strong>3.96|3.93</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>最醒目数字（笔者解读）</strong>：</p>
 <ul>
 <li><strong>删除任务 GRPO 后 WER 0.47%(basic)</strong>——VoiceCraft 删除 WER 16.99%、Ming-UniAudio 14.85%，本方法比它们低一个数量级。删除是 AR 声学 token 模型的死穴（幻觉、停不下来），语义 token 编辑 + 时长 gate 把这个死穴直接治好。这是本作最强的单点证据。</li>
@@ -1092,7 +1092,7 @@
 <li><strong>SIM 0.82 全场最高，且 GRPO 几乎不动 SIM</strong>（0.82→0.82）。论文解释得诚实：音色保住主要靠冻结的 Flow Matching 解码器，RL 只优化语义 token，所以 RL 不该动 SIM——<strong>这个&quot;预期不变&quot;反而验证了架构的解耦设计是对的</strong>。</div></li>
 </ul>
 <p><strong>表2：变长掩码鲁棒性（0.5s→2.5s）</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1132,7 +1132,7 @@
 <td><strong>3.148</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info">VoiceCraft 随编辑时长增长 WER 从 8.5 飙到 11.2（AR 声学 token 误差累积），FluentSpeech SIM 从 0.797 跌到 0.535（NAR 长程崩）。本方法 WER/SIM 几乎不随时长退化。<strong>笔者解读</strong>：这是&quot;语义 token 编辑 + 统一声学流形重建&quot;架构红利的直接体现——编辑区与上下文投影到同一声学 manifold，长度变化不破坏连贯。GRPO 在长编辑时 DNSMOS 增益更明显（短编辑边际收益小、长编辑收益大），印证&quot;自一致 reward 对长上下文连贯性最有效&quot;。</div></p>
 <hr />
 <h2 id="6-解决的场景">6. 解决的场景</h2>

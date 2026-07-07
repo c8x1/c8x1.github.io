@@ -836,7 +836,7 @@ arXiv：<a href="https://arxiv.org/abs/2601.19767" target="_blank" rel="noopener
 <p>本文的改进：引入**可微 k-means（differentiable k-means）**与 <strong>L1/L2 多任务学习（MTL）</strong>，把 SSL 模型、聚类质心、两个 ASR（L1 的日语 CTC 模型 + L2 的英语 CTC/attention AED 模型）联合优化，使 token 同时捕获 L1 与 L2 的语音特征。在 ERJ 语料（日本学习者的英语）上验证两种场景：① native-only（仅用母语训练，直接当 ASR 识别域外口音语音）；② accent-adapted（少量口音语音 2/5/11.2h 经模型当 tokenizer 转 token，再训一个口音专用 ASR）。在 accent-adapted 场景下，相对 vanilla k-means baseline 的 WER 相对降低约 <strong>20%</strong>（2h 子集 19.3%、5h 子集 19.4%）。</p>
 <hr />
 <h2 id="2-背景与前置工作对比表">2. 背景与前置工作（对比表）</h2>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>维度</th>
@@ -890,7 +890,7 @@ arXiv：<a href="https://arxiv.org/abs/2601.19767" target="_blank" rel="noopener
 <td>母语为主 + 少量口音（accent-adapted 用 2-5h）</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>其他相关：数据增强类口音鲁棒 ASR [7-8] 需要口音语音；accent-specific codebook [9-10]；多任务学习用 L1 信息改善口音 ASR [30]（Ghorbani &amp; Hansen, Interspeech 2018）——本文把其思想引入离散 token ASR。</p>
 <p><div class="callout callout-info">笔者解读：本文本质是&quot;把 [12] 的两步法 + 单 L1 偏置&quot;升级为&quot;端到端 + L1/L2 双语偏置&quot;，技术增量集中在&quot;可微 k-means × MTL&quot;的组合，而非全新架构。其价值在于用母语数据这一廉价资源撬动口音鲁棒性，契合&quot;X-accented Y&quot;语料稀缺的现实（绝大多数口音语料都是 X-accented English）。</div></p>
 <hr />

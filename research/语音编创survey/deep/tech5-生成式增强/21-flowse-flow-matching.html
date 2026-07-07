@@ -837,7 +837,7 @@ arXiv：<a href="https://arxiv.org/abs/2508.06840" target="_blank" rel="noopener
 <p>实验在 WSJ0-CHiME3 与 VoiceBank-DEMAND 上，以 NCSN++ 为网络骨架（与 BBED/CRP 相同配置对比）。结果：<strong>FlowSE NFE=5 的性能与扩散 BBED NFE=60 几乎持平、并优于 BBED NFE=5；与需额外微调的 CRP（NFE=5）相当，但 FlowSE 无需任何微调</strong>。进一步，作者推导出与 FlowSE 概率路径对应的等价扩散模型（漂移系数同 BBED、扩散系数 <code>g(t)=√(2tσ²/(1−t))</code>，式23），用分数匹配（DSM）训练该扩散模型，NFE=5 也能达到与 CFM 训练近似的性能（Table II: PESQ 3.01 vs 3.03）——证明&quot;线性均值+线性方差&quot;的 OT 式路径设计本身是省 NFE 的关键，与训练目标（CFM vs SM）无关。</p>
 <hr />
 <h2 id="2-背景与前置工作对比表">2. 背景与前置工作（对比表）</h2>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>方法</th>
@@ -914,7 +914,7 @@ arXiv：<a href="https://arxiv.org/abs/2508.06840" target="_blank" rel="noopener
 <td>首个CFM-SE</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>动机：扩散 SE 性能强但 NFE 高限制应用；CRP 用微调把 NFE 降到 5 但需额外训练步骤。流匹配训练连续归一化流（CNF）、OT 路径提供更直的概率路径与更快采样——是潜在替代。本文把 FM 用于 SE 并证明无需微调即可达 CRP 同等 NFE=5 性能。</p>
 <hr />
 <p><div class="callout callout-info"></p>
@@ -969,7 +969,7 @@ arXiv：<a href="https://arxiv.org/abs/2508.06840" target="_blank" rel="noopener
 <li><strong>指标</strong>：WB-PESQ、DNSMOS、WVMOS、ESTOI、DNSMOS P.835（SIG/BAK/OVRL）、SI-SDR、SI-SIR、SI-SAR。报均值+95% 置信区间。</li>
 </ul>
 <p><strong>关键结果（Table I 节选，WSJ0-CHiME3 / VB-DMD）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>数据集</th>
@@ -1073,7 +1073,7 @@ arXiv：<a href="https://arxiv.org/abs/2508.06840" target="_blank" rel="noopener
 <td>18.95±.23</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Table II（WSJ0-CHiME3, NFE=5）</strong>：Flow matching PESQ 3.03/DNSMOS 4.04/WVMOS 4.00/ESTOI 0.93/SI-SDR 18.95；Score matching 3.01/4.03/3.92/0.93/18.57——两者接近，SM 略低但无微调。</p>
 <hr />
 <p><div class="callout callout-warn"></p>

@@ -839,7 +839,7 @@
 <hr />
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p>风格编辑子领域的范式演进：<strong>显式标签/参考音频 → 自然语言描述 → 编辑指令</strong>。第一阶段用情感标签或参考音频驱动 VC，灵活性与可扩展性受限；第二阶段 PromptTTS/CapSpeech 给语音配文本描述做&quot;风格化生成&quot;，但描述的是绝对状态而非 source→target 的 delta，套到编辑任务上目标病态、风格与内容/音色解耦困难；第三阶段 InstructSpeech 给配对 source-target 加指令，但指令粗糙模板化且不开源。</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>数据集</th>
@@ -916,7 +916,7 @@
 <td>✓</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>ISSE 在 lineage 中的位置</strong>：它是 InstructSpeech 思路的&quot;开源 + 细粒度 + 上量&quot;补全。组件层面几乎没有全新发明——EmoCapTTS（生成）、Chatterbox（VC）、Qwen3-8B（指令）、emotion2vec/ECAPA-TDNN/Whisper（质检）、Llasa+XCodec2（基线）全是现成件。真正的贡献是<strong>把这些件编排成一条可量产、可过滤的流水线，并把数据从 29h/42h 量级拉到 382h</strong>。</p>
 <hr />
 <h2 id="3-核心创新笔者的理解">3. 核心创新（笔者的理解）</h2>
@@ -980,7 +980,7 @@
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>表2：LlasaEdit 在 ISSE vs ESD 上的训练对比（同域+跨域）</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>训练集</th>
@@ -1025,10 +1025,10 @@
 <td><strong>4.29</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info">最醒目的数字：<strong>ESD 训练的模型跨域到 ISSE 测试集 WER 崩到 68.17</strong>（基本等于不会说话），而 ISSE 训练的模型跨域到 ESD 反而 WER 更低（7.69 vs ESD 同域 10.07）。这是规模+多样性优势最硬的证据——但<strong>也暴露了 ESD 作为测试集太弱</strong>（5 种情感、29h），ISSE 训出来的模型&quot;溢出&quot;到这么小的分布上自然轻松。<strong>笔者解读</strong>：这个对比有利于 ISSE，但对照不公——ESD 本就是被 ISSE 在规模/风格数上碾压的对象，赢它是预期内的，缺少与 InstructSpeech（同为指令型、22 风格）的直接对比是硬伤。</div></p>
 <p><strong>表3：ISSE 对 TTS/ESS 的可扩展性</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>任务</th>
@@ -1073,7 +1073,7 @@
 <td>3.94</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>ISSE 还能反过来给 TTS 用，微调后 WER 5.48→3.74；ESS 条件化风格描述后性别准确率 0.96、SIMsty 0.60。说明数据不只服务编辑，对风格化生成也有增益。</p>
 <hr />
 <h2 id="6-解决的场景">6. 解决的场景</h2>

@@ -837,7 +837,7 @@ Demo: https://p1ping.github.io/CosyAccent-Demo · Code&amp;data: https://github.
 <p>实验在扩展 L2-ARCTIC（7 口音）上对比两个用真实 L2 数据训练的强基线 FramAN（frame-to-frame flow matching）和 TokAN（离散 SSL token，两模式）。结果：CosyAccent（<strong>仅用合成数据训练</strong>）在内容保持 WER 12.96%（TokAN-1 16.21%）、自然度 NAT 64.62 / UTMOS 3.04 上全面优于基线；口音消减 (ACT 31.04、ΔPPG 0.38) 与 TokAN 持平；唯说话人相似度 SECS (0.8213) 略低于 TokAN (0.8613)，作者归因于 TokAN 用 AdaLN 注入音色优于本文的拼接注入，且 TokAN 客观 SECS 高但主观 SIM 反低（因韵律工件）。消融确认 CTC 辅助损失、speaker embedding、position scaling 三者缺一不可（去 position scaling 直接模型崩溃）。<strong>核心叙事是&quot;反直觉地合成源端而非目标端，反而打破 TTS 工件天花板&quot;</strong>。</p>
 <h2 id="2-背景与前置工作对比表">2. 背景与前置工作（对比表）</h2>
 <p>AN 目标：去掉非母语 (L2) 口音得母语 (L1) 听感，保身份与内容。瓶颈是大尺度平行 L1-L2 同说话人同内容语料稀缺，逼得领域转向合成数据。</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>数据策略</th>
@@ -906,7 +906,7 @@ Demo: https://p1ping.github.io/CosyAccent-Demo · Code&amp;data: https://github.
 <td></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>时长建模对比：frame-to-frame [11-13,20] 死板复制源时长；seq2seq [21] 灵活但无控制；近期 NAR [22-24] 引入音素/token 级时长预测器；TokAN [18] 保总时长。本文走&quot;隐式建模节奏 + 显式控制总时长&quot;的中间路线。</p>
 <p><div class="callout callout-info"></p>
 <h2 id="3-核心创新笔者解读">3. 核心创新（笔者解读）</h2>
@@ -956,7 +956,7 @@ Demo: https://p1ping.github.io/CosyAccent-Demo · Code&amp;data: https://github.
 <p>关键：position scaling 是 NAR 下&quot;指定任意目标长度仍能连贯生成&quot;的机制；CTC 辅助 + speaker embedding 是内容/音色保真的双保险（消融显示缺一即 WER 升或 SECS 暴跌）。</p>
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>
 <p><strong>主表 (Table 1, 扩展 L2-ARCTIC, 7口音, 80句, 24 评听人)：</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>系统</th>
@@ -1038,7 +1038,7 @@ Demo: https://p1ping.github.io/CosyAccent-Demo · Code&amp;data: https://github.
 <td>0.37</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li><strong>内容保持 WER 12.96% vs TokAN 16.21%</strong>（低 3.25 个百分点），作者归因 TokAN 过度激进改发音常伤内容；CosyAccent 优势跨几乎所有口音（Hindi 7.55 vs 18.53 尤为突出），仅 Chinese/Vietnamese 接近（因音节计时节奏相似 + TokAN 训练含额外中式英语）。</li>
 <li><strong>自然度双指标最优</strong>：NAT 64.62（TokAN-1 63.63）、UTMOS 3.04（TokAN-1 2.86）——尽管没用真实 L2 训练。</li>

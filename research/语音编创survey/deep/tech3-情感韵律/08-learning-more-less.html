@@ -841,7 +841,7 @@
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p><strong>子领域范式背景</strong>: LRL SER 的三条传统路线——(1)域适配(covariate shift 补偿、transfer NMF)，(2)数据增强(GAN 合成)，(3)迁移学习。本文走第四条：自监督预训练(CL/BYOL)，借 SSL 在 ASR 上的成功，但指出&quot;情感表达跨说话人/文化变异大，比 ASR 的音素结构难得多&quot;。Whisper encoder 作底座是因为其多语言预训练覆盖。</p>
 <p><strong>Prior work 对照表</strong>:</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>维度</th>
@@ -871,7 +871,7 @@
 <td><strong>首次把 speaker-contrastive 用到 LRL 跨语言迁移</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>本文在 lineage 中的位置</strong>: 组件多借来——Whisper encoder、CL(NT-Xent loss, Sohn)、BYOL(Grill 2020)、SpecAugment、mixup。novelty 在&quot;speaker-contrastive adaptation 这一步的设计动机&quot;(用说话人身份锚定 LRL，防止 encoder 只学 HRL 词法/副语言)以及&quot;CL vs BYOL 在 LRL 上的差异化能力画像&quot;。属方法组合 + 系统对比类工作，非架构原创。</p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -924,7 +924,7 @@ HRL+LRL ───►│                                    │ Lmixed = (1-λ)LC
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>Table 1: 三方法在 4 语种上的表现(mean±std，5 次)</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>语种</th>
@@ -1006,7 +1006,7 @@ HRL+LRL ───►│                                    │ Lmixed = (1-λ)LC
 <td>0.561</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>最醒目:</p>
 <ol>
 <li><strong>CL 在 EMO-DB zero-shot F1=0.901</strong>，相对 baseline +15.1 个点——这是全文最强数字，作者称&quot;out-of-domain 最佳&quot;。但 caveat: EMO-DB 是表演型德语情感库，情感区分度高，且德语与英语(训练语)语言近，迁移易。</li>

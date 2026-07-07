@@ -856,7 +856,7 @@ arXiv: <a href="https://arxiv.org/abs/2505.23212" target="_blank" rel="noopener"
 <h3 id="范式背景">范式背景</h3>
 <p>语音增强长期聚焦&quot;匹配训练-推理条件 + 单一任务（去噪/去混响）&quot;。生成模型（score-based diffusion、latent diffusion）把 SE 范围扩到带宽扩展、丢包掩蔽、风噪等更复杂任务，催生&quot;通用 SE&quot;愿景——单一模型多任务多输入格式。但缺乏统一基准使生成式/通用 SE 难以公平比较。</p>
 <h3 id="前置工作对比表">前置工作对比表</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>维度</th>
@@ -917,7 +917,7 @@ arXiv: <a href="https://arxiv.org/abs/2505.23212" target="_blank" rel="noopener"
 <td>简单</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="本版在谱系中的位置">本版在谱系中的位置</h3>
 <p><strong>继承自</strong>：直接接续 URGENT 2024 的&quot;通用 SE 基准&quot;框架（同 7 种采样率、同 F(x) 失真模型定义 <code>x̂ = SE(F(x))</code>、同 DNSMOS 过滤流程、同 TF-GridNet 基线）。</p>
 <p><strong>新增为本版独有</strong>：(a) 多语言评测（mHuBERT-147 进 SBS、CAcc 替 WAcc）；(b) 双轨数据规模实验设计；(c) 3 种新失真（编解码/丢包/风噪）；(d) 神经编解码失真（EnCodec、DAC）作为盲测未见失真；(e) 故意保留含噪样本以逼出&quot;含噪数据利用&quot;方法。</p>
@@ -995,7 +995,7 @@ arXiv: <a href="https://arxiv.org/abs/2505.23212" target="_blank" rel="noopener"
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <h3 id="table-2-节选track1-前-10--关键对照">Table 2 节选（Track1 前 10 + 关键对照）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>Rank</th>
@@ -1060,7 +1060,7 @@ arXiv: <a href="https://arxiv.org/abs/2505.23212" target="_blank" rel="noopener"
 <td>20.50</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>最醒目的数字</strong>：</p>
 <ul>
 <li><strong>T13 的 SDR = -12.28</strong>（负值，意味着增强后比输入还&quot;远离&quot;干净参考）——纯生成式在保真指标上灾难性失败，但主观 MOS 第一（3.69）。这是&quot;听起来好但内容/说话人变了&quot;的铁证。</li>
@@ -1068,7 +1068,7 @@ arXiv: <a href="https://arxiv.org/abs/2505.23212" target="_blank" rel="noopener"
 <li><strong>T1 参数量 ~102M vs 基线 T10 ~8.5M</strong>：12 倍参数换来聚合排名从 9.63 → 2.97，是数据规模大时的&quot;大力出奇迹&quot;。</li>
 </ul>
 <h3 id="table-3-语言依赖最关键证据">Table 3 语言依赖（最关键证据）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>ID</th>
@@ -1101,7 +1101,7 @@ arXiv: <a href="https://arxiv.org/abs/2505.23212" target="_blank" rel="noopener"
 <td>1.94</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>最醒目</strong>：T13 在中文（训练见过）CAcc 仅 20.1%，日语（未见过）36.8%——都比噪声输入 T22 的 69-74% 还低！即纯生成式 SE 在非英语上<strong>反而把内容破坏得比不增强还糟</strong>，而 DNSMOS 仍给 3.07（高分）。这组对比是非侵入指标失效的最强证据。</p>
 <h3 id="track2-反-scaling-发现">Track2 反 scaling 发现</h3>
 <p>Track2（60k 小时）4 个提交无一超过 Track1 冠军 T1；最好的 T2' 排名分 2.50，仍输给 T1 的 2.97 排名机制下其实 T1 第一。<strong>60k 小时含噪数据未带来收益</strong>。</p>

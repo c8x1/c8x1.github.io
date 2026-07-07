@@ -863,7 +863,7 @@ arXiv: <a href="https://arxiv.org/abs/2510.01109" target="_blank" rel="noopener"
 <h3 id="范式背景">范式背景</h3>
 <p>BWE 从信号处理（sinc 插值）走向数据驱动（CNN 回归 → GAN → diffusion）。GAN 路线（HiFi-GAN 的 MPD/MSD）成为 BWE/vocoder 主流判别器范式，但其判别器只匹配分布统计量，不显式建模语音的&quot;混沌微结构&quot;。</p>
 <h3 id="前置工作对比表">前置工作对比表</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>方法</th>
@@ -913,7 +913,7 @@ arXiv: <a href="https://arxiv.org/abs/2510.01109" target="_blank" rel="noopener"
 <td><strong>-</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="本作在谱系中的位置">本作在谱系中的位置</h3>
 <p><strong>继承自</strong>：(a) AP-BWE [12] 的生成器（ConvNeXt criss-cross 双流幅度/相位）与 MRAD/MRPD 判别器、六项损失（mag/pha/com/stft/fm/adv）；(b) 非线性动力学理论——Recurrence Plot [6,19]、Lyapunov 指数 [7,16]、Wolf 算法 [16]；(c) depthwise-separable 卷积 [14] 做轻量化。</p>
 <p><strong>新增为本作独有</strong>：(a) <strong>首次用 Lyapunov 指数做 GAN 判别器（MRLD）</strong>——把局部 Lyapunov rate λ 作为判别特征图喂给 1-D DSC CNN；(b) <strong>首次用 Recurrence Plot 做多尺度 GAN 判别器（MSRD）</strong>——二值化 RP 作为内部特征图喂给 2-D DSC CNN；(c) 用混沌物理判别器替换 MPD，44x 参数缩减且性能不降反升。</p>
@@ -971,7 +971,7 @@ arXiv: <a href="https://arxiv.org/abs/2510.01109" target="_blank" rel="noopener"
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <h3 id="table-1-三频带主客观对比vctk">Table 1: 三频带主客观对比（VCTK）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>Method</th>
@@ -1030,7 +1030,7 @@ arXiv: <a href="https://arxiv.org/abs/2510.01109" target="_blank" rel="noopener"
 <td>0.97/0.73/0.77</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>最醒目数字</strong>：</p>
 <ul>
 <li><strong>NISQA-MOS 16-48: 4.5 vs AP-BWE 4.49</strong>——几乎持平（差 0.01），但 4-16 频带 <strong>4.11 vs 3.86 高 0.25</strong>，8-16 <strong>4.29 vs 3.97 高 0.32</strong>。即增益主要在&quot;窄带起点更窄&quot;的难场景。</li>
@@ -1038,7 +1038,7 @@ arXiv: <a href="https://arxiv.org/abs/2510.01109" target="_blank" rel="noopener"
 <li><strong>SI-SDR/SI-SNR 反而略低于 AP-BWE</strong>（16-48: 19.49 vs 20.86, 19.44 vs 20.74）——即信号保真略降，但感知质量升。印证&quot;混沌判别器优化的是感知自然度而非波形对齐&quot;。</li>
 </ul>
 <h3 id="table-2-判别器消融216-khz">Table 2: 判别器消融（2→16 kHz）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>Row</th>
@@ -1134,7 +1134,7 @@ arXiv: <a href="https://arxiv.org/abs/2510.01109" target="_blank" rel="noopener"
 <td>4.11</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>最醒目数字</strong>：</p>
 <ul>
 <li><strong>Row 2/3 单独用 MRLD/MSRD：NISQA-MOS 暴跌至 2.40/2.36</strong>（低于无判别器基线 3.33）——证明混沌判别器单独使用反而伤害感知质量，必须配合 MRAD/MRPD 的幅度/相位线索。</li>
@@ -1143,7 +1143,7 @@ arXiv: <a href="https://arxiv.org/abs/2510.01109" target="_blank" rel="noopener"
 <li><strong>Row 11 参数：MPD 22M vs MRLD 235.5k + MSRD 247.7k = 483.2k</strong>——44x 缩减的铁证。</li>
 </ul>
 <h3 id="table-3-不同频带性能nldsi-bwe">Table 3: 不同频带性能（NLDSI-BWE）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>Freq range</th>
@@ -1202,10 +1202,10 @@ arXiv: <a href="https://arxiv.org/abs/2510.01109" target="_blank" rel="noopener"
 <td>4.51637</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>规律</strong>：窄带-目标带 gap 越小性能越好；2-48kHz（最广重建）最难，24-48（最窄 gap）最易。</p>
 <h3 id="table-4-计算复杂度">Table 4: 计算复杂度</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>Model</th>
@@ -1237,10 +1237,10 @@ arXiv: <a href="https://arxiv.org/abs/2510.01109" target="_blank" rel="noopener"
 <td>0.0023x</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>关键</strong>：生成器参数/MACs/FLOPs/RTF 与 AP-BWE 完全相同（生成器未改），仅判别器参数 DP 从 42.3M 降至 1.68M。RTF 0.0023x 远低于实时（&lt;1），已具备实时性。<strong>但 RTF 只算生成器推理</strong>——判别器只在训练用，推理不用。</p>
 <h3 id="主观-mosfig1-右下10-人面板5-分制">主观 MOS（Fig.1 右下，10 人面板，5 分制）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th></th>
@@ -1269,7 +1269,7 @@ arXiv: <a href="https://arxiv.org/abs/2510.01109" target="_blank" rel="noopener"
 <td>4.38</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>最醒目</strong>：女声 MOS <strong>4.61 vs AP-BWE 4.25</strong>（+0.36），男声 4.4 vs 4.1（+0.3，论文称 negligible 但实际 +0.3 并不小）。论文解释：女声含更高频率，BWE 重建高频更有效。</p>
 <hr />
 <h2 id="6-解决的场景">6. 解决的场景</h2>

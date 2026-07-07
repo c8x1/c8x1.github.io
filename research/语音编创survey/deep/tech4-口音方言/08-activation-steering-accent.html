@@ -855,7 +855,7 @@ arXiv: <a href="https://arxiv.org/abs/2603.05813" target="_blank" rel="noopener"
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p><strong>子领域范式背景</strong>：口音适配经历了三阶段——(1) 传统监督微调/口音专用模型/数据增强（成本高）；(2) PEFT/LoRA/bottleneck adapters（轻量但仍盲目加参数）；(3) 本文探索的&quot;表征空间操控&quot;——借鉴自 LLM 的 activation steering / representation engineering（sentiment/style/safety 在 LLM 里是近似线性方向，可加 mean-shift 向量转向）。</p>
 <p><strong>前置工作对比</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>路线</th>
@@ -902,7 +902,7 @@ arXiv: <a href="https://arxiv.org/abs/2603.05813" target="_blank" rel="noopener"
 <td>本文分析+操控闭环</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>本文在谱系中的位置</strong>：组件借来的——mean-shift 方向构造（contrastive activation addition [28]、task arithmetic [29]）、逐层分析框架（Pasad 的 wav2vec2 逐层分析 [32,33]）、Qwen2-Audio 骨干。<strong>真正新的</strong>：(1) 把 LLM 的 steering 思路首次系统迁移到音频 LLM 的口音；(2) 提出双向 AAS + Specificity（cross 减 within）来分离&quot;口音效应&quot;与&quot;普通说话人间差异&quot;——这个去混淆设计是本文的方法论亮点；(3) 用 forward hook 实现零参数推理注入。</p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -960,7 +960,7 @@ extraction集: 1000对口音对 → 估计 mean-shift 方向 d^(l)
 <h3 id="逐层敏感度fig1ad">逐层敏感度（Fig.1a/d）</h3>
 <p>VCTK 与 L2-ARCTIC 都呈现：早层（0-14）低敏感、约 15 层现峰、21 层后急升到全局最大。<strong>笔者解读</strong>：非母语口音波动更大（&quot;non-native accents induce more distributed representational changes&quot;），因为非母语在低层声学就有更强偏离。</div></p>
 <h3 id="单层-steering-δwerfig1beα5">单层 steering ΔWER（Fig.1b/e，α=5）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>口音类型</th>
@@ -980,12 +980,12 @@ extraction集: 1000对口音对 → 估计 mean-shift 方向 d^(l)
 <td>+3.7~+4.2（崩）</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>最醒目：母语口音中层 steering 可降 30% WER；末层 31 注入在所有口音上都崩（母语 +1.5~5.8、非母语 +3.7~4.2）。</p>
 <h3 id="α-强度分析fig1cf">α 强度分析（Fig.1c/f）</h3>
 <p>α 增大 → 波动与峰值增大；超过临界值后从约 27 层起加速崩塌。母语 α=5 中层最优、α=2 中层差但深层有深度渐进趋势。非母语中层始终是全局最优窗。</p>
 <h3 id="steering-vs-pefttable-1核心">steering vs PEFT（Table 1，核心）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>口音</th>
@@ -1071,7 +1071,7 @@ extraction集: 1000对口音对 → 估计 mean-shift 方向 d^(l)
 <td><strong>-6.70</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读（这张表是全文最重要）</strong>：</p>
 <ul>
 <li>小样本（&lt;100，前 5 行母语）：steering 碾压 PEFT——South African steer 降 25.51% vs PEFT 2.76%，Canadian 33.80% vs 4.67%。PEFT 在 &lt;100 样本时几乎无效甚至有害。</li>

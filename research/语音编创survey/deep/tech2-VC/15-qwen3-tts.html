@@ -836,7 +836,7 @@
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p>TTS 谱系: 端到端神经 TTS (VALL-E/NaturalSpeech 系列) → 离散 codec + 自回归 LM (CosyVoice/F5/MaskGCT/Spark/Llasa/KALL-E/FireRedTTS2) → 流式可控 (CosyVoice2/3, MiniMax-Speech)。Qwen3-TTS 属第二支 + 流式可控。</p>
 <p>tokenizer 谱系: 纯语义 (SpeechTokenizer, S3 Tokenizer) vs 纯声学 (EnCodec/SoundStream) vs 语义-声学耦合 (XCodec, XY-Tokenizer, Mimi, FireRedTTS2)。Qwen3-TTS 两个 tokenizer 分别站不同折中点: 25Hz 单码本偏语义(继承 Qwen2-Audio), 12Hz 多码本偏&quot;语义第一层+声学后续层&quot;(借鉴 Mimi 的语义-声学解耦 + WavLM 蒸馏)。</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>组件</th>
@@ -876,7 +876,7 @@
 <td>训练时概率激活, 改善复杂描述指令跟随</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2 id="3-核心创新我的理解">3. 核心创新(我的理解)</h2>
 <p>论文未显式列 &quot;contributions&quot;, 但可提炼四条, 逐条批判:</p>
 <p><div class="callout callout-info"></p>
@@ -912,7 +912,7 @@
 </code></pre></figure>
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p>Table 4 (12Hz tokenizer 重建, LibriSpeech test-clean):</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -967,10 +967,10 @@
 <td><strong>0.95</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info">笔者解读: 同 12.5Hz/16码本下 PESQ-WB 3.21 vs Mimi 2.88, SIM 0.95 vs 0.87, 是实打实的质量跃升, 不是码本数带来的。</div></p>
 <p>Table 5 (零样本克隆, Seed-TTS WER):</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1010,7 +1010,7 @@
 <td>1.49</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info">笔者解读: test-en 1.24 是全文最硬的 SOTA, 超 CosyVoice3 1.45 与 MiniMax 1.65; 但 test-zh 0.77 略输 CosyVoice3 0.71。12Hz 一致优于 25Hz, 符合&quot;粗时间分辨率利于长程依赖&quot;的论断。</div></p>
 <p>Table 6 (多语种, 10 语 WER 与 SIM, 关键项): Qwen3-12Hz-1.7B 在 6/10 语种 WER 最低 (中/英/意/法/韩/俄), 10/10 语种 SIM 最高 (0.714-0.829)。ElevenLabs 在多数语种 WER 崩 (中文 16.026, 日语 10.646)。</p>
 <p>Table 7 (跨语种, zh-to-ko): Qwen3-12Hz-1.7B 4.82 vs CosyVoice3 14.4 → 降 66%。但笔者注意: zh-to-ja (8.40 输 CosyVoice3 7.08)、en-to-ja (7.21 输 6.80)、ko-to-zh (1.08 输 1.06) 仍输 CosyVoice3——<strong>Qwen3 在日语相关方向偏弱</strong>, 论文只挑 zh-to-ko 高亮, 有选择性呈现之嫌。</p>

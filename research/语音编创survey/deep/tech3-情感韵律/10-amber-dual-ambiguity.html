@@ -843,7 +843,7 @@
 <li><strong>最近的 entropy-aware 选分</strong> [23] Emoent (2025)：用熵感知方法合并语音和文本预测，是最接近&quot;显式处理模态&quot;的先前工作，但仍未与 rater 模糊联合。</li>
 </ul>
 <p>AmbER² 在谱系中的位置：rater 模糊这条线本文一作已经耕耘多代（[4][6][7]），AmbER² 是把它和&quot;模态模糊&quot;第一次拼到一起。fusion head 当 student、unimodal heads 当 experts 的 teacher-student 结构是借鉴知识蒸馏 / MoE 的常见套路，新颖点在于 MAI loss 里&quot;专家权重随其与真值分布的 JS 距离自适应&quot;这一设计。</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>维度</th>
@@ -873,7 +873,7 @@
 <td>Wav2Vec2+BERT 现成</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：真正&quot;新&quot;的只有一件——把模态专家的监督权重做成&quot;离真值越近权重越大&quot;的 softmax(−κ·JS) 自适应。teacher-student 范式、JS 散度、soft label 全是已有积木。所以这是一篇&quot;组合创新 + 评估视角创新&quot;的工程性论文，而非架构突破。</div></p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -914,7 +914,7 @@
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p>挑最醒目的数字。</p>
 <p><strong>Table 3 — AmbER² vs CB-CE baseline（分布度量，fusion head）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>数据集</th>
@@ -968,10 +968,10 @@
 <td>↑12.4%</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>分布度量全线上涨，且 MSP-Podcast（更难、更自然）涨幅更大——这是说服力所在。</p>
 <p><strong>Table 5 — 与 SOTA 对比（IEMOCAP）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>方法</th>
@@ -1024,7 +1024,7 @@
 <td><strong>0.675</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info">笔者解读：AmbER² 在 IEMOCAP 上对 AER-LLM few-shot 是碾压式（BC 0.83 vs 0.69，JS 0.19 vs 0.35）。但要冷静——AER-LLM 是 zero/few-shot 通用大模型，AmbER² 是在 IEMOCAP 上五折 CV 的专用模型，这个对比不完全公平。Emoent [23] 是最可比的（同样 speech+text、同样监督训练），AmbER² ACC 0.683 vs 0.658（↑3.8%）、F1 0.675 vs 0.646（↑4.5%），这个增益才是真增益，且幅度温和、合理。</div></p>
 <p><strong>Table 4 的反常</strong>：MSP-Podcast 上 F1 从 0.276→0.369（大涨），但 W-F1 从 0.552→0.445（明显下降），ACC 0.473→0.520。W-F1 掉说明分布监督让 minority class 的硬分类变差——论文承认这是&quot;distributional fidelity vs hard decision&quot;的权衡。这个坦诚是加分项。</p>
 <p><strong>Section 5.4 模糊等级分析</strong>（MSP-Podcast，按 entropy 分桶）：</p>

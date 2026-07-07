@@ -837,7 +837,7 @@
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p><strong>范式背景</strong>：text-to-audio (TTA) 已从 DDPM (AudioLDM/Make-An-Audio) 演进到 flow matching (TangoFlux)。编辑沿两条线分化：training-free inversion（把输入音频反演成噪声再重采样）与 training-based instruction tuning。图像编辑的 Prompt-to-Prompt (cross-attention replacement) 被迁入音频领域，成为 training-free 阵营的标配。</p>
 <p><strong>Prior work 对比表</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>方法</th>
@@ -896,7 +896,7 @@
 <td>✅(自建 overlapping 数据)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>本文在谱系中的位置</strong>：继承了 AUDIT 的&quot;instruction-driven、不要 caption&quot;主张，但把生成范式从 DDPM-based LDM 换成 RFM (ODE 直线轨迹，无需细粒度时间离散化)。两个组件是借来的——LoRA-tuned Flan-T5 (LoRA 来自 [19]，Flan-T5 来自 [22])、BigVGAN vocoder [20]、VAE latent [21]；真正新的是：(1) RFM 用于音频编辑任务的首次统一训练；(2) channel-wise concat 原始 latent 作为条件 + 从 <code>t_start=0.01</code> 起步的非纯噪声初始化，用来保未编辑区；(3) overlapping 多事件数据集构造法。</p>
 <hr />
 <p><div class="callout callout-info"></p>
@@ -958,7 +958,7 @@
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>表1 编辑质量（最醒目：FD/KL 最佳，IS 垫底）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>Method</th>
@@ -1005,9 +1005,9 @@
 <td>5.27</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>表2 保真度+效率（最醒目：快 9 倍）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>Method</th>
@@ -1048,7 +1048,7 @@
 <td>11.27</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读三个最醒目数</strong>：</p>
 <ol>
 <li><strong>101.87s → 11.27s（快 9 倍）</strong> 且 CLAP 仅低 0.018（0.4398 vs 0.4579）——这是本文最强论据：用训练换推理，性价比极高。</li>

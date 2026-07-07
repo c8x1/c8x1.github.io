@@ -858,7 +858,7 @@
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p><strong>Paradigm 背景</strong>：声音分离从经典 encoder-masker-decoder（STFT 域 mask）发展到通用声音分离 (USS)——PIT/MixIT 训练但需固定最大源数 N，开放域 mixture 源数可变时塌缩（源碰撞/虚假 stem）。Query-Guided Sound Separation (QSS) 用外部 query（视觉/音频/类标签/文本）条件化提取，文本最紧凑。AudioSep 是 SOTA 文本引导系统，BERT/CLAP 嵌入经 FiLM 注入 spectrogram masker。NAC (SoundStream/EnCodec/DAC) 把音频压成 RVQ 离散 token，已用于生成/条件合成。</p>
 <p><strong>前置工作对比表</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>工作</th>
@@ -919,7 +919,7 @@
 <td>encoder-masker-decoder 范式源头</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>本文在 lineage 中的位置</strong>：CodecSep 是 &quot;AudioSep 的 FiLM 文本条件化思路 × CodecFormer 的 codec latent 分离 × masking-not-generating 设计&quot; 的合体。它把 AudioSep 的 spectrogram 域 FiLM masker 搬到 codec latent 域，把 CodecFormer 的 decoder 生成改成 masker 选择，用 DAC 冻结骨干作 codec prior。真正新的是&quot;在 codec latent 上用纯掩码做开放词表分离&quot;这个组合 + 对应的部署 blue-print。FiLM、CLAP、DAC、Transformer masker 全是已知件。所以本文新东西是<strong>任务-表示匹配的判断</strong>（codec latent 足够结构化、masking 足够分离）和<strong>部署范式</strong>（codes-in/codes-out），不是架构发明。</p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -987,7 +987,7 @@
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <h3 id="table-1-dnr-v2-主结果codec-处理后输入">Table 1: dnr-v2 主结果（codec 处理后输入）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1040,7 +1040,7 @@
 <td>3.0</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>最醒目的几个数：</p>
 <ul>
 <li><strong>Speech SI-SDR 10.0 vs AudioSep 4.9/7.7</strong>——双倍提升，是全表最夸张的。Music 从 -5.6 翻到 +1.2（+6.8 dB），SFX 从 -4.7 翻到 +0.9（+5.6 dB）。三 stem 全面碾压，且不是微弱优势。</li>
@@ -1048,7 +1048,7 @@
 <li><strong>ViSQOL 持平而非碾压</strong>——speech 3.2 vs 3.1，music 2.9 vs 2.9。CodecSep 的优势集中在信号级 (SI-SDR)，感知级只是持平。这呼应后面的 oracle 分析：codec 瓶颈限制了感知上限。</li>
 </ul>
 <h3 id="table-9-效率基准24gb-a30-gpu2s-输入batch-2">Table 9: 效率基准（24GB A30 GPU，2s 输入，batch 2）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>指标</th>
@@ -1089,7 +1089,7 @@
 <td>~27×</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li><strong>1.35 GMACs / 54× 少算、28MB / 56× 少内存</strong>——这是全文最锐利的部署数字。code-stream 模式下 CodecSep 几乎不占资源，适合边缘/流式。</li>
 <li><strong>但 audio-stream 模式 CodecSep 4 GMACs ≥ AudioSep 3.35</strong>——codec encoder/decoder 本身（12.28+27.82=40 GMACs）在 audio-stream 模式成为负担。论文诚实报告，不藏。</li>

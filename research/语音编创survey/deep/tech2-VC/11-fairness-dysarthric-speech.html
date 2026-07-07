@@ -840,7 +840,7 @@ arXiv:<a href="https://arxiv.org/abs/2508.05102" target="_blank" rel="noopener">
 <hr />
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p>构音障碍语音技术的痛点是<strong>数据稀缺 + 严重度/说话人差异大</strong>。增广路线演进：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>路线</th>
@@ -885,7 +885,7 @@ arXiv:<a href="https://arxiv.org/abs/2508.05102" target="_blank" rel="noopener">
 <td>评估数据集</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：本文的定位很清楚——它不在 TTS 模型创新赛道，而在&quot;给 TTS 做公平性审计&quot;这个新赛道。把 ASR 公平性文献里的 PD/DI 搬到合成语音上，对象从&quot;识别系统对谁不公平&quot;换成&quot;克隆系统生成谁时不公平&quot;。这个迁移本身是新的，但度量工具是借来的。F5-TTS 只是承载实验的载体，换成任何 zero-shot 克隆模型（VALL-E/CosyVoice/本文集中的 VoxCPM）框架都适用——这是本文的可迁移价值，也是它的&quot;非模型创新&quot;局限。</div></p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -959,7 +959,7 @@ arXiv:<a href="https://arxiv.org/abs/2508.05102" target="_blank" rel="noopener">
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>表 3 公平性度量（跨严重度）——最核心的表</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>严重度</th>
@@ -1019,10 +1019,10 @@ arXiv:<a href="https://arxiv.org/abs/2508.05102" target="_blank" rel="noopener">
 <td>0.90</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>读法：high 严重度 ∆WER 的 DI=0.59（远低于 1）、PD=0.52（远高于 0）→ 可懂度对重度构音障碍严重不公平。SIM-o DI=0.85、AutoPCP DI=0.90 → 说话人和韵律偏置小得多。</p>
 <p><strong>表 2 汇总（按各度量最小 DI 定位最受影响群体）</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>度量</th>
@@ -1062,9 +1062,9 @@ arXiv:<a href="https://arxiv.org/abs/2508.05102" target="_blank" rel="noopener">
 <td>最小干预</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>表 4 下游任务影响（3 种训练配置）</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>配置</th>
@@ -1089,7 +1089,7 @@ arXiv:<a href="https://arxiv.org/abs/2508.05102" target="_blank" rel="noopener">
 <td><strong>73.75%</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>读法：混合训练让 low 严重度 ASR WER 从 53.00 降到 36.66（−44.57% 相对）、检测准确率从 62.50 升到 73.75（+18% 相对）；但 mid/high 的 ASR WER 反而比 model 1 升高（94.19/94.23 vs 89.07/87.53，即退步 5.74%/7.65%）。<strong>合成数据帮了轻症、害了重症</strong>——这正是公平性偏置向下游传导的直接证据。</p>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：表 3 和表 4 放一起是本文最强证据链：克隆阶段对 high 严重度可懂度不公平（DI 0.59）→ 把这种&quot;失真的重症样本&quot;喂下游 → 下游对重症 ASR 退步。偏置是会传导的，这是本文最有说服力的论点。但表 4 的绝对 WER（mid/high 90%+）高得离谱，说明 Wav2vec2-base 无 LM 在 TORGO 上本身就很难，配置间的相对比较比绝对值更有意义。</div></p>
 <hr />

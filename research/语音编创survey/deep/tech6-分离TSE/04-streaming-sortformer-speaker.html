@@ -836,7 +836,7 @@ arXiv：<a href="https://arxiv.org/abs/2507.18446" target="_blank" rel="noopener
 <p>由于 Sortformer 本身就被 Sort Loss 训练成&quot;按到达时间排序输出说话人&quot;，AOSC 与之结合后可<strong>自动消解跨块（between-chunk）排列歧义</strong>，无需 STB 论文里那套 argmax 相关系数的显式置换求解，也无需 attractor。配合一个 FIFO 队列扩大上下文，系统在 DIHARD III Eval / CALLHOME-part2 / CH109 上以单一模型（无逐数据集微调）取得流式 SOTA，且在 1s/0.32s 低延迟下仍具竞争力；甚至在 DIHARD 与 CALLHOME 4+ 说话人子集上<strong>反超离线 Sortformer</strong>。模型规模 117M，最多 4 说话人（设计约束），但在 5+ 说话人子集上仍稳健追踪 4 个主导说话人。</p>
 <hr />
 <h2 id="2-背景与前置工作对比表">2. 背景与前置工作（对比表）</h2>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>系统</th>
@@ -921,7 +921,7 @@ arXiv：<a href="https://arxiv.org/abs/2507.18446" target="_blank" rel="noopener
 <td>单模型多数据集</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>关键动机：离线/流式日志的差距远大于离线/在线 ASR 的差距；原 Sortformer 虽简化了与多说话人 ASR 的集成（免 token 级 PIT），但全长自注意力无法流式且受最大输入长度限制。</p>
 <hr />
 <p><div class="callout callout-info"></p>

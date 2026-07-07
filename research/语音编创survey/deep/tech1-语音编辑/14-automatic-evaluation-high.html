@@ -855,7 +855,7 @@
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p><strong>Paradigm 背景</strong>：音频编辑分两条路线——training-free（基于预训练 TTA diffusion + inversion：SDEdit-based / DDIM-based / DDPM-based）和 supervised（AUDIT、InstructME 用 latent diffusion；MusicGen、Instruct-MusicGen 用自回归）。Training-free 依赖底层 TTA 模型、缺任务监督故鲁棒性差；supervised 缺配对数据。评测方面，图像编辑领域早有评测痛点，音频编辑更甚——音频可自然混合的特性让 AUDIT/InstructME 用 mixing 构造监督，但混合质量本身没人把过关。</p>
 <p><strong>前置工作对比表</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>工作</th>
@@ -900,7 +900,7 @@
 <td>本文用作另一个独立外部验证</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>本文在 lineage 中的位置</strong>：本文是 &quot;MusicEval/AudioEval 的 MOS 预测范式 × 音频编辑的 Q/R/F 三维度 × AUDIT 的 mixing 数据构造&quot; 的合体。真正新的是把这三者捏在一起针对&quot;编辑&quot;这个特殊任务（编辑比生成多了 Faithfulness 维度）。AuditEval-ssl 的设计（SSL backbone + 多 regression head）是 NISQA/DNSMOS 那套语音质量预测的直接搬运；AuditEval-llm（LALM + regression head 预测连续分）是把 LLM-as-judge 从离散打分改成连续回归，这个改动小但有针对性（人工分是 5 人平均的连续浮点，硬离散会丢信息）。</p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -969,7 +969,7 @@ AuditScore: 6360 对, 35.3h, 200+ 事件类型, 编辑引入 150+ 新事件
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <h3 id="table-2-auditeval-vs-传统客观指标系统级--utterance-级1-5-标度">Table 2: AuditEval vs 传统客观指标（系统级 + utterance 级，1-5 标度）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>维度</th>
@@ -1064,7 +1064,7 @@ AuditScore: 6360 对, 35.3h, 200+ 事件类型, 编辑引入 150+ 新事件
 <td><strong>0.6898</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>最醒目的几个数：</p>
 <ul>
 <li><strong>Relevance 上 AuditEval-llm 系统级 LCC 0.7620 vs CLAP 的 0.2141</strong>——CLAP score 作为最常用编辑评测指标，与人类判断的相关性只有 0.21，基本不可用。这是对整个领域现有评测实践的颠覆性证据。</li>
@@ -1073,7 +1073,7 @@ AuditScore: 6360 对, 35.3h, 200+ 事件类型, 编辑引入 150+ 新事件
 <li><strong>Quality 维度 AuditEval-ssl 系统级 LCC 0.6101 &gt; AuditEval-llm 的 0.5814</strong>——SSL 在纯声学质量上反而胜过 LLM，这是 LLM 不全能的硬证据。</li>
 </ul>
 <h3 id="table-3-过滤后数据质量最锐利的发现">Table 3: 过滤后数据质量（最锐利的发现）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>过滤策略</th>
@@ -1130,7 +1130,7 @@ AuditScore: 6360 对, 35.3h, 200+ 事件类型, 编辑引入 150+ 新事件
 <td>5.051</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>关键看点：</p>
 <ul>
 <li><strong>Human-CLAP、PQ、PC、CE、CU 全部提升</strong>——而且这些验证模型（Human-CLAP、AudioBox）与 AuditEval 在数据和模型设计上完全独立，是&quot;完全 in-the-wild 评测&quot;，证据强。</li>

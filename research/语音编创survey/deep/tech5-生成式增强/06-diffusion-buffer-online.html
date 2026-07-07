@@ -869,7 +869,7 @@ arXiv：<a href="https://arxiv.org/abs/2506.02908" target="_blank" rel="noopener
 <h3 id="21-问题定位">2.1 问题定位</h3>
 <p>在线 SE 要求：每来一帧（hop 内），必须处理完一个 chunk 且输出，否则累加延迟。扩散模型反向过程要调用 score model 多次（N 步），而<strong>哪怕一次 NCSN++ 调用在 65M 下就 &gt;16 ms 的 hop 长度</strong>，N&gt;2 即 RTF≫1 不可实时。DB 要让&quot;每帧只调一次 score&quot;成为可能。</p>
 <h3 id="22-前置工作对比笔者整理">2.2 前置工作对比（笔者整理）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>工作</th>
@@ -946,7 +946,7 @@ arXiv：<a href="https://arxiv.org/abs/2506.02908" target="_blank" rel="noopener
 <td><strong>单数据集、延迟仍亚秒级</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"></p>
 <h3 id="23-笔者解读与基线的关系">2.3 笔者解读：与基线的关系</h3>
 <p>DB 不是新 SDE，而是把 BBED/OUVE 两种已有 SDE 参数化&quot;塞进&quot;滑窗训练与推理框架。DB-BBED 与 DB-OUVE 复用对应基线的 c/k/γ/drift，仅改训练目标（式 7，输出只对最后 B 帧）与推理（Algorithm 1，单次 score 调用推进所有 buffer 帧）。因此 DB 是&quot;训练+推理范式&quot;而非&quot;新 SDE&quot;。</div></p>

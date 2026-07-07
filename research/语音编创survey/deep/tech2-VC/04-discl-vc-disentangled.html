@@ -858,7 +858,7 @@ Demo: https://wkd12345.github.io/disclvc/
 <li><strong>生成模型增强线</strong>：normalizing flows、diffusion（DiffVC+、DDDM-VC）提升转换质量；</li>
 <li><strong>可控韵律线</strong>：ACE-VC（预测语速与音高轮廓）、DiffHierVC（diffusion 生成 F0）、StableVC（显式解耦 content/style/timbre）、Vevo（混合 AR/NAR 渐进引入 style 与 timbre）。</li>
 </ol>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>前置工作</th>
@@ -913,7 +913,7 @@ Demo: https://wkd12345.github.io/disclvc/
 <td>消融对照：用 ContentVec 比用 mel 前 20 维更好（因源/目标同源时 mel 韵律仍含说话人信息致训练推理失配）</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：Discl-VC 不是凭空创新，而是把&quot;自监督解耦 + flow matching in-context + 掩码非自回归预测&quot;三件已有武器重新组装，关键在于<strong>把韵律从&quot;连续嵌入/轮廓&quot;升级为&quot;可掩码预测的离散令牌&quot;</strong>，这是它相对 ACE-VC/StableVC/Vevo 的差异化所在。</div></p>
 <hr />
 <p><div class="callout callout-info"></p>
@@ -1020,7 +1020,7 @@ Demo: https://wkd12345.github.io/disclvc/
 <hr />
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>
 <h3 id="51-zero-shot-vcvctk50说话人5句450对">5.1 Zero-shot VC（VCTK，50说话人×5句=450对）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>系统</th>
@@ -1061,7 +1061,7 @@ Demo: https://wkd12345.github.io/disclvc/
 <td><strong>131M</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li><strong>UTMOS 4.079 全场最高</strong>，比 Vevo 高 0.109，比 FAcodec 高 0.499；</li>
 <li><strong>参数量 131M，仅为 Vevo(922M) 的 14.2%</strong>，却音色相似度 SECS 0.929 ≈ Vevo 0.930（基本持平）；</li>
@@ -1069,7 +1069,7 @@ Demo: https://wkd12345.github.io/disclvc/
 </ul>
 <h3 id="52-韵律相关-vcesd-英文每任务-1000-句">5.2 韵律相关 VC（ESD 英文，每任务 1000 句）</h3>
 <p><strong>Prosody Preserved（ESD源→VCTK目标，保留源韵律）</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>系统</th>
@@ -1106,9 +1106,9 @@ Demo: https://wkd12345.github.io/disclvc/
 <td>131M</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Prosody Converted（VCTK源→ESD目标，把目标韵律迁移到源内容）</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>系统</th>
@@ -1137,14 +1137,14 @@ Demo: https://wkd12345.github.io/disclvc/
 <td>269M</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li>韵律保持任务：Discl-VC 在 UTMOS/SECS 均胜 Vevo，F0Corr 0.941 ≈ FAcodec 0.942；</li>
 <li>韵律转换任务：Discl-VC 在 UTMOS(4.063 vs 3.783)、WER(4.139 vs 7.720)、F0Corr(0.822 vs 0.799) 三项胜 Vevo，<strong>唯独 SECS 输了（0.847 &lt; 0.892）</strong>——印证&quot;韵律迁移越彻底、音色越易丢&quot;的代价；</li>
 <li>主观 P-MOS：韵律保持 Discl-VC 与 Vevo 持平区段、韵律转换 Discl-VC N-MOS 4.19 领先。</li>
 </ul>
 <h3 id="53-消融vctk">5.3 消融（VCTK）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>配置</th>
@@ -1184,7 +1184,7 @@ Demo: https://wkd12345.github.io/disclvc/
 <td>0.928</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li><strong>去掉 ContentVec</strong>：SECS 从 0.929 掉到 0.900（-0.029），WER 从 1.946 恶化到 3.147（+1.2）——论文解释为源/目标同源时 mel 前 20 维的韵律仍含说话人信息致训练推理失配；</li>
 <li><strong>去掉 F0 loss</strong>：WER 反而更好（1.279），但 F0Corr/SECS 略降——<strong>F0 监督是拿一点可懂度换韵律相似度的取舍</strong>；</li>

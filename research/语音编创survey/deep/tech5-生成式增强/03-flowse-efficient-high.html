@@ -857,7 +857,7 @@ arXiv: <a href="https://arxiv.org/abs/2505.19476" target="_blank" rel="noopener"
 <h3 id="范式背景">范式背景</h3>
 <p>SE 从确定性回归（CNN/RNN 去噪）走向生成式（学习干净语音分布以泛化未见噪声）。生成式 SE 经历 VAE/GAN → LM（离散 token）→ Diffusion → Flow matching 的范式演进。Flow matching 由 Meta [9] 提出，已在 TTS（MATCHA-TTS、E2-TTS、F5-TTS）取得 SOTA，但&quot;纯音频、DiT 骨干、可选文本条件&quot;的 SE 框架此前未被探索。</p>
 <h3 id="前置工作对比表">前置工作对比表</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>方法</th>
@@ -934,7 +934,7 @@ arXiv: <a href="https://arxiv.org/abs/2505.19476" target="_blank" rel="noopener"
 <td><strong>-</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="本作在谱系中的位置">本作在谱系中的位置</h3>
 <p><strong>继承自</strong>：(a) Flow matching 范式（Lipman 等 [9]）与 TTS 中的 F5-TTS [12]（DiT 骨干 + 文本编码器 + sway 采样思路）；(b) FlowA VSE [14] 的&quot;条件 flow matching 用于 SE&quot;思路，但 FlowA VSE 依赖视觉输入+U-Net，FlowSE 改为纯音频+DiT。</p>
 <p><strong>新增为本作独有</strong>：(a) 首次将 <strong>rectified flow matching + latent DiT</strong> 用于纯音频 SE；(b) <strong>可选文本条件</strong>设计——训练时随机 drop 文本，使推理时有无文本皆可，且文本降质时（低 SNR）显式增益；(c) 在 mel 频谱域而非波形域或 token 域做 flow matching，解耦增强与 vocoder。</p>
@@ -1014,7 +1014,7 @@ arXiv: <a href="https://arxiv.org/abs/2505.19476" target="_blank" rel="noopener"
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <h3 id="table-1-dns-challenge-测试集dnsmos-sigbakovrl--说话人相似度">Table 1: DNS Challenge 测试集（DNSMOS SIG/BAK/OVRL + 说话人相似度）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>系统</th>
@@ -1119,7 +1119,7 @@ arXiv: <a href="https://arxiv.org/abs/2505.19476" target="_blank" rel="noopener"
 <td>0.934</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>最醒目数字</strong>：</p>
 <ul>
 <li><strong>真实录音 OVRL 3.271</strong>——比次优 MaskSR（3.136）高 0.135，比 diffusion 最佳 StoRM（2.940）高 0.331，全面 SOTA。</li>
@@ -1127,7 +1127,7 @@ arXiv: <a href="https://arxiv.org/abs/2505.19476" target="_blank" rel="noopener"
 <li><strong>有混响场景 SpkSim 0.809</strong>——比无混响（0.940）低 0.13，说明混响仍是说话人保真的难点（所有方法在此场景都掉点）。</li>
 </ul>
 <h3 id="table-2-模拟测试集wer--rtf单-4090d">Table 2: 模拟测试集（WER + RTF，单 4090D）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>系统</th>
@@ -1174,7 +1174,7 @@ arXiv: <a href="https://arxiv.org/abs/2505.19476" target="_blank" rel="noopener"
 <td>0.31</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>最醒目数字</strong>：</p>
 <ul>
 <li><strong>RTF 0.31 vs diffusion 3.27-3.49</strong>——快 10 倍以上，已具备实时性（RTF&lt;1）。这是 flow matching 相对 diffusion 的核心实证优势。</li>

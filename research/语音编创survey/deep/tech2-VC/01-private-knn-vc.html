@@ -841,7 +841,7 @@
 <hr />
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p>说话人匿名化的范式背景：VPC 系列挑战赛定义了&quot;攻击者用说话人识别模型在匿名化语音上训练并验证&quot;的评估协议，隐私用 EER（50% 为最优），效用用可懂度 (WER) 与情绪保持 (UAR)。匿名化与 VC 目标相反——VC 追求目标相似度，匿名化追求隐藏源身份。</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>前置工作</th>
@@ -876,7 +876,7 @@
 <td><strong>借鉴</strong>架构，用于 phone predictor 与 duration predictor</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>本文在谱系中的位置</strong>：组件几乎全是借来的（kNN-VC 主体 + FastSpeech2 预测器 + k-means 量化），<strong>新颖性不在架构而在&quot;用可解释手段做受控消融&quot;这一研究方法论</strong>——把匿名化拆成 duration / variation 两个可独立调节的旋钮，并额外把&quot;目标选择&quot;作为被忽视的变量拎出来单独分析。</p>
 <hr />
 <p><div class="callout callout-info"></p>
@@ -935,7 +935,7 @@
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>Table 1 核心结果（VPC2024，同性别目标选择，无后缀）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -994,9 +994,9 @@
 <td>48.5</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>目标选择扰动的醒目对比（同一 (0-8) 配置）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>选择策略</th>
@@ -1021,7 +1021,7 @@
 <td>48.4% / 49.4%</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：三组数字串起来看非常有杀伤力——(0-8) 在同性别下 EER 49.6% 看似&quot;几乎完美隐私&quot;，但把目标选择换成完全随机就暴跌到 18.3%；而 d 实验证明只要维持&quot;两组不相交目标集&quot;这个结构，性别怎么混都照样 49% 附近。这说明 <strong>VPC2024 的 EER 对&quot;目标选择协议&quot;极度敏感</strong>，单纯调高 EER 不等于真匿名化。</div></p>
 <p><strong>时长 vs 变化的对比</strong>：仅调时长最高 EER 22.5% (10-0)，仅调变化最高 49.6% (0-8)——变化约束效率是时长约束的约 2 倍以上，且可懂度损失更小（max WER 4.7% vs 时长路径更高）。</p>
 <hr />

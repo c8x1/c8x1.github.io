@@ -850,7 +850,7 @@
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p><strong>Paradigm 背景</strong>：音频生成从 Text-to-Audio（AudioGen/AudioLDM/AudioLDM2）发展到对生成/修改的细粒度控制（受图像领域 ControlNet/Uni-ControlNet/Emu Edit 启发）。音频编辑模型靠&quot;edit instruction = action+class&quot;（如 &quot;Enhance Laughter&quot;）做具体编辑，AUDIT 是首个通用音频编辑工作，用合成 triplet (instruction, input, output) 训 diffusion 模型。</p>
 <p><strong>前置工作对比表</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>工作</th>
@@ -903,7 +903,7 @@
 <td>本文 depth transformer 改编自 Moshi 的音频解码思路</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>本文在 lineage 中的位置</strong>：本文是 &quot;AUDIT 的合成 triplet 数据范式 × SoundStream RVQ 自回归生成 × PicoAudio 的时间矩阵思路（但解绑词表）&quot; 的合体。真正新的是把 event roll 这个来自音信检索/自动音乐转录传统的可视化表示，改造成编辑控制接口（activity roll = 文本嵌入 ⊗ 二值时间掩码）。encoder-decoder RQ-Transformer + temporal/depth 双自回归子网的结构基本是 SoundStream 生成侧的标准件（depth transformer 改编自 Moshi）。所以本文新东西是<strong>控制接口设计</strong>和<strong>编辑场景定义</strong>，不是架构。</p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -981,7 +981,7 @@ Enhance-only 模型: 每例恰好 1 个 Enhance, TBR 均匀 -30~0 dB
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <h3 id="table-1-主模型edin-数据单目标事件评测">Table 1: 主模型（EDIN 数据）单目标事件评测</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>操作</th>
@@ -1063,7 +1063,7 @@ Enhance-only 模型: 每例恰好 1 个 Enhance, TBR 均匀 -30~0 dB
 <td>0.3</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>最醒目的几个数：</p>
 <ul>
 <li><strong>Delete target MSD 4.8→2.5（改善 2.3，全表最大）</strong>——删除是模型最擅长的，因为强条件（输入含明显事件）+ 已知的源去除能力。</li>

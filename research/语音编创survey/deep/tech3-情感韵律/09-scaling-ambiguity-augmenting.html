@@ -841,7 +841,7 @@
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p><strong>子领域范式背景</strong>: SER 从单标签分类转向&quot;分布建模&quot;(AER)——情感本就主观歧义，单标签丢信息。但 AER 的瓶颈在 ground-truth 分布质量：人工标注稀疏(3-5 人/句)，分布估计粗糙。同期 ALM(Qwen2-Audio、Gemini 2.5-Pro)在情感理解上展现能力，但用 ALM 生成&quot;分布级合成标注&quot;未被探索。</p>
 <p><strong>Prior work 对照表</strong>:</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>维度</th>
@@ -871,7 +871,7 @@
 <td>Qwen2-Audio-7B + LoRA(r=8) + 分布头 + JSD 损失</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>本文在 lineage 中的位置</strong>: 组件——Gemini 2.5-Pro(合成)、Qwen2-Audio-7B(微调底座)、LoRA、mixup、JS 散度——<strong>几乎全借来</strong>。novelty 在三件事的组合框定：(1)Synthetic Perceptual Proxies(用温度+persona 模拟多人视角的 ALM 标注)、(2)DiME-Aug(多模态分布感知 mixup)、(3)首次系统评估&quot;ALM 合成标注能否增补 AER 分布&quot;。属任务工程 + 评估方法学贡献，非架构原创。</p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -925,7 +925,7 @@
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>Figure 2: JS 散度 vs 合成标注数量</strong> —— 随合成标注数增加，JS 散度单调下降并收敛；IEMOCAP 约 6 个收敛、MSP-Podcast 约 10 个收敛(因 MSP-Podcast 人工标注更多 5-21 vs IEMOCAP 3，分布更复杂需更多合成)。收敛时 JS≈0.35(非 0，说明合成分布与人工分布仍有差距)。</p>
 <p><strong>Table 2: AER 下游表现(JS↓ / BC↑)</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>数据集</th>
@@ -986,7 +986,7 @@
 <td>0.665</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>(H=human, S=synthetic, C=combined)</p>
 <p>最醒目:</p>
 <ol>

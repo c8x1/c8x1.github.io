@@ -837,7 +837,7 @@
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p><strong>范式背景</strong>：TTS 的可解释性研究 (probing) 证明中间层编码了 prosody/pronunciation 信息 (Belinkov/Dalvi [25,26] 在 NMT 上的 neuron-level 分析传统)。prosody 控制有两条线——latent reference encoder (GST [10]/reference encoder [11,12]) 与显式特征预测层 (FastSpeech [4,5])。mispronunciation 纠正传统靠 unit-selection 或 G2P 词典；近期 SAC [21] 用非目标说话人语音做 word-level 纠正。</p>
 <p><strong>Prior work 对比表</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>方法</th>
@@ -890,7 +890,7 @@
 <td>✅(β-VAE+VQ prototype)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>本文在谱系中的位置</strong>：把&quot;机械可解释性 (mechanistic interpretability)&quot;的 activation steering / counterfactual 思路 (源自图像 counterfactual [27,28] 与 NLP neuron analysis [26]) 第一次系统搬进 TTS。β-VAE [29]、VQ-VAE [30]、HuBERT [23]、Whisper [33] 全是借来的部件；新的是&quot;用 β-VAE latent 限流形 + VQ prototype 锚内容&quot;这套两段式约束，让梯度编辑不破坏语音 intelligibility。</p>
 <hr />
 <p><div class="callout callout-info"></p>
@@ -953,7 +953,7 @@
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>表1 Mispronunciation 纠正（最醒目：WER/PER 砍半以上）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>Metric</th>
@@ -983,9 +983,9 @@
 <td>0.929</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>表2 CMOS（最醒目：+0.764 主观音质提升）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>Setting</th>
@@ -1002,7 +1002,7 @@
 <td>-0.764</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Fig.2 Prosody 控制（adjustment factor 0.6→2.0 的 change ratio）</strong>：Manifold Preserving CAE 在 duration/pitch/energy 三项上均接近理想线性（factor=2.0 时 ratio≈1.5-2.0，factor=0.6 时 ratio≈0.6-0.75），而 truncation trick 与朴素 CAE 不稳。</p>
 <p><strong>Fig.3 Prototype Loss 作用</strong>：大 adjustment factor (2.0) 下，无 L_proto 的 PER 飙到 ~0.20-0.25，加 L_proto 后 PER 压回 ~0.05-0.10 —— 证明 prototype 锚对保 intelligibility 关键。</p>
 <p><div class="callout callout-info"><strong>笔者解读三个最醒目数</strong>：</p>

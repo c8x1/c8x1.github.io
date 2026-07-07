@@ -853,7 +853,7 @@ arXiv: <a href="https://arxiv.org/abs/2509.18004" target="_blank" rel="noopener"
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p><strong>子领域范式背景</strong>：大规模弱监督语料构建在中文语音界有明确谱系——WenetSpeech 系列。WenetSpeech（1 万+ 小时普通话，ICASSP 2022）→ WenetSpeech4TTS（12,800 小时 TTS，2024）→ WenetSpeech-Yue（粤语，2025）→ 本文 WenetSpeech-Chuan（四川话）。本文是这个管线第一次系统迁移到&quot;方言&quot;层级（此前是语言层级普通话/粤语）。</p>
 <p><strong>前置工作对比</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>工作</th>
@@ -894,7 +894,7 @@ arXiv: <a href="https://arxiv.org/abs/2509.18004" target="_blank" rel="noopener"
 <td>本文把 LLM 纠错 ROVER 思路方言化</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>本文在谱系中的位置</strong>：组件几乎全是借来的——VAD/分割、pyannote 单人选段、CAM++ 聚类、Emotion2vec+SenseVoice 情感投票、Kaldi 强制对齐、WVMOS 质量评估、FireRedASR/SenseVoice/TeleASR 多系统、Qwen3 做 LLM 纠错、CosyVoice2 做 TTS。<strong>真正属于本文的新东西只有两件</strong>：(1) 把这套管线整体搬到四川话并开源 10k 小时数据；(2) LLM-GER——用 Qwen3 在不改变语义/词长前提下融合 3 个 ASR 假设，比单系统平均提升约 15% 转写准确率。这是一个<strong>数据集工程胜利</strong>，不是架构胜利。</p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -942,7 +942,7 @@ WenetSpeech-Chuan: 10,013h
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <h3 id="asrtable-3cer越低越好">ASR（Table 3，CER%↓，越低越好）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -989,10 +989,10 @@ WenetSpeech-Chuan: 10,013h
 <td><strong>13.38</strong>（SOTA）</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>最醒目数字：<strong>Whisper 在四川话上平均 CER 55.51%</strong>（基本不可用），与 FireRedASR-AED 的 15.14% 形成极端对比——说明通用大模型对方言适配极差，而中文专用模型差距巨大。微调 Paraformer 后平均 16.52%→14.58%（提升 11.7%），再加 1k 小时内部数据到 13.38%。Qwen2.5-Omni 微调后 17.69%→15.74%（提升 11.02%）。</p>
 <h3 id="ttstable-4">TTS（Table 4）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1045,7 +1045,7 @@ WenetSpeech-Chuan: 10,013h
 <td>3.98</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info">最醒目：CosyVoice2-WSC-SFT 在 easy 上 CER 4.08%（低于开源 CosyVoice2.0 的 7.14%，逼近商用 Qwen-TTS 4.13%），SIM 78.84% 远超基线，AMOS 4.20 用 10 位母语者评出。<strong>笔者解读</strong>：这组数字证明 10k 野生方言数据 + 100h 高质 SFT 能把开源 TTS 拉到商用水平——数据回报率极高。</div></p>
 <h3 id="llm-ger-收益">LLM-GER 收益</h3>
 <p>测试集上 LLM-GER 比单 ASR 转写平均提升约 <strong>15%</strong> 转写准确率——这是管线核心论点的直接证据。</p>

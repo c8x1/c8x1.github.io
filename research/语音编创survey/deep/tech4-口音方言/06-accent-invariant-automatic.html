@@ -837,7 +837,7 @@ Code&amp;data: https://github.com/MH-Sameti/Accent invariant ASR
 <p>实验在英语 (LibriSpeech/EdAcc/CommonAccent) 与波斯语 (CommonVoice-fa/PDID) 上做。英语：相对 SpecAugment 基线，本文在 EdAcc 加重音上 WER 23.4 vs 27.0、CER 15.1 vs 17.8，未见口音 26.7 vs 30.1，CommonAccent 34.8 vs 38.3。波斯语：base 上加重音 WER 88.8 vs (SpecAug 92.8)、CER 40.6 vs 51.6；medium 上 67.5/36.5。最强相对增益达 <strong>14%</strong>（加重音相对 SpecAugment）。核心卖点是用 Grad-CAM 把&quot;口音敏感区&quot;显式定位并压制，比 SpecAugment 的盲目掩码更有针对性，且对未见口音泛化好。</p>
 <h2 id="2-背景与前置工作对比表">2. 背景与前置工作（对比表）</h2>
 <p>预训练 Transformer ASR (Whisper) 在噪声/自发语音上强，但对非母语与地区口音 WER 显著偏高 [4]（Koenecke 等 PNAS 2020 揭示种族差异）。传统缓解法是加口音数据增广或按口音微调，但数据收集贵、对未见口音泛化差。</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>方法</th>
@@ -914,7 +914,7 @@ Code&amp;data: https://github.com/MH-Sameti/Accent invariant ASR
 <td><strong>低</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info">笔者解读：本文定位在 SpecAugment 的&quot;有针对性升级&quot;——把盲目掩码换成&quot;掩口音敏感区&quot;。相对 LoRA/对比学习等改架构法，它不改模型、只改增广，部署友好。</div></p>
 <p><div class="callout callout-info"></p>
 <h2 id="3-核心创新笔者解读">3. 核心创新（笔者解读）</h2>
@@ -969,7 +969,7 @@ Code&amp;data: https://github.com/MH-Sameti/Accent invariant ASR
 <p>关键：掩码只在训练增广阶段用，推理时直接用原频谱图——模型被&quot;逼&quot;出口音中性表征后无需运行时开销。</p>
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>
 <p><strong>英语 (Table 3, WER/CER)：</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1009,14 +1009,14 @@ Code&amp;data: https://github.com/MH-Sameti/Accent invariant ASR
 <td><strong>34.8/18.2</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li>相对 SpecAugment：EdAcc WER 23.4 vs 27.0（<strong>−13.7% 相对</strong>）、未见口音 26.7 vs 30.1（<strong>−11.3% 相对</strong>）、CommonAccent 34.8 vs 38.3（−9.1% 相对）。</li>
 <li>标准 LibriSpeech 几乎不变（6.8 vs 7.3）——确认增益集中在口音区，不损标准语音（但也说明对标准无提升）。</li>
 <li>口音分类器：英语 <strong>74.6%</strong>、波斯语 <strong>95%</strong>。</li>
 </ul>
 <p><strong>波斯语 (Table 4, WER/CER)：</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1061,7 +1061,7 @@ Code&amp;data: https://github.com/MH-Sameti/Accent invariant ASR
 <td><strong>67.5/36.5</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li>波斯语加重音 WER 相对 SpecAug：base 88.8 vs 92.8（−4.3% 相对）、CER 40.6 vs 51.6（<strong>−21.3% 相对</strong>，最显著）。</li>
 <li>摘要声称&quot;相对增益最高 14%&quot;——对应英语 EdAcc 相对 SpecAug 的 WER 增益。</li>

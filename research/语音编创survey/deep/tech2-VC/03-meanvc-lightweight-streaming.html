@@ -841,7 +841,7 @@
 <hr />
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p>流式 zero-shot VC 范式分 AR / NAR 两路：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>前置工作</th>
@@ -916,7 +916,7 @@
 <td><strong>借用</strong>做声码器</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>本文在谱系中的位置</strong>：是 ASLP@NPU 团队流式 VC 路线 (StreamVoice→StreamVoice+→DualVC2→MeanVC) 的最新迭代。<strong>几乎所有组件都是借的</strong>（recognition-synthesis 框架 + DiT + CFM + mean flows + DAPT + chunk-wise 因果掩码）。<strong>新颖性在于&quot;chunk-wise AR 去噪 + mean flows 1-NFE + DAPT&quot;这三者的特定组合，用以同时满足流式/轻量/高质量</strong>。属典型的工程集成创新。</p>
 <hr />
 <p><div class="callout callout-info"></p>
@@ -988,7 +988,7 @@
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>Table 1 zero-shot 性能（unseen speakers）</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>方法</th>
@@ -1048,10 +1048,10 @@
 <td><strong>211.52</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：最醒目的数字是 RTF 0.136 vs StreamVoice 13.632——<strong>快 100 倍</strong>，参数 14M vs 101M——<strong>小 7 倍</strong>，且 NMOS/SMOS/SSIM/CER 全面更优。延迟 211ms vs 2379ms——<strong>降 11 倍</strong>。唯一输项是 DNSMOS（3.76 vs Seed-VC 3.84），作者归因于参数更小，合理。SSIM 0.687 vs Seed-VC 0.582 是显著优势，说明 mean flows 1-NFE 在音色相似度上反而比多步 Seed-VC 强——这是反直觉的，可能因 chunk-wise AR 的历史缓存保了长程音色一致。</div></p>
 <p><strong>Table 3 消融</strong>：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>配置</th>
@@ -1092,7 +1092,7 @@
 <td>0.700</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>笔者解读</strong>：chunk 80ms 时 CER 从 5.01 飙到 9.97（近翻倍）——说明 160ms 是&quot;够建模的最小上下文&quot;门槛；200ms 各项更好但延迟+25%，是干净的性能-延迟 trade-off 曲线。去 DAPT 三项全掉印证过平滑痛点；去 clean cache CER 暴涨印证 in-context 缓存降训练-推理失配。</div></p>
 <hr />
 <h2 id="6-解决的场景">6. 解决的场景</h2>

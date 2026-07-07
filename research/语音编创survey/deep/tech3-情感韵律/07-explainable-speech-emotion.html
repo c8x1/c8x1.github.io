@@ -841,7 +841,7 @@
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p><strong>子领域范式背景</strong>: SER 走过三段——(1)手工特征(MFCC/formant/韵律)+ SVM/HMM/GMM，对 acted 语料有效但对自发情感拉胯；(2)端到端深度学习(CNN-over-spectrogram、attention-LSTM)，到 Wav2Vec2.0/HuBERT 这类 SSL 语音 encoder；(3)多模态(音频+文本 transcript)，Odyssey 2024 挑战赛上一致碾压单模态。本文处在第三段内部，聚焦&quot;frame→utterance 聚合&quot;这个被忽视的子问题。</p>
 <p><strong>Prior work 对照表</strong>:</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>维度</th>
@@ -871,7 +871,7 @@
 <td>用 Bayesian 似然比分析高注意力帧的音素分布，给出&quot;定位到情感区域&quot;的实证</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>本文在 lineage 中的位置</strong>: 三大组件——(a)W2V-BERT 2.0 + DeBERTa v3 + 简单拼接融合，<strong>全部是借来的</strong>，无 encoder 创新；(b)gradual unfreezing 三阶段训练(冻结→解冻上层→全解冻)+ class-weighted focal loss，<strong>借自 ULMFit/Odyssey 2024 的工程经验</strong>，非首创；(c)MQMHA pooling 引入 SER + 注意力音素分析，<strong>是本文真正的 novelty 落点</strong>。所以这是一篇&quot;把成熟组件做系统化 benchmark + 可解释性深挖&quot;的论文，不是架构创新论文。</p>
 <hr />
 <h2 id="3-核心创新我的理解">3. 核心创新（我的理解）</h2>
@@ -916,7 +916,7 @@ Transcript (Whisper-lv3 生成) ──► DeBERTa v3 (同三阶段) ─► Custo
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <p><strong>Table 1: 模态对照(dev set macro F1)</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>Model</th>
@@ -941,10 +941,10 @@ Transcript (Whisper-lv3 生成) ──► DeBERTa v3 (同三阶段) ─► Custo
 <td>0.3559</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>音频(0.2921)&lt;文本(0.3174)&lt;多模态(0.3559)。文本居然比音频强——这说明在自然播客上 transcript 的语义线索相当有用，纯声学 cue 不够。但官方 baseline 0.32 比本文单音频还高，说明本文的&quot;音频 only&quot;配置偏弱(可能受池化默认 average 拖累)。</p>
 <p><strong>Table 2: 池化对照(dev / test macro F1)</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>Pooling</th>
@@ -1004,7 +1004,7 @@ Transcript (Whisper-lv3 生成) ──► DeBERTa v3 (同三阶段) ─► Custo
 <td>—</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>最醒目三点:</p>
 <ol>
 <li>AS 相对 average +3.25 个点(0.3559→0.3884)，attention 确实比静态聚合强。</li>

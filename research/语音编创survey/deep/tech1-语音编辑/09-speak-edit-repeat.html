@@ -839,7 +839,7 @@
 <hr />
 <h2 id="2-背景与前置工作">2. 背景与前置工作</h2>
 <p><strong>NCLM（神经编解码语言模型）与语音编辑 lineage</strong>（论文第2节）：</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>代际</th>
@@ -893,7 +893,7 @@
 <td><strong>长文本 TTS 仍有 gap、未测极长</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>三大未解痛点（论文归纳）</strong>：① Transformer 二次复杂度限制上下文窗口；② 评测协议只测短编辑 span（UniCATS&lt;2s），不测真实多词短语；③ 无机制利用语言学增强输入（韵律标注文本）引导上下文感知修改。</p>
 <p><strong>本作在 lineage 中的位置</strong>：MAVE 是首个把结构化状态空间模型（SSM/Mamba）成功用于文本条件语音生成（编辑+TTS）的工作。区别于 CM-Mamba（要求文本/音频等长，需 padding 或下采样），MAVE 用<strong>显式 cross-attention 模块</strong>实现长度无关的文本→音频条件，解耦于自回归音频状态演化。infilling 用 CM3 式因果掩码+token 重排；codec 用 X-Codec；训练用 GigaSpeech（9k 小时）；评测用 RealEdit（VoiceCraft 基准）+ LibriTTS。</p>
 <hr />

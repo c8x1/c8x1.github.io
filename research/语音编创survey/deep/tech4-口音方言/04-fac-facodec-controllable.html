@@ -837,7 +837,7 @@ Demo: https://claussss.github.io/accent_control_demo/
 <p>实验在 L2-Arctic（6 种非母语口音、24 说话人）上证明：从 reconstruction 到 t_start=100，美式口音分类器分数从 70.51 涨到 89.86（+19.35），说话人相似度从 0.98 降到 0.88（-0.10），WER 从 0.05 升到 0.15（+0.10）；与三个基线（[15] 仅改发音、[6]/[16] 重生成韵律）对比，本文在说话人相似度上更优、WER 相当或更低，但口音分类分数偏低（因为不改韵律）。MUSHRA-like 主观测试（13 人）确认 t_start 升高时感知上更接近母语且呈平滑梯度。<strong>核心卖点不是 SOTA 口音转换，而是 &quot;可控&quot; 这一维度本身</strong>——这是首个让用户拧旋钮调口音强度的工作。</p>
 <h2 id="2-背景与前置工作对比表">2. 背景与前置工作（对比表）</h2>
 <p>口音转换 (AC) 旨在把说话人口音转向目标口音同时保持身份；外国口音转换 (FAC) 专指把非母语口音转为母语。难点在于：(1) 改口音会改变听感身份，需平衡修改与保持；(2) 大规模平行 L1-L2 语料稀缺；(3) 不同应用（语言学习 vs 配音 vs 个人通信）对平衡点需求不同。</p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>工作</th>
@@ -914,7 +914,7 @@ Demo: https://claussss.github.io/accent_control_demo/
 <td><strong>不需平行加重音</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>前置关键技术：FACodec [10]（NaturalSpeech 3 的分解式编解码器）把波形编码为 h，再分解为 content (z_c=z_c1+z_c2)、prosody (z_p)、acoustic detail (z_d) 和全局音色 g；本文只动 z_c1，其余全固定，使口音修改聚焦于段发音层面而不碰韵律/音色。</p>
 <p><div class="callout callout-info"></p>
 <h2 id="3-核心创新笔者解读">3. 核心创新（笔者解读）</h2>
@@ -964,7 +964,7 @@ Demo: https://claussss.github.io/accent_control_demo/
 <p>关键点：t_start 同时是后验似然方差 (1-ᾱ_{t_start})I 的开关——小→窄似然→锚定非母语；大→宽似然→偏母语先验。逐帧独立采样保证平滑梯度。</p>
 <h2 id="5-关键证据醒目数字">5. 关键证据（醒目数字）</h2>
 <p><strong>可控性主表 (L2-Arctic, Table 1, 平均)：</strong></p>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>条件</th>
@@ -1005,7 +1005,7 @@ Demo: https://claussss.github.io/accent_control_demo/
 <td>89.86 (+20.09)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li>从 reconstruction 到 t_start=100：<strong>Acc +19.35、SS −0.10、WER +0.10</strong>，三者随 t_start 平滑单调变化，确认细粒度控制有效。</li>
 <li>单口音亮点：<strong>Hindi</strong> 从 10.30 涨到 76.63（+70.61 Δ），是转换最剧烈的口音；<strong>Vietnamese</strong> 从 60.97 到 88.58（+35.49）；而 <strong>Korean/Spanish</strong> 初始已高（97.42/91.16），大 t_start 反而略降（Korean −8.51）——说明初始口音越接近目标，旋钮收益越小甚至负。</li>

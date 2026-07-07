@@ -857,7 +857,7 @@ arXiv: <a href="https://arxiv.org/abs/2510.02187" target="_blank" rel="noopener"
 <h3 id="范式背景">范式背景</h3>
 <p>scaling law 在 NLP/CV/音频生成（AudioLM、MusicGen、Gemini）上证明模型与数据规模可自然提升保真与泛化。但 SE 仍由时域（Conv-TasNet、Demucs、DCCRN）或条件架构主导。LM-SE 多用 16 kHz 低采样率 codec + 多阶段/条件流水线。</p>
 <h3 id="前置工作对比表">前置工作对比表</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>维度</th>
@@ -904,7 +904,7 @@ arXiv: <a href="https://arxiv.org/abs/2510.02187" target="_blank" rel="noopener"
 <td><strong>DAC（高保真）</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3 id="本作在谱系中的位置">本作在谱系中的位置</h3>
 <p><strong>继承自</strong>：(a) AR LM on discrete audio tokens 范式（AudioLM、MusicGen 的 flatten RVQ 策略）；(b) LM-SE 路线（SELM、LLaSE-G1）；(c) DAC 高保真 codec（Kumar et al. NeurIPS 2023）。</p>
 <p><strong>新增为本作独有</strong>：(a) 首个直接在 44.1 kHz DAC token 上做 SE 的框架；(b) 抛弃语义编码器，纯 NAC 表示；(c) flatten 9 codebook 成单序列（774 token/秒）而非分 codebook 聚合；(d) 两阶段训练（多任务→逐任务微调同一模型）解决任务间梯度尺度不均；(e) 用 scaling law 叙事（1B + 50 亿 token + 12 小时 H200）替代领域特定架构改动。</p>
@@ -957,7 +957,7 @@ arXiv: <a href="https://arxiv.org/abs/2510.02187" target="_blank" rel="noopener"
 <hr />
 <h2 id="5-关键证据">5. 关键证据</h2>
 <h3 id="table-2hifitts-2-测试集客观--mushra-主观">Table 2：HiFiTTS-2 测试集（客观 + MUSHRA 主观）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1034,10 +1034,10 @@ arXiv: <a href="https://arxiv.org/abs/2510.02187" target="_blank" rel="noopener"
 <td><strong>58.3</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>关键读数：(i) MUSHRA 58.3 大幅领先；(ii) PESQ 2.46 远低于 Clean 4.50，且 BAK 3.70 低于 VoiceFixer 3.90——<strong>背景噪声压制并非最强</strong>；(iii) WER 0.25 与 Noisy 持平，未改善 ASR 下游（生成式内容漂移隐患）；(iv) S-BERTS 0.89 与 Noisy 相同，语义保真无提升。</p>
 <h3 id="table-3icassp-2022-plc-挑战盲测">Table 3：ICASSP 2022 PLC 挑战（盲测）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1057,10 +1057,10 @@ arXiv: <a href="https://arxiv.org/abs/2510.02187" target="_blank" rel="noopener"
 <td><strong>4.34</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>DAC-SE1 PLCMOS 4.34 略胜，但 OVRL 3.12 低于 LLaSE-G1 multi 3.27。</p>
 <h3 id="table-4icassp-2023-dns-挑战盲测pdnsmos">Table 4：ICASSP 2023 DNS 挑战（盲测，pDNSMOS）</h3>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>模型</th>
@@ -1089,11 +1089,11 @@ arXiv: <a href="https://arxiv.org/abs/2510.02187" target="_blank" rel="noopener"
 <td>3.63</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><div class="callout callout-info"><strong>DAC-SE1 在公开 DNS 挑战上 OVRL 3.63 &lt; LLaSE-G1 3.72 &lt; TEA-PSE 3.65</strong>，作者表述&quot;on par with strong published baselines&quot;。<strong>笔者解读</strong>：这是本文最该被审视之处——scaling law 叙事在自家 HiFiTTS-2 子集上成立，在公开 DNS 盲测上并不占优。</div></p>
 <hr />
 <h2 id="6-解决的场景">6. 解决的场景</h2>
-<table class="gfm-table">
+<div class="table-wrap"><table class="gfm-table">
 <thead>
 <tr>
 <th>场景</th>
@@ -1130,7 +1130,7 @@ arXiv: <a href="https://arxiv.org/abs/2510.02187" target="_blank" rel="noopener"
 <td>MUSHRA 58.3 领先</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <hr />
 <h2 id="7-局限">7. 局限</h2>
 <ol>
