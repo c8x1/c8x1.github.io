@@ -37,6 +37,15 @@ echo "[$(date '+%Y-%m-%d %H:%M:%S')] 开始每日文章归档..." | tee "$LOG_FI
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] PROJECT_DIR=$PROJECT_DIR" | tee -a "$LOG_FILE"
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] CLAUDE=$CLAUDE" | tee -a "$LOG_FILE"
 
+# 代理预检：调研步 curl 维基 + 抓 3:AM 都依赖 7897。没起就跳过当天，不产半成品。
+# 设 NO_PROXY=1 可跳过本检查（仅在不需要外网时）。
+if [ -z "${NO_PROXY:-}" ]; then
+  if ! nc -z 127.0.0.1 7897 2>/dev/null; then
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] 代理 127.0.0.1:7897 未运行，跳过今日归档（避免半成品）。启 Clash 后可手动 ./scripts/daily-articles.sh 补跑。" | tee -a "$LOG_FILE"
+    exit 0
+  fi
+fi
+
 cd "$PROJECT_DIR"
 
 # 先同步远端（trending cron 可能已推送 data/ 改动）
@@ -69,9 +78,11 @@ REMOTE=$(git rev-parse origin/master 2>/dev/null || echo "none")
 
 if [ "$LOCAL" != "$REMOTE" ]; then
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] 检测到未推送的提交, 尝试 push..." | tee -a "$LOG_FILE"
+  # 主 push：~/.ssh/config 已把 github.com 映射到 ssh.github.com:443 直连
   git push origin master 2>&1 | tee -a "$LOG_FILE" || {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] git push 失败, 使用代理重试..." | tee -a "$LOG_FILE"
-    https_proxy="$https_proxy" http_proxy="$http_proxy" git push origin master 2>&1 | tee -a "$LOG_FILE"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] 直连 push 失败, 经 Clash SOCKS5 (ssh.github.com:443) 重试..." | tee -a "$LOG_FILE"
+    GIT_SSH_COMMAND="ssh -o HostName=ssh.github.com -o Port=443 -o ProxyCommand='nc -X 5 -x 127.0.0.1:7897 %h %p'" \
+      git push origin master 2>&1 | tee -a "$LOG_FILE"
   }
   PUSH_EXIT=$?
   if [ $PUSH_EXIT -ne 0 ]; then
