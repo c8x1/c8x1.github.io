@@ -791,17 +791,359 @@
       <main class="content">
         <article class="md-body">
         <h1 id="语音编创精选-2025h22026h1--总览">语音编创精选 2025H2~2026H1 · 总览</h1>
-<h2 id="一执行摘要">一、执行摘要</h2>
-<p>本总览基于 <a href="../papers-2025H2-2026/%E7%B2%BE%E9%80%89-%E7%BC%96%E5%88%9B-2025H2-2026.md">精选-编创-2025H2-2026.md</a>（97 篇、6 个编创任务类、arXiv ID 与引用数均经 Semantic Scholar 核实），从约 3245 篇语音相关论文经分层评分 + 路线去重 + 口径收紧（speech-LM/多模态按场景并入 6 任务类、纯生成/对话/理解移出非编创）精选而来。</p>
-<p>口径：<strong>编创 = 生成/编辑/变换/克隆（纯语音，不含歌声）</strong>；speech-LM/语音多模态是范式而非任务，已按实际场景并入 6 任务类或移出非编创。6 类：语音编辑、VC/声音克隆、情感/韵律、口音/方言、生成式增强、分离/TSE。</p>
-<p>跨方向三条主线（据 6 个 tech 页深读实证修正，每条标注代表 arXiv ID 与限定条件）：</p>
-<p>先说清几个术语：流匹配（flow matching，用向量场学从噪声到目标的连续形变路径，比扩散省步数）、RL（强化学习，让模型自己跟自己比来对齐偏好）、codec（把语音压成离散码本的神经编解码器）、SSL（自监督学习，先在海量无标注语音上预训练表征）、training-free（不重训母体模型，靠推理时操控激活/嵌入来改输出）。</p>
-<p>(1)<strong>效率路线（流匹配/单步/滑窗/RL 后训练）是本周期最密集集群，并非&quot;RL 是最强趋势&quot;</strong>。tech5 实证：FlowSE（rectified flow, <a href="https://arxiv.org/abs/2505.19476" target="_blank" rel="noopener">2505.19476</a>）RTF 0.31 vs 扩散 3.27-3.49；单步 MeanFlowSE（<a href="https://arxiv.org/abs/2509.14858" target="_blank" rel="noopener">2509.14858</a>）NFE=1/RTF 0.11 但 PESQ 塌陷至 2.942；Diffusion Buffer（<a href="https://arxiv.org/abs/2506.02908" target="_blank" rel="noopener">2506.02908</a>）滑窗把延迟压到 320-960ms，只适合广播、不够通话。RL 只是其中一条正交线：FlowSE-GRPO（<a href="https://arxiv.org/abs/2601.16483" target="_blank" rel="noopener">2601.16483</a>）5k 步 LoRA 超 20k 步 DPO，<strong>但评测依赖 DNSMOS 自评自训、缺人评 MOS、存在&quot;用神经网络评神经网络&quot;的确认偏差</strong>，且实证&quot;单指标奖励必被黑客&quot;须对 DNSMOS 压权。编辑侧 RL 渗透也要限定：06-Edit-Content-Preserve（<a href="https://arxiv.org/abs/2602.00560" target="_blank" rel="noopener">2602.00560</a>）用预训练 TTS 条件似然当 reward 的 GRPO 把删除 WER 压到 0.47%，07-Step-Audio-EditX（<a href="https://arxiv.org/abs/2511.03601" target="_blank" rel="noopener">2511.03601</a>）走 token 级 reward+PPO，但两者&quot;imperceptible/编辑&quot;分别被证为仅 15 人 MOS 的自然度主张与&quot;实为 conditional regeneration&quot;。<strong>所以 RL 是渗透编辑与增强的范式之一，但密集度与可信度都不如效率路线</strong>。</p>
-<p><div class="callout callout-danger">(2)<strong>评测基准系统化 + &quot;改对 vs 保住&quot;度量分离 + 评测回路自我参照普遍被实证纠偏</strong>。SpeechEditBench（<a href="https://arxiv.org/abs/2606.01804" target="_blank" rel="noopener">2606.01804</a>）用 anchor-based TS/PS/JS 三指标揭穿&quot;波形匹配评编辑&quot;的错误范式，最锐利的发现是 target-only vs joint 的鸿沟（target 77.5% 但 joint 0.50%）——&quot;改了但毁了一切&quot;，复合编辑三元组 joint 全 0。URGENT 2025（<a href="https://arxiv.org/abs/2505.23212" target="_blank" rel="noopener">2505.23212</a>）用 32 系统实证&quot;DNSMOS 被生成式幻觉欺骗&quot;——T13 日语 CAcc 36.8%（低于噪声 74.5%）却仍得 DNSMOS 3.07 高分。MULTI-Bench（<a href="https://arxiv.org/abs/2511.00850" target="_blank" rel="noopener">2511.00850</a>）揭示 GPT-4o 多选副语言 hard 全对率仅 17.84%。CAMEO（<a href="https://arxiv.org/abs/2505.11051" target="_blank" rel="noopener">2505.11051</a>）实证 AudioLLM zero-shot SER 最佳 macro-F1 仅 0.2023（7 类随机≈0.14）且存在数据污染。<strong>共性红线</strong>：SpeechEditBench 用 Gemini-2.5-pro 当判官而 Gemini-Live 同是被测（同族利益冲突未讨论）、MULTI-Bench LLM 既当环境又当裁判、FlowSE-GRPO DNSMOS 自评自训——&quot;评测回路自我参照 + cherry-picking 分母&quot;跨 tech1/tech3/tech5 普遍。</div></p>
-<p>(3)<strong>training-free 操控成低成本切入路径，但天花板低且常被过度宣称</strong>。tech2 LinearVC（<a href="https://arxiv.org/abs/2506.01510" target="_blank" rel="noopener">2506.01510</a>）单一线性投影+Procrustes 即打平 kNN-VC（实证&quot;旋转+反射&quot;是换音色主几何操作、content 子空间 rank≈16/speaker rank≈100）。tech3 EmoShift（<a href="https://arxiv.org/abs/2601.22873" target="_blank" rel="noopener">2601.22873</a>）10M 参数激活转向超 311M 全量微调（但 α=3&quot;Best&quot;以 WER 7.90→11.60 恶化为代价）。tech4 Activation Steering（<a href="https://arxiv.org/abs/2603.05813" target="_blank" rel="noopener">2603.05813</a>）小样本(&lt;100)免训练降 LALM WER 碾压 PEFT（但样本~800 时 PEFT 反超，存在 crossover）。tech1 Counterfactual Activation Editing（<a href="https://arxiv.org/abs/2506.00832" target="_blank" rel="noopener">2506.00832</a>）/CodecSep（<a href="https://arxiv.org/abs/2509.11717" target="_blank" rel="noopener">2509.11717</a>）不重训母体做编辑/分离。<strong>共性限定</strong>：多数仅单骨干验证（02 仅 Tacotron2 28M、04 仅 Qwen2-Audio 7B）、向量级编辑特征纠缠（调 duration 影响 pitch）、评测放大效应（balanced 子集绝对降幅需打折）。</p>
 <blockquote>
-<p>⚠ 各子 tech md 已含&quot;方向概览（深读实证重写）+ 论文清单 + 论文深度分析（9 节）&quot;。本总览的跨方向结论与各 tech 页方向概览一致；对原总览中与深读证据不符的过度表述（如&quot;RL 是最强趋势&quot;&quot;统一潜空间吞并专用模型&quot;）已逐项加限定或改正，详见下方四、横切洞察。</p>
+<p>本总览基于 <a href="../papers-2025H2-2026/%E7%B2%BE%E9%80%89-%E7%BC%96%E5%88%9B-2025H2-2026.md">精选-编创-2025H2-2026.md</a>（97 篇、6 个编创任务类、arXiv ID 经 Semantic Scholar 核实），并叠加两份网络调研素材（行业/市场，2026-07-07；竞争/自己/机会，97 篇深读提炼）合成&quot;五看三定&quot;战略洞察。
+口径：<strong>编创 = 生成/编辑/变换/克隆（纯语音，不含歌声）</strong>；speech-LM/语音多模态是范式而非任务，已按场景并入 6 任务类或移出非编创。</p>
 </blockquote>
+<h2 id="一五看三定战略洞察与决策">一、五看三定（战略洞察与决策）</h2>
+<blockquote>
+<p>视角背景：作者为音频 OS 框架开发，正转 Cortex-M 音频硬件（端侧/低延迟/嵌入式）。&quot;看自己&quot;与&quot;定战略控制点&quot;带这个视角。
+写法：每条先给一句话结论，再展开；arXiv ID 与来源 URL 一个不丢；未核实的老实标&quot;未核实&quot;。</p>
+</blockquote>
+<h3 id="五看">五看</h3>
+<h4 id="看行业起量确定精确规模不可核实价值链已分层资本过热政策收紧">看行业：起量确定，精确规模不可核实；价值链已分层、资本过热、政策收紧</h4>
+<p><strong>一句话结论：语音编创赛道&quot;起量&quot;信号确凿（ElevenLabs 三年估值从 $2M 拉到 $11B），但市场研究机构的精确规模数字本会话无法一手核实——只敢说&quot;起量&quot;，不敢说&quot;多大&quot;。价值链已分成基础模型/平台API/终端应用三层，资本在追统一化大模型，政策（EU AI Act、中国深度合成规定、美国 robocall 执法）同步收紧。</strong></p>
+<ul>
+<li><strong>规模与增速（精确数字未核实）</strong>：Grand View Research 的 TTS 报告页 Wayback 快照显示&quot;information being developed&quot;——GVR 当前未公开 TTS 报告正文 <code>[来源: https://web.archive.org/web/20250912232141/https://www.grandviewresearch.com/industry-analysis/text-to-speech-market]</code>；Mordor/Fortune/Allied 均以 Cloudflare JS 挑战拦截 curl <code>[来源: https://www.fortunebusinessinsights.com/text-to-speech-tts-market-101795 → 403]</code>；Statista 页 JS 渲染无静态数字；WebSearch 反复返回无来源模型估算（如&quot;TTS ~$2-4B、CAGR 15-20%&quot;），<strong>不采用</strong>。<strong>可核实的体量信号（非市场规模）</strong>：ElevenLabs 自 2023-01 至 2025-01 两年内用户生成&quot;1000 年的音频内容&quot;，员工覆盖 60%+ 财富 500 强，Conversational AI 上线两月即被构建 25 万+ 语音 agent <code>[来源: https://elevenlabs.io/blog/series-c]</code>。<strong>老实说</strong>：无一手核实数据，但可佐证起量。</li>
+<li><strong>价值链分层</strong>：基础模型/语音 LLM 层——OpenAI Realtime API（语音 agent/实时翻译/WebRTC/WS/SIP 多接入）<code>[来源: https://platform.openai.com/docs/guides/realtime]</code>；Microsoft Azure Neural TTS（100+ 语言/区域 + Custom Voice 责任使用准入）<code>[来源: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech]</code>；Amazon Polly（2016-11 上线，41 语言变体/100+ 音色，客户 Duolingo）<code>[来源: https://en.wikipedia.org/wiki/Amazon_Polly]</code>；阿里 FunAudioLLM/CosyVoice（22k★ GitHub，Fun-CosyVoice 3.0 覆盖 9 语种 + 18+ 中国方言）<code>[来源: https://github.com/FunAudioLLM/CosyVoice]</code>。平台/API 层——ElevenLabs 三平台同源（ElevenCreative + ElevenAgents + ElevenAPI，70+ 语言，Voice Library 5000+ 共享音色分成超 $2M）<code>[来源: https://elevenlabs.io]</code>。终端应用层——客户矩阵覆盖技术（NVIDIA/Perplexity/Synthesia/HeyGen）、媒体（Bertelsmann/ESPN/Aston Martin F1）、出版（TIME/The New Yorker/Harper Collins/Washington Post）、游戏（Inworld/Paradox Interactive/Don't Nod）、教育（Chess.com/SchoolAI）<code>[来源: https://elevenlabs.io/blog/series-c]</code>。音乐生成同源外溢——Suno（2023-12 上线，v5.5 于 2026-03-26 发布）<code>[来源: https://en.wikipedia.org/wiki/Suno_AI]</code>；Udio（2024-04 公测，前 DeepMind 团队）<code>[来源: https://en.wikipedia.org/wiki/Udio]</code>。</li>
+<li><strong>技术轨迹</strong>：经典演进 = 拼接式 → 共振峰 → 发音 → HMM → 正弦 → 深度学习 → 音频深度伪造/voice cloning，经典 TTS 三模块=文本分析+声学模型+声码器 <code>[来源: https://en.wikipedia.org/wiki/Speech_synthesis]</code> <code>[来源: https://en.wikipedia.org/wiki/Audio_deepfake]</code>。零样本/语音 LLM 时代——CosyVoice 即&quot;基于 LLM 的 TTS&quot;，主打 zero-shot 多语 in-the-wild <code>[来源: https://github.com/FunAudioLLM/CosyVoice]</code>。可控/编辑/agent 演进——ElevenLabs 已从 TTS 演进到 Conversational AI（实时语音 agent）、Voice Design（文本描述生成音色）、Sound Effects、Dubbing Studio（32 语种保原声）、Flash Model（75ms 模型延迟）<code>[来源: https://elevenlabs.io/blog/series-c]</code>；OpenAI Realtime 走原生音频（非 STT→LLM→TTS 管线），支持打断/情绪检测 <code>[来源: https://platform.openai.com/docs/guides/realtime]</code>。声音克隆精度——ElevenLabs IVC 仅需 10 秒样本，PVC &quot;几乎与原声不可区分&quot;，克隆音可说 32+ 语种 <code>[来源: https://elevenlabs.io/voice-cloning]</code>。</li>
+<li><strong>资本/玩家动向（逐轮可核实）</strong>：ElevenLabs 融资轨迹——2023-01 $2M pre-seed → 2023-06 $19M Series A（估值 $100M）→ 2024-01-22 $80M Series B（$1.1B）→ 2025-01-30 $180M Series C（$3.3B，累计 $281M）→ 2025-09 员工 tender offer（$6.6B）→ <strong>2026-02-04 $500M Series D，估值 $11B，Sequoia 领投，明确 build toward IPO</strong>，纽约扩点 + $33M 研发投入，员工 400 <code>[来源: https://sifted.eu/articles/elevenlabs-raises-500m-series-d-led-by-sequoia]</code> <code>[来源: https://en.wikipedia.org/wiki/ElevenLabs]</code>；Sifted 另报道据报寻求 $22B 估值售股（早期洽谈）<code>[来源: https://sifted.eu/articles/elevenlabs-raises-500m-series-d-led-by-sequoia]</code>。Suno——2023-04 开源 Bark、2023-12 集成 Microsoft Copilot、v3/v4/v4.5/v5.5 递进 <code>[来源: https://en.wikipedia.org/wiki/Suno_AI]</code>。版权诉讼——2024-06 RIAA 起诉 Suno 与 Udio 索赔每作品最高 $150,000；2025-11 Suno 与 Warner Music Group 达成 <strong>$500M 和解</strong>，获 WMG 曲库训练授权 <code>[来源: https://en.wikipedia.org/wiki/Suno_AI]</code> <code>[来源: https://en.wikipedia.org/wiki/Udio]</code>。中国厂商开源——阿里 FunAudioLLM 开源 CosyVoice/CosyVoice 2.0/Fun-CosyVoice 3.0（Apache-2.0）<code>[来源: https://github.com/FunAudioLLM/CosyVoice]</code>。<strong>注</strong>：字节/腾讯/百度 TTS 开源细节未核实到官方一手页面——标&quot;未核实&quot;。</li>
+<li><strong>政策/伦理</strong>：欧盟 AI Act（Regulation (EU) 2024/1689，2024-08-01 生效，分级 + 通用 AI 透明度义务，与 GDPR/DSA 并列）<code>[来源: https://en.wikipedia.org/wiki/EU_AI_Act]</code>；中国深度合成规定被 Wikipedia 列为与 deepfake 直接相关主要监管框架之一（具体条款未抓到网信办一手原文——未核实）<code>[来源: https://en.wikipedia.org/wiki/Deepfake]</code>；美国音频 deepfake 执法——2024 新罕布什尔州冒充拜登 robocall 劝阻投票，音频专家认定使用 ElevenLabs，FCC 拟对责任方罚 $6M、对中转商 Lingo Telecom 罚 $2M <code>[来源: https://en.wikipedia.org/wiki/Deepfake]</code> <code>[来源: https://en.wikipedia.org/wiki/ElevenLabs]</code>；行业自律——ElevenLabs 设 AI Speech Classifier（检测）、Voice Library 分成、Impact Program + ALS 语音恢复 <code>[来源: https://en.wikipedia.org/wiki/ElevenLabs]</code>；声音克隆 deepfake 全球诈骗损失 Wikipedia 转引估算 $12B、未来三年或达 $40B（<strong>Wikipedia 转引、非一手源——未核实-转引</strong>）<code>[来源: https://en.wikipedia.org/wiki/Deepfake]</code>。</li>
+</ul>
+<h4 id="看市场六大场景已商用产品矩阵成型未满足需求集中在实时方言编辑精度版权检测端侧">看市场：六大场景已商用、产品矩阵成型，未满足需求集中在实时/方言/编辑精度/版权检测/端侧</h4>
+<p><strong>一句话结论：内容创作/游戏/客服语音 agent/多语配音/无障碍医疗/教育六大场景已被 ElevenLabs 等跑通商用，但&quot;实时通话级延迟&quot;&quot;方言小语种&quot;&quot;细粒度情感编辑&quot;&quot;声音版权与 deepfake 检测&quot;&quot;端侧离线&quot;五块仍是公开未满足需求——其中&quot;端侧离线&quot;恰好与作者 Cortex-M 转型对口。</strong></p>
+<ul>
+<li><strong>内容创作（有声书/播客/配音）</strong>：作者/出版商用 PVC 做有声书 narration 省棚录；播客用克隆音修错/加段/整集生成；YouTube/社媒 voiceover 扩产；出版客户含 TIME、The New Yorker、Harper Collins、Washington Post、The Atlantic、Storytel <code>[来源: https://elevenlabs.io/voice-cloning]</code> <code>[来源: https://elevenlabs.io/blog/series-c]</code>。</li>
+<li><strong>游戏</strong>：开发者用克隆生成 NPC/主角对白带情绪深度；客户含 Inworld、Paradox Interactive、Magicave、Don't Nod、AMGI Studios <code>[来源: https://elevenlabs.io/voice-cloning]</code> <code>[来源: https://elevenlabs.io/blog/series-c]</code>。</li>
+<li><strong>客服/呼叫中心/语音 agent</strong>：ElevenLabs Conversational AI 上线两月即被构建 25 万+ 语音 agent（客服/销售/营销/内通）；客户含 Cognigy、Retell AI、Vapi、Parloa、EliseAI <code>[来源: https://elevenlabs.io/blog/series-c]</code>。</li>
+<li><strong>多语配音/本地化</strong>：Dubbing Studio 支持 32 语种保原声翻译与编辑；已本地化 100 万+ 小时音频 <code>[来源: https://elevenlabs.io/blog/series-c]</code>。</li>
+<li><strong>无障碍/医疗（语音恢复）</strong>：与 Bridging Voice、Scott Morgan Foundation 合作为 1000+ ALS 等言语障碍者恢复声音；2026-03 承诺 $1B 免费语音恢复技术给 100 万永久失声者 <code>[来源: https://elevenlabs.io/blog/series-c]</code> <code>[来源: https://en.wikipedia.org/wiki/ElevenLabs]</code>。</li>
+<li><strong>教育</strong>：Chess.com、SchoolAI、Synthesis、Articulate、Praktika <code>[来源: https://elevenlabs.io/blog/series-c]</code>；Amazon Polly 被 Duolingo 用于语言学习 <code>[来源: https://en.wikipedia.org/wiki/Amazon_Polly]</code>；ElevenLabs ElevenReader 已朗读 100 万+ 小时文本 <code>[来源: https://elevenlabs.io/blog/series-c]</code>。</li>
+<li><strong>音乐生成消费者</strong>：Suno 用户 imoliver 2025-07 与 Hallwood Media 签约（首例传统厂牌签 AI 创作者），AI 艺人 Xania Monet 后以 $3M 签约 Hallwood <code>[来源: https://en.wikipedia.org/wiki/Suno_AI]</code>。</li>
+<li><strong>商用产品矩阵</strong>：</li>
+</ul>
+<table class="gfm-table">
+<thead>
+<tr>
+<th>公司/产品</th>
+<th>定位</th>
+<th>关键事实</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ElevenLabs</td>
+<td>平台/API + 语音 agent（全栈）</td>
+<td>ElevenCreative/ElevenAgents/ElevenAPI；70+ 语种；IVC 10s/PVC 超写实；Flash 75ms 延迟；$11B 估值（2026-02）</td>
+<td>elevenlabs.io / sifted.eu</td>
+</tr>
+<tr>
+<td>OpenAI</td>
+<td>基础模型 + Realtime 语音 agent</td>
+<td>原生音频、实时翻译、WebRTC/WS/SIP；语音生成</td>
+<td>platform.openai.com/docs/guides/realtime</td>
+</tr>
+<tr>
+<td>Microsoft Azure</td>
+<td>云 TTS + Custom Voice</td>
+<td>Neural TTS 100+ 语言；标准 + 责任使用 Custom Voice；实时 + 长音频批合成</td>
+<td>learn.microsoft.com</td>
+</tr>
+<tr>
+<td>Amazon Polly</td>
+<td>云 TTS（API）</td>
+<td>2016-11 上线；41 语言变体/100+ 音色；客户 Duolingo</td>
+<td>en.wikipedia.org/wiki/Amazon_Polly</td>
+</tr>
+<tr>
+<td>阿里 CosyVoice</td>
+<td>开源语音 LLM</td>
+<td>Apache-2.0；9 语种 + 18+ 方言；零样本多语/跨语克隆；3.0 为最新</td>
+<td>github.com/FunAudioLLM/CosyVoice</td>
+</tr>
+<tr>
+<td>Suno</td>
+<td>生成式音乐（含人声）</td>
+<td>2023-12 上线；v5.5（2026-03）；与 WMG $500M 和解；曾集成 Microsoft Copilot</td>
+<td>en.wikipedia.org/wiki/Suno_AI</td>
+</tr>
+<tr>
+<td>Udio</td>
+<td>生成式音乐</td>
+<td>2024-04 公测；前 DeepMind 团队；a16z 投资</td>
+<td>en.wikipedia.org/wiki/Udio</td>
+</tr>
+<tr>
+<td>ElevenLabs ElevenReader</td>
+<td>C 端阅读 App</td>
+<td>电子书/PDF/新闻转音频</td>
+<td>elevenlabs.io/blog/series-c</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>注：Murf、Play.ht、Resemble AI、Descript（Lyrebird）、字节豆包/火山引擎、腾讯、百度——Wikipedia 无独立条目或占位、官网未在本会话抓取——<strong>未核实</strong>，不下结论。</p>
+</blockquote>
+<ul>
+<li><strong>未满足需求</strong>：实时低延迟——ElevenLabs Flash 主打 75ms 模型延迟（行业前沿），OpenAI 走原生音频降端到端延迟，&quot;实时对话级&quot;仍是各家主攻点 <code>[来源: https://elevenlabs.io/blog/series-c]</code> <code>[来源: https://platform.openai.com/docs/guides/realtime]</code>。方言/小语种——CosyVoice 3.0 显式覆盖 18+ 中国方言折射通用模型对小语种覆盖仍是痛点 <code>[来源: https://github.com/FunAudioLLM/CosyVoice]</code>；ElevenLabs 印度团队专攻 Indic 语种 <code>[来源: https://elevenlabs.io/blog/series-c]</code>。情感可控/编辑精度——ElevenLabs Voice Design（文本描述生成音色）、可调语速/能量/清晰度/情绪；CosyVoice 强调韵律自然度——细粒度情感与编辑控制仍是竞争高地 <code>[来源: https://elevenlabs.io/voice-cloning]</code> <code>[来源: https://github.com/FunAudioLLM/CosyVoice]</code>。声音版权与同意权/合成媒体检测——RIAA 起诉 Suno/Udio、Suno 与 WMG $500M 和解暴露训练数据合法性与声音权属张力 <code>[来源: https://en.wikipedia.org/wiki/Suno_AI]</code>；AI Speech Classifier + 新罕布什尔 robocall 引发 FCC 重罚——deepfake 检测与同意权机制仍在搭建 <code>[来源: https://en.wikipedia.org/wiki/ElevenLabs]</code> <code>[来源: https://en.wikipedia.org/wiki/Deepfake]</code>。deepfake 检测——Wikipedia 列 audio deepfake 三类（replay/synthetic/imitation）与对应检测法，检测仍为开放挑战 <code>[来源: https://en.wikipedia.org/wiki/Audio_deepfake]</code>。<strong>端侧/离线——本会话未抓到主流厂商端侧/离线 TTS 一手发布页——未核实（这正是作者要切入的空白）</strong>。</li>
+</ul>
+<h4 id="看竞争大厂卷统一化学术卷精控端侧派是被忽视的差异化赛道agent-闭环几乎空白">看竞争：大厂卷统一化、学术卷精控、端侧派是被忽视的差异化赛道、agent 闭环几乎空白</h4>
+<p><strong>一句话结论：竞品分四派——大厂&quot;统一化派&quot;（Qwen3-Omni/MiMo-Audio/Step-Audio/VoxCPM/Ming-UniAudio/MGM-Omni/MM-Sonate）卷一个模型打天下但深读实证&quot;统一有代价&quot;；学术&quot;精控派&quot;在分解潜空间/激活方向做旋钮但强度可控以可懂度为代价；&quot;端侧/低延迟派&quot;（MeanVC/LinearVC/CodecSep/2S-AVTSE）是最可下沉 Cortex-M 的一脉却最不被卷；&quot;agent 闭环派&quot;——97 篇里几乎没有真正闭环工作，是最大空白。</strong></p>
+<ul>
+<li><strong>大厂技术报告型玩家</strong>：</li>
+</ul>
+<table class="gfm-table">
+<thead>
+<tr>
+<th>玩家</th>
+<th>arXiv ID</th>
+<th>定位</th>
+<th>强项（实证）</th>
+<th>短板（实证）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Qwen3-TTS</td>
+<td><a href="https://arxiv.org/abs/2601.15621" target="_blank" rel="noopener">2601.15621</a></td>
+<td>开源 TTS 新标杆，双 tokenizer 矩阵+MTP</td>
+<td>test-en WER 1.24 SOTA、10 语 SIM 全 SOTA、首包 97ms；Apache 2.0 开权重+tokenizer</td>
+<td>无 Limitations 章节；日语系统性偏弱（zh-to-ja 8.40 vs CosyVoice3 7.08）；DPO/GSPO/thinking 三后训练无消融；97ms 是低并发理想值（并发 6 涨到 299ms）；长语音只评 WER 不评音色漂移</td>
+</tr>
+<tr>
+<td>MiMo-Audio</td>
+<td><a href="https://arxiv.org/abs/2512.23808" target="_blank" rel="noopener">2512.23808</a></td>
+<td>1 亿小时 scaling-law/emergence 实证，&quot;语音=文本 next-token&quot;推到极致</td>
+<td>0.7T tokens 后 VC/翻译 few-shot 涌现（InstructTTS-EN 72.59 超 GPT-4o-mini-tts）；开源权重+SpeechMMLU 评测套件</td>
+<td>&quot;无损压缩=涌现&quot;因果未证（无有损 tokenizer 反事实对照）；tokenizer 带宽对比不公平；Base VC 只给 16-shot 没 zero-shot；VC 相似度纵轴仅 30-40%；对话音色不连续、易读错符号/公式；thinking 在 sound/music 上反而掉点</td>
+</tr>
+<tr>
+<td>Step-Audio-EditX</td>
+<td><a href="https://arxiv.org/abs/2511.03601" target="_blank" rel="noopener">2511.03601</a></td>
+<td>开源 3B 级情感/风格/副语言编辑+zero-shot TTS 统一</td>
+<td>大间隔对比数据+token 级 reward model+PPO；迭代编辑当强度旋钮（情感 Iter0 55%→Iter3 71%）；闭源后处理增强有商业价值</td>
+<td>&quot;编辑&quot;实为 conditional regeneration/transfer（自承）；5 情感+7 风格闭集分类无细粒度强度/混合情感；评测靠 Gemini-2.5-Pro 闭集分类无 MOS；迭代编辑可能音色漂移未测；安全/伦理缺位</td>
+</tr>
+<tr>
+<td>VoxCPM</td>
+<td><a href="https://arxiv.org/abs/2509.24650" target="_blank" rel="noopener">2509.24650</a></td>
+<td>tokenizer-free 半离散残差，0.5B 开源 SOTA</td>
+<td>EN-WER 1.85、CV3-Hard-EN 7.89% 超 CosyVoice3-1.5B(10.55%)；FSQ 当正则瓶颈+RALM 补量化损失的开创性架构</td>
+<td>AudioVAE 单独预训练非完全端到端；SOTA 高度依赖 1.8M 私有小时；Hard set 仍输多阶段管线；AudioVAE 仅 16kHz 达不到高保真；细粒度韵律/情绪可控受限</td>
+</tr>
+<tr>
+<td>Ming-UniAudio</td>
+<td><a href="https://arxiv.org/abs/2511.05516" target="_blank" rel="noopener">2511.05516</a></td>
+<td>VAE 连续统一 tokenizer，统一 ASR+TTS+编辑</td>
+<td>重建 PESQ 4.21 断层领先；ContextASR 8/12 SOTA；Seed-zh WER 0.95；首个无时间戳指令式自由编辑（CoT 定位）</td>
+<td>Seed-zh SIM 0.70/Seed-en SIM 0.58 远低于 Seed-TTS 0.80，对 VC 场景近乎不可用；编辑基准自建自评无横向对比；16.8B MoE 不适合资源受限部署</td>
+</tr>
+<tr>
+<td>MGM-Omni</td>
+<td><a href="https://arxiv.org/abs/2509.25131" target="_blank" rel="noopener">2509.25131</a></td>
+<td>双轨&quot;脑-口&quot;+分块并行解码，长生成（&gt;10min）</td>
+<td>WER 4.98+RTF 0.19+&lt;400k 小时数据高效；FSQ 也能用并行解码（首次证，提速 3×）</td>
+<td>&quot;脑-口解耦&quot;本质是美化级联；长时段音色一致性无 SIM 定量；hard 集（URL/数学/电话）WER 26% 离实用远；算力/延迟未报</td>
+</tr>
+<tr>
+<td>MM-Sonate</td>
+<td><a href="https://arxiv.org/abs/2601.01568" target="_blank" rel="noopener">2601.01568</a></td>
+<td>20B 多模态 flow-matching，联合音视频+零样本 VC</td>
+<td>首次联合音视频生成+VC 塞进一模型（SNC 6.51 vs Ovi 4.28，唇同步断层）</td>
+<td>克隆保真未达专精 TTS（英文 SIM 0.604 vs MaskGCT 0.713 差 11 点、中文 WER 2.768 比 CosyVoice2 1.45 差近一倍）；20B 不开权重；noise-based CFG 结论边际无方差</td>
+</tr>
+<tr>
+<td>Qwen3.5-Omni</td>
+<td><a href="https://arxiv.org/abs/2604.15804" target="_blank" rel="noopener">2604.15804</a></td>
+<td>全模态基座技术报告</td>
+<td>ARIA（自适应速率约束统一单通道文本-语音交织）解决跳字/错读；AuT 6.25Hz 音频表征；chunked prefilling 降 TTFT 235ms</td>
+<td>ARIA 无 on/off 消融量化真实贡献；Audio-Visual Vibe Coding 作&quot;涌现能力&quot;无 benchmark/消融证据严重不足；AV-SpeakerBench 71.3 落后 Gemini 75.1；对分离/TSE 只提供 AuT+ARIA 两组件，本身不解决鸡尾酒会</td>
+</tr>
+<tr>
+<td>OVI (twin backbone)</td>
+<td><a href="https://arxiv.org/abs/2510.01284" target="_blank" rel="noopener">2510.01284</a></td>
+<td>开源对称 twin backbone 联合音视频生成</td>
+<td>对称消除投影层；scaled-RoPE 跨模态时序对齐；combined prompt 反直觉优于分离；TTS WER 0.035 持平 CosyVoice</td>
+<td>摘要宣称&quot;带丰富说话人身份与情感&quot;却只评了 WER，无 SpkSIM/情感召回量化；视频质量相对 Wan2.2 退化未量化；仅 5s 短片段；对称 twin 算力高（音频塔从零训）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>学术/开源代表</strong>：</li>
+</ul>
+<table class="gfm-table">
+<thead>
+<tr>
+<th>代表</th>
+<th>arXiv ID</th>
+<th>定位与贡献</th>
+<th>短板</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LinearVC</td>
+<td><a href="https://arxiv.org/abs/2506.01510" target="_blank" rel="noopener">2506.01510</a></td>
+<td>VC 压到极简线性投影+Procrustes，打平 kNN-VC（LibriSpeech EER 33.6 vs kNN 38.9）；实证&quot;旋转+反射&quot;是换音色主几何操作，content rank≈16/speaker rank≈100</td>
+<td>EER 与主观脱节；单 NN 配对脆弱；rank=100 结论可能被 LibriSpeech artifacts 高估；仅英文朗读 clean</td>
+</tr>
+<tr>
+<td>MeanVC</td>
+<td><a href="https://arxiv.org/abs/2510.08392" target="_blank" rel="noopener">2510.08392</a></td>
+<td>14M+mean flows+1-NFE+chunk-wise AR，RTF 0.322 单块延迟 211ms，超 StreamVoice/Seed-VC；CPU 可跑</td>
+<td>mean flows 借自 <a href="https://arxiv.org/abs/2505.13447" target="_blank" rel="noopener">2505.13447</a> 非原创；SSIM 0.687 绝对值偏低&quot;高保真&quot;标签略过；CER 5.01% 不算低；仅中文评估</td>
+</tr>
+<tr>
+<td>FlowSE (rectified flow)</td>
+<td><a href="https://arxiv.org/abs/2505.19476" target="_blank" rel="noopener">2505.19476</a> / <a href="https://arxiv.org/abs/2508.06840" target="_blank" rel="noopener">2508.06840</a></td>
+<td>流匹配 SE 效率范式确立，RTF 0.31 vs diffusion 3.27-3.49（快 10×），SpkSim 0.940 避开 LM 量化损失；ICASSP 2025 已录用</td>
+<td>PESQ/SI-SNR 未报（回避保真指标有选指标之嫌）；DNSMOS 可能高估生成式；文本条件&quot;低 SNR 增益&quot;未量化；仅中英未测多语言</td>
+</tr>
+<tr>
+<td>SpeechEditBench</td>
+<td><a href="https://arxiv.org/abs/2606.01804" target="_blank" rel="noopener">2606.01804</a></td>
+<td>anchor-based TS/PS/JS 双约束评测，揭穿 target 77.5% vs joint 0.50% 鸿沟；复合编辑三元组 joint 全 0</td>
+<td>用 Gemini-2.5-pro 当判官而 Gemini-Live 同是被测（同族利益冲突未讨论）；preservation gate 仅检查词级不查音色/韵律；组合 400 条里三元组仅 80 统计置信度低</td>
+</tr>
+<tr>
+<td>FAC-FACodec</td>
+<td><a href="https://arxiv.org/abs/2510.10785" target="_blank" rel="noopener">2510.10785</a></td>
+<td>&quot;首个带显式强度旋钮的外国口音转换&quot;</td>
+<td>&quot;首个可控&quot;有营销色彩——SDEdt/EdiTTS 噪声量本就是旋钮，本文实为把 t_start 在 z_c1 上重命名；t_start=100 时 WER 0.05→0.15 翻三倍；目标口音被 LJSpeech 单一女声锁死；13 人主观仅 indicative</td>
+</tr>
+<tr>
+<td>CosyAccent</td>
+<td><a href="https://arxiv.org/abs/2602.19166" target="_blank" rel="noopener">2602.19166</a></td>
+<td>&quot;源-合成&quot;范式反转（合成 L2 当源、真实母语当目标），WER 12.96% 反超用真实 L2 的 TokAN(16.21%)</td>
+<td>&quot;不用真实 L2&quot;是半真（数据构造仍需 L2-ARCTIC 做 LM prompt+口音分类器过滤）；客观 SECS 0.8213 输 TokAN 0.8613 但主观 SIM 反超，暴露 SECS 度量缺陷；仅 L2-ARCTIC+中式英语两来源</td>
+</tr>
+<tr>
+<td>EEND-TA</td>
+<td><a href="https://arxiv.org/abs/2509.14737" target="_blank" rel="noopener">2509.14737</a></td>
+<td>brute-force scaling：模拟说话人数 4→8、预训练 80000h，DIHARD III DER 14.49%（相对 SOTA 改进 8.15%）；13.3M GPU 5870× 实时</td>
+<td>预训练全来自 LibriSpeech 重采样多样性单一；VoxConverse 野外 21 人场景仍输 pyannoteAI；仅域内成立</td>
+</tr>
+<tr>
+<td>SpeakerLM</td>
+<td><a href="https://arxiv.org/abs/2508.06372" target="_blank" rel="noopener">2508.06372</a></td>
+<td>把 SD 重定义为结构化文本解码，No/Match/Over-Regist 三档；7638.95h 下 No-Regist cpCER 在 AliMeeting/AISHELL4/AISHELL5-Eval 降 6.60/6.56/13.82%；AAAI 2026</td>
+<td>只输出文本归属不输出分离音轨；7B+4×A800 四阶段各 1M steps 算力门槛极高无实时性；只做 Mandarin 却自称 versatile，跨语言未验证</td>
+</tr>
+<tr>
+<td>FlowTSE</td>
+<td><a href="https://arxiv.org/abs/2505.14465" target="_blank" rel="noopener">2505.14465</a></td>
+<td>条件流匹配在 Mel 域回归速度场，只依赖一个 vocoder，PESQ/DNSMOS/SIM 多项最优</td>
+<td>SI-SDR −25.64 基本不可用，相位条件化 vocoder 拉到 +10.81 却牺牲 PESQ/OVRL；仅 Libri2Mix 单族 2 说话人</td>
+</tr>
+<tr>
+<td>Private kNN-VC</td>
+<td><a href="https://arxiv.org/abs/2505.17584" target="_blank" rel="noopener">2505.17584</a></td>
+<td>可解释消融实证 kNN-VC 隐私泄漏主因是音素级微观变异非宏观时长（8 聚类 EER 10.4%→49.6%）；戳穿&quot;VPC2024 客观 EER≈真实隐私&quot;</td>
+<td>评估协议单一（依赖 VPC2024 ASR-encoder 攻击者）；duration predictor 单说话人训练；&lt;8 聚类损害可懂度直接放弃（公平性盲点）；缺主观效用评估</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>格局派系判断</strong>：
+<ul>
+<li><strong>统一化派</strong>：MiMo-Audio(<a href="https://arxiv.org/abs/2512.23808" target="_blank" rel="noopener">2512.23808</a>)、Ming-UniAudio(<a href="https://arxiv.org/abs/2511.05516" target="_blank" rel="noopener">2511.05516</a>)、Qwen3.5-Omni(<a href="https://arxiv.org/abs/2604.15804" target="_blank" rel="noopener">2604.15804</a>)、MM-Sonate(<a href="https://arxiv.org/abs/2601.01568" target="_blank" rel="noopener">2601.01568</a>)、MGM-Omni(<a href="https://arxiv.org/abs/2509.25131" target="_blank" rel="noopener">2509.25131</a>)——把 VC/编辑/翻译收编为 in-context 技能。但深读实证&quot;统一有代价&quot;：MiMo 因果未证、Ming 的 SIM 对 VC 近乎不可用、Qwen3.5-Omni 核心创新无消融、MM-Sonate 克隆保真输专精 TTS、MGM-Omni 长时段音色无定量。<strong>&quot;一个模型打天下&quot;在 VC/TTS 仍难成立</strong>——Qwen3-TTS 用双 tokenizer 矩阵而非单架构调和&quot;长程稳定 vs 流式低延迟&quot;即为反证。</li>
+<li><strong>精控派</strong>：FAC-FACodec(<a href="https://arxiv.org/abs/2510.10785" target="_blank" rel="noopener">2510.10785</a>)/CosyAccent(<a href="https://arxiv.org/abs/2602.19166" target="_blank" rel="noopener">2602.19166</a>)/EmoShift(<a href="https://arxiv.org/abs/2601.22873" target="_blank" rel="noopener">2601.22873</a>)/EASPO(<a href="https://arxiv.org/abs/2509.25416" target="_blank" rel="noopener">2509.25416</a>)——在分解潜空间/激活方向做可控旋钮。代价是强度可控以可懂度/身份为代价（EmoShift α=3 WER 7.90→11.60；FAC-FACodec t_start=100 WER 翻三倍）。</li>
+<li><strong>端侧/低延迟派</strong>：MeanVC(<a href="https://arxiv.org/abs/2510.08392" target="_blank" rel="noopener">2510.08392</a>, 14M RTF 0.322)、LinearVC(<a href="https://arxiv.org/abs/2506.01510" target="_blank" rel="noopener">2506.01510</a>, 学一次 W 推理只矩阵乘)、CodecSep(<a href="https://arxiv.org/abs/2509.11717" target="_blank" rel="noopener">2509.11717</a>, codes-in/out 1.35 GMACs/28MB)、2S-AVTSE(<a href="https://arxiv.org/abs/2505.22229" target="_blank" rel="noopener">2505.22229</a>, 1.36M/1.89GMACs M1 Pro 1.46ms/帧)、Fast-ULCNet(<a href="https://arxiv.org/abs/2601.14925" target="_blank" rel="noopener">2601.14925</a>, 0.338M)。<strong>这是当前最可下沉到 Cortex-M/嵌入式的一脉，却最不被大厂卷</strong>。</li>
+<li><strong>agent/闭环派</strong>：本批 97 篇<strong>几乎没有真正的 agent 闭环工作</strong>。Audio MultiChallenge(<a href="https://arxiv.org/abs/2512.14865" target="_blank" rel="noopener">2512.14865</a>) 揭示 Gemini 3 Pro 在多轮+语音+非单调编辑耦合下仅 54.65% APR、Voice Editing 轴 17.99%——&quot;E2E 语音助手远未到可用&quot;，是<strong>agent 闭环空白的最硬证据</strong>。SpeakerLM 把 diarization 重定义为文本解码是 agent 路线的早期实例但无实时性。</li>
+</ul>
+</li>
+</ul>
+<h4 id="看自己15-个共性可借鉴机制已提炼5-类能力差距评测工程门槛单骨干端侧延迟数据标注待补端侧视角贯穿">看自己：15 个共性可借鉴机制已提炼，5 类能力差距（评测/工程门槛/单骨干/端侧延迟/数据标注）待补，端侧视角贯穿</h4>
+<p><strong>一句话结论：从 97 篇深读里能提炼 15 个共性可借鉴机制（preservation gate / codec 因子化 / 激活转向 / mean flow 单步 / GRPO 偏好对齐等），但自研有 5 类硬差距——评测缺失（最硬）、工程门槛高、training-free 多单骨干、端侧延迟不达标、数据标注能力缺。结合作者 Cortex-M 转型：判别式打底+生成补内容、mean flow 单步+滑窗压通话级延迟、codes-in/out 流水线是对口的三条可走路线。</strong></p>
+<ul>
+<li><strong>共性可借鉴机制（从 97 篇深读 ## 9 提炼）</strong>：
+<ol>
+<li><strong>preservation gate（保住比改对更难，已量化）</strong>——SpeechEditBench(<a href="https://arxiv.org/abs/2606.01804" target="_blank" rel="noopener">2606.01804</a>) target 77.5% vs joint 0.50% 鸿沟。机制：anchor-based 双约束，用 ASR WER/CER≤10% 硬门控先判&quot;非目标区没坏&quot;再判目标。<strong>对端侧编辑器</strong>：任何&quot;改局部别带漂全局&quot;的任务（VC/TSE/韵律迁移）都应加这层 gate。</li>
+<li><strong>codec 因子化 / 分解潜空间操作</strong>——FAC-FACodec(<a href="https://arxiv.org/abs/2510.10785" target="_blank" rel="noopener">2510.10785</a>) 在 z_c1 上动而冻 z_p/z_d/g；CodecSep(<a href="https://arxiv.org/abs/2509.11717" target="_blank" rel="noopener">2509.11717</a>) 在 DAC latent 上 masking-not-generating；Discl-VC(<a href="https://arxiv.org/abs/2505.24291" target="_blank" rel="noopener">2505.24291</a>) 韵律离散令牌化。<strong>对端侧</strong>：LinearVC 的&quot;学一次 W、推理只矩阵乘+通用 vocoder&quot;是极友好形态，2.7 分钟参考+预计算矩阵即可。</li>
+<li><strong>激活转向（training-free / 参数高效）</strong>——EmoShift(<a href="https://arxiv.org/abs/2601.22873" target="_blank" rel="noopener">2601.22873</a>) 10M 参数超 311M 全量微调；Activation Steering(<a href="https://arxiv.org/abs/2603.05813" target="_blank" rel="noopener">2603.05813</a>) 小样本(&lt;100)碾压 PEFT 但 ~800 时 PEFT 反超（清晰 crossover，数据少用 steering、数据多用 PEFT）；Counterfactual Activation Editing(<a href="https://arxiv.org/abs/2506.00832" target="_blank" rel="noopener">2506.00832</a>)/SALM(<a href="https://arxiv.org/abs/2507.16724" target="_blank" rel="noopener">2507.16724</a>)/CodecSep 不重训母体。<strong>对端侧</strong>：forward hook 免参注入，上线新口音/情感采 1000 对参考样本估计向量即可，无需重训。</li>
+<li><strong>mean flow 单步生成（无需蒸馏）</strong>——MeanVC(<a href="https://arxiv.org/abs/2510.08392" target="_blank" rel="noopener">2510.08392</a>) 1-NFE+chunk-wise AR；MeanFlowSE(<a href="https://arxiv.org/abs/2509.14858" target="_blank" rel="noopener">2509.14858</a>) NFE=1 RTF 0.11 全场最低。机制：学平均速度场而非瞬时速度，JVP 双反传+stop-gradient 阻断高阶+稳定系数 c&lt;1。<strong>对端侧</strong>：把多步 ODE 压到单步是流式生成的通用杠杆。<strong>代价</strong>：MeanFlowSE PESQ 塌陷至 2.942（vs FlowSE 4.051），单步以通信质量回退换 RTF。</li>
+<li><strong>GRPO 偏好对齐（绕开无 ground-truth 配对）</strong>——Edit-Content-Preserve(<a href="https://arxiv.org/abs/2602.00560" target="_blank" rel="noopener">2602.00560</a>) 用预训练 TTS 条件似然当编辑一致性 reward（绕开&quot;编辑无配对真值&quot;），删除 WER 压到 0.47%（VoiceCraft 16.99%）；FlowSE-GRPO(<a href="https://arxiv.org/abs/2601.16483" target="_blank" rel="noopener">2601.16483</a>) 5k 步 LoRA 超 20k 步 DPO；EASPO(<a href="https://arxiv.org/abs/2509.25416" target="_blank" rel="noopener">2509.25416</a>) 逐步 dense reward。<strong>铁律</strong>：单神经指标奖励必被黑客，须多指标加权并对 DNSMOS 压权（λ1=0.6）。<strong>对端侧</strong>：gated reward fusion（软似然+硬 gate）防 reward hacking 直接可用。</li>
+<li><strong>流式滑窗&quot;沿物理时间铺开&quot;</strong>——Diffusion Buffer(<a href="https://arxiv.org/abs/2506.02908" target="_blank" rel="noopener">2506.02908</a>) 把 N 步沿物理时间铺开，单步 score 调用 RTF&lt;1，算法延迟 320-960ms。<strong>对端侧</strong>：只适合广播/字幕/流媒体，<strong>不适合双向通话（&lt;150ms）</strong>；训练-推理一致性需前补零模拟初始化。</li>
+<li><strong>&quot;判别打底+生成补内容&quot;混合范式</strong>——URGENT 2025(<a href="https://arxiv.org/abs/2505.23212" target="_blank" rel="noopener">2505.23212</a>) 32 系统实证纯生成式 SDR −12.28 灾难性、纯判别式 T1 SDR 12.66 第一；Hybrid(<a href="https://arxiv.org/abs/2601.19113" target="_blank" rel="noopener">2601.19113</a>) DPRNN-Attention 把 LM 当语义条件器而非波形生成器绕开 codec 瓶颈。<strong>对端侧</strong>：判别式做主力（去噪去混响保内容），生成式仅处理判别式弱项（带宽扩展/丢包/风噪）。</li>
+<li><strong>codes-in/codes-out 部署流水线</strong>——CodecSep(<a href="https://arxiv.org/abs/2509.11717" target="_blank" rel="noopener">2509.11717</a>) 边缘 codec 压码、服务器 codec 域处理、再吐码，省掉 decode-separate-re-encode 循环，1.35 GMACs/28MB。<strong>对端侧/Cortex-M 直接相关</strong>：这是&quot;边缘实时分离&quot;从概念到可工程化的 blue-print。</li>
+<li><strong>双 tokenizer 矩阵而非单架构</strong>——Qwen3-TTS(<a href="https://arxiv.org/abs/2601.15621" target="_blank" rel="noopener">2601.15621</a>) 25Hz(语义/长程)+12Hz(低延迟/克隆)覆盖不同场景。<strong>对端侧</strong>：不强求单模型全场景，按场景选 tokenizer 矩阵。</li>
+<li><strong>三路自动质检门控（WER/SIMsty/SIMspk）+硬阈值</strong>——ISSE(<a href="https://arxiv.org/abs/2509.24570" target="_blank" rel="noopener">2509.24570</a>) 把合成配对训练数据质检工程化。<strong>对端侧数据 pipeline</strong>：防止合成噪声污染训练，比人工抽检可扩展。</li>
+<li><strong>置信度驱动数据过滤</strong>——LEMAS(<a href="https://arxiv.org/abs/2601.04233" target="_blank" rel="noopener">2601.04233</a>) 对齐置信度作可调数据质量旋钮，编辑用高阈值（要精确边界）、TTS 用低阈值（要规模）。<strong>对端侧低资源语种</strong>：Uroman+MMS 绕开 G2P 词典快速覆盖更多语言。</li>
+<li><strong>逐维口音分解 + 声学探针绕过 ASR 依赖</strong>——PSP(<a href="https://arxiv.org/abs/2604.25476" target="_blank" rel="noopener">2604.25476</a>) 口音正交于可懂度（ElevenLabs Telugu WER 0.041 但 PSD 154 最差）；用 XLS-R 嵌入余弦比而非 ASR 假设匹配。<strong>对端侧低资源语种评测</strong>：不靠 ASR 测口音（ASR 错与口音相关会循环）。</li>
+<li><strong>后校正层架构模式</strong>——EmoCorrector(<a href="https://arxiv.org/abs/2505.20341" target="_blank" rel="noopener">2505.20341</a>) 不重训 TSE 基座，后挂 RAG+解耦校正层（TSEAcc 7.2%→48%，但 GT 天花板仅 52.1%）。可推广到&quot;风格/口音/响度后校正&quot;。</li>
+<li><strong>源-合成范式</strong>——CosyAccent(<a href="https://arxiv.org/abs/2602.19166" target="_blank" rel="noopener">2602.19166</a>) 合成源端、真实母语当目标，破解&quot;目标工件污染+真实 L2 数据稀缺&quot;双痛点。核心：把工件留在要被丢掉的一端。</li>
+<li><strong>可微 k-means + MTL loss 把领域知识写进 loss</strong>——ISIB(<a href="https://arxiv.org/abs/2601.19767" target="_blank" rel="noopener">2601.19767</a>) <code>L=(1-α)L_l2+αL_l1</code>，口音强度→L1 权重 α 的物理直觉。<strong>对端侧</strong>：低资源口音&quot;母语训 tokenizer+少量口音训 ASR&quot;。</li>
+</ol>
+</li>
+<li><strong>自研能力差距（从深读局限反推，带端侧视角）</strong>：
+<ul>
+<li><strong>A. 评测能力缺失（最硬的差距）</strong>——无&quot;判官与被测不同族&quot;的评测协议：SpeechEditBench 用 Gemini-2.5-pro 当判官而 Gemini-Live 同是被测；MULTI-Bench LLM 既当环境又当裁判；FlowSE-GRPO DNSMOS 自评自训。客观嵌入相似度 vs 主观听感系统性不一致：SECS 0.8213 输 TokAN 0.8613 但主观 SIM 反超；EER 与主观脱节；DNSMOS 被生成式幻觉欺骗（URGENT T13 日语 CAcc 36.8% vs DNSMOS 3.07）。缺 SE 专用 MOS 预测器；缺复合情感/强度连续维度评测（CAMEO 只 7 类离散单标签）；缺口音逐维仪表盘（PSP v1 仅 10 句 pilot 统计不成立）。<strong>自研缺口</strong>：需建&quot;判官异族 + 多指标齐报（不挑分母）+ 人评兜底&quot;协议。</li>
+<li><strong>B. 工程门槛高/能力不可得</strong>——大模型统一范式算力门槛：SpeakerLM 7B+4×A800 四阶段各 1M steps；MiMo-Audio 1 亿小时（开源社区无法复现）；MM-Sonate 20B 不开权重。codec 是瓶颈非 LM：UniSE(<a href="https://arxiv.org/abs/2510.20441" target="_blank" rel="noopener">2510.20441</a>) 消融换 LM 主干性能相近(OVRL 3.43/3.44/3.43)、换 codec OVRL 3.43→3.34。scaling law 在公开榜外不成立：DAC-SE1(<a href="https://arxiv.org/abs/2510.02187" target="_blank" rel="noopener">2510.02187</a>) 自家集 MUSHRA 58.3 领先但公开 DNS 2023 盲测 OVRL 3.63 &lt; LLaSE-G1 3.72。<strong>自研缺口</strong>：无此算力，只能走端侧轻量+精控路线（MeanVC/LinearVC/CodecSep）；低码率 NAC 是自研短板（UniSE 作者直接呼吁改进）。</li>
+<li><strong>C. 单骨干验证 / 天花板低（training-free 路线共性短板）</strong>——多数 training-free 仅单骨干验证：Counterfactual Activation Editing 仅 Tacotron2 28M；Activation Steering 仅 Qwen2-Audio 7B；EmoShift steering vector 未配探针验证可解释性。向量级编辑特征纠缠：调 duration 影响 pitch；EmoShift α=3 以 WER 翻倍为代价；balanced 评测子集有放大效应（绝对降幅 29.86%→4.35% 需打折）。<strong>自研缺口</strong>：跨骨干验证（≥2 种 encoder 架构）是宣称&quot;model-agnostic&quot;的必做项。</li>
+<li><strong>D. 端侧/低延迟视角特有差距</strong>——流式扩散延迟不达标：Diffusion Buffer 320-960ms <strong>不适合双向通话（&lt;150ms）</strong>；FlowSE RTF 0.31 但未报步数消融；MeanFlowSE 单步但 PESQ 塌陷。长流式误差累积未量化：Diffusion Buffer 早期去噪误差作后续上下文传导路径未分析；MGM-Omni 长时段音色一致性无 SIM 定量。2S-AVTSE 1.36M/1.89GMACs M1 Pro 1.46ms/帧是端侧 TSE 标杆，但放弃身份识别能力（&quot;最近镜头即目标&quot;双人对镜会选错人）。<strong>自研缺口</strong>：Cortex-M 级延迟预算（&lt;150ms 通话/&lt;1s 流媒体）需先定预算再反推模型容量，而非反之。</li>
+<li><strong>E. 数据/标注能力缺失</strong>——合成-校正合成循环：EmoCorrector ECD-TSE 全由 3 个 TTS 合成，缺真人情绪做对照；Step-Audio-EditX 用 StepTTS 生成 margin 评分→数据偏置。多标注者分歧当信号而非噪声：Medusa 消融软目标(−8.23%)远比重采样(−1.20%)重要；AmbER² 分布度量须 JS+BC+R² 三件套。低资源语种数据公平性：URDU CL 把女性准确率从 74% 拉到 41%（男性主导语料 86% 男）；F5-TTS 公平性审计 8 说话人样本量极小。</li>
+</ul>
+</li>
+</ul>
+<h4 id="看机会10-个机会窗口端侧护城河是对口差异化赛道">看机会：10 个机会窗口，端侧护城河是对口差异化赛道</h4>
+<p><strong>一句话结论：从 97 篇深读提炼 10 个机会窗口——混合范式 / 干净评测 / 复合编辑 / agent 闭环 / 端侧低延迟护城河 / training-free 激活操控 / codec-native 下游 / 可控方言口音 / 情感显式建模 / 隐私公平。其中&quot;端侧低延迟护城河&quot;与作者 Cortex-M 背景最对口，且是大厂全在卷统一化时被忽视的差异化赛道。</strong></p>
+<p><div class="callout callout-danger"></p>
+<ul>
+<li><strong>机会 1：判别式打底 + 生成补内容的混合范式</strong>（红线：URGENT 2025(<a href="https://arxiv.org/abs/2505.23212" target="_blank" rel="noopener">2505.23212</a>) 32 系统实证纯生成式 T13 SDR −12.28、日语 CAcc 36.8% vs 噪声 74.5%；DisContSE(<a href="https://arxiv.org/abs/2601.21940" target="_blank" rel="noopener">2601.21940</a>) W Acc 75.50% &lt; Noisy 79.91%；DeepFilterGAN(<a href="https://arxiv.org/abs/2505.23515" target="_blank" rel="noopener">2505.23515</a>) 75.05% &lt; 79.53%；USEMamba-Flow(<a href="https://arxiv.org/abs/2505.21198" target="_blank" rel="noopener">2505.21198</a>) 69.07% vs 回归版 88.05%；DAC-SE1(<a href="https://arxiv.org/abs/2510.02187" target="_blank" rel="noopener">2510.02187</a>) WER 0.25 与 Noisy 持平；Hybrid(<a href="https://arxiv.org/abs/2601.19113" target="_blank" rel="noopener">2601.19113</a>) DPRNN-Attention 绕开 codec 瓶颈拿 URGENT 2026 第 3）。<strong>对端侧</strong>：Cortex-M 上判别式（TF-Gridnet/BSRNN 轻量版）打底，生成式仅在丢包/带宽扩展时触发。</li>
+<li><strong>机会 2：干净评测基准 + 判官异族</strong>（红线：SpeechEditBench(<a href="https://arxiv.org/abs/2606.01804" target="_blank" rel="noopener">2606.01804</a>) Gemini 既判官又被测；MULTI-Bench(<a href="https://arxiv.org/abs/2511.00850" target="_blank" rel="noopener">2511.00850</a>) LLM 既环境又裁判，0.885 人评相关性仅 10 人；FlowSE-GRPO(<a href="https://arxiv.org/abs/2601.16483" target="_blank" rel="noopener">2601.16483</a>) DNSMOS 自评自训；Auto-Eval(<a href="https://arxiv.org/abs/2508.11966" target="_blank" rel="noopener">2508.11966</a>) CLAP score 作编辑评测 LCC 仅 0.21 失效、FAD 过滤后从 0.2859 恶化到 0.6003；CAMEO(<a href="https://arxiv.org/abs/2505.11051" target="_blank" rel="noopener">2505.11051</a>) 数据污染未做 leave-one-out）。<strong>机会窗口</strong>：建&quot;判官与被测不同族 + 多指标齐报 + 人评兜底 + SE 专用 MOS 预测器&quot;评测协议；anchor-based 双约束（TS/PS/JS）+ 类别化 Friedman 排名 + per-dimension 可解释分解是跨方向可迁移的评测基建。</li>
+<li><strong>机会 3：复合编辑 / 多意图单指令</strong>（红线：SpeechEditBench(<a href="https://arxiv.org/abs/2606.01804" target="_blank" rel="noopener">2606.01804</a>) 复合编辑三元组 joint 全 0、两元组闭源仅 21.5%/20.0%；target-only 77.5% vs joint 0.50% 鸿沟——&quot;改了但毁了一切&quot;）。<strong>机会窗口</strong>：多意图编辑（同时改情感+韵律+口音+内容）是下一代 Speech LLM 必攻硬骨头；当前所有模型&quot;会改不会保&quot;。<strong>对端侧</strong>：可做&quot;先 attention 定位关键帧再局部 edit&quot;两阶段管线。</li>
+<li><strong>机会 4：agent 闭环空白</strong>（红线：Audio MultiChallenge(<a href="https://arxiv.org/abs/2512.14865" target="_blank" rel="noopener">2512.14865</a>) Gemini 3 Pro 多轮+语音+非单调编辑耦合仅 54.65% APR、Voice Editing 轴 17.99%、Audio-Cue 36.5% gap；本批 97 篇无真正 agent 闭环工作；SpeakerLM(<a href="https://arxiv.org/abs/2508.06372" target="_blank" rel="noopener">2508.06372</a>) 把 diarization 重定义为文本解码是早期实例但无实时性）。<strong>机会窗口</strong>：规划-工具-反馈闭环（TSE/编辑/分离/增强作为工具调用）；audio-native judge；多轮交互轨迹+用户体验奖励的 RL 阶段（Qwen3.5-Omni <a href="https://arxiv.org/abs/2604.15804" target="_blank" rel="noopener">2604.15804</a> 的交互对齐 RL 思路）。</li>
+<li><strong>机会 5：端侧低延迟护城河（Cortex-M / 嵌入式音频）</strong>（来源：MeanVC(<a href="https://arxiv.org/abs/2510.08392" target="_blank" rel="noopener">2510.08392</a>) 14M RTF 0.322 单核 CPU；LinearVC(<a href="https://arxiv.org/abs/2506.01510" target="_blank" rel="noopener">2506.01510</a>) 学一次 W 推理只矩阵乘；CodecSep(<a href="https://arxiv.org/abs/2509.11717" target="_blank" rel="noopener">2509.11717</a>) codes-in/out 1.35 GMACs/28MB；2S-AVTSE(<a href="https://arxiv.org/abs/2505.22229" target="_blank" rel="noopener">2505.22229</a>) 1.36M/1.89GMACs M1 Pro 1.46ms/帧；Fast-ULCNet(<a href="https://arxiv.org/abs/2601.14925" target="_blank" rel="noopener">2601.14925</a>) 0.338M RTF 降 34%；EEND-TA(<a href="https://arxiv.org/abs/2509.14737" target="_blank" rel="noopener">2509.14737</a>) 13.3M GPU 5870× 实时）。<strong>这是用户背景最对口的护城河</strong>：大厂全在卷统一化/百亿参数（MiMo 1 亿小时、MM-Sonate 20B），端侧轻量+精控+流式是被忽视的差异化赛道。<strong>但</strong>：Diffusion Buffer 320-960ms 不达通话级（&lt;150ms），需 mean flow 单步+滑窗组合才能压到通话级。</li>
+<li><strong>机会 6：training-free 激活操控（低成本切入，但需补跨骨干验证）</strong>（红线：LinearVC(<a href="https://arxiv.org/abs/2506.01510" target="_blank" rel="noopener">2506.01510</a>)/MKL-VC(<a href="https://arxiv.org/abs/2506.09709" target="_blank" rel="noopener">2506.09709</a>) 瓶颈在特征非模型；EmoShift(<a href="https://arxiv.org/abs/2601.22873" target="_blank" rel="noopener">2601.22873</a>) 10M 超 311M；Activation Steering(<a href="https://arxiv.org/abs/2603.05813" target="_blank" rel="noopener">2603.05813</a>) crossover（&lt;100 steer、~800 PEFT）；Counterfactual Activation Editing(<a href="https://arxiv.org/abs/2506.00832" target="_blank" rel="noopener">2506.00832</a>)/SALM(<a href="https://arxiv.org/abs/2507.16724" target="_blank" rel="noopener">2507.16724</a>)/CodecSep(<a href="https://arxiv.org/abs/2509.11717" target="_blank" rel="noopener">2509.11717</a>) 不重训母体）。<strong>机会窗口</strong>：forward hook 免参注入，上线新口音/情感采 1000 对参考样本即可；<strong>但需补</strong>：跨骨干验证（≥2 种 encoder）、dimension/neuron 级编辑解纠缠、探针验证可解释性、balanced 子集放大效应打折。</li>
+<li><strong>机会 7：codec-native 下游处理（NAC 作共享表示骨干）</strong>（来源：CodecSep(<a href="https://arxiv.org/abs/2509.11717" target="_blank" rel="noopener">2509.11717</a>) &quot;codec latent 已结构化到支持纯掩码分离&quot;；UniSE(<a href="https://arxiv.org/abs/2510.20441" target="_blank" rel="noopener">2510.20441</a>) codec 是瓶颈非 LM；Hybrid(<a href="https://arxiv.org/abs/2601.19113" target="_blank" rel="noopener">2601.19113</a>) DPRNN-Attention 把 LM 当语义条件器；Recomposer(<a href="https://arxiv.org/abs/2509.05256" target="_blank" rel="noopener">2509.05256</a>) &quot;编辑可直接建模低层 codec 不必走语义层&quot;）。<strong>机会窗口</strong>：NAC 从&quot;生成/压缩专用&quot;走向&quot;下游处理共享表示骨干&quot;——增强/去混响/编辑/分离都可在 codec 域做。<strong>对端侧</strong>：codes-in/out 流水线省掉 decode-re-encode 循环。<strong>但</strong>：低码率 NAC 是自研短板（UniSE 作者直接呼吁改进），且 oracle codec 重建 ViSQOL 才 4.1-4.2 限制了感知上限。</li>
+<li><strong>机会 8：可控方言/口音 TTS（数据打底 + 激活操控切换）</strong>（来源：WenetSpeech-Chuan(<a href="https://arxiv.org/abs/2509.18004" target="_blank" rel="noopener">2509.18004</a>) 10013h 四川话语料把开源 ASR/TTS 拉到接近商用（CosyVoice2-WSC-SFT 4.08% vs Qwen-TTS 4.13%），通用大模型在方言崩盘（Whisper CER 55.51%）；ADI-20(<a href="https://arxiv.org/abs/2511.10070" target="_blank" rel="noopener">2511.10070</a>) 数据量×模型规模性价比矩阵（medium+30%数据≈large+全量）；Activation Steering(<a href="https://arxiv.org/abs/2603.05813" target="_blank" rel="noopener">2603.05813</a>) + PSP(<a href="https://arxiv.org/abs/2604.25476" target="_blank" rel="noopener">2604.25476</a>) 逐维口音分解）。<strong>机会窗口</strong>：中文方言（粤语/吴语/闽南语）编创产品——数据打底（Chuan-Pipeline 可复用）+ 激活操控做可控口音切换。<strong>对端侧</strong>：1.2 亿四川话使用者被主流语音技术边缘化，是 AI 公平性叙事的实质去偏弹药。</li>
+<li><strong>机会 9：情感显式建模（不指望通用模型涌现）</strong>（来源：CAMEO(<a href="https://arxiv.org/abs/2505.11051" target="_blank" rel="noopener">2505.11051</a>) zero-shot SER 最佳 macro-F1 仅 0.2023（7 类随机≈0.14）且有数据污染；EmoShift(<a href="https://arxiv.org/abs/2601.22873" target="_blank" rel="noopener">2601.22873</a>) 生成端互为注脚；Frozen-LLM(<a href="https://arxiv.org/abs/2410.01162" target="_blank" rel="noopener">2410.01162</a>) &quot;冻结 LLM+行为对齐&quot;把副语言压进 soft token）。<strong>机会窗口</strong>：情感/韵律需被显式建模——识别端用分布标注+歧义建模（Medusa 软目标 −8.23% 远超重采样 −1.20%），生成端用激活转向+逐步 dense reward（EASPO）+随机化显式韵律（Stochastic-Prosody）。<strong>对端侧</strong>：副语言支路用 HuBERT masked-unit 持续预训练于非语言发声数据（笑声/filler/抽泣）。</li>
+<li><strong>机会 10：隐私/公平性维度（VC 的安全/社会维度被显式化）</strong>（来源：Private kNN-VC(<a href="https://arxiv.org/abs/2505.17584" target="_blank" rel="noopener">2505.17584</a>) 隐私泄漏主因是音素微观变异；VoxMorph(<a href="https://arxiv.org/abs/2601.20883" target="_blank" rel="noopener">2601.20883</a>) 多身份 morphing 攻击 ASV（FMMPMR@0.01% FAR=67.8%，换 ECAPA 掉到 48.2%）；F5-TTS 公平性审计(<a href="https://arxiv.org/abs/2508.05102" target="_blank" rel="noopener">2508.05102</a>) 偏置向下游 ASR 传导（帮轻症 -44.57% WER、害重症 +7.65%））。<strong>机会窗口</strong>：VC/克隆评估加&quot;对 ASV 攻击成功率&quot;+&quot;跨群体 PD/DI 公平性&quot;维度；fairness-aware 克隆（按严重度重采样/推理时强条件约束）；水印+受控发布作合规标配。</div></li>
+</ul>
+<h3 id="三定">三定</h3>
+<h4 id="定战略控制点自研要抢占的-5-个关键点端侧护城河为核心">定战略控制点：自研要抢占的 5 个关键点（端侧护城河为核心）</h4>
+<p><strong>一句话结论：结合看机会+看自己，自研要抢占 5 个控制点——端侧低延迟护城河（Cortex-M 差异化核心）、preservation gate（保住比改对更难的硬约束）、codec 因子化（codec-native 下游处理骨架）、干净评测基准（判官异族+多指标齐报）、agent 闭环（规划-工具-反馈）。其中端侧护城河是唯一一个&quot;大厂不卷、作者对口、可工程化&quot;的三重交叉点。</strong></p>
+<ol>
+<li><strong>端侧低延迟护城河（Cortex-M 差异化核心）</strong>——大厂全在卷统一化/百亿参数（MiMo 1 亿小时、MM-Sonate 20B），端侧轻量+精控+流式是被忽视赛道。控制点 = mean flow 单步(2510.08392/2509.14858)+滑窗组合压到通话级（&lt;150ms）+LinearVC 学一次 W 矩阵乘(<a href="https://arxiv.org/abs/2506.01510" target="_blank" rel="noopener">2506.01510</a>)+CodecSep codes-in/out 1.35 GMACs/28MB(<a href="https://arxiv.org/abs/2509.11717" target="_blank" rel="noopener">2509.11717</a>)流水线。这是&quot;大厂不卷 + 作者对口 + 可工程化&quot;三重交叉点，是最该抢占的护城河。</li>
+<li><strong>preservation gate（保住比改对更难的硬约束）</strong>——SpeechEditBench(<a href="https://arxiv.org/abs/2606.01804" target="_blank" rel="noopener">2606.01804</a>) target 77.5% vs joint 0.50% 鸿沟已量化&quot;改了但毁了一切&quot;。控制点 = anchor-based 双约束（TS/PS/JS）+ ASR WER/CER≤10% 硬门控，任何&quot;改局部别带漂全局&quot;任务（VC/TSE/韵律迁移）都加这层 gate。这是跨编辑/VC/增强的共性硬约束，谁先把 gate 做成可复用组件谁占住编辑器底座。</li>
+<li><strong>codec 因子化 / codec-native 下游处理骨架</strong>——CodecSep(<a href="https://arxiv.org/abs/2509.11717" target="_blank" rel="noopener">2509.11717</a>) &quot;codec latent 已结构化到支持纯掩码分离&quot;、UniSE(<a href="https://arxiv.org/abs/2510.20441" target="_blank" rel="noopener">2510.20441</a>) &quot;codec 是瓶颈非 LM&quot;、Hybrid(<a href="https://arxiv.org/abs/2601.19113" target="_blank" rel="noopener">2601.19113</a>) 把 LM 当语义条件器而非波形生成器。控制点 = 在 codec 域做增强/去混响/编辑/分离（codes-in/out 流水线），而非 decode-re-encode 循环。<strong>但低码率 NAC 是自研短板</strong>（UniSE 作者直接呼吁改进），需补这块能力才能占住。</li>
+<li><strong>干净评测基准（判官异族 + 多指标齐报 + 人评兜底）</strong>——SpeechEditBench(<a href="https://arxiv.org/abs/2606.01804" target="_blank" rel="noopener">2606.01804</a>) Gemini 既判官又被测、MULTI-Bench(<a href="https://arxiv.org/abs/2511.00850" target="_blank" rel="noopener">2511.00850</a>) LLM 既环境又裁判、FlowSE-GRPO(<a href="https://arxiv.org/abs/2601.16483" target="_blank" rel="noopener">2601.16483</a>) DNSMOS 自评自训、Auto-Eval(<a href="https://arxiv.org/abs/2508.11966" target="_blank" rel="noopener">2508.11966</a>) CLAP LCC 仅 0.21 失效。控制点 = 自建&quot;判官与被测不同族 + 多指标齐报（不挑分母，DNSMOS+SpkSim+WER/CAcc+SDR/POLQA）+ 主观 MOS 兜底 + SE 专用 MOS 预测器&quot;评测协议。评测基准是隐藏护城河——谁有干净基准谁就能揭穿过度宣称、定义赛道。</li>
+<li><strong>agent 闭环（规划-工具-反馈）</strong>——Audio MultiChallenge(<a href="https://arxiv.org/abs/2512.14865" target="_blank" rel="noopener">2512.14865</a>) Gemini 3 Pro 仅 54.65% APR、Voice Editing 轴 17.99%，97 篇无真正 agent 闭环工作。控制点 = 把 TSE/编辑/分离/增强做成工具调用 + audio-native judge + 多轮交互轨迹 RL（Qwen3.5-Omni <a href="https://arxiv.org/abs/2604.15804" target="_blank" rel="noopener">2604.15804</a> 交互对齐思路）。这是最大空白，但也是最高风险控制点——需等端侧护城河站稳后再攻。</li>
+</ol>
+<h4 id="定目标自研能力里程碑近中远期量化指标标待自研确认非硬指标">定目标：自研能力里程碑（近/中/远期，量化指标标&quot;待自研确认&quot;非硬指标）</h4>
+<p><strong>一句话结论：近期 training-free 操控+开源主干快速原型、中期统一潜空间+RL 对齐+复合编辑、远期 agent 闭环+端侧护城河。所有量化指标（如端侧 &lt;30ms 延迟、复刻 SpeechEditBench 级干净基准）均为&quot;待自研确认&quot;的目标方向，非已验证硬指标。</strong></p>
+<ul>
+<li><strong>近期（0-6 个月，待自研确认）</strong>：
+<ul>
+<li>复刻 SpeechEditBench(<a href="https://arxiv.org/abs/2606.01804" target="_blank" rel="noopener">2606.01804</a>) 级干净评测基准（anchor-based TS/PS/JS 双约束 + 判官异族协议）——目标：在本批 97 篇代表模型上复现 target 77.5% vs joint 0.50% 鸿沟量级（待自研确认）。</li>
+<li>training-free 激活操控原型——基于 Activation Steering(<a href="https://arxiv.org/abs/2603.05813" target="_blank" rel="noopener">2603.05813</a>)/EmoShift(<a href="https://arxiv.org/abs/2601.22873" target="_blank" rel="noopener">2601.22873</a>)/LinearVC(<a href="https://arxiv.org/abs/2506.01510" target="_blank" rel="noopener">2506.01510</a>) 思路，在 ≥2 种 encoder 骨架（跨骨干验证）上做口音/情感切换，目标：单骨干→跨骨干泛化不掉点（待自研确认）。</li>
+<li>端侧延迟预算先行——先定 Cortex-M 级预算（&lt;150ms 通话/&lt;1s 流媒体）再反推模型容量，目标：复现 MeanVC(<a href="https://arxiv.org/abs/2510.08392" target="_blank" rel="noopener">2510.08392</a>) 14M RTF 0.322 + LinearVC 矩阵乘 + CodecSep(<a href="https://arxiv.org/abs/2509.11717" target="_blank" rel="noopener">2509.11717</a>) 1.35 GMACs 在目标硬件上的实测延迟（待自研确认）。</li>
+</ul>
+</li>
+<li><strong>中期（6-18 个月，待自研确认）</strong>：
+<ul>
+<li>mean flow 单步 + 滑窗组合压通话级延迟——目标：在 Diffusion Buffer(<a href="https://arxiv.org/abs/2506.02908" target="_blank" rel="noopener">2506.02908</a>) 320-960ms 基础上，用 MeanFlowSE(<a href="https://arxiv.org/abs/2509.14858" target="_blank" rel="noopener">2509.14858</a>) NFE=1 + chunk-wise AR 组合，把算法延迟压到 &lt;150ms 通话级，同时控制 PESQ 不塌陷（待自研确认，因 MeanFlowSE PESQ 塌陷至 2.942 是已知代价）。</li>
+<li>codec-native 下游处理骨架——在 codec 域做增强/去混响/编辑/分离（codes-in/out 流水线），目标：复现 CodecSep(<a href="https://arxiv.org/abs/2509.11717" target="_blank" rel="noopener">2509.11717</a>) 1.35 GMACs/28MB 量级 + 补低码率 NAC 短板（UniSE <a href="https://arxiv.org/abs/2510.20441" target="_blank" rel="noopener">2510.20441</a> 作者直接呼吁改进，待自研确认）。</li>
+<li>GRPO 偏好对齐 + 复合编辑——基于 Edit-Content-Preserve(<a href="https://arxiv.org/abs/2602.00560" target="_blank" rel="noopener">2602.00560</a>)/FlowSE-GRPO(<a href="https://arxiv.org/abs/2601.16483" target="_blank" rel="noopener">2601.16483</a>)/EASPO(<a href="https://arxiv.org/abs/2509.25416" target="_blank" rel="noopener">2509.25416</a>) 思路，做 gated reward fusion（软似然+硬 gate）防 reward hacking，目标：复合编辑三元组 joint 从 0 提升（待自研确认，因当前所有模型&quot;会改不会保&quot;）。</li>
+<li>判别打底+生成补内容混合范式——Cortex-M 上判别式（TF-Gridnet/BSRNN 轻量版）打底 + 生成式仅在丢包/带宽扩展触发，目标：避开 URGENT 2025(<a href="https://arxiv.org/abs/2505.23212" target="_blank" rel="noopener">2505.23212</a>) T13 SDR −12.28 灾难性塌陷（待自研确认）。</li>
+</ul>
+</li>
+<li><strong>远期（18+ 个月，待自研确认）</strong>：
+<ul>
+<li>agent 闭环（规划-工具-反馈）——把 TSE/编辑/分离/增强做成工具调用 + audio-native judge + 多轮交互轨迹 RL，目标：在 Audio MultiChallenge(<a href="https://arxiv.org/abs/2512.14865" target="_blank" rel="noopener">2512.14865</a>) 54.65% APR 基础上提升（待自研确认，因这是 97 篇最大空白）。</li>
+<li>端侧护城河工程化——LinearVC 几何探针 + CodecSep codes-in/out blue-print + mean flow 单步三件套在 Cortex-M 硬件上跑通端侧 VC/TSE/编辑流水线，目标：端侧 &lt;30ms 延迟（待自研确认，非硬指标，需硬件实测）。</li>
+<li>可控方言/口音 + 隐私公平性——数据打底（Chuan-Pipeline 复用）+ 激活操控切换 + fairness-aware 克隆（按严重度重采样/推理时强条件约束）+ 水印受控发布，目标：在 1.2 亿四川话使用者场景验证公平性去偏（待自研确认）。</li>
+</ul>
+</li>
+</ul>
+<h4 id="定策略技术路线图三阶段递进">定策略：技术路线图（三阶段递进）</h4>
+<p><strong>一句话结论：近期 training-free 操控 + 开源主干快速原型（低成本切入，补跨骨干验证）→ 中期统一潜空间 + RL 对齐 + 复合编辑（在 codec 域做下游处理，GRPO 防黑客）→ 远期 agent 闭环 + 端侧护城河（工具调用闭环 + Cortex-M 工程化）。每阶段都先定延迟预算再反推模型容量，不盲目堆数据/参数（因 scaling law 在公开榜外不成立）。</strong></p>
+<ul>
+<li><strong>近期策略（training-free 操控 + 开源主干快速原型）</strong>：不重训母体，靠推理时操控激活/嵌入改输出（Activation Steering <a href="https://arxiv.org/abs/2603.05813" target="_blank" rel="noopener">2603.05813</a> / EmoShift <a href="https://arxiv.org/abs/2601.22873" target="_blank" rel="noopener">2601.22873</a> / LinearVC <a href="https://arxiv.org/abs/2506.01510" target="_blank" rel="noopener">2506.01510</a> / Counterfactual Activation Editing <a href="https://arxiv.org/abs/2506.00832" target="_blank" rel="noopener">2506.00832</a> / SALM <a href="https://arxiv.org/abs/2507.16724" target="_blank" rel="noopener">2507.16724</a> / CodecSep <a href="https://arxiv.org/abs/2509.11717" target="_blank" rel="noopener">2509.11717</a>）。用开源主干（Qwen3-TTS <a href="https://arxiv.org/abs/2601.15621" target="_blank" rel="noopener">2601.15621</a> / CosyVoice / VoxCPM <a href="https://arxiv.org/abs/2509.24650" target="_blank" rel="noopener">2509.24650</a>）快速原型，避开大模型统一范式算力门槛（MiMo 1 亿小时、MM-Sonate 20B）。<strong>铁律</strong>：跨骨干验证（≥2 种 encoder）是宣称&quot;model-agnostic&quot;的必做项；balanced 子集放大效应需打折；向量级编辑特征纠缠（调 duration 影响 pitch）需解纠缠。</li>
+<li><strong>中期策略（统一潜空间 + RL 对齐 + 复合编辑）</strong>：在 codec 域做下游处理（codec-native，CodecSep <a href="https://arxiv.org/abs/2509.11717" target="_blank" rel="noopener">2509.11717</a> / UniSE <a href="https://arxiv.org/abs/2510.20441" target="_blank" rel="noopener">2510.20441</a> / Hybrid <a href="https://arxiv.org/abs/2601.19113" target="_blank" rel="noopener">2601.19113</a>），把 NAC 从&quot;生成/压缩专用&quot;走向&quot;下游处理共享表示骨干&quot;。RL 对齐用 GRPO（Edit-Content-Preserve <a href="https://arxiv.org/abs/2602.00560" target="_blank" rel="noopener">2602.00560</a> / FlowSE-GRPO <a href="https://arxiv.org/abs/2601.16483" target="_blank" rel="noopener">2601.16483</a> / EASPO <a href="https://arxiv.org/abs/2509.25416" target="_blank" rel="noopener">2509.25416</a>），但<strong>铁律</strong>：单神经指标奖励必被黑客，须多指标加权并对 DNSMOS 压权（λ1=0.6），用 gated reward fusion（软似然+硬 gate）防 reward hacking。复合编辑攻&quot;多意图单指令&quot;（SpeechEditBench <a href="https://arxiv.org/abs/2606.01804" target="_blank" rel="noopener">2606.01804</a> joint 全 0 的开放空间），用&quot;先 attention 定位关键帧再局部 edit&quot;两阶段管线。判别打底+生成补内容混合范式（URGENT 2025 <a href="https://arxiv.org/abs/2505.23212" target="_blank" rel="noopener">2505.23212</a> / Hybrid <a href="https://arxiv.org/abs/2601.19113" target="_blank" rel="noopener">2601.19113</a>），避开纯生成式对 ASR 下游副作用。<strong>铁律</strong>：不盲目堆数据/参数（DAC-SE1 <a href="https://arxiv.org/abs/2510.02187" target="_blank" rel="noopener">2510.02187</a> scaling law 在公开榜外不成立），data curation first。</li>
+<li><strong>远期策略（agent 闭环 + 端侧护城河）</strong>：agent 闭环——把 TSE/编辑/分离/增强做成工具调用 + audio-native judge + 多轮交互轨迹 RL（Qwen3.5-Omni <a href="https://arxiv.org/abs/2604.15804" target="_blank" rel="noopener">2604.15804</a> 交互对齐思路），攻 Audio MultiChallenge(<a href="https://arxiv.org/abs/2512.14865" target="_blank" rel="noopener">2512.14865</a>) 54.65% APR 空白。端侧护城河——LinearVC 几何探针 + CodecSep codes-in/out blue-print + mean flow 单步三件套在 Cortex-M 硬件工程化，抢占&quot;大厂不卷 + 作者对口 + 可工程化&quot;三重交叉点。<strong>铁律</strong>：每阶段先定延迟预算（&lt;150ms 通话/&lt;1s 流媒体）再反推模型容量，而非反之；长流式误差累积需量化（Diffusion Buffer <a href="https://arxiv.org/abs/2506.02908" target="_blank" rel="noopener">2506.02908</a> 早期去噪误差传导路径未分析是已知缺口）。</li>
+</ul>
 <h2 id="二论文总览表格venue--任务类">二、论文总览表格（venue × 任务类）</h2>
 <blockquote>
 <p>arXiv 预印本经 <code>&lt;comments&gt;</code> 字段挖掘：6 篇有真实 venue（已录用/已发表/投稿中），20 篇确为预印本。</p>
@@ -1112,68 +1454,16 @@
 </tr>
 </tbody>
 </table>
-<h2 id="四横切洞察跨方向基于-6-tech-深读实证">四、横切洞察（跨方向，基于 6 tech 深读实证）</h2>
-<blockquote>
-<p>以下每条均落到具体 arXiv ID 与实证数字，对原&quot;结构化要点&quot;中与深读不符的过度表述（如&quot;统一潜空间吞并专用模型&quot;&quot;RL 是最强趋势&quot;）已改正。</p>
-</blockquote>
-<h3 id="41-共性硬约束局部编辑变换不引发全局漂移贯穿编辑与-vc且保住比改对更难被量化">4.1 共性硬约束：&quot;局部编辑/变换不引发全局漂移&quot;贯穿编辑与 VC，且&quot;保住比改对更难&quot;被量化</h3>
-<p>一句话：编辑/变换最难的不是&quot;改对目标&quot;，而是&quot;改了之后别把其余部分带漂&quot;——而且后者更难，已被量化。</p>
-<ul>
-<li>tech1 SpeechEditBench(<a href="https://arxiv.org/abs/2606.01804" target="_blank" rel="noopener">2606.01804</a>) 把这个约束量化成 anchor-based 的 TS/PS/JS preservation hard gate，揭穿 target-only 77.5% vs joint 0.50% 的鸿沟——&quot;改了但毁了一切&quot;。复合编辑三元组 joint 全 0、两元组闭源仅 21.5%/20.0%。</li>
-<li>tech1 06-Edit-Content-Preserve(<a href="https://arxiv.org/abs/2602.00560" target="_blank" rel="noopener">2602.00560</a>) 用 GRPO 乘性 reward（预训练 TTS 条件似然）显式惩罚全局重写，删除 WER 压到 0.47%；tech1 03-EmoCorrector(<a href="https://arxiv.org/abs/2505.20341" target="_blank" rel="noopener">2505.20341</a>) 把 TSEAcc 从 7.2% 拉到 48%，但 GT 天花板仅 52.1%，编辑后情绪一致性仍未饱和。</li>
-<li>tech2 三角&quot;音色相似度 vs 内容保真 vs 韵律自然度&quot;中，Discl-VC(<a href="https://arxiv.org/abs/2505.24291" target="_blank" rel="noopener">2505.24291</a>) 韵律迁移越彻底音色越易丢（SECS 0.847&lt;Vevo 0.892）、Non-AR EVC(<a href="https://arxiv.org/abs/2506.04013" target="_blank" rel="noopener">2506.04013</a>) 离散化致德→英 WER 30.84% 崩盘——&quot;风格赢、可懂度赔&quot;是离散解耦路线的结构性代价。</li>
-<li>tech5 把同一约束推到 SE：纯生成式&quot;补内容&quot;反而伤保真，URGENT T13 SDR=−12.28（比输入还远离干净参考）、仅主观 MOS 第一——&quot;听起来好但内容/说话人变了&quot;。</li>
-</ul>
-<p><div class="callout callout-danger"></p>
-<h3 id="42-共性红线原总览遗漏6-tech-实证新增生成式增强对-asr-下游副作用--评测回路自我参照cherry-picking--首个可控营销过度宣称">4.2 共性红线（原总览遗漏，6 tech 实证新增）：生成式增强对 ASR 下游副作用 + 评测回路自我参照/cherry-picking + &quot;首个/可控&quot;营销过度宣称</h3>
-<p></div></p>
-<p><strong>(A) 生成式增强后 ASR 词准确率（W Acc）普遍低于带噪输入——生成模型重建语音对人耳更自然、对 ASR 更难。</strong> 这是一条贯穿 tech5 多篇的反直觉共识：</p>
-<ul>
-<li>DisContSE(<a href="https://arxiv.org/abs/2601.21940" target="_blank" rel="noopener">2601.21940</a>) W Acc 75.50% &lt; Noisy 79.91%；DeepFilterGAN(<a href="https://arxiv.org/abs/2505.23515" target="_blank" rel="noopener">2505.23515</a>) 75.05% &lt; 79.53%；USEMamba-Flow(<a href="https://arxiv.org/abs/2505.21198" target="_blank" rel="noopener">2505.21198</a>) 69.07% vs 回归版 88.05%；DAC-SE1(<a href="https://arxiv.org/abs/2510.02187" target="_blank" rel="noopener">2510.02187</a>) WER 0.25/S-BERTS 0.89 与 Noisy 持平（下游无提升）；URGENT T13 日语 CAcc 36.8% vs 噪声 74.5% 是极端案例。</li>
-<li>下游传导在 tech2 亦有镜像：F5-TTS 公平性审计(<a href="https://arxiv.org/abs/2508.05102" target="_blank" rel="noopener">2508.05102</a>) 实证克隆偏置向下游 ASR 传导（合成数据帮轻症 -44.57% WER、害重症 +7.65%）。<strong>含义</strong>：生成式 SE/VC 作为&quot;ASR 前端/数据增强源&quot;的传统定位面临警示，解决方向是 ASR-in-the-loop 或音素/文本引导生成。</li>
-</ul>
-<p><strong>(B) 评测回路自我参照 + cherry-picking 分母跨 tech1/tech3/tech5 普遍。</strong></p>
-<ul>
-<li>tech1 SpeechEditBench(<a href="https://arxiv.org/abs/2606.01804" target="_blank" rel="noopener">2606.01804</a>) 用 Gemini-2.5-pro 当情感/风格判官而 Gemini-Live 同是被测——同族模型既当裁判又当被测的利益冲突论文未讨论（anchor-based 解了&quot;波形不可比&quot;却把题转嫁给&quot;判官可信度未知&quot;）；tech1 14-Auto-Eval(<a href="https://arxiv.org/abs/2508.11966" target="_blank" rel="noopener">2508.11966</a>) 揭穿 CLAP score 作编辑评测 LCC 仅 0.21 基本失效、FAD 过滤后从 0.2859 恶化到 0.6003。</li>
-<li>tech3 EASPO(<a href="https://arxiv.org/abs/2509.25416" target="_blank" rel="noopener">2509.25416</a>) Emo SIM 99.15 近 cosine×100 天花板，却挑次次佳 CosyVoice(97.07) 做分母宣称&quot;2.07% gain&quot;（相对次佳 EmoVoice 仅 +0.57%）、Table 8 数值不一致；MULTI-Bench(<a href="https://arxiv.org/abs/2511.00850" target="_blank" rel="noopener">2511.00850</a>) LLM 既当环境又当裁判（DeepSeek 当用户、GPT-4o 选情绪、Gemini 打分）系统性耦合；CAMEO(<a href="https://arxiv.org/abs/2505.11051" target="_blank" rel="noopener">2505.11051</a>) 只指数据污染未做 leave-one-out 去污染量化；EmoShift(<a href="https://arxiv.org/abs/2601.22873" target="_blank" rel="noopener">2601.22873</a>) α=3&quot;Best&quot;以 WER 7.90→11.60 恶化为代价论文未在 abstract 强调。</li>
-<li>tech5 FlowSE-GRPO(<a href="https://arxiv.org/abs/2601.16483" target="_blank" rel="noopener">2601.16483</a>) 评测依赖 DNSMOS 自评自训、缺人评 MOS；TS-URGENet(<a href="https://arxiv.org/abs/2505.18533" target="_blank" rel="noopener">2505.18533</a>) 训练拟合评估器与评估用同一评估器有循环嫌疑。<strong>含义</strong>：跨方向需引入&quot;判官与被测不同族 + 多指标齐报（不挑分母）+ 人评兜底&quot;的评测协议。</li>
-</ul>
-<p><strong>(C) &quot;首个/可控/imperceptible/不用真实 L2&quot;等标题级主张普遍需打折。</strong> tech1 06&quot;imperceptible&quot;仅 15 人 MOS 测自然度、非不可察觉性（缺 ABX 边界检测）、07&quot;编辑&quot;实为 conditional regeneration；tech2 MiMo-Audio(<a href="https://arxiv.org/abs/2512.23808" target="_blank" rel="noopener">2512.23808</a>) &quot;无损压缩=涌现&quot;无有损 tokenizer 反事实对照且 tokenizer 带宽对比不公平、Qwen3-TTS(<a href="https://arxiv.org/abs/2601.15621" target="_blank" rel="noopener">2601.15621</a>) 日语系统性偏弱却只挑 zh-to-ko 高亮；tech4 FAC-FACodec(<a href="https://arxiv.org/abs/2510.10785" target="_blank" rel="noopener">2510.10785</a>) &quot;首个可控&quot;实为把已知噪声步 t_start 重命名、CosyAccent(<a href="https://arxiv.org/abs/2602.19166" target="_blank" rel="noopener">2602.19166</a>) &quot;不用真实 L2&quot;半真（数据构造仍需 L2-ARCTIC）；tech5 UniverSR(<a href="https://arxiv.org/abs/2510.00771" target="_blank" rel="noopener">2510.00771</a>) 表述与表格数据矛盾、MeanFlowSE(<a href="https://arxiv.org/abs/2509.14858" target="_blank" rel="noopener">2509.14858</a>) PESQ 塌陷未解释。</p>
-<h3 id="43-统一范式-vs-专用模型的真相统一有代价精控下降保真塌陷且瓶颈常在-codec特征而非-lm架构">4.3 统一范式 vs 专用模型的真相：统一有代价（精控下降、保真塌陷），且瓶颈常在 codec/特征而非 LM/架构</h3>
-<p>一句话：大模型&quot;统一吃掉专用模型&quot;的笼统说法被实证修正——统一是有代价的，而且瓶颈常常不在你以为的地方。</p>
-<ul>
-<li>tech5 证伪&quot;统一潜空间吞并专用模型且精控下降&quot;的笼统表述——精控下降的根因被实证定位：UniSE(<a href="https://arxiv.org/abs/2510.20441" target="_blank" rel="noopener">2510.20441</a>) 消融显示换 LM 主干（LLaMA/Qwen2/GLM）性能相近(OVRL 3.43/3.44/3.43，<strong>框架对 LM 架构不敏感</strong>)、换 codec(BiCodec→X-codec2) OVRL 3.43→3.34，<strong>codec 是瓶颈非 LM</strong>；Hybrid(<a href="https://arxiv.org/abs/2601.19113" target="_blank" rel="noopener">2601.19113</a>) 用 DPRNN-Attention 把 LM 当语义条件器而非波形生成器绕开 codec 瓶颈；DAC-SE1(<a href="https://arxiv.org/abs/2510.02187" target="_blank" rel="noopener">2510.02187</a>) scaling law 在自家集 MUSHRA 58.3 领先但公开 DNS 2023 盲测 OVRL 3.63 &lt; LLaSE-G1 3.72，<strong>scaling law 在公开榜外不成立</strong>。</li>
-<li>tech2 对&quot;一个模型打天下&quot;的限定：专精 VC 模型长期价值正被基础模型 in-context 压缩，但专精在成本/可控性/保真度短期仍有优势；Qwen3-TTS 用双 tokenizer 矩阵而非单架构调和长程稳定 vs 流式低延迟即为&quot;统一难成立&quot;的反证；MiMo-Audio scaling 曲线只证相关性不证因果（无有损 tokenizer 反事实）。</li>
-<li>tech6 通用大模型染指分离(SpeakerLM 2508.06372/Qwen3.5-Omni 2604.15804/LongSpeech <a href="https://arxiv.org/abs/2601.13539" target="_blank" rel="noopener">2601.13539</a>)是&quot;上限演示多于部署方案&quot;：SpeakerLM 只输出文本归属不输出分离音轨、7B+4×A800 无实时性、仅 Mandarin 却自称 versatile；Qwen3.5-Omni 的 AV Vibe Coding 作&quot;涌现能力&quot;无 benchmark/消融。</li>
-<li>tech3 收敛判断：情感/韵律需被显式建模而非指望通用模型涌现（CAMEO 识别端 zero-shot 0.20 + EmoShift 生成端互为注脚）。</li>
-</ul>
-<h3 id="44-training-free--激活操控是跨方向低成本切入但天花板低多单骨干验证评测放大效应待打折">4.4 Training-free / 激活操控是跨方向低成本切入，但天花板低、多单骨干验证、评测放大效应待打折</h3>
-<p>一句话：不重训母体、只在推理时操控激活/嵌入，是跨方向共同的低成本切入法，但天花板低、还常被评测放大效应虚高。</p>
-<ul>
-<li>tech2 LinearVC(<a href="https://arxiv.org/abs/2506.01510" target="_blank" rel="noopener">2506.01510</a>)/MKL-VC(<a href="https://arxiv.org/abs/2506.09709" target="_blank" rel="noopener">2506.09709</a>) 把 VC 压到线性投影/最优传输解析解，实证瓶颈在特征（WavLM 子块近似高斯）而非模型；tech3 EmoShift(<a href="https://arxiv.org/abs/2601.22873" target="_blank" rel="noopener">2601.22873</a>) 10M 参数激活转向超 311M 全量微调；tech4 Activation Steering(<a href="https://arxiv.org/abs/2603.05813" target="_blank" rel="noopener">2603.05813</a>) 小样本碾压 PEFT 但存在 crossover（&lt;100 用 steer、~800 用 PEFT）；tech1 Counterfactual Activation Editing(<a href="https://arxiv.org/abs/2506.00832" target="_blank" rel="noopener">2506.00832</a>)/SALM(<a href="https://arxiv.org/abs/2507.16724" target="_blank" rel="noopener">2507.16724</a>)/CodecSep(<a href="https://arxiv.org/abs/2509.11717" target="_blank" rel="noopener">2509.11717</a>) 不重训母体。</li>
-<li><strong>共性天花板</strong>：单骨干验证（02 仅 Tacotron2 28M 未跨 FastSpeech/LLM-TTS、04 仅 Qwen2-Audio 7B、steering 仅 8 英语口音）、特征纠缠（调 duration 影响 pitch）、评测放大（tech4 balanced 子集一半 WER=0 + 一半 WER&gt;0 绝对降幅需打折）、未配探针验证可解释性（EmoShift steering vector）。</li>
-</ul>
-<h3 id="45-评测基准是隐藏护城河且多份基准同时承担揭穿过度宣称的纠偏职能">4.5 评测基准是隐藏护城河，且多份基准同时承担&quot;揭穿过度宣称&quot;的纠偏职能</h3>
-<p>一句话：评测基准不只是打分工具，还是揭穿过度宣称的纠偏器——这层职能常被低估。</p>
-<ul>
-<li>tech1 SpeechEditBench(<a href="https://arxiv.org/abs/2606.01804" target="_blank" rel="noopener">2606.01804</a>)/Auto-Eval(<a href="https://arxiv.org/abs/2508.11966" target="_blank" rel="noopener">2508.11966</a>)/Audio MultiChallenge(<a href="https://arxiv.org/abs/2512.14865" target="_blank" rel="noopener">2512.14865</a>) 定义编辑赛道并揭穿&quot;波形匹配评编辑&quot;&quot;CLAP 评测失效&quot;&quot;Gemini 3 Pro 仅 54.65% APR&quot;；tech3 MULTI-Bench(<a href="https://arxiv.org/abs/2511.00850" target="_blank" rel="noopener">2511.00850</a>)/CAMEO(<a href="https://arxiv.org/abs/2505.11051" target="_blank" rel="noopener">2505.11051</a>) 揭穿 AudioLLM zero-shot 情感接近随机与数据污染；tech5 URGENT 三部曲(2505.23212/2506.01611/2601.13531) 重塑 SE 评测实践（DNSMOS 不可靠成共识 + 类别化多指标 + CAcc 内容指标 + SE 专用 MOS 预测器）；tech6 SDBench(<a href="https://arxiv.org/abs/2507.16136" target="_blank" rel="noopener">2507.16136</a>)/LongSpeech(<a href="https://arxiv.org/abs/2601.13539" target="_blank" rel="noopener">2601.13539</a>) 暴露日志与长语音高层推理短板（时序定位严格准确率最高 23.69%、情感 &lt;40%）；tech4 PSP(<a href="https://arxiv.org/abs/2604.25476" target="_blank" rel="noopener">2604.25476</a>) 揭穿 WER 系统性低估印度语 TTS 口音缺口（ElevenLabs Telugu WER 0.041 但 PSD 154 最差）。</li>
-<li><strong>共性方法论贡献</strong>：anchor-based 双约束、类别化 Friedman 排名、per-dimension 可解释分解、声学探针绕过 ASR 质量依赖——是跨方向可迁移的评测基建。</li>
-</ul>
-<h3 id="46-度量缺陷是横跨-6-tech-的共性短板客观嵌入相似度-vs-主观听感系统性不一致单指标不可靠">4.6 度量缺陷是横跨 6 tech 的共性短板：客观嵌入相似度 vs 主观听感系统性不一致、单指标不可靠</h3>
-<p>一句话：客观打分（嵌入相似度/单指标）跟人耳听感系统性不一致，是 6 个方向共同的度量短板。</p>
-<ul>
-<li>tech4 SECS(0.8213) 输 TokAN(0.8613) 但主观 SIM 反超(0.033 vs -0.027)——客观嵌入相似度不反映听感身份；PSP per-phoneme 噪声地板 43-53%（母语音频 RR 仅 0.54/0.47）、5 维尺度悬殊未归一使 nPVI 主导。</li>
-<li>tech5 DNSMOS 单指标被生成式幻觉欺骗（T17 DNSMOS 3.26 全场第一但 PESQ 1.36/SDR 0.41/MOS 3.05 崩盘）；UTMOS/SCOREQ 与 MOS 相关性最高，DNSMOS 的 LCC 高但 KRCC 低（数值近、排名错配）；开源语料带宽失配与标签噪声普遍（DNS5 LibriVox ~100% 有效带宽低于声明采样率）。</li>
-<li>tech3 分布度量须 JS+BC+R² 三件套齐报（AmbER² 单看 JS 会被高模糊区&quot;假性变好&quot;误导）；tech2 SIM 纵轴仅 30-40% 且绑定弱 ASV（VoxMorph 换 ECAPA 从 67.8% 掉到 48.2%）。<strong>含义</strong>：跨方向亟需&quot;多指标齐报 + 主观兜底 + 度量本身的可信度评估&quot;。</li>
-</ul>
-<h2 id="五数据可信度说明">五、数据可信度说明</h2>
+<h2 id="四数据可信度说明">四、数据可信度说明</h2>
 <ul>
 <li>97 个 arXiv ID 经 Semantic Scholar 核实；引用数为 2026-06-25 时点值。</li>
 <li>来源列指向 venue sweep/arXiv sweep 原始 md；venue sweep 行人工复核，arXiv 行四列为摘要级规则生成（部分&quot;待核&quot;/英文截断）。</li>
 <li>口径收紧：speech-LM/多模态 150 篇按场景重归（35 并入 6 类、115 移出非编创）；csSD-2026H1（无 H3 结构）的少量 speech-LM/多模态行未参与重桶。</li>
 <li>选取理由为 LLM 基于标题/技术点/场景+引用判断，非全文精读。</li>
+<li><strong>行业/市场素材来自网络调研（2026-07-07）</strong>：方法为 curl 走本地代理(7897)抓权威来源（公司官网/Wikipedia/Sifted/arXiv/Microsoft Learn/OpenAI docs）；WebSearch 与 WebFetch 在本环境多数被网络策略拦截或返回模型&quot;知识库&quot;非实时结果。<strong>市场精确规模（GVR/Mordor/Fortune/Allied/Statista/Precedence 等研究机构数字）未一手核实</strong>——GVR 报告页&quot;developing&quot;、Mordor/Fortune/Allied 被 Cloudflare 拦、Statista JS 渲染无静态数字、WebSearch 返回无来源模型估算，一律不采用，仅以可核实体量信号（如 ElevenLabs 融资轨迹、用户生成音频时长）佐证&quot;起量&quot;。具体未核实项见调研素材&quot;未核实清单&quot;。</li>
+<li>竞争/自己/机会素材来自 97 篇深读实证（精选-编创-讲解/深读分析/tech1~tech6）+ 6 个 tech 页方向概览，每条带 arXiv ID；深读里没有的不编。</li>
 </ul>
-<h2 id="六参考文件清单">六、参考文件清单</h2>
+<h2 id="五参考文件清单">五、参考文件清单</h2>
 <table class="gfm-table">
 <thead>
 <tr>
@@ -1213,6 +1503,11 @@
 </tbody>
 </table>
 <p>上游：<a href="../papers-2025H2-2026/%E7%B2%BE%E9%80%89-%E7%BC%96%E5%88%9B-2025H2-2026.md">精选-编创-2025H2-2026.md</a> / <a href="../papers-2025H2-2026/%E7%BC%96%E5%88%9B%E5%90%88%E9%9B%86-2025H2-2026.md">编创合集-2025H2-2026.md</a> / <a href="../papers-2025H2-2026/00-INDEX.md">00-INDEX.md</a>。</p>
+<p>调研素材（合成五看三定的输入）：</p>
+<ul>
+<li>行业/市场调研（看行业 + 看市场，2026-07-07，带来源 URL，市场精确规模标&quot;未核实&quot;）</li>
+<li>竞争/自己/机会调研（看竞争 + 看自己 + 看机会，97 篇深读提炼，带 arXiv ID）</li>
+</ul>
 
         </article>
 
