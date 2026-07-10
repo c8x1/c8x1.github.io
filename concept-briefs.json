@@ -137,6 +137,61 @@
       "is_process_type": false,
       "canonical_sentence_cn": "关键物种是数量（生物量）占比小、但对群落结构与生态系统功能影响不成比例的物种；一旦移除，整个生态系统将经历剧烈变化甚至崩塌。",
       "canonical_sentence_en": "A keystone species has a disproportionately large effect on its ecosystem relative to its abundance, and its removal triggers dramatic shifts or collapse of the ecological community."
+    },
+    "deadlocks": {
+      "concept": "deadlocks",
+      "concept_cn": "死锁",
+      "definition_cn": "两个或两个以上的运算单元互相持有对方所需的资源并各自等待对方释放，导致任何一方都无法继续执行的系统状态。",
+      "definition_en": "A situation in concurrent computing where no member of a group of entities can proceed because each waits for another to release a resource or take action.",
+      "core_mechanism": "当四个必要条件（互斥、持有并等待、不可抢占、循环等待）同时满足时，系统进入所有进程互相阻塞、无法推进的停滞状态。死锁是一种系统状态/条件组合，而非任何进程的意愿过程或主动行为——没有任何进程\"想\"死锁，它是资源分配结构导致的结果状态。",
+      "key_relations": [
+        "四个必要条件（Coffman conditions）必须同时满足才发生死锁：互斥 mutual exclusion、持有并等待 hold-and-wait、不可抢占 no preemption、循环等待 circular wait。",
+        "循环等待（circular wait）是最直观的特征：P1等P2持有的资源，P2等P3…Pn等P1，形成闭合等待环。",
+        "预防 prevention = 在系统设计时永久破坏四个条件中的至少一个，使死锁结构上不可能发生（如资源有序分配以破坏循环等待）。",
+        "避免 avoidance = 运行时动态分析每个资源请求是否会导向不安全状态，仅在判定安全时才分配（代表算法为银行家算法 Banker's algorithm）；需进程预先声明资源需求。",
+        "忽略/检测恢复 detection & recovery = 允许死锁发生，运行期检测到再处理（终止进程或抢占资源回滚），或如鸵鸟算法直接忽略（认为代价可接受）。",
+        "预防、避免、检测恢复三者区别：预防=事前破坏条件（静态）；避免=事中判断安全状态（动态、不破坏条件）；检测恢复=事后处理已发生的死锁。"
+      ],
+      "common_misconceptions": [
+        "误以为死锁是进程/人\"故意\"或\"愿意\"僵持——实际它是资源分配结构产生的系统状态，无人主动选择，任何一方都不\"想\"死锁。",
+        "误以为只要两个进程互相等待就是死锁——必须四个条件同时满足；缺少任一条件（如资源可共享、或可被强制抢占）则不会死锁。",
+        "混淆死锁 deadlock 与活锁 livelock——死锁是进程都在等待、状态不变；活锁是进程状态不断变化（如互相让路却又同时占同一侧），却始终无进展。两人在走廊互不相让是死锁，互相礼让却总让到同一侧是活锁。",
+        "误以为\"避免\"与\"预防\"是同义词——预防静态破坏条件，避免动态判断安全状态，机制完全不同。",
+        "误以为四个条件是\"充分且必要\"于所有系统——对单实例资源系统是充分的，对多实例资源系统仅表明\"可能\"发生死锁。",
+        "误以为死锁只发生在操作系统进程间——并发计算、并行计算、分布式系统、通信系统（信号丢失/损坏）均可出现死锁。"
+      ],
+      "literal_domain_to_avoid": "计算机系统/操作系统/进程/线程/资源分配/并发编程/锁机制/分布式系统/调度算法",
+      "is_process_type": false,
+      "canonical_sentence_cn": "死锁是两个以上运算单元互相持有对方所需资源、循环等待、任何一方都无法继续推进的系统状态，须四个必要条件同时满足才会发生。",
+      "canonical_sentence_en": "A deadlock is a system state in which two or more entities each hold resources the others need and wait in a cycle, so none can proceed; it arises only when all four necessary conditions hold simultaneously."
+    },
+    "overfitting": {
+      "concept": "overfitting",
+      "concept_cn": "过拟合",
+      "definition_cn": "过拟合是指模型过于紧密或精确地匹配特定训练数据集，以致无法良好地拟合新数据或可靠预测未来观察结果的现象。",
+      "definition_en": "Overfitting is the production of an analysis that corresponds too closely or exactly to a particular set of data, so that it fails to fit additional data or predict future observations reliably.",
+      "core_mechanism": "模型在训练数据上表现好却泛化差，是因为它不自觉地把数据中的残差/噪声当作底层规律吸收进了参数；这是模型失效模式，而非任何主体的意愿过程。",
+      "key_relations": [
+        "训练误差低但泛化/测试误差高：在已知数据上精确，在新数据上不精确",
+        "记住了噪声与特例而非底层规律：本质是把残差变异误当作模型结构",
+        "对应高方差(high variance)：发生过拟合时偏差小而方差大",
+        "与欠拟合(underfitting)相对：欠拟合是偏差大、方差小、捕捉不到规律",
+        "违反奥卡姆剃刀原则：参数/复杂度超过数据所含信息量",
+        "缓解手段：更多数据、正则化、交叉验证、简化模型、提前停止、剪枝、dropout、贝叶斯先验",
+        "偏差-方差权衡中处于高方差一端",
+        "选择模型的标准与评价模型的标准不一致时易发生过拟合"
+      ],
+      "common_misconceptions": [
+        "误以为过拟合是模型的'意愿'或主动选择；实为非意愿的失效模式，模型不自觉吸收了噪声",
+        "误以为训练表现越好模型越好；过拟合时训练误差下降而泛化误差反而上升",
+        "误以为参数越多模型越强；相对数据量而言参数过多正是过拟合的成因",
+        "把过拟合等同于过训练；二者在机器学习中有时混用，但过训练强调迭代过久，过拟合强调拟合了噪声",
+        "误以为只需在训练集上完美拟合即可；若参数数等于或多于样本数，可完美记忆训练数据却对新数据预测失败"
+      ],
+      "literal_domain_to_avoid": "机器学习/统计/训练数据/模型/算法",
+      "is_process_type": false,
+      "canonical_sentence_cn": "过拟合是模型过于紧密地匹配特定数据、记住了噪声与特例而非底层规律，从而在训练数据上表现好却对未见数据泛化差的失效模式，对应偏差-方差权衡中的高方差一端。",
+      "canonical_sentence_en": "Overfitting is the non-volitional failure mode in which a model matches a particular dataset too closely—absorbing noise and idiosyncrasies rather than the underlying structure—so that it performs well on training data yet generalizes poorly to unseen data, corresponding to the high-variance end of the bias-variance tradeoff."
     }
   }
 }
