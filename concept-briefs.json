@@ -295,6 +295,65 @@
       "is_process_type": false,
       "canonical_sentence_cn": "系统整体性能提升受限于被优化部分的实际使用时间比例；不可优化的串行部分为整体加速封顶。",
       "canonical_sentence_en": "The speedup of a task gained by optimizing one part is bounded by the fraction of time that part is actually used; the unoptimizable serial portion caps the whole."
+    },
+    "genetic drift": {
+      "concept": "genetic drift",
+      "concept_cn": "遗传漂变",
+      "definition_cn": "遗传漂变是指由于随机（机会）因素导致的种群中等位基因频率在代际间发生的变化。",
+      "definition_en": "Genetic drift is the change in the frequency of an existing allele in a population due to chance.",
+      "core_mechanism": "繁殖过程可视作对亲代基因库的一次随机抽样，抽样误差使子代等位基因频率偏离亲代；这是一个非定向、非选择驱动的机械性随机过程（mechanical / stochastic，非 selection-driven，与个体适应性无关），小种群中效应最强。",
+      "key_relations": [
+        "小种群 → 随机抽样波动 → 等位基因频率在代际随机变化（抽样误差是核心驱动力）",
+        "种群越小，漂变效应越强，固定/丢失发生得越快；无限大种群中不发生固定",
+        "瓶颈效应（population bottleneck）：种群数量骤减为少数随机幸存者，导致遗传变异骤降",
+        "奠基者效应（founder effect）：少数个体脱离原种群建立新种群，是瓶颈效应的特例，新种群基因构成严重偏离原种群",
+        "最终趋向：某一等位基因被固定（频率达100%）或丢失（频率达0%），漂变随之停止；整体趋向降低遗传多样性",
+        "被固定的概率等于该等位基因当前频率（如75%频率→75%被固定概率）",
+        "与自然选择、基因流（迁移）、突变并列为改变等位基因频率的进化机制之一；区别在于漂变是随机的、方向不确定的",
+        "中性突变在种群中扩散主要由漂变驱动（木村资生中性进化理论）"
+      ],
+      "common_misconceptions": [
+        "误以为漂变是由环境或适应性选择驱动的定向过程；实为与生存繁殖能力无关的随机抽样误差，方向不确定。",
+        "误以为漂变只在小种群发生；理论上任何有限种群都存在抽样误差，只是大种群中效应微弱、被统计平均化。",
+        "误以为漂变会持续产生新等位基因或增加多样性；漂变只能移除（不能创造）等位基因，长期趋势是降低遗传多样性、推向固定。",
+        "误以为固定后漂变仍继续；一旦某等位基因频率达到1（固定）或0（丢失），该基因座的漂变即停止，除非突变或基因流引入新等位基因。",
+        "误以为漂变总是对称地偏向某个方向；单代方向随机不可预测，但长期看必然走向某一等位基因的固定。",
+        "误以为漂变与自然选择是同一回事；漂变作用于中性等位基因，不依赖表型适应性，而选择依赖相对适应度差异。"
+      ],
+      "literal_domain_to_avoid": "故事不得设在遗传漂变字面领域：基因、等位基因、基因频率、种群、繁衍/繁殖、抽样、基因库、固定/丢失、生物群体、瓶颈效应、奠基者效应等生物学遗传学场景。",
+      "is_process_type": true,
+      "canonical_sentence_cn": "在小种群中，随机抽样误差使等位基因频率在代际间随机波动，最终导致某些等位基因被固定、另一些丢失，从而降低遗传多样性。",
+      "canonical_sentence_en": "In small populations, random sampling error causes allele frequencies to fluctuate between generations, eventually leading to the fixation of some alleles and the loss of others, thereby reducing genetic variation."
+    },
+    "Gibbs free energy": {
+      "concept": "Gibbs free energy",
+      "concept_cn": "吉布斯自由能",
+      "definition_cn": "在等温等压下，一个封闭热力学系统所能做出的最大非体积功所对应的热力学势，其变化量用以判断过程在该条件下是否自发。",
+      "definition_en": "A thermodynamic potential whose change equals the maximum non-pressure-volume work obtainable from a closed system at constant temperature and pressure, used to judge whether a process is spontaneous under those conditions.",
+      "core_mechanism": "吉布斯能 G = H - TS，其变化 ΔG = ΔH - TΔS 是焓变与熵变（乘以温度）两股力量竞争的净结果；在等温等压且无非体积功时，ΔG < 0 过程自发进行，ΔG = 0 系统处于平衡，ΔG > 0 过程非自发、须由外界注入非体积功才可能发生。这是平衡趋向型机制（系统自发趋向吉布斯能最小、即最小自由能的平衡态），而非机械决定性或意志驱动过程。",
+      "key_relations": [
+        "G = H - TS = U + pV - TS",
+        "ΔG = ΔH - TΔS（等温等压下的变化判据）",
+        "ΔG < 0：过程自发（放能过程 exergonic）",
+        "ΔG = 0：系统处于平衡态",
+        "ΔG > 0：过程非自发，须外界提供非体积功（吸能过程 endergonic）",
+        "焓变（ΔH，能量因素）与熵变（ΔS，混乱度因素）相互竞争，温度 T 决定哪一项主导",
+        "孤立系统熵增 ΔS_tot ≥ 0 对应等温等压子系统 ΔG = -TΔS_tot ≤ 0",
+        "耦合反应：一个 ΔG>0 的非自发反应可与一个 ΔG<0 的自发反应耦合，使总 ΔG 为负从而整体自发"
+      ],
+      "common_misconceptions": [
+        "误以为 ΔG<0 就代表反应一定发生或快速发生：自发只表示热力学上可能，不代表动力学速率；金刚石转石墨 ΔG 为负却因活化能极高而几乎不发生。",
+        "误以为 'free energy' 的 'free' 意为 '免费/无成本'：其原意是 '以有用功（非体积功）形式可被释放' 的能量，1988 年 IUPAC 建议改称 'Gibbs energy' 以消除歧义。",
+        "误以为吉布斯能判据无条件通用：ΔG 自发性判据仅在等温等压（且无非体积功或已计入）下成立，其他约束（如等温等容）应改用亥姆霍兹自由能。",
+        "误以为自发过程逆方向也自发：自发过程朝吉布斯能减小方向进行，其逆过程 ΔG>0 非自发，须外界做功。",
+        "误以为非自发过程绝对不可能发生：ΔG>0 的过程经耦合（借助外界输入能量或与自发过程联合）仍可发生。",
+        "误将 ΔG 与反应速率混为一谈：ΔG 只决定方向与平衡位置，与速率、活化能无关。",
+        "误以为吉布斯能是系统总能量：它只是状态函数，衡量可用于做非体积功的那部分能量，不是总能量的全部。"
+      ],
+      "literal_domain_to_avoid": "故事不得设在化学热力学字面领域：化学反应/反应物与产物/分子与原子/焓熵平衡常数/反应体系/标准生成吉布斯能/电化学电池/相变与多相平衡等。不得出现 ΔG、ΔH、ΔS、反应坐标、平衡常数 K、标准态等化学热力学符号与术语作为剧情要素。",
+      "is_process_type": true,
+      "canonical_sentence_cn": "在等温等压下，过程是否自发取决于吉布斯能变化 ΔG = ΔH - TΔS：ΔG 为负则自发，为零则平衡，为正则非自发，需外界做功方可发生；这是焓与熵两股力量竞争、由温度决定何者主导的平衡趋向机制。",
+      "canonical_sentence_en": "At constant temperature and pressure, whether a process is spontaneous is determined by the Gibbs free energy change ΔG = ΔH - TΔS: negative means spontaneous, zero means equilibrium, positive means non-spontaneous and requiring external work; it is an equilibrium-seeking mechanism where enthalpy and entropy compete, with temperature deciding which dominates."
     }
   }
 }
