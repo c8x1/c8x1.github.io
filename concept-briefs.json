@@ -354,6 +354,62 @@
       "is_process_type": true,
       "canonical_sentence_cn": "在等温等压下，过程是否自发取决于吉布斯能变化 ΔG = ΔH - TΔS：ΔG 为负则自发，为零则平衡，为正则非自发，需外界做功方可发生；这是焓与熵两股力量竞争、由温度决定何者主导的平衡趋向机制。",
       "canonical_sentence_en": "At constant temperature and pressure, whether a process is spontaneous is determined by the Gibbs free energy change ΔG = ΔH - TΔS: negative means spontaneous, zero means equilibrium, positive means non-spontaneous and requiring external work; it is an equilibrium-seeking mechanism where enthalpy and entropy compete, with temperature deciding which dominates."
+    },
+    "Kolmogorov complexity": {
+      "concept": "Kolmogorov complexity",
+      "concept_cn": "柯尔莫古洛夫复杂性（柯氏复杂性）",
+      "definition_cn": "一个对象（如一段文字）的柯氏复杂性，是能输出且仅输出该对象的最短计算机程序（在预先选定的通用图灵机/描述语言下）的长度，即衡量描述该对象所需信息量的尺度。",
+      "definition_en": "The Kolmogorov complexity of an object is the length of the shortest computer program (in a predetermined universal description language) that produces that object as output, measuring the computational resources needed to specify the object.",
+      "core_mechanism": "核心机制是一个确定性的、机械的算法过程：固定一台通用图灵机作参照后，对每个对象枚举所有可能程序、取能输出该对象的最短程序长度作为其复杂度；它不是意愿/选择驱动的（非 selection-driven）过程，而是描述长度这一客观量在通用机上的最小化结果。",
+      "key_relations": [
+        "不变性定理（invariance theorem）：选定通用机后，复杂度对机器/语言的选择只差一个不依赖对象的常数，故复杂度是对象本身的近似内在属性。",
+        "不可计算性：K(s) 不可计算，等价于停机问题；不存在任何程序对无穷多字符串给出其精确柯氏复杂度。",
+        "柴廷不完备性（Chaitin's incompleteness）：任何计算 K 下界的程序，其输出值不能超过该程序自身长度加常数；复杂度高于某阈值的具体事实无法被形式系统证明。",
+        "柯氏随机性（Kolmogorov/算法随机性）：长度为 n 的串 x 若满足 K(x) ≥ n + O(1)，即最短程序与串本身几乎一样长，则称其为随机串——随机即不可压缩。",
+        "与香农熵的关系：对马可夫信息源输出，K 归一化后几乎必然收敛于信源的熵率；Brudno 定理给出动力系统轨迹的算法复杂度等于熵率。",
+        "链式法则：K(X,Y) ≈ K(X) + K(Y|X)（至多差一个对数项），可借此定义算法意义下的互信息。",
+        "与康托尔对角论证、哥德尔不完备定理、图灵停机问题并列为不可能性结果，刻画形式系统的内在局限。",
+        "生物学推论：进化被发现偏好低柯氏复杂度的结构——对称性、模块化与可自复制单元生成的最短电路更易被自然选择保留。"
+      ],
+      "common_misconceptions": [
+        "误以为柯氏复杂度与日常'压缩文件大小'相同——通用压缩（如 PNG）只是 K 的上界，往往远大于真正的柯氏复杂度。",
+        "误以为复杂度可由某算法直接算出——实际上 K 不可计算，只能给出上界（压缩后长度）或逼近估计。",
+        "误以为'随机串'等于'毫无规律、无法生成'——柯氏随机串恰可由约等于自身长度的程序生成，其'随机'指不可被更短程序压缩。",
+        "误以为换一台机器/语言复杂度就失去意义——不变性定理保证差异只是与对象无关的常数。",
+        "误以为复杂度高即'信息量大/有意义'——复杂度高只意味着无更短描述，与人类可读性、语义价值无关（高复杂度串反而像噪声）。",
+        "误以为柯氏复杂度是可被'设计/选择'的过程量——它是对确定的最短程序这一客观量的度量，本身不涉及主体意图或自然选择。"
+      ],
+      "literal_domain_to_avoid": "故事不得直接设在算法/程序/源代码/字符串/数据压缩/图灵机/比特/数字本身这些字面技术领域；亦勿把角色设定为计算机科学家在算 K 值。应将'最短描述即本质/不可压缩即随机/可证与不可证之界'这些结构性洞见迁移到非技术领域（如生物形态、自然花纹、记忆与叙事、艺术品鉴定、语言学、生物演化、法律/证据等）作寓言载体。",
+      "is_process_type": false,
+      "canonical_sentence_cn": "一个对象的柯氏复杂度，是能在预先选定的通用图灵机上输出该对象的最短程序的长度；它不可计算，且仅因机器选择不同而差一个与对象无关的常数。",
+      "canonical_sentence_en": "The Kolmogorov complexity of an object is the length of the shortest program that outputs it on a fixed universal Turing machine; it is uncomputable and, by the invariance theorem, well-defined up to an additive constant independent of the object."
+    },
+    "the bias-variance tradeoff": {
+      "concept": "the bias-variance tradeoff",
+      "concept_cn": "偏差-方差权衡",
+      "definition_cn": "在统计与机器学习中，模型的偏差（来自过度简化假设导致的系统性误差）与方差（来自对训练样本波动过于敏感导致的误差）通常无法同时最小化，须在二者间折中取舍。",
+      "definition_en": "In statistics and machine learning, the bias-variance tradeoff is the conflict in trying to simultaneously minimize two sources of error — bias from oversimplifying assumptions and variance from sensitivity to training-sample fluctuations — that keep a supervised model from generalizing beyond its training set.",
+      "core_mechanism": "预期泛化误差可被分解为偏差的平方、方差与不可约误差三项之和；模型灵活性增加时偏差下降而方差上升，二者此消彼长，故总误差呈U形——这是误差分解公式的确定性结构结果，属机械/分解驱动（mechanical / decomposition-driven），非有意识的取舍动作；它刻画的是结构上的权衡关系，而非某个有意识主体做出的选择过程。",
+      "key_relations": [
+        "总期望误差 = 偏差² + 方差 + 不可约误差σ²（噪声固有的下限，无法消除）。",
+        "模型灵活性↑ → 偏差↓、方差↑；灵活性↓ → 偏差↑、方差↓，呈此消彼长。",
+        "高偏差对应欠拟合：模型过简单，连训练数据中的规律都抓不住。",
+        "高方差对应过拟合：模型过度贴合训练集（含噪声），在新数据上剧烈波动。",
+        "与'准确度 vs 精密度'类比相通：准确度近似量化偏差，精密度描述方差。",
+        "正则化（如收缩/shrinkage）通过显式平滑模型，在偏差与方差之间挪动平衡点。",
+        "复杂模型未必高方差：参数个数是衡量复杂度的劣质指标，反向不必然成立（如两参数的正弦函数也能高频振荡插值无数点，同时高偏差高方差）。"
+      ],
+      "common_misconceptions": [
+        "误以为复杂模型必然高方差——高方差模型某种意义上'复杂'，但反过来不成立；参数个数不能衡量复杂度。",
+        "误以为只要模型够复杂就能同时降低偏差和方差——实际上二者通常无法同时最小化。",
+        "误以为偏差与方差是两个相互独立、可分别调到零的旋钮——存在不可约误差σ²这个噪声下限，总误差不可能为零。",
+        "误以为权衡只发生在训练数据量的多少上——它由模型灵活性、样本波动与噪声共同决定。",
+        "误把偏差当作纯随机误差——偏差是系统性的、来自简化假设的误差，方向一致；方差才是随机波动部分。"
+      ],
+      "literal_domain_to_avoid": "故事不得设在统计学、机器学习、训练数据、模型拟合、回归/分类算法、参数调优本身等字面领域；不得出现训练集/测试集、过拟合/欠拟合、参数、模型等作为剧情要素。",
+      "is_process_type": true,
+      "canonical_sentence_cn": "模型的预期泛化误差可分解为偏差的平方加方差加不可约噪声误差；偏差与方差随模型灵活性此消彼长，故二者通常无法同时最小化，只能在一个中间折中点取得最小总误差。",
+      "canonical_sentence_en": "A model's expected generalization error decomposes into squared bias plus variance plus irreducible noise error; because bias and variance trade off against each other as model flexibility changes, they typically cannot be minimized simultaneously, and the minimum total error lies at an intermediate balance point."
     }
   }
 }
