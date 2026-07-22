@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Loop System 设计笔记 v2 — 三角色 + Karpathy LOOPS.md + autoresearch</title>
+<style>
+  :root {
+    --bg: #0d1117; --card: #161b22; --border: #30363d;
+    --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff;
+    --green: #3fb950; --red: #f85149; --yellow: #d29922; --purple: #d2a8ff;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.7; font-size: 16px; }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-size: 1.9em; margin: 0 0 4px; color: #fff; letter-spacing: -0.02em; }
+  h2 { font-size: 1.35em; margin: 48px 0 16px; color: #fff; padding-bottom: 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  h2 .num { font-family: var(--mono); font-size: 0.7em; color: var(--accent); background: rgba(88,166,255,0.1); padding: 2px 8px; border-radius: 4px; }
+  h3 { font-size: 1.05em; margin: 24px 0 8px; color: #fff; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .sub { color: var(--muted); font-size: 0.9em; margin: 0 0 24px; }
+  code { font-family: var(--mono); font-size: 0.88em; background: #1f2937; padding: 2px 6px; border-radius: 4px; color: #e6edf3; }
+  pre { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; overflow-x: auto; font-family: var(--mono); font-size: 0.82em; line-height: 1.6; color: #e6edf3; }
+  pre code { background: none; padding: 0; }
+  .kw { color: #ff7b72; } .str { color: #a5d6ff; } .cmt { color: #8b949e; } .fn { color: #d2a8ff; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; margin: 16px 0; }
+  .callout { border-left: 3px solid var(--accent); background: rgba(88,166,255,0.06); padding: 14px 18px; margin: 16px 0; border-radius: 0 6px 6px 0; }
+  .callout.warn { border-color: var(--yellow); background: rgba(210,153,34,0.08); }
+  .callout.ok { border-color: var(--green); background: rgba(63,185,80,0.08); }
+  .callout.new { border-color: var(--purple); background: rgba(210,168,255,0.07); }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.92em; }
+  th, td { border: 1px solid var(--border); padding: 9px 12px; text-align: left; }
+  th { background: #21262d; color: #fff; font-weight: 600; }
+  td { vertical-align: top; }
+  tr:nth-child(even) td { background: #0d1117; }
+  .pill { display: inline-block; font-size: 0.72em; font-family: var(--mono); padding: 2px 8px; border-radius: 10px; vertical-align: middle; }
+  .pill.green { background: rgba(63,185,80,0.15); color: var(--green); }
+  .pill.red { background: rgba(248,81,73,0.15); color: var(--red); }
+  .pill.yellow { background: rgba(210,153,34,0.15); color: var(--yellow); }
+  .pill.blue { background: rgba(88,166,255,0.15); color: var(--accent); }
+  .pill.purple { background: rgba(210,168,255,0.15); color: var(--purple); }
+  ul, ol { padding-left: 22px; } li { margin: 6px 0; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+  .ascii { font-family: var(--mono); font-size: 0.78em; line-height: 1.45; white-space: pre; overflow-x: auto; color: var(--text); background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .toc { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px 24px; margin: 24px 0; }
+  .toc ol { margin: 6px 0; } .toc a { color: var(--text); } .toc a:hover { color: var(--accent); }
+  .footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85em; }
+  .src-badge { font-family: var(--mono); font-size: 0.7em; padding: 1px 6px; border-radius: 3px; margin-left: 6px; vertical-align: middle; }
+  .src-loops { background: rgba(210,168,255,0.15); color: var(--purple); }
+  .src-auto { background: rgba(63,185,80,0.15); color: var(--green); }
+
+  /* flowchart */
+  .flow { display: flex; flex-direction: column; align-items: center; margin: 24px 0; }
+  .node {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 20px; text-align: center; min-width: 300px; max-width: 580px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .node .nt { font-weight: 600; color: #fff; font-size: 0.98em; }
+  .node .nd { color: var(--muted); font-size: 0.82em; margin-top: 4px; line-height: 1.5; }
+  .node .nd code { font-size: 0.95em; }
+  .node.accent { border-color: var(--accent); background: rgba(88,166,255,0.07); }
+  .node.purple { border-color: var(--purple); background: rgba(210,168,255,0.07); }
+  .node.green  { border-color: var(--green);  background: rgba(63,185,80,0.07); }
+  .node.yellow { border-color: var(--yellow); background: rgba(210,153,34,0.07); }
+  .node.loop   { border-color: var(--yellow); background: rgba(210,153,34,0.12); border-style: dashed; }
+  .arrow { color: var(--muted); font-size: 1.5em; line-height: 1; padding: 4px 0; }
+  .arrow-label { color: var(--muted); font-family: var(--mono); font-size: 0.72em; padding: 0 0 2px; }
+  .branch { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; width: 100%; max-width: 620px; }
+  .branch .node { min-width: 200px; }
+  .side-note { color: var(--muted); font-size: 0.78em; font-style: italic; margin: 10px 0 0; text-align: center; }
+  .feedback {
+    margin-top: 14px; padding: 10px 16px; border: 1px dashed var(--purple);
+    border-radius: 6px; color: var(--purple); font-size: 0.8em; text-align: center; max-width: 580px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Agent Loop System 设计笔记 <span style="font-size:0.6em;color:var(--muted)">v2</span></h1>
+<p class="sub">三角色 × Karpathy <code>LOOPS.md</code> + <code>autoresearch/program.md</code> × Agent SDK · 整合两份来源后的修正版 · 2026-07</p>
+
+<div class="callout new">
+  <strong>v2 更新原因：</strong>上一版只读了 <code>autoresearch/program.md</code>，结论是"别急着拉 3 个 LLM agent，evaluator 该写代码"。读到 <code>LOOPS.md</code>（本 gist 的 TIER 6）后发现：对<strong>主观/建 app 类任务</strong>，Karpathy 明确 endorse 三角色分离、三独立上下文——<strong>你的直觉是对的</strong>。两份来源按任务类型分档，不矛盾。本版按此调和。
+</div>
+
+<div class="toc">
+  <strong>目录</strong>
+  <ol>
+    <li><a href="#goal">目标与三角色</a></li>
+    <li><a href="#loops">来源 A：LOOPS.md 的 agent loop 规则（TIER 6）</a></li>
+    <li><a href="#auto">来源 B：autoresearch/program.md 的实战实践</a></li>
+    <li><a href="#reconcile">两份来源的调和：按任务类型分档</a></li>
+    <li><a href="#sdk">Agent SDK 是什么 + 三种实现路径</a></li>
+    <li><a href="#final">最终架构（分两档）</a></li>
+    <li><a href="#decide">决策清单与下一步</a></li>
+  </ol>
+</div>
+
+<h2 id="goal"><span class="num">01</span> 目标与三角色</h2>
+<p>构建一个 <strong>agent loop system</strong>，三个角色各有<strong>独立上下文 + 独立记忆</strong>，形成闭环：</p>
+<table>
+  <tr><th>角色</th><th>职责</th><th>硬约束 <span class="src-badge src-loops">LOOPS XXVIII</span></th></tr>
+  <tr><td><strong>Planner</strong></td><td>把模糊的人话翻成 sprint spec</td><td><strong>绝不碰代码</strong></td></tr>
+  <tr><td><strong>Generator</strong></td><td>写一切</td><td><strong>禁止给自己打分</strong></td></tr>
+  <tr><td><strong>Evaluator</strong></td><td>读 diff / 跑测试 / 试 app</td><td>第一条消息就被告知"代码是坏的，你的任务是证明它"（adversarial）</td></tr>
+</table>
+<div class="callout warn">
+  <strong>LOOPS.md 的核心警告：</strong>"绝不混角色。模型一旦自评就变谄媚，loop 悄悄收敛到 slop。" 这就是为什么要三个独立上下文——不是为了并行，而是为了<strong>防止自我评分的污染</strong>。
+</div>
+
+<h2 id="loops"><span class="num">02</span> 来源 A：LOOPS.md 的 agent loop 规则</h2>
+<p>来自 gist <a href="https://gist.github.com/sanchez314c/a767997b030d2904c0d0f08fabae2d42" target="_blank">Karpathy-Michaels CLAUDE.md + LOOPS.md</a> 的 TIER 6（规则 XXVII–XXXV）。主旨："大多数 agent 系统不是死在弱模型，而是死在弱 harness。模型能写代码、审代码、对着 rubric 验证自己的输出，但它<strong>自己无法决定何时停、何时重启、结果写哪</strong>——那是 loop 的活。"</p>
+
+<table>
+  <tr><th>规则</th><th>一句话</th><th>对你的设计的意义</th></tr>
+  <tr><td><strong>XXVII</strong> Write the Loop, Not the Prompt</td><td>prompt 打一次，loop 自主跑。在反复打磨一条消息而非定义可重复流程 = 还在 prompting 时代</td><td>loop = gather → reason → act → verify → repeat</td></tr>
+  <tr><td><strong>XXVIII</strong> Separate the Roles</td><td>三角色、三上下文、三 system prompt，绝不混</td><td><strong>你的三角色直觉被 endorse</strong>，且补 adversarial evaluator + 禁自评</td></tr>
+  <tr><td><strong>XXIX</strong> Negotiate the Contract First</td><td>generator 写第一行前，先把"完成"定义成可测断言 checklist。小 app ~27 条合理，10 条太少会 rubber-stamp</td><td><strong>evaluator 评的是 contract，不是 vibe</strong>。这是把 run 从坏 demo 变可用产品的唯一改动</td></tr>
+  <tr><td><strong>XXX</strong> Write to Disk, Not to Context</td><td>"Context window 会撒谎：压缩、腐烂、用你没写的摘要藏起一小时前说的话。磁盘上的文件不撒谎。"</td><td><strong>独立记忆 = 磁盘文件，不是对话历史</strong></td></tr>
+  <tr><td><strong>XXXI</strong> Let the Loop Restart</td><td>跑偏了全删重来，别打成考古。第 9 次删、第 11 次交付可用 = loop 正常</td><td>状态全在磁盘，所以能删能重启</td></tr>
+  <tr><td><strong>XXXII</strong> Score the Subjective</td><td>品味可评分：定轴（design/originality/craft/functionality）、加权重、用参考样例标定（好 vs slop）</td><td>主观任务可用 LLM evaluator，但必须 rubric + 参考样例</td></tr>
+  <tr><td><strong>XXXIII</strong> Read the Traces</td><td>把 agent 输出 pipe 到文件，grep 出判断偏离你的那一刻，针对那一瞬改 prompt</td><td>调 agent = 读 transcript，不是再跑实验</td></tr>
+  <tr><td><strong>XXXIV</strong> Delete the Harness</td><td>harness 是为弥补模型写的；模型变强后一半成负担，每版本重读并删</td><td>脚手架别单调增长</td></tr>
+  <tr><td><strong>XXXV</strong> The Bottleneck Always Moves</td><td>coding→planning→verification→taste。永远不完成，只是暴露下一个瓶颈</td><td>loop 的意义是让下一个瓶颈可见</td></tr>
+</table>
+
+<h3>XXX 落到具体文件：最少 4 个 <span class="src-badge src-loops">LOOPS XXX</span></h3>
+<pre><code>feature_list.json   <span class="cmt"># 在建什么</span>
+progress.md          <span class="cmt"># 做完 vs 待办</span>
+contract.md          <span class="cmt"># 可测的成功标准（evaluator 评这个）</span>
+log.md               <span class="cmt"># append-only，每条 `## [YYYY-MM-DD] op | title`</span></code></pre>
+<div class="callout ok">
+  <strong>关键标准：</strong>"模型应该能崩溃、丢掉 session，然后读三个文件就接上。如果你的状态没法用三个文件描述，那它太复杂了。"
+</div>
+
+<h2 id="auto"><span class="num">03</span> 来源 B：autoresearch/program.md 的实战实践</h2>
+<p>来自 <a href="https://github.com/karpathy/autoresearch/blob/master/program.md" target="_blank">karpathy/autoresearch</a>——让 LLM 自主做 ML 研究实验的 loop 规约。要点：</p>
+<table>
+  <tr><th>实践</th><th>含义</th></tr>
+  <tr><td>LOOP FOREVER，自主不停</td><td>不问人，跑到被手动打断</td></tr>
+  <tr><td>第一个 run 永远是 baseline</td><td>先建基准再改</td></tr>
+  <tr><td><strong>evaluator = 客观指标</strong>（<code>evaluate_bpb</code>）</td><td>代码判定胜负，不是 LLM</td></tr>
+  <tr><td>git 当状态机</td><td>改进→保留 commit 推进分支；持平/变差→<code>git reset</code> 回退</td></tr>
+  <tr><td>结构化追加日志 = 记忆</td><td><code>results.tsv</code>（commit/bpb/内存/状态/描述），append-only，不入 git</td></tr>
+  <tr><td>上下文卫生</td><td>输出重定向到 <code>run.log</code>，<code>grep</code> 只取指标</td></tr>
+  <tr><td>严格 in/out-of-scope</td><td><code>prepare.py</code> 只读、<code>train.py</code> 可改、不加依赖</td></tr>
+  <tr><td>简单性准则</td><td>相同收益下越简单越好；删代码拿等价结果 = 赢</td></tr>
+  <tr><td>超时即杀</td><td>&gt;10 分钟 kill，记 crash，回退</td></tr>
+  <tr><td>卡住不是重试，是升级策略</td><td>读论文、重读 in-scope 文件、组合 near-miss、激进改架构</td></tr>
+</table>
+
+<h2 id="reconcile"><span class="num">04</span> 两份来源的调和：按任务类型分档</h2>
+<div class="callout ok">
+  两个来源<strong>不矛盾</strong>，是按"任务有没有客观指标"分档。记忆原则两边一致：写磁盘，不写上下文。
+</div>
+<table>
+  <tr><th>维度</th><th>档 A：有客观指标 <span class="src-badge src-auto">autoresearch</span></th><th>档 B：主观 / 多准则 <span class="src-badge src-loops">LOOPS</span></th></tr>
+  <tr><td>典型任务</td><td>ML 研究、benchmark、测试通过率</td><td>建全栈 app、要质量的代码、设计</td></tr>
+  <tr><td>角色数</td><td>单 agent（兼 planner+generator）</td><td><strong>三角色分离</strong>，三独立上下文</td></tr>
+  <tr><td>evaluator</td><td>客观 metric 函数（<code>val_bpb</code>）<span class="pill green">代码</span></td><td>LLM，但 rubric + 参考样例 <span class="pill purple">rubric-grounded</span></td></tr>
+  <tr><td>"完成"定义</td><td>单条 metric 阈值</td><td>contract.md：~27 条可测断言 checklist</td></tr>
+  <tr><td>记忆载体</td><td><code>results.tsv</code>（append-only）</td><td><code>feature_list.json</code> / <code>progress.md</code> / <code>contract.md</code> / <code>log.md</code></td></tr>
+  <tr><td>状态机</td><td>git 分支：keep→advance / discard→reset</td><td>磁盘文件 + 重启权（XXXI）</td></tr>
+  <tr><td>共用原则</td><td colspan="2">写磁盘不写上下文 · 输出进文件 grep 提取 · loop forever · 卡住升级策略而非重试</td></tr>
+</table>
+
+<h2 id="sdk"><span class="num">05</span> Agent SDK 是什么 + 三种实现路径</h2>
+<p>Anthropic 官方代码库（npm <code>@anthropic-ai/claude-agent-sdk</code> / pip <code>claude-agent-sdk</code>），让你<strong>用代码控制一个能调工具、自主循环的 agent</strong>，并完全控制它的循环和记忆。</p>
+<table>
+  <tr><th>对比</th><th>是什么</th><th>loop 在哪</th><th>记忆</th></tr>
+  <tr><td><strong>Claude Code CLI</strong></td><td>给人用的终端工具</td><td>CLI 内部，看不见</td><td>会话级</td></tr>
+  <tr><td><strong>Anthropic API</strong></td><td>裸 API，发消息收回复</td><td>自己从零写</td><td>自己管 <code>messages[]</code></td></tr>
+  <tr><td><strong>Agent SDK</strong></td><td>API 上加"现成 agent 能力"（工具、循环、文件访问）</td><td>SDK 管，你能介入</td><td>能拿到每步状态</td></tr>
+</table>
+<pre><code><span class="cmt"># 三角色各持独立 history = 独立记忆（档 B）</span>
+planner   = Agent(sys=PLANNER_PROMPT,   history=[])  <span class="cmt"># 禁碰代码</span>
+generator = Agent(sys=GENERATOR_PROMPT, history=[])  <span class="cmt"># 禁自评</span>
+evaluator = Agent(sys=EVAL_PROMPT,       history=[])  <span class="cmt"># 第一句: "代码是坏的,证明它"</span>
+
+<span class="kw">while</span> <span class="kw">True</span>:
+    plan     = await planner.run(goal + read_state_files())   <span class="cmt"># 读磁盘</span>
+    code     = await generator.run(plan)
+    verdict  = await evaluator.run(code, read(<span class="str">"contract.md"</span>))
+    append(<span class="str">"log.md"</span>, plan, code, verdict)              <span class="cmt"># append-only, 不靠 history</span>
+    <span class="kw">if</span> verdict.pass: <span class="kw">break</span>
+    planner.history.append({<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: verdict.feedback})</code></pre>
+<div class="callout warn">
+  <strong>不一定要 SDK：</strong>evaluator 能写客观代码、loop 简单时，<strong>裸 API + while + 文件记忆</strong> 就够。SDK 在"需要 agent 自主调一堆工具（读写文件、跑命令）"时才值得引入。
+</div>
+
+<h2 id="final"><span class="num">06</span> 最终架构（分两档）</h2>
+
+<h3>档 A — 有客观指标（autoresearch 模式）</h3>
+<div class="flow">
+  <div class="node accent">
+    <div class="nt">Planner / Generator（单 agent 合一）</div>
+    <div class="nd">读：目标 + in-scope 文件 + results.tsv + git · 产出：一个改动的 idea + 代码 patch</div>
+  </div>
+  <div class="arrow-label">commit</div>
+  <div class="arrow">↓</div>
+  <div class="node">
+    <div class="nt">Run（代码执行）</div>
+    <div class="nd">固定时间预算，超时即杀</div>
+  </div>
+  <div class="arrow-label">run.log（输出进文件，不进 context）</div>
+  <div class="arrow">↓</div>
+  <div class="node green">
+    <div class="nt">Evaluator = 客观指标函数</div>
+    <div class="nd">代码判定胜负，不是 LLM</div>
+  </div>
+  <div class="arrow-label">metric + verdict</div>
+  <div class="arrow">↓</div>
+  <div class="branch">
+    <div class="node green">
+      <div class="nt">keep</div>
+      <div class="nd">advance 分支，保留 commit</div>
+    </div>
+    <div class="node red" style="border-color:var(--red);background:rgba(248,81,73,0.07)">
+      <div class="nt">discard</div>
+      <div class="nd">git reset 回退</div>
+    </div>
+  </div>
+  <div class="arrow-label">append results.tsv（append-only）</div>
+  <div class="arrow">↓</div>
+  <div class="node loop">
+    <div class="nt">LOOP FOREVER</div>
+    <div class="nd">卡住 → 升级策略：读论文 / 组合 near-miss / 激进改架构</div>
+  </div>
+</div>
+
+<h3>档 B — 主观 / 多准则（LOOPS.md 模式，你的三角色场景）</h3>
+<div class="flow">
+  <div class="node purple">
+    <div class="nt">Planner（独立上下文）</div>
+    <div class="nd">模糊需求 → sprint spec · <strong>禁碰代码</strong></div>
+  </div>
+  <div class="arrow-label">spec</div>
+  <div class="arrow">↓</div>
+  <div class="node accent">
+    <div class="nt">Generator（独立上下文）</div>
+    <div class="nd">写一切 · <strong>禁自评</strong> · 写入 feature_list.json / progress.md / log.md</div>
+  </div>
+  <div class="arrow-label">diff / code</div>
+  <div class="arrow">↓</div>
+  <div class="node purple">
+    <div class="nt">Evaluator（独立上下文）</div>
+    <div class="nd">读 diff / 跑测试 / 试 app · system 首句：<code>"代码是坏的，你的任务是证明它"</code></div>
+    <div class="nd">评 <code>contract.md</code> + rubric + 参考样例（好 vs slop）</div>
+  </div>
+  <div class="arrow-label">verdict: { pass, score, feedback }</div>
+  <div class="arrow">↓</div>
+  <div class="node loop">
+    <div class="nt">LOOP FOREVER</div>
+    <div class="nd">跑偏 → 整删重来（XXXI） · 卡住 → 升级策略</div>
+  </div>
+  <div class="feedback">
+    ↺ verdict.feedback 喂回 Planner，进入下一轮（独立 history，但不靠对话历史当记忆——记忆走磁盘 4 文件）
+  </div>
+</div>
+
+<div class="callout ok">
+  <strong>v2 的核心修正：</strong>三角色分离 + 三独立上下文，对主观任务<strong>是对的</strong>（LOOPS XXVIII endorse）。三件必须做对的事：① generator 禁自评；② evaluator adversarial 框架；③ 记忆走磁盘 4 文件，不走对话历史。状态全在磁盘 → 能崩溃重启 → 能整删重来（XXXI）。
+</div>
+
+<h2 id="decide"><span class="num">07</span> 决策清单与下一步</h2>
+<table>
+  <tr><th>问题</th><th>选项</th><th>影响</th></tr>
+  <tr><td><strong>你的任务有客观指标吗？</strong></td><td><span class="pill green">有 → 档 A</span> <span class="pill purple">没有 → 档 B</span></td><td>决定 evaluator 是代码还是 rubric-LLM，决定单 agent 还是三角色</td></tr>
+  <tr><td>SDK 语言</td><td><span class="pill blue">TypeScript</span> <span class="pill blue">Python</span></td><td>决定骨架写法</td></tr>
+  <tr><td>是否需要自主调工具</td><td><span class="pill yellow">是 → Agent SDK</span> <span class="pill blue">否 → 裸 API + while</span></td><td>是否引入 SDK</td></tr>
+</table>
+
+<h3>无论哪档，都要落实的 5 条</h3>
+<ol>
+  <li><strong>Contract 先行</strong>：generator 写代码前，把"完成"写成可测断言 checklist（XXIX）。</li>
+  <li><strong>记忆 = 磁盘文件</strong>：4 文件集，append-only log，状态能用 3 文件恢复（XXX）。</li>
+  <li><strong>evaluator 独立 + adversarial</strong>：三独立上下文，evaluator 第一句"代码是坏的，证明它"（XXVIII）。</li>
+  <li><strong>输出进文件，grep 提取</strong>：原始输出不进 loop 的 context（autoresearch 上下文卫生）。</li>
+  <li><strong>loop forever + 重启权 + 升级策略</strong>：跑偏整删重来；卡住读论文/组合 near-miss（XXXI + autoresearch）。</li>
+</ol>
+
+<div class="footer">
+  来源 A · <a href="https://gist.github.com/sanchez314c/a767997b030d2904c0d0f08fabae2d42" target="_blank">Karpathy-Michaels CLAUDE.md + LOOPS.md（gist）</a> · TIER 6 规则 XXVII–XXXV<br>
+  来源 B · <a href="https://github.com/karpathy/autoresearch/blob/master/program.md" target="_blank">karpathy/autoresearch — program.md</a><br>
+  本笔记基于对话整理，2026-07
+</div>
+
+</div>
+</body>
+</html>
