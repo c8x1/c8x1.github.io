@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据流水线 · 走读 EP13</title>
+<style>
+  :root{
+    --bg:#0f0f12; --bg2:#000; --side:#1a1a1a; --card:#16161c; --line:#2a2a33;
+    --txt:#e8e8e8; --mut:#9a9a9a; --mut2:#6a6a6a;
+    --serif:ui-serif,Georgia,"Times New Roman",Times,serif;
+    --sans:system-ui,-apple-system,"PingFang SC","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace;
+    --red:#C7000B; --red-bg:#2a0f10; --red-bd:#6e1a1c; --red-tx:#e88;
+    --grn:#788C5D; --grn-bg:#14241a; --grn-bd:#2e5a3a; --grn-tx:#7ab98a;
+    --acc:#C7000B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+  .page{max-width:1180px;margin:0 auto;padding:0}
+  /* breadcrumb + nav */
+  .topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);
+    font-size:13px;color:var(--mut)}
+  .topbar .crumb{font-family:var(--serif);font-style:italic}
+  .topbar nav{margin-left:auto;display:flex;gap:8px}
+  .topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:4px 10px;border-radius:6px}
+  .topbar nav a:hover{color:#fff;border-color:var(--acc)}
+  /* layout: tree + main */
+  .body{display:grid;grid-template-columns:160px 1fr;align-items:start}
+  .tree{background:var(--side);border-right:1px solid var(--line);padding:14px 8px;
+    font-family:var(--mono);font-size:11px;color:var(--mut2);min-height:80vh;position:sticky;top:0}
+  .tree .f{display:block;padding:2px 4px;white-space:pre}
+  .tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px}
+  .main{padding:22px 28px 80px}
+  /* headings */
+  h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:6px 0 2px;color:#fff}
+  .goal{font-family:var(--serif);font-style:italic;color:var(--mut);margin:0 0 4px}
+  .gain{font-size:13px;color:var(--mut);margin:0 0 20px}
+  .gain b{color:var(--red-tx)}
+  h2{font-family:var(--serif);font-weight:600;font-size:18px;color:#fff;margin:26px 0 6px;
+    border-bottom:1px solid var(--line);padding-bottom:3px}
+  h2 .sec{color:var(--mut2);font-style:italic;font-size:13px;margin-left:8px}
+  p{margin:8px 0}
+  /* code as numbered figure */
+  .figcap{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);
+    margin:10px 0 2px}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--mut2);
+    padding:10px 12px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55}
+  pre .ln{display:inline-block;width:32px;color:var(--mut2);user-select:none}
+  .filelink{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--red-tx);margin:4px 0 14px}
+  .filelink a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--red-bd)}
+  .footnote{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--mut2);margin:4px 0 14px}
+  /* highlight tints */
+  /* PyCharm Darcula 主题 token 配色 */
+  pre[data-lang]{color:#d4d4d4}
+  .tok-kw{color:#cc7832;font-weight:600}
+  .tok-bi{color:#9876aa;font-style:italic}
+  .tok-fn{color:#ffc66d}
+  .tok-cl{color:#a9b7c6;font-style:italic}
+  .tok-st{color:#6a8759}
+  .tok-cm{color:#808080;font-style:italic}
+  .tok-nm{color:#6897bb}
+  .tok-dc{color:#bbb33b}
+  .tok-key{color:#cc7832}
+  .tok-var{color:#9876aa}
+  .tree .f,.tree a.f{color:#6a6a6a;text-decoration:none;display:block;padding:2px 4px;white-space:pre;border-radius:3px}
+  .tree a.f:hover{background:#2a2a33;color:#d4d4d4}
+  .tree a.f.act,.tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px;font-weight:600}
+  /* gnpu split card */
+  .gnpu{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:14px 0}
+  .gnpu .g{background:var(--grn-bg);border-right:1px solid var(--line);padding:10px 14px}
+  .gnpu .n{background:var(--red-bg);padding:10px 14px}
+  .gnpu h4{margin:0 0 6px;font-family:var(--serif);font-size:13px}
+  .gnpu .g h4{color:var(--grn-tx)}.gnpu .n h4{color:var(--red-tx)}
+  .gnpu .row{display:grid;grid-template-columns:90px 1fr;gap:6px;font-size:12.5px;margin:4px 0}
+  .gnpu .row .k{color:var(--mut2)}
+  /* inline svg */
+  .diag{margin:10px 0 6px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:8px}
+  /* summary */
+  .sum{border-top:1px solid var(--line);margin-top:22px;padding-top:10px;font-size:13.5px}
+  .sum .pit{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12.5px;margin-top:6px}
+  /* file list at end */
+  .filelist{font-family:var(--mono);font-size:11px;color:var(--mut2);margin-top:22px;border-top:1px dashed var(--line);padding-top:10px}
+  .filelist b{color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <span class="crumb">第四篇章 · 模型与数据 › EP13</span>
+    <span style="color:var(--mut2)">EP13</span>
+    <nav>
+      <a href="ep12.html">◀ 上一篇</a>
+      <a href="index.html">索引</a>
+      <a href="ep14.html">下一篇 ▶</a>
+    </nav>
+  </div>
+  <div class="body">
+    <aside class="tree">
+      <a class="f" href="appendix/index.html" target="_blank">📁 附录·项目文件走读</a>
+      <span class="f">MindSpeed-LLM/</span>
+      <a class="f" href="appendix/file_089411e68e5d5b.html" target="_blank">├ train_fsdp2.py</a>
+      <span class="f">├ examples/fsdp2/</span>
+      <a class="f" href="appendix/file_d04a217944c522.html" target="_blank">│  ├ env_config.sh</a>
+      <span class="f">│  └ qwen3/</span>
+      <span class="f">├ mindspeed_llm/fsdp2/</span>
+      <a class="f act" href="appendix/file_d76cd71b4235d0.html" target="_blank">├ data/data_factory.py</a>
+      <a class="f act" href="appendix/file_47d3bf9896ce54.html" target="_blank">├ data/template.py</a>
+      <a class="f act" href="appendix/file_7771b635660e44.html" target="_blank">├ data/formatter.py</a>
+      <a class="f act" href="appendix/file_0d7c52e51f5071.html" target="_blank">├ data/converter.py</a>
+      <a class="f act" href="appendix/file_3b4a1596c6b763.html" target="_blank">├ data/collator.py</a>
+      <span class="f act">├ data/megatron_data/</span>
+      <span class="f">└ ...</span>
+    </aside>
+    <main class="main">
+      <h1>数据流水线</h1>
+      <p class="goal">目标：理清 raw 数据→formatter→converter→template→collator→batch 的流水。前置：EP12 Qwen3 建模精读。</p>
+      <p class="gain">你将获得：<b>①</b> 一条从 parquet 原始样本到 FSDP2 训练 batch 的完整链路地图 <b>②</b> 预训练（mg 定长）与微调（alpaca 短样本）两条路径的分叉点，以及 megatron_data/ 目录存在的真实理由</p>
+
+      <h2>你已经熟悉的情况 <span class="sec">桥接开场</span></h2>
+      <p>你写过 PyTorch 训练循环，三件套是肌肉记忆：<b>Dataset</b> 负责按索引吐出一条样本、<b>DataLoader</b> 负责多进程拉取与拼批、<b>collate_fn</b> 负责把一列表样本对齐成张量 batch。分布式再加一个 <b>DistributedSampler</b>，按 rank 切分索引、保证各卡不重叠。</p>
+      <p>这套够用，但只解决了"喂张量"这一段。语言模型训练还有两个它管不了的问题：原始样本是 prompt+response 的对话，不是 token id；且各样本长短不一，直接拼批会因 padding 浪费算力，更无法表达"只对 response 计 loss"。于是本项目的 fsdp2 data 模块在标准三件套前面，再插了三段——<b>formatter</b>（按模板把对话填成字符串）、<b>converter</b>（把原始列名对齐成统一 _prompt/_response 结构）、<b>template</b>（qwen3 的 chat 模板，定义 <|im_start|> 等特殊标记摆位），后面再接一个支持 4D 注意力掩码的 <b>collator</b>。此外，预训练场景数据量大、要求定长连续拼接，于是另起一条 mg（Megatron）路径。下面把这条流水一段段拆开看。</p>
+
+      <h2>本项目怎么做 <span class="sec">原理</span></h2>
+      <p>整条流水是一个"格式化→转模板→拼批"的三段串接，外加一个在入口处的二选一分叉。入口 <b>DataFactory.create</b> 看 <code>training_args.stage</code> 与 <code>data_manager_type</code> 两个开关，二选一返回 <b>LFDataManager</b>（llamafactory 风格，微调用）或 <b>MegatronDataManager</b>（Megatron 风格，预训练用）。LF 路径里，<code>get_dataset</code> 先加载原始 parquet，经 <code>align_dataset</code> 用 converter 把列名对齐成 <code>_prompt/_response/_system/_tools</code> 标准结构，再用 <code>_get_dataset_processor</code> 调用 template 把它 token 化成 input_ids/labels（label 里 prompt 部分 mask 成 IGNORE_INDEX）。最后 <code>SFTDataCollatorWith4DAttentionMask</code> 按批 padding 并在 neat_packing 时生成块对角 4D 掩码。mg 路径则走 <code>train_valid_test_datasets_provider</code>，读 mcore 的 indexed_dataset（.bin/.idx 定长 mmap），用 <code>MegatronPretrainingSampler</code> 按定长步长切样本，不经 template 在线拼。</p>
+      <div class="diag">
+        <svg viewBox="0 0 880 320" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace,monospace" font-size="11">
+          <!-- nodes -->
+          <rect x="10" y="20" width="120" height="40" rx="6" fill="#14241a" stroke="#2e5a3a"/>
+          <text x="70" y="44" text-anchor="middle" fill="#7ab98a">raw parquet</text>
+          <rect x="160" y="20" width="120" height="40" rx="6" fill="#1a1a1a" stroke="#2a2a33"/>
+          <text x="220" y="44" text-anchor="middle" fill="#e8e8e8">converter</text>
+          <text x="220" y="58" text-anchor="middle" fill="#9a9a9a">列名→_prompt/_resp</text>
+          <rect x="310" y="20" width="120" height="40" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="370" y="44" text-anchor="middle" fill="#e88">template(qwen3)</text>
+          <text x="370" y="58" text-anchor="middle" fill="#9a9a9a">&lt;|im_start|&gt;...拼串+tokenize</text>
+          <rect x="460" y="20" width="120" height="40" rx="6" fill="#1a1a1a" stroke="#2a2a33"/>
+          <text x="520" y="44" text-anchor="middle" fill="#e8e8e8">Dataset</text>
+          <text x="520" y="58" text-anchor="middle" fill="#9a9a9a">input_ids/labels</text>
+          <rect x="610" y="20" width="120" height="40" rx="6" fill="#1a1a1a" stroke="#2a2a33"/>
+          <text x="670" y="44" text-anchor="middle" fill="#e8e8e8">collator</text>
+          <text x="670" y="58" text-anchor="middle" fill="#9a9a9a">padding+4D mask</text>
+          <rect x="760" y="20" width="110" height="40" rx="6" fill="#14241a" stroke="#2e5a3a"/>
+          <text x="815" y="44" text-anchor="middle" fill="#7ab98a">batch</text>
+          <!-- arrows LF path -->
+          <line x1="130" y1="40" x2="160" y2="40" stroke="#6a6a6a" marker-end="url(#a)"/>
+          <line x1="280" y1="40" x2="310" y2="40" stroke="#6a6a6a" marker-end="url(#a)"/>
+          <line x1="430" y1="40" x2="460" y2="40" stroke="#6a6a6a" marker-end="url(#a)"/>
+          <line x1="580" y1="40" x2="610" y2="40" stroke="#6a6a6a" marker-end="url(#a)"/>
+          <line x1="730" y1="40" x2="760" y2="40" stroke="#6a6a6a" marker-end="url(#a)"/>
+          <!-- mg branch -->
+          <rect x="310" y="120" width="260" height="40" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="440" y="144" text-anchor="middle" fill="#e88">megatron_data/ (mcore indexed .bin/.idx)</text>
+          <rect x="610" y="120" width="120" height="40" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="670" y="144" text-anchor="middle" fill="#e88">MegatronSampler</text>
+          <line x1="70" y1="60" x2="70" y2="100" stroke="#6e1a1c" stroke-dasharray="3,3"/>
+          <line x1="70" y1="100" x2="440" y2="100" stroke="#6e1a1c" stroke-dasharray="3,3" marker-end="url(#a)"/>
+          <line x1="570" y1="140" x2="610" y2="140" stroke="#6e1a1c" marker-end="url(#a)"/>
+          <line x1="670" y1="160" x2="670" y2="200" stroke="#6e1a1c" marker-end="url(#a)"/>
+          <text x="440" y="95" text-anchor="middle" fill="#9a9a9a" font-style="italic">stage=pt, data_manager_type=mg → 定长连续拼接，不经 template 在线拼</text>
+          <!-- factory gate -->
+          <rect x="10" y="120" width="120" height="40" rx="6" fill="#1a1a1a" stroke="#2a2a33"/>
+          <text x="70" y="138" text-anchor="middle" fill="#e8e8e8">DataFactory</text>
+          <text x="70" y="152" text-anchor="middle" fill="#9a9a9a">stage×type 二选一</text>
+          <line x1="130" y1="140" x2="460" y2="40" stroke="#2e5a3a" stroke-dasharray="2,2"/>
+          <text x="300" y="200" text-anchor="middle" fill="#7ab98a" font-style="italic">LF 路径(SFT)：template 在线渲染对话 → 短样本动态 padding</text>
+          <text x="300" y="218" text-anchor="middle" fill="#e88" font-style="italic">mg 路径(PT)：离线预处理成定长 idx，在线只按步长切片</text>
+          <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="#6a6a6a"/></marker></defs>
+        </svg>
+      </div>
+
+      <h2>源码下钻 <span class="sec">file:line</span></h2>
+
+      <p class="figcap">mindspeed_llm/fsdp2/data/data_factory.py — DataFactory.create 的 stage×type 二选一分叉（LFDataManager=SFT，MegatronDataManager=PT）</p>
+      <pre data-lang="py">class DataFactory:
+    @staticmethod
+    def create(
+        data_manager_type: Literal["lf", "mg"],
+        ...
+        stage: Literal["pt", "sft"],
+        tokenizer: "PreTrainedTokenizer",
+        template: "Template"
+    ):
+        # Fine-tuning supports Llamafactory data processing style
+        if training_args.stage == "sft" and data_manager_type == "lf":
+            return LFDataManager(...)
+        # Pre-training supports Megatron data processing style
+        elif training_args.stage == "pt" and data_manager_type == "mg":
+            return MegatronDataManager(...)</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/data/data_factory.py#L238">mindspeed_llm/fsdp2/data/data_factory.py:238</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/data/data_factory.py#L250">:250</a>（sft→LF） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/data/data_factory.py#L261">:261</a>（pt→mg）</p>
+      <p class="footnote">注意组合是硬约束：LF 只配 sft、mg 只配 pt，其余组合在第 272 行抛 ValueError。LFDataManager 构造时（第 84 行）调 get_dataset 完成 converter+template 的在线渲染，并把 collator 实例化为 SFTDataCollatorWith4DAttentionMask；MegatronDataManager 构造时（第 190 行）直接调 train_valid_test_datasets_provider 取定长 dataset，不走 template。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/data/template.py — qwen3 模板注册：用 <|im_start|>role\n...<|im_end|>\n 的 ChatML 摆位，ReasoningTemplate 类</p>
+      <pre data-lang="py">register_template(
+    name="qwen3",
+    format_user=StringFormatter(slots=["&lt;|im_start|&gt;user\n{{content}}&lt;|im_end|&gt;\n&lt;|im_start|&gt;assistant\n"]),
+    format_assistant=StringFormatter(slots=["{{content}}&lt;|im_end|&gt;\n"]),
+    format_system=StringFormatter(slots=["&lt;|im_start|&gt;system\n{{content}}&lt;|im_end|&gt;\n"]),
+    format_function=FunctionFormatter(slots=["{{content}}&lt;|im_end|&gt;\n"], tool_format="qwen"),
+    format_observation=StringFormatter(slots=["&lt;|im_start|&gt;user\n\n{{content}}\n\n&lt;|im_end|&gt;\n&lt;|im_start|&gt;assistant\n"]),
+    format_tools=ToolFormatter(tool_format="qwen"),
+    stop_words=["&lt;|im_end|&gt;"],
+    replace_eos=True,
+    template_class=ReasoningTemplate,
+)</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/data/template.py#L510">mindspeed_llm/fsdp2/data/template.py:510</a>（register_template name="qwen3"） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/data/template.py#L512">:512</a>（format_user 摆位） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/data/template.py#L522">:522</a>（template_class=ReasoningTemplate）</p>
+      <p class="footnote">每个 format_* 是一个 Formatter 子类（StringFormatter/FunctionFormatter/ToolFormatter），其 apply() 把 {{content}} 占位填成实际文本再拼成 token 串。ReasoningTemplate 在第 496 行处被判断，可挂 thought_words 做推理/非推理切换（如 qwen3_vl_nothink 后缀）。template 由 get_template() 在 data_utils 中按 data_args.template 名取出。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/data/formatter.py — Formatter 抽象基类：apply() 按 kwargs 渲染 slots 成待编码片段</p>
+      <pre data-lang="py">class Formatter(ABC):
+    slots: SLOTS = field(default_factory=list)
+    tool_format: Optional[str] = None
+
+    @abstractmethod
+    def apply(self, **kwargs) -> SLOTS:
+        r"""Forms a list of slots according to the inputs to encode."""
+        ...
+
+    def extract(self, content: str) -> Union[str, list["FunctionCall"]]:
+        r"""Extract a list of tuples from the response message if using tools."""
+        raise NotImplementedError</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/data/formatter.py#L189">mindspeed_llm/fsdp2/data/formatter.py:189</a>（Formatter ABC） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/data/formatter.py#L223">:223</a>（StringFormatter：把 {{content}} 填进 slots 字符串）</p>
+      <p class="footnote">职责一句话：formatter 负责"按角色（user/assistant/system/tool）把对话内容塞进模板槽位"，它只产出字符串/字符串列表，不碰 tokenizer。StringFormatter（第 223 行）是 qwen3 各 format_* 用的具体子类，FunctionFormatter/ToolFormatter 在其上叠加工具调用解析。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/data/converter.py — AlpacaDatasetConverter：把原始 instruction/input/output 列对齐成 _prompt/_response 标准结构</p>
+      <pre data-lang="py">class AlpacaDatasetConverter(DatasetConverter):
+    def __call__(self, example: dict[str, Any]) -> dict[str, Any]:
+        prompt = []
+        if self.dataset_attr.history and isinstance(example[self.dataset_attr.history], list):
+            for old_prompt, old_response in example[self.dataset_attr.history]:
+                prompt.append({"role": Role.USER.value, "content": old_prompt})
+                prompt.append({"role": Role.ASSISTANT.value, "content": old_response})
+        ...
+        prompt.append({"role": Role.USER.value, "content": "\n".join(query)})</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/data/converter.py#L40">mindspeed_llm/fsdp2/data/converter.py:40</a>（AlpacaDatasetConverter） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/data/converter.py#L340">:340</a>（get_dataset_converter 按 formatting 名取转换器） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/data/converter.py#L356">:356</a>（align_dataset：dataset.map(converter) 对齐列名）</p>
+      <p class="footnote">职责一句话：converter 负责"原始数据集列名（alpaca 的 instruction/output、sharegpt 的 conversations 等）→ 统一的 role/content 列表结构"，抹平不同数据集格式差异，给后面 template 喂统一输入。converter 不碰 token、不碰模板，只重组字典。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/data/collator.py — SFTDataCollatorWith4DAttentionMask：在父类 padding 之上，neat_packing 时生成块对角 4D 掩码</p>
+      <pre data-lang="py">def prepare_4d_attention_mask(attention_mask_with_indices, dtype):
+    # (batch, seq) 索引掩码 → (batch, 1, seq, seq) 下三角块对角掩码
+    non_padding_mask = (attention_mask_with_indices != 0).unsqueeze(1).unsqueeze(2)
+    indices = attention_mask_with_indices.unsqueeze(1).unsqueeze(2)
+    indices_t = attention_mask_with_indices.unsqueeze(1).unsqueeze(3)
+    tril_mask = torch.tril(torch.ones((seq_len, seq_len), dtype=torch.bool))
+    attention_mask_4d = (indices == indices_t) & non_padding_mask & tril_mask
+    return torch.where(attention_mask_4d, zero_tensor, min_dtype)
+
+@dataclass
+class SFTDataCollatorWith4DAttentionMask(DataCollatorForSeq2Seq):
+    def __call__(self, features):
+        features = super().__call__(features)
+        if self.block_diag_attn and self.attn_implementation != "flash_attention_2":
+            features["attention_mask"] = prepare_4d_attention_mask(features["attention_mask"], self.compute_dtype)
+        return features</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/data/collator.py#L10">mindspeed_llm/fsdp2/data/collator.py:10</a>（prepare_4d_attention_mask） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/data/collator.py#L54">:54</a>（SFTDataCollatorWith4DAttentionMask） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/data/collator.py#L61">:61</a>（__call__ 触发块对角掩码）</p>
+      <p class="footnote">职责一句话：collator 负责"把一列表变长样本对齐成定张量 batch，并在 neat_packing（把多条短样本打包进同一序列）时生成 4D 块对角掩码防止样本间互相 attend"。它继承自 transformers 的 DataCollatorForSeq2Seq，padding 到 cp_size*2 的倍数（data_factory.py 第 88 行），label 的 pad 位填 IGNORE_INDEX。</p>
+
+      <p class="figcap">megatron_data/ — 为兼容 mcore（Megatron-Core）数据格式而留的整套预训练数据设施</p>
+      <pre data-lang="py">megatron_dataset_generate.py:  def train_valid_test_datasets_provider(model_args, data_args, training_args):
+megatron_dataset_iter.py:      # mcore 风格的 indexed_dataset 迭代（.bin/.idx mmap 定长）
+megatron_dataset_samplers.py: class MegatronPretrainingSampler  # 按定长步长切样本</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/data/megatron_data/megatron_dataset_generate.py#L378">mindspeed_llm/fsdp2/data/megatron_data/megatron_dataset_generate.py:378</a>（provider 入口） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/data/megatron_data/indexed_dataset.py">megatron_data/indexed_dataset.py</a>（.bin/.idx mmap 定长格式） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/data/megatron_data/megatron_dataset_samplers.py">megatron_dataset_samplers.py</a>（定长采样器）</p>
+      <p class="footnote">为何存在：mcore 的预训练数据是离线预处理好的一套 indexed 格式（每个样本已是定长 token id 序列，.bin 存数据、.idx 存索引），fsdp2 后端为了复用这套既有预处理产物与 MegatronPretrainingSampler 的定长步长切片逻辑，原样保留了 megatron_data/ 整个目录。它本质是"mcore 数据格式兼容层"，不是新的数据流。不在本篇深挖实现，只定位其存在理由。</p>
+
+      <p class="figcap">examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml — 预训练配置：data_manager_type: mg + stage: pt（定长路径）</p>
+      <pre data-lang="yaml">data:
+  template: qwen3
+  cutoff_len: 4096
+  max_samples: 100000
+  overwrite_cache: True
+  preprocessing_num_workers: 1
+  data_manager_type: mg      # ← 走 MegatronDataManager，定长 indexed
+
+training:
+  stage: pt                  # ← 预训练阶段，与 mg 配对
+  dataloader_num_workers: 4
+  dataloader_drop_last: True</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml#L11">examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml:11</a>（data_manager_type: mg） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml#L28">:28</a>（stage: pt）</p>
+      <p class="footnote">对照 tune_qwen3_8b_4k_fsdp2_A2.yaml（微调）：该文件 data 段<b>没有</b> data_manager_type 行、training 段<b>没有</b> stage 行，默认落到 LF 路径与 sft 阶段（见 data_factory.py:250 的判定）。两条配置同样的 template: qwen3、cutoff_len: 4096，差别只在数据管理器与阶段——这正是"预训练(mg定长)与微调(alpaca)数据路径不同"的配置层证据。</p>
+
+      <div class="gnpu">
+        <div class="g"><h4>GPU / 已知</h4>
+          <div class="row"><span class="k">Dataset</span><span>torch.utils.data.Dataset 按索引吐样本，是"喂张量"的最小单位</span></div>
+          <div class="row"><span class="k">DataLoader</span><span>单机多进程拉取+拼批，配 RandomSampler/DistributedSampler</span></div>
+          <div class="row"><span class="k">collate_fn</span><span>用户手写或 DataCollatorForSeq2Seq，做 padding 与 label 对齐</span></div>
+          <div class="row"><span class="k">template</span><span>HF ChatTemplate / apply_chat_template，jinja 渲染对话</span></div>
+        </div>
+        <div class="n"><h4>NPU / 本项目</h4>
+          <div class="row"><span class="k">Dataset</span><span>LF 路径 get_dataset 在线渲染（converter+template）；mg 路径走 megatron_data indexed .bin/.idx，自带 mcore Dataset</span></div>
+          <div class="row"><span class="k">DataLoader</span><span>同一 torch DataLoader，但 sampler 分叉：LF 用 DistributedSampler（dp_fsdp rank/size），mg 用 MegatronPretrainingSampler（按定长步长切）</span></div>
+          <div class="row"><span class="k">collate_fn</span><span>SFTDataCollatorWith4DAttentionMask：neat_packing 时额外生成 4D 块对角掩码（兼容 NPU eager attention，无 FA2 时启用）</span></div>
+          <div class="row"><span class="k">template</span><span>自研 Template 体系：register_template 注册 qwen3，StringFormatter 槽位填 {{content}}，ReasoningTemplate 支持推理开关</span></div>
+        </div>
+      </div>
+
+      <div class="sum">
+        <b>小结</b>　心智模型：数据 = 格式化（converter 抹平列名）→ 转模板（template/formatter 把对话填进 ChatML 槽位并 tokenize、prompt 部分 mask 成 IGNORE_INDEX）→ 拼批（collator padding + 4D 块对角掩码）三段串接；入口 DataFactory 用 stage×data_manager_type 二选一，LF 在线渲染走 sft，mg 走 mcore 定长 indexed 走 pt。
+        <div class="pit">常见误区：① 以为预训练(mg定长)与微调(alpaca)数据路径相同——实则两条配置一个带 data_manager_type: mg+stage: pt 走 MegatronDataManager 的离线定长 indexed，一个不带这两个键默认落到 LFDataManager 的在线 alpaca 渲染，converter/template/collator 三段只服务 LF 路径。② 以为 megatron_data/ 是新数据流——它只是为兼容 mcore 已有的 .bin/.idx 预处理产物而保留的格式兼容层。③ 以为 template 只渲染字符串不管 token——其实 get_dataset 流程里 template 同时负责 tokenize 与 label mask（IGNORE_INDEX），formatter 才是只产字符串的那一层。</div>
+      </div>
+
+      <div class="filelist"><b>本篇涉及文件</b><br>
+mindspeed_llm/fsdp2/data/data_factory.py<br>
+mindspeed_llm/fsdp2/data/template.py<br>
+mindspeed_llm/fsdp2/data/formatter.py<br>
+mindspeed_llm/fsdp2/data/converter.py<br>
+mindspeed_llm/fsdp2/data/collator.py<br>
+mindspeed_llm/fsdp2/data/data_utils.py<br>
+mindspeed_llm/fsdp2/data/megatron_data/megatron_dataset_generate.py<br>
+mindspeed_llm/fsdp2/data/megatron_data/indexed_dataset.py<br>
+mindspeed_llm/fsdp2/data/megatron_data/megatron_dataset_samplers.py<br>
+examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml<br>
+examples/fsdp2/qwen3/tune_qwen3_8b_4k_fsdp2_A2.yaml</div>
+    </main>
+  </div>
+</div>
+<script>
+// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre[data-lang]').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];if(!rules)return;
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      return '<span class="ln">'+(i+1)+'</span>'+tokLine(l,rules);
+    }).join('\n');
+  });
+})();
+</script>
+</body>
+</html>

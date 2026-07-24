@@ -1,0 +1,182 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/data/processor/processor_utils.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/data/processor/processor_utils.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_ca0ad28a7f54a7.html">◀ pretrain_processor.py</a> <a href="file_8e4354a4b6d576.html">sft_processor.py ▶</a></nav></div>
+<div class="wrap">
+<h1>processor_utils.py</h1><p class="goal">mindspeed_llm/fsdp2/data/processor/processor_utils.py · 2593B · 81 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L16" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class DatasetProcessor(ABC)</a><a href="#L24" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def preprocess_dataset(self, examples: dict[st</a><a href="#L29" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def print_data_example(self, example: dict[str</a><a href="#L34" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def search_for_fit(numbers: list[int], capacit</a><a href="#L40" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def greedy_knapsack(numbers: list[int], capaci</a><a href="#L66" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def infer_seqlen(source_len: int, target_len: </a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<span class="mut">（未被正文 EP 引用）</span>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p>Copyright 2025 the LlamaFactory team.</p><p class="mut">（自动提取自首行注释）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1"># Copyright 2025 the LlamaFactory team.
+
+import bisect
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Optional
+
+from transformers import PreTrainedTokenizer, ProcessorMixin
+
+from ...utils.arguments import DataArguments
+from ..template import Template
+
+IGNORE_INDEX = -100
+
+@dataclass
+class DatasetProcessor(ABC):
+    r&quot;&quot;&quot;A class for data processors.&quot;&quot;&quot;
+
+    template: &quot;Template&quot;
+    tokenizer: &quot;PreTrainedTokenizer&quot;
+    data_args: &quot;DataArguments&quot;
+
+    @abstractmethod
+    def preprocess_dataset(self, examples: dict[str, list[Any]]) -&gt; dict[str, list[Any]]:
+        r&quot;&quot;&quot;Build model inputs from the examples.&quot;&quot;&quot;
+        ...
+
+    @abstractmethod
+    def print_data_example(self, example: dict[str, list[int]]) -&gt; None:
+        r&quot;&quot;&quot;Print a data example to stdout.&quot;&quot;&quot;
+        ...
+
+
+def search_for_fit(numbers: list[int], capacity: int) -&gt; int:
+    r&quot;&quot;&quot;Find the index of largest number that fits into the knapsack with the given capacity.&quot;&quot;&quot;
+    index = bisect.bisect(numbers, capacity)
+    return -1 if index == 0 else (index - 1)
+
+
+def greedy_knapsack(numbers: list[int], capacity: int) -&gt; list[list[int]]:
+    r&quot;&quot;&quot;Implement efficient greedy algorithm with binary search for the knapsack problem.&quot;&quot;&quot;
+    # sort numbers in ascending order for binary search
+    numbers.sort()
+    knapsacks = []
+
+    while numbers:
+        current_knapsack = []
+        remaining_capacity = capacity
+
+        while True:
+            index = search_for_fit(numbers, remaining_capacity)
+            if index == -1:
+                # no more numbers fit in this knapsack
+                break
+
+            # update the remaining capacity
+            remaining_capacity -= numbers[index]
+            # add the number to knapsack
+            current_knapsack.append(numbers.pop(index)) 
+
+        knapsacks.append(current_knapsack)
+
+    return knapsacks
+
+
+def infer_seqlen(source_len: int, target_len: int, cutoff_len: int) -&gt; tuple[int, int]:
+    r&quot;&quot;&quot;Compute the real sequence length after truncation by the cutoff_len.&quot;&quot;&quot;
+    if target_len * 2 &lt; cutoff_len:
+        # truncate source
+        max_target_len = cutoff_len
+    elif source_len * 2 &lt; cutoff_len:
+        # truncate target
+        max_target_len = cutoff_len - source_len
+    else:
+        # truncate both
+        max_target_len = int(cutoff_len * (target_len / (source_len + target_len)))
+
+    new_target_len = min(max_target_len, target_len)
+    max_source_len = max(cutoff_len - new_target_len, 0)
+    new_source_len = min(max_source_len, source_len)
+    return new_source_len, new_target_len</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

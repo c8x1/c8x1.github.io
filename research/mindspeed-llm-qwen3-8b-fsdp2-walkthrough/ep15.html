@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trainer 主循环精读 · 走读 EP15</title>
+<style>
+  :root{
+    --bg:#0f0f12; --bg2:#000; --side:#1a1a1a; --card:#16161c; --line:#2a2a33;
+    --txt:#e8e8e8; --mut:#9a9a9a; --mut2:#6a6a6a;
+    --serif:ui-serif,Georgia,"Times New Roman",Times,serif;
+    --sans:system-ui,-apple-system,"PingFang SC","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace;
+    --red:#C7000B; --red-bg:#2a0f10; --red-bd:#6e1a1c; --red-tx:#e88;
+    --grn:#788C5D; --grn-bg:#14241a; --grn-bd:#2e5a3a; --grn-tx:#7ab98a;
+    --acc:#C7000B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+  .page{max-width:1180px;margin:0 auto;padding:0}
+  .topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);
+    font-size:13px;color:var(--mut)}
+  .topbar .crumb{font-family:var(--serif);font-style:italic}
+  .topbar nav{margin-left:auto;display:flex;gap:8px}
+  .topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:4px 10px;border-radius:6px}
+  .topbar nav a:hover{color:#fff;border-color:var(--acc)}
+  .body{display:grid;grid-template-columns:160px 1fr;align-items:start}
+  .tree{background:var(--side);border-right:1px solid var(--line);padding:14px 8px;
+    font-family:var(--mono);font-size:11px;color:var(--mut2);min-height:80vh;position:sticky;top:0}
+  .tree .f{display:block;padding:2px 4px;white-space:pre}
+  .tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px}
+  .main{padding:22px 28px 80px}
+  h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:6px 0 2px;color:#fff}
+  .goal{font-family:var(--serif);font-style:italic;color:var(--mut);margin:0 0 4px}
+  .gain{font-size:13px;color:var(--mut);margin:0 0 20px}
+  .gain b{color:var(--red-tx)}
+  h2{font-family:var(--serif);font-weight:600;font-size:18px;color:#fff;margin:26px 0 6px;
+    border-bottom:1px solid var(--line);padding-bottom:3px}
+  h2 .sec{color:var(--mut2);font-style:italic;font-size:13px;margin-left:8px}
+  p{margin:8px 0}
+  .figcap{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);
+    margin:10px 0 2px}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--mut2);
+    padding:10px 12px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55}
+  pre .ln{display:inline-block;width:32px;color:var(--mut2);user-select:none}
+  .filelink{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--red-tx);margin:4px 0 14px}
+  .filelink a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--red-bd)}
+  .footnote{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--mut2);margin:4px 0 14px}
+  /* PyCharm Darcula 主题 token 配色 */
+  pre[data-lang]{color:#d4d4d4}
+  .tok-kw{color:#cc7832;font-weight:600}
+  .tok-bi{color:#9876aa;font-style:italic}
+  .tok-fn{color:#ffc66d}
+  .tok-cl{color:#a9b7c6;font-style:italic}
+  .tok-st{color:#6a8759}
+  .tok-cm{color:#808080;font-style:italic}
+  .tok-nm{color:#6897bb}
+  .tok-dc{color:#bbb33b}
+  .tok-key{color:#cc7832}
+  .tok-var{color:#9876aa}
+  .tree .f,.tree a.f{color:#6a6a6a;text-decoration:none;display:block;padding:2px 4px;white-space:pre;border-radius:3px}
+  .tree a.f:hover{background:#2a2a33;color:#d4d4d4}
+  .tree a.f.act,.tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px;font-weight:600}
+  .hl-mk{background:#3a2a00;color:#e8c87a;border-radius:2px;padding:0 2px}
+  .gnpu{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:14px 0}
+  .gnpu .g{background:var(--grn-bg);border-right:1px solid var(--line);padding:10px 14px}
+  .gnpu .n{background:var(--red-bg);padding:10px 14px}
+  .gnpu h4{margin:0 0 6px;font-family:var(--serif);font-size:13px}
+  .gnpu .g h4{color:var(--grn-tx)}.gnpu .n h4{color:var(--red-tx)}
+  .gnpu .row{display:grid;grid-template-columns:110px 1fr;gap:6px;font-size:12.5px;margin:4px 0}
+  .gnpu .row .k{color:var(--mut2)}
+  .diag{margin:10px 0 6px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:8px}
+  .sum{border-top:1px solid var(--line);margin-top:22px;padding-top:10px;font-size:13.5px}
+  .sum .pit{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12.5px;margin-top:6px}
+  .filelist{font-family:var(--mono);font-size:11px;color:var(--mut2);margin-top:22px;border-top:1px dashed var(--line);padding-top:10px}
+  .filelist b{color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <span class="crumb">第五篇章 · 训练循环与优化 › EP15</span>
+    <span style="color:var(--mut2)">EP15</span>
+    <nav>
+      <a href="ep14.html">◀ 上一篇</a>
+      <a href="index.html">索引</a>
+      <a href="ep16.html">下一篇 ▶</a>
+    </nav>
+  </div>
+  <div class="body">
+    <aside class="tree">
+      <a class="f" href="appendix/index.html" target="_blank">📁 附录·项目文件走读</a>
+      <span class="f">MindSpeed-LLM/</span>
+      <a class="f" href="appendix/file_089411e68e5d5b.html" target="_blank">├ train_fsdp2.py</a>
+      <span class="f">├ examples/fsdp2/</span>
+      <a class="f" href="appendix/file_d04a217944c522.html" target="_blank">│  ├ env_config.sh</a>
+      <span class="f">│  └ qwen3/</span>
+      <span class="f">├ mindspeed_llm/fsdp2/</span>
+      <a class="f act" href="appendix/file_c0e968286883c9.html" target="_blank">├ train/trainer.py</a>
+      <a class="f act" href="appendix/file_048a517398fb5a.html" target="_blank">├ utils/train_monitor.py</a>
+      <a class="f act" href="appendix/file_7af4de60b181f1.html" target="_blank">├ utils/logging.py</a>
+      <span class="f">└ ...</span>
+    </aside>
+    <main class="main">
+      <h1>Trainer 主循环精读</h1>
+      <p class="goal">目标：讲清 FSDP2 下训练一步的完整时序。前置：EP14 微调 vs 预训练差异。</p>
+      <p class="gain">你将获得：<b>①</b> trainer.py 主循环逐方法精读——train 入口、training_step 前向反向、no_sync 梯度累积、clip+step+zero、save，每段贴真实 file:line <b>②</b> 一个反直觉点——Trainer 只调标准 <code>loss.backward()</code>，FSDP2 的 ReduceScatter 梯度同步是反向时由 hook 隐式触发的，<b>无需手动 all_reduce 梯度</b>；外加 quick_start 里那行 <code>iteration 1/2000 | consumed tokens ... | lm loss ... | max_memory_allocated</code> 日志的来源——TrainMonitor 的模板拼装</p>
+
+      <h2>你已经熟悉的情况 <span class="sec">桥接开场</span></h2>
+      <p>你写过单卡训练循环，最熟的骨架是 <code>for batch in loader: loss = model(batch); loss.backward(); optimizer.step(); optimizer.zero_grad()</code>。这四行已经把"前向→反向→更新参数→清梯度"讲完了，梯度是模型自己算、自己累加到 <code>.grad</code>，优化器直接读 <code>.grad</code> 更新权重。单卡世界里没有"同步梯度"这回事——因为只有一份梯度。</p>
+      <p>到了多卡 DDP，骨架不变，但反向时多了一步：每个 rank 的梯度算完后，DDP 的 hook 会自动 <code>all_reduce</code> 梯度，让你看到的 <code>.grad</code> 已经是全量平均。你不用改训练循环代码——同步藏在 <code>loss.backward()</code> 里面。MindSpeed-LLM 的 FSDP2 后端把这件事又往前推了一层：<b>不是 all_reduce 整个梯度张量，而是 ReduceScatter 把梯度切成分片只留在本 rank</b>，省显存。但对外接口完全一样——Trainer 仍然只写 <code>loss.backward()</code>，分片同步是 FSDP2 在反向时由注册在参数上的 hook 隐式触发的。下面把 trainer.py 这个 40KB 文件按方法拆开读，看"标准训练循环 + 隐式分片同步 + TrainMonitor 统一日志"是怎么拼起来的。</p>
+      <p>读这个文件最大的认知冲击是：<b>你以为分片训练会很复杂，结果发现训练循环本身朴素得像教程</b>。三层 for 循环（epoch / update_step / micro-batch）、一个 <code>loss.backward()</code>、一个 <code>optimizer.step()</code>——和 PyTorch 官方教程几乎逐行对应。所有"分片"的复杂度都被关进了两个黑盒：一是 FSDP2 在反向时的 ReduceScatter hook（不在 trainer.py 里），二是 <code>ckpt_manager</code> 在 save 时的 sharded dcp 写盘（不在 trainer.py 里）。Trainer 只负责"循环骨架 + 调用顺序 + 日志聚合"，把分片细节全委托出去。这种分层让你能读懂训练循环而不必先懂 FSDP2 内部——但也埋了最大的坑：<b>以为梯度同步在 trainer.py 里找不到就是没同步</b>，其实它藏在 <code>loss.backward()</code> 这一行的 hook 里。</p>
+
+      <h2>本项目怎么做 <span class="sec">原理</span></h2>
+      <p>FSDP2 训练一步的时序，表面看和单卡一样是 forward→backward→step，但中间夹了三层"隐式并行"：第一层是<b>梯度累积</b>——一个 update_step 内跑多个 micro-batch，前 N-1 个用 <code>fsdp_root.no_sync()</code> 包住，让反向只在本地累积梯度、不触发分片同步，最后一个 micro-batch 才放出同步；第二层是<b>反向时的隐式 ReduceScatter</b>——<code>loss.backward()</code> 一调，FSDP2 注册在 sharded 参数上的 backward hook 自动把本 rank 的梯度贡献 reduce-scatter 给组内各 rank，结果 <code>.grad</code> 是分片形式（这部分在仓库内的 fsdp_turbo/外部 hook 实现，trainer.py 里看不到同步代码）；第三层是<b>分片优化器状态</b>——<code>optimizer.step()</code> 读写的是分片参数与分片 m/v 状态，全量优化器状态从不物化。clip、lr_scheduler.step、zero_grad、save/log 都还是标准写法。下图把这一步的时序摊开。</p>
+      <p>这三层"隐式"有一个共同特征：<b>Trainer 调的都是标准 PyTorch 接口，分片逻辑全部藏在接口背后</b>。<code>loss.backward()</code> 是标准 autograd 入口，<code>optimizer.step()</code> 是标准优化器入口，<code>fsdp_root.no_sync()</code> 是 FSDP 暴露的 context manager——没有一个自定义的同步函数被显式调用。这正是 FSDP2 相对 mcore 的设计差异：mcore 在 <code>train_step</code> 里手写 forward/backward/optimizer/clip 一整套并显式编排通信，FSDP2 则把这些委托给 torch 原生的 hook 机制，循环骨架回归"朴素教程"风格。代价是<b>可读性反直觉</b>：你想在 trainer.py 里找"梯度在哪里同步"会找不到，得知道它埋在 backward hook 里——这也是本篇反复强调"无需手动 all_reduce 梯度"的原因。</p>
+      <div class="diag">
+        <svg viewBox="0 0 920 360" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace,monospace" font-size="11">
+          <text x="460" y="18" text-anchor="middle" fill="#9a9a9a" font-style="italic">FSDP2 训练一步时序（一个 update_step，含 N 个 micro-batch）</text>
+          <!-- timeline axis -->
+          <line x1="40" y1="40" x2="880" y2="40" stroke="#2a2a33"/>
+          <text x="40" y="34" fill="#6a6a6a">t</text>
+          <!-- micro-batch accumulation bracket -->
+          <rect x="40" y="50" width="430" height="60" rx="4" fill="#14241a" stroke="#2e5a3a"/>
+          <text x="60" y="68" fill="#7ab98a">micro-batch 循环 i=0..N-1（trainer.py:270）</text>
+          <text x="60" y="86" fill="#9a9a9a">i &lt; N-1: fsdp_root.no_sync() —— 仅本地累积，不触发 RS（:277-282）</text>
+          <text x="60" y="102" fill="#e88">i = N-1: 放出 no_sync，反向触发 FSDP2 隐式 ReduceScatter</text>
+          <!-- forward box -->
+          <rect x="60" y="120" width="180" height="28" rx="4" fill="#000" stroke="#2a2a33"/>
+          <text x="150" y="138" text-anchor="middle" fill="#dcdcaa">forward: model(**inputs)（:698）</text>
+          <!-- backward box -->
+          <rect x="250" y="120" width="200" height="28" rx="4" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="350" y="138" text-anchor="middle" fill="#e88">loss.backward()（:482）→ FSDP2 hook 隐式 RS</text>
+          <line x1="240" y1="134" x2="250" y2="134" stroke="#6a6a6a" marker-end="url(#a)"/>
+          <!-- clip -->
+          <rect x="490" y="120" width="160" height="28" rx="4" fill="#000" stroke="#2a2a33"/>
+          <text x="570" y="138" text-anchor="middle" fill="#dcdcaa">clip_grad_norm（:301）</text>
+          <line x1="450" y1="134" x2="490" y2="134" stroke="#6a6a6a" marker-end="url(#a)"/>
+          <!-- step -->
+          <rect x="660" y="120" width="200" height="28" rx="4" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="760" y="138" text-anchor="middle" fill="#e88">optimizer.step()（:307）→ 分片 m/v 状态</text>
+          <line x1="650" y1="134" x2="660" y2="134" stroke="#6a6a6a" marker-end="url(#a)"/>
+          <!-- second row: scheduler/zero/all_reduce/save/log -->
+          <rect x="60" y="165" width="180" height="28" rx="4" fill="#000" stroke="#2a2a33"/>
+          <text x="150" y="183" text-anchor="middle" fill="#dcdcaa">lr_scheduler.step()（:308）</text>
+          <rect x="250" y="165" width="180" height="28" rx="4" fill="#000" stroke="#2a2a33"/>
+          <text x="340" y="183" text-anchor="middle" fill="#dcdcaa">optimizer.zero_grad()（:309）</text>
+          <rect x="440" y="165" width="180" height="28" rx="4" fill="#000" stroke="#2a2a33"/>
+          <text x="530" y="183" text-anchor="middle" fill="#dcdcaa">all_reduce(loss/grad_norm)（:322）</text>
+          <rect x="630" y="165" width="230" height="28" rx="4" fill="#14241a" stroke="#2e5a3a"/>
+          <text x="745" y="183" text-anchor="middle" fill="#7ab98a">train_monitor.step() 拼日志（:333）</text>
+          <!-- save -->
+          <rect x="60" y="210" width="800" height="28" rx="4" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="460" y="228" text-anchor="middle" fill="#e88">save_steps 命中 → ckpt_manager.save（分片 dcp，:380）+ dist.barrier + cleanup_old_checkpoints（:388）</text>
+          <!-- legend -->
+          <rect x="40" y="265" width="14" height="10" fill="#14241a" stroke="#2e5a3a"/><text x="60" y="274" fill="#9a9a9a">FSDP2 隐式 / 分片侧（hook 自动，Trainer 不写同步代码）</text>
+          <rect x="40" y="285" width="14" height="10" fill="#000" stroke="#2a2a33"/><text x="60" y="294" fill="#9a9a9a">Trainer 显式标准调用</text>
+          <text x="40" y="320" fill="#6a6a6a" font-style="italic">关键：loss.backward() 这一行同时承担"算梯度"+"跨 rank ReduceScatter 同步梯度"两件事——后者全在 hook 里，trainer.py 看不到。</text>
+          <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="#6a6a6a"/></marker></defs>
+        </svg>
+      </div>
+
+      <h2>源码下钻 <span class="sec">file:line</span></h2>
+
+      <p class="figcap">mindspeed_llm/fsdp2/train/trainer.py —— train() 主循环入口：epoch 循环 → update_step（梯度累积）→ micro-batch 循环；本段是骨架，注释里的行号对应本文件</p>
+      <pre data-lang="py">def train(self, resume_from_checkpoint: Optional[str] = None):
+    args = self.args
+    train_dataloader = self.train_dataloader
+    ps = ParallelState()
+    if ps.is_fsdp_enable():
+        reduce_group = ps.get_fsdp_group()        # ReduceScatter 的通信组
+    else:
+        reduce_group = None
+    steps_in_epoch = len(train_dataloader)
+    total_updates_per_epoch = steps_in_epoch // args.gradient_accumulation_steps + int(
+        steps_in_epoch % args.gradient_accumulation_steps > 0)
+    total_steps = args.max_steps if args.max_steps > 0 else (total_updates_per_epoch * args.num_train_epochs)
+    ...
+    self.model.train()
+    self._step_start_time = time.time()
+    # --- Epoch Loop ---
+    for epoch in range(epochs_trained, int(args.num_train_epochs)):
+        self.epoch = epoch
+        if hasattr(train_dataloader.sampler, "set_epoch"):
+            train_dataloader.sampler.set_epoch(epoch)
+        epoch_iterator = iter(train_dataloader)
+        # --- Gradient Accumulation Loop ---
+        remainder = steps_in_epoch % args.gradient_accumulation_steps
+        if remainder == 0:
+            remainder = args.gradient_accumulation_steps
+        total_updates = total_updates_per_epoch
+        for update_step in range(start_update_step, total_updates):
+            num_batches = args.gradient_accumulation_steps if update_step != (total_updates - 1) else remainder
+            batch_samples, batch_seqlens, num_items_in_batch = self.get_batch_samples_func()(
+                ps, epoch_iterator, num_batches)
+            self.current_gradient_accumulation_steps = len(batch_samples)
+            current_step_loss = 0.0; current_step_lm_loss = 0.0; current_step_mtp_loss = 0.0
+            # --- Micro-Batch Loop ---
+            for i, inputs in enumerate(batch_samples):
+                do_sync_step = i == len(batch_samples) - 1
+                ...</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L145">mindspeed_llm/fsdp2/train/trainer.py:145</a>（def train，主循环入口） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L154">:154</a>（reduce_group = ps.get_fsdp_group()，FSDP2 通信组） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L221">:221</a>（for epoch 外层 epoch 循环） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L255">:255</a>（for update_step 梯度累积循环） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L257">:257</a>（num_batches 取 accum_steps 或末尾 remainder） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L270">:270</a>（for i, inputs 微批循环） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L271">:271</a>（do_sync_step = 最后一个 micro-batch）</p>
+      <p class="footnote">train() 是整个 Trainer 的主入口，签名 <code>train(self, resume_from_checkpoint=None)</code>。三层循环嵌套：最外层 epoch（:221）、中层 update_step（:255，一个 update = 一次 optimizer.step）、最内层 micro-batch（:270，一个 update 内跑 N 个 micro-batch 做梯度累积）。<code>reduce_group</code> 在 :154 取 <code>ps.get_fsdp_group()</code>——这是 FSDP2 域通信组，后面 :322 的 <code>all_reduce(loss/grad_norm)</code> 用它做 metric 聚合（注意：聚合的是<b>标量 loss/grad_norm 用于日志</b>，不是梯度本身——梯度的 ReduceScatter 在反向 hook 里）。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/train/trainer.py —— micro-batch 循环体：no_sync 梯度累积 + training_step 前向反向；do_sync_step 控制何时放出 FSDP2 同步</p>
+      <pre data-lang="py">            for i, inputs in enumerate(batch_samples):
+                do_sync_step = i == len(batch_samples) - 1
+                # FSDP Communication Optimization
+                # Only synchronize gradients on the last micro-batch
+                fsdp_root = self._get_fsdp_root()
+                sync_context = (
+                    fsdp_root.no_sync()
+                    if (not do_sync_step and hasattr(fsdp_root, "no_sync"))
+                    else contextlib.nullcontext()
+                )
+                with sync_context:
+                    # Forward &amp; Backward
+                    # Note: training_step already divides loss by accum_steps
+                    loss, lm_loss, mtp_loss = self.training_step(inputs, num_items_in_batch)
+                # Accumulate Loss for logging (restore to original scale for display)
+                if not torch.isnan(loss) and not torch.isinf(loss):
+                    current_step_loss += loss.item()
+                if not torch.isnan(lm_loss) and not torch.isinf(lm_loss):
+                    current_step_lm_loss += lm_loss.item()
+                if not torch.isnan(mtp_loss) and not torch.isinf(mtp_loss):
+                    current_step_mtp_loss += mtp_loss.item()</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L275">mindspeed_llm/fsdp2/train/trainer.py:275</a>（fsdp_root = self._get_fsdp_root()） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L277">:277</a>（sync_context：no_sync 或 nullcontext） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L286">:286</a>（training_step 前向反向，loss 已除以 accum_steps） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L290">:290</a>（NaN/Inf 保护，避免污染日志聚合） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L841">:841</a>（_get_fsdp_root 取最内层 FSDP 模块）</p>
+      <p class="footnote">这是 FSDP2 梯度累积的核心 trick：前 N-1 个 micro-batch 用 <code>fsdp_root.no_sync()</code> 包住 <code>training_step</code>，让反向只在本 rank 累积梯度、<b>不触发跨 rank 的 ReduceScatter</b>；只有最后一个 micro-batch（<code>do_sync_step=True</code>）才用 <code>nullcontext</code> 放出同步，此时反向会让 FSDP2 hook 把累积好的梯度 reduce-scatter 出去。这把通信从"每 micro-batch 一次"压到"每 update 一次"，是 FSDP2 训练吞吐的关键。<code>no_sync</code> 是 FSDP/原生 FSDP2 暴露的 context manager，Trainer 这里只是调用方。<code>_get_fsdp_root</code>（:841）处理不同 wrap 深度（直接是 FSDP / model.module / model.module.model 三层探测）拿到最内层 FSDP 实例。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/train/trainer.py —— training_step() 单步前向反向：loss.backward() 这一行是 FSDP2 隐式 ReduceScatter 的唯一触发点</p>
+      <pre data-lang="py">def training_step(self, inputs, num_items_in_batch):
+    # 1. Set model to train mode
+    self.model.train()
+    if hasattr(self.optimizer, "train") and callable(self.optimizer.train):
+        self.optimizer.train()
+    # 2. Forward pass
+    loss_all = self._compute_loss(inputs, return_outputs=False, num_items_in_batch=num_items_in_batch)
+    if self.args.stage == 'pt':
+        loss_all.loss = loss_all.loss / self.current_gradient_accumulation_steps
+        loss_all.lm_loss_output = loss_all.lm_loss_output / self.current_gradient_accumulation_steps
+        loss_all.mtp_loss_output = loss_all.mtp_loss_output / self.current_gradient_accumulation_steps
+    loss = loss_all.loss
+    del inputs
+    # 4. Multi-device parallelism: Average loss across devices (if not using FSDP internal handling)
+    if torch.cuda.device_count() > 1:
+        loss = loss.mean()
+    # 5. Backward pass
+    loss.backward()
+    # 6. Return detached loss
+    return loss.detach(), loss_all.lm_loss_output.detach(), loss_all.mtp_loss.detach()</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L453">mindspeed_llm/fsdp2/train/trainer.py:453</a>（def training_step，单步前向反向） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L464">:464</a>（_compute_loss 前向） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L465">:465</a>（pt 阶段 loss 除以 accum_steps） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L482">:482</a>（loss.backward() —— FSDP2 隐式 RS 触发点） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L675">:675</a>（_compute_loss 定义） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L698">:698</a>（outputs = self.model(**model_inputs) 真正前向）</p>
+      <p class="footnote">这是本篇最关键的一段。<code>loss.backward()</code>（:482）看起来和单卡一模一样——但因为它作用在 FSDP2 包裹的模型上，反向时注册在 sharded 参数上的 backward hook 会自动执行 ReduceScatter：每个 rank 把自己算出的梯度贡献 reduce-scatter 给通信组，最终 <code>param.grad</code> 落地为<b>分片形式</b>（只持有本 rank 负责的那一片）。<b>Trainer 全程没有一行 all_reduce/all_reduce 梯度的代码</b>——同步完全在 hook 内部。pt 阶段在 :465 把 loss 除以 <code>current_gradient_accumulation_steps</code>，配合外层 no_sync 实现"梯度累积 = 平均"；tune/sft 阶段不除（loss 由模型内部 num_items_in_batch token 加权处理）。注释 :474-478 老实承认：标准 FSDP 的 loss averaging 通常由梯度 reduction 或显式 loss reduction 处理，<b>"For FSDP2, loss is usually local until aggregation"</b>——即 loss 在反向前是本地的，聚合发生在反向 hook。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/train/trainer.py —— _compute_loss() 前向细节：forward → 取 loss → 跨设备 token 加权；_compute_language_model_pretrain_loss 里 cp&gt;1 时显式 all_reduce(loss/num_items)</p>
+      <pre data-lang="py">def _compute_loss(self, inputs, return_outputs=False, num_items_in_batch=None):
+    args = self.args
+    device = torch.accelerator.current_device()
+    kwargs = {}
+    if num_items_in_batch is not None:
+        kwargs["num_items_in_batch"] = num_items_in_batch   # token 加权
+    labels = inputs['labels'].to(device, non_blocking=True)
+    if args.stage == 'pt':
+        inputs['labels'] = None                              # pt 阶段模型内部自己 shift
+    if self.optimization_args.chunk_loss_size and args.stage == 'pt':
+        loss_ctx, loss_mask = self._build_chunk_loss(labels, chunk_size=self.optimization_args.chunk_loss_size)
+        kwargs['loss_ctx'] = loss_ctx; kwargs['loss_mask'] = loss_mask
+    model_inputs = {**inputs, **kwargs}
+    # 2. Forward pass
+    outputs = self.model(**model_inputs)
+    ...
+    # 4. Cross-device token averaging adjustment
+    ps = ParallelState()
+    if dist.is_initialized() and args.stage != 'pt':
+        loss *= ps.get_group_size("dp_fsdp")                 # sft: 乘 dp 域大小，配合反向 all_reduce(mean)
+        ...
+
+def _compute_language_model_pretrain_loss(self, logits, labels, ignore_index=-100, **kwargs):
+    ...
+    ps = ParallelState()
+    if ps.get_group_size("cp") > 1:
+        loss = F.cross_entropy(logits, shift_labels, reduction='sum', ignore_index=ignore_index)
+        num_items_in_batch = (labels.ne(ignore_index)).sum()
+        dist.all_reduce(num_items_in_batch, op=dist.ReduceOp.SUM, group=ps.get_group("cp"))
+        dist.all_reduce(loss, op=dist.ReduceOp.SUM, group=ps.get_group("cp"))
+        loss = loss / num_items_in_batch.item()              # cp 域显式求和再除</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L675">mindspeed_llm/fsdp2/train/trainer.py:675</a>（def _compute_loss） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L683">:683</a>（num_items_in_batch 注入 kwargs，token 加权） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L690">:690</a>（chunk_loss 分块算 pt loss，省显存） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L698">:698</a>（outputs = self.model(**model_inputs) 真正前向） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L740">:740</a>（sft 阶段 loss *= dp_fsdp 组大小） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L757">:757</a>（def _compute_language_model_pretrain_loss） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L766">:766</a>（cp&gt;1 走 sum reduction） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L770">:770</a>（dist.all_reduce num_items，cp 域） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L771">:771</a>（dist.all_reduce loss，cp 域）</p>
+      <p class="footnote">这里出现了<b>仓库内唯一能看到的 all_reduce 梯度相关的 loss/张量</b>——但要分清它是什么、不是什么。<code>_compute_loss</code>（:675）的 forward 在 :698 调 <code>self.model(**model_inputs)</code>，拿到 outputs 后取 loss。sft 阶段在 :740 把 loss <b>乘以 dp_fsdp 组大小</b>——这不是同步，是为后面反向时 DDP/FSDP 的 mean 聚合"预先放大"，让除以 world_size 后还是正确的均值（经典 trick）。真正显式的 <code>dist.all_reduce</code> 在 <code>_compute_language_model_pretrain_loss</code>（:757）里，但只在 <b>cp（context parallel）域 &gt; 1</b> 时出现（:766-773）：因为 cp 把序列切到多个 rank，cross_entropy 的 sum reduction 必须跨 cp 域求和、再除以总有效 token 数才对。<b>这是 loss 张量的聚合，发生在 forward 里、是 cp 并行专属，不是 FSDP2 的梯度 ReduceScatter</b>——别把两者混为一谈。FSDP2 的梯度同步仍在 <code>loss.backward()</code> 的 hook 里，trainer.py 这一段完全没碰梯度同步。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/train/trainer.py —— optimizer step 段：clip → step → scheduler → zero_grad → all_reduce(metric) → log → save；这段在 micro-batch 循环之后</p>
+      <pre data-lang="py">            # --- Optimizer Step (Executed only after accumulation) ---
+            # 1. Clip Gradients and get Norm
+            grad_norm = clip_grad_norm(self.model, args.max_grad_norm)
+            if isinstance(grad_norm, torch.Tensor):
+                grad_norm = grad_norm.item()
+            # 2. Update Parameters
+            self.optimizer.step()
+            self.lr_scheduler.step()
+            self.optimizer.zero_grad()
+            self.global_step += 1
+            # 3. Distributed Aggregation of Loss and GradNorm
+            reduced_loss, reduced_lm_loss, reduced_mtp_loss, reduced_grad_norm = all_reduce(
+                (current_step_loss, current_step_lm_loss, current_step_mtp_loss, grad_norm), group=reduce_group
+            )
+            self._total_loss_scalar += reduced_loss
+            self._total_lm_loss_scalar += reduced_lm_loss
+            self._total_mtp_loss_scalar += reduced_mtp_loss
+            self.batch_seqlens.extend(batch_seqlens)
+            # 4. Logging
+            if self.global_step % args.logging_steps == 0:
+                _, record_info = self.train_monitor.step(
+                    self.epoch, self.lr_scheduler, global_batch_size, reduced_grad_norm,
+                    self.batch_seqlens, self._step_start_time, total_steps, self.global_step,
+                    self._last_logged_step, self._total_loss_scalar, self._total_lm_loss_scalar,
+                    self._total_mtp_loss_scalar, self._last_logged_loss_scalar,
+                    self._last_logged_lm_loss_scalar, self._last_logged_mtp_loss_scalar,
+                    sparse_attn_reduce_group=reduce_group,
+                )
+                self._step_start_time = record_info['time']
+                self._last_logged_loss_scalar = record_info['logged_loss']
+                ...</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L301">mindspeed_llm/fsdp2/train/trainer.py:301</a>（clip_grad_norm 裁剪梯度并取范数） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L307">:307</a>（optimizer.step 更新参数） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L308">:308</a>（lr_scheduler.step） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L309">:309</a>（optimizer.zero_grad） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L322">:322</a>（all_reduce loss/grad_norm 用于日志，group=reduce_group） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L333">:333</a>（train_monitor.step 拼日志）</p>
+      <p class="footnote">这里顺序是<b>先 clip 再 step</b>——clip_grad_norm（:301）在分片参数上算总梯度范数（内部会跨 rank reduce），用 <code>args.max_grad_norm</code> 缩放梯度，返回 grad_norm 标量给日志用。:307 <code>optimizer.step()</code> 更新的是<b>分片参数</b>，优化器内部维护的 m/v 状态也是分片的（全量状态从不物化，省显存）。:322 的 <code>all_reduce</code> 聚合的是 <b>(loss, lm_loss, mtp_loss, grad_norm) 四个标量</b>，目的是让日志里的 loss 是跨 rank 平均后的值——<b>这不是梯度同步</b>，是 metric 聚合。:333 <code>train_monitor.step</code> 每 <code>logging_steps</code> 步调一次，把上面这一堆累计量喂进去拼出日志行。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/train/trainer.py —— save 段：save_steps 命中时，组装 model+optimizer+extra_state，交给 ckpt_manager 存分片 dcp</p>
+      <pre data-lang="py">            # 5. Saving
+            if args.save_steps > 0 and self.global_step % args.save_steps == 0:
+                if not args.output_dir:
+                    logger.info_rank0("output_dir is not set, skipping checkpoint saving")
+                else:
+                    empty_cache()
+                    save_checkpoint_path = os.path.join(
+                        args.output_dir, "checkpoints", f"global_step_{self.global_step}")
+                    state = {
+                        "model": self.model,
+                        "optimizer": self.optimizer,
+                        "extra_state": {
+                            "global_step": self.global_step,
+                            "_global_step_last_logged": self._global_step_last_logged,
+                            "_last_logged_step": self._last_logged_step,
+                            "lr_scheduler": self.lr_scheduler.state_dict(),
+                            "train_metric": self.train_monitor.state_dict(),
+                            "torch_rng_state": torch.get_rng_state(),
+                        },
+                    }
+                    self.ckpt_manager.save(
+                        path=save_checkpoint_path, state=state,
+                        save_only_model=args.save_only_model, global_steps=self.global_step)
+                    dist.barrier()
+                    logger.info_rank0(f"Distributed checkpoint saved at {save_checkpoint_path} successfully!")
+                    cleanup_old_checkpoints(args, self.data_args.data_shared_file_system)</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L360">mindspeed_llm/fsdp2/train/trainer.py:360</a>（save_steps 命中判定） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L364">:364</a>（empty_cache 清显存） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L365">:365</a>（save_checkpoint_path 路径拼装） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L368">:368</a>（state 字典：model+optimizer+extra_state） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L376">:376</a>（train_metric: self.train_monitor.state_dict()） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L380">:380</a>（ckpt_manager.save 存分片 dcp） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L386">:386</a>（dist.barrier 全 rank 同步） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/train/trainer.py#L388">:388</a>（cleanup_old_checkpoints 清旧 ckpt）</p>
+      <p class="footnote">save 段是标准"组装 state → 存 → barrier → 清理"。关键在 :368 的 state 字典：直接把 <code>self.model</code> 和 <code>self.optimizer</code> 对象塞进去（不是 state_dict！）——<code>ckpt_manager.save</code> 内部用 torch.distributed.checkpoint (dcp) 的 sharded 写法，把 FSDP2 的<b>分片参数 + 分片优化器状态</b>直接落盘成 sharded checkpoint，每个 rank 只写自己那片。<code>extra_state</code> 里塞了 global_step、lr_scheduler 状态、<code>train_monitor.state_dict()</code>（:376，让 resume 时能恢复 consumed_tokens 等监控量）、torch_rng_state。save 后 :386 <code>dist.barrier()</code> 保证所有 rank 都写完，:388 <code>cleanup_old_checkpoints</code> 按 keep 数清旧 ckpt。HF 全量权重另走 :433-445 的 <code>get_model_state_dict(full_state_dict=True, cpu_offload=True)</code> + rank0 <code>save_model_weights</code>，与分片 ckpt 是两套产物。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/utils/train_monitor.py —— step() 入口与日志模板：把 quick_start 里那行 iteration/consumed tokens/lm loss/max_memory_allocated 日志拼出来的地方</p>
+      <pre data-lang="py">@staticmethod
+def _init_log_templates() -> Dict[str, str]:
+    return {
+        "base": " iteration {:8d}/{:8d} | consumed samples: {:10d} | consumed tokens: {:10d} | elapsed time per iteration (ms): {:.2f} |",
+        "throughput": " tokens/s: {:.2f} | mfu: {:.2f} |",
+        "optimizer": " learning rate: {:.6E} | global batch size: {:5d} | lm loss: {:.6E} | mtp loss: {:.6E} |",
+        "grad_norm": " grad norm: {:.3f} |",
+        "npu_memory": " max_memory_allocated(GB): {:.2f} | max_memory_reserved(GB): {:.2f} |",
+        "cpu_memory": " cpu_used_memory(GB): {:.2f} | cpu_available_memory(GB): {:.2f} | cpu_memory_usage(%): {:.1f} |",
+        "sparse_attn": " indexer loss: {:.6E} |",
+    }
+def step(self, epoch, lr_scheduler, batch_size, grad_norm, batch_seqlens,
+        _step_start_time, total_steps, current_step, _last_logged_step,
+        _total_loss_scalar, _total_lm_loss_scalar, _total_mtp_loss_scalar, ...,
+        sparse_attn_reduce_group=None):
+    step_diff = current_step - _last_logged_step
+    if step_diff &lt;= 0:
+        return {}, TrainMonitor._get_empty_logging_state()
+    current_time = time.time()
+    elapsed_time = current_time - _step_start_time if _step_start_time else 0.0
+    elapsed_time_second_per_iteration = elapsed_time / step_diff if elapsed_time > 1e-6 else 0.0
+    training_progress_metrics = TrainMonitor._compute_training_progress_metrics(
+        epoch, lr_scheduler, current_step, batch_size)
+    loss_optimizer_metrics = TrainMonitor._compute_loss_optimizer_metrics(...)
+    memory_metrics = TrainMonitor._compute_memory_metrics()
+    ...
+    self._generate_and_log_metrics(metrics, total_steps, elapsed_time_second_per_iteration)
+    ...</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/train_monitor.py#L62">mindspeed_llm/fsdp2/utils/train_monitor.py:62</a>（_init_log_templates 日志模板定义） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/train_monitor.py#L68">:68</a>（base 模板：iteration/consumed samples/consumed tokens/elapsed） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/train_monitor.py#L70">:70</a>（optimizer 模板：lr/global batch/lm loss/mtp loss） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/train_monitor.py#L71">:71</a>（grad_norm 模板） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/train_monitor.py#L72">:72</a>（npu_memory 模板：max_memory_allocated/max_memory_reserved） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/train_monitor.py#L115">:115</a>（def step 入口） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/train_monitor.py#L158">:158</a>（step_diff &lt;= 0 边界返回） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/train_monitor.py#L246">:246</a>（_compute_training_progress_metrics → iteration/consumed_samples） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/train_monitor.py#L295">:295</a>（_compute_memory_metrics → max_memory_allocated） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/train_monitor.py#L382">:382</a>（_generate_and_log_metrics 拼串输出）</p>
+      <p class="footnote">这就是 quick_start 那行 <code>INFO [...] >> iteration 1/2000 | consumed samples: 8 | consumed tokens: 32768 | ... | lm loss: 1.30 | grad norm: 8.5 | max_memory_allocated(GB): 19.07 |</code> 的来源。train_monitor.py 把日志拆成 7 段模板（base/throughput/optimizer/grad_norm/npu_memory/cpu_memory/sparse_attn），<code>step()</code>（:115）被 trainer.py :333 每隔 logging_steps 调一次，内部按"进度/loss/内存/flops/吞吐/sparse"六类算 metrics（每个一个 <code>_compute_*_metrics</code> 静态方法，单一职责），最后 :382 <code>_generate_and_log_metrics</code> 用模板把 base+throughput+optimizer+grad_norm+npu_memory 拼成一整行交给 <code>logger.info_rank0</code>。<code>consumed_samples = current_step * batch_size</code>（:256），<code>consumed_tokens</code> 累积在 <code>self.consume_tokens</code>（:362，每次 += batch_tokens，跨 rank all_reduce 求和）。<code>max_memory_allocated</code> 取 <code>torch.accelerator.max_memory_allocated()</code>（:301）再 all_reduce(max) 取全 rank 最大值。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/utils/logging.py —— INFO [...] >> ... 前缀格式 + rank0 过滤：让上面的日志只在 LOCAL_RANK=0 打印</p>
+      <pre data-lang="py">class _Logger(logging.Logger):
+    def info_rank0(self, msg, *args, **kwargs):
+        if int(os.getenv("LOCAL_RANK", "0")) == 0:
+            kwargs["stacklevel"] = kwargs.get("stacklevel", 1) + 1
+            self.info(msg, *args, **kwargs)
+    ...
+def setup_global_logging(level="INFO"):
+    ...
+    if log_level == logging.DEBUG:
+        log_format = "%(levelname)s [%(asctime)s %(pathname)s:%(lineno)s] >> %(message)s"
+    else:
+        log_format = "%(levelname)s [%(asctime)s] >> %(message)s"
+    ...
+    logging.basicConfig(level=log_level, format=log_format, datefmt="%Y-%m-%d %H:%M:%S",
+                        stream=sys.stdout, force=True)</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/logging.py#L33">mindspeed_llm/fsdp2/utils/logging.py:33</a>（info_rank0：LOCAL_RANK=0 才打） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/logging.py#L107">:107</a>（setup_global_logging） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/logging.py#L135">:135</a>（DEBUG 格式带 pathname:lineno） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/logging.py#L137">:137</a>（INFO 格式 INFO [asctime] >> message） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/logging.py#L180">:180</a>（get_logger 工厂）</p>
+      <p class="footnote">logging.py 给 quick_start 日志的 <code>INFO [2026-06-22 19:28:40] >> iteration ...</code> 前缀提供了"骨架"：<code>%(levelname)s [%(asctime)s] >> %(message)s</code>（:137，INFO 级别不带 pathname），<code>&gt;&gt;</code> 后面接的就是 train_monitor 拼好的那一整行。<code>info_rank0</code>（:33）用 <code>LOCAL_RANK==0</code> 过滤，保证 8 卡训练时只有 rank0 打日志、其余 7 卡沉默。DEBUG 级别（:135）会额外带 pathname:lineno，方便定位日志是哪一行打的。Trainer 和 TrainMonitor 里所有日志都走 <code>logger.info_rank0</code>，所以日志行天然不重复。</p>
+
+      <p class="figcap">docs/zh/pytorch/training/fsdp2_quick_start.md —— quick_start 实测日志样本：与 mindspeed_llm/fsdp2/utils/train_monitor.py 的模板逐字段对得上</p>
+      <pre>INFO [2026-06-22 19:28:40] >>  iteration        1/    2000 | consumed samples:          8 | consumed tokens:      32768 | elapsed time per iteration (ms): 10520.60 | learning rate: 9.999994E-06 | global batch size:     8 | lm loss: 1.304194E+00 | grad norm: 8.515 | max_memory_allocated(GB): 19.07 | max_memory_reserved(GB): 20.87 |</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/training/fsdp2_quick_start.md#L209">docs/zh/pytorch/training/fsdp2_quick_start.md:209</a>（quick_start 实测 iteration 1/2000 日志样本）</p>
+      <p class="footnote">把这一行和 train_monitor.py 的模板对一下：<code>INFO [asctime] &gt;&gt;</code> 来自 logging.py :137；<code>iteration 1/2000</code> 来自 base 模板 :68（<code>iteration {:8d}/{:8d}</code>）；<code>consumed samples: 8</code> 来自 :68 的 <code>consumed samples: {:10d}</code>，值 = current_step(1) × global_batch_size(8)，对应 :256；<code>consumed tokens: 32768</code> 来自 base :68 <code>consumed tokens: {:10d}</code>，值 = 累积 consume_tokens，对应 :362；<code>lm loss: 1.30</code> 来自 optimizer 模板 :70；<code>grad norm: 8.515</code> 来自 grad_norm 模板 :71；<code>max_memory_allocated(GB): 19.07 / max_memory_reserved(GB): 20.87</code> 来自 npu_memory 模板 :72，值取自 :301-308（accelerator.max_memory_allocated + all_reduce(max)）。<b>一行日志 = logging 前缀 + train_monitor 5 段模板拼装</b>，没有第三处来源。</p>
+
+      <div class="gnpu">
+        <div class="g"><h4>单卡 / DDP（已知）</h4>
+          <div class="row"><span class="k">loss.backward()</span><span>算梯度 + 累到 <code>.grad</code>；DDP 下 hook 做 <b>all_reduce 整张量</b>（梯度是全量）</span></div>
+          <div class="row"><span class="k">optimizer.step()</span><span>读写<b>全量</b>参数 + 全量 m/v 状态（单卡全物化）</span></div>
+          <div class="row"><span class="k">梯度累积</span><span>需手动 <code>(loss/accum).backward()</code> 累加，或用 DDP <code>no_sync()</code></span></div>
+          <div class="row"><span class="k">save ckpt</span><span><code>torch.save(model.state_dict())</code> 全量字典落盘</span></div>
+          <div class="row"><span class="k">梯度同步</span><span>DDP：反向 hook all_reduce <b>整张量</b>；Trainer 不写</span></div>
+        </div>
+        <div class="n"><h4>FSDP2 / NPU（本项目）</h4>
+          <div class="row"><span class="k">loss.backward()</span><span><b>同</b>一行——但 FSDP2 hook 触发 <b>ReduceScatter</b>，<code>.grad</code> 落地为分片（只持本 rank 一片）</span></div>
+          <div class="row"><span class="k">optimizer.step()</span><span>读写<b>分片</b>参数 + 分片 m/v 状态（全量从不物化，省显存）</span></div>
+          <div class="row"><span class="k">梯度累积</span><span><code>fsdp_root.no_sync()</code>（:277）包前 N-1 个 micro-batch，只在最后放出 RS，通信从每微批一次压到每 update 一次</span></div>
+          <div class="row"><span class="k">save ckpt</span><span><code>ckpt_manager.save</code>（:380）走 dcp sharded，每 rank 写自己那片；HF 全量另走 :435 <code>get_model_state_dict(full_state_dict=True, cpu_offload=True)</code></span></div>
+          <div class="row"><span class="k">梯度同步</span><span>FSDP2：反向 hook ReduceScatter <b>分片</b>；<b>无需手动 all_reduce 梯度</b>——Trainer 全程没写梯度同步代码</span></div>
+        </div>
+      </div>
+
+      <div class="sum">
+        <b>小结</b>　心智模型：Trainer = 标准训练循环（epoch→update→micro-batch 三层嵌套，forward/clip/step/scheduler/zero/save 全是熟悉写法）+ FSDP2 隐式分片同步（<code>loss.backward()</code> 一行同时算梯度和跨 rank ReduceScatter，<code>no_sync()</code> 压通信到每 update 一次，优化器读写分片状态）+ TrainMonitor 统一日志（5 段模板拼出 quick_start 那行 iteration/consumed tokens/lm loss/grad norm/max_memory_allocated）。对照 mcore 的 train step：mcore 在 megatron 核心里自己编排 forward/backward/optimizer/clip 一整套（train_step 函数），FSDP2 这里则贴近 HuggingFace Transformers 的写法（文件头 docstring 自述"Strictly follows the gradient accumulation and loop logic found in HuggingFace Transformers"），把分片并行的脏活留给 FSDP2 hook，循环本身保持朴素。
+        <div class="pit">常见误区：① <b>以为要手动 all_reduce 梯度——FSDP2 在 backward 自动 ReduceScatter</b>。trainer.py 全文搜不到一行 all_reduce 梯度的代码，<code>loss.backward()</code>（:482）就是同步触发点，ReduceScatter 由注册在 sharded 参数上的 hook 执行；:322 的 all_reduce 聚合的是 loss/grad_norm 四个标量用于日志，不是梯度。② 以为 <code>optimizer.step()</code> 会读全量参数——FSDP2 下参数和 m/v 状态都是分片的，全量从不物化。③ 以为梯度累积要自己写累加逻辑——<code>no_sync()</code> 上下文 + <code>loss/accum_steps</code>（:465）已处理，前 N-1 个 micro-batch 不触发 RS、最后放出。④ 以为 quick_start 那行日志是 mcore 风格手写的——其实是 train_monitor.py 的 5 段模板（base/optimizer/grad_norm/npu_memory 等）拼出来的，logging.py 只提供 <code>INFO [asctime] &gt;&gt;</code> 前缀。⑤ 以为 save 存的是全量 state_dict——<code>ckpt_manager.save</code>（:380）存的是 dcp sharded ckpt，model/optimizer 对象直接塞进 state 字典（:368）由 dcp 分片写盘；HF 全量权重是 :433 另一条路径。</div>
+      </div>
+
+      <div class="filelist"><b>本篇涉及文件</b><br>
+mindspeed_llm/fsdp2/train/trainer.py<br>
+mindspeed_llm/fsdp2/utils/train_monitor.py<br>
+mindspeed_llm/fsdp2/utils/logging.py<br>
+docs/zh/pytorch/training/fsdp2_quick_start.md</div>
+    </main>
+  </div>
+</div>
+<script>
+// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre[data-lang]').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];if(!rules)return;
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      return '<span class="ln">'+(i+1)+'</span>'+tokLine(l,rules);
+    }).join('\n');
+  });
+})();
+</script>
+</body>
+</html>

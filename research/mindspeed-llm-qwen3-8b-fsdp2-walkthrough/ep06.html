@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>参数体系精读 · 走读 EP06</title>
+<style>
+  :root{
+    --bg:#0f0f12; --bg2:#000; --side:#1a1a1a; --card:#16161c; --line:#2a2a33;
+    --txt:#e8e8e8; --mut:#9a9a9a; --mut2:#6a6a6a;
+    --serif:ui-serif,Georgia,"Times New Roman",Times,serif;
+    --sans:system-ui,-apple-system,"PingFang SC","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace;
+    --red:#C7000B; --red-bg:#2a0f10; --red-bd:#6e1a1c; --red-tx:#e88;
+    --grn:#788C5D; --grn-bg:#14241a; --grn-bd:#2e5a3a; --grn-tx:#7ab98a;
+    --acc:#C7000B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+  .page{max-width:1180px;margin:0 auto;padding:0}
+  /* breadcrumb + nav */
+  .topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);
+    font-size:13px;color:var(--mut)}
+  .topbar .crumb{font-family:var(--serif);font-style:italic}
+  .topbar nav{margin-left:auto;display:flex;gap:8px}
+  .topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:4px 10px;border-radius:6px}
+  .topbar nav a:hover{color:#fff;border-color:var(--acc)}
+  /* layout: tree + main */
+  .body{display:grid;grid-template-columns:160px 1fr;align-items:start}
+  .tree{background:var(--side);border-right:1px solid var(--line);padding:14px 8px;
+    font-family:var(--mono);font-size:11px;color:var(--mut2);min-height:80vh;position:sticky;top:0}
+  .tree .f{display:block;padding:2px 4px;white-space:pre}
+  .tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px}
+  .main{padding:22px 28px 80px}
+  /* headings */
+  h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:6px 0 2px;color:#fff}
+  .goal{font-family:var(--serif);font-style:italic;color:var(--mut);margin:0 0 4px}
+  .gain{font-size:13px;color:var(--mut);margin:0 0 20px}
+  .gain b{color:var(--red-tx)}
+  h2{font-family:var(--serif);font-weight:600;font-size:18px;color:#fff;margin:26px 0 6px;
+    border-bottom:1px solid var(--line);padding-bottom:3px}
+  h2 .sec{color:var(--mut2);font-style:italic;font-size:13px;margin-left:8px}
+  p{margin:8px 0}
+  /* code as numbered figure */
+  .figcap{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);
+    margin:10px 0 2px}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--mut2);
+    padding:10px 12px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55}
+  pre .ln{display:inline-block;width:32px;color:var(--mut2);user-select:none}
+  .filelink{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--red-tx);margin:4px 0 14px}
+  .filelink a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--red-bd)}
+  .footnote{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--mut2);margin:4px 0 14px}
+  /* highlight tints */
+  /* PyCharm Darcula 主题 token 配色 */
+  pre[data-lang]{color:#d4d4d4}
+  .tok-kw{color:#cc7832;font-weight:600}
+  .tok-bi{color:#9876aa;font-style:italic}
+  .tok-fn{color:#ffc66d}
+  .tok-cl{color:#a9b7c6;font-style:italic}
+  .tok-st{color:#6a8759}
+  .tok-cm{color:#808080;font-style:italic}
+  .tok-nm{color:#6897bb}
+  .tok-dc{color:#bbb33b}
+  .tok-key{color:#cc7832}
+  .tok-var{color:#9876aa}
+  .tree .f,.tree a.f{color:#6a6a6a;text-decoration:none;display:block;padding:2px 4px;white-space:pre;border-radius:3px}
+  .tree a.f:hover{background:#2a2a33;color:#d4d4d4}
+  .tree a.f.act,.tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px;font-weight:600}
+  /* gnpu split card */
+  .gnpu{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:14px 0}
+  .gnpu .g{background:var(--grn-bg);border-right:1px solid var(--line);padding:10px 14px}
+  .gnpu .n{background:var(--red-bg);padding:10px 14px}
+  .gnpu h4{margin:0 0 6px;font-family:var(--serif);font-size:13px}
+  .gnpu .g h4{color:var(--grn-tx)}.gnpu .n h4{color:var(--red-tx)}
+  .gnpu .row{display:grid;grid-template-columns:90px 1fr;gap:6px;font-size:12.5px;margin:4px 0}
+  .gnpu .row .k{color:var(--mut2)}
+  /* inline svg */
+  .diag{margin:10px 0 6px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:8px}
+  /* summary */
+  .sum{border-top:1px solid var(--line);margin-top:22px;padding-top:10px;font-size:13.5px}
+  .sum .pit{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12.5px;margin-top:6px}
+  /* file list at end */
+  .filelist{font-family:var(--mono);font-size:11px;color:var(--mut2);margin-top:22px;border-top:1px dashed var(--line);padding-top:10px}
+  .filelist b{color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <span class="crumb">第二篇章 · 工程全局 › EP06</span>
+    <span style="color:var(--mut2)">EP06</span>
+    <nav>
+      <a href="ep05.html">◀ 上一篇</a>
+      <a href="index.html">索引</a>
+      <a href="ep07.html">下一篇 ▶</a>
+    </nav>
+  </div>
+  <div class="body">
+    <aside class="tree">
+      <a class="f" href="appendix/index.html" target="_blank">📁 附录·项目文件走读</a>
+      <span class="f">MindSpeed-LLM/</span>
+      <a class="f" href="appendix/file_089411e68e5d5b.html" target="_blank">├ train_fsdp2.py</a>
+      <span class="f">├ examples/fsdp2/</span>
+      <a class="f" href="appendix/file_d04a217944c522.html" target="_blank">│  ├ env_config.sh</a>
+      <span class="f">│  └ qwen3/</span>
+      <span class="f">├ mindspeed_llm/fsdp2/</span>
+      <!-- 本篇相关文件高亮 .act，按篇替换 -->
+      <a class="f act" href="appendix/file_8f7827e587d5df.html" target="_blank">mindspeed_llm/fsdp2/utils/arguments.py</a>
+      <span class="f">└ ...</span>
+    </aside>
+    <main class="main">
+      <h1>参数体系精读</h1>
+      <p class="goal">目标：掌握五段 dataclass 即全部可调旋钮。前置：EP05 入口与启动链路。</p>
+      <p class="gain">你将获得：<b>①</b> 一张能从 <code>--parallel.fsdp_modules</code> 这类 <code>--段.字段</code> CLI 一路对应到 <code>field(default=…)</code> 声明、再到被各工厂消费的完整参数地图 <b>②</b> 弄懂为什么 fsdp2 只用五段（model/data/parallel/training/optimization）而不是 mcore 那数百项——以及 <code>model.layers.{*}</code> 这种模块路径通配符到底匹配什么</p>
+
+      <h2>你已经熟悉的情况 <span class="sec">桥接开场</span></h2>
+      <p>你写训练脚本时配参数大概都走过这条路：<code>parser = argparse.ArgumentParser()</code>，然后一行行 <code>parser.add_argument("--lr", type=float, default=1e-5)</code>，最后 <code>args = parser.parse_args()</code> 拿到一个 <code>Namespace</code>，到处 <code>args.lr</code> 取值。<code>Namespace</code> 是个扁平对象，<code>lr / batch_size / output_dir</code> 全堆在一个平面上，<code>--lr 1e-5</code> 就 <code>args.lr</code>，简单直白。这种写法的问题是：参数一多就糊成一团，没有分类，<code>add_argument</code> 写到第三十个就分不清哪些是模型相关、哪些是训练相关。</p>
+      <p>MindSpeed-LLM 的 fsdp2 后端把这套换成了 <b>HfArgumentParser 风格</b>——它不再 <code>add_argument</code> 一个个加，而是先写五个 <code>@dataclass</code>：<code>ModelArguments / DataArguments / ParallelArguments / TrainingArguments / OptimizationArguments</code>，每个字段用 <code>field(default=…, metadata={"help": "…"})</code> 声明类型与默认值；然后 <code>fsdp2_parse_args</code> 用反射（<code>dataclasses.fields</code> + <code>get_type_hints</code>）把这几个 dataclass 动态展开成一个 <code>argparse.ArgumentParser</code>，每个字段注册成 <code>--段.字段</code> 形式的参数（如 <code>--parallel.fsdp_size</code>）。解析后再 <code>_build_dataclass_instances</code> 把 Namespace 反射回五个 dataclass 实例。这一篇就把这五个 dataclass 按段逐字段拆给你看——<b>参数再多，也就这五段</b>。</p>
+
+      <h2>本项目怎么做 <span class="sec">原理</span></h2>
+      <p>fsdp2 的参数哲学是"<b>dataclass 即 schema、五段即全部旋钮、CLI 键名带段前缀</b>"。五个 dataclass 各管一摊：<code>ModelArguments</code> 管"加载什么模型"（路径、是否从零训、tokenizer、量化配方）；<code>DataArguments</code> 管"喂什么数据"（模板、cutoff、数据集、packing）；<code>ParallelArguments</code> 管"怎么并行"（FSDP/TP/EP/CP 大小 + <b>分片模块清单</b>）；<code>TrainingArguments</code> 管"怎么训"（lr/scheduler/batch/save/profile）；<code>OptimizationArguments</code> 管"用哪些 NPU 融合算子"（fused rmsnorm / fused rotary / flash attn）。五个 dataclass 在顶层被包进一个根 dataclass，<code>fsdp2_parse_args</code> 反射展开后，<code>MindSpeedAutoTrainer</code> 把它们具名注入下游各工厂——model 工厂读 <code>model_args</code>、parallel 工厂读 <code>parallel_args</code>、optimizer/scheduler 工厂读 <code>training_args</code>。下面的关系图画清了这条"五段 → 聚合 → 工厂消费"的数据流。</p>
+      <div class="diag">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 480" width="100%" style="max-width:940px" font-family="ui-monospace,Menlo,monospace" font-size="11">
+  <defs>
+    <marker id="arr6" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#6a6a6a"/>
+    </marker>
+  </defs>
+  <!-- 5 segment dataclasses (left column) -->
+  <g font-size="11" font-weight="600" text-anchor="middle">
+    <text x="120" y="34" fill="#7ab98a">五段 dataclass</text>
+  </g>
+  <rect x="40" y="46" width="160" height="30" rx="5" fill="#14241a" stroke="#2e5a3a"/>
+  <text x="120" y="65" fill="#7ab98a" text-anchor="middle" font-size="10.5">ModelArguments</text>
+  <rect x="40" y="82" width="160" height="30" rx="5" fill="#14241a" stroke="#2e5a3a"/>
+  <text x="120" y="101" fill="#7ab98a" text-anchor="middle" font-size="10.5">DataArguments</text>
+  <rect x="40" y="118" width="160" height="30" rx="5" fill="#14241a" stroke="#2e5a3a"/>
+  <text x="120" y="137" fill="#7ab98a" text-anchor="middle" font-size="10.5">ParallelArguments</text>
+  <rect x="40" y="154" width="160" height="30" rx="5" fill="#14241a" stroke="#2e5a3a"/>
+  <text x="120" y="173" fill="#7ab98a" text-anchor="middle" font-size="10.5">TrainingArguments</text>
+  <rect x="40" y="190" width="160" height="30" rx="5" fill="#14241a" stroke="#2e5a3a"/>
+  <text x="120" y="209" fill="#7ab98a" text-anchor="middle" font-size="10.5">OptimizationArguments</text>
+
+  <!-- aggregation: fsdp2_parse_args -->
+  <g font-size="11" font-weight="600" text-anchor="middle">
+    <text x="380" y="34" fill="#e88">fsdp2_parse_args</text>
+  </g>
+  <rect x="300" y="92" width="160" height="90" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+  <text x="380" y="112" fill="#e88" text-anchor="middle" font-size="10">反射展开 fields()</text>
+  <text x="380" y="128" fill="#9a9a9a" text-anchor="middle" font-size="9.5">--段.字段 注册</text>
+  <text x="380" y="144" fill="#9a9a9a" text-anchor="middle" font-size="9.5">YAML+CLI 合参</text>
+  <text x="380" y="160" fill="#9a9a9a" text-anchor="middle" font-size="9.5">→ 五个实例</text>
+  <!-- arrows: 5 segments -> parse -->
+  <g stroke="#6a6a6a" fill="none" marker-end="url(#arr6)">
+    <line x1="200" y1="61" x2="296" y2="108"/>
+    <line x1="200" y1="97" x2="296" y2="120"/>
+    <line x1="200" y1="133" x2="296" y2="132"/>
+    <line x1="200" y1="169" x2="296" y2="144"/>
+    <line x1="200" y1="205" x2="296" y2="152"/>
+  </g>
+
+  <!-- root Arguments aggregate -->
+  <rect x="300" y="208" width="160" height="44" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+  <text x="380" y="226" fill="#e88" text-anchor="middle" font-size="10.5">root Arguments</text>
+  <text x="380" y="242" fill="#9a9a9a" text-anchor="middle" font-size="9">model/data/parallel/</text>
+  <text x="380" y="254" fill="#9a9a9a" text-anchor="middle" font-size="9">training/optimization</text>
+  <line x1="380" y1="182" x2="380" y2="206" stroke="#6a6a6a" marker-end="url(#arr6)"/>
+
+  <!-- factories (right column) consume -->
+  <g font-size="11" font-weight="600" text-anchor="middle">
+    <text x="760" y="34" fill="#7ab98a">各工厂 / Trainer 消费</text>
+  </g>
+  <rect x="640" y="46" width="240" height="28" rx="5" fill="#14241a" stroke="#2e5a3a"/>
+  <text x="760" y="64" fill="#7ab98a" text-anchor="middle" font-size="10">model_factory → model_args</text>
+  <rect x="640" y="82" width="240" height="28" rx="5" fill="#14241a" stroke="#2e5a3a"/>
+  <text x="760" y="100" fill="#7ab98a" text-anchor="middle" font-size="10">data_factory → data_args</text>
+  <rect x="640" y="118" width="240" height="28" rx="5" fill="#14241a" stroke="#2e5a3a"/>
+  <text x="760" y="136" fill="#7ab98a" text-anchor="middle" font-size="10">parallel/state → parallel_args</text>
+  <rect x="640" y="154" width="240" height="28" rx="5" fill="#14241a" stroke="#2e5a3a"/>
+  <text x="760" y="172" fill="#7ab98a" text-anchor="middle" font-size="10">optim_factory → training_args</text>
+  <rect x="640" y="190" width="240" height="28" rx="5" fill="#14241a" stroke="#2e5a3a"/>
+  <text x="760" y="208" fill="#7ab98a" text-anchor="middle" font-size="10">model kernel → optimization_args</text>
+  <rect x="640" y="226" width="240" height="28" rx="5" fill="#14241a" stroke="#2e5a3a"/>
+  <text x="760" y="244" fill="#7ab98a" text-anchor="middle" font-size="10">Trainer(args=… 具名注入)</text>
+
+  <!-- arrows from root Arguments to factories -->
+  <g stroke="#6a6a6a" fill="none" marker-end="url(#arr6)">
+    <line x1="460" y1="230" x2="636" y2="60"/>
+    <line x1="460" y1="230" x2="636" y2="96"/>
+    <line x1="460" y1="230" x2="636" y2="132"/>
+    <line x1="460" y1="230" x2="636" y2="168"/>
+    <line x1="460" y1="230" x2="636" y2="204"/>
+    <line x1="460" y1="230" x2="636" y2="240"/>
+  </g>
+
+  <!-- CLI example strip bottom -->
+  <rect x="40" y="300" width="840" height="44" rx="6" fill="#000" stroke="#2a2a33"/>
+  <text x="460" y="318" fill="#9a9a9a" text-anchor="middle" font-size="10">CLI 键名带段前缀（--段.字段）：</text>
+  <text x="460" y="336" fill="#e88" text-anchor="middle" font-size="10.5">--parallel.fsdp_size 8  --training.lr 1e-5  --optimization.use_flash_attn true</text>
+  <line x1="380" y1="252" x2="380" y2="296" stroke="#6a6a6a" marker-end="url(#arr6)" stroke-dasharray="3 3"/>
+
+  <text x="460" y="392" fill="#6a6a6a" text-anchor="middle" font-style="italic" font-size="9.5">五段 dataclass → fsdp2_parse_args 反射展开 → root Arguments 聚合 → 各工厂具名消费</text>
+
+  <!-- wildcard callout box -->
+  <rect x="40" y="410" width="840" height="50" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+  <text x="460" y="428" fill="#e88" text-anchor="middle" font-size="10" font-style="italic">模块路径通配符 model.layers.{*}</text>
+  <text x="460" y="448" fill="#9a9a9a" text-anchor="middle" font-size="9.5">fsdp_modules / ep_modules / recompute_modules 里 {匹配第 0/1/2… 个数字下标层}，EP08 分片落地详讲</text>
+</svg>
+      </div>
+      <p class="footnote">这张图的关键是中间那个 <code>root Arguments</code> 聚合点：五个 dataclass 不是一个扁平 Namespace，而是<b>各成一段</b>被装进根 dataclass；下游每个工厂只取自己那一段，互不串味。底部的 <code>--parallel.fsdp_size 8</code> 提示了 CLI 键名永远带段前缀——这也是为什么你 grep 不到裸 <code>--lr</code>，因为它叫 <code>--training.lr</code>。</p>
+
+      <h2>源码下钻 <span class="sec">file:line</span></h2>
+      <p>开始按段下钻。arguments.py 全文 46KB、1069 行，五个 dataclass 之间夹着解析/合参/反射辅助函数。本篇只贴各 dataclass 的<b>字段声明段</b>，逐段摘你在启动 Qwen3-8B 时真正会碰到的那些旋钮，并给出 <code>file:line</code>。</p>
+
+      <div class="figcap">ModelArguments 声明段（模型加载/从零训/远程代码信任/量化配方）</div>
+      <pre data-lang="py">@dataclass
+class ModelArguments:
+    """
+    Model-related parameters: path, initialization method, etc.
+    """
+
+    model_name_or_path: str = field(
+        metadata={"help": "Path to pretrained model or model identifier from huggingface.co/models"}
+    )
+    model_id: Optional[Literal["gpt_oss", "qwen3", "qwen3_moe", ...]] = field(
+        default=None,
+        metadata={"help": "Model type. New model needs to be registered ..."},
+    )
+    init_model_with_meta_device: bool = field(
+        default=False, metadata={"help": "Whether or not to initialize the model using the meta device."}
+    )
+    trust_remote_code: bool = field(
+        default=False,
+        metadata={"help": "Whether or not to allow for custom models defined on the Hub ..."},
+    )
+    train_from_scratch: bool = field(
+        default=False,
+        metadata={"help": "If True, initialize the model from config (random weights) instead of loading pretrained weights."},
+    )
+    tokenizer_name_or_path: Optional[str] = field(default=None, ...)
+    cache_dir: Optional[str] = field(default=None, ...)
+    use_fast_tokenizer: bool = field(default=True, ...)
+    resize_vocab: bool = field(default=False, ...)
+    quant_recipe_name: Literal["mxfp8"] = field(default=None, metadata={"help": "Quantization recipe name"})
+    quant_apply_modules: List[str] = field(
+        default_factory=lambda: ['model.layers.{*}'],
+        metadata={"help": "List of model module patterns to apply MXFP8 quantization."},
+    )</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py">../mindspeed_llm/fsdp2/utils/arguments.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L22">:22</a>（@dataclass class ModelArguments）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L28">:28</a>（model_name_or_path，无 default 即必填）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L31">:31</a>（model_id Literal 枚举，含 qwen3/qwen3_moe/qwen3_next…）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L53">:53</a>（trust_remote_code）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L57">:57</a>（train_from_scratch）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L64">:64</a>（tokenizer_name_or_path）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L129">:129</a>–<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L151">:151</a>（quant_recipe_name / quant_apply_modules / quant_ignored_modules / quant_converters）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L134">:134</a>（quant_apply_modules 默认 <code>['model.layers.{*}']</code>）</div>
+      <p>逐字段拆：</p>
+      <ul>
+        <li><b>model_name_or_path（行 28，必填）</b>：注意它<b>没有 <code>default=</code></b>，<code>field(metadata=…)</code> 里只有 help——意味着这是个<b>必填字段</b>，不给就报错。<code>__post_init__</code>（行 164）里那句 <code>if self.model_name_or_path is None: raise ValueError</code> 是双保险。这也是为什么 EP05 的 <code>A2.sh</code> 里 <code>--model.model_name_or_path /home/data/Qwen3-8B/</code> 必须显式给。</li>
+        <li><b>model_id（行 31，枚举）</b>：类型是 <code>Optional[Literal["gpt_oss", "qwen3", "qwen3_moe", "qwen3_next", "step35", "mamba3", …]]</code>——<code>Literal</code> 在反射阶段会被 <code>_handle_literal_or_enum</code>（行 906）转成 <code>argparse choices</code>，所以 CLI 上写 <code>--model.model_id qwen3</code> 写错了直接 argparse 报错。help 里点明"新模型需在 <code>ModelRegistry</code> 注册"——这是模型分发的钥匙。</li>
+        <li><b>trust_remote_code（行 53，默认 False）</b>：和 HuggingFace 同名开关语义一致——允许加载 Hub 上自定义 modeling 代码。Qwen3 官方权重若带自定义层会用到它。</li>
+        <li><b>train_from_scratch（行 57，默认 False）</b>：这是 PT（预训练）与 SFT（微调）在<b>权重来源</b>上的分叉——<code>True</code> 时从 config 随机初始化、不加载预训练权重。和 <code>TrainingArguments.stage</code>（行 536，<code>"pt"/"sft"</code>）配合：从零训配 <code>stage="pt"</code>，微调配 <code>stage="sft"</code>。</li>
+        <li><b>quant_apply_modules（行 133，默认 <code>['model.layers.{*}']</code>）</b>：注意这个默认值——它就是后面 <code>fsdp_modules</code>、<code>recompute_modules</code> 反复出现的 <code>model.layers.{*}</code> 模块路径通配符的<b>第一次出场</b>，含义在 ParallelArguments 段统一讲。它指定 MXFP8 量化作用到哪些子模块。</li>
+      </ul>
+      <p class="footnote">ModelArguments 还有一批 tokenizer/特殊 token/低精度 all-gather 字段（resize_vocab、add_special_tokens、init_special_tokens、enable_fsdp_low_precision_all_gather…），量小但语义专一，本篇不逐字贴，以源码 arguments.py:75–161 为准。</p>
+
+      <div class="figcap">DataArguments 声明段（模板/cutoff/数据集/data_manager_type/packing）</div>
+      <pre data-lang="py">@dataclass
+class DataArguments:
+    """
+    Arguments pertaining to what data we are going to input our model for training and evaluation.
+    """
+
+    template: Optional[str] = field(
+        default=None,
+        metadata={"help": "Which template to use for constructing prompts in training and inference."},
+    )
+    dataset: Optional[Union[Dict[str, Any], str]] = field(
+        default=None, metadata={"help": "Train dataset: config dict or comma-separated dataset names."}
+    )
+    eval_dataset: Optional[Union[Dict[str, Any], str]] = field(default=None, ...)
+    dataset_dir: str = field(default="./configs/fsdp2/data", ...)
+    cutoff_len: int = field(
+        default=2048,
+        metadata={"help": "The cutoff length of the tokenized inputs in the dataset."},
+    )
+    train_on_prompt: bool = field(default=False, ...)
+    streaming: bool = field(default=False, ...)
+    packing: bool = field(default=False, metadata={"help": "Enable sequences packing in training."})
+    neat_packing: bool = field(default=False, ...)
+    data_manager_type: Literal["lf", "mg"] = field(
+        default="lf",
+        metadata={"help": "Data Manager type for building the different data manager"},
+    )
+    # megatron dataset args
+    split: str = field(default="100,0,0", ...)
+    dataloader_type: Literal["single"] = field(default="single", ...)</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py">../mindspeed_llm/fsdp2/utils/arguments.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L173">:173</a>（@dataclass class DataArguments）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L179">:179</a>（template）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L183">:183</a>（dataset，<code>Union[Dict, str]</code> 复合类型）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L189">:189</a>（dataset_dir）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L193">:193</a>（cutoff_len=2048）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L253">:253</a>（packing）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L257">:257</a>（neat_packing）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L288">:288</a>（data_manager_type，<code>Literal["lf","mg"]</code>）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L293">:293</a>（split，megatron 段）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L301">:301</a>（dataloader_type）</div>
+      <p>逐字段拆：</p>
+      <ul>
+        <li><b>template（行 179，默认 None）</b>：对话/prompt 模板名。<code>None</code> 表示从 tokenizer 里解析。文档（arguments.md:179/182）点明"新增 template 需在 <code>template.py</code> 注册，目前支持 gpt 和 qwen3"——Qwen3-8B 训练这条要么留空让它自动解析、要么显式 <code>--data.template qwen3</code>。</li>
+        <li><b>dataset（行 183，<code>Union[Dict[str, Any], str]</code>）</b>：这是个<b>复合类型</b>——既能是 dict（EP05 的 A2.sh 里 <code>--data.dataset '{"file_name": "...parquet"}'</code>），也能是逗号分隔的字符串。反射时 <code>Union[Dict, str]</code> 走的是 <code>_handle_dict</code> 分支（行 858/875），把它标成 <code>dict_fields</code>，等解析后再 <code>_postprocess_json_fields</code>（行 1022）做 JSON 反序列化。这就是为什么 CLI 上 dataset 值要写成 JSON 串。</li>
+        <li><b>cutoff_len（行 193，默认 2048）</b>：tokenize 后的截断长度。注意 <code>__post_init__</code>（行 363）里 <code>if self.packing: self.cutoff_len -= 1</code>——开 packing 时会偷偷减 1 避免 pad_to_multiple_of，<b>（核实：此 -1 的注释写着 "needs improve"，以源码运行时行为为准）</b>。</li>
+        <li><b>data_manager_type（行 288，<code>Literal["lf", "mg"]</code>）</b>：数据管理器类型——<code>"lf"</code>（Llama-Factory 风格，默认）与 <code>"mg"</code>（megatron 风格）二选一。它决定数据流水线走哪条实现，是 fsdp2 同时兼容两种数据生态的开关。下面紧跟的 <code>split / dataloader_type / reset_attention_mask / append_eod</code>（行 293–308）都标了 <code># megatron dataset args</code> 注释——这些字段只有 <code>data_manager_type="mg"</code> 时才真正生效。</li>
+      </ul>
+
+      <div class="figcap">ParallelArguments 声明段（FSDP/TP/EP/CP + 模块路径清单，本篇核心）</div>
+      <pre data-lang="py">@dataclass
+class ParallelArguments:
+    """
+    MindSpeed FSDP backend parallel strategy parameters (FSDP2, TP, EP)
+    """
+
+    tp_size: int = field(default=1, ...)
+    fsdp_size: int = field(default=1, metadata={"help": "Fully Sharded Data Parallel size. (Sharding parameters)"})
+    recompute: bool = field(default=False, metadata={"help": "Whether to enable Gradient Checkpointing ..."})
+    # Expert Parallel (MoE)
+    ep_size: int = field(default=1, metadata={"help": "Expert Parallel size for MoE models."})
+    ep_fsdp_size: int = field(default=1, metadata={"help": "FSDP size inside Expert Parallel groups."})
+    cp_size: int = field(default=1, metadata={"help": "context parallel size."})
+    cp_type: Literal["ulysses", "ring"] = field(default="ulysses", ...)
+    fsdp_modules: List[str] = field(
+        default_factory=lambda: ['model.layers.{*}', 'model.embed_tokens', 'lm_head'],
+        metadata={"help": "Model structure of layers with Fully Sharded Data Parallel."},
+    )
+    ignored_modules: List[str] = field(default=None, ...)
+    reshard_after_forward: bool = field(default=True, ...)
+    tp_colwise: List[str] = field(default_factory=lambda: ['*.q_proj', '*.k_proj', '*.v_proj', '*.gate_proj', '*.up_proj'], ...)
+    tp_rowwise: List[str] = field(default_factory=lambda: ['*.o_proj', '*.down_proj'], ...)
+    ep_modules: List[str] = field(default_factory=lambda: ['model.layers.{*}.mlp.experts'], ...)
+    ep_fsdp_modules: List[str] = field(default_factory=lambda: ['model.layers.{*}.mlp.experts'], ...)
+    ep_dispatcher: Literal["eager", "fused", "mc2"] = field(default="eager", ...)
+    recompute_modules: List[str] = field(
+        default_factory=lambda: ['model.layers.{*}'],
+        metadata={"help": "Model structure of layers with Gradient Checkpointing ..."},
+    )
+    param_dtype: Literal["bf16", "fp16", "fp32"] = field(default="bf16", ...)
+    reduce_dtype: Literal["bf16", "fp16", "fp32"] = field(default="fp32", ...)</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py">../mindspeed_llm/fsdp2/utils/arguments.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L370">:370</a>（@dataclass class ParallelArguments）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L376">:376</a>（tp_size）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L377">:377</a>（fsdp_size）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L378">:378</a>（recompute）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L382">:382</a>（ep_size）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L383">:383</a>（ep_fsdp_size）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L384">:384</a>（cp_size）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L389">:389</a>（fsdp_modules，默认三元组）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L393">:393</a>（ignored_modules）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L397">:397</a>（reshard_after_forward）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L407">:407</a>–<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L414">:414</a>（tp_colwise / tp_rowwise）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L415">:415</a>（ep_modules）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L419">:419</a>（ep_fsdp_modules）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L423">:423</a>（ep_dispatcher）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L432">:432</a>（recompute_modules）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L436">:436</a>（param_dtype=bf16）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L439">:439</a>（reduce_dtype=fp32）；文档交叉见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md">../docs/zh/pytorch/features/fsdp2/arguments.md</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md#L379">:379</a>（并行参数段）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md#L436">:436</a>（fsdp_modules 说明）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md#L478">:478</a>（ep_modules）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md#L496">:496</a>（recompute_modules）</div>
+      <p>逐字段拆：</p>
+      <ul>
+        <li><b>fsdp_size（行 377）</b>：FSDP 分片组大小。EP05 的 A2.sh 里 <code>--parallel.fsdp_size 8</code> 就是设它。注意它<b>默认 1</b>（不分片）——这意味着不显式设的话单卡各自存全量参数，<code>fsdp_modules</code> 名存实亡。文档（arguments.md:400）写"将模型参数分片存储到多张卡"。</li>
+        <li><b>ep_size / ep_fsdp_size（行 382/383）</b>：MoE 专用。<code>ep_size</code> 拆专家到多卡，<code>ep_fsdp_size</code> 在专家组内再对单个专家参数做 FSDP。Qwen3-8B 是 dense 不是 MoE，所以 EP05 里这俩都设 1。文档 arguments.md:412/418。</li>
+        <li><b>fsdp_modules（行 389，默认三元组）</b>：这是本篇乃至 EP08 的<b>核心</b>。默认 <code>['model.layers.{*}', 'model.embed_tokens', 'lm_head']</code>——三段分别表示"所有 transformer 层"、"token embedding"、"输出头"都启用 FSDP。<code>__post_init__</code>（行 458–466）强校验它非 None 且非空，否则 raise。文档 arguments.md:436 写"必填项，不可为空列表"。</li>
+        <li><b>ep_modules / ep_fsdp_modules / ep_dispatcher（行 415/419/423）</b>：MoE 专家并行三连。<code>ep_modules</code> 默认 <code>['model.layers.{*}.mlp.experts']</code>——注意它把 <code>model.layers.{*}</code> 进一步下钻到 <code>.mlp.experts</code> 子模块。<code>ep_dispatcher</code> 是 <code>Literal["eager","fused","mc2"]</code>，help（行 426–430）逐个解释：eager 即时分发、fused 融合路由+计算、mc2 压缩混合分发省跨卡通信。</li>
+        <li><b>recompute / recompute_modules（行 378/432）</b>：<code>recompute</code> 是总开关（bool），<code>recompute_modules</code> 默认 <code>['model.layers.{*}']</code> 是作用清单——只对 transformer 层做梯度检查点。开它能省显存换算力，EP11 重计算详讲。文档 arguments.md:496。</li>
+        <li><b>param_dtype / reduce_dtype（行 436/439）</b>：参数存储用 bf16、梯度规约用 fp32——后者是为了数值稳定，<b>这是 fsdp2 在精度上的保守选择</b>，与纯 bf16 训练的 fast 路线不同。</li>
+      </ul>
+
+      <div class="figcap">模块路径通配符 model.layers.{*} 到底匹配什么（为 EP08 铺路）</div>
+      <pre data-lang="py">fsdp_modules: List[str] = field(
+    default_factory=lambda: ['model.layers.{*}', 'model.embed_tokens', 'lm_head'],
+    ...
+)
+ep_modules: List[str] = field(
+    default_factory=lambda: ['model.layers.{*}.mlp.experts'],
+    ...
+)
+recompute_modules: List[str] = field(
+    default_factory=lambda: ['model.layers.{*}'],
+    ...
+)
+quant_apply_modules: List[str] = field(
+    default_factory=lambda: ['model.layers.{*}'],
+    ...
+)</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py">../mindspeed_llm/fsdp2/utils/arguments.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L389">:389</a>（fsdp_modules）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L415">:415</a>（ep_modules）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L432">:432</a>（recompute_modules）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L133">:133</a>（quant_apply_modules）；文档 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md">../docs/zh/pytorch/features/fsdp2/arguments.md</a>:<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md#L438">:438</a>（默认值写法 <code>model.layers.{}</code>）</div>
+      <p>这四处都用了 <code>model.layers.{*}</code> 这个写法，含义需要单独说清：</p>
+      <ul>
+        <li><b>它不是 Python 通配符，是模块路径模式串</b>。<code>model.layers.{*}</code> 描述的是 HuggingFace 模型里 <code>model.model.layers.0 / model.model.layers.1 / ... / model.model.layers.N-1</code> 这一串<b>带数字下标</b>的子模块。<code>{*}</code> 是个占位符，表示"匹配所有数字下标层"——运行时被替换展开成一层一层的 module 对象。文档（arguments.md:438）把它写成 <code>model.layers.{}</code>（占位写法略异，语义一致）。</li>
+        <li><b>与之对比的是 <code>*.</code> 前缀通配</b>。<code>tp_colwise</code>（行 407）用 <code>['*.q_proj', '*.k_proj', ...]</code>——这里的 <code>*</code> 是<b>前缀通配</b>，匹配"任意父模块下的 q_proj"。两套写法语义不同：<code>model.layers.{*}</code> 是<b>枚举数字层</b>（要展开成 0/1/2…），<code>*.q_proj</code> 是<b>按名字后缀匹配</b>（不关心是第几层）。EP08 分片落地会讲运行时如何把它们解析成真实 <code>nn.Module</code>。</li>
+        <li><b>下钻语法</b>：<code>model.layers.{*}.mlp.experts</code>（ep_modules，行 415）表示先展开数字层、再沿 <code>.mlp.experts</code> 路径下钻——即"每一层 transformer 的 mlp 下的 experts 子模块"。这为 MoE 专家分片提供了精确到子模块的钩子。</li>
+        <li><b>为什么 fsdp_modules 默认要列三个</b>：<code>model.layers.{*}</code>（所有层）、<code>model.embed_tokens</code>（embedding，参数量大）、<code>lm_head</code>（输出头，参数量也大）——这三类是<b>参数占比最大的模块</b>，FSDP 分片优先切它们收益最大。其余小模块留给 <code>ignored_modules</code>（行 393）排除。这套清单就是 EP08 真正"切谁不切谁"的依据。</li>
+      </ul>
+
+      <div class="figcap">TrainingArguments 声明段（optimizer/lr/scheduler/batch/save/stage/profile）</div>
+      <pre data-lang="py">@dataclass
+class TrainingArguments:
+    """
+    Training hyperparameters: corresponding to requirements of Trainer and Optimizer/Scheduler Factory
+    """
+
+    output_dir: str = field(metadata={"help": "The output directory ..."})
+    # --- Optimization ---
+    optimizer: Literal["adamw", "muon"] = field(default="adamw", ...)
+    lr: float = field(default=1e-5, metadata={"help": "The initial learning rate."})
+    weight_decay: float = field(default=0.01, ...)
+    adam_beta1: float = field(default=0.9, ...)
+    adam_beta2: float = field(default=0.95, ...)
+    adam_epsilon: float = field(default=1e-8, ...)
+    max_grad_norm: float = field(default=1.0, ...)
+    # --- Scheduling ---
+    lr_scheduler_type: Literal["cosine", "linear", "constant"] = field(default="cosine", ...)
+    warmup_ratio: float = field(default=0.03, ...)
+    min_lr: float = field(default=1e-6, metadata={"help": "Minimum learning rate for cosine scheduler."})
+    # --- Training Loop Control ---
+    num_train_epochs: float = field(default=3.0, ...)
+    max_steps: int = field(default=-1, metadata={"help": "If > 0: ... Overrides num_train_epochs."})
+    gradient_accumulation_steps: int = field(default=1, ...)
+    seed: int = field(default=42, ...)
+    # --- IO & Logging ---
+    save_steps: int = field(default=500, ...)
+    save_total_limit: Optional[int] = field(default=3, ...)
+    resume_from_checkpoint: Optional[str] = field(default=None, ...)
+    logging_steps: int = field(default=1, ...)
+    stage: Literal["pt", "sft"] = field(default="sft", ...)
+    per_device_train_batch_size: int = field(default=8, ...)
+    save_only_model: bool = field(default=False, ...)
+    save_async: bool = field(default=False, ...)
+    # --- Profiling (NPU) ---
+    profile: bool = field(default=False, ...)</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py">../mindspeed_llm/fsdp2/utils/arguments.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L469">:469</a>（@dataclass class TrainingArguments）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L475">:475</a>（output_dir 必填）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L479">:479</a>（optimizer Literal adamw/muon）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L483">:483</a>（lr=1e-5）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L491">:491</a>（lr_scheduler_type cosine）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L494">:494</a>（warmup_ratio=0.03）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L497">:497</a>（min_lr=1e-6）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L501">:501</a>（max_steps=-1）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L505">:505</a>（gradient_accumulation_steps）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L515">:515</a>（save_steps=500）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L536">:536</a>（stage Literal pt/sft）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L578">:578</a>（per_device_train_batch_size=8）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L600">:600</a>（profile 段起点）；文档 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md">../docs/zh/pytorch/features/fsdp2/arguments.md</a>:<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md#L528">:528</a>（训练参数段）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md#L591">:591</a>（lr_scheduler_type）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md#L603">:603</a>（min_lr）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md#L639">:639</a>（save_steps）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md#L663">:663</a>（stage）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md#L705">:705</a>（per_device_train_batch_size）</div>
+      <p>逐字段拆：</p>
+      <ul>
+        <li><b>optimizer（行 479，<code>Literal["adamw","muon"]</code>）</b>：注意只两个选项——adamw（默认）和 muon。这是个<b>很窄的枚举</b>，不像 HF Trainer 那样随便传字符串。<code>muon</code> 是较新的优化器，会被 optimizer factory 分发到不同实现。EP16 优化器调度详讲。</li>
+        <li><b>lr（行 483，默认 1e-5）</b>：注意是 <code>initial</code> learning rate——scheduler 会从它降到 <code>min_lr</code>。<code>min_lr</code>（行 497，默认 1e-6）是 cosine 调度的下限。<code>warmup_ratio</code>（行 494，默认 0.03）是总步数的 3% 做线性 warmup。这三个一起定义了 lr 曲线。</li>
+        <li><b>lr_scheduler_type（行 491，cosine/linear/constant）</b>：三种调度。cosine 是默认，到 <code>min_lr</code> 平滑收尾；linear 是线性衰减；constant 不变。文档 arguments.md:591。</li>
+        <li><b>max_steps（行 501，默认 -1）</b>：help 写"If > 0: ... Overrides num_train_epochs"——设了正数就<b>覆盖</b> epoch 数。这是"按步数训"与"按 epoch 训"的切换。<code>num_train_epochs</code>（行 500，默认 3.0）只在 max_steps<=0 时生效。</li>
+        <li><b>gradient_accumulation_steps（行 505，默认 1）</b>：梯度累积步数。EP05 的 A2.sh 里 <code>--training.gradient_accumulation_steps 1</code>。它和 <code>per_device_train_batch_size</code>（行 578，默认 8）一起决定 effective batch size = 卡数 × per_device_bs × grad_accum。文档 arguments.md:1072 给了这个公式。</li>
+        <li><b>save_steps（行 515，默认 500）</b>：每 500 步存一次 checkpoint。<code>save_total_limit</code>（行 516，默认 3）限制总数、删旧的。<code>save_async</code>（行 587）异步存盘省阻塞。EP17 checkpoint 详讲。</li>
+        <li><b>stage（行 536，<code>Literal["pt","sft"]</code>）</b>：训练阶段——pt（预训练）vs sft（监督微调），默认 sft。它和 ModelArguments 的 <code>train_from_scratch</code>（行 57）配合决定整条数据/loss 路径。文档 arguments.md:663。</li>
+        <li><b>profile 段（行 600–622）</b>：一大坨 NPU profiling 字段——<code>profile / profile_step_start / profile_step_end / profile_ranks / profile_level / profile_with_cpu / profile_with_stack / profile_with_memory / profile_save_path</code>…。这是<b>昇腾专用</b>的 <code>torch_npu.profiler</code> 接入，GPU 训练时这些字段全闲置。<code>__post_init__</code>（行 627–631）校验 step 区间合法性。</li>
+      </ul>
+      <p class="footnote">TrainingArguments 还有 dataloader_num_workers/prefetch_factor/pin_memory/persistent_workers/drop_last（行 547–577）等 DataLoader 调参，以及 mtp_loss_scaling_factor（行 533，多 token 预测 loss 系数）、calculate_per_token_loss（行 541，megatron 风格 per-token loss）。量小语义专一，以源码为准。</p>
+
+      <div class="figcap">OptimizationArguments 声明段（NPU 融合算子总开关）</div>
+      <pre data-lang="py">@dataclass
+class OptimizationArguments:
+    """
+    Inference hyperparameters: corresponding to requirements of the inference engine and generation config
+    """
+
+    use_fused_rmsnorm: bool = field(default=False, metadata={"help": "Use fused rmsnorm."})
+    moe_grouped_gemm: bool = field(default=False, ...)
+    use_fused_rotary_pos_emb: bool = field(default=False, metadata={"help": "Use fused rotary-pos-emb."})
+    use_flash_attn: bool = field(default=False, metadata={"help": "use FlashAttention implementation of attention."})
+    use_sparse_flash_attn: bool = field(default=False, ...)
+    use_fused_lightning_indexer: bool = field(default=False, ...)
+    use_triton_gdn: bool = field(default=False, ...)
+    use_flash_gdn: bool = field(default=False, ...)
+    gdn_chunk_size: int = field(default=64, ...)
+    use_triton_rmsnormgated: bool = field(default=False, ...)
+    fix_router: bool = field(
+        default=False,
+        metadata={"help": "Replace topk routing with round-robin for balanced expert load. ... not for production training."},
+    )</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py">../mindspeed_llm/fsdp2/utils/arguments.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L657">:657</a>（@dataclass class OptimizationArguments）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L663">:663</a>（use_fused_rmsnorm）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L664">:664</a>（moe_grouped_gemm）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L670">:670</a>（use_fused_rotary_pos_emb）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L671">:671</a>（use_flash_attn）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L672">:672</a>（use_sparse_flash_attn）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L676">:676</a>（use_fused_lightning_indexer）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L696">:696</a>（use_triton_gdn）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L697">:697</a>（use_flash_gdn，与 triton_gdn 互斥）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L703">:703</a>（fix_router）；文档 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md">../docs/zh/pytorch/features/fsdp2/arguments.md</a>:<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md#L867">:867</a>（优化特性参数段）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md#L882">:882</a>（use_fused_rmsnorm）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md#L894">:894</a>（use_fused_rotary_pos_emb）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/arguments.md#L900">:900</a>（use_flash_attn）</div>
+      <p>这一段全是<b>布尔总开关</b>——每个 <code>use_fused_*</code> / <code>use_flash_*</code> 控制一个 NPU 融合算子是否启用：</p>
+      <ul>
+        <li><b>use_fused_rmsnorm（行 663）/ use_fused_rotary_pos_emb（行 670）/ use_flash_attn（行 671）</b>：三个最常见的 NPU 加速开关。Qwen3 用 RMSNorm + RoPE，开 fused 版本走昇腾融合 kernel；flash attn 走 FlashAttention 实现。这三个是 Qwen3-8B 训练调性能时最常拨的旋钮。</li>
+        <li><b>use_sparse_flash_attn / use_fused_lightning_indexer（行 672/676）</b>：DSA（稀疏注意力）相关，<b>仅 DeepSeek-V3.2 与 GLM-5 系列支持</b>——<code>_validate_cross_args</code>（行 772–784）会校验 model_id，不是这两类开了就报错。</li>
+        <li><b>use_triton_gdn / use_flash_gdn（行 696/697，互斥）</b>：<code>__post_init__</code>（行 711）强校验二者不能同 True——Gated DeltaNet 的两种实现只能选一。</li>
+        <li><b>fix_router（行 703）</b>：help 明确写"not for production training"——把 topk 路由换成 round-robin 均衡专家负载，仅供性能调优，不用于正式训练。</li>
+      </ul>
+      <p class="footnote">OptimizationArguments 的 docstring（行 659–661）写的是 "Inference hyperparameters"，但字段全是训练融合算子开关——这是个<b>文档与实际语义略有出入</b>的点，以源码字段 help 为准（核实：docstring 措辞疑似从 InferenceArguments 复制未改，以运行时为准）。</p>
+
+      <div class="figcap">五段聚合 + 反射展开 + 跨段校验（参数流转的收尾）</div>
+      <pre data-lang="py">def fsdp2_parse_args(rootclass: TypeVar) -> TypeVar:
+    parser = _create_argument_parser(rootclass)          # 反射展开五段成 --段.字段
+    cmd_args = sys.argv[1:]
+    yaml_config = _load_yaml_if_provided(cmd_args)      # 第一个 .yaml 位置参数
+    final_cmd_args = _merge_yaml_into_cmd_args(cmd_args, yaml_config)  # CLI 优先
+    args, remaining_args = parser.parse_known_args(final_cmd_args)
+    parse_result = _postprocess_json_fields(args, parser.dict_fields)  # dict/JSON 反序列化
+    result = _build_dataclass_instances(rootclass, parse_result)       # 反射回五个实例
+    _validate_cross_args(result)                        # 跨段约束校验
+    return result
+
+def _validate_cross_args(args):
+    if data_args.reset_attention_mask and training_args.per_device_train_batch_size > 1:
+        raise ValueError("When reset_attention_mask=True, per_device_train_batch_size must be 1 ...")
+    if args.model.model_id == "qwen3_next" and args.parallel.cp_size > 1 and args.parallel.cp_type != "ulysses":
+        raise ValueError("qwen3_next only supports 'ulysses' context parallel type when cp_size > 1 ...")</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py">../mindspeed_llm/fsdp2/utils/arguments.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L787">:787</a>（def fsdp2_parse_args）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L826">:826</a>（_create_argument_parser 反射）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L831">:831</a>（for subclass in fields(rootclass) 遍历五段）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L1060">:1060</a>（_build_dataclass_instances 反射回实例）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L750">:750</a>（def _validate_cross_args）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L758">:758</a>（reset_attention_mask×batch 跨段约束）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L766">:766</a>（qwen3_next×cp_type 跨段约束）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L772">:772</a>–<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L784">:784</a>（DSA 融合算子×model_id 跨段约束）</div>
+      <p>这段把五段串起来收尾：① <code>_create_argument_parser</code> 用 <code>fields(rootclass)</code>（行 831）遍历五段，再对每段 <code>fields(subclass_type)</code>（行 840）逐字段按类型分派注册（<code>_handle_literal_or_enum</code> / <code>_handle_bool</code> / <code>_handle_list_of_scalar</code> / <code>_handle_dict</code> / <code>_handle_scalar</code>，行 906–975）；② 合参（EP05 已讲）；③ <code>_build_dataclass_instances</code>（行 1060）用 <code>subclass_type(**parse_result.get(base, {}))</code>（行 1066）反射回五个 dataclass 实例并装进 root；④ <code>_validate_cross_args</code>（行 750）做<b>跨段</b>约束——单段 <code>__post_init__</code> 只能管自己段内字段，跨段冲突（如 reset_attention_mask×batch、qwen3_next×cp_type、DSA×model_id）必须等五段都建好才能验。这步是"五段虽分、约束跨段"的兜底。</p>
+
+      <div class="gnpu">
+        <div class="g"><h4>GPU / 已知（argparse Namespace）</h4>
+          <div class="row"><span class="k">schema</span><span>argparse 一行行 add_argument，字段无分类</span></div>
+          <div class="row"><span class="k">载体</span><span>扁平 Namespace，args.lr / args.batch 全平铺</span></div>
+          <div class="row"><span class="k">键名</span><span>--lr / --batch_size，无段前缀</span></div>
+          <div class="row"><span class="k">类型</span><span>type=float / type=int 手写，无 Literal 校验</span></div>
+          <div class="row"><span class="k">校验</span><span>散落各处 if args.x:，无跨字段统一入口</span></div>
+        </div>
+        <div class="n"><h4>NPU / 本项目（dataclass + HfArgumentParser 风格）</h4>
+          <div class="row"><span class="k">schema</span><span>五个 @dataclass，字段自带 field(default, metadata help)</span></div>
+          <div class="row"><span class="k">载体</span><span>五段 dataclass 实例（model/data/parallel/training/optimization）</span></div>
+          <div class="row"><span class="k">键名</span><span>--段.字段（--training.lr / --parallel.fsdp_size），反射注册</span></div>
+          <div class="row"><span class="k">类型</span><span>Literal 转 argparse choices，Union[Dict,str] 标 dict_fields 后处理</span></div>
+          <div class="row"><span class="k">校验</span><span>每段 __post_init__ 管段内 + _validate_cross_args 管跨段</span></div>
+        </div>
+      </div>
+
+      <div class="gnpu">
+        <div class="g"><h4>mcore / 旧路线（数百参数）</h4>
+          <div class="row"><span class="k">规模</span><span>megatron 风格数百 CLI（--num-layers / --hidden-size / --lr / --lr-warmup-fraction …）</span></div>
+          <div class="row"><span class="k">数据</span><span>split / --recompute-granularity / --recompute-method 等专属旋钮</span></div>
+          <div class="row"><span class="k">映射</span><span>docs arguments.md:992–1076 列了 mcore↔fsdp2 的字段对应表</span></div>
+        </div>
+        <div class="n"><h4>fsdp2 / 本项目（五段精简）</h4>
+          <div class="row"><span class="k">规模</span><span>仅五段 dataclass，覆盖 model/data/parallel/training/optimization</span></div>
+          <div class="row"><span class="k">数据</span><span>data_manager_type="mg" 时才走 megatron 数据 args（split/dataloader_type…）</span></div>
+          <div class="row"><span class="k">哲学</span><span>用 HF 模型原生结构（model.layers.{*}）+ FSDP 分片，而非 mcore 自管并行</span></div>
+        </div>
+      </div>
+
+      <div class="sum">
+        <b>小结</b>　心智模型：fsdp2 后端的全部可调旋钮就是<b>五段 dataclass</b>——<code>ModelArguments</code>（加载什么）、<code>DataArguments</code>（喂什么）、<code>ParallelArguments</code>（怎么并行 + 分片模块清单）、<code>TrainingArguments</code>（怎么训 + NPU profiling）、<code>OptimizationArguments</code>（用哪些融合算子）。它们经 <code>fsdp2_parse_args</code> 反射展开成 <code>--段.字段</code> CLI、合参后反射回五个实例、再被 <code>MindSpeedAutoTrainer</code> 具名注入各工厂。读这套参数的姿势是"按段读 + 抓清单"：五段各管一摊，每段内最该盯的是 <code>List[str]</code> 形式的<b>模块路径清单</b>（<code>fsdp_modules / ep_modules / recompute_modules / quant_apply_modules</code>）——它们用 <code>model.layers.{*}</code> 通配数字层、用 <code>*.q_proj</code> 匹配后缀，是 EP08 分片落地的真正依据。
+        <div class="pit">常见误区：① <b>参数与 mcore 不通用——独立体系</b>：fsdp2 这五段 dataclass 是为 FSDP2 后端专门设计的，与 mcore（Megatron-Core）那数百个 <code>--num-layers / --lr-warmup-fraction</code> CLI <b>不是一套</b>；docs arguments.md:992–1076 虽列了对应表，但 fsdp2 不直接吃 mcore 的键名，二者只在 <code>data_manager_type="mg"</code> 时共享一小撮数据段旋钮。<b>别拿 mcore 的 <code>--lr</code> 往 fsdp2 上套，这里叫 <code>--training.lr</code></b>。② <b>以为 <code>model.layers.{*}</code> 是正则通配</b>——它不是 <code>re</code>，是 fsdp2 自定义的模块路径模式串，<code>{*}</code> 展开数字层下标、<code>*</code> 作前缀/后缀匹配，运行时由分片逻辑解析（EP08）。③ <b>以为不设 <code>fsdp_size</code> 也会分片</b>——<code>fsdp_size</code> 默认 1，不分片；<code>fsdp_modules</code> 清单写了也只在 <code>fsdp_size>1</code> 时真正生效。④ <b>以为各段校验互不影响</b>——段内 <code>__post_init__</code> 管自己，跨段冲突（reset_attention_mask×batch、qwen3_next×cp_type、DSA×model_id）由 <code>_validate_cross_args</code> 兜底，五段都建好才验。⑤ <b>以为 OptimizationArguments 是推理参数</b>——docstring 写 "Inference hyperparameters" 但字段全是训练融合算子开关，以字段 help 为准（核实：疑似 docstring 从 InferenceArguments 复制未改）。</div>
+      </div>
+
+      <div class="filelist"><b>本篇涉及文件</b><br>
+../mindspeed_llm/fsdp2/utils/arguments.py（ModelArguments 行 22-161；DataArguments 行 173-367；ParallelArguments 行 370-466；TrainingArguments 行 469-632；OptimizationArguments 行 657-712；fsdp2_parse_args 行 787；_create_argument_parser 行 826；_validate_cross_args 行 750；_build_dataclass_instances 行 1060）<br>
+../docs/zh/pytorch/features/fsdp2/arguments.md（模型参数 行 3；数据参数 行 164；并行参数 行 379；训练参数 行 528；优化特性参数 行 867；mcore 映射 行 992-1076）</div>
+    </main>
+  </div>
+</div>
+<script>
+// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre[data-lang]').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];if(!rules)return;
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      return '<span class="ln">'+(i+1)+'</span>'+tokLine(l,rules);
+    }).join('\n');
+  });
+})();
+</script>
+</body>
+</html>

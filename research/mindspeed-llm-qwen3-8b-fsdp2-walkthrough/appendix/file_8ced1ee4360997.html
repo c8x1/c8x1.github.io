@@ -1,0 +1,923 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/data/megatron_data/megatron_gpt_dataset.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/data/megatron_data/megatron_gpt_dataset.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_86277a2aedcb0e.html">◀ megatron_dataset_samplers.py</a> <a href="file_fad5e2a0fdec93.html">megatron_preprocess_dataset.py ▶</a></nav></div>
+<div class="wrap">
+<h1>megatron_gpt_dataset.py</h1><p class="goal">mindspeed_llm/fsdp2/data/megatron_data/megatron_gpt_dataset.py · 31127B · 822 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L25" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class GPTDatasetSampleIndexError(Exception)</a><a href="#L26" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, error_message)</a><a href="#L30" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __repr__(self)</a><a href="#L38" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class GPTDatasetConfig(BlendedMegatronDatasetC</a><a href="#L63" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __post_init__(self) -&gt; None</a><a href="#L74" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class GPTDataset(MegatronDataset)</a><a href="#L92" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__</a><a href="#L125" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def numel_low_level_dataset(low_level_dataset:</a><a href="#L140" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def build_low_level_dataset(dataset_path: str,</a><a href="#L153" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __len__(self) -&gt; int</a><a href="#L161" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __getitem__(self, idx: Optional[int]) -&gt</a><a href="#L243" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _query_document_sample_shuffle_indices</a><a href="#L317" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _build_document_sample_shuffle_indices</a><a href="#L348" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_path_temp_func(suffix)</a><a href="#L527" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_num_tokens_per_epoch(self) -&gt; int</a><a href="#L535" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_num_epochs(self, num_tokens_per_epoch</a><a href="#L558" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _build_document_index</a><a href="#L591" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _build_shuffle_index</a><a href="#L622" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_ltor_masks_and_position_ids</a><a href="#L708" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class MockGPTLowLevelDataset</a><a href="#L728" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, tokenizer: MegatronTokenize</a><a href="#L735" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __len__(self) -&gt; int</a><a href="#L738" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __getitem__(self, idx: int) -&gt; numpy.nu</a><a href="#L745" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get(self, idx: int, offset: int = 0, lengt</a><a href="#L763" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class MockGPTDataset(GPTDataset)</a><a href="#L781" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__</a><a href="#L795" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def numel_low_level_dataset(low_level_dataset:</a><a href="#L807" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def build_low_level_dataset</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<span class="mut">（未被正文 EP 引用）</span>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p>Copyright (c) 2023, NVIDIA CORPORATION. All rights reserved.</p><p class="mut">（自动提取自首行注释）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1"># Copyright (c) 2023, NVIDIA CORPORATION. All rights reserved.
+
+import logging
+import os
+import subprocess
+import time
+from dataclasses import dataclass
+from typing import Dict, Optional, Tuple
+
+import numpy
+import torch
+
+from mindspeed_llm.fsdp2.data.megatron_data.blended_megatron_dataset_config import BlendedMegatronDatasetConfig
+from mindspeed_llm.fsdp2.data.megatron_data.indexed_dataset import IndexedDataset
+from mindspeed_llm.fsdp2.data.megatron_data.megatron_dataset import MegatronDataset
+from mindspeed_llm.fsdp2.data.megatron_data.megatron_tokenizer import MegatronTokenizer
+from mindspeed_llm.fsdp2.data.megatron_data.megatron_utils import Split, need_to_build_dataset
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+
+logger = logging.getLogger(__name__)
+
+_PAD_TOKEN_ID = -1
+
+
+class GPTDatasetSampleIndexError(Exception):
+    def __init__(self, error_message):
+        super().__init__()
+        self._error_message = error_message
+
+    def __repr__(self):
+        if self._error_message:
+            return self._error_message
+        else:
+            return &quot;Bad sample index.&quot;
+
+
+@dataclass
+class GPTDatasetConfig(BlendedMegatronDatasetConfig):
+    &quot;&quot;&quot;Configuration object for Megatron Core GPT datasets&quot;&quot;&quot;
+
+    reset_position_ids: bool = None
+    &quot;&quot;&quot;Option to reset the position IDs in the dataset at an interval&quot;&quot;&quot;
+
+    reset_attention_mask: bool = None
+    &quot;&quot;&quot;Option to reset the attention mask from the dataset&quot;&quot;&quot;
+
+    eod_mask_loss: bool = None
+    &quot;&quot;&quot;Option to enable the EOD mask loss&quot;&quot;&quot;
+
+    create_attention_mask: bool = True
+    &quot;&quot;&quot;Option to enable the attention masks generation. Can be disabled if attention kernel
+       generates masks by itself.
+    &quot;&quot;&quot;
+
+    drop_last_partial_validation_sequence: bool = True
+    &quot;&quot;&quot;Option to drop the last partial validation sequence&quot;&quot;&quot;
+
+    add_extra_token_to_sequence: bool = True
+    &quot;&quot;&quot;Option to draw sequences with one extra token to ensure the sample input tokens and sample
+       output tokens are both of the desired sequence length
+    &quot;&quot;&quot;
+
+    def __post_init__(self) -&gt; None:
+        &quot;&quot;&quot;Do asserts and set fields post init&quot;&quot;&quot;
+        super().__post_init__()
+
+        assert self.tokenizer is not None
+
+        assert self.reset_position_ids is not None
+        assert self.reset_attention_mask is not None
+        assert self.eod_mask_loss is not None
+
+
+class GPTDataset(MegatronDataset):
+    &quot;&quot;&quot;The base GPT dataset
+
+    Args:
+        indexed_dataset (IndexedDataset): The IndexedDataset around which to build the GPTDataset
+
+        dataset_path (Optional[str]): The real path on disk to the dataset, for bookkeeping
+
+        indexed_indices (numpy.ndarray): The set of the documents indices to expose
+
+        num_samples (Optional[int]): The number of samples to draw from the indexed dataset. When
+            None, build as many samples as correspond to one epoch.
+
+        index_split (Split): The indexed_indices Split
+
+        config (GPTDatasetConfig): The config
+    &quot;&quot;&quot;
+
+    def __init__(
+        self,
+        indexed_dataset: IndexedDataset,
+        dataset_path: Optional[str],
+        indexed_indices: numpy.ndarray,
+        num_samples: Optional[int],
+        index_split: Split,
+        config: GPTDatasetConfig,
+    ) -&gt; None:
+        super().__init__(
+            indexed_dataset, dataset_path, indexed_indices, num_samples, index_split, config
+        )
+        self.masks_and_position_ids_are_cacheable = not any(
+            [
+                self.config.reset_position_ids,
+                self.config.reset_attention_mask,
+                self.config.eod_mask_loss,
+            ]
+        )
+        self.masks_and_position_ids_are_cached = False
+        self.cached_attention_mask = None
+        self.cached_loss_mask = None
+        self.cached_position_ids = None
+
+        try:
+            self._pad_token_id = self.config.tokenizer.pad
+        except Exception:
+            self._pad_token_id = _PAD_TOKEN_ID
+        (self.document_index, self.sample_index, self.shuffle_index) = (
+            self._build_document_sample_shuffle_indices()
+        )
+
+    @staticmethod
+    def numel_low_level_dataset(low_level_dataset: IndexedDataset) -&gt; int:
+        &quot;&quot;&quot;Abstract method implementation
+
+        For GPT, the underlying IndexedDataset should be split by sequence, as opposed to, say,
+        BERT, which should be split by document
+
+        Args:
+            low_level_dataset (IndexedDataset): The underlying IndexedDataset
+
+        Returns:
+            int: The number of unique elements in the underlying IndexedDataset
+        &quot;&quot;&quot;
+        return low_level_dataset.sequence_lengths.shape[0]
+
+    @staticmethod
+    def build_low_level_dataset(dataset_path: str, config: GPTDatasetConfig) -&gt; IndexedDataset:
+        &quot;&quot;&quot;Abstract method implementation
+
+        Args:
+            dataset_path (str): The real path prefix to the IndexedDataset .bin and .idx files
+
+            config (GPTDatasetConfig): The config
+
+        Returns:
+            IndexedDataset: The underlying IndexedDataset
+        &quot;&quot;&quot;
+        return IndexedDataset(dataset_path, multimodal=False, mmap=config.mmap_bin_files)
+
+    def __len__(self) -&gt; int:
+        &quot;&quot;&quot;Abstract method implementation
+
+        Returns:
+            int: The length of the dataset
+        &quot;&quot;&quot;
+        return self.sample_index.shape[0] - 1
+
+    def __getitem__(self, idx: Optional[int]) -&gt; Dict[str, torch.Tensor]:
+        &quot;&quot;&quot;Abstract method implementation
+
+        Args:
+            idx (Optioal[int]): The index into the dataset
+
+        Returns:
+            Dict[str, torch.Tensor]: The sample information wrapped in a dictionary
+        &quot;&quot;&quot;
+        if idx is None:
+            # Batch padding sequence so the index does not matter
+            text, _ = self._query_document_sample_shuffle_indices(0)
+        else:
+            text, _ = self._query_document_sample_shuffle_indices(idx)
+
+
+        text = torch.from_numpy(text).long()
+        if self.config.add_extra_token_to_sequence:
+            tokens = text[:-1].contiguous()
+            labels = text[1:].contiguous()
+        else:
+            tokens = text
+            labels = torch.roll(text, shifts=-1, dims=0)
+            labels[-1] = self._pad_token_id
+
+        if (
+            not self.masks_and_position_ids_are_cacheable
+            or not self.masks_and_position_ids_are_cached
+        ):
+            attention_mask, loss_mask, position_ids, actual_seq_len = _get_ltor_masks_and_position_ids(
+                tokens,
+                self.config.tokenizer.eod,
+                self.config.reset_position_ids,
+                self.config.reset_attention_mask,
+                self.config.eod_mask_loss,
+                self.config.create_attention_mask,
+            )
+            if self.masks_and_position_ids_are_cacheable:
+                self.cached_attention_mask = attention_mask
+                self.cached_loss_mask = loss_mask
+                self.cached_position_ids = position_ids
+                self.cache_actual_seq_len = actual_seq_len
+                self.masks_and_position_ids_are_cached = True
+        else:
+            attention_mask = self.cached_attention_mask
+            loss_mask = self.cached_loss_mask
+            position_ids = self.cached_position_ids
+            actual_seq_len = self.cache_actual_seq_len
+
+        # For padded sequences, mask the loss
+        loss_mask[labels == self._pad_token_id] = 0.0
+
+        # For padded sequences, ensure the embedding layer can map the token ID
+        tokens[tokens == self._pad_token_id] = 0
+        labels[labels == self._pad_token_id] = 0
+
+        # Batch padding sequence so we mask the loss
+        if idx is None:
+            loss_mask = torch.zeros_like(loss_mask)
+        if self.config.create_attention_mask:
+            batch = {
+                    &quot;input_ids&quot;: tokens,
+                    &quot;labels&quot;: labels,
+                    &quot;attention_mask&quot;: attention_mask,
+                    &quot;loss_mask&quot;: loss_mask,
+                    &quot;position_ids&quot;: position_ids,
+                }
+            if actual_seq_len is not None:
+                batch.update({&quot;actual_seq_len&quot;: actual_seq_len})
+            return batch
+
+        else:
+            batch = {
+                &quot;input_ids&quot;: tokens,
+                &quot;labels&quot;: labels,
+                &quot;loss_mask&quot;: loss_mask,
+                &quot;position_ids&quot;: position_ids,
+            }
+            if actual_seq_len is not None:
+                batch.update({&quot;actual_seq_len&quot;: actual_seq_len})
+            return batch
+
+    def _query_document_sample_shuffle_indices(
+        self, idx: int
+    ) -&gt; Tuple[numpy.ndarray, numpy.ndarray]:
+        &quot;&quot;&quot;Get the text (token ids) and document ids for a given index
+
+        Args:
+            idx (int): The index into the dataset
+
+        Returns:
+            Tuple[numpy.ndarray, numpy.ndarray]: The text ids and document ids
+        &quot;&quot;&quot;
+        # Do the shuffle mapping
+        idx = self.shuffle_index[idx]
+
+        # Get the beginning and end documents and offsets
+        doc_index_beg, doc_index_beg_offset = self.sample_index[idx]
+        doc_index_end, doc_index_end_offset = self.sample_index[idx + 1]
+
+        document_ids = []
+        sample_parts = []
+
+
+        # Sample spans a single document
+        if doc_index_beg == doc_index_end:
+            # Add the document id
+            document_ids.append(self.document_index[doc_index_beg])
+
+            # Add the entire sample
+            sample_parts.append(
+                self.dataset.get(
+                    self.document_index[doc_index_beg],
+                    offset=doc_index_beg_offset,
+                    length=doc_index_end_offset
+                    - doc_index_beg_offset
+                    + self.config.add_extra_token_to_sequence,
+                )
+            )
+
+        # Sample spans multiple documents
+        else:
+            for i in range(doc_index_beg, doc_index_end + 1):
+                # Add the document id
+                document_ids.append(self.document_index[i])
+
+                # Add the sample part
+                offset = 0 if i &gt; doc_index_beg else doc_index_beg_offset
+                length = (
+                    None
+                    if i &lt; doc_index_end
+                    else doc_index_end_offset + self.config.add_extra_token_to_sequence
+                )
+                sample_parts.append(
+                    self.dataset.get(self.document_index[i], offset=offset, length=length)
+                )
+        assert len(document_ids) == len(
+            sample_parts
+        ), f&quot;len(document_ids) ({len(document_ids)}) != len(sample_parts) ({len(sample_parts)})&quot;
+
+
+        length = sum(map(len, sample_parts))
+
+
+        # Pad the sample if necessary
+        if length &lt; (self.config.sequence_length + self.config.add_extra_token_to_sequence):
+            sample_parts.append(
+                [self._pad_token_id]
+                * (self.config.sequence_length + self.config.add_extra_token_to_sequence - length)
+            )
+
+        return (
+            numpy.concatenate(sample_parts, dtype=numpy.int64),
+            numpy.array(document_ids, dtype=numpy.int64),
+        )
+
+    def _build_document_sample_shuffle_indices(
+        self,
+    ) -&gt; Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]:
+        &quot;&quot;&quot;Build the document index, the sample index, and the shuffle index
+
+        The document index:
+            -- 1-D
+            -- An ordered array of document ids
+
+        The sample index:
+            -- 2-D
+            -- The document indices and offsets which mark the start of every sample
+
+        The shuffle index:
+            -- 1-D
+            -- A random permutation of index range of the sample index
+
+        Returns:
+            Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]: The document index, the sample
+            index, and the shuffle index
+        &quot;&quot;&quot;
+        path_to_cache = self.config.path_to_cache
+        if path_to_cache is None and not self.config.mock:
+            path_to_cache = os.path.join(
+                self.dataset.path_prefix, &quot;cache&quot;, f&quot;{type(self).__name__}_indices&quot;
+            )
+
+        # start of megatron_adaptation,
+        # here we change from (class)GPTDataset._build_document_sample_shuffle_indices
+        # end of megatron_adaptation
+
+        def get_path_temp_func(suffix):
+            return os.path.join(
+                path_to_cache, f&quot;{self.unique_description_hash}-{type(self).__name__}-{suffix}&quot;
+            )
+
+        if path_to_cache:
+            get_path_to = get_path_temp_func
+            path_to_description = get_path_to(&quot;description.txt&quot;)
+            path_to_document_index = get_path_to(&quot;document_index.npy&quot;)
+            path_to_sample_index = get_path_to(&quot;sample_index.npy&quot;)
+            path_to_shuffle_index = get_path_to(&quot;shuffle_index.npy&quot;)
+            cache_hit = all(
+                map(
+                    os.path.isfile,
+                    [
+                        path_to_description,
+                        path_to_document_index,
+                        path_to_sample_index,
+                        path_to_shuffle_index,
+                    ],
+                )
+            )
+        else:
+            cache_hit = False
+
+        if not path_to_cache or (
+                not cache_hit
+                and (not torch.distributed.is_initialized() or need_to_build_dataset())
+        ):
+
+            logger.info_rank0(f&quot;Build and save the {type(self).__name__} {self.index_split.name} indices&quot;)
+            self.built_anew_on_cache_miss = True
+            t_beg = time.time()
+
+            sequence_length = self.config.sequence_length
+            num_tokens_per_epoch = self._get_num_tokens_per_epoch()
+            num_epochs = self._get_num_epochs(num_tokens_per_epoch)
+
+            if num_epochs == 1:
+                separate_final_epoch = False
+            else:
+                # Get the number of samples for the last epoch
+                num_samples_sans_final_epoch = (
+                                                    (num_epochs - 1) * num_tokens_per_epoch
+                                                    - self.config.add_extra_token_to_sequence
+                                            ) // sequence_length
+                num_samples_from_final_epoch = self.num_samples - num_samples_sans_final_epoch
+                num_samples_per_epoch = (
+                                                num_tokens_per_epoch - self.config.add_extra_token_to_sequence
+                                        ) // sequence_length
+
+                # num_samples_from_final_epoch should be non-negative
+                if num_samples_from_final_epoch &lt; 0:
+                    raise ValueError(&quot;num_samples_from_final_epoch should be non-negative&quot;)
+
+                # num_samples_from_final_epoch should not exceed max value
+                if num_samples_from_final_epoch &gt; num_samples_per_epoch + 1:
+                    raise ValueError(&quot;num_samples_from_final_epoch should not exceed max value&quot;)
+
+                # Separate the final epoch if it falls below the threshold
+                threshold = 0.80
+                separate_final_epoch = num_samples_from_final_epoch &lt; int(
+                    threshold * num_samples_per_epoch
+                )
+
+                logger.info_rank0(f&quot;&gt; num_samples_from_final_epoch: {num_samples_from_final_epoch}&quot;)
+                logger.info_rank0(f&quot;&gt; threshold: {threshold}&quot;)
+                logger.info_rank0(f&quot;&gt; num_samples_per_epoch: {num_samples_per_epoch}&quot;)
+
+            logger.info_rank0(f&quot;&gt; separate_final_epoch: {separate_final_epoch}&quot;)
+
+            numpy_random_state = numpy.random.RandomState(self.config.random_seed)
+
+            # Build the document index
+            document_index = _build_document_index(
+                self.indices, num_epochs, numpy_random_state, separate_final_epoch
+            )
+            drop_last_partial_sequence = True
+            if self.index_split == Split.valid:
+                drop_last_partial_sequence = self.config.drop_last_partial_validation_sequence
+
+            # Build the sample index
+            target_dir = os.path.abspath(&quot;mindspeed_llm/fsdp2/data/megatron_data&quot;)
+            cmd = [&quot;make&quot;]
+            subprocess.run(cmd, cwd=target_dir, check=True)
+
+            from mindspeed_llm.fsdp2.data.megatron_data import helpers
+
+            if self.index_split == Split.valid:
+                drop_last_partial_sequence = self.config.drop_last_partial_validation_sequence
+            else:
+                drop_last_partial_sequence = True
+
+            if document_index.dtype != numpy.int32:
+                raise ValueError(f&quot;Expected document_index dtype to be int32, but got {document_index.dtype}&quot;)
+            if self.dataset.sequence_lengths.dtype != numpy.int32:
+                raise ValueError(f&quot;Expected sequence_lengths dtype to be int32, but got {self.dataset.sequence_lengths.dtype}&quot;)
+            if len(document_index) * 2 &gt; len(self.dataset.sequence_lengths):
+                # Heuristic: if &quot;access density&quot; of sequence_lengths is relatively high,
+                # force loading the mmap-ed array into memory by taking a copy.
+                # System performance benefits come from two aspects:
+                # 1. **sequentially** pre-loading the whole file if we&#x27;re gonna read a large fraction anyways.
+                # 2. GIL is held when calling into c++ code; making the c++ func faster improves parallelism.
+                sequence_lengths_for_cpp = self.dataset.sequence_lengths.copy()
+            else:
+                sequence_lengths_for_cpp = self.dataset.sequence_lengths
+
+            sample_index = helpers.build_sample_idx(
+                sequence_lengths_for_cpp,
+                document_index,
+                sequence_length,
+                num_epochs,
+                num_tokens_per_epoch,
+                drop_last_partial_sequence,
+                self.config.add_extra_token_to_sequence,
+            )
+
+            if any(sample_index[:, 0] &lt; 0):
+                _url = &quot;https://gitee.com/ascend/MindSpeed-LLM/wikis/megatron%20data%20helpers%E5%8F%AF%E8%83%BD%E5%BC%95%E5%85%A5%E7%9A%84%E9%97%AE%E9%A2%98&quot;
+                raise GPTDatasetSampleIndexError(f&quot;Bad sample index. Visit {_url} for more information&quot;)
+
+            # Build the shuffle index
+            if separate_final_epoch:
+                shuffle_index = _build_shuffle_index(
+                    num_samples_sans_final_epoch, sample_index.shape[0] - 1, numpy_random_state
+                )
+            else:
+                shuffle_index = _build_shuffle_index(
+                    sample_index.shape[0] - 1, sample_index.shape[0] - 1, numpy_random_state
+                )
+
+            if path_to_cache:
+                os.makedirs(path_to_cache, exist_ok=True)
+                # Write the description
+                with open(path_to_description, &quot;wt&quot;) as writer:
+                    writer.write(self.unique_description)
+                numpy.save(path_to_document_index, document_index, allow_pickle=True)
+                numpy.save(path_to_sample_index, sample_index, allow_pickle=True)
+                numpy.save(path_to_shuffle_index, shuffle_index, allow_pickle=True)
+            else:
+                logger.info_rank0(f&quot;Unable to save the {type(self).__name__} indexes because path_to_cache is None&quot;)
+            t_end = time.time()
+            logger.info_rank0(f&quot;\t&gt; time elapsed: {t_end - t_beg:4f} seconds&quot;)
+
+            logger.info_rank0(f&quot;&gt; total number of samples: {sample_index.shape[0] - 1}&quot;)
+            logger.info_rank0(f&quot;&gt; total number of epochs: {num_epochs}&quot;)
+
+            return document_index, sample_index, shuffle_index
+
+        logger.info_rank0(f&quot;Load the {type(self).__name__} {self.index_split.name} indices&quot;)
+
+        logger.info_rank0(f&quot;\tLoad the document index from {os.path.basename(path_to_document_index)}&quot;)
+        t_beg = time.time()
+        document_index = numpy.load(path_to_document_index, allow_pickle=True, mmap_mode=&#x27;r&#x27;)
+        t_end = time.time()
+        logger.info_rank0(f&quot;\t&gt; time elapsed: {t_end - t_beg:4f} seconds&quot;)
+
+        logger.info_rank0(f&quot;\tLoad the sample index from {os.path.basename(path_to_sample_index)}&quot;)
+        t_beg = time.time()
+        sample_index = numpy.load(path_to_sample_index, allow_pickle=True, mmap_mode=&#x27;r&#x27;)
+
+        if any(sample_index[:, 0] &lt; 0):
+            _url = &quot;https://gitee.com/ascend/MindSpeed-LLM/wikis/megatron%20data%20helpers%E5%8F%AF%E8%83%BD%E5%BC%95%E5%85%A5%E7%9A%84%E9%97%AE%E9%A2%98&quot;
+            raise GPTDatasetSampleIndexError(f&quot;Bad sample index. Visit {_url} for more information&quot;)
+
+        t_end = time.time()
+        logger.info_rank0(f&quot;\t&gt; time elapsed: {t_end - t_beg:4f} seconds&quot;)
+
+        logger.info_rank0(f&quot;\tLoad the shuffle index from {os.path.basename(path_to_shuffle_index)}&quot;)
+        t_beg = time.time()
+        shuffle_index = numpy.load(path_to_shuffle_index, allow_pickle=True, mmap_mode=&#x27;r&#x27;)
+        t_end = time.time()
+        logger.info_rank0(f&quot;\t&gt; time elapsed: {t_end - t_beg:4f} seconds&quot;)
+
+        logger.info_rank0(f&quot;&gt; total number of samples: {sample_index.shape[0] - 1}&quot;)
+
+        return document_index, sample_index, shuffle_index
+       
+
+    def _get_num_tokens_per_epoch(self) -&gt; int:
+        &quot;&quot;&quot;Calculate the number of tokens in a single epoch
+
+        Returns:
+            int: The number of tokens in a single epoch
+        &quot;&quot;&quot;
+        return int(numpy.sum(self.dataset.sequence_lengths[self.indices]))
+
+    def _get_num_epochs(self, num_tokens_per_epoch: int) -&gt; int:
+        &quot;&quot;&quot;Calculate the number of epochs
+
+        Args:
+            num_tokens_per_epoch (int): The number of tokens in a single epoch
+
+        Returns:
+            int: The number of epochs
+        &quot;&quot;&quot;
+        num_epochs = 1
+        num_tokens = num_tokens_per_epoch
+        if self.num_samples is None:
+            return num_epochs
+        else:
+            num_tokens_requested = (
+                self.num_samples * self.config.sequence_length
+            ) + self.config.add_extra_token_to_sequence
+            while num_tokens &lt; num_tokens_requested:
+                num_epochs += 1
+                num_tokens += num_tokens_per_epoch
+        return num_epochs
+
+
+def _build_document_index(
+    documents: numpy.ndarray,
+    num_epochs: int,
+    numpy_random_state: numpy.random.RandomState,
+    separate_final_epoch: bool,
+) -&gt; numpy.ndarray:
+    &quot;&quot;&quot;Build an array with length = num epochs * num documents
+
+    Args:
+        documents (numpy.ndarray): the subset of exposed document indices
+
+        num_epochs (int): The number of epochs
+
+        numpy_random_state (numpy.random.RandomState): The NumPy random state
+
+        separate_final_epoch (bool): Whether to exclude the last epoch from the global shuffle
+
+    Returns:
+        numpy.ndarray: The document index
+    &quot;&quot;&quot;
+    if not separate_final_epoch or num_epochs == 1:
+        document_index = numpy.mgrid[0:num_epochs, 0 : len(documents)][1]
+        document_index[:] = documents
+        document_index = document_index.reshape(-1)
+        document_index = document_index.astype(numpy.int32)
+        numpy_random_state.shuffle(document_index)
+        return document_index
+
+    doc_idx_first = _build_document_index(documents, num_epochs - 1, numpy_random_state, False)
+    doc_idx_last = _build_document_index(documents, 1, numpy_random_state, False)
+    return numpy.concatenate((doc_idx_first, doc_idx_last))
+
+
+def _build_shuffle_index(
+    num_samples: int, total_size: int, numpy_random_state: numpy.random.RandomState
+) -&gt; numpy.ndarray:
+    &quot;&quot;&quot;Build the range [0, size) and shuffle
+
+    Args:
+        num_samples (int): The size of the first shuffle range [0, num_samples)
+
+        total_size (int): The size of the entire index. If larger than &#x27;num_samples&#x27;, it defines
+            the second shuffle range [num_samples, total_size)
+
+        numpy_random_state (numpy.random.RandomState): The NumPy random state
+
+    Returns:
+        numpy.ndarray: The shuffle index
+    &quot;&quot;&quot;
+    dtype_ = numpy.uint32
+    if total_size &gt;= (numpy.iinfo(numpy.uint32).max - 1):
+        dtype_ = numpy.int64
+
+    shuffle_idx_first = numpy.arange(start=0, stop=num_samples, step=1, dtype=dtype_)
+    numpy_random_state.shuffle(shuffle_idx_first)
+    if num_samples == total_size:
+        return shuffle_idx_first
+
+    shuffle_idx_last = numpy.arange(start=num_samples, stop=total_size, step=1, dtype=dtype_)
+    numpy_random_state.shuffle(shuffle_idx_last)
+
+    return numpy.concatenate((shuffle_idx_first, shuffle_idx_last))
+
+
+def _get_ltor_masks_and_position_ids(
+    data: torch.Tensor,
+    eod_token: int,
+    reset_position_ids: bool,
+    reset_attention_mask: bool,
+    eod_mask_loss: bool,
+    create_attention_mask: bool,
+):
+    &quot;&quot;&quot;Build masks and position id for left to right model.
+
+    Args:
+        data (torch.Tensor): The data tenor that holds the tokens from the dataset
+
+        eod_token (int): ID of the token to that is considered the EOD
+
+        reset_position_ids (bool): Switch to reset the document position ID&#x27;s
+
+        reset_attention_mask (bool): Switch to reset the attention mask
+
+        eod_mask_loss (bool): Switch to enable the EOD mask loss
+
+        create_attention_mask (bool): Switch to enable the attention masks generation. Can be
+            disabled if attention kernel generates masks by itself.
+
+    Returns:
+        torch.Tensor: Attention mask needed to be used for Attention
+
+        torch.Tensor: The mask used for loss value during training
+
+        torch.Tensor: The position ID&#x27;s of the token
+    &quot;&quot;&quot;
+    seq_length = data.numel()
+
+    if create_attention_mask:
+        attention_mask = torch.tril(
+            torch.ones((seq_length, seq_length), device=data.device)
+        ).unsqueeze(0)
+    else:
+        attention_mask = None
+
+    # Loss mask.
+    loss_mask = torch.ones(seq_length, dtype=torch.float, device=data.device)
+    if eod_mask_loss:
+        loss_mask[data == eod_token] = 0.0
+
+    # Position ids.
+    position_ids = torch.arange(seq_length, dtype=torch.long, device=data.device)
+    actual_seq_len = None
+    # We need to clone as the ids will be modifed based on batch index.
+    if reset_position_ids:
+        position_ids = position_ids.clone()
+
+    if reset_position_ids or reset_attention_mask:
+        # Find indices where EOD token is.
+        eod_index = position_ids[data == eod_token]
+        # Detach indices from positions if going to modify positions.
+        if reset_position_ids:
+            eod_index = eod_index.clone()
+
+        # Loop through EOD indices:
+        prev_index = 0
+        for j in range(eod_index.numel()):
+            i = eod_index[j]
+            # Mask attention loss.
+            if reset_attention_mask and attention_mask is not None:
+                attention_mask[0, (i + 1) :, : (i + 1)] = 0
+            # Reset positions.
+            if reset_position_ids:
+                position_ids[(i + 1) :] -= i + 1 - prev_index
+                prev_index = i + 1
+
+    if attention_mask is not None:
+        # Convert attention mask to binary:
+        attention_mask = attention_mask &lt; 0.5
+
+
+    if reset_attention_mask:
+        seq_length_tensor = torch.tensor([seq_length])
+        if eod_index.numel() &gt; 0 and eod_index[-1] == seq_length_tensor - 1:
+            actual_seq_len = eod_index + 1
+        else:
+            actual_seq_len = torch.cat([eod_index + 1, seq_length_tensor]) if eod_index.numel() &gt; 0 else seq_length_tensor
+
+    return attention_mask, loss_mask, position_ids, actual_seq_len
+
+
+class MockGPTLowLevelDataset:
+    &quot;&quot;&quot;The mock GPT low level dataset
+
+    This class is meant to generate tokenized data in the classic &quot;Megatron-LM&quot; GPT style. Notably,
+    we add the end of document token to each element indexed in __getitem__
+
+    Args:
+        tokenizer (MegatronTokenizer): The tokenizer the special token information of which we use
+            to augment the mock data.
+    &quot;&quot;&quot;
+
+    seed: int = 0
+    &quot;&quot;&quot;The hard-coded random seed to use to set the NumPy RNG&quot;&quot;&quot;
+
+    size: int = 100000
+    &quot;&quot;&quot;The hard-coded number of samples to generate&quot;&quot;&quot;
+
+    max_sequence_length: int = 4096
+    &quot;&quot;&quot;The hard-coded max sequence length to generate&quot;&quot;&quot;
+
+    def __init__(self, tokenizer: MegatronTokenizer) -&gt; None:
+        self.tokenizer = tokenizer
+        rng = numpy.random.default_rng(seed=self.seed)
+        self.sequence_lengths = rng.integers(
+            low=1, high=self.max_sequence_length, size=self.size, dtype=numpy.int32
+        )
+
+    def __len__(self) -&gt; int:
+        return self.size
+
+    def __getitem__(self, idx: int) -&gt; numpy.number:
+        length = self.sequence_lengths[idx]
+        sample = numpy.int64(
+            numpy.concatenate([numpy.arange(length - 1) + 1, [self.tokenizer.eod]])
+        )
+        return sample
+
+    def get(self, idx: int, offset: int = 0, length: Optional[int] = None) -&gt; numpy.ndarray:
+        &quot;&quot;&quot;This function is n abstraction over __getitem__ with support for slicing
+
+        Args:
+            idx (int): The index into the dataset
+
+            offset (int): The integer token offset in the sequence
+
+            length (Optional[int]): The number of tokens to grab from the sequence
+
+        Returns:
+            numpy.ndarray: The sequence tokens at the index
+        &quot;&quot;&quot;
+        if length is None:
+            length = self.sequence_lengths[idx] - offset
+        return self[idx][offset : offset + length]
+
+
+class MockGPTDataset(GPTDataset):
+    &quot;&quot;&quot;The mock GPT dataset
+
+    Args:
+        indexed_dataset (MockGPTLowLevelDataset): The MockGPTLowLevelDataset around which to build
+            the MockGPTDataset
+
+        dataset_path (Optional[str]): This argument is of no consequence for the MockGPTDataset
+
+        indices (numpy.ndarray): The set of the dataset indices to expose
+
+        num_samples (int): The number of samples to draw from the dataset
+
+        index_split (Split): The indices Split
+
+        config (GPTDatasetConfig): The config
+    &quot;&quot;&quot;
+
+    def __init__(
+        self,
+        dataset: MockGPTLowLevelDataset,
+        dataset_path: Optional[str],
+        indices: numpy.ndarray,
+        num_samples: int,
+        index_split: Split,
+        config: GPTDatasetConfig,
+    ) -&gt; None:
+        assert config.mock
+
+        super().__init__(dataset, dataset_path, indices, num_samples, index_split, config)
+
+    @staticmethod
+    def numel_low_level_dataset(low_level_dataset: MockGPTLowLevelDataset) -&gt; int:
+        &quot;&quot;&quot;Abstract method implementation
+
+        Args:
+            low_level_dataset (MockGPTLowLevelDataset): The underlying MockGPTLowLevelDataset
+
+        Returns:
+            int: The number of unique elements in the underlying MockGPTLowLevelDataset
+        &quot;&quot;&quot;
+        return len(low_level_dataset)
+
+    @staticmethod
+    def build_low_level_dataset(
+        dataset_path: Optional[str], config: GPTDatasetConfig
+    ) -&gt; MockGPTLowLevelDataset:
+        &quot;&quot;&quot;Abstract method implementation
+
+        Args:
+            dataset_path (Optional[str]): This argument is of no consequence for the
+                MockGPTLowLevelDataset
+
+            config (GPTDatasetConfig): The config
+
+        Returns:
+            MockGPTLowLevelDataset: The underlying MockGPTLowLevelDataset
+        &quot;&quot;&quot;
+        return MockGPTLowLevelDataset(config.tokenizer)
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

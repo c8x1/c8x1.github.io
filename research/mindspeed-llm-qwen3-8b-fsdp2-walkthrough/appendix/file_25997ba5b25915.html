@@ -1,0 +1,133 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>examples/fsdp2/qwen3/tune_qwen3_8b_4k_fsdp2_A2.sh · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">examples/fsdp2/qwen3/tune_qwen3_8b_4k_fsdp2_A2.sh</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_f47ff8ca5e74ea.html">◀ pretrain_qwen3_8b_4k_fsdp2_A3.yaml</a> <a href="file_303ac20bb23a2c.html">tune_qwen3_8b_4k_fsdp2_A2.yaml ▶</a></nav></div>
+<div class="wrap">
+<h1>tune_qwen3_8b_4k_fsdp2_A2.sh</h1><p class="goal">examples/fsdp2/qwen3/tune_qwen3_8b_4k_fsdp2_A2.sh · 1042B · 32 行 · sh</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<span class="mut">（无可提取符号）</span></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep14.html">EP14</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p class="mut">（tune_qwen3_8b_4k_fsdp2_A2.sh：无 docstring/注释可提取，请直接看下方源码）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="sh" data-start="1">source examples/fsdp2/env_config.sh
+
+NPUS_PER_NODE=8
+MASTER_ADDR=localhost
+MASTER_PORT=6499
+NNODES=1
+NODE_RANK=0
+WORLD_SIZE=$(($NPUS_PER_NODE*$NNODES))
+TIMESTAMP=$(date &quot;+%Y-%m-%d_%H-%M-%S&quot;)
+
+DISTRIBUTED_ARGS=&quot;
+    --nproc_per_node $NPUS_PER_NODE \
+    --nnodes $NNODES \
+    --node_rank $NODE_RANK \
+    --master_addr $MASTER_ADDR \
+    --master_port $MASTER_PORT
+&quot;
+
+mkdir -p ./logs
+# Commonly used parameters are passed as CLI args here; see companion YAML for full config.
+# CLI args take precedence over the YAML when both are set. All args can also be moved into the YAML if preferred.
+torchrun $DISTRIBUTED_ARGS train_fsdp2.py examples/fsdp2/qwen3/tune_qwen3_8b_4k_fsdp2_A2.yaml \
+    --model.model_name_or_path /home/data/Qwen3-8B/ \
+    --data.dataset alpaca_full \
+    --parallel.fsdp_size 8 \
+    --parallel.ep_size 1 \
+    --parallel.ep_fsdp_size 1 \
+    --training.per_device_train_batch_size 1 \
+    --training.gradient_accumulation_steps 1 \
+    --training.output_dir ./output \
+    | tee logs/tune_qwen3_8b_4k_${TIMESTAMP}.log
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

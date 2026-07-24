@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>入口与启动链路 · 走读 EP05</title>
+<style>
+  :root{
+    --bg:#0f0f12; --bg2:#000; --side:#1a1a1a; --card:#16161c; --line:#2a2a33;
+    --txt:#e8e8e8; --mut:#9a9a9a; --mut2:#6a6a6a;
+    --serif:ui-serif,Georgia,"Times New Roman",Times,serif;
+    --sans:system-ui,-apple-system,"PingFang SC","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace;
+    --red:#C7000B; --red-bg:#2a0f10; --red-bd:#6e1a1c; --red-tx:#e88;
+    --grn:#788C5D; --grn-bg:#14241a; --grn-bd:#2e5a3a; --grn-tx:#7ab98a;
+    --acc:#C7000B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+  .page{max-width:1180px;margin:0 auto;padding:0}
+  /* breadcrumb + nav */
+  .topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);
+    font-size:13px;color:var(--mut)}
+  .topbar .crumb{font-family:var(--serif);font-style:italic}
+  .topbar nav{margin-left:auto;display:flex;gap:8px}
+  .topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:4px 10px;border-radius:6px}
+  .topbar nav a:hover{color:#fff;border-color:var(--acc)}
+  /* layout: tree + main */
+  .body{display:grid;grid-template-columns:160px 1fr;align-items:start}
+  .tree{background:var(--side);border-right:1px solid var(--line);padding:14px 8px;
+    font-family:var(--mono);font-size:11px;color:var(--mut2);min-height:80vh;position:sticky;top:0}
+  .tree .f{display:block;padding:2px 4px;white-space:pre}
+  .tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px}
+  .main{padding:22px 28px 80px}
+  /* headings */
+  h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:6px 0 2px;color:#fff}
+  .goal{font-family:var(--serif);font-style:italic;color:var(--mut);margin:0 0 4px}
+  .gain{font-size:13px;color:var(--mut);margin:0 0 20px}
+  .gain b{color:var(--red-tx)}
+  h2{font-family:var(--serif);font-weight:600;font-size:18px;color:#fff;margin:26px 0 6px;
+    border-bottom:1px solid var(--line);padding-bottom:3px}
+  h2 .sec{color:var(--mut2);font-style:italic;font-size:13px;margin-left:8px}
+  p{margin:8px 0}
+  /* code as numbered figure */
+  .figcap{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);
+    margin:10px 0 2px}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--mut2);
+    padding:10px 12px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55}
+  pre .ln{display:inline-block;width:32px;color:var(--mut2);user-select:none}
+  .filelink{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--red-tx);margin:4px 0 14px}
+  .filelink a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--red-bd)}
+  .footnote{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--mut2);margin:4px 0 14px}
+  /* highlight tints */
+  /* PyCharm Darcula 主题 token 配色 */
+  pre[data-lang]{color:#d4d4d4}
+  .tok-kw{color:#cc7832;font-weight:600}
+  .tok-bi{color:#9876aa;font-style:italic}
+  .tok-fn{color:#ffc66d}
+  .tok-cl{color:#a9b7c6;font-style:italic}
+  .tok-st{color:#6a8759}
+  .tok-cm{color:#808080;font-style:italic}
+  .tok-nm{color:#6897bb}
+  .tok-dc{color:#bbb33b}
+  .tok-key{color:#cc7832}
+  .tok-var{color:#9876aa}
+  .tree .f,.tree a.f{color:#6a6a6a;text-decoration:none;display:block;padding:2px 4px;white-space:pre;border-radius:3px}
+  .tree a.f:hover{background:#2a2a33;color:#d4d4d4}
+  .tree a.f.act,.tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px;font-weight:600}
+  /* gnpu split card */
+  .gnpu{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:14px 0}
+  .gnpu .g{background:var(--grn-bg);border-right:1px solid var(--line);padding:10px 14px}
+  .gnpu .n{background:var(--red-bg);padding:10px 14px}
+  .gnpu h4{margin:0 0 6px;font-family:var(--serif);font-size:13px}
+  .gnpu .g h4{color:var(--grn-tx)}.gnpu .n h4{color:var(--red-tx)}
+  .gnpu .row{display:grid;grid-template-columns:90px 1fr;gap:6px;font-size:12.5px;margin:4px 0}
+  .gnpu .row .k{color:var(--mut2)}
+  /* inline svg */
+  .diag{margin:10px 0 6px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:8px}
+  /* summary */
+  .sum{border-top:1px solid var(--line);margin-top:22px;padding-top:10px;font-size:13.5px}
+  .sum .pit{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12.5px;margin-top:6px}
+  /* file list at end */
+  .filelist{font-family:var(--mono);font-size:11px;color:var(--mut2);margin-top:22px;border-top:1px dashed var(--line);padding-top:10px}
+  .filelist b{color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <span class="crumb">第二篇章 · 工程全局 › EP05</span>
+    <span style="color:var(--mut2)">EP05</span>
+    <nav>
+      <a href="ep04.html">◀ 上一篇</a>
+      <a href="index.html">索引</a>
+      <a href="ep06.html">下一篇 ▶</a>
+    </nav>
+  </div>
+  <div class="body">
+    <aside class="tree">
+      <a class="f" href="appendix/index.html" target="_blank">📁 附录·项目文件走读</a>
+      <span class="f">MindSpeed-LLM/</span>
+      <a class="f" href="appendix/file_089411e68e5d5b.html" target="_blank">├ train_fsdp2.py</a>
+      <span class="f">├ examples/fsdp2/</span>
+      <a class="f" href="appendix/file_d04a217944c522.html" target="_blank">│  ├ env_config.sh</a>
+      <span class="f">│  └ qwen3/</span>
+      <span class="f">├ mindspeed_llm/fsdp2/</span>
+      <!-- 本篇相关文件高亮 .act，按篇替换 -->
+      <a class="f act" href="appendix/file_6532d561d207cc.html" target="_blank">examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh</a>
+      <span class="f">└ ...</span>
+    </aside>
+    <main class="main">
+      <h1>入口与启动链路</h1>
+      <p class="goal">目标：理清 env→torchrun→train_fsdp2→工厂装配 的启动链。前置：EP04 项目全景。</p>
+      <p class="gain">你将获得：<b>①</b> 一条能从 <code>bash A2.sh</code> 一路追到 <code>Trainer.train()</code> 的完整启动时序 <b>②</b> 弄懂"一份 YAML + 一串 CLI"如何被合并成同一套五段 dataclass 参数、且 CLI 永远赢的合参机制</p>
+
+      <h2>你已经熟悉的情况 <span class="sec">桥接开场</span></h2>
+      <p>你最熟的那种启动方式大概是 <code>python train.py config.yaml</code>——一个进程、一份配置、<code>if __name__ == "__main__"</code> 里读 yaml、建模型、开训。要多卡就再补一句 <code>torchrun --nproc_per_node=8 train.py ...</code>，进程由 torchrun 拉、配置还是那一份 yaml，参数该怎么传还怎么传。</p>
+      <p>MindSpeed-LLM 的 fsdp2 路线骨架和这条"熟悉的路"几乎一样：入口仍是 <code>torchrun</code> 拉多进程、<code>if __name__ == "__main__"</code> 仍在 <code>train_fsdp2.py</code> 末尾。但有两处关键不同：一是<b>配置同时来自 YAML 和 CLI 两路</b>，且二者不冲突——CLI 优先，YAML 兜底；二是入口脚本本身<b>几乎不写训练逻辑</b>，它把活儿全交给一个叫 <code>MindSpeedAutoTrainer</code> 的"依赖注入容器"：这个容器按固定顺序（解析参数→初始化分布式→造零件→把零件注入 Trainer）一口气把整条链装配好。这一篇就是顺着 <code>bash A2.sh</code> 这一记回车，把 env、torchrun、解析、工厂、Trainer 这五环一节节拆给你看。</p>
+
+      <h2>本项目怎么做 <span class="sec">原理</span></h2>
+      <p>fsdp2 后端的启动哲学是"<b>环境先行、进程其次、参数合参、容器装配</b>"四段式：先用 <code>env_config.sh</code> 把昇腾相关的运行时开关（HCCL 超时、TaskQueue、显存复用、PYTHONPATH…）一次性 export 进环境；再用 <code>torchrun</code> 按 <code>NPUS_PER_NODE/NNODES</code> 拉起 N 个对等进程，每个进程注入 <code>RANK/WORLD_SIZE/LOCAL_RANK</code> 等环境变量；进程拉起后执行 <code>train_fsdp2.py</code>，其入口 <code>main()</code> 只做一件事——构造 <code>MindSpeedAutoTrainer()</code> 并调 <code>.train()</code>。构造过程内部按 4 步推进：① <code>_parse_args</code> 把 YAML+CLI 合并解析成五段 dataclass；② <code>_initialize</code> 选后端（NPU→hccl / CUDA→nccl）、设设备、设种子、建进程组；③ <code>_build_*</code> 系列工厂按参数造出 model/tokenizer/data/optimizer/scheduler/checkpoint/monitor；④ 把这些零件作为具名参数注入 <code>Trainer(...)</code>，由 Trainer 跑主循环。下面的时序图把这条链画清楚了。</p>
+      <div class="diag">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 560" width="100%" style="max-width:940px" font-family="ui-monospace,Menlo,monospace" font-size="11">
+  <defs>
+    <marker id="arr5" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#6a6a6a"/>
+    </marker>
+  </defs>
+  <!-- vertical swimlanes (5 actors) -->
+  <g stroke="#2a2a33" stroke-dasharray="2 3" fill="none">
+    <line x1="110" y1="50" x2="110" y2="540"/>
+    <line x1="270" y1="50" x2="270" y2="540"/>
+    <line x1="430" y1="50" x2="430" y2="540"/>
+    <line x1="600" y1="50" x2="600" y2="540"/>
+    <line x1="810" y1="50" x2="810" y2="540"/>
+  </g>
+  <g font-size="11" font-weight="600" text-anchor="middle">
+    <text x="110" y="38" fill="#7ab98a">env_config.sh</text>
+    <text x="270" y="38" fill="#7ab98a">torchrun</text>
+    <text x="430" y="38" fill="#e88">train_fsdp2.py</text>
+    <text x="600" y="38" fill="#e88">arguments.py</text>
+    <text x="810" y="38" fill="#7ab98a">各工厂 / Trainer</text>
+  </g>
+  <!-- 1. env export -->
+  <rect x="50" y="60" width="120" height="40" rx="5" fill="#14241a" stroke="#2e5a3a"/>
+  <text x="110" y="76" fill="#7ab98a" text-anchor="middle" font-size="9.5">export TRAINING_BACKEND</text>
+  <text x="110" y="90" fill="#7ab98a" text-anchor="middle" font-size="9.5">HCCL_TIMEOUT/PATH…</text>
+  <!-- arrow env -> torchrun (source) -->
+  <line x1="170" y1="80" x2="210" y2="80" stroke="#6a6a6a" marker-end="url(#arr5)"/>
+  <text x="190" y="74" fill="#6a6a6a" font-size="9" text-anchor="middle">source</text>
+  <!-- 2. torchrun spawn -->
+  <rect x="210" y="120" width="120" height="44" rx="5" fill="#14241a" stroke="#2e5a3a"/>
+  <text x="270" y="136" fill="#7ab98a" text-anchor="middle" font-size="9.5">拉 N 个进程</text>
+  <text x="270" y="150" fill="#7ab98a" text-anchor="middle" font-size="9.5">注入 RANK/WORLD/LOCAL</text>
+  <!-- arrow torchrun -> train_fsdp2 -->
+  <line x1="330" y1="142" x2="380" y2="142" stroke="#6a6a6a" marker-end="url(#arr5)"/>
+  <text x="355" y="136" fill="#6a6a6a" font-size="9" text-anchor="middle">exec</text>
+  <!-- 3. __main__ -> main() -> AutoTrainer() -> MindSpeedAutoTrainer.__init__ -->
+  <rect x="360" y="180" width="140" height="40" rx="5" fill="#2a0f10" stroke="#6e1a1c"/>
+  <text x="430" y="196" fill="#e88" text-anchor="middle" font-size="9.5">if __name__ == "__main__"</text>
+  <text x="430" y="210" fill="#e88" text-anchor="middle" font-size="9.5">main() → AutoTrainer()</text>
+  <!-- arrow to arguments (step1 _parse_args) -->
+  <line x1="500" y1="200" x2="540" y2="200" stroke="#6a6a6a" marker-end="url(#arr5)"/>
+  <text x="520" y="194" fill="#6a6a6a" font-size="9" text-anchor="middle">①_parse_args</text>
+  <!-- 4. arguments: merge YAML+CLI -->
+  <rect x="540" y="240" width="120" height="50" rx="5" fill="#2a0f10" stroke="#6e1a1c"/>
+  <text x="600" y="256" fill="#e88" text-anchor="middle" font-size="9.5">fsdp2_parse_args</text>
+  <text x="600" y="270" fill="#9a9a9a" text-anchor="middle" font-size="9">YAML 兜底</text>
+  <text x="600" y="282" fill="#9a9a9a" text-anchor="middle" font-size="9">CLI 覆盖</text>
+  <!-- arrow back to train_fsdp2 (step2 _initialize) -->
+  <path d="M600,290 Q560,310 500,310" fill="none" stroke="#6a6a6a" marker-end="url(#arr5)"/>
+  <text x="560" y="306" fill="#6a6a6a" font-size="9" text-anchor="middle">五段 dataclass</text>
+  <!-- 5. _initialize: backend hccl + init_process_group -->
+  <rect x="360" y="300" width="140" height="50" rx="5" fill="#2a0f10" stroke="#6e1a1c"/>
+  <text x="430" y="316" fill="#e88" text-anchor="middle" font-size="9.5">②_initialize</text>
+  <text x="430" y="330" fill="#9a9a9a" text-anchor="middle" font-size="9">选 hccl/nccl</text>
+  <text x="430" y="342" fill="#9a9a9a" text-anchor="middle" font-size="9">init_process_group</text>
+  <!-- 6. step3 _build_* factories -->
+  <line x1="500" y1="325" x2="740" y2="325" stroke="#6a6a6a" marker-end="url(#arr5)"/>
+  <text x="620" y="319" fill="#6a6a6a" font-size="9" text-anchor="middle">③_build_model/tokenizer/data/optim/sched/ckpt</text>
+  <rect x="740" y="300" width="140" height="50" rx="5" fill="#14241a" stroke="#2e5a3a"/>
+  <text x="810" y="316" fill="#7ab98a" text-anchor="middle" font-size="9.5">各 Factory.create()</text>
+  <text x="810" y="330" fill="#7ab98a" text-anchor="middle" font-size="9">model / data / optim …</text>
+  <text x="810" y="342" fill="#7ab98a" text-anchor="middle" font-size="9">CheckpointManager</text>
+  <!-- 7. step4 DI into Trainer -->
+  <path d="M810,350 Q810,400 540,400" fill="none" stroke="#6a6a6a" marker-end="url(#arr5)"/>
+  <text x="680" y="396" fill="#6a6a6a" font-size="9" text-anchor="middle">④依赖注入</text>
+  <rect x="360" y="392" width="140" height="44" rx="5" fill="#2a0f10" stroke="#6e1a1c"/>
+  <text x="430" y="408" fill="#e88" text-anchor="middle" font-size="9.5">Trainer(model=…,</text>
+  <text x="430" y="422" fill="#e88" text-anchor="middle" font-size="9.5">optim=…, ckpt=…)</text>
+  <!-- 8. train() -> trainer.train() -->
+  <line x1="430" y1="436" x2="430" y2="470" stroke="#6a6a6a" marker-end="url(#arr5)"/>
+  <text x="455" y="456" fill="#6a6a6a" font-size="9">.train()</text>
+  <rect x="360" y="474" width="140" height="36" rx="5" fill="#14241a" stroke="#2e5a3a"/>
+  <text x="430" y="496" fill="#7ab98a" text-anchor="middle" font-size="9.5">trainer.train() 主循环</text>
+  <text x="470" y="540" fill="#6a6a6a" text-anchor="middle" font-style="italic" font-size="9.5">env → torchrun → __main__ → 解析 → 工厂 → Trainer</text>
+</svg>
+      </div>
+      <p class="footnote">这张图刻意把"参数合参"画成一个回弯：YAML+CLI 在 <code>fsdp2_parse_args</code> 里合并出五段 dataclass 后，结果回流到 <code>train_fsdp2.py</code> 的 <code>_initialize/_build_*</code>，每一步都从这些 dataclass 里取值——所以"一份配置"在物理上是 YAML，在程序内是五个 dataclass 实例。</p>
+
+      <h2>源码下钻 <span class="sec">file:line</span></h2>
+      <p>先看启动脚本本身。<code>A2.sh</code> 就是 Qwen3-8B 在 8 卡单机上的预训练启动脚本，逐行读它等于把整条启动链的"控制台侧"看一遍。</p>
+
+      <div class="figcap">Qwen3-8B 预训练启动脚本（env→torchrun→train_fsdp2.py + CLI 覆盖）</div>
+      <pre data-lang="sh">source examples/fsdp2/env_config.sh
+
+NPUS_PER_NODE=8
+MASTER_ADDR=localhost
+MASTER_PORT=6499
+NNODES=1
+NODE_RANK=0
+WORLD_SIZE=$(($NPUS_PER_NODE*$NNODES))
+
+DISTRIBUTED_ARGS="
+    --nproc_per_node $NPUS_PER_NODE \
+    --nnodes $NNODES \
+    --node_rank $NODE_RANK \
+    --master_addr $MASTER_ADDR \
+    --master_port $MASTER_PORT
+"
+
+# Commonly used parameters are passed as CLI args here; see companion YAML for full config.
+# CLI args take precedence over the YAML when both are set. All args can also be moved into the YAML if preferred.
+torchrun $DISTRIBUTED_ARGS train_fsdp2.py examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml \
+    --model.model_name_or_path /home/data/Qwen3-8B/ \
+    --data.dataset '{"file_name": "your origin data path.example: /home/train-00000-of-a09b74b3ef9c3b56.parquet"}' \
+    --parallel.fsdp_size 8 \
+    --parallel.ep_size 1 \
+    --parallel.ep_fsdp_size 1 \
+    --training.per_device_train_batch_size 1 \
+    --training.gradient_accumulation_steps 1 \
+    --training.output_dir ./output</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh">../examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh#L1">:1</a>（source env）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh#L3">:3</a>（NPUS_PER_NODE=8）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh#L10">:10</a>–<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh#L16">:16</a>（DISTRIBUTED_ARGS）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh#L19">:19</a>（CLI 优先注释）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh#L20">:20</a>–<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh#L28">:28</a>（torchrun 调用 + CLI 覆盖）</div>
+      <p>逐块拆：</p>
+      <ul>
+        <li><b>第 1 行 source</b>：<code>source examples/fsdp2/env_config.sh</code> 把那一坨昇腾运行时环境变量灌进当前 shell——这一步必须在 torchrun 之前，因为这些变量要被 torchrun 拉起的子进程<b>继承</b>。其中最关键的是 <code>TRAINING_BACKEND=mindspeed_fsdp</code>（行 2），它决定 <code>AutoTrainer</code> 走哪条后端分支；其余如 <code>HCCL_CONNECT_TIMEOUT=1800</code>（行 3，HCCL 建链超时 1800 秒）、<code>TASK_QUEUE_ENABLE=2</code>（行 4，昇腾 TaskQueue 调度）、<code>MULTI_STREAM_MEMORY_REUSE=2</code>（行 6，多流显存复用）、<code>PYTHONPATH=$PYTHONPATH:$(pwd)</code>（行 10，把仓库根加进搜索路径，保证 <code>import mindspeed_llm</code> 能找到）都是 NPU 训练的"标配开关"，EP02 已逐条讲过。</li>
+        <li><b>第 3–8 行拓扑变量</b>：<code>NPUS_PER_NODE=8</code> 是单机 NPU 数（Qwen3-8B 走 8 卡）；<code>MASTER_ADDR=localhost / MASTER_PORT=6499</code> 是进程组 rendezvous 地址（单机所以 localhost）；<code>NNODES=1 / NODE_RANK=0</code> 表示单节点本机；<code>WORLD_SIZE</code> 由 <code>NPUS_PER_NODE × NNODES</code> 算出，最终等于 8。多机时只需改 <code>NNODES</code> 并在各机设不同 <code>NODE_RANK</code> 与同一 <code>MASTER_ADDR</code>，脚本结构不变——这是 torchrun 多机协议的标准用法。</li>
+        <li><b>第 10–16 行 DISTRIBUTED_ARGS</b>：把上面五个拓扑变量拼成 torchrun 的参数串：<code>--nproc_per_node 8 --nnodes 1 --node_rank 0 --master_addr localhost --master_port 6499</code>。注意这里用的是 <code>torchrun</code>（PyTorch≥1.9 的统一启动器），不是老式的 <code>python -m torch.distributed.launch</code>。torchrun 会按 <code>--nproc_per_node</code> 起 8 个对等子进程，每个进程注入 <code>RANK / WORLD_SIZE / LOCAL_RANK</code> 三个环境变量——这三个变量后面 <code>_initialize</code> 里会用到。</li>
+        <li><b>第 19 行的注释 + 第 20–28 行的调用</b>：第 19 行注释写得很直白——<code>CLI args take precedence over the YAML when both are set</code>（CLI 与 YAML 同时设置时 CLI 优先）。第 20 行才是真正的启动：<code>torchrun $DISTRIBUTED_ARGS train_fsdp2.py examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml --model.model_name_or_path /home/data/Qwen3-8B/ --parallel.fsdp_size 8 …</code>。这里同时给了 YAML 文件路径（位置参数，<code>sys.argv[1]</code>）和一串 <code>--段.字段 值</code> 形式的 CLI 覆盖。YAML 里装的是"不太常调的全量配置"（recompute/optimizer/lr_scheduler/max_steps 等），CLI 上挂的是"每个环境都要改的"（模型路径、数据集、batch、output_dir、fsdp_size）。<code>--parallel.fsdp_size 8</code> 这一行尤其重要——它把 FSDP 分片组大小设成 8（等于全部 8 卡全分片），而 YAML 里并没有这个键，所以这里 CLI 不是"覆盖"而是"补充"。</li>
+      </ul>
+
+      <div class="figcap">examples/fsdp2/env_config.sh 昇腾运行时开关（被 source 灌入，子进程继承）</div>
+      <pre data-lang="sh"># Common environment variables for the fsdp2 backend
+export TRAINING_BACKEND=mindspeed_fsdp
+export HCCL_CONNECT_TIMEOUT=1800
+export TASK_QUEUE_ENABLE=2
+export CPU_AFFINITY_CONF=1
+export MULTI_STREAM_MEMORY_REUSE=2
+export PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+export TORCH_COMPILE_DEBUG=0
+export CUBLAS_WORKSPACE_CONFIG=:4096:8
+export PYTHONPATH=$PYTHONPATH:$(pwd)</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/env_config.sh">../examples/fsdp2/env_config.sh</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/env_config.sh#L2">:2</a>（TRAINING_BACKEND）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/env_config.sh#L3">:3</a>（HCCL 超时）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/env_config.sh#L6">:6</a>（多流显存复用）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/env_config.sh#L10">:10</a>（PYTHONPATH）</div>
+      <p class="footnote">这 9 行 EP02 已逐条讲过，本篇只复引关键几条——重点是 <code>TRAINING_BACKEND</code>（决定走哪条后端）与 <code>PYTHONPATH</code>（决定能不能 import 到本仓库），其余是昇腾硬件层调优。</p>
+
+      <p>现在跳到 Python 侧。torchrun 把 8 个进程拉起后，每个进程都执行 <code>train_fsdp2.py</code>，末尾这段是真正的"入口的入口"。</p>
+
+      <div class="figcap">train_fsdp2.py 入口段（main 门面 → AutoTrainer 派发 → MindSpeedAutoTrainer 装配）</div>
+      <pre data-lang="py">class MindSpeedAutoTrainer:
+    """
+    AutoTrainer: Dependency Injection Container.
+    Based on FSDP2 Arguments (HfArgumentParser style).
+    """
+
+    def __init__(self):
+        # 1. Parse arguments
+        self._parse_args()
+
+        # 2. Initialize distributed environment
+        self._initialize(seed=self.training_args.seed)
+
+        self.rank = torch.distributed.get_rank()
+        self._print_parsed_args()
+
+        # 3. Build components
+        self.model = self._build_model()
+        self.tokenizer = self._build_tokenizer()
+        self.template = get_template_and_fix_tokenizer(self.tokenizer, self.data_args)
+        self.data_manager = self._build_data_manager(self.tokenizer, self.template)
+        self.train_dataloader = self.data_manager.create_train_dataloader()
+        self.optimizer = self._build_optimizer(self.model)
+        self.lr_scheduler = self._build_scheduler(self.optimizer)
+        self.checkpoint_manager = self._build_checkpointer()
+        self.train_monitor = self._build_monitor()
+        self.model.apply_optimizer_hook(self.optimizer)
+
+        # 4. Dependency Injection
+        self.trainer = Trainer(
+            model=self.model,
+            optimizer=self.optimizer,
+            lr_scheduler=self.lr_scheduler,
+            train_dataloader=self.train_dataloader,
+            args=self.training_args,
+            parallel_args=self.parallel_args,
+            optimization_args=self.optimization_args,
+            data_args=self.data_args,
+            ckpt_manager=self.checkpoint_manager,
+            monitor=self.train_monitor,
+            tokenizer=self.tokenizer,
+        )</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py">../train_fsdp2.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L60">:60</a>（class MindSpeedAutoTrainer）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L62">:62</a>–<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L64">:64</a>（DI 容器 docstring）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L66">:66</a>–<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L101">:101</a>（__init__ 四步装配）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L88">:88</a>–<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L101">:101</a>（Trainer 依赖注入）</div>
+      <p>这段 <code>__init__</code> 就是"依赖注入容器"的本体——它自己不实现任何训练算法，只做<b>按序取件 + 具名交付</b>。四个注释把顺序标得很清楚：① <code>_parse_args</code>（行 68，解析参数）；② <code>_initialize</code>（行 71，初始化分布式）；③ <code>_build_model/_build_tokenizer/_build_data_manager/_build_optimizer/_build_scheduler/_build_checkpointer/_build_monitor</code>（行 77–85，造零件）；④ <code>Trainer(...)</code>（行 89，注入）。注意行 79 的 <code>get_template_and_fix_tokenizer</code> 夹在 tokenizer 和 data 之间——它要在拿到 tokenizer 之后、喂给 data 之前，把对话模板和特殊 token 修正好（EP13 数据流水线详讲）。第 ④ 步里 <code>Trainer</code> 接收的全是<b>具名参数</b>，这就是"依赖注入"的字面体现：Trainer 不自己去 new 任何东西，它需要什么，容器就递什么。装配完，<code>AutoTrainer.train()</code>（见下方入口段）只需调一句 <code>self.trainer.train(resume_from_checkpoint=...)</code>。</p>
+
+      <div class="figcap">train_fsdp2.py 末尾入口段（__main__ → main → AutoTrainer.train）</div>
+      <pre data-lang="py">class AutoTrainer:
+    """
+    Unified entry point for Training.
+    Dispatches to MindSpeedAutoTrainer (New) or McoreAutoTrainer (Old) based on configuration.
+    """
+
+    def __init__(self):
+        # Strategy Dispatch: Prioritize environment variable TRAINING_BACKEND
+        # To run MindSpeed FSDP code, set: export TRAINING_BACKEND=mindspeed_fsdp
+        logger.info_rank0(">>> [AutoTrainer] Initializing MindSpeed FSDP backend...")
+        self.trainer = MindSpeedAutoTrainer()
+
+    def train(self):
+        """Delegate to the implementation"""
+        self.trainer.train()
+
+
+@auto_coverage
+def main():
+    trainer = AutoTrainer()
+    trainer.train()
+
+
+if __name__ == "__main__":
+    main()</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py">../train_fsdp2.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L270">:270</a>（class AutoTrainer 门面）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L277">:277</a>–<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L278">:278</a>（读 TRAINING_BACKEND 注释）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L280">:280</a>（派发到 MindSpeedAutoTrainer）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L287">:287</a>–<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L290">:290</a>（main）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L296">:296</a>–<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L297">:297</a>（__main__ 入口）</div>
+      <p>这里有个值得注意的设计：<code>AutoTrainer</code> 是一层"门面/派发器"（Facade/Dispatcher），它的 <code>__init__</code> 注释明确写着"<b>Prioritize environment variable TRAINING_BACKEND</b>"（行 277），并提示"要跑 MindSpeed FSDP 就 <code>export TRAINING_BACKEND=mindspeed_fsdp</code>"（行 278）——这正好和 <code>env_config.sh:2</code> 对上。换句话说，<code>AutoTrainer</code> 留了"未来切到 mcore 后端"的口子，只是当前实现里直接 <code>self.trainer = MindSpeedAutoTrainer()</code>（行 280）。<code>main()</code>（行 288–290）被 <code>@auto_coverage</code> 装饰（行 287，作用 EP04 讲过：按白名单注入覆盖测试），它只做两件事：<code>trainer = AutoTrainer()</code>、<code>trainer.train()</code>。最后行 296–297 的 <code>if __name__ == "__main__": main()</code> 是 torchrun 拉起进程后真正执行的第一行 Python。</p>
+
+      <p>现在回答本篇最核心的问题：<b>YAML 和 CLI 到底怎么合并、谁优先？</b>答案在 <code>arguments.py</code> 的 <code>fsdp2_parse_args</code>。</p>
+
+      <div class="figcap">fsdp2_parse_args 七步合参（YAML 兜底、CLI 优先的关键证据）</div>
+      <pre data-lang="py">def fsdp2_parse_args(rootclass: TypeVar) -> TypeVar:
+    """
+    Parses the root argument class from CLI or YAML input.
+    Supports complex types like List[Dict] and Dict via JSON serialization.
+    """
+    # 1: Create ArgumentParser and register all fields
+    parser = _create_argument_parser(rootclass)
+
+    # 2: Parse command-line args
+    cmd_args = sys.argv[1:]
+    if not cmd_args:
+        raise ValueError("No arguments provided.")
+
+    # 3: Load YAML config if the first arg is a .yaml/.yml file
+    yaml_config = _load_yaml_if_provided(cmd_args)
+
+    # 4: Merge YAML into CLI args (CLI has higher priority)
+    final_cmd_args = _merge_yaml_into_cmd_args(cmd_args, yaml_config)
+
+    # 5: Parse arguments
+    args, remaining_args = parser.parse_known_args(final_cmd_args)
+    if remaining_args:
+        logger.info_rank0(f"Some specified arguments are not used by the ArgumentParser: {remaining_args}")
+
+    # 6: Post-process fields that require JSON deserialization
+    parse_result = _postprocess_json_fields(args, parser.dict_fields)
+
+    # 7: Build dataclass instances
+    result = _build_dataclass_instances(rootclass, parse_result)
+
+    # 8: Cross-dataclass validation
+    _validate_cross_args(result)
+
+    return result</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py">../mindspeed_llm/fsdp2/utils/arguments.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L787">:787</a>（def fsdp2_parse_args）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L796">:796</a>（sys.argv[1:]）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L803">:803</a>（CLI 优先注释）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L804">:804</a>（_merge_yaml_into_cmd_args）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L807">:807</a>（parse_known_args）</div>
+      <p>第 1 步先用 <code>_create_argument_parser(rootclass)</code> 把五段 dataclass（model/data/parallel/training/optimization）的所有字段动态注册成一个 <code>argparse.ArgumentParser</code>，每个字段注册成 <code>--段.字段</code> 形式的参数——这就是为什么 CLI 里写的是 <code>--parallel.fsdp_size 8</code> 而不是 <code>--fsdp_size 8</code>。第 2 步取 <code>sys.argv[1:]</code>（注意：YAML 文件名也在里面，作为 <code>cmd_args[0]</code>）。第 3 步 <code>_load_yaml_if_provided</code> 检查 <code>cmd_args[0]</code> 是否以 <code>.yaml/.yml</code> 结尾，是就用 <code>yaml.safe_load</code> 读成 dict（这就是为什么 YAML 必须是<b>第一个位置参数</b>）。第 4 步是关键——注释写得明明白白：<code># 4: Merge YAML into CLI args (CLI has higher priority)</code>（行 803），然后调 <code>_merge_yaml_into_cmd_args</code>（行 804）。第 5 步把合并后的串喂给 <code>parser.parse_known_args</code>。后续 6/7/8 是 JSON 反序列化、构造 dataclass 实例、跨段校验。</p>
+
+      <div class="figcap">_merge_yaml_into_cmd_args 合参实现（CLI 已出现的字段被跳过）</div>
+      <pre data-lang="py">def _merge_yaml_into_cmd_args(cmd_args, yaml_config):
+    """Convert YAML config to CLI-style arguments (lower priority than explicit CLI)."""
+    working_args = cmd_args[1:] if yaml_config else cmd_args[:]
+    cmd_args_string = "=".join(working_args)
+    result = working_args[:]
+
+    for base, arg_dict in yaml_config.items():
+        if not isinstance(arg_dict, dict):
+            continue
+        for arg_name, arg_value in arg_dict.items():
+            if arg_value is None:
+                continue
+            if f"--{base}.{arg_name}=" in cmd_args_string:
+                continue  # Skip if overridden by CLI
+
+            result.append(f"--{base}.{arg_name}")
+            if isinstance(arg_value, list):
+                result.extend(str(item) for item in arg_value)
+            elif isinstance(arg_value, dict):
+                result.append(json.dumps(arg_value, ensure_ascii=False))
+            else:
+                result.append(str(arg_value))
+
+    return result</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py">../mindspeed_llm/fsdp2/utils/arguments.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L993">:993</a>（def _merge_yaml_into_cmd_args）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L994">:994</a>（lower priority 注释）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L1006">:1006</a>（Skip if overridden by CLI）</div>
+      <p>这一段把"CLI 优先"落到了代码上：它先把 YAML 转成等价的 <code>--段.字段 值</code> 串，但<b>只要某个字段已经在 CLI 里以 <code>--段.字段=...</code> 形式出现过，YAML 的那份就被 <code>continue</code> 跳过</b>（行 1006 注释 <code> Skip if overridden by CLI</code>）。注意第 1000 行（按文件实际行号，即上方 <code>cmd_args_string = "=".join(working_args)</code>）把 CLI 串按 <code>=</code> 拼起来做"是否已出现"的子串匹配——这隐含一个约定：CLI 覆盖必须用 <code>--key=value</code> 形式才能被识别为"已出现"（脚本里 <code>--parallel.fsdp_size 8</code> 是空格分隔，会被 argparse 转成 <code>=</code> 形式后再比对，<b>（核实：空格分隔的 <code>--k v</code> 与 <code>--k=v</code> 在此子串匹配下是否等价，最终以 arguments.py 运行时行为为准）</b>）。合参完成后，YAML 与 CLI 在程序内已无区别，统一是一串 CLI 风格参数，由同一个 ArgumentParser 解析。这就是为什么"CLI 与 YAML 不冲突"——它们不是两套并行配置，而是 YAML 先被翻译成 CLI 串、再被 CLI 同形覆盖。</p>
+
+      <div class="figcap">_initialize 选后端 + 建进程组（hccl vs nccl 的分流点）</div>
+      <pre data-lang="py">@staticmethod
+def _initialize(seed: int):
+    if is_torch_npu_available():
+        fallback = torch.npu
+        dist_backend = "hccl"
+        apply_hccl_premul_sum_patch()
+    elif torch.cuda.is_available():
+        fallback = torch.cuda
+        dist_backend = "nccl"
+    else:
+        raise RuntimeError("No supported accelerator found (NPU/CUDA)")
+
+    set_accelerator_compatible(fallback)
+    setup_global_logging(level="INFO")
+
+    env_local_rank = int(os.environ.get("LOCAL_RANK", -1))
+    ...
+    if not torch.distributed.is_initialized():
+        torch.distributed.init_process_group(backend=dist_backend, rank=rank, world_size=world_size)</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py">../train_fsdp2.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L104">:104</a>（def _initialize）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L111">:111</a>（dist_backend = "hccl"）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L112">:112</a>（apply_hccl_premul_sum_patch）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L125">:125</a>（读 LOCAL_RANK）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L156">:156</a>（init_process_group）</div>
+      <p>这一段是 NPU 与 GPU 的真正分叉点：行 109 <code>is_torch_npu_available()</code> 为真就走 <code>dist_backend = "hccl"</code>（行 111），并立刻 <code>apply_hccl_premul_sum_patch()</code>（行 112，EP03 讲过的 HCCL premul-sum 补丁）；否则走 <code>nccl</code>。行 125 读 <code>LOCAL_RANK</code>——这个环境变量正是 torchrun 在第②步注入的，所以 <code>_initialize</code> 能"无痛"拿到本进程的设备号。行 144–149 还做了<b>非 torchrun 容错</b>：若 <code>RANK</code> 不在环境里（即用户直接 <code>python train_fsdp2.py ...</code> 单进程跑），手动补 <code>RANK=0 / WORLD_SIZE=1 / LOCAL_RANK=0</code>，让单进程也能 init_process_group。行 156 的 <code>init_process_group</code> 是分布式真正的"开机"动作。</p>
+
+      <div class="gnpu">
+        <div class="g"><h4>GPU / 已知（单进程或 torchrun+nccl）</h4>
+          <div class="row"><span class="k">启动</span><span>python train.py config.yaml（单进程）；多卡 torchrun --nproc_per_node train.py …</span></div>
+          <div class="row"><span class="k">配置</span><span>argparse 单段 Namespace，或自己 yaml.load 一份 dict</span></div>
+          <div class="row"><span class="k">合参</span><span>要么全 argparse、要么全 yaml，二选一，不混用</span></div>
+          <div class="row"><span class="k">后端</span><span>torchrun 默认 backend=nccl（NVIDIA 集合通信库）</span></div>
+          <div class="row"><span class="k">装配</span><span>main 里手写 model=…/optim=…/loop，无 DI 容器</span></div>
+        </div>
+        <div class="n"><h4>NPU / 本项目（torchrun + YAML/CLI 合参）</h4>
+          <div class="row"><span class="k">启动</span><span>bash A2.sh → source env → torchrun train_fsdp2.py YAML --cli 覆盖</span></div>
+          <div class="row"><span class="k">配置</span><span>HfArgumentParser 风格五段 dataclass（model/data/parallel/training/optimization）</span></div>
+          <div class="row"><span class="k">合参</span><span>YAML 兜底 + CLI 优先，统一翻译成 --段.字段 串再 parse_known_args</span></div>
+          <div class="row"><span class="k">后端</span><span>backend=hccl（昇腾集合通信库），apply_hccl_premul_sum_patch 修语义</span></div>
+          <div class="row"><span class="k">装配</span><span>MindSpeedAutoTrainer DI 容器：_parse_args→_initialize→_build_*→Trainer(具名注入)</span></div>
+        </div>
+      </div>
+
+      <div class="sum">
+        <b>小结</b>　心智模型：fsdp2 后端的启动是一条"<b>torchrun 启多进程 + 一份 YAML/CLI 合参驱动工厂装配</b>"的链——env_config 灌运行时开关，torchrun 按 NPUS_PER_NODE 拉对等进程并注入 RANK/LOCAL_RANK，train_fsdp2.py 的 <code>main()</code> 把球交给 <code>MindSpeedAutoTrainer</code> 这个依赖注入容器，容器按"解析→初始化分布式→造零件→注入 Trainer"四步把整条训练链一次装配好。读这一路代码的姿势是"顺着 <code>__init__</code> 的四个注释往下追"，而不是被五段 dataclass 吓住——参数再多，入口只有一个 <code>AutoTrainer().train()</code>。
+        <div class="pit">常见误区：① <b>以为 CLI 与 YAML 冲突</b>——其实二者不冲突，<code>_merge_yaml_into_cmd_args</code> 先把 YAML 翻译成 CLI 串、CLI 已出现的字段被跳过（行 1006 <code> Skip if overridden by CLI</code>），所以<b>CLI 优先、YAML 兜底</b>，二者最终是同一串参数。② 以为 YAML 文件可以放任意位置——它必须是 <code>sys.argv[1]</code>（第一个位置参数），否则 <code>_load_yaml_if_provided</code> 不会识别。③ 以为 <code>--parallel.fsdp_size 8</code> 是"覆盖"YAML——其实 A2 的 YAML 里压根没 <code>fsdp_size</code> 这键，这里 CLI 是"补充"而非"覆盖"；真正"覆盖"的是 YAML 里已设、CLI 又改了同一字段的情况。④ 以为 <code>MindSpeedAutoTrainer</code> 就是 <code>Trainer</code>——前者是装配/注入容器，后者是被注入后跑主循环的引擎，二者不是一回事。</div>
+      </div>
+
+      <div class="filelist"><b>本篇涉及文件</b><br>
+../examples/fsdp2/env_config.sh（环境开关，行 2/3/6/10）<br>
+../examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh（启动脚本，行 1/3/10-16/19/20-28）<br>
+../examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml（伴随 YAML 全量配置）<br>
+../train_fsdp2.py（入口，MindSpeedAutoTrainer __init__ 行 66-101；AutoTrainer 行 270-284；main 行 287-297）<br>
+../mindspeed_llm/fsdp2/utils/arguments.py（fsdp2_parse_args 行 787；_merge_yaml_into_cmd_args 行 993，行 1006 CLI 覆盖跳过）</div>
+    </main>
+  </div>
+</div>
+<script>
+// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre[data-lang]').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];if(!rules)return;
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      return '<span class="ln">'+(i+1)+'</span>'+tokLine(l,rules);
+    }).join('\n');
+  });
+})();
+</script>
+</body>
+</html>

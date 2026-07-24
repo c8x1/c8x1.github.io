@@ -1,0 +1,487 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/distributed/parallel_state.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/distributed/parallel_state.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_e508408c704381.html">◀ parallel_engine_config.py</a> <a href="file_437e79f3b85550.html">async_offload.py ▶</a></nav></div>
+<div class="wrap">
+<h1>parallel_state.py</h1><p class="goal">mindspeed_llm/fsdp2/distributed/parallel_state.py · 7267B · 185 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L18" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class Singleton(type)</a><a href="#L21" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __call__(cls, *args, **kwargs)</a><a href="#L27" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_last_mesh_dim(mesh_shape)</a><a href="#L37" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def init_parallel_state(config: ParallelEngine</a><a href="#L44" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class ParallelState(metaclass=Singleton)</a><a href="#L56" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __post_init__(self)</a><a href="#L96" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __str__(self)</a><a href="#L106" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def is_initialized(self) -&gt; bool</a><a href="#L110" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def world_size(self) -&gt; int</a><a href="#L114" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def local_rank(self) -&gt; int</a><a href="#L118" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def global_rank(self) -&gt; int</a><a href="#L121" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def is_group_enable(self, mesh_name: str) -&gt</a><a href="#L127" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_group(self, mesh_name: str)</a><a href="#L133" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_group_size(self, mesh_name: str)</a><a href="#L139" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_rank(self, mesh_name: str)</a><a href="#L145" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_device_mesh(self, mesh_name: str)</a><a href="#L151" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def add_device_mesh_groups(self, mesh_dim_name</a><a href="#L153" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_methods(name)</a><a href="#L154" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def is_enable_method(self)</a><a href="#L157" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_group_method(self)</a><a href="#L160" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_size_method(self)</a><a href="#L163" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_rank_method(self)</a><a href="#L166" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_mesh_method(self)</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep07.html">EP07</a><a href="../ep08.html">EP08</a><a href="../ep09.html">EP09</a><a href="../ep10.html">EP10</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="annot"><div class="seg"><p class="seglab">行 1-15 · 模块头部与依赖：HCCL 与 torch.accelerator 接缝的伏笔</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :1-:15）</h5><pre data-lang="py" data-start="1" data-idprefix="A"># Copyright (c) 2025, Huawei Technologies Co., Ltd. All rights reserved.
+import os
+import types
+import logging
+from dataclasses import dataclass, asdict, fields
+from functools import reduce
+
+import torch
+from torch.distributed.device_mesh import init_device_mesh, DeviceMesh
+
+
+from mindspeed_llm.fsdp2.distributed.parallel_engine_config import ParallelEngineConfig
+from mindspeed.lite.utils.log import print_rank
+
+logger = logging.getLogger(__name__)</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">import torch
+import torch.distributed as dist
+from torch.distributed.device_mesh import init_device_mesh, DeviceMesh
+# 标准 GPU DDP 侧依赖:
+# torch + torch.distributed(NCCL) 即可
+# 不需要 mindspeed.* / 不需要 print_rank 封装
+# backend 字面量 &#x27;nccl&#x27; 散落在各启动脚本里</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>对照差异：标准 GPU DDP 只需 <code>torch</code>+<code>torch.distributed</code> 两样，后端 <code>'nccl'</code> 通常在启动脚本里写死，日志直接 <code>print</code> 或 <code>if dist.get_rank()==0: logging.info(...)</code> 手动挡。本仓这边把 backend 写死 <code>'hccl'</code>（HCCL 是 CANN 对标 NCCL 的集合通信库）、把 rank0 日志封装成 <code>print_rank</code>、并把设备发现交给 <code>torch.accelerator</code> 抽象层（:175）而非硬编码 <code>'npu'</code>。多出来的这些接缝，本质是为「Ascend 上跑通 FSDP2 DeviceMesh + 不在业务代码里写死厂商」服务的——同一个文件换 backend 字符串和 accelerator 解析就能在 GPU 上读，但实际只在 Ascend 路径被 <code>MindSpeedParallelEngine</code> 装载。</p></div></div><div class="seg"><p class="seglab">行 18-34 · Singleton 元类 + get_last_mesh_dim：单例与「缺省维反推」</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :18-:34）</h5><pre data-lang="py" data-start="18" data-idprefix="A">class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+def get_last_mesh_dim(mesh_shape):
+    last_mesh = torch.distributed.get_world_size()
+
+    for shape in mesh_shape:
+        if last_mesh % shape != 0:
+            raise AssertionError(&quot;World size is not divisible by mesh group {}&quot;.format(mesh_shape))
+        last_mesh //= shape
+    return last_mesh</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># DDP 侧无此模式:
+# data_parallel_size = world_size  # 直接相等
+# 不需要 get_last_mesh_dim 反推
+# 没有 Singleton 单例,并行状态散落在各处
+data_parallel_size = torch.distributed.get_world_size()</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>对照差异：DDP 时代 <code>data_parallel_size</code> 直接等于 <code>world_size</code>（每卡持有完整模型副本，数据维就是全部卡），不需要反推；并行状态通常是散落的 <code>TP_GROUP/CP_GROUP</code> 全局变量，没有单例封装。FSDP2 这边因为 mesh 是多维的（dp/fsdp/tp/ep/cp 多维并存），用户只显式指定 <code>fully_shard/tp</code>，<code>dp</code> 维被 <code>get_last_mesh_dim</code> 用 world_size 反推；而单例 <code>Singleton</code> 保证这张多维拓扑表在进程内唯一，下游全部经它查 group/rank。<code>get_last_mesh_dim</code> 的除不尽断言（:31）就是 mesh shape 必须整除 world_size 的数学约束——DDP 下不存在多维 mesh 也就没有这约束。</p></div></div><div class="seg"><p class="seglab">行 37-40 · init_parallel_state 工厂：用字段交集丢弃 plan 类配置</p><pre data-lang="py" data-start="37" data-idprefix="A">def init_parallel_state(config: ParallelEngineConfig):
+    field_names = {field.name for field in fields(ParallelState)}
+    parallel_state_config = {k: v for k, v in asdict(config).items() if k in field_names}
+    return ParallelState(**parallel_state_config)</pre><div class="exp"><p>:37-:40 <code>init_parallel_state(config)</code> 是 <code>ParallelState</code> 的工厂入口。它不直接把整个 <code>ParallelEngineConfig</code> 塞进 <code>ParallelState</code>，而是做<strong>字段交集过滤</strong>：:38 用 <code>fields(ParallelState)</code> 取 <code>ParallelState</code> 的全部 dataclass 字段名集合，:39 用 <code>asdict(config)</code> 把 <code>ParallelEngineConfig</code> 摊平成 dict，再做字典推导 <code>{k:v for k,v in asdict(config).items() if k in field_names}</code>——只保留两边<strong>名字相同</strong>的字段（即 size 字段），:40 灌进 <code>ParallelState(**parallel_state_config)</code>。</p><p>这步过滤的工程含义：<code>ParallelEngineConfig</code> 里除了 size 还携带 <code>fsdp_plan/tp_plan/cp_plan/ep_plan/quantization_plan</code> 这些 plan 类字段，<strong>它们不会被 <code>ParallelState</code> 存下</strong>——plan 在 <code>MindSpeedParallelEngine</code> 那侧被单独消费（决定哪些层被 fully_shard wrap）。<code>ParallelState</code> 只管「进程组拓扑」这件事，职责单一。:40 <code>ParallelState(**...)</code> 触发 dataclass <code>__init__</code>，随即进入 :56 的 <code>__post_init__</code> 真正造 mesh。</p></div></div><div class="seg"><p class="seglab">行 43-54 · ParallelState dataclass：字段默认 -1（强制显式配置）+ 砍 ulysses</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :43-:54）</h5><pre data-lang="py" data-start="43" data-idprefix="A">@dataclass
+class ParallelState(metaclass=Singleton):
+    data_parallel_size: int = -1
+    fully_shard_parallel_size: int = -1
+    tensor_parallel_size: int = -1
+    context_parallel_size: int = -1
+
+    expert_parallel_size: int = -1
+    expert_fully_shard_parallel_size: int = -1
+    expert_data_parallel_size: int = -1
+
+    device_mesh_map: dict[str, DeviceMesh] = None</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># DDP/GPU 侧无此 dataclass:
+# 并行状态通常是裸的全局变量
+tensor_model_parallel_world_size = TP_SIZE
+data_parallel_world_size = WORLD_SIZE // TP_SIZE
+# 默认值概念不存在;不传就单卡
+torch.distributed.init_process_group(backend=&#x27;nccl&#x27;)</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>对照差异：DDP/GPU 侧没有「并行状态单例 dataclass」这层抽象，size 通常是裸全局变量或启动脚本里的 env（<code>TP_SIZE</code> / <code>WORLD_SIZE//TP_SIZE</code>），不传就走单卡，不会有构造期断言。本仓用 dataclass + 默认 <code>-1</code> + :59 断言，把「没配 size」从运行期静默错误提升为构造期硬错。砍 ulysses 维是项目级取舍：核心库 fork 保留 Ulysses 序列并行能力，LLM 版针对 Qwen3-8B FSDP2 场景精简掉，mesh 少一维、字段少一个、配置心智负担更轻。</p></div></div><div class="seg"><p class="seglab">行 56-64 · __post_init__ 上半：hccl 后端 + 完全分片未初始化断言</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :56-:64）</h5><pre data-lang="py" data-start="56" data-idprefix="A">    def __post_init__(self):
+        if not torch.distributed.is_initialized():
+            torch.distributed.init_process_group(backend=&#x27;hccl&#x27;)
+        if self.fully_shard_parallel_size &lt; 0:
+            raise Exception(&quot;ParallelState has not been initialized .&quot;)
+
+        if self.device_mesh_map is None:
+            self.device_mesh_map = dict()
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># 标准 GPU DDP 启动（对照）:
+torch.distributed.init_process_group(
+    backend=&#x27;nccl&#x27;,          # ← NVIDIA
+    init_method=&#x27;env://&#x27;,
+)
+# backend 通常由启动脚本传,不在并行状态类里写死
+# 没有 &quot;fully_shard &lt; 0&quot; 断言</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>对照差异：标准 GPU DDP 用 <code>backend='nccl'</code>，通常在 <code>torchrun</code> 启动脚本或 main 里调 <code>init_process_group</code>，不在并行状态类里写死后端字符串；也没有「fully_shard 未初始化」这种断言（DDP 没有 fully_shard 概念）。本仓把 <code>backend='hccl'</code> 写死在并行状态构造期，意味着「调 <code>init_parallel_state</code> 就默认你在 Ascend 上」——这是强耦合，但换来业务代码不出现 <code>'npu'</code>/<code>'hccl'</code> 散落字符串的好处，集中在这一处。:59 的 &lt;0 断言是 LLM 版为 <code>-1</code> 默认值配套加的，把未配置从静默提升为硬错。</p></div></div><div class="seg"><p class="seglab">行 65-86 · 三张 DeviceMesh 构造：dense / expert / dp_fsdp+cp</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :65-:86）</h5><pre data-lang="py" data-start="65" data-idprefix="A">        # create DP/CP/Ulysses/TP groups
+        mesh_dim_names = (&#x27;dp&#x27;, &#x27;fsdp&#x27;, &#x27;tp&#x27;)
+        mesh_shape = (
+            self.fully_shard_parallel_size,
+            self.tensor_parallel_size,
+        )
+        self.data_parallel_size = get_last_mesh_dim(mesh_shape)
+        mesh_shape = (self.data_parallel_size,) + mesh_shape
+        self.add_device_mesh_groups(mesh_dim_names, mesh_shape)
+
+        # create EP_DP/EP groups
+        mesh_dim_names = (&#x27;edp&#x27;, &#x27;efsdp&#x27;, &#x27;ep&#x27;)
+        mesh_shape = (self.expert_fully_shard_parallel_size, self.expert_parallel_size,)
+        self.expert_data_parallel_size = get_last_mesh_dim(mesh_shape)
+        mesh_shape = (self.expert_data_parallel_size,) + mesh_shape
+        self.add_device_mesh_groups(mesh_dim_names, mesh_shape)
+
+        # create DP_FSDP
+        mesh_dim_names = (&#x27;dp_fsdp&#x27;, &#x27;cp&#x27;)
+        mesh_shape = (self.fully_shard_parallel_size * self.data_parallel_size // self.context_parallel_size,
+                      self.context_parallel_size)
+        self.add_device_mesh_groups(mesh_dim_names, mesh_shape)</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># DDP/GPU 侧无 DeviceMesh,手搓 ProcessGroup:
+world_size = torch.distributed.get_world_size()
+tp_group = torch.distributed.new_group(
+    [i % TP_SIZE == 0 ...]  # 手写 rank 切分
+cp_group = torch.distributed.new_group(ranks=...)
+# 没有 dense/expert/dp_fsdp 三张 mesh 的分层
+# group 散落,无嵌套叠加</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>对照差异：DDP/GPU 侧没有 <code>DeviceMesh</code> 抽象，要 TP/CP 就 <code>dist.new_group(ranks)</code> 手搓一堆 ProcessGroup，再散落到各处 <code>if tp_size&gt;1</code> 分支调用；没有 dense/expert/dp_fsdp 三张 mesh 的分层概念，更没有「mesh 嵌套叠加」（第三张把 dp×fsdp 合平面再按 cp 切）。FSDP2 这边 <code>init_device_mesh</code>（:175）一次性造多维 mesh，每个维名对应一个子 ProcessGroup，参数的 <code>DTensor.placements</code> 就指向某维——mesh 是 FSDP2 跨节点分片的基础抽象。三张 mesh 分别服务 dense 参数 / 专家参数 / cp 切序列，职责清晰，DDP 时代这层是不存在的。</p></div></div><div class="seg"><p class="seglab">行 88-94 · 两条硬约束：dp 必须为 1、fsdp 必须等于 world_size</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :88-:94）</h5><pre data-lang="py" data-start="88" data-idprefix="A">        if self.data_parallel_size != 1:
+            raise Exception(
+                f&quot;Currently, only `data_parallel_size` = 1 is supported, but `self.data_parallel_size` = {self.data_parallel_size} .&quot;)
+        if self.fully_shard_parallel_size != torch.distributed.get_world_size():
+            raise Exception(&quot;Currently, `fully_shard_parallel_size` must be equal to the distributed world size.&quot;)
+
+        print_rank(logger.info, f&#x27;Parallel state initialized:\n {self.__str__()}&#x27;)</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># DDP/GPU 侧无此约束:
+# dp = world_size 是常态,dp&gt;1 完全合法
+data_parallel_size = torch.distributed.get_world_size()
+assert data_parallel_size &gt;= 1  # 唯一约束
+# fully_shard 概念不存在;参数每卡完整副本
+# 想 FSDP 得单独用 torch.distributed.fsdp.FullyShardedDataParallel</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>对照差异：DDP/GPU 侧 <code>data_parallel_size</code> 就是 <code>world_size</code>，<code>dp&gt;1</code> 是最常见形态（多卡各持完整模型副本，backward 隐式 all-reduce 梯度），完全合法；<code>fully_shard</code> 概念不存在，参数天然不分片。FSDP2 这边用 :88-:90 和 :91-:92 两条断言硬锁死：dp 维必须为 1、fsdp 维必须等于 world_size——即「数据并行由 fsdp 维承担，不再保留独立 dp 维」。这是 FSDP2 与 DDP 的根本取舍差异：DDP 把并行度花在「复制模型」，FSDP2 把并行度花在「分片模型」。想跨机扩 batch？DDP 加卡（dp++），FSDP2 加 fsdp 维（分片更细）。所以 :88 的异常信息明说「only data_parallel_size=1 is supported」——纯 DDP 的 dp&gt;1 在这条路不被支持。</p></div></div><div class="seg"><p class="seglab">行 96-119 · __str__ 拓扑表 + rank/world_size 属性</p><pre data-lang="py" data-start="96" data-idprefix="A">    def __str__(self):
+        info = &#x27;&#x27;
+        for name, _ in self.device_mesh_map.items():
+            enable = self.is_group_enable(name)
+            size = self.get_group_size(name)
+            mesh = self.get_device_mesh(name)
+            info += f&#x27;[{name}] = {enable} | Group size: {size} | device mesh:{mesh} \n&#x27;
+        return info
+
+    @property
+    def is_initialized(self) -&gt; bool:
+        return torch.distributed.is_initialized()
+
+    @property
+    def world_size(self) -&gt; int:
+        return 1 if not self.is_initialized else torch.distributed.get_world_size()
+
+    @property
+    def local_rank(self) -&gt; int:
+        return int(os.getenv(&quot;LOCAL_RANK&quot;, &quot;-1&quot;))
+
+    @property
+    def global_rank(self) -&gt; int:
+        return -1 if not self.is_initialized else torch.distributed.get_rank()</pre><div class="exp"><p>:96-:103 <code>__str__</code> 把 <code>device_mesh_map</code> 里每个 mesh 维度拼成一行拓扑表：<code>[name] = {enable} | Group size: {size} | device mesh:{mesh}</code>（:102）。:99-:101 对每个维度取 enable/group_size/device_mesh 三个量，:99 的 <code>is_group_enable</code> 判 size&gt;1（见 :121-:125）。这张表在 :94 被 rank0 打印出来，是调试并行配置的第一手信息——一眼看出哪些维启用、group 多大。</p><p>:105-:107 <code>is_initialized</code> 属性直接转发 <code>torch.distributed.is_initialized()</code>。:109-:111 <code>world_size</code> 属性有兜底：未初始化返回 1，已初始化返回 <code>get_world_size()</code>——让单测或未起分布式时也能调。:113-:115 <code>local_rank</code> 读 <code>os.getenv("LOCAL_RANK", "-1")</code>（:115）<strong>而非</strong> <code>torch.distributed.get_rank</code>——因为 local_rank 是节点内序号、与全局 rank 不同，由 <code>torchrun</code> 注入环境变量，二者语义不同。:117-:119 <code>global_rank</code> 则反过来：未初始化返回 -1，已初始化返回 <code>torch.distributed.get_rank()</code>。</p><p>这段全是只读访问器，与核心库 fork（fork:83-:106）逐字相同——fork 同名方法因 LLM 版多了 :88-:92 断言和第三张 mesh 导致行号整体后移（fork:83→LLM:96，fork:106→LLM:119），引用行号时认准 LLM 版。</p></div></div><div class="seg"><p class="seglab">行 121-149 · group/rank/mesh 查询访问器：DeviceMesh 的 ProcessGroup 中转</p><pre data-lang="py" data-start="121" data-idprefix="A">    def is_group_enable(self, mesh_name: str) -&gt; bool:
+        if mesh_name in self.device_mesh_map:
+            return self.get_group_size(mesh_name) &gt; 1
+        else:
+            return False
+
+    def get_group(self, mesh_name: str):
+        if mesh_name in self.device_mesh_map:
+            return self.device_mesh_map[mesh_name].get_group(mesh_name)
+        else:
+            raise RuntimeError(f&quot;Mesh group {mesh_name} not found.&quot;)
+
+    def get_group_size(self, mesh_name: str):
+        if mesh_name in self.device_mesh_map:
+            return torch.distributed.get_world_size(self.device_mesh_map[mesh_name].get_group(mesh_name))
+        else:
+            raise RuntimeError(f&quot;Mesh group {mesh_name} not found.&quot;)
+
+    def get_rank(self, mesh_name: str):
+        if mesh_name in self.device_mesh_map:
+            return self.device_mesh_map[mesh_name].get_local_rank(mesh_name)
+        else:
+            raise RuntimeError(f&quot;Mesh group {mesh_name} not found.&quot;)
+
+    def get_device_mesh(self, mesh_name: str):
+        if mesh_name in self.device_mesh_map:
+            return self.device_mesh_map[mesh_name][mesh_name]
+        else:
+            raise RuntimeError(f&quot;Mesh group {mesh_name} not found.&quot;)</pre><div class="exp"><p>:121-:125 <code>is_group_enable</code>：维度在 map 里且 <code>get_group_size &gt; 1</code> 才算启用（:123）。这是 FSDP2 混合并行的开关——下游代码据此决定要不要走集合通信路径（单卡 size=1 跳过 all-gather）。:127-:131 <code>get_group</code> 取 <code>device_mesh_map[name].get_group(name)</code>（:129）——<code>DeviceMesh.get_group(dim_name)</code> 返回该维对应的 <code>ProcessGroup</code>，HCCL 的 all-gather/all-reduce 就作用在这些 ProcessGroup 上，而非 DDP 时代的 <code>dist.group.WORLD</code>。</p><p>:133-:137 <code>get_group_size</code> 取该 group 的 world_size（:135 <code>torch.distributed.get_world_size(pg)</code>）。:139-:143 <code>get_rank</code> 取 <code>device_mesh_map[name].get_local_rank(name)</code>（:141）——注意是 <code>get_local_rank</code> 不是 <code>get_rank</code>，返回在<strong>该 mesh 维</strong>内的局部序号。:145-:149 <code>get_device_mesh</code> 取 <code>device_mesh_map[name][name]</code>（:147）——<code>DeviceMesh[dim_name]</code> 返回该维的子 mesh，PyTorch DTensor 的 <code>placements</code> 就指向这个子 mesh 的某一维。</p><p>这五个方法都是「查 map → 转发 DeviceMesh API」的中转层，与核心库 fork（fork:108-:136）逐字相同。它们是 :180-:184 动态挂载的方法的实际实现——<code>get_fsdp_group()</code> 这种调用最终走到 :127 的 <code>get_group("fsdp")</code>。</p></div></div><div class="seg"><p class="seglab">行 151-184 · add_device_mesh_groups：动态方法挂载 + torch.accelerator 接缝</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :151-:184）</h5><pre data-lang="py" data-start="151" data-idprefix="A">    def add_device_mesh_groups(self, mesh_dim_names, mesh_shape):
+
+        def get_methods(name):
+            def is_enable_method(self):
+                return self.is_group_enable(name)
+
+            def get_group_method(self):
+                return self.get_group(name)
+
+            def get_size_method(self):
+                return self.get_group_size(name)
+
+            def get_rank_method(self):
+                return self.get_rank(name)
+
+            def get_mesh_method(self):
+                return self.get_device_mesh(name)
+
+            return is_enable_method, get_group_method, get_size_method, get_rank_method, get_mesh_method
+
+        if reduce(lambda a, b: a * b, mesh_shape) != torch.distributed.get_world_size():
+            raise AssertionError(f&quot;Mesh groups {mesh_shape}({reduce(lambda a, b: a * b, mesh_shape)}) &quot;
+                                 f&quot;!= world size({torch.distributed.get_world_size()})&quot;)
+
+        device_mesh = init_device_mesh(device_type=torch.accelerator.current_accelerator().type, mesh_shape=mesh_shape, mesh_dim_names=mesh_dim_names)
+
+        for mesh_name in mesh_dim_names:
+            self.device_mesh_map[mesh_name] = device_mesh
+            is_enable, get_group, get_size, get_rank, get_mesh = get_methods(mesh_name)
+            setattr(self, &#x27;is_{}_enable&#x27;.format(mesh_name), types.MethodType(is_enable, self))
+            setattr(self, &#x27;get_{}_group&#x27;.format(mesh_name), types.MethodType(get_group, self))
+            setattr(self, &#x27;get_{}_group_size&#x27;.format(mesh_name), types.MethodType(get_size, self))
+            setattr(self, &#x27;get_{}_rank&#x27;.format(mesh_name), types.MethodType(get_rank, self))
+            setattr(self, &#x27;get_{}_device_mesh&#x27;.format(mesh_name), types.MethodType(get_mesh, self))</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># 标准 GPU DDP 无此动态挂载:
+# TP/CP group 是手搓 new_group 后存全局变量
+tp_group = torch.distributed.new_group(tp_ranks)
+cp_group = torch.distributed.new_group(cp_ranks)
+# 调用方显式 if tp_size&gt;1: dist.all_reduce(x, group=tp_group)
+# 没有 setattr 动态方法,没有 torch.accelerator 抽象
+# device_type=&#x27;cuda&#x27; 或 backend=&#x27;nccl&#x27; 写死</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>对照差异：标准 GPU DDP 把 TP/CP 的 ProcessGroup 存成全局变量（<code>tp_group/cp_group</code>），调用方在每个通信点显式写 <code>if tp_size&gt;1: dist.all_reduce(x, group=tp_group)</code>——分支散落、易漏易错。FSDP2 这边用 <code>init_device_mesh</code> 一次性造多维 mesh，再用 :180-:184 的 <code>setattr</code>+<code>types.MethodType</code> 把每个维度的 is_enable/get_group/get_size/get_rank/get_mesh 五个方法动态挂成实例方法，下游统一写 <code>parallel_state.get_fsdp_group()</code>。差异点三（:175 的 <code>torch.accelerator</code>）是跨厂商适配的关键：GPU 侧 <code>torch.accelerator.current_accelerator().type</code> 会解析出 <code>'cuda'</code>，NPU 侧解析出 <code>'npu'</code>——业务代码不写死厂商，比核心库 fork 的硬编码 <code>'npu'</code> 更可移植。但这只是「可读性跨厂商」，:58 的 <code>backend='hccl'</code> 仍写死，所以实际运行仍只在 Ascend。</p></div></div></div>
+<details class="src"><summary>📜 完整源码（185 行）— 大纲点跳行</summary><pre data-lang="py" data-start="1"># Copyright (c) 2025, Huawei Technologies Co., Ltd. All rights reserved.
+import os
+import types
+import logging
+from dataclasses import dataclass, asdict, fields
+from functools import reduce
+
+import torch
+from torch.distributed.device_mesh import init_device_mesh, DeviceMesh
+
+
+from mindspeed_llm.fsdp2.distributed.parallel_engine_config import ParallelEngineConfig
+from mindspeed.lite.utils.log import print_rank
+
+logger = logging.getLogger(__name__)
+
+
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+def get_last_mesh_dim(mesh_shape):
+    last_mesh = torch.distributed.get_world_size()
+
+    for shape in mesh_shape:
+        if last_mesh % shape != 0:
+            raise AssertionError(&quot;World size is not divisible by mesh group {}&quot;.format(mesh_shape))
+        last_mesh //= shape
+    return last_mesh
+
+
+def init_parallel_state(config: ParallelEngineConfig):
+    field_names = {field.name for field in fields(ParallelState)}
+    parallel_state_config = {k: v for k, v in asdict(config).items() if k in field_names}
+    return ParallelState(**parallel_state_config)
+
+
+@dataclass
+class ParallelState(metaclass=Singleton):
+    data_parallel_size: int = -1
+    fully_shard_parallel_size: int = -1
+    tensor_parallel_size: int = -1
+    context_parallel_size: int = -1
+
+    expert_parallel_size: int = -1
+    expert_fully_shard_parallel_size: int = -1
+    expert_data_parallel_size: int = -1
+
+    device_mesh_map: dict[str, DeviceMesh] = None
+
+    def __post_init__(self):
+        if not torch.distributed.is_initialized():
+            torch.distributed.init_process_group(backend=&#x27;hccl&#x27;)
+        if self.fully_shard_parallel_size &lt; 0:
+            raise Exception(&quot;ParallelState has not been initialized .&quot;)
+
+        if self.device_mesh_map is None:
+            self.device_mesh_map = dict()
+
+        # create DP/CP/Ulysses/TP groups
+        mesh_dim_names = (&#x27;dp&#x27;, &#x27;fsdp&#x27;, &#x27;tp&#x27;)
+        mesh_shape = (
+            self.fully_shard_parallel_size,
+            self.tensor_parallel_size,
+        )
+        self.data_parallel_size = get_last_mesh_dim(mesh_shape)
+        mesh_shape = (self.data_parallel_size,) + mesh_shape
+        self.add_device_mesh_groups(mesh_dim_names, mesh_shape)
+
+        # create EP_DP/EP groups
+        mesh_dim_names = (&#x27;edp&#x27;, &#x27;efsdp&#x27;, &#x27;ep&#x27;)
+        mesh_shape = (self.expert_fully_shard_parallel_size, self.expert_parallel_size,)
+        self.expert_data_parallel_size = get_last_mesh_dim(mesh_shape)
+        mesh_shape = (self.expert_data_parallel_size,) + mesh_shape
+        self.add_device_mesh_groups(mesh_dim_names, mesh_shape)
+
+        # create DP_FSDP
+        mesh_dim_names = (&#x27;dp_fsdp&#x27;, &#x27;cp&#x27;)
+        mesh_shape = (self.fully_shard_parallel_size * self.data_parallel_size // self.context_parallel_size,
+                      self.context_parallel_size)
+        self.add_device_mesh_groups(mesh_dim_names, mesh_shape)
+
+        if self.data_parallel_size != 1:
+            raise Exception(
+                f&quot;Currently, only `data_parallel_size` = 1 is supported, but `self.data_parallel_size` = {self.data_parallel_size} .&quot;)
+        if self.fully_shard_parallel_size != torch.distributed.get_world_size():
+            raise Exception(&quot;Currently, `fully_shard_parallel_size` must be equal to the distributed world size.&quot;)
+
+        print_rank(logger.info, f&#x27;Parallel state initialized:\n {self.__str__()}&#x27;)
+
+    def __str__(self):
+        info = &#x27;&#x27;
+        for name, _ in self.device_mesh_map.items():
+            enable = self.is_group_enable(name)
+            size = self.get_group_size(name)
+            mesh = self.get_device_mesh(name)
+            info += f&#x27;[{name}] = {enable} | Group size: {size} | device mesh:{mesh} \n&#x27;
+        return info
+
+    @property
+    def is_initialized(self) -&gt; bool:
+        return torch.distributed.is_initialized()
+
+    @property
+    def world_size(self) -&gt; int:
+        return 1 if not self.is_initialized else torch.distributed.get_world_size()
+
+    @property
+    def local_rank(self) -&gt; int:
+        return int(os.getenv(&quot;LOCAL_RANK&quot;, &quot;-1&quot;))
+
+    @property
+    def global_rank(self) -&gt; int:
+        return -1 if not self.is_initialized else torch.distributed.get_rank()
+
+    def is_group_enable(self, mesh_name: str) -&gt; bool:
+        if mesh_name in self.device_mesh_map:
+            return self.get_group_size(mesh_name) &gt; 1
+        else:
+            return False
+
+    def get_group(self, mesh_name: str):
+        if mesh_name in self.device_mesh_map:
+            return self.device_mesh_map[mesh_name].get_group(mesh_name)
+        else:
+            raise RuntimeError(f&quot;Mesh group {mesh_name} not found.&quot;)
+
+    def get_group_size(self, mesh_name: str):
+        if mesh_name in self.device_mesh_map:
+            return torch.distributed.get_world_size(self.device_mesh_map[mesh_name].get_group(mesh_name))
+        else:
+            raise RuntimeError(f&quot;Mesh group {mesh_name} not found.&quot;)
+
+    def get_rank(self, mesh_name: str):
+        if mesh_name in self.device_mesh_map:
+            return self.device_mesh_map[mesh_name].get_local_rank(mesh_name)
+        else:
+            raise RuntimeError(f&quot;Mesh group {mesh_name} not found.&quot;)
+
+    def get_device_mesh(self, mesh_name: str):
+        if mesh_name in self.device_mesh_map:
+            return self.device_mesh_map[mesh_name][mesh_name]
+        else:
+            raise RuntimeError(f&quot;Mesh group {mesh_name} not found.&quot;)
+
+    def add_device_mesh_groups(self, mesh_dim_names, mesh_shape):
+
+        def get_methods(name):
+            def is_enable_method(self):
+                return self.is_group_enable(name)
+
+            def get_group_method(self):
+                return self.get_group(name)
+
+            def get_size_method(self):
+                return self.get_group_size(name)
+
+            def get_rank_method(self):
+                return self.get_rank(name)
+
+            def get_mesh_method(self):
+                return self.get_device_mesh(name)
+
+            return is_enable_method, get_group_method, get_size_method, get_rank_method, get_mesh_method
+
+        if reduce(lambda a, b: a * b, mesh_shape) != torch.distributed.get_world_size():
+            raise AssertionError(f&quot;Mesh groups {mesh_shape}({reduce(lambda a, b: a * b, mesh_shape)}) &quot;
+                                 f&quot;!= world size({torch.distributed.get_world_size()})&quot;)
+
+        device_mesh = init_device_mesh(device_type=torch.accelerator.current_accelerator().type, mesh_shape=mesh_shape, mesh_dim_names=mesh_dim_names)
+
+        for mesh_name in mesh_dim_names:
+            self.device_mesh_map[mesh_name] = device_mesh
+            is_enable, get_group, get_size, get_rank, get_mesh = get_methods(mesh_name)
+            setattr(self, &#x27;is_{}_enable&#x27;.format(mesh_name), types.MethodType(is_enable, self))
+            setattr(self, &#x27;get_{}_group&#x27;.format(mesh_name), types.MethodType(get_group, self))
+            setattr(self, &#x27;get_{}_group_size&#x27;.format(mesh_name), types.MethodType(get_size, self))
+            setattr(self, &#x27;get_{}_rank&#x27;.format(mesh_name), types.MethodType(get_rank, self))
+            setattr(self, &#x27;get_{}_device_mesh&#x27;.format(mesh_name), types.MethodType(get_mesh, self))
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

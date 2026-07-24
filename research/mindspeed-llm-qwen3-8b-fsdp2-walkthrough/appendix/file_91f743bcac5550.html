@@ -1,0 +1,576 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/models/model_factory.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/models/model_factory.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_777917f2a28f85.html">◀ mtp.py</a> <a href="file_089aebc2685b12.html">model_loader.py ▶</a></nav></div>
+<div class="wrap">
+<h1>model_factory.py</h1><p class="goal">mindspeed_llm/fsdp2/models/model_factory.py · 10621B · 250 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L24" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_config_class(model_id: str)</a><a href="#L40" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class ModelFactory</a><a href="#L51" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def create(model_args, parallel_args)</a><a href="#L145" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _build_parallel_config(model_args, paralle</a><a href="#L238" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class AutoModelFactory</a><a href="#L245" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def create(*args, **kwargs)</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep08.html">EP08</a><a href="../ep09.html">EP09</a><a href="../ep10.html">EP10</a><a href="../ep11.html">EP11</a><a href="../ep12.html">EP12</a><a href="../ep18.html">EP18</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="annot"><div class="seg"><p class="seglab">行 1-22 · 导入与引擎/配置对象栈</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :1-:22）</h5><pre data-lang="py" data-start="1" data-idprefix="A">import os
+import importlib
+import torch
+import torch.distributed as dist
+from transformers import AutoConfig
+
+from mindspeed_llm.fsdp2.models.model_registry import ModelRegistry
+from mindspeed_llm.fsdp2.distributed.mindspeed_parallel_engine import MindSpeedParallelEngine
+from mindspeed_llm.fsdp2.distributed.parallel_engine_config import (
+    ParallelEngineConfig,
+    FSDPPlanConfig,
+    TPPlanConfig,
+    EPPlanConfig,
+    CPPlanConfig,
+    QuantizeConfig,
+)
+
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+from mindspeed_llm.fsdp2.models.model_loader import ModelLoader
+
+logger = get_logger(__name__)
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># GPU/DDP 常见入口
+import torch
+from transformers import AutoModelForCausalLM
+
+model = AutoModelForCausalLM.from_pretrained(path)
+model = DDP(model, device_ids=[local_rank])</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异：GPU/DDP 路径里 <code>from_pretrained</code> 直接产完整模型再 <code>DDP()</code> 一包，参数是一个扁平 namespace。本厂 :9-16 先把并行需求拆成六个 PlanConfig dataclass，:132 才交给 <code>MindSpeedParallelEngine</code>——工厂自己<b>不</b>调 <code>from_pretrained</code> 建模型（:19 ModelLoader 才建），也<b>不</b>直接 <code>DDP()</code>。编排 vs 直接包裹，是两种范式。</p></div></div><div class="seg"><p class="seglab">行 24-34 · _get_config_class：model_id snake→Pascal 映射回退</p><pre data-lang="py" data-start="24" data-idprefix="A">def _get_config_class(model_id: str):
+    &quot;&quot;&quot;Dynamically import the config class by model_id.&quot;&quot;&quot;
+    try:
+        module_path = f&quot;transformers.models.{model_id}.configuration_{model_id}&quot;
+        config_module = importlib.import_module(module_path)
+        # Convert model_id like &quot;qwen3_next&quot; to &quot;Qwen3NextConfig&quot;
+        parts = model_id.split(&quot;_&quot;)
+        class_name = &quot;&quot;.join(p.capitalize() for p in parts) + &quot;Config&quot;
+        return getattr(config_module, class_name)
+    except (ImportError, AttributeError):
+        return None</pre><div class="exp"><p>工具函数 :24-34，按 <code>model_id</code> 动态拿 HF config 类。:27 拼模块路径 <code>transformers.models.{model_id}.configuration_{model_id}</code>，:28 <code>importlib.import_module</code>。:30-31 把 snake_case 的 <code>model_id</code>（如 <code>qwen3_next</code>）拆 <code>_</code> 后逐段 <code>capitalize()</code> 拼成 <code>Qwen3NextConfig</code>（PascalCase + Config 后缀），:32 <code>getattr</code>。:33 <code>except (ImportError, AttributeError)</code> 统一吞掉，:34 <code>return None</code>。这个 None 回退是关键：:92-97 会据此改走 <code>AutoConfig.from_pretrained</code>。意义在于<b>优先</b>用打补丁过的自定义 config（带 EP/量化等本仓扩展字段），拿不到再退回 HF vanilla。对 Qwen3-8B dense 而言，若 <code>model_args.model_id</code> 未设，全程走 AutoConfig。</p></div></div><div class="seg"><p class="seglab">行 50-74 · create() 入口：设备锚定与 init_device 分流</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :50-:74）</h5><pre data-lang="py" data-start="50" data-idprefix="A">    @staticmethod
+    def create(model_args, parallel_args):
+        &quot;&quot;&quot;
+        Creates a MindSpeed FSDP wrapped model.
+
+        Args:
+            model_args: Contains model_name_or_path, trust_remote_code, train_from_scratch,
+                        init_model_with_meta_device, etc.
+            parallel_args: Contains tp_size, fsdp_size, recompute, ep_size, etc.
+        &quot;&quot;&quot;
+        # 1. Setup Device
+        # Ensure NPU is being used
+        if torch.accelerator.is_available():
+            local_rank = int(os.environ.get(&quot;LOCAL_RANK&quot;, 0))
+            target_device = torch.device(torch.accelerator.current_accelerator().type, local_rank)
+            torch.accelerator.set_device(target_device)
+        else:
+            target_device = torch.device(&quot;cpu&quot;)
+
+        # 2. Determine initialization device based on init_model_with_meta_device flag
+        use_meta_device = getattr(model_args, &#x27;init_model_with_meta_device&#x27;, False)
+        init_device = &quot;meta&quot; if use_meta_device else &quot;cpu&quot;
+        logger.info_rank0(
+            f&quot;&gt; Model initialization device: {init_device} (init_model_with_meta_device={use_meta_device})&quot;
+        )</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># GPU 典型
+local_rank = int(os.environ[&quot;LOCAL_RANK&quot;])
+torch.cuda.set_device(local_rank)
+device = f&quot;cuda:{local_rank}&quot;
+model = AutoModel.from_pretrained(path).to(device)</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异：GPU 写法硬编码 <code>cuda</code>、<code>torch.cuda.set_device</code>。本厂 :64-65 全走 <code>torch.accelerator</code> 抽象层，Ascend/CUDA 同代码路径（NPU 靠导入期重定向生效）。更关键：GPU 路径 <code>from_pretrained(...).to(device)</code> 一气建好整模型再搬卡；本厂 :71 引入 <code>init_device="meta"</code> 档——先在 meta 上建空壳、FSDP 分片后再加载权重，避免先全量驻 CPU 再拷贝，省显存与拷贝。这是 FSDP2 下 Ascend 控显存的基本姿势。</p></div></div><div class="seg"><p class="seglab">行 76-97 · HF Config 加载：config-load 期注入 attn_implementation</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :76-:97）</h5><pre data-lang="py" data-start="76" data-idprefix="A">        # 3. Load HF Config
+        logger.info_rank0(f&quot;&gt; Loading AutoConfig from {model_args.model_name_or_path}...&quot;)
+        trust_remote_code = model_args.trust_remote_code
+        attn_implementation = &quot;eager&quot; if parallel_args.cp_size &gt; 1 else None
+
+        hf_config = None
+        model_id = getattr(model_args, &#x27;model_id&#x27;, None)
+        if model_id:
+            config_cls = _get_config_class(model_id)
+            if config_cls is not None:
+                logger.info_rank0(f&quot;&gt; Using direct config class: {config_cls.__name__}&quot;)
+                hf_config = config_cls.from_pretrained(
+                    model_args.model_name_or_path,
+                    trust_remote_code=trust_remote_code,
+                    attn_implementation=attn_implementation,
+                )
+        if hf_config is None:
+            hf_config = AutoConfig.from_pretrained(
+                model_args.model_name_or_path,
+                trust_remote_code=trust_remote_code,
+                attn_implementation=attn_implementation,
+            )</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># GPU 常见
+config = AutoConfig.from_pretrained(path, trust_remote_code=True)
+model = AutoModelForCausalLM.from_pretrained(
+    path, config=config, use_flash_attn=True)</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异：GPU/DDP 常见 <code>use_flash_attn=True</code> 在 <code>from_pretrained</code> 运行期注入 boolean。本厂 :79 把它前移成 config-load 期的字符串 <code>attn_implementation</code>（"eager"/None），并随 config 一起传给 :132 引擎。dense（cp==1）传 None 让 HF 默认值决定，CP>1 才强制 eager 暴露 token 边界——这是 FSDP2+CP 在 Ascend 上必须的算子选择，旧 boolean 模型表达不了「随 CP 模式切换后端」。</p></div></div><div class="seg"><p class="seglab">行 99-112 · 模型类路由与 register_patches 扩展点</p><pre data-lang="py" data-start="99" data-idprefix="A">        # 4. Load HF Model
+        # Decide loading method based on init_device and whether training from scratch or fine-tuning.
+        # if model_id is configured, load model according to model_id.
+        model_cls = None
+        if getattr(model_args, &#x27;model_id&#x27;, None):
+            logger.info_rank0(f&quot;&gt; Using factory mode with model_id: {model_args.model_id}&quot;)
+            model_cls = ModelRegistry.get_model_class(model_args.model_id)
+            if hasattr(model_cls, &#x27;register_patches&#x27;):
+                model_cls.register_patches(model_args)
+
+        # Use ModelLoader to create model based on init_device
+        loader = ModelLoader(model_args, init_device=init_device, hf_config=hf_config)
+        model, weights_path = loader.create_model(model_cls=model_cls)
+        hf_config = loader.hf_config</pre><div class="exp"><p>步骤(4)加载 HF 模型。:103 若有 model_id，:105 <code>ModelRegistry.get_model_class(model_args.model_id)</code> 拿模型类（非 AutoModel，显式映射）。:106-107 <b>关键扩展点</b>：若 <code>hasattr(model_cls, 'register_patches')</code> 就先 <code>model_cls.register_patches(model_args)</code>——这是给 Qwen3/DeepSeek 等模型在<b>构造前</b>注册 Ascend 算子替换钩子的挂载位（把某些 HF 默认算子换成 mindspeed 的 NPU 实现）。:109-111 不在本工厂直接 <code>model_cls(...)</code>，而是造 <code>ModelLoader(model_args, init_device=, hf_config=)</code> 并 <code>loader.create_model(model_cls=model_cls)</code>，返回 <code>(model, weights_path)</code>——把「按 init_device 决定 meta/cpu 建法」的复杂度下沉到 ModelLoader。:112 <code>hf_config = loader.hf_config</code> 回读（loader 可能对 config 再加工）。本段只做路由+挂钩，不建模型本体。</p></div></div><div class="seg"><p class="seglab">行 114-134 · DP 推导与 MindSpeedParallelEngine 全委托</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :114-:134）</h5><pre data-lang="py" data-start="114" data-idprefix="A">        # 5. Build MindSpeed FSDP Configuration
+        # Dynamically calculate Data Parallel (DP) Size
+        world_size = dist.get_world_size() if dist.is_initialized() else 1
+
+        # Guard against division by zero if args are not set correctly
+        tp_size = parallel_args.tp_size
+        fsdp_size = parallel_args.fsdp_size
+        cp_size = parallel_args.cp_size
+        dp_size = world_size // (tp_size * fsdp_size * cp_size)
+
+        parallel_config = ModelFactory._build_parallel_config(model_args, parallel_args, dp_size)
+
+        # 6. Wrap &amp; Move
+        logger.info_rank0(f&quot;&gt; Wrapping model with MindSpeed FSDP (TP={tp_size},CP={cp_size}, FSDP={fsdp_size})...&quot;)
+
+        # MindSpeed FSDP will shard and wrap the CPU model based on the config.
+        # The wrapped model automatically handles forward/backward communication.
+        # Pass init_device, weights_path, and hf_config for meta device support.
+        model = MindSpeedParallelEngine(
+            config=parallel_config, model=model, init_device=init_device, weights_path=weights_path, hf_config=hf_config
+        )</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># GPU/DDP
+model = AutoModel.from_pretrained(path)
+model = DDP(model, device_ids=[local_rank])
+# 全模型一档，没有 &#x27;fsdp_modules 列表&#x27; 概念</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异：GPU <code>DDP()</code> 在本工厂位置就地完成复制梯度同步。本厂 :132-134 把分片<b>整体委托</b>给 <code>MindSpeedParallelEngine</code>，工厂退成纯编排。且 dense 的 <code>fully_shard</code> 本体在外部 fsdp_turbo（本仓不可见），本仓 in-repo 的只有 EP 专家的 <code>expert_fully_shard</code>——这是诚实的边界：本文件读不到 dense 分片算子，只读到「把谁分片」的列表编排。meta 模式下工厂连 <code>.to(device)</code> 都不做（:139 只 cpu 分支），权重落地进引擎内部。</p></div></div><div class="seg"><p class="seglab">行 144-170 · _build_parallel_config (1/2)：fsdp_modules 分层消费</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :144-:170）</h5><pre data-lang="py" data-start="144" data-idprefix="A">    @staticmethod
+    def _build_parallel_config(model_args, parallel_args, dp_size) -&gt; &#x27;ParallelEngineConfig&#x27;:
+        &quot;&quot;&quot;
+        Builds the Config based on parallel_args and hardcoded layer name rules.
+        Note: The wildcards here (e.g., &#x27;model.layers.{*}&#x27;) are suitable for standard structures like Llama/Qwen.
+        If using other non-standard models, these strings might need adjustment.
+        &quot;&quot;&quot;
+        # --- 1. FSDP Plan ---
+        # Requirement: Apply FSDP to transformer layers
+        apply_modules = {
+            parallel_args.fsdp_modules[0]: {
+                &#x27;reshard_after_forward&#x27;: parallel_args.reshard_after_forward,
+                &#x27;shard_placement_fn&#x27;: parallel_args.shard_placement_fn,
+            },
+        }
+        for modules in parallel_args.fsdp_modules[1:]:
+            apply_modules[modules] = {
+                &#x27;reshard_after_forward&#x27;: parallel_args.reshard_after_forward,
+            }
+        fsdp_plan = FSDPPlanConfig(
+            ignored_modules=parallel_args.ignored_modules if parallel_args.ignored_modules else [],
+            apply_modules=apply_modules,
+            param_dtype=parallel_args.param_dtype,
+            reduce_dtype=parallel_args.reduce_dtype,
+            num_to_forward_prefetch=parallel_args.num_to_forward_prefetch,
+            num_to_backward_prefetch=parallel_args.num_to_backward_prefetch,
+        )</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># GPU DDP 下不存在
+# DDP 全模型一档，无 &#x27;fsdp_modules[0] 带 placement、其余带 reshard&#x27; 之分
+# 也无 ignored_modules 豁免 embed/lm_head 的概念</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异：GPU/DDP 分片粒度只有「全模型」一档，embed/lm_head 与 layer body 一起被包，无差别。本厂 :153-162 把「分片」拆成 config 驱动多档：<code>fsdp_modules[0]</code> 带 placement、其余带 reshard、<code>ignored_modules</code> 豁免首尾——「按层 fully_shard + 独立控首尾」是 FSDP2 在 Ascend 上控显存的基本姿势。误区必含：不是每个 fsdp_modules 元素都带 placement，只有第 0 项。</p></div></div><div class="seg"><p class="seglab">行 176-231 · _build_parallel_config (2/2)：EP/CP/量化与五维组装</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :176-:231）</h5><pre data-lang="py" data-start="176" data-idprefix="A">        # --- 3. Expert Parallel Plan ---
+        # For Mixture-of-Experts (MoE) models
+        ep_size = parallel_args.ep_size
+        ep_fsdp_size = parallel_args.ep_fsdp_size
+
+        ep_plan = EPPlanConfig(
+            apply_modules=parallel_args.ep_modules,
+            apply_efsdp_modules=parallel_args.ep_fsdp_modules,
+            dispatcher=parallel_args.ep_dispatcher,
+        )
+
+        cp_plan = CPPlanConfig(context_parallel_type=parallel_args.cp_type, is_pack=getattr(model_args, &quot;pack&quot;, False))
+
+        # --- 4. Recompute Plan ---
+        # Activation Checkpointing
+        recompute_plan = parallel_args.recompute_modules if parallel_args.recompute else []
+
+        # --- 5. Quantization Config ---
+        quantization_plan = QuantizeConfig(
+            recipe_name=model_args.quant_recipe_name,
+            apply_modules=model_args.quant_apply_modules,
+            ignored_modules=model_args.quant_ignored_modules,
+            quant_converters=model_args.quant_converters,
+            enable_fsdp_low_precision_all_gather=model_args.enable_fsdp_low_precision_all_gather,
+            fsdp_low_precision_all_gather_mode=model_args.fsdp_low_precision_all_gather_mode,
+        )
+
+        # --- 6. Assemble Config ---
+        # Get parallel sizes safely
+        tp_size = parallel_args.tp_size
+        fsdp_size = parallel_args.fsdp_size
+
+        config = ParallelEngineConfig(
+            # Parallelism parameters
+            data_parallel_size=dp_size,
+            fully_shard_parallel_size=fsdp_size,
+            fsdp_plan=fsdp_plan,
+            tensor_parallel_size=tp_size,
+            tp_plan=tp_plan,
+            # Expert Parallelism
+            expert_parallel_size=ep_size,
+            expert_fully_shard_parallel_size=ep_fsdp_size,
+            expert_data_parallel_size=dp_size,  # Usually EP data parallel size matches global or has specific logic
+            ep_plan=ep_plan,
+            # Context Parallelism
+            context_parallel_size=parallel_args.cp_size,
+            context_parallel_type=parallel_args.cp_type,
+            cp_plan=cp_plan,
+            # Recomputation
+            recompute=parallel_args.recompute,
+            recompute_plan=recompute_plan,
+            # Quantization
+            quantization_plan=quantization_plan,
+        )
+
+        return config</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># GPU 量化训练
+from transformers import BitsAndBytesConfig
+qconfig = BitsAndBytesConfig(load_in_8bit=True)
+model = AutoModel.from_pretrained(path, quantization_config=qconfig)</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异：GPU 量化多是推理期 bitsandbytes，与 DDP 通信无耦合。本厂 :193-201 把量化与 FSDP2 通信耦合——<code>enable_fsdp_low_precision_all_gather</code> 让 FSDP2 的 all-gather 走低精度省 Ascend HCCL 带宽，这是 NPU 量化训练的差异点。另外 :218 EP 的 expert_data_parallel_size 直接复用 dp_size 是简化（GPU MoE 如 DeepSpeed-MoE 会单独算 EP-DP），本厂注释坦承这点。</p></div></div><div class="seg"><p class="seglab">行 234-249 · AutoModelFactory 门面：AutoTrainer 统一入口</p><pre data-lang="py" data-start="234" data-idprefix="A"># ==============================================================================
+# [Facade] AutoModelFactory
+# Unified entry point used by AutoTrainer
+# ==============================================================================
+class AutoModelFactory:
+    &quot;&quot;&quot;
+    Unified Factory for creating models.
+    Dispatches to ModelFactory or McoreModelFactory based on the environment.
+    &quot;&quot;&quot;
+
+    @staticmethod
+    def create(*args, **kwargs):
+        &quot;&quot;&quot;
+        Factory method that forwards arguments to the specific implementation.
+        &quot;&quot;&quot;
+        return ModelFactory.create(*args, **kwargs)</pre><div class="exp"><p>:234-249 是门面。:238 <code>AutoModelFactory</code> 类，注释 :241 明说「Dispatches to ModelFactory or McoreModelFactory based on the environment」——预留了 mcore（Megatron Core）分支，但本仓当前 :244-249 <code>create(*args, **kwargs)</code> 只 <code>return ModelFactory.create(*args, **kwargs)</code> 转发，没有实际分派逻辑（mcore 路径是占位）。意义：AutoTrainer 只依赖 <code>AutoModelFactory.create</code> 这个稳定符号，底层 HF-native 还是 mcore 可切换，工厂本体的编排逻辑（本文件 :50-142）只在 HF-native 路径生效。读 Qwen3-8B FSDP2 的装配链路，到此门面即终点，再往上就是 AutoTrainer 的调用。</p></div></div></div>
+<details class="src"><summary>📜 完整源码（250 行）— 大纲点跳行</summary><pre data-lang="py" data-start="1">import os
+import importlib
+import torch
+import torch.distributed as dist
+from transformers import AutoConfig
+
+from mindspeed_llm.fsdp2.models.model_registry import ModelRegistry
+from mindspeed_llm.fsdp2.distributed.mindspeed_parallel_engine import MindSpeedParallelEngine
+from mindspeed_llm.fsdp2.distributed.parallel_engine_config import (
+    ParallelEngineConfig,
+    FSDPPlanConfig,
+    TPPlanConfig,
+    EPPlanConfig,
+    CPPlanConfig,
+    QuantizeConfig,
+)
+
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+from mindspeed_llm.fsdp2.models.model_loader import ModelLoader
+
+logger = get_logger(__name__)
+
+
+def _get_config_class(model_id: str):
+    &quot;&quot;&quot;Dynamically import the config class by model_id.&quot;&quot;&quot;
+    try:
+        module_path = f&quot;transformers.models.{model_id}.configuration_{model_id}&quot;
+        config_module = importlib.import_module(module_path)
+        # Convert model_id like &quot;qwen3_next&quot; to &quot;Qwen3NextConfig&quot;
+        parts = model_id.split(&quot;_&quot;)
+        class_name = &quot;&quot;.join(p.capitalize() for p in parts) + &quot;Config&quot;
+        return getattr(config_module, class_name)
+    except (ImportError, AttributeError):
+        return None
+
+
+# ==============================================================================
+# ModelFactory
+# ==============================================================================
+class ModelFactory:
+    &quot;&quot;&quot;
+    Responsible for building HuggingFace native models and wrapping them
+    as MindSpeed FSDP instances based on parallelization arguments.
+
+    Supports two initialization modes controlled by model_args.init_model_with_meta_device:
+    - False: Load model fully on CPU (original behavior)
+    - True: Create empty model on meta device, load weights after FSDP wrapping
+    &quot;&quot;&quot;
+
+    @staticmethod
+    def create(model_args, parallel_args):
+        &quot;&quot;&quot;
+        Creates a MindSpeed FSDP wrapped model.
+
+        Args:
+            model_args: Contains model_name_or_path, trust_remote_code, train_from_scratch,
+                        init_model_with_meta_device, etc.
+            parallel_args: Contains tp_size, fsdp_size, recompute, ep_size, etc.
+        &quot;&quot;&quot;
+        # 1. Setup Device
+        # Ensure NPU is being used
+        if torch.accelerator.is_available():
+            local_rank = int(os.environ.get(&quot;LOCAL_RANK&quot;, 0))
+            target_device = torch.device(torch.accelerator.current_accelerator().type, local_rank)
+            torch.accelerator.set_device(target_device)
+        else:
+            target_device = torch.device(&quot;cpu&quot;)
+
+        # 2. Determine initialization device based on init_model_with_meta_device flag
+        use_meta_device = getattr(model_args, &#x27;init_model_with_meta_device&#x27;, False)
+        init_device = &quot;meta&quot; if use_meta_device else &quot;cpu&quot;
+        logger.info_rank0(
+            f&quot;&gt; Model initialization device: {init_device} (init_model_with_meta_device={use_meta_device})&quot;
+        )
+
+        # 3. Load HF Config
+        logger.info_rank0(f&quot;&gt; Loading AutoConfig from {model_args.model_name_or_path}...&quot;)
+        trust_remote_code = model_args.trust_remote_code
+        attn_implementation = &quot;eager&quot; if parallel_args.cp_size &gt; 1 else None
+
+        hf_config = None
+        model_id = getattr(model_args, &#x27;model_id&#x27;, None)
+        if model_id:
+            config_cls = _get_config_class(model_id)
+            if config_cls is not None:
+                logger.info_rank0(f&quot;&gt; Using direct config class: {config_cls.__name__}&quot;)
+                hf_config = config_cls.from_pretrained(
+                    model_args.model_name_or_path,
+                    trust_remote_code=trust_remote_code,
+                    attn_implementation=attn_implementation,
+                )
+        if hf_config is None:
+            hf_config = AutoConfig.from_pretrained(
+                model_args.model_name_or_path,
+                trust_remote_code=trust_remote_code,
+                attn_implementation=attn_implementation,
+            )
+
+        # 4. Load HF Model
+        # Decide loading method based on init_device and whether training from scratch or fine-tuning.
+        # if model_id is configured, load model according to model_id.
+        model_cls = None
+        if getattr(model_args, &#x27;model_id&#x27;, None):
+            logger.info_rank0(f&quot;&gt; Using factory mode with model_id: {model_args.model_id}&quot;)
+            model_cls = ModelRegistry.get_model_class(model_args.model_id)
+            if hasattr(model_cls, &#x27;register_patches&#x27;):
+                model_cls.register_patches(model_args)
+
+        # Use ModelLoader to create model based on init_device
+        loader = ModelLoader(model_args, init_device=init_device, hf_config=hf_config)
+        model, weights_path = loader.create_model(model_cls=model_cls)
+        hf_config = loader.hf_config
+
+        # 5. Build MindSpeed FSDP Configuration
+        # Dynamically calculate Data Parallel (DP) Size
+        world_size = dist.get_world_size() if dist.is_initialized() else 1
+
+        # Guard against division by zero if args are not set correctly
+        tp_size = parallel_args.tp_size
+        fsdp_size = parallel_args.fsdp_size
+        cp_size = parallel_args.cp_size
+        dp_size = world_size // (tp_size * fsdp_size * cp_size)
+
+        parallel_config = ModelFactory._build_parallel_config(model_args, parallel_args, dp_size)
+
+        # 6. Wrap &amp; Move
+        logger.info_rank0(f&quot;&gt; Wrapping model with MindSpeed FSDP (TP={tp_size},CP={cp_size}, FSDP={fsdp_size})...&quot;)
+
+        # MindSpeed FSDP will shard and wrap the CPU model based on the config.
+        # The wrapped model automatically handles forward/backward communication.
+        # Pass init_device, weights_path, and hf_config for meta device support.
+        model = MindSpeedParallelEngine(
+            config=parallel_config, model=model, init_device=init_device, weights_path=weights_path, hf_config=hf_config
+        )
+
+        # 7. Move to target device
+        # For cpu mode: move to NPU after wrapping
+        # For meta mode: weights are already loaded to device in MindSpeedParallelEngine
+        if init_device == &quot;cpu&quot;:
+            model = model.to(target_device)
+
+        return model
+
+    @staticmethod
+    def _build_parallel_config(model_args, parallel_args, dp_size) -&gt; &#x27;ParallelEngineConfig&#x27;:
+        &quot;&quot;&quot;
+        Builds the Config based on parallel_args and hardcoded layer name rules.
+        Note: The wildcards here (e.g., &#x27;model.layers.{*}&#x27;) are suitable for standard structures like Llama/Qwen.
+        If using other non-standard models, these strings might need adjustment.
+        &quot;&quot;&quot;
+        # --- 1. FSDP Plan ---
+        # Requirement: Apply FSDP to transformer layers
+        apply_modules = {
+            parallel_args.fsdp_modules[0]: {
+                &#x27;reshard_after_forward&#x27;: parallel_args.reshard_after_forward,
+                &#x27;shard_placement_fn&#x27;: parallel_args.shard_placement_fn,
+            },
+        }
+        for modules in parallel_args.fsdp_modules[1:]:
+            apply_modules[modules] = {
+                &#x27;reshard_after_forward&#x27;: parallel_args.reshard_after_forward,
+            }
+        fsdp_plan = FSDPPlanConfig(
+            ignored_modules=parallel_args.ignored_modules if parallel_args.ignored_modules else [],
+            apply_modules=apply_modules,
+            param_dtype=parallel_args.param_dtype,
+            reduce_dtype=parallel_args.reduce_dtype,
+            num_to_forward_prefetch=parallel_args.num_to_forward_prefetch,
+            num_to_backward_prefetch=parallel_args.num_to_backward_prefetch,
+        )
+
+        # --- 2. Tensor Parallel Plan ---
+        # Requirement: Column Parallel for Q/K/V/Gate/Up, Row Parallel for O/Down
+        tp_plan = TPPlanConfig(colwise_parallel=parallel_args.tp_colwise, rowwise_parallel=parallel_args.tp_rowwise)
+
+        # --- 3. Expert Parallel Plan ---
+        # For Mixture-of-Experts (MoE) models
+        ep_size = parallel_args.ep_size
+        ep_fsdp_size = parallel_args.ep_fsdp_size
+
+        ep_plan = EPPlanConfig(
+            apply_modules=parallel_args.ep_modules,
+            apply_efsdp_modules=parallel_args.ep_fsdp_modules,
+            dispatcher=parallel_args.ep_dispatcher,
+        )
+
+        cp_plan = CPPlanConfig(context_parallel_type=parallel_args.cp_type, is_pack=getattr(model_args, &quot;pack&quot;, False))
+
+        # --- 4. Recompute Plan ---
+        # Activation Checkpointing
+        recompute_plan = parallel_args.recompute_modules if parallel_args.recompute else []
+
+        # --- 5. Quantization Config ---
+        quantization_plan = QuantizeConfig(
+            recipe_name=model_args.quant_recipe_name,
+            apply_modules=model_args.quant_apply_modules,
+            ignored_modules=model_args.quant_ignored_modules,
+            quant_converters=model_args.quant_converters,
+            enable_fsdp_low_precision_all_gather=model_args.enable_fsdp_low_precision_all_gather,
+            fsdp_low_precision_all_gather_mode=model_args.fsdp_low_precision_all_gather_mode,
+        )
+
+        # --- 6. Assemble Config ---
+        # Get parallel sizes safely
+        tp_size = parallel_args.tp_size
+        fsdp_size = parallel_args.fsdp_size
+
+        config = ParallelEngineConfig(
+            # Parallelism parameters
+            data_parallel_size=dp_size,
+            fully_shard_parallel_size=fsdp_size,
+            fsdp_plan=fsdp_plan,
+            tensor_parallel_size=tp_size,
+            tp_plan=tp_plan,
+            # Expert Parallelism
+            expert_parallel_size=ep_size,
+            expert_fully_shard_parallel_size=ep_fsdp_size,
+            expert_data_parallel_size=dp_size,  # Usually EP data parallel size matches global or has specific logic
+            ep_plan=ep_plan,
+            # Context Parallelism
+            context_parallel_size=parallel_args.cp_size,
+            context_parallel_type=parallel_args.cp_type,
+            cp_plan=cp_plan,
+            # Recomputation
+            recompute=parallel_args.recompute,
+            recompute_plan=recompute_plan,
+            # Quantization
+            quantization_plan=quantization_plan,
+        )
+
+        return config
+
+
+# ==============================================================================
+# [Facade] AutoModelFactory
+# Unified entry point used by AutoTrainer
+# ==============================================================================
+class AutoModelFactory:
+    &quot;&quot;&quot;
+    Unified Factory for creating models.
+    Dispatches to ModelFactory or McoreModelFactory based on the environment.
+    &quot;&quot;&quot;
+
+    @staticmethod
+    def create(*args, **kwargs):
+        &quot;&quot;&quot;
+        Factory method that forwards arguments to the specific implementation.
+        &quot;&quot;&quot;
+        return ModelFactory.create(*args, **kwargs)
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

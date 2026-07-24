@@ -1,0 +1,1048 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/models/model_loader.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/models/model_loader.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_91f743bcac5550.html">◀ model_factory.py</a> <a href="file_9123a7d831d5d4.html">model_registry.py ▶</a></nav></div>
+<div class="wrap">
+<h1>model_loader.py</h1><p class="goal">mindspeed_llm/fsdp2/models/model_loader.py · 20684B · 489 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L31" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def init_empty_weights()</a><a href="#L37" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def register_empty_parameter(module, name, par</a><a href="#L59" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def reset_hf_initialized_flag(module: nn.Modul</a><a href="#L67" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _find_submodule(module: nn.Module, name: s</a><a href="#L78" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class ModelLoader</a><a href="#L81" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, model_args, init_device: st</a><a href="#L89" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def load_config(self) -&gt; AutoConfig</a><a href="#L101" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def create_model(self, model_cls=None) -&gt; T</a><a href="#L111" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _create_on_cpu(self, model_cls=None) -&gt;</a><a href="#L140" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _create_on_meta(self, model_cls=None) -&gt</a><a href="#L171" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class WeightLoader</a><a href="#L178" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def load</a><a href="#L194" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _init_random(model: nn.Module, device: str</a><a href="#L209" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _load_pretrained</a><a href="#L303" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_state_dict_files(weights_path: str)</a><a href="#L335" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _iterate_state_dict(filepath: str)</a><a href="#L347" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _find_model_param(param_names: Set[str], t</a><a href="#L357" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _dispatch_parameter</a><a href="#L414" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _dispatch_buffer(model: nn.Module, name: s</a><a href="#L433" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _init_parameter(model: nn.Module, name: st</a><a href="#L452" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _post_process</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep08.html">EP08</a><a href="../ep12.html">EP12</a><a href="../ep18.html">EP18</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="annot"><div class="seg"><p class="seglab">行 1-54 · 导入与 init_empty_weights：meta 建壳的基石</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :1-:54）</h5><pre data-lang="py" data-start="1" data-idprefix="A"># Copyright (c) 2026, Huawei Technologies Co., Ltd. All rights reserved.
+import os
+import glob
+import json
+from contextlib import contextmanager
+from typing import Optional, Dict, Tuple, Set
+
+from safetensors import safe_open
+import torch
+from torch import nn
+from torch.distributed.tensor import distribute_tensor
+from transformers import AutoConfig, AutoModelForCausalLM
+
+try:
+    from transformers.modeling_utils import no_init_weights
+except ImportError:
+    # adapt  for transformers 5.x.x
+    from transformers.initialization import no_init_weights
+
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+from mindspeed_llm.fsdp2.utils.global_vars import get_args
+from mindspeed_llm.fsdp2.checkpoint.weight_conv_adapter import WeightConvAdapter
+
+logger = get_logger(__name__)
+
+
+# ==============================================================================
+# Context Managers
+# ==============================================================================
+@contextmanager
+def init_empty_weights():
+    &quot;&quot;&quot;
+    A context manager under which models are initialized with all parameters on the meta device.
+    &quot;&quot;&quot;
+    old_register_parameter = nn.Module.register_parameter
+
+    def register_empty_parameter(module, name, param):
+        old_register_parameter(module, name, param)
+        if param is not None:
+            param_cls = type(module._parameters[name])
+            kwargs = module._parameters[name].__dict__
+            kwargs[&quot;requires_grad&quot;] = param.requires_grad
+            module._parameters[name] = (
+                param
+                if param.device == torch.device(&quot;meta&quot;)
+                else param_cls(module._parameters[name].to(&quot;meta&quot;), **kwargs)
+            )
+
+    try:
+        nn.Module.register_parameter = register_empty_parameter
+        yield
+    finally:
+        nn.Module.register_parameter = old_register_parameter
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">model = AutoModelForCausalLM.from_pretrained(&quot;Qwen/Qwen3-8B&quot;, torch_dtype=torch.bfloat16, device_map=&quot;cuda:0&quot;)</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>GPU 侧的常规做法是 <b>直接 <code>from_pretrained</code> 一次性把整份权重载到 <code>cuda:0</code></b>——meta 设备根本不参与，因为单卡 8B 模型 bfloat16 约 16GB、放得下，没必要建壳。本厂走 meta 壳路线是因为：(1) 要在 Ascend NPU 上复用 HF 的 <code>from_config</code> 实例化逻辑但不想让权重落任何实际设备；(2) 后续 FSDP2 wrap 后每个 rank 只持有一片 shard，meta 壳能确保 wrap 阶段不会先全量物化再切。代价是多写了 :30-54 这段 monkey-patch 和后面整套 narrow 灌权逻辑。</p></div></div><div class="seg"><p class="seglab">行 56-72 · 工具函数：HF 初始化标志复位与叶子定位</p><pre data-lang="py" data-start="56" data-idprefix="A"># ==============================================================================
+# Utility Functions
+# ==============================================================================
+def reset_hf_initialized_flag(module: nn.Module) -&gt; None:
+    &quot;&quot;&quot;Reset HuggingFace&#x27;s _is_hf_initialized flag.&quot;&quot;&quot;
+    if hasattr(module, &quot;_is_hf_initialized&quot;):
+        setattr(module, &quot;_is_hf_initialized&quot;, False)
+    for child in module.children():
+        reset_hf_initialized_flag(child)
+
+
+def _find_submodule(module: nn.Module, name: str) -&gt; Tuple[nn.Module, str]:
+    &quot;&quot;&quot;Find the leaf module according to the name.&quot;&quot;&quot;
+    pieces = name.split(&quot;.&quot;)
+    for piece in pieces[:-1]:
+        module = getattr(module, piece)
+    return module, pieces[-1]</pre><div class="exp"><p>:59-64 <code>reset_hf_initialized_flag</code> 递归把每个子模块的 <code>_is_hf_initialized</code> 拍回 <code>False</code>。这个 HF 内部标志一旦为 True，<code>from_config</code> 出来的模块会跳过 _init_weights 钩子；本厂在 meta 壳 + 后灌权路径下需要让随机初始化分支（见 :194-205）能重新生效，所以先复位。</p><p>:67-72 <code>_find_submodule</code> 按 <code>a.b.c.weight</code> 这种点分名字逐级 <code>getattr</code> 下钻到叶子父模块，返回 <code>(leaf_parent, last_name)</code>。它是 :357 <code>_dispatch_parameter</code> 把 checkpoint 张量写进具体 param 的依赖项——灌权时靠名字定位，因为 meta 壳出来的模型结构是活的、不能按下标取。</p></div></div><div class="seg"><p class="seglab">行 78-99 · ModelLoader：建壳器入口与 config 加载</p><pre data-lang="py" data-start="78" data-idprefix="A">class ModelLoader:
+    &quot;&quot;&quot;Load model on CPU or meta device.&quot;&quot;&quot;
+
+    def __init__(self, model_args, init_device: str = &quot;cpu&quot;, hf_config: Optional[AutoConfig] = None):
+        self.model_args = model_args
+        self.init_device = init_device
+        self.trust_remote_code = getattr(model_args, &#x27;trust_remote_code&#x27;, False)
+        self.model_path = model_args.model_name_or_path
+        self.train_from_scratch = getattr(model_args, &#x27;train_from_scratch&#x27;, False)
+        self.hf_config = hf_config
+
+    def load_config(self) -&gt; AutoConfig:
+        &quot;&quot;&quot;Load HuggingFace model config.&quot;&quot;&quot;
+        logger.info_rank0(f&quot;&gt; Loading config from {self.model_path}...&quot;)
+        self.hf_config = AutoConfig.from_pretrained(
+            self.model_path,
+            trust_remote_code=self.trust_remote_code,
+            # Context parallelism requires uniformly applying a patch to the attention component,
+            # which is unified here into the `eager` implementation part
+            attn_implementation=&quot;eager&quot; if get_args().cp_size &gt; 1 else None,
+        )
+        return self.hf_config</pre><div class="exp"><p>:81-87 <code>__init__</code> 囤住 5 个状态：<code>init_device</code>（<code>"cpu"</code> 或 <code>"meta"</code>，决定建壳路线）、<code>model_path</code>（= <code>model_args.model_name_or_path</code>，注意这是<b>输入侧的权重路径</b>，后面 EP17 场景下它会被指向 merge 产物）、<code>train_from_scratch</code>、<code>trust_remote_code</code>、<code>hf_config</code>。注意此时 <code>self.model_path</code> 还没有「merge 产物」语义，它的值完全由上游 args 决定——这是训练/推理 hinge 的上游入口。</p><p>:89-99 <code>load_config()</code> 用 <code>AutoConfig.from_pretrained</code> 读 config，:97 还有一条 CP（context parallel）专用逻辑：<code>cp_size &gt; 1</code> 时强制 <code>attn_implementation="eager"</code>。原因是 CP 要对 attention 组件打统一 patch，eager 实现路径可控、flash/sdpa 不可控。这条逻辑在 model_factory.py:79 也有镜像，保证 config 阶段就钉死 attn 实现。</p></div></div><div class="seg"><p class="seglab">行 101-138 · create_model + _create_on_cpu：CPU 路线与 from_pretrained hinge</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :101-:138）</h5><pre data-lang="py" data-start="101" data-idprefix="A">    def create_model(self, model_cls=None) -&gt; Tuple[nn.Module, Optional[str]]:
+        &quot;&quot;&quot;Create model based on init_device.&quot;&quot;&quot;
+        if self.hf_config is None:
+            self.load_config()
+
+        if self.init_device == &quot;meta&quot;:
+            return self._create_on_meta(model_cls)
+        else:
+            return self._create_on_cpu(model_cls)
+
+    def _create_on_cpu(self, model_cls=None) -&gt; Tuple[nn.Module, None]:
+        &quot;&quot;&quot;Create and load model on CPU.&quot;&quot;&quot;
+        if model_cls is not None:
+            logger.info_rank0(f&quot;&gt; Loading {model_cls.__name__} on CPU...&quot;)
+            model = model_cls.from_pretrained(
+                self.model_path,
+                config=self.hf_config,
+                low_cpu_mem_usage=True,
+                device_map=&quot;cpu&quot;,
+                torch_dtype=torch.float32,
+            )
+        elif self.train_from_scratch:
+            logger.info_rank0(&quot;&gt; Creating model with random weights on CPU...&quot;)
+            model = AutoModelForCausalLM.from_config(
+                self.hf_config, trust_remote_code=self.trust_remote_code, torch_dtype=torch.float32
+            )
+        else:
+            logger.info_rank0(f&quot;&gt; Loading pretrained model on CPU from {self.model_path}...&quot;)
+            model = AutoModelForCausalLM.from_pretrained(
+                self.model_path,
+                config=self.hf_config,
+                trust_remote_code=self.trust_remote_code,
+                torch_dtype=torch.float32,
+                low_cpu_mem_usage=True,
+                device_map=&quot;cpu&quot;,
+            )
+
+        return model, None</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">model = AutoModelForCausalLM.from_pretrained(&quot;Qwen/Qwen3-8B&quot;, torch_dtype=torch.bfloat16, device_map=&quot;cuda:0&quot;)</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>GPU 侧推理就是一行 <code>from_pretrained(device_map="cuda:0")</code>，HF 内部自动把权重铺到 GPU、自动切 sharding。本厂 :129 表面看也是 <code>from_pretrained</code>，但两处本质差异：(1) <code>device_map="cpu"</code>（:135）只物化到 CPU，不沾 NPU 显存，留给后面 FSDP2 wrap 后再上卡；(2) <code>torch_dtype=float32</code>（:133）而非 bfloat16——因为后续 FSDP2/TP 切分要在 float32 上做 narrow 再下放到 NPU，精度无损。GPU 侧的 <code>from_pretrained</code> 是「载即上卡即推理」的终态；本厂的 :129 只是 hinge，把 EP17 merge 产物搬进 CPU 内存，wrap + 灌权还在后头。</p></div></div><div class="seg"><p class="seglab">行 140-165 · _create_on_meta：meta 壳建法（FSDP2 三步走 step1）</p><pre data-lang="py" data-start="140" data-idprefix="A">    def _create_on_meta(self, model_cls=None) -&gt; Tuple[nn.Module, Optional[str]]:
+        &quot;&quot;&quot;Create empty model on meta device.&quot;&quot;&quot;
+        weights_path = None if self.train_from_scratch else self.model_path
+
+        if model_cls is not None:
+            logger.info_rank0(f&quot;&gt; Creating empty {model_cls.__name__} on meta device...&quot;)
+            with init_empty_weights(), no_init_weights():
+                if hasattr(model_cls, &#x27;_from_config&#x27;):
+                    model = model_cls._from_config(self.hf_config)
+                else:
+                    model = model_cls.from_config(self.hf_config)
+        elif self.train_from_scratch:
+            logger.info_rank0(&quot;&gt; Creating empty model on meta device for random init...&quot;)
+            with init_empty_weights():
+                model = AutoModelForCausalLM.from_config(
+                    self.hf_config, trust_remote_code=self.trust_remote_code, torch_dtype=torch.float32
+                )
+        else:
+            logger.info_rank0(f&quot;&gt; Creating empty model on meta device (weights: {self.model_path})...&quot;)
+            with init_empty_weights(), no_init_weights():
+                model = AutoModelForCausalLM.from_config(
+                    self.hf_config, trust_remote_code=self.trust_remote_code, torch_dtype=torch.float32
+                )
+
+        logger.info_rank0(f&quot;&gt; Model created on meta device. Weights path: {weights_path}&quot;)
+        return model, weights_path</pre><div class="exp"><p>:140-165 是 FSDP2 路线的核心建壳。:142 <code>weights_path = None if train_from_scratch else self.model_path</code>——这里把「是否要后灌权」和「建壳」解耦：壳只建一次，灌权与否看 <code>weights_path</code> 是否为 None，灌权动作发生在 wrap 之后（见 mindspeed_parallel_engine.py:44-46）。</p><p>三分支建壳：<code>model_cls</code> 给定时（:144-150）优先 <code>_from_config</code>（私有、跳过部分后处理），否则 <code>from_config</code>；<code>train_from_scratch</code>（:151-156）只套 <code>init_empty_weights</code>，不套 <code>no_init_weights</code>，因为随机初始化要靠后面 :194-205 的 <code>init_weights</code>；默认分支 :157-162 同时套 <code>init_empty_weights()</code> + <code>no_init_weights()</code>，前者把参数赶到 meta、后者压制 HF 默认初始化钩子，双保险。</p><p>:165 返回 <code>(model, weights_path)</code>，<code>weights_path</code> 非 None 时下游 engine 会拿它去灌权。此时 model 全在 meta、零字节占用，可以安全地过 FSDP2 wrap。</p></div></div><div class="seg"><p class="seglab">行 171-205 · WeightLoader.load + _init_random：wrap 后的灌权分派</p><pre data-lang="py" data-start="171" data-idprefix="A">class WeightLoader:
+    &quot;&quot;&quot;
+    Load weights into FSDP-wrapped model.
+    Supports weight conversion via transformers conversion_mapping API.
+    &quot;&quot;&quot;
+
+    @staticmethod
+    def load(
+        model: nn.Module,
+        weights_path: Optional[str],
+        device: Optional[str] = None,
+        hf_config: Optional[AutoConfig] = None,
+    ) -&gt; None:
+        &quot;&quot;&quot;Load or initialize weights after FSDP wrapping.&quot;&quot;&quot;
+        if device is None:
+            device = torch.accelerator.current_accelerator().type
+
+        if weights_path is None:
+            WeightLoader._init_random(model, device)
+        else:
+            WeightLoader._load_pretrained(model, weights_path, device, hf_config)
+
+    @staticmethod
+    def _init_random(model: nn.Module, device: str) -&gt; None:
+        &quot;&quot;&quot;Initialize model with random weights.&quot;&quot;&quot;
+        logger.info_rank0(f&quot;&gt; Initializing random weights on {device}...&quot;)
+
+        model.to_empty(device=device)
+        model = model.float()
+        reset_hf_initialized_flag(model)
+
+        if hasattr(model, &#x27;init_weights&#x27;):
+            model.init_weights()
+
+        logger.info_rank0(&quot;&gt; Random initialization done&quot;)</pre><div class="exp"><p>:177-191 <code>WeightLoader.load</code> 是 wrap 后的入口。:185-186 <b>torch_npu device 路由</b>：<code>device = torch.accelerator.current_accelerator().type</code>——在 Ascend 环境下这是 <code>"npu"</code>，在 CUDA 下会是 <code>"cuda"</code>。这是本厂「能跑 Ascend 也能跑 GPU」的抽象层：<code>torch.accelerator</code> 是 PyTorch 2.x 的统一加速器 API，不写死 <code>cuda</code>。:188-191 按 <code>weights_path</code> 是否为 None 二分：<code>None</code> 走随机初始化、否则走灌权。</p><p>:193-205 <code>_init_random</code> 是 <code>train_from_scratch</code> 的收尾。:198 <code>model.to_empty(device=device)</code> 把 meta 张量物化到实际设备（占真实显存），:199 <code>model.float()</code>，:200 复位 HF 初始化标志（见 :59），:202-203 若模型有 <code>init_weights</code> 就调它做随机初始化。注意 :199 转 float32 是为后续训练精度，<b>不是</b>推理 dtype。</p><p>关键时序：这段发生在 <code>apply_fsdp_modules()</code> 之后（engine :41 → :46），所以 <code>model.to_empty</code> 物化的是<b>已被 FSDP2 wrap 后的 sharded param</b>，每个 rank 只物化自己那片，显存峰值极低——这是 meta 路线相对 CPU 路线（:129 整模物化）的核心收益。</p></div></div><div class="seg"><p class="seglab">行 207-294 · _load_pretrained 主体：buffer 保存、to_empty、key 重命名与流式灌权</p><pre data-lang="py" data-start="207" data-idprefix="A">    @staticmethod
+    @torch.no_grad()
+    def _load_pretrained(
+        model: nn.Module, weights_path: str, device: str, hf_config: Optional[AutoConfig] = None
+    ) -&gt; None:
+        &quot;&quot;&quot;
+        Load pretrained weights with dynamic weight conversion support.
+        Uses transformers conversion_mapping API for model-type-specific weight transformations.
+        &quot;&quot;&quot;
+
+        logger.info_rank0(f&quot;&gt; Loading pretrained weights from {weights_path}...&quot;)
+
+        model_type = getattr(hf_config, &#x27;model_type&#x27;, None) if hf_config else None
+        adapter = WeightConvAdapter(model_type=model_type) if model_type else None
+
+        # Step 1: Save buffers before to_empty
+        buffer_dict = {name: buffer.clone() for name, buffer in model.named_buffers()}
+        parameter_names_to_load = {name for name, _ in model.named_parameters()}
+
+        logger.info_rank0(f&quot;&gt; Saved {len(buffer_dict)} buffers, {len(parameter_names_to_load)} parameters to load&quot;)
+
+        # Step 2: Materialize model to device
+        model.to_empty(device=device)
+        model = model.float()
+        logger.info_rank0(f&quot;&gt; Model materialized to {device}&quot;)
+
+        # Step 3: Load state dict and dispatch parameters
+        state_dict_files = WeightLoader._get_state_dict_files(weights_path)
+
+        pending_weights: Dict[str, torch.Tensor] = {}
+        collected_keys: Set[str] = set()
+        converted_groups: Dict[str, Dict[str, list]] = {}
+
+        for state_dict_file in state_dict_files:
+            for name, tensor in WeightLoader._iterate_state_dict(state_dict_file):
+                if adapter and adapter.has_conversions:
+                    renamed_key, source_pattern = adapter.rename_key(name)
+
+                    if source_pattern is not None:
+                        converter = adapter.match_converter(source_pattern)
+                        if converter:
+                            converted_groups.setdefault(renamed_key, {}).setdefault(source_pattern, []).append(
+                                (name, tensor)
+                            )
+                            collected_keys.add(name)
+                            continue
+
+                    name = renamed_key
+
+                if name in buffer_dict:
+                    buffer_dict[name] = tensor.clone()
+                elif name in parameter_names_to_load:
+                    parameter_names_to_load.remove(name)
+                    WeightLoader._dispatch_parameter(model, name, tensor)
+                else:
+                    pending_weights[name] = tensor
+
+        # Dispatch pending weights from first pass
+        for name in list(pending_weights.keys()):
+            if name in buffer_dict:
+                buffer_dict[name] = pending_weights.pop(name).clone()
+            elif name in parameter_names_to_load:
+                parameter_names_to_load.remove(name)
+                WeightLoader._dispatch_parameter(model, name, pending_weights.pop(name))
+
+        # Dispatch converted weights (streaming via native WeightConverter.convert)
+        for target_name, collected in converted_groups.items():
+            source_pattern = next(iter(collected))
+            converter = adapter.match_converter(source_pattern)
+            if not converter:
+                continue
+
+            full_name = WeightLoader._find_model_param(parameter_names_to_load, target_name)
+            if not full_name:
+                logger.debug(f&quot;&gt; No model param matching converted target: {target_name}&quot;)
+                continue
+
+            parameter_names_to_load.discard(full_name)
+            original_keys = [item[0] for item in collected[source_pattern]]
+            tensors_only = {sp: [item[1] for item in items] for sp, items in collected.items()}
+            for name, tensor in WeightConvAdapter.dispatch_converted(converter, full_name, tensors_only, original_keys):
+                WeightLoader._dispatch_parameter(model, name, tensor)
+
+        # Log remaining unexpected keys
+        for name in pending_weights:
+            if name not in collected_keys:
+                logger.debug(f&quot;&gt; Unexpected key in state dict: {name}&quot;)
+        del pending_weights</pre><div class="exp"><p>:207-300 是灌权主流程，分 4 个 Step。</p><p><b>Step1 :222-226</b>：<code>to_empty</code> 前先 <code>named_buffers</code> 克隆所有 buffer（如 RoPE 的 cos/sin 缓存、LayerNorm 的常量）。因为 <code>to_empty</code> 会把 buffer 也清空，得先存着最后 :297 还原。</p><p><b>Step2 :228-231</b>：<code>model.to_empty(device=device)</code> 物化 sharded param 到 NPU，再 <code>.float()</code>。</p><p><b>Step3 :233-294</b> 是核心。<code>_get_state_dict_files</code> 拿到 safetensors 分片列表，然后<b>逐文件流式 yield</b>（:241-242，见 :335-344 的 <code>safe_open</code>），不一次性 load 整份 state_dict——这是省内存关键，8B 权重不必整份驻留 CPU。</p><p>:242-262 对每个 (key, tensor)：<code>adapter.has_conversions</code> 时先 <code>rename_key</code>（把 HF 名字映回本厂并行化后的名字），命中 <code>source_pattern</code> 的进入 <code>converted_groups</code>（:248-251，多源张量合并写入，如 TP 切分前的合并权重）；否则按 buffer/param/pending 三分流。:256-260 命中 param 就 <code>_dispatch_parameter</code> 当场灌。:265-270 是兜底：第一遍漏网的 pending 在这里再过一遍 buffer/param。:273-288 处理 <code>converted_groups</code>——调 <code>WeightConvAdapter.dispatch_converted</code> 用原生 WeightConverter 把多源张量算成目标，再逐个 dispatch。:291-294 把既没命中也没转换的 key 记成 debug 级 unexpected。</p><p><b>Step4 :296-300</b>：<code>_post_process</code> 还原 buffer、初始化缺失 param、tie embedding，最后 :298-299 <code>torch.distributed.barrier()</code> 等所有 rank 灌完再放行——这是跨 rank 同步点，避免有人先跑 forward 时别的 rank 还在灌权。</p></div></div><div class="seg"><p class="seglab">行 302-354 · 权重文件定位、流式迭代与叶子 param 匹配</p><pre data-lang="py" data-start="302" data-idprefix="A">    @staticmethod
+    def _get_state_dict_files(weights_path: str):
+        &quot;&quot;&quot;Get list of state dict files.&quot;&quot;&quot;
+        # Check for safetensors index
+        index_file = os.path.join(weights_path, &quot;model.safetensors.index.json&quot;)
+        if os.path.exists(index_file):
+            with open(index_file, &#x27;r&#x27;, encoding=&#x27;utf-8&#x27;) as f:
+                index = json.load(f)
+            files = set(index[&quot;weight_map&quot;].values())
+            return [os.path.join(weights_path, f) for f in sorted(files)]
+
+        # Check for single safetensors file
+        single_safetensor = os.path.join(weights_path, &quot;model.safetensors&quot;)
+        if os.path.exists(single_safetensor):
+            return [single_safetensor]
+
+        # Check for multiple safetensors files
+        safetensor_files = sorted(glob.glob(os.path.join(weights_path, &quot;*.safetensors&quot;)))
+        if safetensor_files:
+            return safetensor_files
+
+        # Check for pytorch files
+        pytorch_files = sorted(glob.glob(os.path.join(weights_path, &quot;*.bin&quot;)))
+        if pytorch_files:
+            return pytorch_files
+
+        pytorch_files = sorted(glob.glob(os.path.join(weights_path, &quot;*.pt&quot;)))
+        if pytorch_files:
+            return pytorch_files
+
+        raise FileNotFoundError(f&quot;No weight files found in {weights_path}&quot;)
+
+    @staticmethod
+    def _iterate_state_dict(filepath: str):
+        &quot;&quot;&quot;Iterate over state dict file, yielding (key, tensor) pairs.&quot;&quot;&quot;
+        if filepath.endswith(&quot;.safetensors&quot;):
+            with safe_open(filepath, framework=&quot;pt&quot;, device=&quot;cpu&quot;) as f:
+                for key in f.keys():
+                    yield key, f.get_tensor(key)
+        else:
+            state_dict = torch.load(filepath, map_location=&quot;cpu&quot;, weights_only=True)
+            for key, tensor in state_dict.items():
+                yield key, tensor
+
+    @staticmethod
+    def _find_model_param(param_names: Set[str], target_name: str) -&gt; Optional[str]:
+        &quot;&quot;&quot;Find full model param name that ends with target_name.&quot;&quot;&quot;
+        if target_name in param_names:
+            return target_name
+        for name in param_names:
+            if name.endswith(target_name):
+                return name
+        return None</pre><div class="exp"><p>:302-332 <code>_get_state_dict_files</code> 是 EP17 merge 产物的<b>探测优先级</b>：先 :306 <code>model.safetensors.index.json</code>（多分片索引，最常见，merge_dcp_to_hf 产出这个），再 :314 单文件 <code>model.safetensors</code>，再 :319 glob <code>*.safetensors</code>，再 :324 <code>*.bin</code>，最后 :328 <code>*.pt</code>。这个顺序说明本厂首选 safetensors——和 merge_dcp_to_hf.py:13 的 <code>save_file</code> 对齐，形成「EP17 merge 出 safetensors → 这里 safetensors 直读」的闭环。:332 找不到就抛 <code>FileNotFoundError</code>。</p><p>:334-344 <code>_iterate_state_dict</code>：safetensors 用 <code>safe_open(framework="pt", device="cpu")</code> <b>零拷贝按 key yield</b>，内存只占一个 tensor；非 safetensors（.bin/.pt）才 <code>torch.load(weights_only=True)</code> 整份载入。<code>weights_only=True</code> 是安全约束，防 pickle 反序列化攻击。</p><p>:346-354 <code>_find_model_param</code>：给一个 <code>target_name</code>（可能是 converted 后的短名），先精确匹配，再 <code>endswith</code> 兜底——因为 FSDP2 wrap 后参数全名会带 <code>_fsdp_wrapped_module.</code> 之类前缀，短名后缀匹配能跨过前缀差异。</p></div></div><div class="seg"><p class="seglab">行 356-411 · _dispatch_parameter：DTensor placements 本地 narrow 灌权（FSDP2 核心）</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :356-:411）</h5><pre data-lang="py" data-start="356" data-idprefix="A">    @staticmethod
+    def _dispatch_parameter(
+        model: nn.Module,
+        name: str,
+        tensor: torch.Tensor,
+    ) -&gt; None:
+        &quot;&quot;&quot;
+        Copy a checkpoint tensor into the target parameter of a parallelized model.
+        &quot;&quot;&quot;
+        module, local_name = _find_submodule(model, name)
+        orig_param = dict(module.named_parameters(recurse=False))[local_name]
+        orig_tensor = orig_param.data
+
+        if not hasattr(orig_tensor, &quot;_local_tensor&quot;):
+            # Plain tensor (e.g. replicated norm weights).
+            src = tensor.to(device=orig_tensor.device, dtype=orig_tensor.dtype, non_blocking=True)
+            orig_param.data.copy_(src, non_blocking=True)
+            return
+
+        # DTensor path: slice on CPU, then move the local shard to device.
+        mesh = orig_tensor.device_mesh
+        placements = orig_tensor.placements
+        local_target = orig_tensor._local_tensor
+
+        # Walk through each mesh dimension and narrow along the tensor dim
+        # specified by the Shard placement. Replicate / Partial are no-ops.
+        local_cpu = tensor
+        for mesh_dim, placement in enumerate(placements):
+            if not placement.is_shard():
+                continue
+
+            shard_dim = placement.dim
+            mesh_size = mesh.size(mesh_dim)
+            mesh_rank = mesh.get_local_rank(mesh_dim)
+            full_len = local_cpu.size(shard_dim)
+
+            if full_len % mesh_size == 0:
+                chunk_len = full_len // mesh_size
+                local_cpu = local_cpu.narrow(shard_dim, mesh_rank * chunk_len, chunk_len)
+            else:
+                # Match DTensor&#x27;s chunk-based partitioning for uneven splits.
+                chunks = torch.chunk(local_cpu, mesh_size, dim=shard_dim)
+                if mesh_rank &lt; len(chunks):
+                    local_cpu = chunks[mesh_rank]
+                else:
+                    empty_shape = list(local_cpu.shape)
+                    empty_shape[shard_dim] = 0
+                    local_cpu = local_cpu.new_empty(empty_shape)
+
+        local_cpu = local_cpu.contiguous().pin_memory()
+        local_dev = local_cpu.to(
+            device=local_target.device,
+            dtype=local_target.dtype,
+            non_blocking=True,
+        )
+        local_target.copy_(local_dev, non_blocking=True)</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># GPU DDP: state_dict 全量 broadcast 到每卡, load_state_dict 直填
+model.load_state_dict(torch.load(&quot;pytorch_model.bin&quot;, map_location=&quot;cuda&quot;))
+# 或 FSDP1: model.set_state_dict(state_dict) 走 all_gather 还原</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>GPU/DDP 侧灌权是<b>拓扑无关的全量 load</b>：每张卡都持完整权重，<code>load_state_dict</code> 直接填，根本不需要 narrow。FSDP1 也好、DDP 也好，权重对象的分片是 wrap 时内部做的，灌权时给的是整份。<b>本厂 :383-411 必须手动 narrow 的根因</b>：FSDP2 用 DTensor 表达分片，wrap 后的 param <code>.data</code> <b>就是本地 shard 大小</b>（不是全量），而 HF checkpoint 给的是全量张量——所以必须在灌权侧按 placements 主动切。这是 FSDP2（DTensor-centric）相对 FSDP1/DDP（全量-centric）在权重加载路径上最大的范式差：灌权逻辑要<b>懂 mesh + placements</b>，不能只靠 <code>load_state_dict</code>。另一个差异：:405 的 pin_memory + non_blocking H2D 是 Ascend NPU 的常用异步拷贝范式，与 CUDA 的 <code>non_blocking</code> 行为对齐但目标设备是 <code>npu</code>。</p></div></div><div class="seg"><p class="seglab">行 413-489 · _dispatch_buffer + _init_parameter + _post_process：buffer 还原、缺失补齐与 tie embedding</p><pre data-lang="py" data-start="413" data-idprefix="A">    @staticmethod
+    def _dispatch_buffer(model: nn.Module, name: str, buffer: torch.Tensor, dtensor_factory) -&gt; None:
+        &quot;&quot;&quot;
+        Assign buffer to model.
+        &quot;&quot;&quot;
+        module, local_name = _find_submodule(model, name)
+        orig_buffer = dict(module.named_buffers(recurse=False))[local_name]
+
+        if hasattr(orig_buffer, &quot;device_mesh&quot;):
+            device_mesh = orig_buffer.device_mesh
+            placements = orig_buffer.placements
+            module.register_buffer(
+                local_name, dtensor_factory(buffer.to(dtype=orig_buffer.dtype), device_mesh, placements)
+            )
+        else:
+            dict(module.named_buffers(recurse=False))[local_name].copy_(
+                buffer.to(device=orig_buffer.device, dtype=orig_buffer.dtype)
+            )
+
+    @staticmethod
+    def _init_parameter(model: nn.Module, name: str) -&gt; None:
+        &quot;&quot;&quot;
+        Initialize missing parameter.
+        &quot;&quot;&quot;
+        pieces = name.split(&quot;.&quot;)
+        init_func = None
+        module = model
+
+        for piece in pieces[:-1]:
+            if hasattr(module, &quot;_init_weights&quot;):
+                init_func = getattr(module, &quot;_init_weights&quot;, None)
+            module = getattr(module, piece)
+
+        if init_func is not None:
+            module.apply(init_func)
+        else:
+            logger.warning(f&quot;&gt; Cannot find _init_weights for {name}, skipping initialization&quot;)
+
+    @staticmethod
+    def _post_process(
+        model: nn.Module, buffer_dict: Dict[str, torch.Tensor], parameter_names_left: Set[str], dtensor_factory
+    ) -&gt; None:
+        &quot;&quot;&quot;
+        Post-process after weight loading.
+        &quot;&quot;&quot;
+        # Restore buffers
+        for name, buffer in buffer_dict.items():
+            try:
+                WeightLoader._dispatch_buffer(model, name, buffer, dtensor_factory)
+            except Exception as e:
+                logger.warning(f&quot;&gt; Failed to restore buffer {name}: {e}&quot;)
+
+        logger.info_rank0(f&quot;&gt; Restored {len(buffer_dict)} buffers&quot;)
+
+        # Initialize missing parameters
+        if parameter_names_left:
+            logger.info_rank0(f&quot;&gt; Missing {parameter_names_left} parameters, initializing them...&quot;)
+            for name in parameter_names_left:
+                try:
+                    WeightLoader._init_parameter(model, name)
+                except Exception as e:
+                    logger.warning(f&quot;&gt; Failed to initialize {name}: {e}&quot;)
+
+        # Tie embeddings if needed
+        if getattr(model.config, &quot;tie_word_embeddings&quot;, True):
+            try:
+                input_embeddings = model.get_input_embeddings()
+                output_embeddings = model.get_output_embeddings()
+                if output_embeddings is not None and input_embeddings is not None:
+                    output_embeddings.register_parameter(
+                        &quot;weight&quot;,
+                        input_embeddings.weight,
+                    )
+                    logger.info_rank0(&quot;&gt; Tied input/output embeddings&quot;)
+            except Exception as e:
+                logger.warning(f&quot;&gt; Failed to tie embeddings: {e}&quot;)
+</pre><div class="exp"><p>:413-430 <code>_dispatch_buffer</code>：还原 buffer 时也分 DTensor / 非 DTensor 两路。:421 若 buffer 带 <code>device_mesh</code>（如被 CP/TP 切过的 RoPE buffer），用 <code>dtensor_factory</code> 重建 DTensor buffer（:424-426）；否则 :428-430 普通 <code>.copy_</code>。<code>dtensor_factory</code> 就是 :297 传进来的 <code>distribute_tensor</code>（:11 导入）。</p><p>:432-449 <code>_init_parameter</code>：对 <code>parameter_names_left</code> 里没被 checkpoint 覆盖的 param，沿名字下钻找到最近的带 <code>_init_weights</code> 的父模块，:447 <code>module.apply(init_func)</code> 只初始化这一支。:449 找不到就 warning 跳过——不抛错，因为有些 param（如新增的 lm_head）确实可以靠 tie 或后续补。</p><p>:451-488 <code>_post_process</code> 收尾三件事：:459-465 还原所有 buffer（失败仅 warning，:462-463）；:468-474 给<b>缺失 param</b>补随机初始化（EP18 续训场景常见，比如换 vocab 后 embedding 维度变了、checkpoint 没覆盖）；:477-488 <b>tie embedding</b>——若 <code>tie_word_embeddings=True</code>，把 output embedding 的 <code>weight</code> 直接 register 成 input embedding 的同一个 param（:482-485）。tie 放最后是因为必须等 input embedding 灌完才能共享，否则 tie 了个空壳。</p><p>整段对应 EP08（训练冷启动，<code>train_from_scratch</code>，靠 :194-205 + 这里 :468-474 补齐）和 EP18（续训/微调，靠 :129 直载 + 这里 tie/buffer 还原）两个场景的后处理尾巴。</p></div></div></div>
+<details class="src"><summary>📜 完整源码（489 行）— 大纲点跳行</summary><pre data-lang="py" data-start="1"># Copyright (c) 2026, Huawei Technologies Co., Ltd. All rights reserved.
+import os
+import glob
+import json
+from contextlib import contextmanager
+from typing import Optional, Dict, Tuple, Set
+
+from safetensors import safe_open
+import torch
+from torch import nn
+from torch.distributed.tensor import distribute_tensor
+from transformers import AutoConfig, AutoModelForCausalLM
+
+try:
+    from transformers.modeling_utils import no_init_weights
+except ImportError:
+    # adapt  for transformers 5.x.x
+    from transformers.initialization import no_init_weights
+
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+from mindspeed_llm.fsdp2.utils.global_vars import get_args
+from mindspeed_llm.fsdp2.checkpoint.weight_conv_adapter import WeightConvAdapter
+
+logger = get_logger(__name__)
+
+
+# ==============================================================================
+# Context Managers
+# ==============================================================================
+@contextmanager
+def init_empty_weights():
+    &quot;&quot;&quot;
+    A context manager under which models are initialized with all parameters on the meta device.
+    &quot;&quot;&quot;
+    old_register_parameter = nn.Module.register_parameter
+
+    def register_empty_parameter(module, name, param):
+        old_register_parameter(module, name, param)
+        if param is not None:
+            param_cls = type(module._parameters[name])
+            kwargs = module._parameters[name].__dict__
+            kwargs[&quot;requires_grad&quot;] = param.requires_grad
+            module._parameters[name] = (
+                param
+                if param.device == torch.device(&quot;meta&quot;)
+                else param_cls(module._parameters[name].to(&quot;meta&quot;), **kwargs)
+            )
+
+    try:
+        nn.Module.register_parameter = register_empty_parameter
+        yield
+    finally:
+        nn.Module.register_parameter = old_register_parameter
+
+
+# ==============================================================================
+# Utility Functions
+# ==============================================================================
+def reset_hf_initialized_flag(module: nn.Module) -&gt; None:
+    &quot;&quot;&quot;Reset HuggingFace&#x27;s _is_hf_initialized flag.&quot;&quot;&quot;
+    if hasattr(module, &quot;_is_hf_initialized&quot;):
+        setattr(module, &quot;_is_hf_initialized&quot;, False)
+    for child in module.children():
+        reset_hf_initialized_flag(child)
+
+
+def _find_submodule(module: nn.Module, name: str) -&gt; Tuple[nn.Module, str]:
+    &quot;&quot;&quot;Find the leaf module according to the name.&quot;&quot;&quot;
+    pieces = name.split(&quot;.&quot;)
+    for piece in pieces[:-1]:
+        module = getattr(module, piece)
+    return module, pieces[-1]
+
+
+# ==============================================================================
+# Model Loader Class
+# ==============================================================================
+class ModelLoader:
+    &quot;&quot;&quot;Load model on CPU or meta device.&quot;&quot;&quot;
+
+    def __init__(self, model_args, init_device: str = &quot;cpu&quot;, hf_config: Optional[AutoConfig] = None):
+        self.model_args = model_args
+        self.init_device = init_device
+        self.trust_remote_code = getattr(model_args, &#x27;trust_remote_code&#x27;, False)
+        self.model_path = model_args.model_name_or_path
+        self.train_from_scratch = getattr(model_args, &#x27;train_from_scratch&#x27;, False)
+        self.hf_config = hf_config
+
+    def load_config(self) -&gt; AutoConfig:
+        &quot;&quot;&quot;Load HuggingFace model config.&quot;&quot;&quot;
+        logger.info_rank0(f&quot;&gt; Loading config from {self.model_path}...&quot;)
+        self.hf_config = AutoConfig.from_pretrained(
+            self.model_path,
+            trust_remote_code=self.trust_remote_code,
+            # Context parallelism requires uniformly applying a patch to the attention component,
+            # which is unified here into the `eager` implementation part
+            attn_implementation=&quot;eager&quot; if get_args().cp_size &gt; 1 else None,
+        )
+        return self.hf_config
+
+    def create_model(self, model_cls=None) -&gt; Tuple[nn.Module, Optional[str]]:
+        &quot;&quot;&quot;Create model based on init_device.&quot;&quot;&quot;
+        if self.hf_config is None:
+            self.load_config()
+
+        if self.init_device == &quot;meta&quot;:
+            return self._create_on_meta(model_cls)
+        else:
+            return self._create_on_cpu(model_cls)
+
+    def _create_on_cpu(self, model_cls=None) -&gt; Tuple[nn.Module, None]:
+        &quot;&quot;&quot;Create and load model on CPU.&quot;&quot;&quot;
+        if model_cls is not None:
+            logger.info_rank0(f&quot;&gt; Loading {model_cls.__name__} on CPU...&quot;)
+            model = model_cls.from_pretrained(
+                self.model_path,
+                config=self.hf_config,
+                low_cpu_mem_usage=True,
+                device_map=&quot;cpu&quot;,
+                torch_dtype=torch.float32,
+            )
+        elif self.train_from_scratch:
+            logger.info_rank0(&quot;&gt; Creating model with random weights on CPU...&quot;)
+            model = AutoModelForCausalLM.from_config(
+                self.hf_config, trust_remote_code=self.trust_remote_code, torch_dtype=torch.float32
+            )
+        else:
+            logger.info_rank0(f&quot;&gt; Loading pretrained model on CPU from {self.model_path}...&quot;)
+            model = AutoModelForCausalLM.from_pretrained(
+                self.model_path,
+                config=self.hf_config,
+                trust_remote_code=self.trust_remote_code,
+                torch_dtype=torch.float32,
+                low_cpu_mem_usage=True,
+                device_map=&quot;cpu&quot;,
+            )
+
+        return model, None
+
+    def _create_on_meta(self, model_cls=None) -&gt; Tuple[nn.Module, Optional[str]]:
+        &quot;&quot;&quot;Create empty model on meta device.&quot;&quot;&quot;
+        weights_path = None if self.train_from_scratch else self.model_path
+
+        if model_cls is not None:
+            logger.info_rank0(f&quot;&gt; Creating empty {model_cls.__name__} on meta device...&quot;)
+            with init_empty_weights(), no_init_weights():
+                if hasattr(model_cls, &#x27;_from_config&#x27;):
+                    model = model_cls._from_config(self.hf_config)
+                else:
+                    model = model_cls.from_config(self.hf_config)
+        elif self.train_from_scratch:
+            logger.info_rank0(&quot;&gt; Creating empty model on meta device for random init...&quot;)
+            with init_empty_weights():
+                model = AutoModelForCausalLM.from_config(
+                    self.hf_config, trust_remote_code=self.trust_remote_code, torch_dtype=torch.float32
+                )
+        else:
+            logger.info_rank0(f&quot;&gt; Creating empty model on meta device (weights: {self.model_path})...&quot;)
+            with init_empty_weights(), no_init_weights():
+                model = AutoModelForCausalLM.from_config(
+                    self.hf_config, trust_remote_code=self.trust_remote_code, torch_dtype=torch.float32
+                )
+
+        logger.info_rank0(f&quot;&gt; Model created on meta device. Weights path: {weights_path}&quot;)
+        return model, weights_path
+
+
+# ==============================================================================
+# Weight Loader Class
+# ==============================================================================
+class WeightLoader:
+    &quot;&quot;&quot;
+    Load weights into FSDP-wrapped model.
+    Supports weight conversion via transformers conversion_mapping API.
+    &quot;&quot;&quot;
+
+    @staticmethod
+    def load(
+        model: nn.Module,
+        weights_path: Optional[str],
+        device: Optional[str] = None,
+        hf_config: Optional[AutoConfig] = None,
+    ) -&gt; None:
+        &quot;&quot;&quot;Load or initialize weights after FSDP wrapping.&quot;&quot;&quot;
+        if device is None:
+            device = torch.accelerator.current_accelerator().type
+
+        if weights_path is None:
+            WeightLoader._init_random(model, device)
+        else:
+            WeightLoader._load_pretrained(model, weights_path, device, hf_config)
+
+    @staticmethod
+    def _init_random(model: nn.Module, device: str) -&gt; None:
+        &quot;&quot;&quot;Initialize model with random weights.&quot;&quot;&quot;
+        logger.info_rank0(f&quot;&gt; Initializing random weights on {device}...&quot;)
+
+        model.to_empty(device=device)
+        model = model.float()
+        reset_hf_initialized_flag(model)
+
+        if hasattr(model, &#x27;init_weights&#x27;):
+            model.init_weights()
+
+        logger.info_rank0(&quot;&gt; Random initialization done&quot;)
+
+    @staticmethod
+    @torch.no_grad()
+    def _load_pretrained(
+        model: nn.Module, weights_path: str, device: str, hf_config: Optional[AutoConfig] = None
+    ) -&gt; None:
+        &quot;&quot;&quot;
+        Load pretrained weights with dynamic weight conversion support.
+        Uses transformers conversion_mapping API for model-type-specific weight transformations.
+        &quot;&quot;&quot;
+
+        logger.info_rank0(f&quot;&gt; Loading pretrained weights from {weights_path}...&quot;)
+
+        model_type = getattr(hf_config, &#x27;model_type&#x27;, None) if hf_config else None
+        adapter = WeightConvAdapter(model_type=model_type) if model_type else None
+
+        # Step 1: Save buffers before to_empty
+        buffer_dict = {name: buffer.clone() for name, buffer in model.named_buffers()}
+        parameter_names_to_load = {name for name, _ in model.named_parameters()}
+
+        logger.info_rank0(f&quot;&gt; Saved {len(buffer_dict)} buffers, {len(parameter_names_to_load)} parameters to load&quot;)
+
+        # Step 2: Materialize model to device
+        model.to_empty(device=device)
+        model = model.float()
+        logger.info_rank0(f&quot;&gt; Model materialized to {device}&quot;)
+
+        # Step 3: Load state dict and dispatch parameters
+        state_dict_files = WeightLoader._get_state_dict_files(weights_path)
+
+        pending_weights: Dict[str, torch.Tensor] = {}
+        collected_keys: Set[str] = set()
+        converted_groups: Dict[str, Dict[str, list]] = {}
+
+        for state_dict_file in state_dict_files:
+            for name, tensor in WeightLoader._iterate_state_dict(state_dict_file):
+                if adapter and adapter.has_conversions:
+                    renamed_key, source_pattern = adapter.rename_key(name)
+
+                    if source_pattern is not None:
+                        converter = adapter.match_converter(source_pattern)
+                        if converter:
+                            converted_groups.setdefault(renamed_key, {}).setdefault(source_pattern, []).append(
+                                (name, tensor)
+                            )
+                            collected_keys.add(name)
+                            continue
+
+                    name = renamed_key
+
+                if name in buffer_dict:
+                    buffer_dict[name] = tensor.clone()
+                elif name in parameter_names_to_load:
+                    parameter_names_to_load.remove(name)
+                    WeightLoader._dispatch_parameter(model, name, tensor)
+                else:
+                    pending_weights[name] = tensor
+
+        # Dispatch pending weights from first pass
+        for name in list(pending_weights.keys()):
+            if name in buffer_dict:
+                buffer_dict[name] = pending_weights.pop(name).clone()
+            elif name in parameter_names_to_load:
+                parameter_names_to_load.remove(name)
+                WeightLoader._dispatch_parameter(model, name, pending_weights.pop(name))
+
+        # Dispatch converted weights (streaming via native WeightConverter.convert)
+        for target_name, collected in converted_groups.items():
+            source_pattern = next(iter(collected))
+            converter = adapter.match_converter(source_pattern)
+            if not converter:
+                continue
+
+            full_name = WeightLoader._find_model_param(parameter_names_to_load, target_name)
+            if not full_name:
+                logger.debug(f&quot;&gt; No model param matching converted target: {target_name}&quot;)
+                continue
+
+            parameter_names_to_load.discard(full_name)
+            original_keys = [item[0] for item in collected[source_pattern]]
+            tensors_only = {sp: [item[1] for item in items] for sp, items in collected.items()}
+            for name, tensor in WeightConvAdapter.dispatch_converted(converter, full_name, tensors_only, original_keys):
+                WeightLoader._dispatch_parameter(model, name, tensor)
+
+        # Log remaining unexpected keys
+        for name in pending_weights:
+            if name not in collected_keys:
+                logger.debug(f&quot;&gt; Unexpected key in state dict: {name}&quot;)
+        del pending_weights
+
+        # Step 4: Post-process (restore buffers, handle missing params)
+        WeightLoader._post_process(model, buffer_dict, parameter_names_to_load, distribute_tensor)
+        if torch.distributed.is_initialized():
+            torch.distributed.barrier()
+        logger.info_rank0(&quot;&gt; Pretrained weights loaded successfully&quot;)
+
+    @staticmethod
+    def _get_state_dict_files(weights_path: str):
+        &quot;&quot;&quot;Get list of state dict files.&quot;&quot;&quot;
+        # Check for safetensors index
+        index_file = os.path.join(weights_path, &quot;model.safetensors.index.json&quot;)
+        if os.path.exists(index_file):
+            with open(index_file, &#x27;r&#x27;, encoding=&#x27;utf-8&#x27;) as f:
+                index = json.load(f)
+            files = set(index[&quot;weight_map&quot;].values())
+            return [os.path.join(weights_path, f) for f in sorted(files)]
+
+        # Check for single safetensors file
+        single_safetensor = os.path.join(weights_path, &quot;model.safetensors&quot;)
+        if os.path.exists(single_safetensor):
+            return [single_safetensor]
+
+        # Check for multiple safetensors files
+        safetensor_files = sorted(glob.glob(os.path.join(weights_path, &quot;*.safetensors&quot;)))
+        if safetensor_files:
+            return safetensor_files
+
+        # Check for pytorch files
+        pytorch_files = sorted(glob.glob(os.path.join(weights_path, &quot;*.bin&quot;)))
+        if pytorch_files:
+            return pytorch_files
+
+        pytorch_files = sorted(glob.glob(os.path.join(weights_path, &quot;*.pt&quot;)))
+        if pytorch_files:
+            return pytorch_files
+
+        raise FileNotFoundError(f&quot;No weight files found in {weights_path}&quot;)
+
+    @staticmethod
+    def _iterate_state_dict(filepath: str):
+        &quot;&quot;&quot;Iterate over state dict file, yielding (key, tensor) pairs.&quot;&quot;&quot;
+        if filepath.endswith(&quot;.safetensors&quot;):
+            with safe_open(filepath, framework=&quot;pt&quot;, device=&quot;cpu&quot;) as f:
+                for key in f.keys():
+                    yield key, f.get_tensor(key)
+        else:
+            state_dict = torch.load(filepath, map_location=&quot;cpu&quot;, weights_only=True)
+            for key, tensor in state_dict.items():
+                yield key, tensor
+
+    @staticmethod
+    def _find_model_param(param_names: Set[str], target_name: str) -&gt; Optional[str]:
+        &quot;&quot;&quot;Find full model param name that ends with target_name.&quot;&quot;&quot;
+        if target_name in param_names:
+            return target_name
+        for name in param_names:
+            if name.endswith(target_name):
+                return name
+        return None
+
+    @staticmethod
+    def _dispatch_parameter(
+        model: nn.Module,
+        name: str,
+        tensor: torch.Tensor,
+    ) -&gt; None:
+        &quot;&quot;&quot;
+        Copy a checkpoint tensor into the target parameter of a parallelized model.
+        &quot;&quot;&quot;
+        module, local_name = _find_submodule(model, name)
+        orig_param = dict(module.named_parameters(recurse=False))[local_name]
+        orig_tensor = orig_param.data
+
+        if not hasattr(orig_tensor, &quot;_local_tensor&quot;):
+            # Plain tensor (e.g. replicated norm weights).
+            src = tensor.to(device=orig_tensor.device, dtype=orig_tensor.dtype, non_blocking=True)
+            orig_param.data.copy_(src, non_blocking=True)
+            return
+
+        # DTensor path: slice on CPU, then move the local shard to device.
+        mesh = orig_tensor.device_mesh
+        placements = orig_tensor.placements
+        local_target = orig_tensor._local_tensor
+
+        # Walk through each mesh dimension and narrow along the tensor dim
+        # specified by the Shard placement. Replicate / Partial are no-ops.
+        local_cpu = tensor
+        for mesh_dim, placement in enumerate(placements):
+            if not placement.is_shard():
+                continue
+
+            shard_dim = placement.dim
+            mesh_size = mesh.size(mesh_dim)
+            mesh_rank = mesh.get_local_rank(mesh_dim)
+            full_len = local_cpu.size(shard_dim)
+
+            if full_len % mesh_size == 0:
+                chunk_len = full_len // mesh_size
+                local_cpu = local_cpu.narrow(shard_dim, mesh_rank * chunk_len, chunk_len)
+            else:
+                # Match DTensor&#x27;s chunk-based partitioning for uneven splits.
+                chunks = torch.chunk(local_cpu, mesh_size, dim=shard_dim)
+                if mesh_rank &lt; len(chunks):
+                    local_cpu = chunks[mesh_rank]
+                else:
+                    empty_shape = list(local_cpu.shape)
+                    empty_shape[shard_dim] = 0
+                    local_cpu = local_cpu.new_empty(empty_shape)
+
+        local_cpu = local_cpu.contiguous().pin_memory()
+        local_dev = local_cpu.to(
+            device=local_target.device,
+            dtype=local_target.dtype,
+            non_blocking=True,
+        )
+        local_target.copy_(local_dev, non_blocking=True)
+
+    @staticmethod
+    def _dispatch_buffer(model: nn.Module, name: str, buffer: torch.Tensor, dtensor_factory) -&gt; None:
+        &quot;&quot;&quot;
+        Assign buffer to model.
+        &quot;&quot;&quot;
+        module, local_name = _find_submodule(model, name)
+        orig_buffer = dict(module.named_buffers(recurse=False))[local_name]
+
+        if hasattr(orig_buffer, &quot;device_mesh&quot;):
+            device_mesh = orig_buffer.device_mesh
+            placements = orig_buffer.placements
+            module.register_buffer(
+                local_name, dtensor_factory(buffer.to(dtype=orig_buffer.dtype), device_mesh, placements)
+            )
+        else:
+            dict(module.named_buffers(recurse=False))[local_name].copy_(
+                buffer.to(device=orig_buffer.device, dtype=orig_buffer.dtype)
+            )
+
+    @staticmethod
+    def _init_parameter(model: nn.Module, name: str) -&gt; None:
+        &quot;&quot;&quot;
+        Initialize missing parameter.
+        &quot;&quot;&quot;
+        pieces = name.split(&quot;.&quot;)
+        init_func = None
+        module = model
+
+        for piece in pieces[:-1]:
+            if hasattr(module, &quot;_init_weights&quot;):
+                init_func = getattr(module, &quot;_init_weights&quot;, None)
+            module = getattr(module, piece)
+
+        if init_func is not None:
+            module.apply(init_func)
+        else:
+            logger.warning(f&quot;&gt; Cannot find _init_weights for {name}, skipping initialization&quot;)
+
+    @staticmethod
+    def _post_process(
+        model: nn.Module, buffer_dict: Dict[str, torch.Tensor], parameter_names_left: Set[str], dtensor_factory
+    ) -&gt; None:
+        &quot;&quot;&quot;
+        Post-process after weight loading.
+        &quot;&quot;&quot;
+        # Restore buffers
+        for name, buffer in buffer_dict.items():
+            try:
+                WeightLoader._dispatch_buffer(model, name, buffer, dtensor_factory)
+            except Exception as e:
+                logger.warning(f&quot;&gt; Failed to restore buffer {name}: {e}&quot;)
+
+        logger.info_rank0(f&quot;&gt; Restored {len(buffer_dict)} buffers&quot;)
+
+        # Initialize missing parameters
+        if parameter_names_left:
+            logger.info_rank0(f&quot;&gt; Missing {parameter_names_left} parameters, initializing them...&quot;)
+            for name in parameter_names_left:
+                try:
+                    WeightLoader._init_parameter(model, name)
+                except Exception as e:
+                    logger.warning(f&quot;&gt; Failed to initialize {name}: {e}&quot;)
+
+        # Tie embeddings if needed
+        if getattr(model.config, &quot;tie_word_embeddings&quot;, True):
+            try:
+                input_embeddings = model.get_input_embeddings()
+                output_embeddings = model.get_output_embeddings()
+                if output_embeddings is not None and input_embeddings is not None:
+                    output_embeddings.register_parameter(
+                        &quot;weight&quot;,
+                        input_embeddings.weight,
+                    )
+                    logger.info_rank0(&quot;&gt; Tied input/output embeddings&quot;)
+            except Exception as e:
+                logger.warning(f&quot;&gt; Failed to tie embeddings: {e}&quot;)
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

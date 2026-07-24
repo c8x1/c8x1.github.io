@@ -1,0 +1,309 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/optim/muon.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/optim/muon.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_8dcaac0ad11177.html">◀ __init__.py</a> <a href="file_9334776bbcaff9.html">optimizer.py ▶</a></nav></div>
+<div class="wrap">
+<h1>muon.py</h1><p class="goal">mindspeed_llm/fsdp2/optim/muon.py · 8038B · 208 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L12" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def zeropower_via_newtonschulz5(G: &quot;torch</a><a href="#L57" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class Muon(torch.optim.Optimizer)</a><a href="#L83" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__</a><a href="#L119" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def adjust_lr_for_muon(self, lr: float, param_</a><a href="#L127" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def step(self, closure=None)</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep16.html">EP16</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p>Copyright 2025 Moonshot AI and the LlamaFactory team.</p><p class="mut">（自动提取自首行注释）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1"># Copyright 2025 Moonshot AI and the LlamaFactory team.
+
+import math
+import torch
+
+try:
+    from torch.distributed.tensor import DTensor
+except ImportError:
+    DTensor = None
+
+
+def zeropower_via_newtonschulz5(G: &quot;torch.Tensor&quot;, steps: int) -&gt; &quot;torch.Tensor&quot;:
+    &quot;&quot;&quot;Newton-Schulz iteration to compute the zeroth power / orthogonalization of G.
+
+    We opt to use a quintic iteration whose coefficients are selected to maximize the slope at zero.
+    For the purpose of minimizing steps, it turns out to be empirically effective to keep increasing
+    the slope at zero even beyond the point where the iteration no longer converges all the way to
+    one everywhere on the interval. This iteration therefore does not produce UV^T but rather something
+    like US&#x27;V^T where S&#x27; is diagonal with S_{ii}&#x27; ~ Uniform(0.5, 1.5), which turns out not to hurt model
+    performance at all relative to UV^T, where USV^T = G is the SVD.
+    &quot;&quot;&quot;
+    # Unpack DTensor, extract local tensor shards for computation
+    is_dtensor = False
+    original_dtensor_meta = None
+    if type(G).__name__ == &#x27;DTensor&#x27;:
+        is_dtensor = True
+        original_dtensor_meta = G
+        G = G.to_local()
+
+    if len(G.shape) != 2:
+        raise ValueError(
+            f&quot;Expected input tensor G to be 2-dimensional, but got {len(G.shape)}-dimensional tensor with shape {G.shape}.&quot;
+        )
+    a, b, c = (3.4445, -4.7750, 2.0315)
+    # Convert to float32 to prevent NaN values
+    X = G.float()
+    if G.size(0) &gt; G.size(1):
+        X = X.T
+    # Ensure spectral norm is at most 1
+    X = X / (X.norm() + 1e-7)
+    # Perform the NS iterations
+    for _ in range(steps):
+        A = X @ X.T
+        B = b * A + c * A @ A
+        X = a * X + B @ X
+
+    if G.size(0) &gt; G.size(1):
+        X = X.T
+
+    # Pack DTensor, integrate local computation results into distributed tensor
+    if is_dtensor:
+        result = DTensor.from_local(X, original_dtensor_meta.device_mesh, original_dtensor_meta.placements)
+
+    return result
+
+
+class Muon(torch.optim.Optimizer):
+    &quot;&quot;&quot;Muon - MomentUm Orthogonalized by Newton-schulz.
+
+    Muon internally runs standard SGD-momentum, and then performs an orthogonalization post-
+    processing step, in which each 2D parameter&#x27;s update is replaced with the nearest orthogonal
+    matrix. To efficiently orthogonalize each update, we use a Newton-Schulz iteration, which has
+    the advantage that it can be stably run in bfloat16 on the GPU.
+
+    Some warnings:
+    - We believe this optimizer is unlikely to work well for training with small batch size.
+    - We believe it may not work well for finetuning pretrained models, but we haven&#x27;t tested this.
+
+    Arguments:
+        muon_params: The parameters to be optimized by Muon.
+        lr: The learning rate. The updates will have spectral norm of `lr`. (0.02 is a good default)
+        momentum: The momentum used by the internal SGD. (0.95 is a good default)
+        nesterov: Whether to use Nesterov-style momentum in the internal SGD. (recommended)
+        ns_steps: The number of Newton-Schulz iterations to run. (6 is probably always enough)
+        adamw_params: The parameters to be optimized by AdamW. Any parameters in `muon_params` which are
+        {0, 1}-D or are detected as being the embed or lm_head will be optimized by AdamW as well.
+        adamw_lr: The learning rate for the internal AdamW.
+        adamw_betas: The betas for the internal AdamW.
+        adamw_eps: The epsilon for the internal AdamW.
+        adamw_wd: The weight decay for the internal AdamW.
+    &quot;&quot;&quot;
+
+    def __init__(
+            self,
+            lr=1e-3,
+            wd=0.1,
+            muon_params=None,
+            momentum=0.95,
+            nesterov=True,
+            ns_steps=5,
+            adamw_params=None,
+            adamw_betas=(0.9, 0.95),
+            adamw_eps=1e-8,
+    ):
+        defaults = dict(
+            lr=lr,
+            wd=wd,
+            momentum=momentum,
+            nesterov=nesterov,
+            ns_steps=ns_steps,
+            adamw_betas=adamw_betas,
+            adamw_eps=adamw_eps,
+        )
+
+        params = list(muon_params)
+        adamw_params = list(adamw_params) if adamw_params is not None else []
+        params.extend(adamw_params)
+        super().__init__(params, defaults)
+        # Sort parameters into those for which we will use Muon, and those for which we will not
+        for p in muon_params:
+            # Use Muon for every parameter in muon_params which is &gt;= 2D and doesn&#x27;t look like an embedding or head layer
+            if p.ndim != 2:
+                raise ValueError(f&quot;Muon only supports 2D parameters, but got {p.ndim}D parameter (shape: {p.shape}).&quot;)
+            self.state[p][&quot;use_muon&quot;] = True
+        for p in adamw_params:
+            # Do not use Muon for parameters in adamw_params
+            self.state[p][&quot;use_muon&quot;] = False
+
+    def adjust_lr_for_muon(self, lr: float, param_shape: list[int]) -&gt; float:
+        A, B = param_shape[:2]
+        # We adjust the learning rate and weight decay based on the size of the parameter matrix
+        # as describted in the paper
+        adjusted_ratio = 0.2 * math.sqrt(max(A, B))
+        adjusted_lr = lr * adjusted_ratio
+        return adjusted_lr
+
+    def step(self, closure=None):
+        &quot;&quot;&quot;Perform a single optimization step.
+
+        Args:
+            closure (Callable, optional): A closure that reevaluates the model
+                and returns the loss.
+        &quot;&quot;&quot;
+        loss = None
+        if closure is not None:
+            with torch.enable_grad():
+                loss = closure()
+
+        for group in self.param_groups:
+            # Muon loop
+            params = [p for p in group[&quot;params&quot;] if self.state[p][&quot;use_muon&quot;]]
+            lr = group[&quot;lr&quot;]
+            wd = group[&quot;wd&quot;]
+            momentum = group[&quot;momentum&quot;]
+
+            # generate weight updates in distributed fashion
+            for p in params:
+                # sanity check
+                g = p.grad
+                if g is None:
+                    continue
+                if g.ndim &gt; 2:
+                    g = g.view(g.size(0), -1)
+
+                # calc update
+                state = self.state[p]
+                if &quot;momentum_buffer&quot; not in state:
+                    state[&quot;momentum_buffer&quot;] = torch.zeros_like(g)
+                buf = state[&quot;momentum_buffer&quot;]
+                buf.mul_(momentum).add_(g)
+                if group[&quot;nesterov&quot;]:
+                    g = g.add(buf, alpha=momentum)
+                else:
+                    g = buf
+                u = zeropower_via_newtonschulz5(g, steps=group[&quot;ns_steps&quot;])
+
+                # scale update
+                adjusted_lr = self.adjust_lr_for_muon(lr, p.shape)
+
+                # apply weight decay
+                p.data.mul_(1 - lr * wd)
+
+                # apply update
+                p.data.add_(u, alpha=-adjusted_lr)
+
+            # Adam backup
+            params = [p for p in group[&quot;params&quot;] if not self.state[p][&quot;use_muon&quot;]]
+            lr = group[&quot;lr&quot;]
+            beta1, beta2 = group[&quot;adamw_betas&quot;]
+            eps = group[&quot;adamw_eps&quot;]
+            weight_decay = group[&quot;wd&quot;]
+
+            for p in params:
+                g = p.grad
+                if g is None:
+                    continue
+                state = self.state[p]
+                if &quot;step&quot; not in state:
+                    state[&quot;step&quot;] = 0
+                    state[&quot;moment1&quot;] = torch.zeros_like(g)
+                    state[&quot;moment2&quot;] = torch.zeros_like(g)
+                state[&quot;step&quot;] += 1
+                step = state[&quot;step&quot;]
+                buf1 = state[&quot;moment1&quot;]
+                buf2 = state[&quot;moment2&quot;]
+                buf1.lerp_(g, 1 - beta1)
+                buf2.lerp_(g.square(), 1 - beta2)
+
+                g = buf1 / (eps + buf2.sqrt())
+
+                bias_correction1 = 1 - beta1 ** step
+                bias_correction2 = 1 - beta2 ** step
+                scale = bias_correction1 / bias_correction2 ** 0.5
+                p.data.mul_(1 - lr * weight_decay)
+                p.data.add_(g, alpha=-lr / scale)
+
+        return loss
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

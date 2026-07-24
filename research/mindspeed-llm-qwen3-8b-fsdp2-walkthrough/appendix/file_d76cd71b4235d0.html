@@ -1,0 +1,661 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/data/data_factory.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/data/data_factory.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_0d7c52e51f5071.html">◀ converter.py</a> <a href="file_8f61455f04b597.html">data_utils.py ▶</a></nav></div>
+<div class="wrap">
+<h1>data_factory.py</h1><p class="goal">mindspeed_llm/fsdp2/data/data_factory.py · 10633B · 279 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L30" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class DataManager(ABC)</a><a href="#L31" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__</a><a href="#L52" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def create_train_dataloader(self) -&gt; DataLo</a><a href="#L60" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def create_eval_dataloader(self) -&gt; DataLoa</a><a href="#L67" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class LFDataManager(DataManager)</a><a href="#L71" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__</a><a href="#L95" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def create_train_dataloader(self) -&gt; DataLo</a><a href="#L105" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def create_eval_dataloader(self) -&gt; DataLoa</a><a href="#L115" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _build_dataloader</a><a href="#L144" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_train_sampler(self, train_dataset: Op</a><a href="#L158" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_eval_sampler(self, eval_dataset: Data</a><a href="#L172" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class MegatronDataManager(DataManager)</a><a href="#L176" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__</a><a href="#L193" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def create_train_dataloader(self) -&gt; DataLo</a><a href="#L202" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def create_eval_dataloader(self) -&gt; DataLoa</a><a href="#L211" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _build_dataloader(self, dataset, data_args</a><a href="#L237" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class DataFactory</a><a href="#L239" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def create</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep13.html">EP13</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="annot"><div class="seg"><p class="seglab">行 1-28 · 模块导入与依赖装配</p><pre data-lang="py" data-start="1" data-idprefix="A">import os
+import contextlib
+import numpy as np
+from functools import partial
+from typing import Any, Callable, Optional, Literal, Union
+from datasets import Dataset, IterableDataset
+from abc import ABC, abstractmethod
+
+import torch
+import torch.distributed as dist
+from torch.utils.data import DataLoader, Sampler, RandomSampler, SequentialSampler, DistributedSampler
+
+from transformers import PreTrainedTokenizer
+from transformers.trainer_utils import seed_worker
+
+from ..utils.arguments import DataArguments, ModelArguments, TrainingArguments, ParallelArguments
+from .processor.processor_utils import IGNORE_INDEX
+from mindspeed_llm.fsdp2.distributed.parallel_state import ParallelState
+
+from .data_utils import get_dataset
+from .template import Template
+from .collator import SFTDataCollatorWith4DAttentionMask
+from mindspeed_llm.fsdp2.data.megatron_data.megatron_dataset_generate import train_valid_test_datasets_provider
+from mindspeed_llm.fsdp2.data.megatron_data.megatron_dataset_samplers import MegatronPretrainingSampler, MegatronPretrainingRandomSampler
+
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+logger = get_logger(__name__)
+</pre><div class="exp"><p>第 1-14 行是标准 Python 生态导入：<code>contextlib</code>、<code>numpy</code>、<code>functools.partial</code> 与 typing；第 6 行的 <code>datasets.Dataset/IterableDataset</code> 来自 HuggingFace datasets，是 LF 通路的数据载体。第 9-11 行是 PyTorch 分布式核心：<code>torch.distributed as dist</code> 与 <code>DataLoader, Sampler, DistributedSampler</code>，<code>DistributedSampler</code> 在第 148 行被 LFDataManager 直接使用。</p><p>第 16-24 行是本仓内部依赖，值得逐一看：第 16 行从 <code>..utils.arguments</code> 取四类参数对象；第 18 行 <code>ParallelState</code> 是 FSDP2 的进程组管理器（后面 sampler 的 <b>规模维度</b> 关键）；第 20 行 <code>get_dataset</code> 来自 <code>.data_utils</code>，负责把 alpaca 等变长数据集按 template 装好；第 22 行 <code>SFTDataCollatorWith4DAttentionMask</code> 是<b>本仓特制 collator</b>——把 mask 升到 4D 以配合 CP（Context Parallel），见第 85 行。</p><p>第 23-24 行是 <b>mg 通路的命脉</b>：<code>megatron_dataset_generate.train_valid_test_datasets_provider</code> 读定长 mindrecord，<code>megatron_dataset_samplers.MegatronPretrainingSampler/MegatronPretrainingRandomSampler</code> 是 Megatron 风格的按 <code>consumed_samples</code> 断点续训 sampler。记住这两行——它决定了 pt 走的是<b>完全不同的数据路径</b>，不是简单换个 dataset。</p></div></div><div class="seg"><p class="seglab">行 30-65 · DataManager 抽象基类：双通路统一接口</p><pre data-lang="py" data-start="30" data-idprefix="A">class DataManager(ABC):
+    def __init__(
+        self,
+        model_args: &quot;ModelArguments&quot;,
+        data_args: &quot;DataArguments&quot;,
+        training_args: &quot;TrainingArguments&quot;,
+        parallel_args: &quot;ParallelArguments&quot;,
+        stage: Literal[&quot;pt&quot;, &quot;sft&quot;],
+        tokenizer: &quot;PreTrainedTokenizer&quot;,
+        template: &quot;Template&quot;
+    ):
+        self.model_args=model_args
+        self.data_args=data_args
+        self.training_args=training_args
+        self.parallel_args=parallel_args
+        self.stage=stage
+
+        self.template = template
+        self.tokenizer = tokenizer
+
+
+    @abstractmethod
+    def create_train_dataloader(self) -&gt; DataLoader:
+        &quot;&quot;&quot;
+        The interfaces for obtaining training dataloader
+        &quot;&quot;&quot;
+        raise NotImplementedError(&quot;Subclasses must implement this method.&quot;)
+
+
+    @abstractmethod
+    def create_eval_dataloader(self) -&gt; DataLoader:
+        &quot;&quot;&quot;
+        The interfaces for obtaining eval dataloader
+        &quot;&quot;&quot;
+        raise NotImplementedError(&quot;Subclasses must implement this method.&quot;)
+</pre><div class="exp"><p>第 30 行 <code>DataManager(ABC)</code> 是两条数据通路的<b>统一抽象</b>。构造函数（31-48 行）把 <code>model_args/data_args/training_args/parallel_args/stage/tokenizer/template</code> 全部存到 self，<code>stage</code> 是 <code>Literal["pt","sft"]</code>（第 37 行）。注意这里<b>不</b>建 dataset 也不建 collator——具体装配留给子类，这是模板方法的典型写法。</p><p>第 51-64 行两个 <code>@abstractmethod</code>：<code>create_train_dataloader</code>（:52）与 <code>create_eval_dataloader</code>（:60），返回 <code>DataLoader</code>。这两个就是<b>对外契约</b>：上层 Trainer 只调这两个，不关心底下是 LF 还是 Megatron。差异全在子类的 <code>__init__</code> 与 <code>_build_dataloader</code> 里——记住这一点，后面 LFDataManager 和 MegatronDataManager 的 <code>_build_dataloader</code> 签名<b>都不同</b>（LF 带 sampler_fn/is_training，mg 带 data_args/training_args）。</p></div></div><div class="seg"><p class="seglab">行 67-93 · LFDataManager：alpaca 变长数据的 collator 装配（4D mask + CP 对齐）</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :67-:93）</h5><pre data-lang="py" data-start="67" data-idprefix="A">class LFDataManager(DataManager):
+    &quot;&quot;&quot;
+    Data manager, provides the create_train_dataloader and create_eval_dataloader interfaces for obtaining training and evaluation data.
+    &quot;&quot;&quot;
+    def __init__(
+        self,
+        model_args: &quot;ModelArguments&quot;,
+        data_args: &quot;DataArguments&quot;,
+        training_args: &quot;TrainingArguments&quot;,
+        parallel_args: &quot;ParallelArguments&quot;,
+        stage: Literal[&quot;pt&quot;, &quot;sft&quot;],
+        tokenizer: &quot;PreTrainedTokenizer&quot;,
+        template: &quot;Template&quot;
+    ):
+        super().__init__(model_args, data_args, training_args, parallel_args, stage, tokenizer, template)
+
+
+        self.dataset_module = get_dataset(self.template, model_args, data_args, training_args, stage=stage, tokenizer=self.tokenizer)
+        self.data_collator = SFTDataCollatorWith4DAttentionMask(
+            tokenizer=self.tokenizer,
+            padding=True,
+            pad_to_multiple_of=parallel_args.cp_size * 2 if parallel_args.cp_size &gt; 1 else 8,
+            label_pad_token_id=IGNORE_INDEX if data_args.ignore_pad_token_for_loss else self.tokenizer.pad_token_id,
+            block_diag_attn=data_args.neat_packing,
+            compute_dtype=torch.bfloat16
+        )
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># 标准 NVIDIA/PyTorch DDP SFT collator（无 CP）
+collator = DataCollatorForSeq2Seq(
+    tokenizer=tokenizer,
+    padding=True,
+    label_pad_token_id=-100,
+    pad_to_multiple_of=8,   # 固定 8 对齐
+)
+# sampler 侧：标准 DistributedSampler
+DistributedSampler(dataset, num_replicas=dist.get_world_size(), rank=dist.get_rank())</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异在<b>规模维度的分布式</b>上。标准 DDP：<code>num_replicas=dist.get_world_size()</code>——把<b>全局 world_size</b> 当作副本数，因为 DDP 下每个 rank 都是一份完整副本、只切 batch。本厂 FSDP2：<code>num_replicas=parallel_state.get_group_size("dp_fsdp")</code>（见 :150）——副本数取 <b>dp_fsdp 子组大小</b>，而非全局。原因：FSDP2 下张量在 TP/PP/CP 各维被切，只有 <code>dp_fsdp</code> 子组内的 rank 才共享同一份数据副本（数据并行维）。若误用 world_size，TP=2 时会把同一份数据算两次，导致<b>样本错切/重复消费</b>。collator 侧的 <code>cp_size*2</code> 对齐也是标准 DDP 完全没有的——那是序列维切分（CP）才需要的 padding 拓扑约束。</p></div></div><div class="seg"><p class="seglab">行 95-141 · LF 通路：create_*_dataloader → _build_dataloader 的统一管道</p><pre data-lang="py" data-start="95" data-idprefix="A">    def create_train_dataloader(self) -&gt; DataLoader:
+        dataloader=self._build_dataloader(
+            dataset=self.dataset_module[&quot;train_dataset&quot;], 
+            batch_size=self.training_args.per_device_train_batch_size,
+            sampler_fn=self._get_train_sampler,
+            is_training=True)
+
+        return dataloader
+
+
+    def create_eval_dataloader(self) -&gt; DataLoader:
+        dataloader=self._build_dataloader(
+            dataset=self.dataset_module[&quot;eval_dataset&quot;], 
+            batch_size=self.training_args.per_device_train_batch_size,
+            sampler_fn=self._get_eval_sampler,
+            is_training=False)
+
+        return dataloader
+
+
+    def _build_dataloader(
+        self,
+        dataset: Dataset,
+        batch_size: int,
+        sampler_fn: Optional[Callable[[Dataset], Sampler]] = None,
+        is_training: bool = False,
+    ) -&gt; DataLoader:
+        &quot;&quot;&quot;Create a [`~torch.utils.data.DataLoader`] from the given dataset.&quot;&quot;&quot;
+        dataloader_params = {
+            &quot;batch_size&quot;: batch_size,
+            &quot;collate_fn&quot;: self.data_collator,
+            &quot;num_workers&quot;: self.training_args.dataloader_num_workers,
+            &quot;pin_memory&quot;: self.training_args.dataloader_pin_memory,
+            &quot;persistent_workers&quot;: self.training_args.dataloader_persistent_workers,
+        }
+
+        if not isinstance(dataset, IterableDataset):
+            if sampler_fn is not None:
+                dataloader_params[&quot;sampler&quot;] = sampler_fn(dataset)
+            dataloader_params[&quot;drop_last&quot;] = self.training_args.dataloader_drop_last
+            dataloader_params[&quot;prefetch_factor&quot;] = self.training_args.dataloader_prefetch_factor
+            if is_training:
+                dataloader_params[&quot;worker_init_fn&quot;] = partial(
+                    seed_worker, num_workers=self.training_args.dataloader_num_workers, rank=dist.get_rank()
+                )
+
+        return DataLoader(dataset, **dataloader_params)</pre><div class="exp"><p>第 95-102 行 <code>create_train_dataloader</code>（:52 接口的实现）调 <code>_build_dataloader</code>，传 <code>train_dataset</code>、<code>per_device_train_batch_size</code>、<code>sampler_fn=self._get_train_sampler</code>、<code>is_training=True</code>。第 105-112 行 <code>create_eval_dataloader</code>（:60 实现）结构一致，换 <code>eval_dataset</code> + <code>_get_eval_sampler</code> + <code>is_training=False</code>。</p><p>第 115-141 行 <code>_build_dataloader</code> 是<b>通用装配管道</b>。第 123-129 行拼 <code>dataloader_params</code>：batch_size、<code>collate_fn=self.data_collator</code>（第 85 行建的 4D mask collator）、num_workers、pin_memory、persistent_workers。第 131 行先判 <code>not isinstance(dataset, IterableDataset)</code>——<b>map-style 才挂 sampler</b>；IterableDataset 走另一套（无 sampler、不 drop_last）。第 132-133 行 <code>sampler_fn(dataset)</code> 把 sampler 函数化注入，这样 train/eval 复用同一管道只换 sampler_fn。第 136-139 行 <code>is_training</code> 时挂 <code>worker_init_fn=partial(seed_worker, num_workers, rank=dist.get_rank())</code>——多进程 dataloader 的<b>可复现性</b>：每个 worker 用 <code>dist.get_rank()</code> 做种子偏移，保证各 rank 的多 worker 之间既不重复又可复现。第 141 行 <code>DataLoader(dataset, **dataloader_params)</code> 收尾。</p></div></div><div class="seg"><p class="seglab">行 144-169 · LF 通路 sampler：挂在 dp_fsdp 子组而非 world_size（规模维度重点）</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :144-:169）</h5><pre data-lang="py" data-start="144" data-idprefix="A">    def _get_train_sampler(self, train_dataset: Optional[Dataset] = None) -&gt; Optional[Sampler]:
+        if train_dataset is None or len(train_dataset) is None:
+            return None
+        parallel_state = ParallelState()
+        return DistributedSampler(
+            train_dataset,
+            num_replicas=parallel_state.get_group_size(&quot;dp_fsdp&quot;),
+            rank=parallel_state.get_rank(&quot;dp_fsdp&quot;),
+            shuffle=not self.training_args.disable_shuffling,
+            seed=self.training_args.seed,
+            drop_last=self.training_args.dataloader_drop_last
+        )
+
+
+    def _get_eval_sampler(self, eval_dataset: Dataset) -&gt; Optional[Sampler]:
+        if eval_dataset is None or len(eval_dataset) is None:
+            return None
+        parallel_state = ParallelState()
+        return DistributedSampler(
+            eval_dataset,
+            num_replicas=parallel_state.get_group_size(&quot;dp_fsdp&quot;),
+            rank=parallel_state.get_rank(&quot;dp_fsdp&quot;),
+            shuffle=not self.training_args.disable_shuffling,
+            seed=self.training_args.seed,
+            drop_last=self.training_args.dataloader_drop_last
+        )</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># 标准 PyTorch DDP（单维并行）
+sampler = DistributedSampler(
+    dataset,
+    num_replicas=dist.get_world_size(),  # 全局
+    rank=dist.get_rank(),                # 全局
+    shuffle=True, seed=seed, drop_last=True,
+)
+# world_size == 副本数，因为每 rank 持完整模型副本</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>核心差异：<b>sampler 的「副本数」语义</b>。标准 DDP 是<b>纯数据并行</b>，模型在每张卡上是完整副本，所以 <code>num_replicas=world_size</code>、<code>rank=全局rank</code>——副本数=卡数。FSDP2 是<b>多维并行</b>（TP/PP/CP/DP 同时存在），同一份<b>数据副本</b>只被 <code>dp_fsdp</code> 子组内的 rank 共享：TP 维的几张卡<b>共享同一份数据</b>（它们切的是模型不是数据），CP 维的几张卡<b>共享同一份 batch 但切序列</b>。所以副本数=dp_fsdp 子组大小，rank=子组内局部 rank。若误用 world_size：EP13 下 TP=2 会把数据副本数算成 12 而非 6，sampler 会<b>把每个样本分给 2 个 TP rank</b>，导致同一样本被算两次、梯度重复、loss 翻倍。这就是「sampler 挂在 dp_fsdp 子组而非 world_size」这一句的全部技术含义。</p></div></div><div class="seg"><p class="seglab">行 172-234 · MegatronDataManager：pt 定长 mindrecord 通路（与 LF 完全不同的数据路径）</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :172-:234）</h5><pre data-lang="py" data-start="172" data-idprefix="A">class MegatronDataManager(DataManager):
+    &quot;&quot;&quot;
+    Data manager, provides the create_train_dataloader and create_eval_dataloader interfaces for obtaining training and evaluation data.
+    &quot;&quot;&quot;
+    def __init__(
+        self,
+        model_args: &quot;ModelArguments&quot;,
+        data_args: &quot;DataArguments&quot;,
+        training_args: &quot;TrainingArguments&quot;,
+        parallel_args: &quot;ParallelArguments&quot;,
+        stage: Literal[&quot;pt&quot;, &quot;sft&quot;],
+        tokenizer: &quot;PreTrainedTokenizer&quot;,
+        template: &quot;Template&quot;
+    ):
+        super().__init__(model_args, data_args, training_args, parallel_args, stage, tokenizer, template)
+        self.model_args = model_args
+        self.data_args = data_args
+        self.training_args = training_args
+        self.train_dataset, self.eval_dataset, _ = train_valid_test_datasets_provider(self.model_args, self.data_args, self.training_args)
+
+
+    def create_train_dataloader(self) -&gt; DataLoader:
+        dataloader=self._build_dataloader(
+            dataset=self.train_dataset,
+            data_args=self.data_args,
+            training_args=self.training_args)
+
+        return dataloader
+
+
+    def create_eval_dataloader(self) -&gt; DataLoader:
+        dataloader=self._build_dataloader(
+            dataset=self.eval_dataset,
+            data_args=self.data_args,
+            training_args=self.training_args)
+
+        return dataloader
+
+
+    def _build_dataloader(self, dataset, data_args, training_args):
+        &quot;&quot;&quot;Build dataloader given an input dataset.&quot;&quot;&quot;
+        ps = ParallelState()
+        if dataset is None:
+            return None
+
+        if data_args.dataloader_type == &#x27;single&#x27;:
+            batch_sampler = MegatronPretrainingSampler(
+                total_samples=len(dataset),
+                consumed_samples=0,
+                micro_batch_size=training_args.per_device_train_batch_size,
+                data_parallel_rank=ps.get_rank(&quot;dp_fsdp&quot;),
+                data_parallel_size=ps.get_group_size(&quot;dp_fsdp&quot;))
+        else:
+            raise Exception(&#x27;{} dataloader type is not supported.&#x27;.format(
+                    data_args.dataloader_type))
+
+        # Torch dataloader.
+        return DataLoader(dataset,
+                          batch_sampler=batch_sampler,
+                          num_workers=training_args.dataloader_num_workers,
+                          pin_memory=True,
+                          persistent_workers=True if training_args.dataloader_num_workers &gt; 0 else False,
+                          )</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># 标准 PyTorch 定长预训练（无断点续训语义）
+sampler = DistributedSampler(dataset, num_replicas=world_size, rank=rank)
+DataLoader(dataset, sampler=sampler, batch_size=micro_bs,
+           collate_fn=default_collator)  # 定长，padding 无意义</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异有二：<b>(1) sampler 语义</b>。标准 DDP 用 <code>sampler=</code>，DataLoader 内部按 batch_size 把 sampler 产出的索引切片成 batch，每个 rank 用 <code>rank % replicas</code> 取偶数/奇数索引。Megatron 用 <code>batch_sampler=</code>——<code>MegatronPretrainingSampler</code> 自己就把「该 rank 该 step 取哪些样本」算成完整 batch 索引列表，DataLoader 不再切片，这对<b>断点续训</b>至关重要：<code>consumed_samples</code> 能精确从全局第 N 个样本续上，而标准 DistributedSampler 的 <code>set_epoch</code> 模型做不到跨重启精确续点。<b>(2) 副本数</b>：同样取 dp_fsdp 而非 world_size（:223 vs 标准 world_size），原因同 LF 段——多维并行下只有 DP 维切数据。</p></div></div><div class="seg"><p class="seglab">行 237-279 · DataFactory.create：stage × type 的二选一装配总开关</p><pre data-lang="py" data-start="237" data-idprefix="A">class DataFactory:
+    @staticmethod
+    def create(
+        data_manager_type: Literal[&quot;lf&quot;, &quot;mg&quot;],
+        model_args: &quot;ModelArguments&quot;,
+        data_args: &quot;DataArguments&quot;,
+        training_args: &quot;TrainingArguments&quot;,
+        parallel_args: &quot;ParallelArguments&quot;,
+        stage: Literal[&quot;pt&quot;, &quot;sft&quot;],
+        tokenizer: &quot;PreTrainedTokenizer&quot;,
+        template: &quot;Template&quot;
+    ):
+        #Fine-tuning supports Llamafactory data processing style
+        if training_args.stage == &quot;sft&quot; and data_manager_type == &quot;lf&quot;:
+            return LFDataManager(
+                model_args=model_args,
+                data_args=data_args,
+                training_args=training_args,
+                parallel_args=parallel_args,
+                stage=stage,
+                tokenizer=tokenizer,
+                template=template
+            )
+        #Pre-training supports Megatron data processing style
+        elif training_args.stage == &quot;pt&quot; and data_manager_type == &quot;mg&quot;:
+            return MegatronDataManager(
+                model_args=model_args,
+                data_args=data_args,
+                training_args=training_args,
+                parallel_args=parallel_args,
+                stage=stage,
+                tokenizer=tokenizer,
+                template=template
+            )
+        else:
+            raise ValueError(
+                f&quot;Unsupported configuration combination: &quot;
+                f&quot;stage=&#x27;{training_args.stage}&#x27;, data_manager_type=&#x27;{data_manager_type}&#x27;.\n&quot;
+                f&quot;Currently supported combinations are:\n&quot;
+                f&quot;  - stage=&#x27;sft&#x27; with data_manager_type=&#x27;lf&#x27; (Llamafactory style)\n&quot;
+                f&quot;  - stage=&#x27;pt&#x27; with data_manager_type=&#x27;mg&#x27; (Megatron style)&quot;
+            )
+        </pre><div class="exp"><p>第 237 行 <code>DataFactory</code> 是<b>对外入口</b>，第 238 行 <code>@staticmethod</code>，第 239 行 <code>create(data_manager_type, ...)</code>。第 240 行 <code>data_manager_type: Literal["lf","mg"]</code>。</p><p>第 250-259 行：<code>if training_args.stage == "sft" and data_manager_type == "lf"</code> → 返回 <code>LFDataManager</code>。注释（:249）「Fine-tuning supports Llamafactory data processing style」点明这是<b>微调专用</b>。第 261-270 行：<code>elif stage == "pt" and type == "mg"</code> → 返回 <code>MegatronDataManager</code>，注释（:260）「Pre-training supports Megatron data processing style」。</p><p>第 271-278 行 <code>else</code> 抛 <code>ValueError</code>，明确列出<b>唯一两个支持组合</b>：<code>sft+lf</code> 与 <code>pt+mg</code>。<b>这是强约束</b>——不允许 sft+mg 或 pt+lf 的交叉组合。原因：sft 的变长+template 渲染逻辑（<code>get_dataset</code>+4D collator）与 pt 的定长 mindrecord+断点续训 sampler（<code>train_valid_test_datasets_provider</code>+<code>MegatronPretrainingSampler</code>）是两套<b>互不兼容的数据预处理栈</b>，强行混用会在 collator/sampler 两侧都出问题（变长数据喂给定长 sampler、或定长数据缺 4D mask 给 CP）。<b>误区收尾</b>：有人以为 pt 和 sft 只是 stage 字段不同、底下共用一套 DataLoader——错，它们从 dataset 构建、collator、sampler 类型到 <code>_build_dataloader</code> 签名<b>全部分叉</b>，<code>DataFactory.create</code> 就是这个分叉的开关。</p></div></div></div>
+<details class="src"><summary>📜 完整源码（279 行）— 大纲点跳行</summary><pre data-lang="py" data-start="1">import os
+import contextlib
+import numpy as np
+from functools import partial
+from typing import Any, Callable, Optional, Literal, Union
+from datasets import Dataset, IterableDataset
+from abc import ABC, abstractmethod
+
+import torch
+import torch.distributed as dist
+from torch.utils.data import DataLoader, Sampler, RandomSampler, SequentialSampler, DistributedSampler
+
+from transformers import PreTrainedTokenizer
+from transformers.trainer_utils import seed_worker
+
+from ..utils.arguments import DataArguments, ModelArguments, TrainingArguments, ParallelArguments
+from .processor.processor_utils import IGNORE_INDEX
+from mindspeed_llm.fsdp2.distributed.parallel_state import ParallelState
+
+from .data_utils import get_dataset
+from .template import Template
+from .collator import SFTDataCollatorWith4DAttentionMask
+from mindspeed_llm.fsdp2.data.megatron_data.megatron_dataset_generate import train_valid_test_datasets_provider
+from mindspeed_llm.fsdp2.data.megatron_data.megatron_dataset_samplers import MegatronPretrainingSampler, MegatronPretrainingRandomSampler
+
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+logger = get_logger(__name__)
+
+
+class DataManager(ABC):
+    def __init__(
+        self,
+        model_args: &quot;ModelArguments&quot;,
+        data_args: &quot;DataArguments&quot;,
+        training_args: &quot;TrainingArguments&quot;,
+        parallel_args: &quot;ParallelArguments&quot;,
+        stage: Literal[&quot;pt&quot;, &quot;sft&quot;],
+        tokenizer: &quot;PreTrainedTokenizer&quot;,
+        template: &quot;Template&quot;
+    ):
+        self.model_args=model_args
+        self.data_args=data_args
+        self.training_args=training_args
+        self.parallel_args=parallel_args
+        self.stage=stage
+
+        self.template = template
+        self.tokenizer = tokenizer
+
+
+    @abstractmethod
+    def create_train_dataloader(self) -&gt; DataLoader:
+        &quot;&quot;&quot;
+        The interfaces for obtaining training dataloader
+        &quot;&quot;&quot;
+        raise NotImplementedError(&quot;Subclasses must implement this method.&quot;)
+
+
+    @abstractmethod
+    def create_eval_dataloader(self) -&gt; DataLoader:
+        &quot;&quot;&quot;
+        The interfaces for obtaining eval dataloader
+        &quot;&quot;&quot;
+        raise NotImplementedError(&quot;Subclasses must implement this method.&quot;)
+
+
+class LFDataManager(DataManager):
+    &quot;&quot;&quot;
+    Data manager, provides the create_train_dataloader and create_eval_dataloader interfaces for obtaining training and evaluation data.
+    &quot;&quot;&quot;
+    def __init__(
+        self,
+        model_args: &quot;ModelArguments&quot;,
+        data_args: &quot;DataArguments&quot;,
+        training_args: &quot;TrainingArguments&quot;,
+        parallel_args: &quot;ParallelArguments&quot;,
+        stage: Literal[&quot;pt&quot;, &quot;sft&quot;],
+        tokenizer: &quot;PreTrainedTokenizer&quot;,
+        template: &quot;Template&quot;
+    ):
+        super().__init__(model_args, data_args, training_args, parallel_args, stage, tokenizer, template)
+
+
+        self.dataset_module = get_dataset(self.template, model_args, data_args, training_args, stage=stage, tokenizer=self.tokenizer)
+        self.data_collator = SFTDataCollatorWith4DAttentionMask(
+            tokenizer=self.tokenizer,
+            padding=True,
+            pad_to_multiple_of=parallel_args.cp_size * 2 if parallel_args.cp_size &gt; 1 else 8,
+            label_pad_token_id=IGNORE_INDEX if data_args.ignore_pad_token_for_loss else self.tokenizer.pad_token_id,
+            block_diag_attn=data_args.neat_packing,
+            compute_dtype=torch.bfloat16
+        )
+
+
+    def create_train_dataloader(self) -&gt; DataLoader:
+        dataloader=self._build_dataloader(
+            dataset=self.dataset_module[&quot;train_dataset&quot;], 
+            batch_size=self.training_args.per_device_train_batch_size,
+            sampler_fn=self._get_train_sampler,
+            is_training=True)
+
+        return dataloader
+
+
+    def create_eval_dataloader(self) -&gt; DataLoader:
+        dataloader=self._build_dataloader(
+            dataset=self.dataset_module[&quot;eval_dataset&quot;], 
+            batch_size=self.training_args.per_device_train_batch_size,
+            sampler_fn=self._get_eval_sampler,
+            is_training=False)
+
+        return dataloader
+
+
+    def _build_dataloader(
+        self,
+        dataset: Dataset,
+        batch_size: int,
+        sampler_fn: Optional[Callable[[Dataset], Sampler]] = None,
+        is_training: bool = False,
+    ) -&gt; DataLoader:
+        &quot;&quot;&quot;Create a [`~torch.utils.data.DataLoader`] from the given dataset.&quot;&quot;&quot;
+        dataloader_params = {
+            &quot;batch_size&quot;: batch_size,
+            &quot;collate_fn&quot;: self.data_collator,
+            &quot;num_workers&quot;: self.training_args.dataloader_num_workers,
+            &quot;pin_memory&quot;: self.training_args.dataloader_pin_memory,
+            &quot;persistent_workers&quot;: self.training_args.dataloader_persistent_workers,
+        }
+
+        if not isinstance(dataset, IterableDataset):
+            if sampler_fn is not None:
+                dataloader_params[&quot;sampler&quot;] = sampler_fn(dataset)
+            dataloader_params[&quot;drop_last&quot;] = self.training_args.dataloader_drop_last
+            dataloader_params[&quot;prefetch_factor&quot;] = self.training_args.dataloader_prefetch_factor
+            if is_training:
+                dataloader_params[&quot;worker_init_fn&quot;] = partial(
+                    seed_worker, num_workers=self.training_args.dataloader_num_workers, rank=dist.get_rank()
+                )
+
+        return DataLoader(dataset, **dataloader_params)
+
+
+    def _get_train_sampler(self, train_dataset: Optional[Dataset] = None) -&gt; Optional[Sampler]:
+        if train_dataset is None or len(train_dataset) is None:
+            return None
+        parallel_state = ParallelState()
+        return DistributedSampler(
+            train_dataset,
+            num_replicas=parallel_state.get_group_size(&quot;dp_fsdp&quot;),
+            rank=parallel_state.get_rank(&quot;dp_fsdp&quot;),
+            shuffle=not self.training_args.disable_shuffling,
+            seed=self.training_args.seed,
+            drop_last=self.training_args.dataloader_drop_last
+        )
+
+
+    def _get_eval_sampler(self, eval_dataset: Dataset) -&gt; Optional[Sampler]:
+        if eval_dataset is None or len(eval_dataset) is None:
+            return None
+        parallel_state = ParallelState()
+        return DistributedSampler(
+            eval_dataset,
+            num_replicas=parallel_state.get_group_size(&quot;dp_fsdp&quot;),
+            rank=parallel_state.get_rank(&quot;dp_fsdp&quot;),
+            shuffle=not self.training_args.disable_shuffling,
+            seed=self.training_args.seed,
+            drop_last=self.training_args.dataloader_drop_last
+        )
+
+
+class MegatronDataManager(DataManager):
+    &quot;&quot;&quot;
+    Data manager, provides the create_train_dataloader and create_eval_dataloader interfaces for obtaining training and evaluation data.
+    &quot;&quot;&quot;
+    def __init__(
+        self,
+        model_args: &quot;ModelArguments&quot;,
+        data_args: &quot;DataArguments&quot;,
+        training_args: &quot;TrainingArguments&quot;,
+        parallel_args: &quot;ParallelArguments&quot;,
+        stage: Literal[&quot;pt&quot;, &quot;sft&quot;],
+        tokenizer: &quot;PreTrainedTokenizer&quot;,
+        template: &quot;Template&quot;
+    ):
+        super().__init__(model_args, data_args, training_args, parallel_args, stage, tokenizer, template)
+        self.model_args = model_args
+        self.data_args = data_args
+        self.training_args = training_args
+        self.train_dataset, self.eval_dataset, _ = train_valid_test_datasets_provider(self.model_args, self.data_args, self.training_args)
+
+
+    def create_train_dataloader(self) -&gt; DataLoader:
+        dataloader=self._build_dataloader(
+            dataset=self.train_dataset,
+            data_args=self.data_args,
+            training_args=self.training_args)
+
+        return dataloader
+
+
+    def create_eval_dataloader(self) -&gt; DataLoader:
+        dataloader=self._build_dataloader(
+            dataset=self.eval_dataset,
+            data_args=self.data_args,
+            training_args=self.training_args)
+
+        return dataloader
+
+
+    def _build_dataloader(self, dataset, data_args, training_args):
+        &quot;&quot;&quot;Build dataloader given an input dataset.&quot;&quot;&quot;
+        ps = ParallelState()
+        if dataset is None:
+            return None
+
+        if data_args.dataloader_type == &#x27;single&#x27;:
+            batch_sampler = MegatronPretrainingSampler(
+                total_samples=len(dataset),
+                consumed_samples=0,
+                micro_batch_size=training_args.per_device_train_batch_size,
+                data_parallel_rank=ps.get_rank(&quot;dp_fsdp&quot;),
+                data_parallel_size=ps.get_group_size(&quot;dp_fsdp&quot;))
+        else:
+            raise Exception(&#x27;{} dataloader type is not supported.&#x27;.format(
+                    data_args.dataloader_type))
+
+        # Torch dataloader.
+        return DataLoader(dataset,
+                          batch_sampler=batch_sampler,
+                          num_workers=training_args.dataloader_num_workers,
+                          pin_memory=True,
+                          persistent_workers=True if training_args.dataloader_num_workers &gt; 0 else False,
+                          )
+
+
+class DataFactory:
+    @staticmethod
+    def create(
+        data_manager_type: Literal[&quot;lf&quot;, &quot;mg&quot;],
+        model_args: &quot;ModelArguments&quot;,
+        data_args: &quot;DataArguments&quot;,
+        training_args: &quot;TrainingArguments&quot;,
+        parallel_args: &quot;ParallelArguments&quot;,
+        stage: Literal[&quot;pt&quot;, &quot;sft&quot;],
+        tokenizer: &quot;PreTrainedTokenizer&quot;,
+        template: &quot;Template&quot;
+    ):
+        #Fine-tuning supports Llamafactory data processing style
+        if training_args.stage == &quot;sft&quot; and data_manager_type == &quot;lf&quot;:
+            return LFDataManager(
+                model_args=model_args,
+                data_args=data_args,
+                training_args=training_args,
+                parallel_args=parallel_args,
+                stage=stage,
+                tokenizer=tokenizer,
+                template=template
+            )
+        #Pre-training supports Megatron data processing style
+        elif training_args.stage == &quot;pt&quot; and data_manager_type == &quot;mg&quot;:
+            return MegatronDataManager(
+                model_args=model_args,
+                data_args=data_args,
+                training_args=training_args,
+                parallel_args=parallel_args,
+                stage=stage,
+                tokenizer=tokenizer,
+                template=template
+            )
+        else:
+            raise ValueError(
+                f&quot;Unsupported configuration combination: &quot;
+                f&quot;stage=&#x27;{training_args.stage}&#x27;, data_manager_type=&#x27;{data_manager_type}&#x27;.\n&quot;
+                f&quot;Currently supported combinations are:\n&quot;
+                f&quot;  - stage=&#x27;sft&#x27; with data_manager_type=&#x27;lf&#x27; (Llamafactory style)\n&quot;
+                f&quot;  - stage=&#x27;pt&#x27; with data_manager_type=&#x27;mg&#x27; (Megatron style)&quot;
+            )
+        </pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

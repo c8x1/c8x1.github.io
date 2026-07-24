@@ -1,0 +1,354 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/data/megatron_data/megatron_tokenizer.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/data/megatron_data/megatron_tokenizer.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_fad5e2a0fdec93.html">◀ megatron_preprocess_dataset.py</a> <a href="file_1e261331389de3.html">megatron_utils.py ▶</a></nav></div>
+<div class="wrap">
+<h1>megatron_tokenizer.py</h1><p class="goal">mindspeed_llm/fsdp2/data/megatron_data/megatron_tokenizer.py · 7632B · 253 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L10" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class MegatronTokenizer(ABC)</a><a href="#L22" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, *tokenizer_paths: str, **to</a><a href="#L35" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def tokenize(self, text: str) -&gt; numpy.ndar</a><a href="#L46" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def detokenize(self, ids: numpy.ndarray) -&gt;</a><a href="#L60" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def offsets(self, ids: list[int], text: str) -</a><a href="#L77" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def vocab(self)</a><a href="#L83" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def inv_vocab(self)</a><a href="#L89" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def vocab_size(self)</a><a href="#L94" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def cls(self)</a><a href="#L103" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def sep(self)</a><a href="#L112" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def pad(self)</a><a href="#L121" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def eod(self)</a><a href="#L130" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def bos(self)</a><a href="#L139" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def eos(self)</a><a href="#L148" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def mask(self)</a><a href="#L157" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class _AutoTokenizer(MegatronTokenizer)</a><a href="#L160" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, tokenizer_name_or_path, voc</a><a href="#L177" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def vocab_size(self)</a><a href="#L181" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def vocab(self)</a><a href="#L189" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def inv_vocab(self)</a><a href="#L192" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def tokenize(self, text)</a><a href="#L195" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def detokenize(self, token_ids)</a><a href="#L199" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def eod(self)</a><a href="#L203" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def eos_token_id(self)</a><a href="#L207" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def pad_token_id(self)</a><a href="#L211" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def cls(self)</a><a href="#L216" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def sep(self)</a><a href="#L221" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def pad(self)</a><a href="#L231" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def mask(self)</a><a href="#L236" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def bos(self)</a><a href="#L240" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def eos(self)</a><a href="#L245" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def additional_special_tokens_ids(self)</a><a href="#L250" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _check_token_candidate(candidate)</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<span class="mut">（未被正文 EP 引用）</span>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p>Copyright (c) 2024, NVIDIA CORPORATION. All rights reserved.</p><p class="mut">（自动提取自首行注释）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1"># Copyright (c) 2024, NVIDIA CORPORATION. All rights reserved.
+import json
+from abc import ABC, abstractmethod
+from collections import OrderedDict
+from typing import Any
+
+import numpy
+from transformers import AutoTokenizer
+
+class MegatronTokenizer(ABC):
+    &quot;&quot;&quot;Abstract class for tokenizer
+
+    Absent a config or class-specific tracking of which objects are uniquely identifying, we must
+    include all key word arguments as unique identifiers
+
+    Args:
+        tokenizer_paths (Tuple[str]): All tokenizer source paths or prefixes
+
+        tokenizer_options (Dict[str, Any]): All tokenizer options
+    &quot;&quot;&quot;
+
+    def __init__(self, *tokenizer_paths: str, **tokenizer_options: Any):
+
+        self.unique_identifiers = OrderedDict()
+        self.unique_identifiers[&quot;class&quot;] = type(self).__name__
+        self.unique_identifiers[&quot;tokenizer_path&quot;] = list(tokenizer_paths)
+        for option in tokenizer_options:
+            self.unique_identifiers[option] = str(tokenizer_options[option])
+
+        self.unique_description = json.dumps(self.unique_identifiers, indent=4)
+
+        super().__init__()
+
+    @abstractmethod
+    def tokenize(self, text: str) -&gt; numpy.ndarray:
+        &quot;&quot;&quot;Convert text to embedding ids
+
+        Args:
+            text (str): The text to convert
+
+        Returns:
+            numpy.ndarray: The converted embedding ids
+        &quot;&quot;&quot;
+        pass
+
+    def detokenize(self, ids: numpy.ndarray) -&gt; str:
+        &quot;&quot;&quot;Convert embedding ids to text
+
+        Args:
+            ids (numpy.ndarray): The ids to convert
+
+        Returns:
+            str: The converted text
+
+        Raises:
+            NotImplementedError: Non-abstract, optional method
+        &quot;&quot;&quot;
+        raise NotImplementedError(&quot;{} has no method &#x27;detokenize&#x27;&quot;.format(type(self).__name__))
+
+    def offsets(self, ids: list[int], text: str) -&gt; list[int]:
+        &quot;&quot;&quot;Convert embedding ids to text offsets
+
+        Args:
+            ids (list[int]): The ids to convert
+            text (str): The text to convert
+
+        Returns:
+            list[int]: The converted offsets
+
+        Raises:
+            NotImplementedError: Non-abstract, optional method
+        &quot;&quot;&quot;
+        raise NotImplementedError(&quot;{} has no method &#x27;offsets&#x27;&quot;.format(type(self).__name__))
+
+    @property
+    @abstractmethod
+    def vocab(self):
+        &quot;&quot;&quot;Dictionary from vocab text token to id token&quot;&quot;&quot;
+        pass
+
+    @property
+    @abstractmethod
+    def inv_vocab(self):
+        &quot;&quot;&quot;Dictionary from vocab id token to text token&quot;&quot;&quot;
+        pass
+
+    @property
+    @abstractmethod
+    def vocab_size(self):
+        &quot;&quot;&quot;The vocabulary size&quot;&quot;&quot;
+        pass
+
+    @property
+    def cls(self):
+        &quot;&quot;&quot;The CLS token id
+
+        Raises:
+            NotImplementedError: Non-abstract, optional attribute
+        &quot;&quot;&quot;
+        raise NotImplementedError(&quot;{} has no attribute &#x27;cls&#x27;&quot;.format(type(self).__name__))
+
+    @property
+    def sep(self):
+        &quot;&quot;&quot;The SEP token id
+
+        Raises:
+            NotImplementedError: Non-abstract, optional attribute
+        &quot;&quot;&quot;
+        raise NotImplementedError(&quot;{} has no attribute &#x27;sep&#x27;&quot;.format(type(self).__name__))
+
+    @property
+    def pad(self):
+        &quot;&quot;&quot;The PAD token id
+
+        Raises:
+            NotImplementedError: Non-abstract, optional attribute
+        &quot;&quot;&quot;
+        raise NotImplementedError(&quot;{} has no attribute &#x27;pad&#x27;&quot;.format(type(self).__name__))
+
+    @property
+    def eod(self):
+        &quot;&quot;&quot;The EOD token id
+
+        Raises:
+            NotImplementedError: Non-abstract, optional attribute
+        &quot;&quot;&quot;
+        raise NotImplementedError(&quot;{} has no attribute &#x27;eod&#x27;&quot;.format(type(self).__name__))
+
+    @property
+    def bos(self):
+        &quot;&quot;&quot;The BOS token id
+
+        Raises:
+            NotImplementedError: Non-abstract, optional attribute
+        &quot;&quot;&quot;
+        raise NotImplementedError(&quot;{} has no attribute &#x27;bos&#x27;&quot;.format(type(self).__name__))
+
+    @property
+    def eos(self):
+        &quot;&quot;&quot;The EOS token id
+
+        Raises:
+            NotImplementedError: Non-abstract, optional attribute
+        &quot;&quot;&quot;
+        raise NotImplementedError(&quot;{} has no attribute &#x27;eos&#x27;&quot;.format(type(self).__name__))
+
+    @property
+    def mask(self):
+        &quot;&quot;&quot;The MASK token id
+
+        Raises:
+            NotImplementedError: Non-abstract, optional attribute
+        &quot;&quot;&quot;
+        raise NotImplementedError(&quot;{} has no attribute &#x27;mask&#x27;&quot;.format(type(self).__name__))
+
+
+class _AutoTokenizer(MegatronTokenizer):
+    &quot;&quot;&quot;AutoTokenizer for Hf Pretrained model loading.&quot;&quot;&quot;
+
+    def __init__(self, tokenizer_name_or_path, vocab_extra_ids, model_max_length, use_fast, prompt_type=None, **kwargs):
+        name = tokenizer_name_or_path
+        super().__init__(name)
+        hf_tokenizer_kwargs = kwargs
+        if vocab_extra_ids &gt; 0:
+            hf_tokenizer_kwargs[&quot;additional_special_tokens&quot;] = [f&quot;&lt;extra_id_{_id}&gt;&quot; for _id in range(vocab_extra_ids)]
+
+        hf_tokenizer_kwargs[&quot;model_max_length&quot;] = model_max_length
+        hf_tokenizer_kwargs[&quot;use_fast&quot;] = use_fast
+        hf_tokenizer_kwargs[&quot;trust_remote_code&quot;] = True
+        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_name_or_path, **hf_tokenizer_kwargs, local_files_only=True)
+        if (prompt_type is None) and (self.tokenizer.pad_token_id is None):
+            self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
+        self.encoder = self.tokenizer.get_vocab()
+        self.decoder = {v: k for k, v in self.encoder.items()}
+
+    @property
+    def vocab_size(self):
+        return len(self.tokenizer)  # vocab_size doesn&#x27;t contain additional tokens
+
+    @property
+    def vocab(self):
+        return {
+            **{special_token: self.tokenizer.convert_tokens_to_ids(special_token)
+               for special_token in self.tokenizer.additional_special_tokens},
+            **self.tokenizer.vocab,
+        }
+
+    @property
+    def inv_vocab(self):
+        return {v: k for k, v in self.vocab.items()}
+
+    def tokenize(self, text):
+        return self.tokenizer.encode(text)
+
+    def detokenize(self, token_ids):
+        return self.tokenizer.decode(token_ids)
+
+    @property
+    def eod(self):
+        return self.eos
+
+    @property
+    def eos_token_id(self):
+        return self.tokenizer.eos_token_id
+
+    @property
+    def pad_token_id(self):
+        return self.tokenizer.pad_token_id
+
+    @property
+    def cls(self):
+        candidate = self.tokenizer.cls_token_id
+        return self._check_token_candidate(candidate)
+
+    @property
+    def sep(self):
+        candidate = self.tokenizer.sep_token_id
+        return self._check_token_candidate(candidate)
+
+    @property
+    def pad(self):
+        candidate = self.tokenizer.pad_token_id
+
+        # just use eos_token_id if pad_token_id is not available, it is reasonable
+        # maybe add a new token, and resize embedding layer is better
+        if candidate is None:
+            candidate = self.tokenizer.eos_token_id
+        return self._check_token_candidate(candidate)
+
+    @property
+    def mask(self):
+        candidate = self.tokenizer.mask_token_id
+        return self._check_token_candidate(candidate)
+
+    @property
+    def bos(self):
+        raise NotImplementedError(&quot;Missing &lt;bos&gt;&quot;)
+
+    @property
+    def eos(self):
+        candidate = self.tokenizer.eos_token_id
+        return self._check_token_candidate(candidate)
+
+    @property
+    def additional_special_tokens_ids(self):
+        &quot;&quot;&quot; All the additional special tokens you may want to use (list of strings).&quot;&quot;&quot;
+        return self.tokenizer.additional_special_tokens_ids
+
+    @staticmethod
+    def _check_token_candidate(candidate):
+        if candidate is None:
+            raise AttributeError(&quot;Token doesn&#x27;t exist&quot;)
+        return candidate</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

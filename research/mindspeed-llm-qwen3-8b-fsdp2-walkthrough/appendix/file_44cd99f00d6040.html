@@ -1,0 +1,354 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/features/chunkloss.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/features/chunkloss.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_437e79f3b85550.html">◀ async_offload.py</a> <a href="file_a9a5d02cd75659.html">__init__.py ▶</a></nav></div>
+<div class="wrap">
+<h1>chunkloss.py</h1><p class="goal">mindspeed_llm/fsdp2/features/chunkloss.py · 11312B · 253 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L6" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class ChunkLoss(torch.autograd.Function)</a><a href="#L19" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def forward</a><a href="#L78" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def backward(ctx, *grad_output) -&gt; Tuple</a><a href="#L98" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def fixed_cross_entropy</a><a href="#L153" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def calculate_lm_loss</a><a href="#L231" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def chunk_loss(hidden_states, head_weight, hea</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep11.html">EP11</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p class="mut">（chunkloss.py：无 docstring/注释可提取，请直接看下方源码）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1">from typing import Any, Callable, Optional, Tuple
+import torch
+import torch.nn.functional as F
+
+
+class ChunkLoss(torch.autograd.Function):
+    &quot;&quot;&quot;
+    A custom autograd function that computes a loss in chunks to reduce memory usage.
+
+    This function splits the input hidden states along the feature dimension into chunks,
+    computes the loss and gradients for each chunk separately using a provided loss function,
+    and then accumulates the results. It is particularly useful when the full forward pass
+    would exceed device memory limits.
+
+    Note: Bias terms in the head (e.g., classifier bias) are not currently supported.
+    &quot;&quot;&quot;
+
+    @staticmethod
+    def forward(
+            ctx,
+            hidden_states: torch.Tensor,
+            head_weight: torch.Tensor,
+            head_bias: Optional[torch.Tensor],
+            loss_forward: Callable,
+            loss_kwargs_chunks: list[Any],
+            chunk_size: int,
+    ) -&gt; torch.Tensor:
+        &quot;&quot;&quot;
+        Forward pass: compute the total loss by processing hidden states in chunks.
+
+        Args:
+            ctx: Context object used to save tensors for backward pass.
+            hidden_states (torch.Tensor): Input tensor of shape (batch_size, seq_len, hidden_dim).
+            head_weight (torch.Tensor): Weight matrix of the final prediction head.
+            head_bias (Optional[torch.Tensor]): Bias vector of the head (currently unsupported).
+            loss_forward (Callable): A function that takes (hidden_chunk, weight, bias, **kwargs)
+                                     and returns (loss, aux_output).
+            loss_kwargs_chunks (list[Any]): A list of keyword argument dictionaries, one per chunk.
+            chunk_size (int): The size (in feature dimension) of each chunk.
+
+        Returns:
+            torch.Tensor: Scalar tensor representing the accumulated loss over all chunks.
+        &quot;&quot;&quot;
+
+        if head_bias is not None:
+            raise NotImplementedError(f&quot;head_bias is not supported in ChunkLoss&quot;)
+
+        device = hidden_states.device
+        # Initialize accumulated scalar loss on the same device
+        accumulated_loss = torch.tensor(0.0, device=device)
+        # Pre-allocate gradient tensors for inputs and weights
+        grad_inputs = torch.empty_like(hidden_states)
+        grad_weight = torch.zeros_like(head_weight)
+
+        # Split tensors into chunks along the feature dimension (dim=1 assumed to be sequence dim)
+        grad_inputs_chunks = torch.split(grad_inputs, chunk_size, dim=1)
+        hidden_states_chunks = torch.split(hidden_states, chunk_size, dim=1)
+
+        # Process each chunk independently
+        for hidden_states_chunk, grad_inputs_chunk, loss_kwargs in zip(
+                hidden_states_chunks, grad_inputs_chunks, loss_kwargs_chunks
+        ):
+            # Compute both gradients and loss value for this chunk
+            (chunk_grad_input, chunk_grad_weight), (per_chunk_loss, _) = torch.func.grad_and_value(
+                loss_forward, argnums=(0, 1), has_aux=True
+            )(hidden_states_chunk, head_weight, None, **loss_kwargs)
+
+            # Accumulate loss and gradients
+            accumulated_loss.add_(per_chunk_loss)
+            grad_inputs_chunk.copy_(chunk_grad_input)
+            grad_weight.add_(chunk_grad_weight)
+
+        # Save computed gradients for use in backward pass
+        ctx.save_for_backward(grad_inputs, grad_weight)
+        return accumulated_loss
+
+    @staticmethod
+    def backward(ctx, *grad_output) -&gt; Tuple:
+        &quot;&quot;&quot;
+        Backward pass: propagate upstream gradients through the precomputed gradients.
+
+        Args:
+            ctx: Context object with saved tensors from forward pass.
+            grad_output: Gradient of the loss w.r.t. the output (usually a scalar).
+
+        Returns:
+            tuple: Gradients w.r.t. (hidden_states, head_weight, head_bias, loss_forward,
+                   loss_kwargs_chunks, chunk_size). Only the first two are non-None.
+        &quot;&quot;&quot;
+        grad_input, grad_weight = ctx.saved_tensors
+        if torch.ne(grad_output[0], torch.tensor(1.0, device=grad_output[0].device)):
+            grad_input = grad_input * grad_output[0]
+            grad_weight = grad_weight * grad_output[0]
+
+        return grad_input, grad_weight, None, None, None, None
+
+
+def fixed_cross_entropy(
+        source: torch.Tensor,
+        target: torch.Tensor,
+        alpha: Optional[torch.Tensor] = None,
+        ignore_index: int = -100,
+        reduction: str = &quot;sum&quot;,
+        **kwargs,
+) -&gt; torch.Tensor:
+    &quot;&quot;&quot;
+    Compute a modified cross-entropy loss that optionally normalizes the loss by a per-example or global scaling factor (alpha).
+    Args:
+        source (torch.Tensor): Predicted logits of shape (N, C), where C is the number of classes.
+        target (torch.Tensor): Ground truth labels of shape (N,) with values in [0, C-1].
+        alpha (Optional[torch.Tensor]): Optional scaling factor.
+            - If scalar (0-D tensor), it globally scales the total loss.
+            - If 1-D tensor of shape (N,), it provides per-example scaling factors.
+            - Must be positive and non-zero.
+        ignore_index (int): Specifies a target value that is ignored and does not contribute to the loss.
+        reduction (str): Specifies the reduction to apply to the output:
+            - `&quot;sum&quot;`: Sum all losses before dividing by `alpha`.
+            - `&quot;none&quot;`: No reduction; used here to enable per-example weighting via `alpha`.
+            Note: `&quot;mean&quot;` is not supported in this implementation.
+        **kwargs: Additional keyword arguments passed to `F.cross_entropy` (though currently unused).
+
+    Returns:
+        torch.Tensor: A scalar tensor representing the normalized cross-entropy loss.
+    &quot;&quot;&quot;
+
+    # Compute standard cross-entropy loss
+    loss = torch.nn.functional.cross_entropy(source, target, ignore_index=ignore_index, reduction=reduction)
+    if alpha is not None:
+        alpha = alpha.to(loss.device)
+
+    if reduction == &quot;sum&quot;:
+        # Global normalization: total loss divided by scalar alpha
+        loss = loss / alpha
+
+    elif reduction == &quot;none&quot;:
+        if alpha.ndim == 0:
+            # Alpha is a scalar: sum all element-wise losses, then divide
+            loss = loss.sum() / alpha
+        else:
+            # Alpha is 1-D with shape (N,): assume N examples
+            # Reshape loss to (N, -1) to group elements per example
+            loss = loss.view(alpha.shape[0], -1)
+            # Sum over non-batch dimensions (e.g., sequence length in token classification)
+            # Normalize each example&#x27;s loss by its corresponding alpha
+            loss = loss.sum(1) / alpha
+            loss = loss.sum()
+    else:
+        raise ValueError(f&quot;Unsupported reduction mode: {reduction}. Use &#x27;sum&#x27; or &#x27;none&#x27;.&quot;)
+
+    return loss
+
+
+def calculate_lm_loss(
+        hidden_states: torch.Tensor,
+        head_weight: torch.Tensor,
+        head_bias: Optional[torch.Tensor] = None,
+        *,
+        shift_labels: torch.Tensor,
+        alpha: Optional[torch.Tensor] = None,
+        ignore_index: int = -100,
+        reduction: Optional[str] = None,
+        **kwargs
+) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+    &quot;&quot;&quot;
+    Compute the language modeling (LM) loss using a linear output head and a modified cross-entropy function.
+
+    This function is typically used in autoregressive language models where the prediction for each token
+    is compared against the next token in the sequence. The input `hidden_states` are projected to logits
+    via a linear layer (without bias if `head_bias` is None), then compared to shifted labels.
+
+    Note:
+        - The `head_bias` argument is accepted for interface compatibility but **not used** in the current implementation.
+        - Label shifting (i.e., aligning predictions with next-token targets) is assumed to have been done externally;
+          this function only flattens the tensors for loss computation.
+
+    Args:
+        hidden_states (torch.Tensor):
+            The hidden representations from the transformer backbone, of shape (batch_size, seq_len, hidden_dim).
+        head_weight (torch.Tensor):
+            Weight matrix of the output classification head, of shape (vocab_size, hidden_dim).
+        head_bias (Optional[torch.Tensor], optional):
+            Bias vector for the output head (shape: (vocab_size,)). Currently **ignored**.
+        shift_labels (torch.Tensor):
+            Ground truth token IDs, already shifted to align with predictions (e.g., target[i] = input[i+1]),
+            of shape (batch_size, seq_len).
+        alpha (Optional[torch.Tensor], optional):
+            Optional scaling factor used in `fixed_cross_entropy` for loss normalization
+            (e.g., per-example or global weighting). See `fixed_cross_entropy` for details.
+        ignore_index (int, optional):
+            Specifies a target value that is ignored and does not contribute to the loss. Default: -100.
+        reduction (Optional[str], optional):
+            Reduction method for the loss (&#x27;none&#x27;, &#x27;sum&#x27;, etc.). Passed directly to `fixed_cross_entropy`.
+            If None, the default behavior of `fixed_cross_entropy` applies (typically &#x27;sum&#x27;).
+        **kwargs (Any):
+            Additional keyword arguments forwarded to `fixed_cross_entropy`.
+
+    Returns:
+        tuple[torch.Tensor, torch.Tensor]:
+            - **loss**: Scalar tensor representing the computed LM loss.
+            - **logits**: The unnormalized prediction scores of shape (batch_size * seq_len, vocab_size).
+
+    Example:
+        &gt;&gt;&gt; hidden = torch.randn(2, 5, 768)
+        &gt;&gt;&gt; weight = torch.randn(30522, 768)
+        &gt;&gt;&gt; labels = torch.randint(0, 30522, (2, 5))
+        &gt;&gt;&gt; loss, logits = calculate_lm_loss(hidden, weight, shift_labels=labels, reduction=&quot;sum&quot;)
+    &quot;&quot;&quot;
+    # Flatten labels to 1D: (batch_size * seq_len,)
+    shift_labels = shift_labels.reshape(-1)
+
+    # Flatten hidden states to (batch_size * seq_len, hidden_dim)
+    hidden_states = hidden_states.reshape(-1, hidden_states.size(-1))
+
+    # Project to logits using only the weight (bias is intentionally omitted here)
+    # Cast to float to ensure numerical stability in loss computation
+    logits = F.linear(hidden_states, head_weight).float()
+
+    # Compute the modified cross-entropy loss
+    loss = fixed_cross_entropy(
+        logits,
+        shift_labels,
+        alpha=alpha,
+        ignore_index=ignore_index,
+        reduction=reduction,
+        **kwargs
+    )
+
+    return loss, logits
+
+
+def chunk_loss(hidden_states, head_weight, head_bias, loss_forward, loss_kwargs_chunks, chunk_size):
+    &quot;&quot;&quot;
+    Compute loss in chunks using the custom autograd function `ChunkLoss`.
+
+    Args:
+        hidden_states: Input tensor (e.g., from a transformer) to compute loss on.
+        head_weight: Weight matrix of the output classification head.
+        head_bias: Bias vector of the head.
+        loss_forward: Callable that computes the loss for a given chunk.
+        loss_kwargs_chunks: List of keyword arguments for `loss_forward`, one per chunk.
+        chunk_size: Number of features per chunk (along dim=1).
+
+    Returns:
+        The total accumulated loss as a scalar tensor.
+    &quot;&quot;&quot;
+    return ChunkLoss.apply(
+        hidden_states,
+        head_weight,
+        head_bias,
+        loss_forward,
+        loss_kwargs_chunks,
+        chunk_size
+    )</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/checkpoint/utils.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/checkpoint/utils.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_c2c662b9358535.html">◀ merge_dcp_to_hf.py</a> <a href="file_d7ee270afef1f9.html">weight_conv_adapter.py ▶</a></nav></div>
+<div class="wrap">
+<h1>utils.py</h1><p class="goal">mindspeed_llm/fsdp2/checkpoint/utils.py · 13529B · 364 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L32" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_dtype_size(dtype: &quot;torch.dtype&qu</a><a href="#L66" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def synchronize() -&gt; None</a><a href="#L73" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def empty_cache() -&gt; None</a><a href="#L84" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_shard_info</a><a href="#L164" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def save_state_dict</a><a href="#L186" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def cleanup_old_checkpoints(training_args, sha</a><a href="#L242" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def drop_ep_dim(loaded_tensor: torch.Tensor, d</a><a href="#L278" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def restore_ep_dim(origin_tensor: torch.Tensor</a><a href="#L308" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class EPSpecInfo</a><a href="#L320" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def build_ep_fqn2spec_info</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep17.html">EP17</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p>This module provides utility functions for PyTorch Distributed Checkpoint (DCP), including device helpers, memory management, state_dict sharding, serialization, checkpoint cleanup, and DCP-to-torch state_dict conversion.</p><p class="mut">（自动提取自模块 docstring；核心讲解待补——若该文件被某 EP 覆盖，见下方回链）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1">&quot;&quot;&quot;
+This module provides utility functions for PyTorch Distributed Checkpoint (DCP), including device helpers, memory management, state_dict sharding, serialization, checkpoint cleanup, and DCP-to-torch state_dict conversion.
+&quot;&quot;&quot;
+import gc
+import os
+import torch
+from collections import OrderedDict
+from functools import lru_cache
+from dataclasses import dataclass
+from typing import Any, Dict, Optional, Union, Tuple
+from transformers.utils import SAFE_WEIGHTS_NAME, WEIGHTS_NAME
+from safetensors.torch import save_file
+from torch.distributed.checkpoint.metadata import STATE_DICT_TYPE
+from torch.distributed.checkpoint.state_dict_loader import _load_state_dict
+from torch.distributed.checkpoint import FileSystemReader
+from torch.distributed.checkpoint.default_planner import _EmptyStateDictLoadPlanner
+from torch.distributed._tensor import DeviceMesh, DTensor, Shard, Replicate
+
+from mindspeed_llm.fsdp2.distributed.expert_parallel.expert_parallel import get_ep_modules
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+
+# --------------------------
+# Global Variables
+# --------------------------
+logger = get_logger(__name__)
+
+
+# --------------------------
+# DType Utilities
+# --------------------------
+@lru_cache
+def get_dtype_size(dtype: &quot;torch.dtype&quot;) -&gt; int:
+    &quot;&quot;&quot;
+    Return the size (in bytes) of a given torch dtype.
+
+    This implementation is adapted from safetensors to ensure
+    consistent size calculation across serialization backends.
+
+    Args:
+        dtype (torch.dtype): Torch data type
+
+    Returns:
+        int: Size in bytes for a single element
+    &quot;&quot;&quot;
+    _float8_e4m3fn = getattr(torch, &quot;float8_e4m3fn&quot;, None)
+    _float8_e5m2 = getattr(torch, &quot;float8_e5m2&quot;, None)
+
+    # Mapping from dtype to element size in bytes
+    _SIZE = {
+        torch.int64: 8,
+        torch.float32: 4,
+        torch.int32: 4,
+        torch.bfloat16: 2,
+        torch.float16: 2,
+        torch.int16: 2,
+        torch.uint8: 1,
+        torch.int8: 1,
+        torch.bool: 1,
+        torch.float64: 8,
+        _float8_e4m3fn: 1,
+        _float8_e5m2: 1,
+    }
+    return _SIZE[dtype]
+
+
+def synchronize() -&gt; None:
+    &quot;&quot;&quot;
+    Synchronize the current device stream.
+    &quot;&quot;&quot;
+    torch.accelerator.synchronize()
+
+
+def empty_cache() -&gt; None:
+    &quot;&quot;&quot;
+    Explicitly release cached device memory and trigger garbage collection.
+    &quot;&quot;&quot;
+    gc.collect()
+    torch.accelerator.empty_cache()
+
+
+# --------------------------
+# State Dict Sharding Utilities
+# --------------------------
+def get_shard_info(
+    state_dict: Dict[str, &quot;torch.Tensor&quot;],
+    save_dtype: Optional[Union[str, &quot;torch.dtype&quot;]],
+    shard_size: int,
+    safe_serialization: bool,
+) -&gt; Tuple[bool, int, Dict[str, str]]:
+    &quot;&quot;&quot;
+    Compute sharding information for a state_dict.
+
+    This function determines:
+    - Whether weights need to be sharded
+    - Total serialized size
+    - Mapping from parameter name to shard file name
+
+    Args:
+        state_dict (Dict[str, Tensor]): Model state_dict
+        save_dtype (str or torch.dtype): Target dtype for saving
+        shard_size (int): Maximum shard size in bytes
+        safe_serialization (bool): Whether to use safetensors format
+
+    Returns:
+        Tuple:
+            - is_sharded (bool)
+            - total_size (int)
+            - weight_map (Dict[str, str])
+    &quot;&quot;&quot;
+    current_size, total_size = 0, 0
+    current_shard, shard_list = [], []
+
+    # Iterate through parameters and group them into shards
+    for name, tensor in state_dict.items():
+        if isinstance(save_dtype, str):
+            dtype = getattr(torch, save_dtype)
+        elif isinstance(save_dtype, torch.dtype):
+            dtype = save_dtype
+        else:
+            dtype = tensor.dtype
+
+        # dtensor.numel == local tensor.numel
+        tensor_size = tensor.numel() * get_dtype_size(dtype)
+
+        # Start a new shard if size exceeds limit
+        if current_size != 0 and current_size + tensor_size &gt; shard_size:
+            total_size += current_size
+            shard_list.append(current_shard)
+            current_size = 0
+            current_shard = []
+
+        current_size += tensor_size
+        current_shard.append(name)
+
+    # Flush the last shard
+    if current_size != 0:
+        total_size += current_size
+        shard_list.append(current_shard)
+
+    weights_name = SAFE_WEIGHTS_NAME if safe_serialization else WEIGHTS_NAME
+    num_shards = len(shard_list)
+
+    weight_map = OrderedDict()
+    if num_shards == 1:
+        # Single-file checkpoint
+        is_sharded = False
+        for name in shard_list[0]:
+            weight_map[name] = weights_name
+    else:
+        # Multi-shard checkpoint
+        is_sharded = True
+        for shard_idx, shard in enumerate(shard_list):
+            prefix, extension = weights_name.rsplit(&quot;.&quot;, maxsplit=1)
+            file_name = f&quot;{prefix}-{shard_idx + 1:05d}-of-{num_shards:05d}.{extension}&quot;
+            for name in shard:
+                weight_map[name] = file_name
+
+    return is_sharded, total_size, weight_map
+
+
+# --------------------------
+# State Dict Serialization
+# --------------------------
+def save_state_dict(
+    state_dict: Dict[str, &quot;torch.Tensor&quot;],
+    path_to_save: &quot;os.PathLike&quot;,
+    safe_serialization: bool,
+) -&gt; None:
+    &quot;&quot;&quot;
+    Save a state_dict to disk.
+
+    Args:
+        state_dict (Dict[str, Tensor]): State dictionary to save
+        path_to_save (PathLike): Output file path
+        safe_serialization (bool): Whether to use safetensors
+    &quot;&quot;&quot;
+    if safe_serialization:
+        save_file(state_dict, path_to_save, metadata={&quot;format&quot;: &quot;pt&quot;})
+    else:
+        torch.save(state_dict, path_to_save)
+
+
+# --------------------------
+# Checkpoint Cleanup Utilities
+# --------------------------
+def cleanup_old_checkpoints(training_args, shared_file_system: bool = True):
+    &quot;&quot;&quot;
+    Remove old checkpoints based on save_total_limit.
+
+    Checkpoints are sorted by modification time (oldest first).
+    For shared storage, only rank 0 performs deletion.
+    For non-shared storage, each node&#x27;s local_rank 0 deletes its own local copy.
+
+    All ranks must call this function together.
+
+    Args:
+        training_args: Training arguments containing output_dir and save_total_limit
+        shared_file_system (bool): Whether nodes share the same filesystem.
+    &quot;&quot;&quot;
+    if not hasattr(training_args, &quot;save_total_limit&quot;):
+        return
+
+    save_total_limit = training_args.save_total_limit
+    if save_total_limit is None or save_total_limit &lt;= 0:
+        return
+
+    rank = torch.distributed.get_rank()
+    local_rank = int(os.environ.get(&quot;LOCAL_RANK&quot;, 0))
+
+    should_delete = (rank == 0) if shared_file_system else (local_rank == 0)
+
+    if should_delete:
+        checkpoint_dir = os.path.join(training_args.output_dir, &quot;checkpoints&quot;)
+        if os.path.isdir(checkpoint_dir):
+            checkpoints = []
+            for item in os.listdir(checkpoint_dir):
+                checkpoint_path = os.path.join(checkpoint_dir, item)
+                if os.path.isdir(checkpoint_path):
+                    mtime = os.path.getmtime(checkpoint_path)
+                    checkpoints.append((mtime, checkpoint_path))
+
+            # Sort by modification time, oldest first
+            checkpoints.sort(key=lambda x: x[0])
+
+            if len(checkpoints) &gt; save_total_limit:
+                for _, checkpoint_path in checkpoints[:-save_total_limit]:
+                    try:
+                        if os.path.isdir(checkpoint_path):
+                            if rank == 0:
+                                logger.info_rank0(f&quot;Removing old checkpoint: {checkpoint_path}&quot;)
+                            import shutil
+                            shutil.rmtree(checkpoint_path)
+                    except FileNotFoundError:
+                        pass
+    # Synchronize all ranks after cleanup
+    torch.distributed.barrier()
+
+
+# --------------------------
+# EP Checkpoint  Utilities
+# --------------------------
+def drop_ep_dim(loaded_tensor: torch.Tensor, device_mesh: DeviceMesh) -&gt; torch.Tensor:
+    &quot;&quot;&quot;Drop the Expert Parallelism (EP) dimension from a tensor loaded from a DCP checkpoint.
+
+    Args:
+        loaded_tensor (torch.Tensor | DTensor): The tensor loaded from a DCP checkpoint,
+            potentially containing an extra EP dimension.
+        device_mesh (DeviceMesh): A 2D device mesh with dimensions (&quot;ep&quot;, &quot;ep_fsdp&quot;).
+
+    Returns:
+        torch.Tensor | DTensor: The tensor with the EP dimension removed, ready to be
+            copied into model parameters.
+    &quot;&quot;&quot;
+    if device_mesh.ndim != 2:
+        raise ValueError(f&quot;device_mesh.ndim must be 2, got {device_mesh.ndim}&quot;)
+    ep_fsdp_mesh = device_mesh[&quot;ep_fsdp&quot;]
+
+    if isinstance(loaded_tensor, DTensor):
+        if len(loaded_tensor.placements) == 2:
+            # EP + FSDP sharded: keep only the FSDP shard on the ep_fsdp sub-mesh
+            tensor_to_put = DTensor.from_local(
+                loaded_tensor.to_local(), device_mesh=ep_fsdp_mesh, placements=[Shard(1)]
+            )
+        elif len(loaded_tensor.placements) == 1:
+            # EP-only sharded: collapse to plain local tensor
+            tensor_to_put = loaded_tensor.to_local()
+        else:
+            raise RuntimeError(
+                f&quot;Expect EP parameters to be DTensor with 1 or 2 placements, got {loaded_tensor.placements}&quot;
+            )
+    else:
+        # Plain tensor — no EP dimension present
+        tensor_to_put = loaded_tensor
+
+    return tensor_to_put
+
+
+def restore_ep_dim(origin_tensor: torch.Tensor, device_mesh: DeviceMesh) -&gt; DTensor:
+    &quot;&quot;&quot;Restore the Expert Parallelism (EP) dimension on a tensor for DCP checkpoint saving.
+
+    Args:
+        origin_tensor (torch.Tensor | DTensor): The model tensor to be saved, in its current EP-sharded layout.
+        device_mesh (DeviceMesh): A 2D device mesh with dimensions (&quot;ep&quot;, &quot;ep_fsdp&quot;).
+
+    Returns:
+        DTensor: The tensor with the EP dimension restored, suitable for DCP saving.
+
+    &quot;&quot;&quot;
+    if device_mesh.ndim != 2:
+        raise ValueError(f&quot;device_mesh.ndim must be 2, got {device_mesh.ndim}&quot;)
+    ep_mesh = device_mesh[&quot;ep&quot;]
+
+    if isinstance(origin_tensor, DTensor):
+        # Already a DTensor (EP + FSDP): re-wrap with both shard dimensions on the full mesh
+        dtensor = DTensor.from_local(
+            origin_tensor.to_local(), device_mesh=device_mesh, placements=[Shard(0), Shard(1)]
+        )
+    elif torch.is_tensor(origin_tensor):
+        # Plain tensor (EP-only): wrap with EP shard on the EP sub-mesh
+        dtensor = DTensor.from_local(origin_tensor, device_mesh=ep_mesh, placements=[Shard(0)])
+    else:
+        raise RuntimeError(f&quot;origin_tensor - {origin_tensor} is not a tensor!&quot;)
+
+    return dtensor
+
+
+@dataclass
+class EPSpecInfo:
+    &quot;&quot;&quot;Specification for how an Expert Parallelism (EP) parameter should be
+    saved/restored as a DTensor during checkpointing.
+
+    Attributes:
+        placement (Union[Shard, Replicate]): The DTensor placement strategy for the EP dimension (typically Shard(0) for expert-parallel parameters).
+        ep_fsdp_mesh (DeviceMesh): A 2D device mesh with dimensions (&quot;ep&quot;, &quot;ep_fsdp&quot;) used to construct the DTensor layout during save/load.
+    &quot;&quot;&quot;
+    placement: Union[Shard, Replicate]
+    ep_fsdp_mesh: DeviceMesh  # (&quot;ep&quot;, &quot;ep_fsdp&quot;) 2D mesh
+
+
+def build_ep_fqn2spec_info(
+    model, parallel_state, ep_plan
+) -&gt; Dict[str, EPSpecInfo]:
+    &quot;&quot;&quot;Build a mapping from parameter fully-qualified names (FQNs) to their EP spec info.
+
+    Args:
+        model: The model instance. Must support `named_modules()` and `named_parameters()`. Its inner `model.model` attribute is passed
+            to `get_ep_modules` to resolve expert modules.
+        parallel_state (ParallelState): The current parallelism configuration, used to query EP and E-FSDP group sizes.
+        ep_plan: The expert parallelism plan (from `model.config.ep_plan`)
+            that defines which modules are expert-parallel.
+
+    Returns:
+        Dict[str, EPSpecInfo]: A dictionary mapping each expert parameter&#x27;s FQN
+            to its `EPSpecInfo`, containing the placement strategy and the 2D
+            (&quot;ep&quot;, &quot;ep_fsdp&quot;) device mesh for checkpoint transformations.
+    &quot;&quot;&quot;
+    ep_size = parallel_state.get_ep_group_size()
+    efsdp_size = (
+        parallel_state.get_efsdp_group_size()
+        if parallel_state.is_efsdp_enable() else 1
+    )
+
+    # Construct a logical 2D mesh: rows = EP ranks, cols = E-FSDP ranks
+    ep_fsdp_mesh = DeviceMesh(
+        device_type=torch.accelerator.current_accelerator().type,
+        mesh=torch.arange(ep_size * efsdp_size).view(ep_size, efsdp_size),
+        mesh_dim_names=(&quot;ep&quot;, &quot;ep_fsdp&quot;),
+    )
+
+    # Identify all modules designated as expert-parallel by the EP plan
+    ep_modules = get_ep_modules(model.model, ep_plan)
+    ep_module_fqns = {
+        name for name, module in model.named_modules()
+        if module in ep_modules
+    }
+
+    # Map each parameter belonging to an EP module to its spec info
+    fqn2spec = {}
+    for fqn, _ in model.named_parameters():
+        if any(fqn == m or fqn.startswith(m + &quot;.&quot;) for m in ep_module_fqns):
+            fqn2spec[fqn] = EPSpecInfo(
+                placement=Shard(0), ep_fsdp_mesh=ep_fsdp_mesh
+            )
+    return fqn2spec</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

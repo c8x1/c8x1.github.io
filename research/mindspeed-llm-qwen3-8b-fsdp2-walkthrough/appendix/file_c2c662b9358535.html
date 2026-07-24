@@ -1,0 +1,993 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_69f869b1e6784c.html">◀ conversion_mappings.py</a> <a href="file_73aaf82398dd10.html">utils.py ▶</a></nav></div>
+<div class="wrap">
+<h1>merge_dcp_to_hf.py</h1><p class="goal">mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py · 13817B · 458 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L40" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_dtype_size(dtype: torch.dtype) -&gt; i</a><a href="#L70" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _normalize_key(key: str) -&gt; Optional[st</a><a href="#L104" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_sharding_plan</a><a href="#L205" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _process_shard</a><a href="#L306" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def save_model_weights</a><a href="#L383" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def merge_to_hf_pt</a><a href="#L433" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def main()</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep17.html">EP17</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="annot"><div class="seg"><p class="seglab">行 1-17 · 模块定位：DCP→HF 中转器（离线路径，与 convert_ckpt_v2.py 并行不混）</p><pre data-lang="py" data-start="1" data-idprefix="A">&quot;&quot;&quot;
+This file implements a memory-efficient converter that transforms PyTorch Distributed Checkpoint (DCP) model weights into HuggingFace compatible checkpoint formats.
+&quot;&quot;&quot;
+import argparse
+import gc
+import json
+import logging
+import os
+from collections import OrderedDict
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Tuple, Union
+
+import torch
+from safetensors.torch import save_file
+from torch.distributed.checkpoint import FileSystemReader, load
+from torch.distributed.checkpoint.metadata import Metadata
+from transformers import AutoConfig, AutoProcessor
+from transformers.utils import SAFE_WEIGHTS_INDEX_NAME, SAFE_WEIGHTS_NAME, WEIGHTS_INDEX_NAME, WEIGHTS_NAME</pre><div class="exp"><p>本文件实现的是 <b>离线、只读</b> 的 Distributed Checkpoint（DCP）→ HuggingFace 权重转换器（:1-3）。它服务于 FSDP2 训练完成后，把 <code>.distcp</code> 目录里的分片权重中转成 HF <code>safetensors</code> 分片，交给下游推理/评测。</p><p><b>关键区分：</b>仓库根目录的 <code>convert_ckpt_v2.py</code> 是另一套体系——Megatron↔HF 互转，内部含 TP/PP/EP 重切（如 EP17 场景下专家维度的重排），面向的是 Megatron 格式与 HF 格式之间的双向切分映射。而本文件面向的是 <b>FSDP2 dcp→HF</b> 这一条单向中转链路，<b>两者并行、不共用代码、不可混用</b>：FSDP2 用户走本文件，Megatron 用户走 convert_ckpt_v2.py。</p><p>依赖上（:12-17）只用 <code>torch.distributed.checkpoint</code> 的 <code>FileSystemReader/load/Metadata</code> 与 <code>safetensors</code>、<code>transformers</code>——全部是 CPU/HF 侧库，没有 NPU/CANN 或 Ascend 驱动依赖，所以本步 <b>硬件维度弱</b>：merge 是 CPU/HF 中转，不涉及卡端算子。</p></div></div><div class="seg"><p class="seglab">行 20-37 · 类型门面与日志：save_pretrained 资产契约</p><pre data-lang="py" data-start="20" data-idprefix="A">if TYPE_CHECKING:
+    from transformers import GenerationConfig, PretrainedConfig, PreTrainedTokenizer, ProcessorMixin
+
+    # HuggingFace assets that support save_pretrained()
+    ModelAssets = Union[
+        GenerationConfig,
+        PretrainedConfig,
+        PreTrainedTokenizer,
+        ProcessorMixin,
+    ]
+
+
+logging.basicConfig(
+    format=&quot;%(asctime)s - %(levelname)s - %(name)s - %(message)s&quot;,
+    datefmt=&quot;%Y-%m-%d %H:%M:%S&quot;,
+    level=logging.INFO,
+)
+logger = logging.getLogger(__name__)</pre><div class="exp"><p><code>TYPE_CHECKING</code> 块（:20-29）声明了 <code>ModelAssets</code> 联合类型——<code>GenerationConfig/PretrainedConfig/PreTrainedTokenizer/ProcessorMixin</code>，即所有实现了 <code>save_pretrained()</code> 的 HF 资产。这是给后面 <code>save_model_weights</code> 的 <code>model_assets</code> 参数用的类型门面：只接收「能被 <code>.save_pretrained()</code> 持久化」的对象，避免把不可保存的东西塞进中转流程。用 <code>TYPE_CHECKING</code> 包住是为了不在导入期拉起完整 transformers 运行时依赖。</p><p>日志（:32-37）用标准 <code>logging.basicConfig</code>，INFO 级别，带时间戳——典型的离线工具脚本风格，没有分布式 rank0 过滤（因为本流程单进程跑，不需要 <code>logger.rank0</code> 之类的多卡区分）。</p></div></div><div class="seg"><p class="seglab">行 40-67 · get_dtype_size：纯元数据体积估算（不碰真实张量）</p><pre data-lang="py" data-start="40" data-idprefix="A">def get_dtype_size(dtype: torch.dtype) -&gt; int:
+    &quot;&quot;&quot;
+    Return the size (in bytes) of a given torch dtype.
+
+    Args:
+        dtype (torch.dtype):
+            PyTorch data type, e.g. torch.float32, torch.bfloat16.
+
+    Returns:
+        int:
+            Size in bytes for a single element of the given dtype.
+
+    Notes:
+        - Used for estimating tensor and shard sizes without loading tensors.
+        - Defaults to 4 bytes if dtype is not explicitly listed.
+    &quot;&quot;&quot;
+    size_map = {
+        torch.float32: 4,
+        torch.float16: 2,
+        torch.bfloat16: 2,
+        torch.int64: 8,
+        torch.int32: 4,
+        torch.int16: 2,
+        torch.int8: 1,
+        torch.uint8: 1,
+        torch.bool: 1,
+    }
+    return size_map.get(dtype, 4)</pre><div class="exp"><p><code>get_dtype_size</code>（:40-67）返回单个 dtype 元素的字节数。它是<b>第一阶段规划</b>的基石：在 <code>_get_sharding_plan</code> 里要按 shard_size 分片，但<b>不想为了估体积就把真实权重 load 进内存</b>，于是只读 DCP 元数据里的 dtype+shape，用 <code>numel × dtype_size</code> 估算每个张量占多少字节。</p><p>注意默认值 4（:67）——遇到未列出的 dtype 兜底成 4 字节（float32 量级），宁可高估也不报错中断，保证规划阶段对未知 dtype 容错。<b>这里不读真实数据</b>是整个两阶段设计的核心动机：把「决定怎么切」和「真的加载+保存」彻底分离。</p></div></div><div class="seg"><p class="seglab">行 70-101 · _normalize_key：DCP key → HF key 的命名映射</p><pre data-lang="py" data-start="70" data-idprefix="A">def _normalize_key(key: str) -&gt; Optional[str]:
+    &quot;&quot;&quot;
+    Convert a DCP state_dict key into a HuggingFace-compatible parameter key.
+
+    Args:
+        key (str):
+            Original key from DCP checkpoint state_dict.
+
+    Returns:
+        Optional[str]:
+            Converted HuggingFace-style key if this is a model weight,
+            otherwise None (e.g. optimizer or non-model states).
+
+    Conversion rules:
+        - model.model.xxx  -&gt; model.xxx
+        - model.lm_head.weight -&gt; lm_head.weight
+        - model.xxx -&gt; xxx (with warning)
+        - Non &quot;model.&quot; keys are ignored
+    &quot;&quot;&quot;
+    if not key.startswith(&quot;model.&quot;):
+        return None
+
+    if key.startswith(&quot;model.model.&quot;):
+        return key[6:]  # strip first &quot;model.&quot;
+    elif key == &quot;model.lm_head.weight&quot;:
+        return &quot;lm_head.weight&quot;
+    else:
+        logger.warning(
+            f&quot;Found unexpected DCP key format &#x27;{key}&#x27;, &quot;
+            f&quot;stripping leading &#x27;model.&#x27; prefix.&quot;
+        )
+        return key[6:]</pre><div class="exp"><p><code>_normalize_key</code>（:70-101）把 DCP <code>state_dict</code> 的 key 映射成 HF 参数 key。规则：</p><ul><li><code>model.model.xxx → model.xxx</code>（:92-93，剥掉第一层 <code>model.</code>，对应 FSDP2 顶层 wrapper 多包了一层 <code>model.</code>）；</li><li><code>model.lm_head.weight → lm_head.weight</code>（:94-95，lm_head 不嵌在 transformer body 里，单独平铺）；</li><li>其它 <code>model.</code> 前缀的 key 剥前缀并 <code>warning</code>（:97-101），保守处理但留痕迹。</li></ul><p>非 <code>model.</code> 开头的 key 直接返回 <code>None</code>（:89-90）被跳过——这<b>天然过滤掉 optimizer state、step、LR 调度器状态等非权重条目</b>。对于 EP17 这类有大量路由/专家权重的场景，只要专家权重本身存在 <code>model.</code> 前缀的命名空间里，就会被一视同仁地纳入中转；本文件不做 EP 维度的重切（那是 convert_ckpt_v2.py 的事），只做 key 改名+物理分片。</p></div></div><div class="seg"><p class="seglab">行 104-202 · _get_sharding_plan：第一阶段——纯元数据规划分片（两阶段之「规划」）</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :104-:202）</h5><pre data-lang="py" data-start="104" data-idprefix="A">def _get_sharding_plan(
+    checkpoint_path: Union[str, os.PathLike],
+    shard_size: int,
+    save_dtype: Optional[Union[str, torch.dtype]],
+) -&gt; Tuple[List[Dict[str, str]], int, List[str]]:
+    &quot;&quot;&quot;
+    Build a shard plan based solely on DCP metadata.
+
+    This function:
+    - Reads DCP metadata
+    - Estimates tensor sizes
+    - Groups tensors into shards that do not exceed shard_size
+    - Does NOT load actual tensor data
+
+    Args:
+        checkpoint_path (str | PathLike):
+            Path to the DCP checkpoint directory.
+        shard_size (int):
+            Maximum allowed size (in bytes) per output shard.
+        save_dtype (str | torch.dtype | None):
+            Target dtype for saving weights.
+            If provided, size estimation uses this dtype.
+
+    Returns:
+        Tuple:
+            shards (List[Dict[str, str]]):
+                List of shards, each mapping hf_key -&gt; dcp_key.
+            total_size (int):
+                Estimated total model size in bytes.
+            all_dcp_keys (List[str]):
+                List of all valid DCP model keys discovered.
+
+    Raises:
+        ValueError:
+            If checkpoint metadata is invalid or missing dtype info.
+    &quot;&quot;&quot;
+    reader = FileSystemReader(checkpoint_path)
+    metadata = reader.read_metadata()
+
+    if not isinstance(metadata, Metadata):
+        raise ValueError(f&quot;Invalid metadata format in {checkpoint_path}&quot;)
+
+    tensor_infos = []
+    all_dcp_keys = []
+
+    for key, tensor_meta in metadata.state_dict_metadata.items():
+        hf_key = _normalize_key(key)
+        if hf_key is None:
+            continue
+
+        # Resolve dtype for size estimation
+        if save_dtype:
+            dtype = getattr(torch, save_dtype) if isinstance(save_dtype, str) else save_dtype
+        else:
+            if not hasattr(tensor_meta.properties, &quot;dtype&quot;):
+                raise ValueError(f&quot;Missing dtype info for tensor &#x27;{key}&#x27;&quot;)
+            dtype = tensor_meta.properties.dtype
+
+        # Compute number of elements
+        numel = 1
+        for dim in tensor_meta.size:
+            numel *= dim
+
+        byte_size = numel * get_dtype_size(dtype)
+
+        tensor_infos.append(
+            {
+                &quot;dcp_key&quot;: key,
+                &quot;hf_key&quot;: hf_key,
+                &quot;size&quot;: byte_size,
+                &quot;metadata&quot;: tensor_meta,
+            }
+        )
+        all_dcp_keys.append(key)
+
+    # Deterministic ordering
+    tensor_infos.sort(key=lambda x: x[&quot;hf_key&quot;])
+
+    shards: List[Dict[str, str]] = []
+    current_shard: Dict[str, str] = {}
+    current_size = 0
+    total_size = 0
+
+    for info in tensor_infos:
+        size = info[&quot;size&quot;]
+        total_size += size
+
+        if current_shard and current_size + size &gt; shard_size:
+            shards.append(current_shard)
+            current_shard = {}
+            current_size = 0
+
+        current_shard[info[&quot;hf_key&quot;]] = info[&quot;dcp_key&quot;]
+        current_size += size
+
+    if current_shard:
+        shards.append(current_shard)
+
+    return shards, total_size, all_dcp_keys</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">torch.load(state_dict) 全量加载</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p><b>标准 GPU/DDP 路径</b>（如 DDP 下 <code>torch.load(ckpt)['state_dict']</code>）是「一把梭」：一次性把整个 state_dict 全部反序列化进内存，再整个 <code>load_state_dict(model)</code>。简单但峰值内存 = 模型全量，8B 模型 bf16 约 16GB，在 CPU 上 merge 时容易撑爆内存。</p><p><b>本文件离线路径</b>不同：先用<b>纯元数据</b>（Metadata，几十 KB）规划好分片边界（:104-202），第二阶段才按 shard 逐片 load+save。峰值内存 ≈ 单个 shard 而非全模型，这是「规划/执行分离」带来的内存收益——代价是读两遍 dcp 目录（规划读元数据，执行读数据），用一点 IO 换大幅内存。两条路在<b>同一个流程里互斥</b>：选了离线分片就不走全量 load。</p></div></div><div class="seg"><p class="seglab">行 205-302 · _process_shard：第二阶段——逐片 load→转换→save（两阶段之「执行」）</p><pre data-lang="py" data-start="205" data-idprefix="A">def _process_shard(
+    shard_idx: int,
+    num_shards: int,
+    shard_keys: Dict[str, str],
+    checkpoint_path: str,
+    output_dir: str,
+    save_dtype: Optional[Union[str, torch.dtype]],
+    safe_serialization: bool,
+) -&gt; str:
+    &quot;&quot;&quot;
+    Load, convert, and save a single shard of model weights.
+
+    Args:
+        shard_idx (int):
+            Index of the current shard.
+        num_shards (int):
+            Total number of shards.
+        shard_keys (Dict[str, str]):
+            Mapping from HuggingFace key -&gt; DCP key.
+        checkpoint_path (str):
+            Path to the DCP checkpoint directory.
+        output_dir (str):
+            Directory to save converted shards.
+        save_dtype (str | torch.dtype | None):
+            Target dtype for saved weights.
+        safe_serialization (bool):
+            Whether to use safetensors format.
+
+    Returns:
+        str:
+            Filename of the saved shard.
+    &quot;&quot;&quot;
+    weights_name = SAFE_WEIGHTS_NAME if safe_serialization else WEIGHTS_NAME
+
+    if num_shards == 1:
+        filename = weights_name
+    else:
+        prefix, extension = weights_name.rsplit(&quot;.&quot;, 1)
+        filename = f&quot;{prefix}-{shard_idx + 1:05d}-of-{num_shards:05d}.{extension}&quot;
+
+    save_path = os.path.join(output_dir, filename)
+    logger.info(f&quot;Processing shard {shard_idx + 1}/{num_shards}: {filename}&quot;)
+
+    reader = FileSystemReader(checkpoint_path)
+    metadata = reader.read_metadata()
+
+    # Allocate placeholder tensors
+    state_dict = OrderedDict()
+    for dcp_key in shard_keys.values():
+        tensor_meta = metadata.state_dict_metadata[dcp_key]
+        state_dict[dcp_key] = torch.empty(
+            tensor_meta.size,
+            dtype=tensor_meta.properties.dtype,
+        )
+
+    # Load tensors from DCP
+    load(
+        state_dict,
+        checkpoint_id=checkpoint_path,
+        storage_reader=reader,
+        no_dist=True,
+    )
+
+    processed_dict = OrderedDict()
+    target_dtype = (
+        getattr(torch, save_dtype) if isinstance(save_dtype, str) else save_dtype
+    )
+
+    for hf_key, dcp_key in shard_keys.items():
+        tensor = state_dict[dcp_key]
+
+        if hasattr(tensor, &quot;full_tensor&quot;):
+            tensor = tensor.full_tensor()
+
+        if target_dtype:
+            tensor = tensor.to(dtype=target_dtype)
+
+        processed_dict[hf_key] = tensor.cpu().detach().clone()
+        del tensor
+
+    # Memory cleanup
+    del state_dict, metadata, reader
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+    # Save shard
+    if safe_serialization:
+        save_file(processed_dict, save_path, metadata={&quot;format&quot;: &quot;pt&quot;})
+    else:
+        torch.save(processed_dict, save_path)
+
+    del processed_dict
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+    return filename</pre><div class="exp"><p>这是<b>执行阶段</b>（:205-302），被 <code>save_model_weights</code> 逐 shard 调用。单 shard 内部是另一个<b>局部两步</b>：先分配占位张量再 load。</p><p>步骤：</p><ol><li>定文件名（:237-243）：单 shard 用 <code>SAFE_WEIGHTS_NAME</code>（<code>model.safetensors</code>），多 shard 用 <code>model-NNNNN-of-NNNNN.safetensors</code> 五位补零——HF 标准 sharded 命名。</li><li>再建一次 <code>FileSystemReader</code>（:248）——注意<b>执行阶段重新建 reader</b>，不复用规划阶段的，因为两阶段是独立调用、各自短生命周期。</li><li>按 shard 的 DCP key 从 metadata 拿到每个 tensor 的 shape+dtype，<code>torch.empty(...)</code> 分配<b>占位张量</b>（:252-258）——这步关键：DCP 的 <code>load</code> 需要<b>预分配好形状匹配的容器</b>，它按 key 把数据从分片文件 <code>memcpy</code> 进来。</li><li><code>load(..., no_dist=True)</code>（:261-266）：<code>no_dist=True</code> 表示<b>不走分布式 process group</b>，单进程直接读——merge 是离线工具，没有 <code>dist.init_process_group</code> 上下文，必须单进程模式。</li><li>逐 tensor 后处理（:273-283）：<code>full_tensor()</code>（:276-277）兜底 DTensor/局部张量物化成完整张量；<code>to(dtype)</code> 转 save_dtype（默认 bf16）；<code>.cpu().detach().clone()</code>（:282）脱离计算图并搬 CPU。<code>del tensor</code>（:283）及时释放。</li><li>显式内存清理（:286-289）：<code>del state_dict, metadata, reader; gc.collect()</code> + <code>torch.cuda.empty_cache()</code>（:288-289 仅 cuda available 时）——每片处理完立刻回收，把峰值压到单片。</li><li>保存（:292-295）：safetensors 走 <code>save_file(..., metadata={'format':'pt'})</code>，否则 <code>torch.save</code>；再 <code>del</code>+清理（:297-300）。</li></ol><p>注意 <code>full_tensor()</code>（:276-277）的存在：即便离线读 dcp，理论上仍可能拿到 <code>ShardedTensor</code>/DTensor 句柄（取决于 dcp 落盘时的 sharding 方式），这里做一次物化兜底。但<b>本文件不走 gather-all</b>——它是按 shard 边界物化该片所需张量，与 <code>checkpoint_manager.py</code> 在线 gather 版是<b>同名两条路互斥</b>（见下段）。</p></div></div><div class="seg"><p class="seglab">行 305-381 · save_model_weights（离线版）：@torch.no_grad 的总控，与 checkpoint_manager.py:452 在线版同名互斥</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :305-:381）</h5><pre data-lang="py" data-start="305" data-idprefix="A">@torch.no_grad()
+def save_model_weights(
+    output_dir: Union[str, os.PathLike],
+    checkpoint_path: Union[str, os.PathLike],
+    save_dtype: Optional[Union[str, torch.dtype]] = &quot;bfloat16&quot;,
+    shard_size: int = 2_000_000_000,
+    safe_serialization: bool = True,
+    model_assets: Optional[Sequence[&quot;ModelAssets&quot;]] = None,
+) -&gt; None:
+    &quot;&quot;&quot;
+    Convert a full DCP checkpoint into HuggingFace weight files.
+
+    Args:
+        output_dir (str | PathLike):
+            Target directory for HuggingFace checkpoint.
+        checkpoint_path (str | PathLike):
+            Source DCP checkpoint directory.
+        save_dtype (str | torch.dtype | None):
+            Target dtype for saved weights.
+        shard_size (int):
+            Maximum size per shard in bytes.
+        safe_serialization (bool):
+            Whether to save weights using safetensors.
+        model_assets (Sequence[ModelAssets] | None):
+            Optional HuggingFace assets to save (config, tokenizer, processor).
+
+    Returns:
+        None
+    &quot;&quot;&quot;
+    os.makedirs(output_dir, exist_ok=True)
+
+    shards, total_size, all_dcp_keys = _get_sharding_plan(
+        checkpoint_path, shard_size, save_dtype
+    )
+
+    if not shards:
+        logger.warning(&quot;No model weights found in checkpoint.&quot;)
+        return
+
+    weight_map = OrderedDict()
+    num_shards = len(shards)
+
+    for idx, shard_keys in enumerate(shards):
+        filename = _process_shard(
+            idx,
+            num_shards,
+            shard_keys,
+            checkpoint_path,
+            output_dir,
+            save_dtype,
+            safe_serialization,
+        )
+        for hf_key in shard_keys:
+            weight_map[hf_key] = filename
+
+    # Save index file for sharded checkpoints
+    if num_shards &gt; 1:
+        index = {
+            &quot;metadata&quot;: {&quot;total_size&quot;: total_size},
+            &quot;weight_map&quot;: weight_map,
+        }
+        index_file = (
+            SAFE_WEIGHTS_INDEX_NAME if safe_serialization else WEIGHTS_INDEX_NAME
+        )
+        with open(os.path.join(output_dir, index_file), &quot;w&quot;, encoding=&quot;utf-8&quot;) as f:
+            f.write(json.dumps(index, indent=2, sort_keys=True) + &quot;\n&quot;)
+
+    # Save additional HuggingFace assets
+    if model_assets:
+        for asset in model_assets:
+            if hasattr(asset, &quot;save_pretrained&quot;):
+                asset.save_pretrained(output_dir)
+            else:
+                logger.warning(
+                    f&quot;{type(asset).__name__} does not implement save_pretrained()&quot;
+                )
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">checkpoint_manager.py:452 在线 gather 版 save_model_weights</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p><b>并排对照（左：本文件离线 :306 / 右：checkpoint_manager.py:452 在线）：</b></p><ul><li><b>入参</b>：左吃 <code>checkpoint_path</code>（路径）/ 右吃 <code>state_dict</code>（内存 DTensor）。</li><li><b>物化时机</b>：左在 <code>_process_shard</code> 内 <code>load(no_dist=True)</code> 离线读盘后 <code>full_tensor()</code>（:276）；右在训练进程内直接 <code>tensor.data.full_tensor()</code>（cm:479-480）<b>在线 gather</b>——后者要跨卡 all_gather 真实梯度链路。</li><li><b>多卡协同</b>：左 <code>no_dist=True</code> 单进程，无 barrier；右 <code>global_rank</code>+<code>dist.barrier()</code>+<code>synchronize()</code>（cm:498-500）多卡同步，仅 rank0 写盘。</li><li><b>内存峰值</b>：左 ≈ 单 shard（规划保证不超 shard_size）；右 ≈ 全模型（gather 后整份 state_dict 在 rank0 内存）。</li><li><b>运行窗口</b>：左 离线、训练已结束；右 在线、训练进程内（save_checkpoint 回调里）。</li></ul><p><b>差异本质</b>：在线版省去了 dcp 落盘+离线读盘这一来一回的 IO，代价是必须趁显存还热、且 rank0 要扛全模型内存；离线版把「存」和「转 HF」在时间上解耦，训练存完 dcp 就能释放显存退出，merge 后置单独跑，<b>显存压力为零、内存压力可控</b>。FSDP2 大模型（8B+）在 EP17 场景显存吃紧时，离线路径更稳。</p></div></div><div class="seg"><p class="seglab">行 383-430 · merge_to_hf_pt：高层入口，装配 HF 资产后委托 save_model_weights</p><pre data-lang="py" data-start="383" data-idprefix="A">def merge_to_hf_pt(
+    load_dir: str,
+    save_path: str,
+    model_configs: Optional[str] = None,
+    shard_size: int = 2_000_000_000,
+) -&gt; None:
+    &quot;&quot;&quot;
+    High-level conversion entry that prepares model assets
+    and invokes weight conversion.
+
+    Args:
+        load_dir (str):
+            Path to DCP checkpoint directory.
+        save_path (str):
+            Output directory for HuggingFace checkpoint.
+        model_configs (str | None):
+            Path to HuggingFace model configs (optional).
+        shard_size (int):
+            Maximum shard size in bytes.
+
+    Returns:
+        None
+    &quot;&quot;&quot;
+    model_assets = None
+
+    if model_configs:
+        model_assets = []
+        try:
+            model_assets.append(AutoConfig.from_pretrained(model_configs))
+        except Exception as e:
+            logger.warning(f&quot;Failed to load AutoConfig: {e}&quot;)
+
+        try:
+            model_assets.append(
+                AutoProcessor.from_pretrained(model_configs, trust_remote_code=True)
+            )
+        except Exception as e:
+            logger.warning(f&quot;Failed to load AutoProcessor: {e}&quot;)
+
+        if not model_assets:
+            model_assets = None
+
+    save_model_weights(
+        save_path,
+        load_dir,
+        shard_size=shard_size,
+        model_assets=model_assets,
+    )</pre><div class="exp"><p><code>merge_to_hf_pt</code>（:383-430）是<b>高层入口</b>，做两件事：装配可选的 HF 资产（config/processor），再把活儿委托给 <code>save_model_weights</code>。</p><p>资产装配（:408-423）：仅当 <code>model_configs</code> 非空时，尝试 <code>AutoConfig.from_pretrained</code>（:411）和 <code>AutoProcessor.from_pretrained(..., trust_remote_code=True)</code>（:416-418）。<b>两段都包 try/except + warning</b>（:412-413, :419-420），且<b>相互独立</b>——config 失败不影响 processor 尝试。如果两个都没拿到（:422-423）<code>model_assets=None</code>，<code>save_model_weights</code> 就只存权重不存配置（用户得自己补 config/tokenizer）。<code>trust_remote_code=True</code> 是为 Qwen3 这类带自定义 modeling 代码的模型留的口子。</p><p>委托（:425-430）：调 <code>save_model_weights</code>，<b>不传 <code>save_dtype</code>/<code>safe_serialization</code></b>——即用默认值 bf16 + safetensors，只把 <code>shard_size</code> 和 <code>model_assets</code> 透传。说明高层入口把 dtype/序列化格式锁死成生产默认（bf16+safetensors），只暴露 shard_size 这一个调参点。</p></div></div><div class="seg"><p class="seglab">行 433-458 · main/argparse：CLI 入口与默认 shard_size=5GB</p><pre data-lang="py" data-start="433" data-idprefix="A">def main():
+    &quot;&quot;&quot;
+    Command-line entry point for DCP to HuggingFace checkpoint conversion.
+    &quot;&quot;&quot;
+    parser = argparse.ArgumentParser(
+        description=&quot;Merge DCP checkpoint to HuggingFace format&quot;,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(&quot;--load-dir&quot;, type=str, required=True)
+    parser.add_argument(&quot;--save-dir&quot;, type=str, default=None)
+    parser.add_argument(&quot;--model-configs&quot;, type=str, default=None)
+    parser.add_argument(&quot;--shard-size&quot;, type=int, default=5_000_000_000)
+
+    args = parser.parse_args()
+
+    save_dir = args.save_dir or os.path.join(args.load_dir, &quot;hf_ckpt&quot;)
+    merge_to_hf_pt(
+        args.load_dir,
+        save_dir,
+        args.model_configs,
+        shard_size=args.shard_size,
+    )
+
+
+if __name__ == &quot;__main__&quot;:
+    main()</pre><div class="exp"><p><code>main</code>（:433-458）是 CLI 入口，<code>argparse</code> 定义四个参数（:441-444）：</p><ul><li><code>--load-dir</code>（required）：dcp 目录；</li><li><code>--save-dir</code>（default None）：HF 输出目录，不给就在 load-dir 下建 <code>hf_ckpt/</code>（:448）——方便原地中转；</li><li><code>--model-configs</code>：HF 配置目录（可选，给了才装配 config/tokenizer）；</li><li><code>--shard-size</code> default <code>5_000_000_000</code>（5GB，:444）——注意 <b>CLI 默认 5GB</b>，而 <code>save_model_weights</code> 的函数签名默认是 <code>2_000_000_000</code>（2GB，:310）。<b>两个默认值不一致</b>：走 CLI 默认 5GB/片，走函数直调默认 2GB/片。差异源自 CLI 面向「一次性离线工具、希望少产片数」，函数签名面向「被库内调用、保守用小片省内存」。使用时需留意。</li></ul><p>最后 <code>merge_to_hf_pt(...)</code>（:449-454）收尾，<code>__main__</code> 守卫（:457-458）。整个 CLI 不接 <code>--save-dtype</code>/<code>--no-safe</code>——如前段所述，这两个被高层入口锁成 bf16+safetensors，想改只能 Python 里直调 <code>save_model_weights</code>。</p><p><b>EP17 全景回顾</b>：本文件在 EP17 场景下的角色是「dcp 落盘后的 CPU 中转站」——训练时 FSDP2+EP 把专家权重按 dcp 协议分片落盘（含专家维度的 sharding），本文件 <b>不做</b> EP 重切（那是 convert_ckpt_v2.py 的职责），只把 dcp 分片按 HF 命名 reassemble 成 HF safetensors 分片。专家权重的 gather 由 <code>load(no_dist=True)</code> + <code>full_tensor()</code> 在单进程内完成，硬件维度弱（纯 CPU/HF），重点全在<b>两阶段规划/执行分离</b>与<b>离线版 vs 在线版同名互斥</b>这两条设计线上。</p></div></div></div>
+<details class="src"><summary>📜 完整源码（458 行）— 大纲点跳行</summary><pre data-lang="py" data-start="1">&quot;&quot;&quot;
+This file implements a memory-efficient converter that transforms PyTorch Distributed Checkpoint (DCP) model weights into HuggingFace compatible checkpoint formats.
+&quot;&quot;&quot;
+import argparse
+import gc
+import json
+import logging
+import os
+from collections import OrderedDict
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Tuple, Union
+
+import torch
+from safetensors.torch import save_file
+from torch.distributed.checkpoint import FileSystemReader, load
+from torch.distributed.checkpoint.metadata import Metadata
+from transformers import AutoConfig, AutoProcessor
+from transformers.utils import SAFE_WEIGHTS_INDEX_NAME, SAFE_WEIGHTS_NAME, WEIGHTS_INDEX_NAME, WEIGHTS_NAME
+
+
+if TYPE_CHECKING:
+    from transformers import GenerationConfig, PretrainedConfig, PreTrainedTokenizer, ProcessorMixin
+
+    # HuggingFace assets that support save_pretrained()
+    ModelAssets = Union[
+        GenerationConfig,
+        PretrainedConfig,
+        PreTrainedTokenizer,
+        ProcessorMixin,
+    ]
+
+
+logging.basicConfig(
+    format=&quot;%(asctime)s - %(levelname)s - %(name)s - %(message)s&quot;,
+    datefmt=&quot;%Y-%m-%d %H:%M:%S&quot;,
+    level=logging.INFO,
+)
+logger = logging.getLogger(__name__)
+
+
+def get_dtype_size(dtype: torch.dtype) -&gt; int:
+    &quot;&quot;&quot;
+    Return the size (in bytes) of a given torch dtype.
+
+    Args:
+        dtype (torch.dtype):
+            PyTorch data type, e.g. torch.float32, torch.bfloat16.
+
+    Returns:
+        int:
+            Size in bytes for a single element of the given dtype.
+
+    Notes:
+        - Used for estimating tensor and shard sizes without loading tensors.
+        - Defaults to 4 bytes if dtype is not explicitly listed.
+    &quot;&quot;&quot;
+    size_map = {
+        torch.float32: 4,
+        torch.float16: 2,
+        torch.bfloat16: 2,
+        torch.int64: 8,
+        torch.int32: 4,
+        torch.int16: 2,
+        torch.int8: 1,
+        torch.uint8: 1,
+        torch.bool: 1,
+    }
+    return size_map.get(dtype, 4)
+
+
+def _normalize_key(key: str) -&gt; Optional[str]:
+    &quot;&quot;&quot;
+    Convert a DCP state_dict key into a HuggingFace-compatible parameter key.
+
+    Args:
+        key (str):
+            Original key from DCP checkpoint state_dict.
+
+    Returns:
+        Optional[str]:
+            Converted HuggingFace-style key if this is a model weight,
+            otherwise None (e.g. optimizer or non-model states).
+
+    Conversion rules:
+        - model.model.xxx  -&gt; model.xxx
+        - model.lm_head.weight -&gt; lm_head.weight
+        - model.xxx -&gt; xxx (with warning)
+        - Non &quot;model.&quot; keys are ignored
+    &quot;&quot;&quot;
+    if not key.startswith(&quot;model.&quot;):
+        return None
+
+    if key.startswith(&quot;model.model.&quot;):
+        return key[6:]  # strip first &quot;model.&quot;
+    elif key == &quot;model.lm_head.weight&quot;:
+        return &quot;lm_head.weight&quot;
+    else:
+        logger.warning(
+            f&quot;Found unexpected DCP key format &#x27;{key}&#x27;, &quot;
+            f&quot;stripping leading &#x27;model.&#x27; prefix.&quot;
+        )
+        return key[6:]
+
+
+def _get_sharding_plan(
+    checkpoint_path: Union[str, os.PathLike],
+    shard_size: int,
+    save_dtype: Optional[Union[str, torch.dtype]],
+) -&gt; Tuple[List[Dict[str, str]], int, List[str]]:
+    &quot;&quot;&quot;
+    Build a shard plan based solely on DCP metadata.
+
+    This function:
+    - Reads DCP metadata
+    - Estimates tensor sizes
+    - Groups tensors into shards that do not exceed shard_size
+    - Does NOT load actual tensor data
+
+    Args:
+        checkpoint_path (str | PathLike):
+            Path to the DCP checkpoint directory.
+        shard_size (int):
+            Maximum allowed size (in bytes) per output shard.
+        save_dtype (str | torch.dtype | None):
+            Target dtype for saving weights.
+            If provided, size estimation uses this dtype.
+
+    Returns:
+        Tuple:
+            shards (List[Dict[str, str]]):
+                List of shards, each mapping hf_key -&gt; dcp_key.
+            total_size (int):
+                Estimated total model size in bytes.
+            all_dcp_keys (List[str]):
+                List of all valid DCP model keys discovered.
+
+    Raises:
+        ValueError:
+            If checkpoint metadata is invalid or missing dtype info.
+    &quot;&quot;&quot;
+    reader = FileSystemReader(checkpoint_path)
+    metadata = reader.read_metadata()
+
+    if not isinstance(metadata, Metadata):
+        raise ValueError(f&quot;Invalid metadata format in {checkpoint_path}&quot;)
+
+    tensor_infos = []
+    all_dcp_keys = []
+
+    for key, tensor_meta in metadata.state_dict_metadata.items():
+        hf_key = _normalize_key(key)
+        if hf_key is None:
+            continue
+
+        # Resolve dtype for size estimation
+        if save_dtype:
+            dtype = getattr(torch, save_dtype) if isinstance(save_dtype, str) else save_dtype
+        else:
+            if not hasattr(tensor_meta.properties, &quot;dtype&quot;):
+                raise ValueError(f&quot;Missing dtype info for tensor &#x27;{key}&#x27;&quot;)
+            dtype = tensor_meta.properties.dtype
+
+        # Compute number of elements
+        numel = 1
+        for dim in tensor_meta.size:
+            numel *= dim
+
+        byte_size = numel * get_dtype_size(dtype)
+
+        tensor_infos.append(
+            {
+                &quot;dcp_key&quot;: key,
+                &quot;hf_key&quot;: hf_key,
+                &quot;size&quot;: byte_size,
+                &quot;metadata&quot;: tensor_meta,
+            }
+        )
+        all_dcp_keys.append(key)
+
+    # Deterministic ordering
+    tensor_infos.sort(key=lambda x: x[&quot;hf_key&quot;])
+
+    shards: List[Dict[str, str]] = []
+    current_shard: Dict[str, str] = {}
+    current_size = 0
+    total_size = 0
+
+    for info in tensor_infos:
+        size = info[&quot;size&quot;]
+        total_size += size
+
+        if current_shard and current_size + size &gt; shard_size:
+            shards.append(current_shard)
+            current_shard = {}
+            current_size = 0
+
+        current_shard[info[&quot;hf_key&quot;]] = info[&quot;dcp_key&quot;]
+        current_size += size
+
+    if current_shard:
+        shards.append(current_shard)
+
+    return shards, total_size, all_dcp_keys
+
+
+def _process_shard(
+    shard_idx: int,
+    num_shards: int,
+    shard_keys: Dict[str, str],
+    checkpoint_path: str,
+    output_dir: str,
+    save_dtype: Optional[Union[str, torch.dtype]],
+    safe_serialization: bool,
+) -&gt; str:
+    &quot;&quot;&quot;
+    Load, convert, and save a single shard of model weights.
+
+    Args:
+        shard_idx (int):
+            Index of the current shard.
+        num_shards (int):
+            Total number of shards.
+        shard_keys (Dict[str, str]):
+            Mapping from HuggingFace key -&gt; DCP key.
+        checkpoint_path (str):
+            Path to the DCP checkpoint directory.
+        output_dir (str):
+            Directory to save converted shards.
+        save_dtype (str | torch.dtype | None):
+            Target dtype for saved weights.
+        safe_serialization (bool):
+            Whether to use safetensors format.
+
+    Returns:
+        str:
+            Filename of the saved shard.
+    &quot;&quot;&quot;
+    weights_name = SAFE_WEIGHTS_NAME if safe_serialization else WEIGHTS_NAME
+
+    if num_shards == 1:
+        filename = weights_name
+    else:
+        prefix, extension = weights_name.rsplit(&quot;.&quot;, 1)
+        filename = f&quot;{prefix}-{shard_idx + 1:05d}-of-{num_shards:05d}.{extension}&quot;
+
+    save_path = os.path.join(output_dir, filename)
+    logger.info(f&quot;Processing shard {shard_idx + 1}/{num_shards}: {filename}&quot;)
+
+    reader = FileSystemReader(checkpoint_path)
+    metadata = reader.read_metadata()
+
+    # Allocate placeholder tensors
+    state_dict = OrderedDict()
+    for dcp_key in shard_keys.values():
+        tensor_meta = metadata.state_dict_metadata[dcp_key]
+        state_dict[dcp_key] = torch.empty(
+            tensor_meta.size,
+            dtype=tensor_meta.properties.dtype,
+        )
+
+    # Load tensors from DCP
+    load(
+        state_dict,
+        checkpoint_id=checkpoint_path,
+        storage_reader=reader,
+        no_dist=True,
+    )
+
+    processed_dict = OrderedDict()
+    target_dtype = (
+        getattr(torch, save_dtype) if isinstance(save_dtype, str) else save_dtype
+    )
+
+    for hf_key, dcp_key in shard_keys.items():
+        tensor = state_dict[dcp_key]
+
+        if hasattr(tensor, &quot;full_tensor&quot;):
+            tensor = tensor.full_tensor()
+
+        if target_dtype:
+            tensor = tensor.to(dtype=target_dtype)
+
+        processed_dict[hf_key] = tensor.cpu().detach().clone()
+        del tensor
+
+    # Memory cleanup
+    del state_dict, metadata, reader
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+    # Save shard
+    if safe_serialization:
+        save_file(processed_dict, save_path, metadata={&quot;format&quot;: &quot;pt&quot;})
+    else:
+        torch.save(processed_dict, save_path)
+
+    del processed_dict
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+    return filename
+
+
+@torch.no_grad()
+def save_model_weights(
+    output_dir: Union[str, os.PathLike],
+    checkpoint_path: Union[str, os.PathLike],
+    save_dtype: Optional[Union[str, torch.dtype]] = &quot;bfloat16&quot;,
+    shard_size: int = 2_000_000_000,
+    safe_serialization: bool = True,
+    model_assets: Optional[Sequence[&quot;ModelAssets&quot;]] = None,
+) -&gt; None:
+    &quot;&quot;&quot;
+    Convert a full DCP checkpoint into HuggingFace weight files.
+
+    Args:
+        output_dir (str | PathLike):
+            Target directory for HuggingFace checkpoint.
+        checkpoint_path (str | PathLike):
+            Source DCP checkpoint directory.
+        save_dtype (str | torch.dtype | None):
+            Target dtype for saved weights.
+        shard_size (int):
+            Maximum size per shard in bytes.
+        safe_serialization (bool):
+            Whether to save weights using safetensors.
+        model_assets (Sequence[ModelAssets] | None):
+            Optional HuggingFace assets to save (config, tokenizer, processor).
+
+    Returns:
+        None
+    &quot;&quot;&quot;
+    os.makedirs(output_dir, exist_ok=True)
+
+    shards, total_size, all_dcp_keys = _get_sharding_plan(
+        checkpoint_path, shard_size, save_dtype
+    )
+
+    if not shards:
+        logger.warning(&quot;No model weights found in checkpoint.&quot;)
+        return
+
+    weight_map = OrderedDict()
+    num_shards = len(shards)
+
+    for idx, shard_keys in enumerate(shards):
+        filename = _process_shard(
+            idx,
+            num_shards,
+            shard_keys,
+            checkpoint_path,
+            output_dir,
+            save_dtype,
+            safe_serialization,
+        )
+        for hf_key in shard_keys:
+            weight_map[hf_key] = filename
+
+    # Save index file for sharded checkpoints
+    if num_shards &gt; 1:
+        index = {
+            &quot;metadata&quot;: {&quot;total_size&quot;: total_size},
+            &quot;weight_map&quot;: weight_map,
+        }
+        index_file = (
+            SAFE_WEIGHTS_INDEX_NAME if safe_serialization else WEIGHTS_INDEX_NAME
+        )
+        with open(os.path.join(output_dir, index_file), &quot;w&quot;, encoding=&quot;utf-8&quot;) as f:
+            f.write(json.dumps(index, indent=2, sort_keys=True) + &quot;\n&quot;)
+
+    # Save additional HuggingFace assets
+    if model_assets:
+        for asset in model_assets:
+            if hasattr(asset, &quot;save_pretrained&quot;):
+                asset.save_pretrained(output_dir)
+            else:
+                logger.warning(
+                    f&quot;{type(asset).__name__} does not implement save_pretrained()&quot;
+                )
+
+
+def merge_to_hf_pt(
+    load_dir: str,
+    save_path: str,
+    model_configs: Optional[str] = None,
+    shard_size: int = 2_000_000_000,
+) -&gt; None:
+    &quot;&quot;&quot;
+    High-level conversion entry that prepares model assets
+    and invokes weight conversion.
+
+    Args:
+        load_dir (str):
+            Path to DCP checkpoint directory.
+        save_path (str):
+            Output directory for HuggingFace checkpoint.
+        model_configs (str | None):
+            Path to HuggingFace model configs (optional).
+        shard_size (int):
+            Maximum shard size in bytes.
+
+    Returns:
+        None
+    &quot;&quot;&quot;
+    model_assets = None
+
+    if model_configs:
+        model_assets = []
+        try:
+            model_assets.append(AutoConfig.from_pretrained(model_configs))
+        except Exception as e:
+            logger.warning(f&quot;Failed to load AutoConfig: {e}&quot;)
+
+        try:
+            model_assets.append(
+                AutoProcessor.from_pretrained(model_configs, trust_remote_code=True)
+            )
+        except Exception as e:
+            logger.warning(f&quot;Failed to load AutoProcessor: {e}&quot;)
+
+        if not model_assets:
+            model_assets = None
+
+    save_model_weights(
+        save_path,
+        load_dir,
+        shard_size=shard_size,
+        model_assets=model_assets,
+    )
+
+
+def main():
+    &quot;&quot;&quot;
+    Command-line entry point for DCP to HuggingFace checkpoint conversion.
+    &quot;&quot;&quot;
+    parser = argparse.ArgumentParser(
+        description=&quot;Merge DCP checkpoint to HuggingFace format&quot;,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(&quot;--load-dir&quot;, type=str, required=True)
+    parser.add_argument(&quot;--save-dir&quot;, type=str, default=None)
+    parser.add_argument(&quot;--model-configs&quot;, type=str, default=None)
+    parser.add_argument(&quot;--shard-size&quot;, type=int, default=5_000_000_000)
+
+    args = parser.parse_args()
+
+    save_dir = args.save_dir or os.path.join(args.load_dir, &quot;hf_ckpt&quot;)
+    merge_to_hf_pt(
+        args.load_dir,
+        save_dir,
+        args.model_configs,
+        shard_size=args.shard_size,
+    )
+
+
+if __name__ == &quot;__main__&quot;:
+    main()</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

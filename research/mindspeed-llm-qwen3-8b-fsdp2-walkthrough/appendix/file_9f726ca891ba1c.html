@@ -1,0 +1,1298 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_481aaea34a0d89.html">◀ __init__.py</a> <a href="file_69f869b1e6784c.html">conversion_mappings.py ▶</a></nav></div>
+<div class="wrap">
+<h1>checkpoint_manager.py</h1><p class="goal">mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py · 22945B · 617 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L69" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class ModelState(Stateful)</a><a href="#L83" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, model)</a><a href="#L94" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def state_dict(self)</a><a href="#L114" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def load_state_dict(self, state_dict)</a><a href="#L162" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class OptimizerState(Stateful)</a><a href="#L180" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, model, optimizer)</a><a href="#L193" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def state_dict(self)</a><a href="#L221" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def load_state_dict(self, state_dict)</a><a href="#L267" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _find_ep_fqn(self, key: str) -&gt; Optiona</a><a href="#L285" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class CheckpointManager</a><a href="#L305" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def save</a><a href="#L353" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def load</a><a href="#L407" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def execute_save</a><a href="#L453" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def save_model_weights</a><a href="#L532" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def save_config(cls, output_dir, model_configs</a><a href="#L542" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def save_args(cls, args: Optional[Any], output</a><a href="#L558" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _create_checkpoint_dir(cls, checkpoint_dir</a><a href="#L562" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _create_storage_reader(cls, checkpoint_dir</a><a href="#L566" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _create_storage_writer(cls, checkpoint_dir</a><a href="#L575" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _save_extra_state(cls, checkpoint_dir: str</a><a href="#L591" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _load_extra_state(cls, checkpoint_dir: str</a><a href="#L604" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_saved_keys(cls, checkpoint_dir: str) </a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep17.html">EP17</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="annot"><div class="seg"><p class="seglab">行 1-24 · 模块导入：DCP 原语来自 torch stdlib</p><pre data-lang="py" data-start="1" data-idprefix="A">&quot;&quot;&quot;
+This module provides a unified checkpoint management implementation based on PyTorch Distributed Checkpoint (DCP) for large-scale distributed training.
+&quot;&quot;&quot;
+
+import gc
+import json
+import os
+from collections import OrderedDict
+from dataclasses import asdict
+from typing import Any, Dict, Optional, Sequence, Union, Set
+import yaml
+
+import torch
+import torch.distributed as dist
+import torch.distributed.checkpoint as dcp
+from torch.distributed._tensor import DTensor
+from torch.distributed.checkpoint import FileSystemReader, FileSystemWriter
+from torch.distributed.checkpoint.state_dict import (
+    get_model_state_dict,
+    get_optimizer_state_dict,
+    set_model_state_dict,
+    set_optimizer_state_dict,
+)
+from torch.distributed.checkpoint.stateful import Stateful</pre><div class="exp"><p>开篇注释 (:2) 直陈本模块基于 PyTorch Distributed Checkpoint (DCP)。关键看 :13-24 的导入来源：<code>torch.distributed.checkpoint as dcp</code> (:15)、<code>FileSystemReader/FileSystemWriter</code> (:17)、<code>get_model_state_dict / set_model_state_dict / get_optimizer_state_dict / set_optimizer_state_dict</code> (:18-23) 以及 <code>Stateful</code> (:24) —— 这些全是 <b>PyTorch stdlib</b>（torch 自带），不在本仓内。这与同仓的 <code>fsdp_turbo</code>（<code>fully_shard</code> 走的外部加速实现）不同：本文件做 checkpoint 落盘时依赖的是 torch 标准库 DCP，而 FSDP2 的计算分片逻辑在别处。如实说：DCP 原语是 stdlib，本文件只是“编排”这些原语 + 仓内的 EP 适配逻辑。</p><p>另外注意 :16 的 <code>DTensor</code> —— FSDP2 下参数是 <code>DTensor</code>（带 mesh/placement 的分布式张量），后续 state_dict 的取/装都要处理它的 <code>to_local()</code>。:34-35 是仓内依赖：<code>get_logger</code> 与 <code>ParallelState</code>（并行状态，查 EP 是否开启）。</p></div></div><div class="seg"><p class="seglab">行 25-63 · HF 资产类型与 extra_state 命名</p><pre data-lang="py" data-start="25" data-idprefix="A">
+from transformers import (
+    GenerationConfig,
+    PretrainedConfig,
+    PreTrainedTokenizer,
+    ProcessorMixin,
+)
+from transformers.utils import SAFE_WEIGHTS_INDEX_NAME, WEIGHTS_INDEX_NAME
+
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+from mindspeed_llm.fsdp2.distributed.parallel_state import ParallelState
+from .utils import (
+    empty_cache,
+    get_shard_info,
+    save_state_dict,
+    synchronize,
+    drop_ep_dim,
+    restore_ep_dim,
+    build_ep_fqn2spec_info,
+)
+
+# --------------------------
+# Global Variables
+# --------------------------
+logger = get_logger(__name__)
+
+# Unified type for all HF-style model assets that can be saved with save_pretrained
+ModelConfigs = Union[
+    GenerationConfig,
+    PretrainedConfig,
+    PreTrainedTokenizer,
+    ProcessorMixin,
+]
+
+# Extra state file naming format (rank-specific)
+_EXTRA_STATE_FORMAT = &quot;extra_state_rank_{}.pt&quot;
+
+# Directory name for storing extra_state
+_EXTRA_STATE_DIR = &quot;extra_state&quot;</pre><div class="exp"><p>:26-32 导入 transformers 的若干 Config/Tokenizer/Processor 以及 <code>SAFE_WEIGHTS_INDEX_NAME / WEIGHTS_INDEX_NAME</code> —— 这两个常量是后续 <code>save_model_weights</code> 写分片索引文件名用的（<code>model.safetensors.index.json</code> 或 <code>pytorch_model.bin.index.json</code>）。</p><p>:52-57 定义 <code>ModelConfigs</code> Union 类型：凡是带 <code>save_pretrained</code> 的 HF 资产都能塞进 <code>model_configs</code> 列表一起落盘。:60-63 定义 extra_state 的文件命名：<code>extra_state_rank_{}.pt</code>，按 rank 各存一份，单独放 <code>extra_state/</code> 子目录——注意 extra_state 走的是普通 <code>torch.save</code>（见 :582），不是 DCP，因为它非张量、无需跨 rank 合并。</p></div></div><div class="seg"><p class="seglab">行 69-111 · ModelState.state_dict：get_model_state_dict + EP 维度还原</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :69-:111）</h5><pre data-lang="py" data-start="69" data-idprefix="A">class ModelState(Stateful):
+    &quot;&quot;&quot;Stateful wrapper for model parameters, integrating with DCP (Distributed Checkpoint).
+
+    Args:
+        model: The model whose parameters are managed by this state wrapper.
+
+    Attributes:
+        model: The underlying model instance.
+        parallel_state (ParallelState): Tracks the current distributed parallelism configuration.
+        should_ep_aware (bool): Whether Expert Parallelism-aware checkpointing is needed.
+        ep_fqn2spec_info (dict): Mapping from fully-qualified parameter names to their
+            EP specification info (e.g., FSDP mesh layout). Empty if EP is not enabled.
+    &quot;&quot;&quot;
+
+    def __init__(self, model):
+        self.model = model
+        self.parallel_state = ParallelState()
+
+        ep_plan = getattr(getattr(model, &quot;config&quot;, None), &quot;ep_plan&quot;, None)
+        self.should_ep_aware = ep_plan is not None and self.parallel_state.is_ep_enable()
+        self.ep_fqn2spec_info = (
+            build_ep_fqn2spec_info(model, self.parallel_state, ep_plan) if self.should_ep_aware else {}
+        )
+
+    @torch.no_grad()
+    def state_dict(self):
+        &quot;&quot;&quot;Extract model parameters into a DCP-compatible state dictionary.
+
+        Returns:
+            Dict[str, torch.Tensor]: The model state dictionary, with EP dimensions
+                restored for expert parameters when applicable.
+        &quot;&quot;&quot;
+        model_state_dict = get_model_state_dict(model=self.model)
+
+        if self.should_ep_aware:
+            if dist.get_rank() == 0:
+                logger.info(&quot;ModelState: Restoring EP dimension for Expert modules&quot;)
+
+            for name, tensor in model_state_dict.items():
+                if name in self.ep_fqn2spec_info and torch.is_tensor(tensor) and tensor.ndim &gt; 0:
+                    model_state_dict[name] = restore_ep_dim(tensor, self.ep_fqn2spec_info[name].ep_fsdp_mesh)
+
+        return model_state_dict</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">torch.save(model.state_dict(), path)</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>GPU/DDP 习惯：<code>torch.save(model.state_dict(), path)</code> 一次性把 <b>完整</b> state_dict 序列化到单文件。这里换成 DCP 路径：<code>get_model_state_dict</code> 抽的是 FSDP2 <b>本地分片</b>（不是全量），且还要做 EP 维度的对称变换（restore/drop），这是单文件 <code>torch.save</code> 完全不涉及的概念——DCP 按 rank 分片写、跨 rank 读，靠 metadata 拼回全量。</p></div></div><div class="seg"><p class="seglab">行 113-159 · ModelState.load_state_dict：drop_ep_dim + 手动 copy</p><pre data-lang="py" data-start="113" data-idprefix="A">    @torch.no_grad()
+    def load_state_dict(self, state_dict):
+        &quot;&quot;&quot;Load a state dictionary into the model.
+
+        For non-EP models, delegates directly to `set_model_state_dict`.
+        For EP-aware models, it first drops the EP dimension from expert tensors,
+        then manually copies the loaded tensors into the model parameters,
+        handling both DTensor and plain Tensor cases. Shape mismatches are logged
+        and the corresponding parameter is skipped.
+
+        Args:
+            state_dict (Dict[str, torch.Tensor]): The state dictionary to load.
+                Expected to contain EP-restored dimensions if the model is EP-aware.
+
+        Returns:
+            None
+        &quot;&quot;&quot;
+        if not self.should_ep_aware:
+            set_model_state_dict(model=self.model, model_state_dict=state_dict)
+            return
+
+        if dist.get_rank() == 0:
+            logger.info(&quot;ModelState: Dropping EP dimension for Expert modules&quot;)
+
+        # Drop the EP dimension from expert tensors to match the model&#x27;s sharded layout
+        for name, tensor in state_dict.items():
+            if name in self.ep_fqn2spec_info and torch.is_tensor(tensor) and tensor.ndim &gt; 0:
+                state_dict[name] = drop_ep_dim(tensor, self.ep_fqn2spec_info[name].ep_fsdp_mesh)
+
+        # Copy loaded tensors into model parameters, extracting local tensors from DTensors
+        param_dict = dict(self.model.named_parameters())
+        for name, loaded_tensor in state_dict.items():
+            if name not in param_dict:
+                continue
+
+            model_param = param_dict[name]
+            local_tensor = loaded_tensor.to_local() if isinstance(loaded_tensor, DTensor) else loaded_tensor
+            target_tensor = model_param.to_local() if isinstance(model_param, DTensor) else model_param.data
+
+            if target_tensor.shape != local_tensor.shape:
+                if dist.get_rank() == 0:
+                    logger.error(
+                        f&quot;Shape mismatch for &#x27;{name}&#x27;: loaded={local_tensor.shape}, model={target_tensor.shape}&quot;
+                    )
+                continue
+
+            target_tensor.copy_(local_tensor)</pre><div class="exp"><p>这是 EP 维度对称变换的“取”方向。:130-132 非 EP 模型直接 <code>set_model_state_dict</code>（stdlib）一把装回。</p><p>EP 模型 (:134-159)：先 :138-140 对每个命中表项的张量调 <code>drop_ep_dim</code>——把存盘时还原出的 EP 维度再 drop 掉，回到模型本地 shard 的布局。注意这里是对 <code>state_dict</code> 直接改写（in-place 替换 value）。</p><p>:143-159 不再走 stdlib 的 set，而是<b>手动 copy</code>：取 <code>model.named_parameters()</code>，逐个把 loaded 张量（DTensor 先 <code>to_local()</code> :149）与模型参数（DTensor 也 <code>to_local()</code> :150）对齐，:152 形状不匹配就 log error 跳过该参数，:159 <code>target_tensor.copy_(local_tensor)</code> 拷贝。这是 EP 路径的精细控制——MultiOptimizer/EP 的参数布局与 DCP 存盘布局不对称，需要显式逐参数对齐，不能靠 stdlib 自动 set。</p></div></div><div class="seg"><p class="seglab">行 162-279 · OptimizerState：EP 用 MultiOptimizer merged dict + DTensor 重建</p><pre data-lang="py" data-start="162" data-idprefix="A">class OptimizerState(Stateful):
+    &quot;&quot;&quot;Stateful wrapper for optimizer state, integrating with DCP (Distributed Checkpoint).
+
+    Args:
+        model: The model associated with the optimizer.
+        optimizer: The optimizer (or MultiOptimizer for EP) whose state is managed.
+
+    Attributes:
+        model: The underlying model instance.
+        optimizer: The optimizer instance.
+        parallel_state (ParallelState): Tracks the current distributed parallelism configuration.
+        should_ep_aware (bool): Whether Expert Parallelism-aware checkpointing is needed.
+        ep_fqn2spec_info (dict): Mapping from fully-qualified parameter names to their
+            EP specification info. Only populated when EP is enabled.
+        param_fqn_to_param (dict): Mapping from fully-qualified names to model parameters.
+            Only populated when EP is enabled; used to reconstruct DTensors on load.
+    &quot;&quot;&quot;
+
+    def __init__(self, model, optimizer):
+        self.model = model
+        self.optimizer = optimizer
+        self.parallel_state = ParallelState()
+
+        ep_plan = getattr(getattr(model, &quot;config&quot;, None), &quot;ep_plan&quot;, None)
+        self.should_ep_aware = ep_plan is not None and self.parallel_state.is_ep_enable()
+
+        if self.should_ep_aware:
+            self.ep_fqn2spec_info = build_ep_fqn2spec_info(model, self.parallel_state, ep_plan)
+            self.param_fqn_to_param = dict(self.model.named_parameters())
+
+    @torch.no_grad()
+    def state_dict(self):
+        &quot;&quot;&quot;Extract optimizer state into a DCP-compatible state dictionary.
+
+        Returns:
+            dict: The optimizer state dictionary, with EP dimensions restored
+                for expert parameters when applicable.
+        &quot;&quot;&quot;
+        if self.should_ep_aware:
+            if dist.get_rank() == 0:
+                logger.info(&quot;OptimizerState: Restoring EP dimension for Expert modules&quot;)
+
+            # EP → MultiOptimizer, which produces a merged flattened dict
+            optim_sd = self.optimizer.state_dict()
+
+            for name in list(optim_sd.keys()):
+                ep_fqn = self._find_ep_fqn(name)
+                if ep_fqn is None:
+                    continue
+                tensor = optim_sd[name]
+                if torch.is_tensor(tensor) and tensor.ndim &gt; 0:
+                    optim_sd[name] = restore_ep_dim(tensor, self.ep_fqn2spec_info[ep_fqn].ep_fsdp_mesh)
+
+            return optim_sd
+
+        # Non-EP → single optimizer
+        return get_optimizer_state_dict(model=self.model, optimizers=self.optimizer)
+
+    @torch.no_grad()
+    def load_state_dict(self, state_dict):
+        &quot;&quot;&quot;Load an optimizer state dictionary.
+
+        Args:
+            state_dict (dict): The optimizer state dictionary to load. Expected to
+                contain EP-restored dimensions if the model is EP-aware.
+
+        Returns:
+            None
+        &quot;&quot;&quot;
+        if self.should_ep_aware:
+            if dist.get_rank() == 0:
+                logger.info(&quot;OptimizerState: Dropping EP dimension for Expert modules&quot;)
+
+            for name in list(state_dict.keys()):
+                ep_fqn = self._find_ep_fqn(name)
+                if ep_fqn is None:
+                    continue
+                tensor = state_dict[name]
+                if not torch.is_tensor(tensor) or tensor.ndim == 0:
+                    continue
+
+                local_tensor = tensor.to_local() if isinstance(tensor, DTensor) else tensor
+
+                # Reconstruct DTensor to match model parameter layout
+                model_param = self.param_fqn_to_param.get(ep_fqn)
+                if model_param is not None and isinstance(model_param, DTensor):
+                    state_dict[name] = DTensor.from_local(
+                        local_tensor,
+                        device_mesh=model_param.device_mesh,
+                        placements=model_param.placements,
+                    )
+                else:
+                    state_dict[name] = local_tensor
+
+            # EP → MultiOptimizer handles splitting/filtering internally
+            self.optimizer.load_state_dict(state_dict)
+            return
+
+        # Non-EP → single optimizer
+        set_optimizer_state_dict(
+            model=self.model,
+            optimizers=self.optimizer,
+            optim_state_dict=state_dict,
+        )
+
+    def _find_ep_fqn(self, key: str) -&gt; Optional[str]:
+        &quot;&quot;&quot;Find the EP parameter fully-qualified name (FQN) matching a state dict key.
+
+        Args:
+            key (str): The optimizer state dict key to look up.
+
+        Returns:
+            Optional[str]: The matching EP FQN, or None if no match is found.
+        &quot;&quot;&quot;
+        if key in self.ep_fqn2spec_info:
+            return key
+        matches = [fqn for fqn in self.ep_fqn2spec_info if fqn in key]
+        return max(matches, key=len) if matches else None</pre><div class="exp"><p><code>OptimizerState</code> (:162) 与 ModelState 平行，但多了一个 <code>param_fqn_to_param</code> (:190)——EP 时缓存 FQN→参数映射，load 时用来重建 DTensor。</p><p><code>state_dict()</code> (:192-218)：EP 分支 (:200-215) 不调 stdlib <code>get_optimizer_state_dict</code>，而是直接 <code>self.optimizer.state_dict()</code> (:205)——注释 (:204) 说明 EP 下 optimizer 是 <code>MultiOptimizer</code>，产出的是“merged flattened dict”。:207-213 同样用 <code>restore_ep_dim</code> 对命中的 expert 张量还原 EP 维度。非 EP (:217-218) 才走 stdlib <code>get_optimizer_state_dict</code>。</p><p><code>load_state_dict()</code> (:220-265)：EP 分支 (:231-258) 先 drop EP 维度 (:235-242)，再 :246-254 <b>重建 DTensor</b>——用 <code>param_fqn_to_param</code> 里模型参数的 <code>device_mesh/placements</code>，调 <code>DTensor.from_local</code> 把本地张量重新包成与模型参数布局一致的 DTensor，最后 :257 <code>self.optimizer.load_state_dict</code>（MultiOptimizer 内部再 split/过滤）。非 EP (:260-265) 走 stdlib <code>set_optimizer_state_dict</code>。</p><p>:267-279 <code>_find_ep_fqn</code> 是 key 匹配的细节：optimizer state dict 的 key 往往带 step/exp 等前缀，不一定等于 FQN，所以先精确匹配，再取“FQN 是 key 子串”里最长的那条——最长匹配消歧。</p></div></div><div class="seg"><p class="seglab">行 285-401 · CheckpointManager.save / load：编排 DCP 的入口</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :285-:401）</h5><pre data-lang="py" data-start="285" data-idprefix="A">class CheckpointManager:
+    &quot;&quot;&quot;
+    Centralized manager for saving and loading distributed checkpoints.
+
+    This class encapsulates:
+    - Synchronous / asynchronous DCP save
+    - Model, optimizer, and extra_state persistence
+    - HuggingFace-compatible weight export
+    &quot;&quot;&quot;
+
+    # Future handle for async DCP save
+    dcp_save_future: Optional[Any] = None
+
+    # Dedicated process group for async save (created lazily)
+    _metadata_process_group: Optional[Any] = None
+
+    # --------------------------
+    # Public Save Interface
+    # --------------------------
+    @classmethod
+    def save(
+        cls,
+        path: str,
+        state: Dict[str, Any],
+        save_async: bool = False,
+        save_only_model: bool = False,
+        global_steps: int = None,
+        storage_writer: Optional[FileSystemWriter] = None,
+    ) -&gt; None:
+        &quot;&quot;&quot;
+        Save training state using PyTorch Distributed Checkpoint.
+
+        Args:
+            path (str): Checkpoint directory
+            state (Dict[str, Any]): Training state, must include &quot;model&quot;
+            save_async (bool): Enable asynchronous save
+            save_only_model (bool): Skip optimizer and extra_state
+            global_steps (int): Global training steps (reserved)
+            storage_writer (FileSystemWriter, optional): Custom storage backend
+        &quot;&quot;&quot;
+        if &quot;model&quot; not in state:
+            raise ValueError(&quot;Model must be provided to save a distributed checkpoint.&quot;)
+
+        checkpoint_dir = path
+        cls._create_checkpoint_dir(checkpoint_dir)
+
+        # Save extra_state first to guarantee consistency
+        if not save_only_model:
+            cls._save_extra_state(checkpoint_dir, state)
+
+        # Build DCP-compatible state
+        save_state = {&quot;model&quot;: ModelState(state[&quot;model&quot;])}
+        if &quot;optimizer&quot; in state and not save_only_model:
+            save_state[&quot;optimizer&quot;] = OptimizerState(
+                model=state[&quot;model&quot;],
+                optimizer=state[&quot;optimizer&quot;],
+            )
+
+        if storage_writer is None:
+            storage_writer = cls._create_storage_writer(checkpoint_dir)
+
+        cls.execute_save(save_state, storage_writer, save_async)
+        logger.info_rank0(f&quot;Saved checkpoint to {checkpoint_dir}&quot;)
+
+    # --------------------------
+    # Public Load Interface
+    # --------------------------
+    @classmethod
+    def load(
+        cls,
+        path: str,
+        state: Dict[str, Any],
+        process_group=None,
+        storage_reader: Optional[FileSystemReader] = None,
+    ) -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;
+        Load training state from a distributed checkpoint.
+
+        Args:
+            path (str): Checkpoint directory
+            state (Dict[str, Any]): Target state container
+            process_group: Optional process group for loading
+            storage_reader (FileSystemReader, optional): Custom reader
+
+        Returns:
+            Dict[str, Any]: Loaded training state
+        &quot;&quot;&quot;
+        if state is None or &quot;model&quot; not in state:
+            raise ValueError(&quot;State with model must be provided for loading.&quot;)
+
+        checkpoint_dir = path
+        load_state = {&quot;model&quot;: ModelState(state[&quot;model&quot;])}
+
+        # Determine which components exist in checkpoint
+        saved_keys = cls._get_saved_keys(checkpoint_dir)
+        if &quot;optimizer&quot; in state and &quot;optimizer&quot; in saved_keys:
+            load_state[&quot;optimizer&quot;] = OptimizerState(
+                model=state[&quot;model&quot;],
+                optimizer=state[&quot;optimizer&quot;],
+            )
+
+        if storage_reader is None:
+            storage_reader = cls._create_storage_reader(checkpoint_dir)
+
+        # Perform DCP load
+        dcp.load(
+            state_dict=load_state,
+            storage_reader=storage_reader,
+            process_group=process_group,
+        )
+
+        # Load extra_state if present
+        if &quot;optimizer&quot; in saved_keys:
+            cls._load_extra_state(checkpoint_dir, state)
+
+        logger.info_rank0(f&quot;Loaded checkpoint from {checkpoint_dir}&quot;)
+        return state</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">torch.save({&quot;model&quot;: model.state_dict(), &quot;optim&quot;: optim.state_dict()}, path)</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>GPU/DDP 习惯：把 model+optim 的 state_dict 塞进一个 dict 直接 <code>torch.save</code> 单文件，所有 rank 各存一份（或 rank0 gather 全量）。这里 save/load 改成 DCP：<code>save_state</code> 里放的是 <b>Stateful 包装器</b>而非裸 state_dict，DCP 内部按 rank 分片写、靠 metadata 拼合；load 时 <code>_get_saved_keys</code> 先探 metadata 决定加载哪些组件——单文件 <code>torch.save</code> 无此“按需加载组件”能力。</p></div></div><div class="seg"><p class="seglab">行 406-447 · execute_save：gloo metadata PG + async_save / save + barrier</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :406-:447）</h5><pre data-lang="py" data-start="406" data-idprefix="A">    @classmethod
+    def execute_save(
+        cls,
+        save_state: Dict[str, Any],
+        storage_writer: FileSystemWriter,
+        save_async: bool,
+    ) -&gt; None:
+        &quot;&quot;&quot;
+        Execute DCP save operation with optional async support.
+
+        Args:
+            save_state (Dict[str, Any]): DCP state dict
+            storage_writer (FileSystemWriter): Backend writer
+            save_async (bool): Enable async save
+        &quot;&quot;&quot;
+        if cls._metadata_process_group is None:
+            cls._metadata_process_group = dist.new_group(backend=&quot;gloo&quot;)
+        if save_async:
+            # Ensure previous async save is finished
+            if cls.dcp_save_future is not None:
+                cls.dcp_save_future.result()
+                cls.dcp_save_future = None
+                dist.barrier()
+
+            cls.dcp_save_future = dcp.async_save(
+                state_dict=save_state,
+                storage_writer=storage_writer,
+                process_group=cls._metadata_process_group,
+            )
+        else:
+            dcp.save(
+                state_dict=save_state,
+                storage_writer=storage_writer,
+                process_group=cls._metadata_process_group,
+            )
+            if dist.is_initialized():
+                dist.barrier()
+
+            # Explicit memory cleanup
+            gc.collect()
+            empty_cache()
+            synchronize()</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">torch.cuda.empty_cache(); torch.cuda.synchronize()</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>GPU 习惯直接 <code>torch.cuda.empty_cache()</code> / <code>torch.cuda.synchronize()</code>。这里用 <code>torch.accelerator.*</code> 抽象层（见 utils.py :68-73），在 Ascend NPU 上会路由到 NPU 的 cache/同步，在 CUDA 上路由到 cuda——同一份代码两边都能跑。另外 DCP 同步 save 后的 barrier + gc 是 DDP 单文件 save 没有的：DDP 下每个 rank 各存各的、互不协调；DCP 需要跨 rank 协调谁写哪个 shard，故 metadata PG + barrier 是必要的。</p></div></div><div class="seg"><p class="seglab">行 452-527 · save_model_weights（在线 gather）：DTensor full_tensor + 分片索引</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :452-:527）</h5><pre data-lang="py" data-start="452" data-idprefix="A">    @classmethod
+    def save_model_weights(
+        cls,
+        output_dir: Union[str, os.PathLike],
+        state_dict: Dict[str, torch.Tensor],
+        global_rank: Optional[int] = None,
+        save_dtype: Optional[Union[str, torch.dtype]] = &quot;bfloat16&quot;,
+        shard_size: int = 5_000_000_000,
+        safe_serialization: bool = True,
+        model_configs: Sequence[ModelConfigs] = None,
+    ) -&gt; None:
+        &quot;&quot;&quot;
+        Save model weights in HuggingFace-compatible (sharded) format.
+
+        Supports DTensor -&gt; full tensor materialization and
+        optional safe serialization using safetensors.
+        &quot;&quot;&quot;
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Determine sharding strategy
+        is_sharded, total_size, weight_map = get_shard_info(state_dict, save_dtype, shard_size, safe_serialization)
+
+        full_state_dict = OrderedDict()
+        prev_file_name = None
+
+        for name, tensor in state_dict.items():
+            # Materialize DTensor if needed
+            if hasattr(tensor.data, &quot;full_tensor&quot;):
+                tensor = tensor.data.full_tensor()
+            else:
+                tensor = tensor.data
+
+            if save_dtype:
+                tensor = tensor.to(dtype=getattr(torch, save_dtype) if isinstance(save_dtype, str) else save_dtype)
+
+            # Flush shard when file boundary changes
+            if prev_file_name and weight_map[name] != prev_file_name:
+                if global_rank is None or global_rank == 0:
+                    save_state_dict(
+                        full_state_dict,
+                        os.path.join(output_dir, prev_file_name),
+                        safe_serialization,
+                    )
+                    full_state_dict.clear()
+
+                empty_cache()
+                if global_rank is not None and dist.is_initialized():
+                    synchronize()
+                    dist.barrier()
+
+            if global_rank is None or global_rank == 0:
+                full_state_dict[name] = tensor.detach().cpu()
+
+            prev_file_name = weight_map[name]
+            del tensor
+
+        # Save last shard and index
+        if global_rank is None or global_rank == 0:
+            if full_state_dict:
+                save_state_dict(
+                    full_state_dict,
+                    os.path.join(output_dir, prev_file_name),
+                    safe_serialization,
+                )
+
+            if is_sharded:
+                index = {
+                    &quot;metadata&quot;: {&quot;total_size&quot;: total_size},
+                    &quot;weight_map&quot;: weight_map,
+                }
+                index_file = SAFE_WEIGHTS_INDEX_NAME if safe_serialization else WEIGHTS_INDEX_NAME
+                with open(os.path.join(output_dir, index_file), &quot;w&quot;, encoding=&#x27;utf-8&#x27;) as f:
+                    f.write(json.dumps(index, indent=2) + &quot;\n&quot;)
+
+            cls.save_config(output_dir, model_configs)
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">torch.save(model.state_dict(), &quot;model.pt&quot;)  # 或 model.save_pretrained(dir)</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>GPU/DDP 习惯：<code>torch.save(model.state_dict(), "model.pt")</code> 一个文件搞定，或直接 <code>model.save_pretrained(dir)</code>。这里改成 DCP-aware：先 <code>full_tensor()</code> all-gather 分片张量为全量，再按 <code>shard_size</code>（默认 5GB :459）切多片、写 safetensors + 索引 JSON。差异核心：DDP 下 <code>state_dict()</code> 直接就是全量（每个 rank 一份冗余），FSDP2 下 <code>state_dict()</code> 是本地分片，必须显式 <code>full_tensor</code> 才能 gather，且要管分片边界与跨 rank barrier。</p></div></div><div class="seg"><p class="seglab">行 531-553 · save_config / save_args：HF 资产与训练参数 YAML</p><pre data-lang="py" data-start="531" data-idprefix="A">    @classmethod
+    def save_config(cls, output_dir, model_configs):
+        &quot;&quot;&quot;Save model-related HuggingFace configs.&quot;&quot;&quot;
+        if model_configs:
+            for item in model_configs:
+                if hasattr(item, &quot;save_pretrained&quot;):
+                    item.save_pretrained(output_dir)
+                else:
+                    logger.warn_rank0(f&quot;{item} does not support save_pretrained&quot;)
+
+    @classmethod
+    def save_args(cls, args: Optional[Any], output_path: str) -&gt; None:
+        &quot;&quot;&quot;
+        Save training arguments to YAML file.
+
+        Args:
+            args: Dataclass-based training arguments
+            output_path (str): Target directory
+        &quot;&quot;&quot;
+        os.makedirs(output_path, exist_ok=True)
+        with open(os.path.join(output_path, &quot;training_args.yaml&quot;), &quot;w&quot;, encoding=&#x27;utf-8&#x27;) as f:
+            f.write(yaml.safe_dump(asdict(args)))
+</pre><div class="exp"><p>:531-539 <code>save_config</code>：遍历 <code>model_configs</code>，凡有 <code>save_pretrained</code> 就调它落盘（config.json / tokenizer / processor 一套），否则 log 警告。:541-552 <code>save_args</code>：把 dataclass 训练参数 <code>asdict</code> 后 <code>yaml.safe_dump</code> 到 <code>training_args.yaml</code>——纯 CPU 侧，与 DCP 无关，只是配套产物。</p><p>这两段是“HF 兼容导出”的收尾：权重由 <code>save_model_weights</code> 出，配置由这里出，合起来才是一个 <code>from_pretrained</code> 能直接吃的目录。</p></div></div><div class="seg"><p class="seglab">行 557-617 · 内部 helper：storage reader/writer、extra_state、_get_saved_keys</p><pre data-lang="py" data-start="557" data-idprefix="A">    @classmethod
+    def _create_checkpoint_dir(cls, checkpoint_dir: str) -&gt; None:
+        os.makedirs(checkpoint_dir, exist_ok=True)
+
+    @classmethod
+    def _create_storage_reader(cls, checkpoint_dir: str) -&gt; FileSystemReader:
+        return FileSystemReader(checkpoint_dir)
+
+    @classmethod
+    def _create_storage_writer(cls, checkpoint_dir: str) -&gt; FileSystemWriter:
+        return FileSystemWriter(
+            checkpoint_dir,
+            thread_count=16,
+            single_file_per_rank=True,
+            sync_files=False,
+        )
+
+    @classmethod
+    def _save_extra_state(cls, checkpoint_dir: str, state: Dict[str, Any]) -&gt; None:
+        if &quot;extra_state&quot; not in state:
+            logger.warn_rank0(&quot;extra_state not found, skipping save&quot;)
+            return
+
+        extra_state_dir = os.path.join(checkpoint_dir, _EXTRA_STATE_DIR)
+        os.makedirs(extra_state_dir, exist_ok=True)
+        torch.save(
+            state[&quot;extra_state&quot;],
+            os.path.join(
+                extra_state_dir,
+                _EXTRA_STATE_FORMAT.format(dist.get_rank()),
+            ),
+        )
+
+    @classmethod
+    def _load_extra_state(cls, checkpoint_dir: str, state: Dict[str, Any]) -&gt; None:
+        if &quot;extra_state&quot; not in state:
+            logger.warn_rank0(&quot;extra_state not found, skipping load&quot;)
+            return
+
+        path = os.path.join(
+            checkpoint_dir,
+            _EXTRA_STATE_DIR,
+            _EXTRA_STATE_FORMAT.format(dist.get_rank()),
+        )
+        state[&quot;extra_state&quot;] = torch.load(path, weights_only=False)
+
+    @classmethod
+    def _get_saved_keys(cls, checkpoint_dir: str) -&gt; Set[str]:
+        &quot;&quot;&quot;
+        Inspect checkpoint metadata to determine which components were saved.
+
+        Returns:
+            Set[str]: Top-level keys in checkpoint
+        &quot;&quot;&quot;
+        try:
+            reader = FileSystemReader(checkpoint_dir)
+            metadata = reader.read_metadata()
+            return {fqn.split(&quot;.&quot;)[0] for fqn in metadata.state_dict_metadata.keys()}
+        except Exception:
+            return set()
+</pre><div class="exp"><p>:557-559 <code>_create_checkpoint_dir</code> 建目录。:562-572 <code>_create_storage_writer</code> 建 <code>FileSystemWriter</code>——参数是看点：<code>thread_count=16</code>（16 线程并发写）、<code>single_file_per_rank=True</code>（每个 rank 一个文件，避免写冲突）、<code>sync_files=False</code>（不强制同步刷盘，靠后续 barrier/empty_cache 保一致）。:562 <code>_create_storage_reader</code> 则很简单，直接 <code>FileSystemReader(dir)</code>。</p><p>:574-588 <code>_save_extra_state</code>：用 <code>torch.save</code> 按 rank 存 <code>extra_state_rank_{rank}.pt</code>——extra_state 非 DCP，因为它不是张量、无需跨 rank 合并，每 rank 各存一份。:590-601 <code>_load_extra_state</code> 对称地 <code>torch.load(path, weights_only=False)</code>——注意 <code>weights_only=False</code>，因为 extra_state 可能含任意 picklable 对象（非纯权重）。</p><p>:603-616 <code>_get_saved_keys</code>：用 <code>FileSystemReader.read_metadata()</code> 读 DCP metadata，取所有 <code>state_dict_metadata</code> 键的<b>顶层段</b>（<code>fqn.split(".")[0]</code>）——得到 <code>{"model", "optimizer", ...}</code>，用于 load 时判断该不该包 OptimizerState。:615 except 兜底返回空 set（坏 checkpoint 不至于直接崩）。</p><p><b>对照同名第二处</b>：<code>merge_dcp_to_hf.py:306</code> 也有一个 <code>save_model_weights</code>——<b>离线</b>路径，入参是 <code>checkpoint_path</code>（DCP 目录）而非活 model，它只读 DCP metadata 做分片规划（<code>_get_sharding_plan</code>，不 load 张量）、逐 shard 搬运转换成 HF。两处同名但语义不同：在线 (:452) 从活模型 gather，离线 (:306 文件内) 从已存的 DCP 合并。<b>三座桥</b>：本段讲 DCP 分片写读的细节、EP 对称变换、在线/离线两处同名——EP17 讲“为何要 merge 回 HF 才能被 transformers 加载”的场景，这里讲逐段实现细节。</p></div></div></div>
+<details class="src"><summary>📜 完整源码（617 行）— 大纲点跳行</summary><pre data-lang="py" data-start="1">&quot;&quot;&quot;
+This module provides a unified checkpoint management implementation based on PyTorch Distributed Checkpoint (DCP) for large-scale distributed training.
+&quot;&quot;&quot;
+
+import gc
+import json
+import os
+from collections import OrderedDict
+from dataclasses import asdict
+from typing import Any, Dict, Optional, Sequence, Union, Set
+import yaml
+
+import torch
+import torch.distributed as dist
+import torch.distributed.checkpoint as dcp
+from torch.distributed._tensor import DTensor
+from torch.distributed.checkpoint import FileSystemReader, FileSystemWriter
+from torch.distributed.checkpoint.state_dict import (
+    get_model_state_dict,
+    get_optimizer_state_dict,
+    set_model_state_dict,
+    set_optimizer_state_dict,
+)
+from torch.distributed.checkpoint.stateful import Stateful
+
+from transformers import (
+    GenerationConfig,
+    PretrainedConfig,
+    PreTrainedTokenizer,
+    ProcessorMixin,
+)
+from transformers.utils import SAFE_WEIGHTS_INDEX_NAME, WEIGHTS_INDEX_NAME
+
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+from mindspeed_llm.fsdp2.distributed.parallel_state import ParallelState
+from .utils import (
+    empty_cache,
+    get_shard_info,
+    save_state_dict,
+    synchronize,
+    drop_ep_dim,
+    restore_ep_dim,
+    build_ep_fqn2spec_info,
+)
+
+# --------------------------
+# Global Variables
+# --------------------------
+logger = get_logger(__name__)
+
+# Unified type for all HF-style model assets that can be saved with save_pretrained
+ModelConfigs = Union[
+    GenerationConfig,
+    PretrainedConfig,
+    PreTrainedTokenizer,
+    ProcessorMixin,
+]
+
+# Extra state file naming format (rank-specific)
+_EXTRA_STATE_FORMAT = &quot;extra_state_rank_{}.pt&quot;
+
+# Directory name for storing extra_state
+_EXTRA_STATE_DIR = &quot;extra_state&quot;
+
+
+# --------------------------
+# Model State Wrapper
+# --------------------------
+class ModelState(Stateful):
+    &quot;&quot;&quot;Stateful wrapper for model parameters, integrating with DCP (Distributed Checkpoint).
+
+    Args:
+        model: The model whose parameters are managed by this state wrapper.
+
+    Attributes:
+        model: The underlying model instance.
+        parallel_state (ParallelState): Tracks the current distributed parallelism configuration.
+        should_ep_aware (bool): Whether Expert Parallelism-aware checkpointing is needed.
+        ep_fqn2spec_info (dict): Mapping from fully-qualified parameter names to their
+            EP specification info (e.g., FSDP mesh layout). Empty if EP is not enabled.
+    &quot;&quot;&quot;
+
+    def __init__(self, model):
+        self.model = model
+        self.parallel_state = ParallelState()
+
+        ep_plan = getattr(getattr(model, &quot;config&quot;, None), &quot;ep_plan&quot;, None)
+        self.should_ep_aware = ep_plan is not None and self.parallel_state.is_ep_enable()
+        self.ep_fqn2spec_info = (
+            build_ep_fqn2spec_info(model, self.parallel_state, ep_plan) if self.should_ep_aware else {}
+        )
+
+    @torch.no_grad()
+    def state_dict(self):
+        &quot;&quot;&quot;Extract model parameters into a DCP-compatible state dictionary.
+
+        Returns:
+            Dict[str, torch.Tensor]: The model state dictionary, with EP dimensions
+                restored for expert parameters when applicable.
+        &quot;&quot;&quot;
+        model_state_dict = get_model_state_dict(model=self.model)
+
+        if self.should_ep_aware:
+            if dist.get_rank() == 0:
+                logger.info(&quot;ModelState: Restoring EP dimension for Expert modules&quot;)
+
+            for name, tensor in model_state_dict.items():
+                if name in self.ep_fqn2spec_info and torch.is_tensor(tensor) and tensor.ndim &gt; 0:
+                    model_state_dict[name] = restore_ep_dim(tensor, self.ep_fqn2spec_info[name].ep_fsdp_mesh)
+
+        return model_state_dict
+
+    @torch.no_grad()
+    def load_state_dict(self, state_dict):
+        &quot;&quot;&quot;Load a state dictionary into the model.
+
+        For non-EP models, delegates directly to `set_model_state_dict`.
+        For EP-aware models, it first drops the EP dimension from expert tensors,
+        then manually copies the loaded tensors into the model parameters,
+        handling both DTensor and plain Tensor cases. Shape mismatches are logged
+        and the corresponding parameter is skipped.
+
+        Args:
+            state_dict (Dict[str, torch.Tensor]): The state dictionary to load.
+                Expected to contain EP-restored dimensions if the model is EP-aware.
+
+        Returns:
+            None
+        &quot;&quot;&quot;
+        if not self.should_ep_aware:
+            set_model_state_dict(model=self.model, model_state_dict=state_dict)
+            return
+
+        if dist.get_rank() == 0:
+            logger.info(&quot;ModelState: Dropping EP dimension for Expert modules&quot;)
+
+        # Drop the EP dimension from expert tensors to match the model&#x27;s sharded layout
+        for name, tensor in state_dict.items():
+            if name in self.ep_fqn2spec_info and torch.is_tensor(tensor) and tensor.ndim &gt; 0:
+                state_dict[name] = drop_ep_dim(tensor, self.ep_fqn2spec_info[name].ep_fsdp_mesh)
+
+        # Copy loaded tensors into model parameters, extracting local tensors from DTensors
+        param_dict = dict(self.model.named_parameters())
+        for name, loaded_tensor in state_dict.items():
+            if name not in param_dict:
+                continue
+
+            model_param = param_dict[name]
+            local_tensor = loaded_tensor.to_local() if isinstance(loaded_tensor, DTensor) else loaded_tensor
+            target_tensor = model_param.to_local() if isinstance(model_param, DTensor) else model_param.data
+
+            if target_tensor.shape != local_tensor.shape:
+                if dist.get_rank() == 0:
+                    logger.error(
+                        f&quot;Shape mismatch for &#x27;{name}&#x27;: loaded={local_tensor.shape}, model={target_tensor.shape}&quot;
+                    )
+                continue
+
+            target_tensor.copy_(local_tensor)
+
+
+class OptimizerState(Stateful):
+    &quot;&quot;&quot;Stateful wrapper for optimizer state, integrating with DCP (Distributed Checkpoint).
+
+    Args:
+        model: The model associated with the optimizer.
+        optimizer: The optimizer (or MultiOptimizer for EP) whose state is managed.
+
+    Attributes:
+        model: The underlying model instance.
+        optimizer: The optimizer instance.
+        parallel_state (ParallelState): Tracks the current distributed parallelism configuration.
+        should_ep_aware (bool): Whether Expert Parallelism-aware checkpointing is needed.
+        ep_fqn2spec_info (dict): Mapping from fully-qualified parameter names to their
+            EP specification info. Only populated when EP is enabled.
+        param_fqn_to_param (dict): Mapping from fully-qualified names to model parameters.
+            Only populated when EP is enabled; used to reconstruct DTensors on load.
+    &quot;&quot;&quot;
+
+    def __init__(self, model, optimizer):
+        self.model = model
+        self.optimizer = optimizer
+        self.parallel_state = ParallelState()
+
+        ep_plan = getattr(getattr(model, &quot;config&quot;, None), &quot;ep_plan&quot;, None)
+        self.should_ep_aware = ep_plan is not None and self.parallel_state.is_ep_enable()
+
+        if self.should_ep_aware:
+            self.ep_fqn2spec_info = build_ep_fqn2spec_info(model, self.parallel_state, ep_plan)
+            self.param_fqn_to_param = dict(self.model.named_parameters())
+
+    @torch.no_grad()
+    def state_dict(self):
+        &quot;&quot;&quot;Extract optimizer state into a DCP-compatible state dictionary.
+
+        Returns:
+            dict: The optimizer state dictionary, with EP dimensions restored
+                for expert parameters when applicable.
+        &quot;&quot;&quot;
+        if self.should_ep_aware:
+            if dist.get_rank() == 0:
+                logger.info(&quot;OptimizerState: Restoring EP dimension for Expert modules&quot;)
+
+            # EP → MultiOptimizer, which produces a merged flattened dict
+            optim_sd = self.optimizer.state_dict()
+
+            for name in list(optim_sd.keys()):
+                ep_fqn = self._find_ep_fqn(name)
+                if ep_fqn is None:
+                    continue
+                tensor = optim_sd[name]
+                if torch.is_tensor(tensor) and tensor.ndim &gt; 0:
+                    optim_sd[name] = restore_ep_dim(tensor, self.ep_fqn2spec_info[ep_fqn].ep_fsdp_mesh)
+
+            return optim_sd
+
+        # Non-EP → single optimizer
+        return get_optimizer_state_dict(model=self.model, optimizers=self.optimizer)
+
+    @torch.no_grad()
+    def load_state_dict(self, state_dict):
+        &quot;&quot;&quot;Load an optimizer state dictionary.
+
+        Args:
+            state_dict (dict): The optimizer state dictionary to load. Expected to
+                contain EP-restored dimensions if the model is EP-aware.
+
+        Returns:
+            None
+        &quot;&quot;&quot;
+        if self.should_ep_aware:
+            if dist.get_rank() == 0:
+                logger.info(&quot;OptimizerState: Dropping EP dimension for Expert modules&quot;)
+
+            for name in list(state_dict.keys()):
+                ep_fqn = self._find_ep_fqn(name)
+                if ep_fqn is None:
+                    continue
+                tensor = state_dict[name]
+                if not torch.is_tensor(tensor) or tensor.ndim == 0:
+                    continue
+
+                local_tensor = tensor.to_local() if isinstance(tensor, DTensor) else tensor
+
+                # Reconstruct DTensor to match model parameter layout
+                model_param = self.param_fqn_to_param.get(ep_fqn)
+                if model_param is not None and isinstance(model_param, DTensor):
+                    state_dict[name] = DTensor.from_local(
+                        local_tensor,
+                        device_mesh=model_param.device_mesh,
+                        placements=model_param.placements,
+                    )
+                else:
+                    state_dict[name] = local_tensor
+
+            # EP → MultiOptimizer handles splitting/filtering internally
+            self.optimizer.load_state_dict(state_dict)
+            return
+
+        # Non-EP → single optimizer
+        set_optimizer_state_dict(
+            model=self.model,
+            optimizers=self.optimizer,
+            optim_state_dict=state_dict,
+        )
+
+    def _find_ep_fqn(self, key: str) -&gt; Optional[str]:
+        &quot;&quot;&quot;Find the EP parameter fully-qualified name (FQN) matching a state dict key.
+
+        Args:
+            key (str): The optimizer state dict key to look up.
+
+        Returns:
+            Optional[str]: The matching EP FQN, or None if no match is found.
+        &quot;&quot;&quot;
+        if key in self.ep_fqn2spec_info:
+            return key
+        matches = [fqn for fqn in self.ep_fqn2spec_info if fqn in key]
+        return max(matches, key=len) if matches else None
+
+
+# --------------------------
+# Checkpoint Manager
+# --------------------------
+class CheckpointManager:
+    &quot;&quot;&quot;
+    Centralized manager for saving and loading distributed checkpoints.
+
+    This class encapsulates:
+    - Synchronous / asynchronous DCP save
+    - Model, optimizer, and extra_state persistence
+    - HuggingFace-compatible weight export
+    &quot;&quot;&quot;
+
+    # Future handle for async DCP save
+    dcp_save_future: Optional[Any] = None
+
+    # Dedicated process group for async save (created lazily)
+    _metadata_process_group: Optional[Any] = None
+
+    # --------------------------
+    # Public Save Interface
+    # --------------------------
+    @classmethod
+    def save(
+        cls,
+        path: str,
+        state: Dict[str, Any],
+        save_async: bool = False,
+        save_only_model: bool = False,
+        global_steps: int = None,
+        storage_writer: Optional[FileSystemWriter] = None,
+    ) -&gt; None:
+        &quot;&quot;&quot;
+        Save training state using PyTorch Distributed Checkpoint.
+
+        Args:
+            path (str): Checkpoint directory
+            state (Dict[str, Any]): Training state, must include &quot;model&quot;
+            save_async (bool): Enable asynchronous save
+            save_only_model (bool): Skip optimizer and extra_state
+            global_steps (int): Global training steps (reserved)
+            storage_writer (FileSystemWriter, optional): Custom storage backend
+        &quot;&quot;&quot;
+        if &quot;model&quot; not in state:
+            raise ValueError(&quot;Model must be provided to save a distributed checkpoint.&quot;)
+
+        checkpoint_dir = path
+        cls._create_checkpoint_dir(checkpoint_dir)
+
+        # Save extra_state first to guarantee consistency
+        if not save_only_model:
+            cls._save_extra_state(checkpoint_dir, state)
+
+        # Build DCP-compatible state
+        save_state = {&quot;model&quot;: ModelState(state[&quot;model&quot;])}
+        if &quot;optimizer&quot; in state and not save_only_model:
+            save_state[&quot;optimizer&quot;] = OptimizerState(
+                model=state[&quot;model&quot;],
+                optimizer=state[&quot;optimizer&quot;],
+            )
+
+        if storage_writer is None:
+            storage_writer = cls._create_storage_writer(checkpoint_dir)
+
+        cls.execute_save(save_state, storage_writer, save_async)
+        logger.info_rank0(f&quot;Saved checkpoint to {checkpoint_dir}&quot;)
+
+    # --------------------------
+    # Public Load Interface
+    # --------------------------
+    @classmethod
+    def load(
+        cls,
+        path: str,
+        state: Dict[str, Any],
+        process_group=None,
+        storage_reader: Optional[FileSystemReader] = None,
+    ) -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;
+        Load training state from a distributed checkpoint.
+
+        Args:
+            path (str): Checkpoint directory
+            state (Dict[str, Any]): Target state container
+            process_group: Optional process group for loading
+            storage_reader (FileSystemReader, optional): Custom reader
+
+        Returns:
+            Dict[str, Any]: Loaded training state
+        &quot;&quot;&quot;
+        if state is None or &quot;model&quot; not in state:
+            raise ValueError(&quot;State with model must be provided for loading.&quot;)
+
+        checkpoint_dir = path
+        load_state = {&quot;model&quot;: ModelState(state[&quot;model&quot;])}
+
+        # Determine which components exist in checkpoint
+        saved_keys = cls._get_saved_keys(checkpoint_dir)
+        if &quot;optimizer&quot; in state and &quot;optimizer&quot; in saved_keys:
+            load_state[&quot;optimizer&quot;] = OptimizerState(
+                model=state[&quot;model&quot;],
+                optimizer=state[&quot;optimizer&quot;],
+            )
+
+        if storage_reader is None:
+            storage_reader = cls._create_storage_reader(checkpoint_dir)
+
+        # Perform DCP load
+        dcp.load(
+            state_dict=load_state,
+            storage_reader=storage_reader,
+            process_group=process_group,
+        )
+
+        # Load extra_state if present
+        if &quot;optimizer&quot; in saved_keys:
+            cls._load_extra_state(checkpoint_dir, state)
+
+        logger.info_rank0(f&quot;Loaded checkpoint from {checkpoint_dir}&quot;)
+        return state
+
+    # --------------------------
+    # DCP Save Execution
+    # --------------------------
+    @classmethod
+    def execute_save(
+        cls,
+        save_state: Dict[str, Any],
+        storage_writer: FileSystemWriter,
+        save_async: bool,
+    ) -&gt; None:
+        &quot;&quot;&quot;
+        Execute DCP save operation with optional async support.
+
+        Args:
+            save_state (Dict[str, Any]): DCP state dict
+            storage_writer (FileSystemWriter): Backend writer
+            save_async (bool): Enable async save
+        &quot;&quot;&quot;
+        if cls._metadata_process_group is None:
+            cls._metadata_process_group = dist.new_group(backend=&quot;gloo&quot;)
+        if save_async:
+            # Ensure previous async save is finished
+            if cls.dcp_save_future is not None:
+                cls.dcp_save_future.result()
+                cls.dcp_save_future = None
+                dist.barrier()
+
+            cls.dcp_save_future = dcp.async_save(
+                state_dict=save_state,
+                storage_writer=storage_writer,
+                process_group=cls._metadata_process_group,
+            )
+        else:
+            dcp.save(
+                state_dict=save_state,
+                storage_writer=storage_writer,
+                process_group=cls._metadata_process_group,
+            )
+            if dist.is_initialized():
+                dist.barrier()
+
+            # Explicit memory cleanup
+            gc.collect()
+            empty_cache()
+            synchronize()
+
+    # --------------------------
+    # Model Weight Export
+    # --------------------------
+    @classmethod
+    def save_model_weights(
+        cls,
+        output_dir: Union[str, os.PathLike],
+        state_dict: Dict[str, torch.Tensor],
+        global_rank: Optional[int] = None,
+        save_dtype: Optional[Union[str, torch.dtype]] = &quot;bfloat16&quot;,
+        shard_size: int = 5_000_000_000,
+        safe_serialization: bool = True,
+        model_configs: Sequence[ModelConfigs] = None,
+    ) -&gt; None:
+        &quot;&quot;&quot;
+        Save model weights in HuggingFace-compatible (sharded) format.
+
+        Supports DTensor -&gt; full tensor materialization and
+        optional safe serialization using safetensors.
+        &quot;&quot;&quot;
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Determine sharding strategy
+        is_sharded, total_size, weight_map = get_shard_info(state_dict, save_dtype, shard_size, safe_serialization)
+
+        full_state_dict = OrderedDict()
+        prev_file_name = None
+
+        for name, tensor in state_dict.items():
+            # Materialize DTensor if needed
+            if hasattr(tensor.data, &quot;full_tensor&quot;):
+                tensor = tensor.data.full_tensor()
+            else:
+                tensor = tensor.data
+
+            if save_dtype:
+                tensor = tensor.to(dtype=getattr(torch, save_dtype) if isinstance(save_dtype, str) else save_dtype)
+
+            # Flush shard when file boundary changes
+            if prev_file_name and weight_map[name] != prev_file_name:
+                if global_rank is None or global_rank == 0:
+                    save_state_dict(
+                        full_state_dict,
+                        os.path.join(output_dir, prev_file_name),
+                        safe_serialization,
+                    )
+                    full_state_dict.clear()
+
+                empty_cache()
+                if global_rank is not None and dist.is_initialized():
+                    synchronize()
+                    dist.barrier()
+
+            if global_rank is None or global_rank == 0:
+                full_state_dict[name] = tensor.detach().cpu()
+
+            prev_file_name = weight_map[name]
+            del tensor
+
+        # Save last shard and index
+        if global_rank is None or global_rank == 0:
+            if full_state_dict:
+                save_state_dict(
+                    full_state_dict,
+                    os.path.join(output_dir, prev_file_name),
+                    safe_serialization,
+                )
+
+            if is_sharded:
+                index = {
+                    &quot;metadata&quot;: {&quot;total_size&quot;: total_size},
+                    &quot;weight_map&quot;: weight_map,
+                }
+                index_file = SAFE_WEIGHTS_INDEX_NAME if safe_serialization else WEIGHTS_INDEX_NAME
+                with open(os.path.join(output_dir, index_file), &quot;w&quot;, encoding=&#x27;utf-8&#x27;) as f:
+                    f.write(json.dumps(index, indent=2) + &quot;\n&quot;)
+
+            cls.save_config(output_dir, model_configs)
+
+    # --------------------------
+    # Config / Args Saving
+    # --------------------------
+    @classmethod
+    def save_config(cls, output_dir, model_configs):
+        &quot;&quot;&quot;Save model-related HuggingFace configs.&quot;&quot;&quot;
+        if model_configs:
+            for item in model_configs:
+                if hasattr(item, &quot;save_pretrained&quot;):
+                    item.save_pretrained(output_dir)
+                else:
+                    logger.warn_rank0(f&quot;{item} does not support save_pretrained&quot;)
+
+    @classmethod
+    def save_args(cls, args: Optional[Any], output_path: str) -&gt; None:
+        &quot;&quot;&quot;
+        Save training arguments to YAML file.
+
+        Args:
+            args: Dataclass-based training arguments
+            output_path (str): Target directory
+        &quot;&quot;&quot;
+        os.makedirs(output_path, exist_ok=True)
+        with open(os.path.join(output_path, &quot;training_args.yaml&quot;), &quot;w&quot;, encoding=&#x27;utf-8&#x27;) as f:
+            f.write(yaml.safe_dump(asdict(args)))
+
+    # --------------------------
+    # Internal Helper Methods
+    # --------------------------
+    @classmethod
+    def _create_checkpoint_dir(cls, checkpoint_dir: str) -&gt; None:
+        os.makedirs(checkpoint_dir, exist_ok=True)
+
+    @classmethod
+    def _create_storage_reader(cls, checkpoint_dir: str) -&gt; FileSystemReader:
+        return FileSystemReader(checkpoint_dir)
+
+    @classmethod
+    def _create_storage_writer(cls, checkpoint_dir: str) -&gt; FileSystemWriter:
+        return FileSystemWriter(
+            checkpoint_dir,
+            thread_count=16,
+            single_file_per_rank=True,
+            sync_files=False,
+        )
+
+    @classmethod
+    def _save_extra_state(cls, checkpoint_dir: str, state: Dict[str, Any]) -&gt; None:
+        if &quot;extra_state&quot; not in state:
+            logger.warn_rank0(&quot;extra_state not found, skipping save&quot;)
+            return
+
+        extra_state_dir = os.path.join(checkpoint_dir, _EXTRA_STATE_DIR)
+        os.makedirs(extra_state_dir, exist_ok=True)
+        torch.save(
+            state[&quot;extra_state&quot;],
+            os.path.join(
+                extra_state_dir,
+                _EXTRA_STATE_FORMAT.format(dist.get_rank()),
+            ),
+        )
+
+    @classmethod
+    def _load_extra_state(cls, checkpoint_dir: str, state: Dict[str, Any]) -&gt; None:
+        if &quot;extra_state&quot; not in state:
+            logger.warn_rank0(&quot;extra_state not found, skipping load&quot;)
+            return
+
+        path = os.path.join(
+            checkpoint_dir,
+            _EXTRA_STATE_DIR,
+            _EXTRA_STATE_FORMAT.format(dist.get_rank()),
+        )
+        state[&quot;extra_state&quot;] = torch.load(path, weights_only=False)
+
+    @classmethod
+    def _get_saved_keys(cls, checkpoint_dir: str) -&gt; Set[str]:
+        &quot;&quot;&quot;
+        Inspect checkpoint metadata to determine which components were saved.
+
+        Returns:
+            Set[str]: Top-level keys in checkpoint
+        &quot;&quot;&quot;
+        try:
+            reader = FileSystemReader(checkpoint_dir)
+            metadata = reader.read_metadata()
+            return {fqn.split(&quot;.&quot;)[0] for fqn in metadata.state_dict_metadata.keys()}
+        except Exception:
+            return set()
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

@@ -1,0 +1,1053 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/utils/train_monitor.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/utils/train_monitor.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_04a296b0c958f5.html">◀ profiler.py</a> <a href="file_850bf1cd3b5562.html">pretrain_qwen3_8b_4k_fsdp2.json ▶</a></nav></div>
+<div class="wrap">
+<h1>train_monitor.py</h1><p class="goal">mindspeed_llm/fsdp2/utils/train_monitor.py · 20825B · 485 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L22" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class TrainMonitor</a><a href="#L31" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__</a><a href="#L63" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _init_log_templates() -&gt; Dict[str, str]</a><a href="#L77" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def state_dict(self) -&gt; Dict[str, Any]</a><a href="#L96" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def load_state_dict(self, state_dict: Dict[str</a><a href="#L115" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def step</a><a href="#L246" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _compute_training_progress_metrics</a><a href="#L260" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _compute_loss_optimizer_metrics</a><a href="#L295" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _compute_memory_metrics() -&gt; Dict[str, </a><a href="#L327" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _compute_flops_mfu_metrics(self, batch_seq</a><a href="#L345" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _compute_throughput_metrics</a><a href="#L372" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _compute_sparse_attn_metrics(loss_scale, i</a><a href="#L382" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _generate_and_log_metrics(self, metrics: D</a><a href="#L440" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _update_logging_state</a><a href="#L459" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_empty_logging_state() -&gt; Dict[str,</a><a href="#L466" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _flatten_seqlens(batch_seqlens)</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep15.html">EP15</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="annot"><div class="seg"><p class="seglab">行 1-19 · 模块头与依赖：设备无关的统计入口</p><pre data-lang="py" data-start="1" data-idprefix="A">&quot;&quot;&quot;
+Module for monitoring training efficiency metrics (memory, throughput, MFU)
+&quot;&quot;&quot;
+
+import time
+from typing import Any, Dict, List, Tuple
+
+import psutil
+import torch
+import torch.distributed as dist
+from transformers import PretrainedConfig, TrainingArguments
+
+from mindspeed_llm.fsdp2.models.common.indexer_loss import IndexerLossLoggingHelper
+from mindspeed_llm.fsdp2.utils.flops.flops_factory import FlopsCounter
+from mindspeed_llm.fsdp2.utils.dist_op import all_reduce
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+
+
+logger = get_logger(__name__)</pre><div class="exp"><p>第 :8-9 行 <code>import psutil</code> 和 <code>import torch</code> 把 CPU 内存（psutil.virtual_memory）与加速器显存统计都纳入观测面——这是本模块要做 NPU+CPU <strong>双轨显存</strong>日志的前提。第 :10 行 <code>import torch.distributed as dist</code> 用于 :48 取 world_size，以及后续 all-reduce 聚合跨卡指标。</p><p>第 :13-16 行从本仓 fsdp2 子包引入四个协作者：<code>IndexerLossLoggingHelper</code>（稀疏注意力/indexer loss 的追踪器，:373 委托给它）、<code>FlopsCounter</code>（:49 实例化、按 config 估算 NPU peak FLOPS）、<code>all_reduce</code>（本仓 dist_op 封装，:306/335/354 反复用 op="max"/op="sum" 聚合）、<code>get_logger</code>（:19 拿 logger，:437 用 <code>logger.info_rank0</code> 只在 Rank0 输出）。<strong>关键点</strong>：模块级没有任何 <code>import torch_npu</code> 也没有 <code>torch.cuda</code>，显存统计走 :300 的 <code>torch.accelerator</code> 抽象层——这是 FSDP2 分支刻意做的设备无关设计，详见下段 NPU 语义。</p></div></div><div class="seg"><p class="seglab">行 22-60 · TrainMonitor.__init__：world_size + flops 估算器 + 续训缓存槽</p><pre data-lang="py" data-start="22" data-idprefix="A">class TrainMonitor:
+    &quot;&quot;&quot;
+    Computes the metrics about the training efficiency.
+
+    Args:
+        model_args: Contains model_name_or_path, trust_remote_code, train_from_scratch, etc.
+        config (PretrainedConfig): The configuration of the model.
+    &quot;&quot;&quot;
+
+    def __init__(
+        self,
+        training_args: TrainingArguments,
+        config: PretrainedConfig,
+    ) -&gt; None:
+        &quot;&quot;&quot;
+        Initialize TrainMonitor with training and model configurations
+
+        Args:
+            training_args (TrainingArguments): Training hyperparameters and logging settings
+            config (PretrainedConfig): Model configuration containing architecture parameters
+
+        Returns:
+            None
+        &quot;&quot;&quot;
+        self.training_args = training_args
+        self.config = config
+        self.world_size = dist.get_world_size() if dist.is_initialized() else 1
+        self.estimate_flops = FlopsCounter(config).estimate_flops
+        # Initialize log templates for extensibility
+        self.log_templates = TrainMonitor._init_log_templates()
+
+        self.consume_tokens = 0
+        self._last_iteration = 0
+        self._last_epoch = 0
+        self._last_avg_loss = 0.0
+        self._last_mfu = 0.0
+        self._last_tokens_per_second = 0.0
+        self._last_reserved_memory = 0.0  # in GB
+        self._last_grad_norm = 0.0</pre><div class="exp"><p>第 :31-35 构造函数只吃两个 HF 对象：<code>training_args</code>（TrainingArguments，决定 <code>log_throughput/log_cpu_memory</code> 等开关）和 <code>config</code>（PretrainedConfig，喂给 FlopsCounter 估算算力）。<strong>Monitor 不持有 trainer 引用</strong>——这是第三座桥（算法→观测桥）的设计：所有训练态标量通过 :115-133 的 <code>step()</code> 参数显式传入，解耦使 Monitor 可被任意训练循环复用、也能独立单测。</p><p>第 :48 <code>self.world_size = dist.get_world_size() if dist.is_initialized() else 1</code>——防御性取 world_size，单测或非分布式时退化为 1，用于 :338 的 MFU 分母 <code>flops_promised_per_npu * world_size</code>。第 :49 <code>self.estimate_flops = FlopsCounter(config).estimate_flops</code> 直接绑定方法引用，:332 调用时拿到本卡 achieved FLOPS 和单卡 peak。</p><p>第 :53-60 是八个 <code>_last_*</code> 缓存槽：iteration/epoch/avg_loss/mfu/tokens_per_second/reserved_memory/grad_norm，外加 <code>consume_tokens</code>。它们在 :234-240 由本步 metrics 回填，再由 :77 的 <code>state_dict</code> 落盘、:96 的 <code>load_state_dict</code> 续训恢复。这是“断点续训不掉累计 consumed tokens/mfu 曲线”的关键状态。</p></div></div><div class="seg"><p class="seglab">行 62-75 · _init_log_templates：一行训练日志的七段拼装</p><pre data-lang="py" data-start="62" data-idprefix="A">    @staticmethod
+    def _init_log_templates() -&gt; Dict[str, str]:
+        &quot;&quot;&quot;
+        Initialize log templates to facilitate log format modification/extension
+        &quot;&quot;&quot;
+        return {
+            &quot;base&quot;: &quot; iteration {:8d}/{:8d} | consumed samples: {:10d} | consumed tokens: {:10d} | elapsed time per iteration (ms): {:.2f} |&quot;,
+            &quot;throughput&quot;: &quot; tokens/s: {:.2f} | mfu: {:.2f} |&quot;,
+            &quot;optimizer&quot;: &quot; learning rate: {:.6E} | global batch size: {:5d} | lm loss: {:.6E} | mtp loss: {:.6E} |&quot;,
+            &quot;grad_norm&quot;: &quot; grad norm: {:.3f} |&quot;,
+            &quot;npu_memory&quot;: &quot; max_memory_allocated(GB): {:.2f} | max_memory_reserved(GB): {:.2f} |&quot;,
+            &quot;cpu_memory&quot;: &quot; cpu_used_memory(GB): {:.2f} | cpu_available_memory(GB): {:.2f} | cpu_memory_usage(%): {:.1f} |&quot;,
+            &quot;sparse_attn&quot;: &quot; indexer loss: {:.6E} |&quot;,
+        }</pre><div class="exp"><p>第 :67-75 把最终日志拆成七段模板，<code>_generate_and_log_metrics</code>（:382）按序拼接。<code>base</code> 段（:68）就是 EP15 在终端看到的那行开头：<code>iteration {:8d}/{:8d} | consumed samples: {:10d} | consumed tokens: {:10d} | elapsed time per iteration (ms): {:.2f} |</code>——<code>iteration</code> 是 current_step，<code>{:8d}/{:8d}</code> 对齐 current_step/total_steps，consumed tokens 来自 :368 的全局累计。</p><p>后续按需追加：<code>throughput</code>（:69，tokens/s + mfu，受 :406 <code>log_throughput</code> 开关保护）、<code>optimizer</code>（:70，lr + global batch size + lm loss + mtp loss，<strong>注意是 mtp loss 而非 total loss</strong>，Qwen3 若开 MTP 头这里才非零）、<code>grad_norm</code>（:71）、<code>npu_memory</code>（:72，max_memory_allocated/reserved GB）、<code>cpu_memory</code>（:73，受 :431 <code>log_cpu_memory</code> 开关保护）、<code>sparse_attn</code>（:74，indexer loss，仅当 metrics 含 <code>indexer_loss</code> key 时追加，:418 判定）。模板化使日志格式可改、单测有 regex 可对拍。</p></div></div><div class="seg"><p class="seglab">行 77-113 · state_dict / load_state_dict：续训状态保活</p><pre data-lang="py" data-start="77" data-idprefix="A">    def state_dict(self) -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;
+        Get state dictionary for saving/loading training monitor state
+
+        Returns:
+            Dict[str, Any]: Dictionary containing monitor state variables
+        &quot;&quot;&quot;
+        state_dict = {
+            &quot;consume_tokens&quot;: self.consume_tokens,
+            &quot;last_iteration&quot;: self._last_iteration,
+            &quot;last_epoch&quot;: self._last_epoch,
+            &quot;last_avg_loss&quot;: self._last_avg_loss,
+            &quot;last_mfu&quot;: self._last_mfu,
+            &quot;last_tokens_per_second&quot;: self._last_tokens_per_second,
+            &quot;last_reserved_memory&quot;: self._last_reserved_memory,
+            &quot;last_grad_norm&quot;: self._last_grad_norm,
+        }
+        return state_dict
+
+    def load_state_dict(self, state_dict: Dict[str, Any]):
+        &quot;&quot;&quot;
+        Load monitor state from a state dictionary (for resume training)
+
+        Args:
+            state_dict (Dict[str, Any]): State dictionary containing monitor variables
+
+        Returns:
+            None
+        &quot;&quot;&quot;
+        self.consume_tokens = state_dict.get(&quot;consume_tokens&quot;, 0)
+        self._last_iteration = state_dict.get(&quot;last_iteration&quot;, 0)
+        self._last_epoch = state_dict.get(&quot;last_epoch&quot;, 0)
+        self._last_avg_loss = state_dict.get(&quot;last_avg_loss&quot;, 0.0)
+        self._last_mfu = state_dict.get(&quot;last_mfu&quot;, 0.0)
+        self._last_tokens_per_second = state_dict.get(&quot;last_tokens_per_second&quot;, 0.0)
+        self._last_reserved_memory = state_dict.get(&quot;last_reserved_memory&quot;, 0.0)
+        self._last_grad_norm = state_dict.get(&quot;last_grad_norm&quot;, 0.0)</pre><div class="exp"><p>第 :77-94 的 <code>state_dict</code> 把八个 <code>_last_*</code> 槽 + consume_tokens 序列化。注意 :85 的 key 名是 <code>consume_tokens</code>（动词）而字段名是 <code>self.consume_tokens</code>，属历史命名遗留，load 时 :106 按 key 取回。这是 FSDP2 断点续训的<strong>观测层</strong>状态：checkpoint 里除了模型 optimizer state，还要带上 consumed tokens / 上次 mfu / 上次 reserved memory，否则续训后 consumed tokens 曲线会从 0 重计、MFU 曲线断档。</p><p>第 :96-113 的 <code>load_state_dict</code> 全程用 <code>.get(key, default)</code> 防御性取值——旧 checkpoint 缺字段时退化为 0/0.0，保证向后兼容（老 ckpt 没有 <code>last_grad_norm</code> 也能 load）。这是观测层续训兼容性的关键，与模型 state_dict 的 strict 加载语义不同：这里宁可静默回退也不报错，避免因为日志字段演进卡住恢复流程。</p></div></div><div class="seg"><p class="seglab">行 115-167 · step() 上：边界校验 + 时间基（除零防护）</p><pre data-lang="py" data-start="115" data-idprefix="A">    def step(
+        self,
+        epoch,
+        lr_scheduler,
+        batch_size: int,
+        grad_norm: float,
+        batch_seqlens,
+        _step_start_time,
+        total_steps,
+        current_step,
+        _last_logged_step,
+        _total_loss_scalar,
+        _total_lm_loss_scalar,
+        _total_mtp_loss_scalar,
+        _last_logged_loss_scalar,
+        _last_logged_lm_loss_scalar,
+        _last_logged_mtp_loss_scalar,
+        sparse_attn_reduce_group=None,
+    ) -&gt; Tuple[Dict[str, Any], Dict[str, Any]]:
+        &quot;&quot;&quot;
+        Calculate and log training metrics for the current training step
+
+        Args:
+            epoch (int): Current training epoch number
+            lr_scheduler: Learning rate scheduler object (must have get_last_lr() method)
+            batch_size (int): Global batch size for training
+            grad_norm (float): Gradient norm value for current step
+            batch_seqlens (list): List of sequence lengths for samples in current batch
+            _step_start_time (float): Timestamp of the start of the logging interval (seconds)
+            total_steps (int): Total number of training steps
+            current_step (int): Current training step number
+            _last_logged_step (int): Step number of the last logging
+            _total_loss_scalar (float): Cumulative total loss up to current step
+            _last_logged_loss_scalar (float): Cumulative loss at last logging step
+            sparse_attn_reduce_group: Process group used to reduce sparse-attention metrics
+
+        Returns:
+            Tuple[Dict[str, Any], Dict[str, Any]]:
+                - metrics: Dictionary of computed training efficiency metrics
+                - logging_state: Dictionary of updated logging state variables
+        &quot;&quot;&quot;
+        # 1. Boundary Validation
+        # Return empty results if no valid step interval (avoid calculations)
+        step_diff = current_step - _last_logged_step
+        if step_diff &lt;= 0:
+            return {}, TrainMonitor._get_empty_logging_state()
+
+        # 2. Time Base Calculation
+        # Calculate core time metrics for throughput/efficiency computation
+        current_time = time.time()
+        elapsed_time = current_time - _step_start_time if _step_start_time else 0.0
+        # Safe division: avoid zero division error for elapsed time per iteration
+        elapsed_time_second_per_iteration = elapsed_time / step_diff if elapsed_time &gt; 1e-6 else 0.0</pre><div class="exp"><p>第 :115-133 <code>step()</code> 是 Monitor 的唯一入口，签名极长——把训练循环里散落的累计标量、batch_seqlens、grad_norm、lr_scheduler、sparse_attn_reduce_group 全显式传进来。这正对应第三座桥（算法→观测桥）：Monitor 不持有 trainer，靠参数注入解耦。返回 <code>Tuple[metrics, logging_state]</code>（:133）。</p><p>第 :156-160 <strong>边界校验</strong>：<code>step_diff = current_step - _last_logged_step</code>，若 <code>step_diff &lt;= 0</code> 直接返回空 metrics + 空态（:460 的 <code>_get_empty_logging_state</code>）。这避免 logging_steps 未到时的无谓计算和除零。</p><p>第 :162-167 <strong>时间基</strong>：<code>elapsed_time = current_time - _step_start_time</code>（整个 logging 区间的墙钟，不是单步），:167 <code>elapsed_time_second_per_iteration = elapsed_time / step_diff</code> 得到“区间内平均每步秒数”。关键细节：:167 的 <code>if elapsed_time &gt; 1e-6 else 0.0</code> 是除零防护——极快区间或 _step_start_time 为空时退化为 0。这个值在 :396 乘 1000 转毫秒后塞进 base 模板，所以日志里的 <code>elapsed time per iteration (ms)</code> 是<strong>区间平均每步毫秒</strong>，不是单步耗时，区间长波动会被平滑掉，看通信尖刺要缩短 logging_steps。</p></div></div><div class="seg"><p class="seglab">行 169-220 · step() 中：六类指标计算 + 合并</p><pre data-lang="py" data-start="169" data-idprefix="A">        # 3. Metric Calculation (Category-based)
+        # Each method follows single responsibility principle for specific metric category
+        # 3.1 Training Progress Metrics (iteration/epoch/lr/consumed samples)
+        training_progress_metrics = TrainMonitor._compute_training_progress_metrics(
+            epoch, lr_scheduler, current_step, batch_size
+        )
+
+        # 3.2 Loss &amp; Optimizer Metrics (avg loss/gradient norm)
+        loss_optimizer_metrics = TrainMonitor._compute_loss_optimizer_metrics(
+            _total_loss_scalar,
+            _total_lm_loss_scalar,
+            _total_mtp_loss_scalar,
+            _last_logged_loss_scalar,
+            _last_logged_lm_loss_scalar,
+            _last_logged_mtp_loss_scalar,
+            step_diff,
+            grad_norm,
+        )
+
+        # 3.3 Memory Metrics (merged NPU + CPU memory stats)
+        memory_metrics = TrainMonitor._compute_memory_metrics()
+
+        # 3.4 FLOPS &amp; MFU Metrics (computational efficiency)
+        batch_seqlens = TrainMonitor._flatten_seqlens(batch_seqlens)
+        flops_mfu_metrics = self._compute_flops_mfu_metrics(batch_seqlens, elapsed_time)
+
+        # 3.5 Throughput Metrics (token/s/sequence length stats)
+        throughput_metrics = self._compute_throughput_metrics(batch_seqlens, elapsed_time, batch_size)
+
+        # 3.6 Sparse Attention Metrics
+        sparse_attn_metrics = self._compute_sparse_attn_metrics(
+            loss_scale=1.0,
+            iteration=current_step,
+            reduce_group=sparse_attn_reduce_group,
+        )
+
+        # 4. Metric Merging
+        # Merge all metrics in the specified category order for consistency
+        metrics = {
+            # Training Progress
+            **training_progress_metrics,
+            # Loss/Optimizer
+            **loss_optimizer_metrics,
+            # Memory (merged NPU + CPU)
+            **memory_metrics,
+            # FLOPS/MFU
+            **flops_mfu_metrics,
+            # Throughput
+            **throughput_metrics,
+            # Sparse Attention
+            **sparse_attn_metrics,
+        }</pre><div class="exp"><p>第 :169-220 是 step 的核心：按“单一职责”拆成六个静态/实例方法并行算，最后 :207-220 合并成一个 metrics dict。顺序固定（training_progress → loss_optimizer → memory → flops_mfu → throughput → sparse_attn），保证后续日志拼装顺序稳定。</p><p>第 :192 <code>batch_seqlens = TrainMonitor._flatten_seqlens(batch_seqlens)</code> 是<strong>预处理</strong>：neat-pack 模式下 batch_seqlens 是带 <code>-inf</code> padding 的嵌套 list（见 :465-484），先摊平过滤再喂给 flops 和 throughput 计算，否则 padding 会污染 batch_tokens 统计。</p><p>第 :189 <code>memory_metrics = TrainMonitor._compute_memory_metrics()</code> 和 :193 <code>flops_mfu_metrics = self._compute_flops_mfu_metrics(...)</code> 都内部含 all-reduce（:306 op=max、:335 op=sum）——即<strong>指标计算在所有 rank 都跑、都付通信开销</strong>，不是只 Rank0 算。第 :199-203 的 sparse_attn 走 IndexerLossLoggingHelper，只在传了 reduce_group 时才跨卡聚合 indexer loss。:207-220 用 <code>**</code> 解包合并，重复 key 后者覆盖——这里各类 key 无冲突，顺序仅影响日志拼接而非数值。</p></div></div><div class="seg"><p class="seglab">行 222-242 · step() 下：日志生成 + logging_state 回填 + _last_* 缓存</p><pre data-lang="py" data-start="222" data-idprefix="A">        # 5. Log Generation &amp; Output
+        # Generate formatted logs using predefined templates (Rank 0 process only)
+        # Note: elapsed_time_second_per_iteration will be converted to milliseconds in _generate_and_log_metrics
+        self._generate_and_log_metrics(metrics, total_steps, elapsed_time_second_per_iteration)
+
+        # 6. Logging State Update
+        # Update state for resume training (last logged step/loss/time)
+        logging_state = TrainMonitor._update_logging_state(
+            current_step, _total_loss_scalar, _total_lm_loss_scalar, _total_mtp_loss_scalar, current_time
+        )
+
+        # 7. Save key statistics for state_dict
+        self._last_iteration = metrics.get(&quot;iteration&quot;, 0)
+        self._last_epoch = metrics.get(&quot;epoch&quot;, 0)
+        self._last_avg_loss = metrics.get(&quot;avg_loss&quot;, 0.0)
+        self._last_mfu = metrics.get(&quot;mfu&quot;, 0.0)
+        self._last_tokens_per_second = metrics.get(&quot;tokens_per_second&quot;, 0.0)
+        self._last_reserved_memory = metrics.get(&quot;max_memory_reserved(GB)&quot;, 0.0)
+        self._last_grad_norm = metrics.get(&quot;grad_norm&quot;, 0.0)
+
+        return metrics, logging_state</pre><div class="exp"><p>第 :225 <code>self._generate_and_log_metrics(metrics, total_steps, elapsed_time_second_per_iteration)</code>——把秒转毫秒、按模板拼字符串、:437 <code>logger.info_rank0</code> 只在 Rank0 打印。<strong>重要</strong>：只 Rank0 打印 ≠ 只 Rank0 算——前面 :189/193 的 all-reduce 每卡都付了，Rank0 只是省了 I/O。</p><p>第 :229-231 <code>_update_logging_state</code>（静态方法，:439）把 current_step/累计 loss/累计 lm/mtp loss/current_time 打包成 logging_state 返回给训练循环，循环用它更新自己的 <code>_last_logged_step/_last_logged_loss_scalar</code> 等，为下一次 step 的区间均值做基准。这是“区间平均”口径的状态锚点。</p><p>第 :234-240 把本步 metrics 的关键字段回填到 <code>_last_*</code> 八槽，供 :77 state_dict 落盘。注意 :239 <code>self._last_reserved_memory = metrics.get("max_memory_reserved(GB)", 0.0)</code>——缓存的是 reserved 不是 allocated，续训恢复后日志首行能立刻显示上次峰值显存，方便判断是否接近 OOM。:242 返回 <code>(metrics, logging_state)</code> 给训练循环。</p></div></div><div class="seg"><p class="seglab">行 244-292 · 训练进度 + loss/grad 指标：区间均值与 NaN 钳制</p><pre data-lang="py" data-start="244" data-idprefix="A">    # ------------------------------ Metrics method ------------------------------
+    @staticmethod
+    def _compute_training_progress_metrics(
+        epoch: int, lr_scheduler, current_step: int, batch_size: int
+    ) -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;
+        Compute training progress metrics (single responsibility)
+        &quot;&quot;&quot;
+        return {
+            &quot;iteration&quot;: current_step,
+            &quot;epoch&quot;: epoch,
+            &quot;lr&quot;: lr_scheduler.get_last_lr()[0] if (lr_scheduler and hasattr(lr_scheduler, &quot;get_last_lr&quot;)) else 0.0,
+            &quot;consumed_samples&quot;: current_step * batch_size,
+        }
+
+    @staticmethod
+    def _compute_loss_optimizer_metrics(
+        cumulative_loss: float,
+        lm_loss: float,
+        mtp_loss: float,
+        last_logged_loss: float,
+        last_logged_lm_loss: float,
+        last_logged_mtp_loss: float,
+        step_diff: int,
+        grad_norm: float,
+    ) -&gt; Dict[str, float]:
+        &quot;&quot;&quot;
+        Compute loss and optimizer metrics (single responsibility)
+        &quot;&quot;&quot;
+        # Calculate average loss over the logging interval
+        avg_loss = (cumulative_loss - last_logged_loss) / step_diff
+        # Safe handling: NaN/Inf protection
+        avg_loss = 0.0 if not (-1e10 &lt; avg_loss &lt; 1e10) else avg_loss  # pylint:disable=R1716
+
+        # Calculate average loss over the logging interval
+        avg_lm_loss = (lm_loss - last_logged_lm_loss) / step_diff
+        # Safe handling: NaN/Inf protection
+        avg_lm_loss = 0.0 if not (-1e10 &lt; avg_lm_loss &lt; 1e10) else avg_lm_loss  # pylint:disable=R1716
+
+        # Calculate average loss over the logging interval
+        avg_mtp_loss = (mtp_loss - last_logged_mtp_loss) / step_diff
+        # Safe handling: NaN/Inf protection
+        avg_mtp_loss = 0.0 if not (-1e10 &lt; avg_mtp_loss &lt; 1e10) else avg_mtp_loss  # pylint:disable=R1716
+
+        # Safe handling of gradient norm
+        grad_norm = grad_norm.item() if isinstance(grad_norm, torch.Tensor) else grad_norm
+        grad_norm = 0.0 if not (-1e10 &lt; grad_norm &lt; 1e10) else grad_norm
+
+        return {&quot;avg_loss&quot;: avg_loss, &quot;avg_lm_loss&quot;: avg_lm_loss, &quot;avg_mtp_loss&quot;: avg_mtp_loss, &quot;grad_norm&quot;: grad_norm}</pre><div class="exp"><p>第 :245-257 <code>_compute_training_progress_metrics</code>：iteration=current_step、epoch=epoch、lr 从 lr_scheduler.get_last_lr()[0] 取（:255 防御性 hasattr 判定）、<code>consumed_samples = current_step * batch_size</code>（:256）。<strong>常见误区</strong>：这里 consumed_samples 用的是配置的 global batch_size，只在数据并行均匀时等于真实 consumed；FSDP2 下若 micro-batch 不均，真实样本数以 :354 all-reduce 后的 real_batch_size 为准，日志里这两个口径并存别混。</p><p>第 :259-292 <code>_compute_loss_optimizer_metrics</code>：对 total/lm/mtp 三路 loss 分别算 <code>(cumulative - last_logged) / step_diff</code> 得区间均值（:274/279/284），每路都做 <code>-1e10 &lt; x &lt; 1e10</code> 钳制（:276/281/286/290）——超界置 0.0。<strong>这是双刃剑</strong>：loss 爆了会被静默钳成 0，看到 <code>lm loss: 0.000000E+00</code> 别误判收敛，多半是上一步溢出被钳掉，要去查 grad_norm。mtp loss 独立计算，Qwen3 开 MTP 头时才非零，这是 FSDP2 训 Qwen3 系列的特有输出项。:289 <code>grad_norm.item() if isinstance(grad_norm, torch.Tensor)</code> 防御性处理张量入参——FSDP2 下 grad_norm 经 clip_grad_norm_ 后通常已是标量，但 NPU 上 .item() 会触发隐式同步，这里先取标量再钳制避免类型问题。</p></div></div><div class="seg"><p class="seglab">行 294-325 · _compute_memory_metrics：torch.accelerator 抽象 + all-reduce 取 max</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :294-:325）</h5><pre data-lang="py" data-start="294" data-idprefix="A">    @staticmethod
+    def _compute_memory_metrics() -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;
+        Compute merged NPU + CPU memory metrics (single responsibility)
+        &quot;&quot;&quot;
+        # Get NPU memory stats (max allocated/reserved during current step)
+        device = torch.accelerator
+        allocated_memory = device.max_memory_allocated()
+        reserved_memory = device.max_memory_reserved()
+        num_alloc_retries = device.memory_stats().get(&quot;num_alloc_retries&quot;, 0)
+
+        # All-reduce to get max values across all distributed processes
+        allocated_memory, reserved_memory, num_alloc_retries = all_reduce(
+            (allocated_memory, reserved_memory, num_alloc_retries), op=&quot;max&quot;
+        )
+
+        npu_memory = {
+            &quot;max_memory_allocated(GB)&quot;: allocated_memory / (1024**3),  # Convert bytes to GB
+            &quot;max_memory_reserved(GB)&quot;: reserved_memory / (1024**3),
+            &quot;num_alloc_retries&quot;: num_alloc_retries,
+        }
+
+        # CPU Memory Metrics
+        cpu_memory_info = psutil.virtual_memory()
+        cpu_memory = {
+            &quot;cpu_used_memory(GB)&quot;: cpu_memory_info.used / (1024**3),
+            &quot;cpu_available_memory(GB)&quot;: cpu_memory_info.available / (1024**3),
+            &quot;cpu_memory_usage(%)&quot;: cpu_memory_info.percent,
+        }
+
+        # Merge NPU and CPU memory metrics
+        return {**npu_memory, **cpu_memory}</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">import torch
+# NVIDIA GPU 侧典型写法（DDP 训练）
+allocated = torch.cuda.max_memory_allocated()        # 峰值已分配字节
+reserved  = torch.cuda.max_memory_reserved()         # 峰值预留字节
+retries   = torch.cuda.memory_stats().get(&quot;num_alloc_retries&quot;, 0)
+# DDP 下每卡 batch 等价，常直接 torch.cuda.max_memory_allocated() 看本卡
+torch.cuda.reset_peak_memory_stats()                # 每步 reset 看单步峰值</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>左侧是 NVIDIA GPU 侧的典型写法：直接 <code>torch.cuda.max_memory_allocated()</code>，且 DDP 下每卡 batch 等价，常每步 <code>reset_peak_memory_stats()</code> 看单步峰值。右侧（本文件 :300）走 <code>torch.accelerator</code> 抽象层，NPU 上解析为 <code>torch.npu.max_memory_allocated()</code>，语义一致但底层是 CANN 内存池统计。</p><p><strong>三处差异</strong>：(1) 设备入口——GPU 硬编码 <code>torch.cuda</code>，本仓抽象到 <code>torch.accelerator</code> 做 NVIDIA/Ascend 平移，这是 FSDP2 分支跨厂商的关键；(2) reset 语义——GPU 侧常每步 reset 取单步峰值，本仓不 reset（取自启动以来累计峰值，单调非降），适合长期监控是否逼近 OOM，但看瞬时涨点要配 num_alloc_retries；(3) 跨卡聚合——DDP 下常只看本卡，本仓 <code>op="max"</code> all-reduce 取全局最吃显存的卡，适配 FSDP2 不均衡分片（各 rank 参数分片大小不同），取 max 才能做集群容量规划。NPU 对应 <code>torch.npu.max_memory_allocated()</code>，CANN 后端提供同义统计。</p></div></div><div class="seg"><p class="seglab">行 327-369 · FLOPS/MFU + 吞吐量：op=sum 聚合与 consumed tokens 累计</p><pre data-lang="py" data-start="327" data-idprefix="A">    def _compute_flops_mfu_metrics(self, batch_seqlens: List[int], elapsed_time: float) -&gt; Dict[str, float]:
+        &quot;&quot;&quot;
+        Compute FLOPS and MFU metrics (single responsibility)
+        &quot;&quot;&quot;
+        # Estimate achieved FLOPS and device peak FLOPS
+        flops_achieved, flops_promised_per_npu = self.estimate_flops(batch_seqlens, elapsed_time)
+
+        # All-reduce to sum flops_achieved across distributed processes
+        flops_achieved = all_reduce(flops_achieved, op=&quot;sum&quot;)
+
+        # Calculate total promised FLOPS (sum of peak FLOPS across all NPUs)
+        flops_promised = flops_promised_per_npu * self.world_size
+
+        # Safe handling: avoid division by zero/infinity
+        mfu = flops_achieved / flops_promised if (flops_promised &gt; 0 and flops_promised != float(&quot;inf&quot;)) else 0.0
+
+        return {&quot;flops_achieved(T)&quot;: flops_achieved, &quot;flops_promised(T)&quot;: flops_promised, &quot;mfu&quot;: mfu * 100}
+
+    def _compute_throughput_metrics(
+        self, batch_seqlens: List[int], elapsed_time: float, batch_size: int
+    ) -&gt; Dict[str, float]:
+        &quot;&quot;&quot;
+        Compute throughput metrics (single responsibility)
+        &quot;&quot;&quot;
+        # All-reduce to sum tokens and samples across distributed processes
+        batch_tokens = sum(batch_seqlens)
+        real_batch_size = len(batch_seqlens)
+        batch_tokens, real_batch_size = all_reduce((batch_tokens, real_batch_size), op=&quot;sum&quot;)
+
+        # Safe handling: avoid division by zero
+        avg_effective_len = batch_tokens / batch_size if batch_size &gt; 0 else 0.0
+        avg_sample_seq_len = batch_tokens / real_batch_size if real_batch_size &gt; 0 else 0.0
+        tokens_per_second = batch_tokens / elapsed_time if elapsed_time &gt; 1e-6 else 0.0
+
+        # Update cumulative token count
+        self.consume_tokens += batch_tokens
+
+        return {
+            &quot;training/avg_effective_len&quot;: avg_effective_len,
+            &quot;training/avg_sample_seq_len&quot;: avg_sample_seq_len,
+            &quot;tokens_per_second&quot;: tokens_per_second,
+            &quot;consumed_tokens&quot;: int(self.consume_tokens),
+        }</pre><div class="exp"><p>第 :327-343 <code>_compute_flops_mfu_metrics</code>：先 <code>self.estimate_flops(batch_seqlens, elapsed_time)</code>（:332）得本卡 achieved FLOPS 和单卡 peak（FlopsCounter 按 config 估），再 :335 <code>all_reduce(flops_achieved, op="sum")</code> 求和得全局 achieved，:338 <code>flops_promised = flops_promised_per_npu * self.world_size</code> 得全卡峰值，:341 <code>mfu = achieved / promised * 100</code>。<strong>FSDP2 口径</strong>：all-gather 拉回全参数做前向/反传的通信不计入 achieved FLOPS，所以 MFU 反映纯计算利用率，通信开销隐含在 elapsed_time 里拉低 MFU——MFU 长期低于 30% 先查 all-gather 通信占比而非算力。op 选 sum 而非 max：算力是可加量，求和才有意义。</p><p>第 :345-369 <code>_compute_throughput_metrics</code>：:352 <code>batch_tokens = sum(batch_seqlens)</code>、:353 <code>real_batch_size = len(batch_seqlens)</code>，:354 <code>all_reduce((batch_tokens, real_batch_size), op="sum")</code>——<strong>FSDP2 下每个 rank 只看到自己 micro-batch，必须 all-reduce 求和才得真实全局</strong>，这是第一座桥（DDP→FSDP2 桥）的核心：DDP 下每卡 batch 等价可直接 step*batch，FSDP2 下 tokens 必须走 all-reduce。:357-359 算 avg_effective_len/avg_sample_seq_len/tokens_per_second，全带除零防护。:362 <code>self.consume_tokens += batch_tokens</code> 累计全局 consumed tokens，:368 转 int 返回——日志里 consumed tokens 是全卡累计、跨步续算的，断点续训由 :77/:96 保活。</p></div></div><div class="seg"><p class="seglab">行 371-437 · 稀疏注意力 + 日志拼装：条件追加与 Rank0 输出</p><pre data-lang="py" data-start="371" data-idprefix="A">    @staticmethod
+    def _compute_sparse_attn_metrics(loss_scale, iteration, writer=None, wandb_writer=None, reduce_group=None):
+        return IndexerLossLoggingHelper.track_indexer_metrics(
+            loss_scale,
+            iteration,
+            writer=writer,
+            wandb_writer=wandb_writer,
+            reduce_group=reduce_group,
+        )
+
+    # ------------------------------ Logging and State Management ------------------------------
+    def _generate_and_log_metrics(self, metrics: Dict[str, Any], total_steps: int, elapsed_time_per_iteration: float):
+        &quot;&quot;&quot;
+        Generate and print training logs using predefined templates (Rank 0 only)
+
+        Args:
+            metrics (Dict[str, Any]): Computed training efficiency metrics dictionary
+            total_steps (int): Total number of training steps
+            elapsed_time_per_iteration (float): Elapsed time per iteration in seconds (converted to ms for logging)
+
+        Returns:
+            None
+        &quot;&quot;&quot;
+        # Build base log string using predefined template
+        # Convert seconds to milliseconds for compatibility with test regex
+        elapsed_time_ms = elapsed_time_per_iteration * 1000.0
+        log_string = self.log_templates[&quot;base&quot;].format(
+            metrics[&quot;iteration&quot;],
+            int(total_steps),
+            metrics[&quot;consumed_samples&quot;],
+            metrics[&quot;consumed_tokens&quot;],
+            elapsed_time_ms,
+        )
+
+        # Append throughput metrics (optional, based on training args)
+        if self.training_args.log_throughput:
+            log_string += self.log_templates[&quot;throughput&quot;].format(metrics[&quot;tokens_per_second&quot;], metrics[&quot;mfu&quot;])
+
+        # Calculate global batch size (avoid division by zero)
+        global_batch_size = metrics[&quot;consumed_samples&quot;] // metrics[&quot;iteration&quot;] if metrics[&quot;iteration&quot;] &gt; 0 else 0
+
+        # Append optimizer/loss metrics using predefined template
+        log_string += self.log_templates[&quot;optimizer&quot;].format(
+            metrics[&quot;lr&quot;], global_batch_size, metrics[&quot;avg_lm_loss&quot;], metrics[&quot;avg_mtp_loss&quot;]
+        )
+
+        # Append sparse-attention metrics when a model reported an indexer loss.
+        if &quot;indexer_loss&quot; in metrics:
+            log_string += self.log_templates[&quot;sparse_attn&quot;].format(metrics[&quot;indexer_loss&quot;])
+
+        # Append gradient norm metrics (optional, if available)
+        if metrics[&quot;grad_norm&quot;] is not None:
+            log_string += self.log_templates[&quot;grad_norm&quot;].format(metrics[&quot;grad_norm&quot;])
+
+        # Append memory metrics
+        log_string += self.log_templates[&quot;npu_memory&quot;].format(
+            metrics[&quot;max_memory_allocated(GB)&quot;], metrics[&quot;max_memory_reserved(GB)&quot;]
+        )
+
+        # Optional: Print CPU memory metrics only if log_cpu_memory is True
+        if hasattr(self.training_args, &#x27;log_cpu_memory&#x27;) and self.training_args.log_cpu_memory:
+            log_string += self.log_templates[&quot;cpu_memory&quot;].format(
+                metrics[&quot;cpu_used_memory(GB)&quot;], metrics[&quot;cpu_available_memory(GB)&quot;], metrics[&quot;cpu_memory_usage(%)&quot;]
+            )
+
+        # Print logs only for Rank 0 process to avoid duplicate logs in distributed training
+        logger.info_rank0(log_string)</pre><div class="exp"><p>第 :371-379 <code>_compute_sparse_attn_metrics</code> 是薄壳，直接委托 <code>IndexerLossLoggingHelper.track_indexer_metrics(loss_scale, iteration, writer=..., wandb_writer=..., reduce_group=...)</code>——只在传了 sparse_attn_reduce_group 时跨卡聚合 indexer loss。返回的 metrics 若含 <code>indexer_loss</code> key，:418 会追加 <code>sparse_attn</code> 模板段（:74 <code>indexer loss: {:.6E}</code>）。这是给稀疏注意力/MoE-style indexer 训练留的观测钩子。</p><p>第 :382-437 <code>_generate_and_log_metrics</code> 按七段模板拼字符串：:396 <code>elapsed_time_ms = elapsed_time_per_iteration * 1000.0</code>（秒转毫秒，兼容测试 regex），:397-403 拼 base 段（iteration/total_steps/consumed_samples/consumed_tokens/elapsed_ms）。:406 <code>if self.training_args.log_throughput</code> 追加 tokens/s+mfu。:410 <code>global_batch_size = consumed_samples // iteration</code>（再除一次取回配置 batch_size，除零保护）。:413-415 拼 optimizer 段（lr/global_batch/avg_lm_loss/avg_mtp_loss）。:418 <code>if "indexer_loss" in metrics</code> 条件追加稀疏段。:422 <code>if metrics["grad_norm"] is not None</code> 追加 grad norm。:426-428 拼 npu_memory 段（max_allocated/max_reserved GB）。:431 <code>if hasattr(training_args, 'log_cpu_memory') and ...</code> 追加 CPU 段。:437 <code>logger.info_rank0(log_string)</code>——<strong>只在 Rank0 输出</strong>，避免分布式训练重复日志，但前面 all-reduce 通信每卡都付。</p></div></div><div class="seg"><p class="seglab">行 439-485 · 状态更新 + neat-pack 摊平：三座桥总览收尾</p><pre data-lang="py" data-start="439" data-idprefix="A">    @staticmethod
+    def _update_logging_state(
+        current_step: int,
+        cumulative_loss: float,
+        cumulative_lm_loss: float,
+        cumulative_mtp_loss: float,
+        current_time: float,
+    ) -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;
+        Update logging state (for resume training)
+        &quot;&quot;&quot;
+        return {
+            &quot;logged_step&quot;: current_step,
+            &quot;logged_loss&quot;: cumulative_loss,
+            &quot;logged_lm_loss&quot;: cumulative_lm_loss,
+            &quot;logged_mtp_loss&quot;: cumulative_mtp_loss,
+            &quot;time&quot;: current_time,
+        }
+
+    @staticmethod
+    def _get_empty_logging_state() -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;
+        Return empty logging state (boundary scenario)
+        &quot;&quot;&quot;
+        return {&quot;logged_step&quot;: 0, &quot;logged_loss&quot;: 0.0, &quot;time&quot;: time.time()}
+
+    @staticmethod
+    def _flatten_seqlens(batch_seqlens):
+        &quot;&quot;&quot;
+        Flatten and filter batch_seqlens to handle neat-pack mode.
+        neat-pack produces nested lists with -inf padding, e.g.:
+        [[512, 256, -inf, -inf], [1024, -inf, -inf, -inf]]
+        Normal mode produces flat int lists, e.g.:
+        [1024, 512, 768]
+        &quot;&quot;&quot;
+        flat = []
+        for item in batch_seqlens:
+            if isinstance(item, (list, tuple)):
+                for val in item:
+                    # Filter -inf and other non-positive padding values.
+                    if isinstance(val, (int, float)) and val &gt; 0 and val != float(&#x27;-inf&#x27;):
+                        flat.append(int(val))
+            else:
+                if isinstance(item, (int, float)) and item &gt; 0 and item != float(&#x27;-inf&#x27;):
+                    flat.append(int(item))
+        return flat
+</pre><div class="exp"><p>第 :439-456 <code>_update_logging_state</code> 打包 current_step/累计 total/lm/mtp loss/current_time 成 logging_state 返回给训练循环，作为下一次 step 的“区间均值基准”。:458-463 <code>_get_empty_logging_state</code> 是边界场景（step_diff&lt;=0）的空态，key 不全但保证调用方不崩。</p><p>第 :465-484 <code>_flatten_seqlens</code> 处理 neat-pack 模式：normal 模式 batch_seqlens 是 <code>[1024, 512, 768]</code> 扁平 int；neat-pack 模式是 <code>[[512, 256, -inf, -inf], [1024, -inf, -inf, -inf]]</code> 嵌套带 <code>-inf</code> padding。:474-483 递归摊平并过滤 <code>val &gt; 0 and val != float('-inf')</code>，保证 batch_tokens 统计不被 padding 污染——FSDP2 下 micro-batch 按 packing 效率排布，这步是统计正确性的前提。</p><p><strong>三座桥收尾</strong>：① DDP→FSDP2 桥——DDP 下 consumed samples 直接 <code>step*batch</code>（:256），FSDP2 下 tokens/consumed 必须走 all-reduce 求和（:354/:335），这是从“每卡独立统计”到“全局聚合统计”的桥；② NVIDIA→Ascend 桥——<code>torch.cuda.max_memory_allocated</code>→<code>torch.accelerator.max_memory_allocated</code>（:300-302），语义平移、底层换 CANN，跨卡 op=max 适配 FSDP2 不均衡分片；③ 算法→观测桥——训练循环散落的累计 loss/lr/grad_norm/seqlens 通过 <code>step()</code> 参数显式传入（:115-133），Monitor 不持有 trainer，可被任意循环复用。EP15 场景（8 卡 NPU FSDP2 全分片训 Qwen3-8B）三桥同时生效：日志里 <code>iteration 1/2000 | consumed samples … | consumed tokens … | lm loss … | max_memory_allocated(GB)</code> 这一行就是三桥协作的产物。</p></div></div></div>
+<details class="src"><summary>📜 完整源码（485 行）— 大纲点跳行</summary><pre data-lang="py" data-start="1">&quot;&quot;&quot;
+Module for monitoring training efficiency metrics (memory, throughput, MFU)
+&quot;&quot;&quot;
+
+import time
+from typing import Any, Dict, List, Tuple
+
+import psutil
+import torch
+import torch.distributed as dist
+from transformers import PretrainedConfig, TrainingArguments
+
+from mindspeed_llm.fsdp2.models.common.indexer_loss import IndexerLossLoggingHelper
+from mindspeed_llm.fsdp2.utils.flops.flops_factory import FlopsCounter
+from mindspeed_llm.fsdp2.utils.dist_op import all_reduce
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+
+
+logger = get_logger(__name__)
+
+
+class TrainMonitor:
+    &quot;&quot;&quot;
+    Computes the metrics about the training efficiency.
+
+    Args:
+        model_args: Contains model_name_or_path, trust_remote_code, train_from_scratch, etc.
+        config (PretrainedConfig): The configuration of the model.
+    &quot;&quot;&quot;
+
+    def __init__(
+        self,
+        training_args: TrainingArguments,
+        config: PretrainedConfig,
+    ) -&gt; None:
+        &quot;&quot;&quot;
+        Initialize TrainMonitor with training and model configurations
+
+        Args:
+            training_args (TrainingArguments): Training hyperparameters and logging settings
+            config (PretrainedConfig): Model configuration containing architecture parameters
+
+        Returns:
+            None
+        &quot;&quot;&quot;
+        self.training_args = training_args
+        self.config = config
+        self.world_size = dist.get_world_size() if dist.is_initialized() else 1
+        self.estimate_flops = FlopsCounter(config).estimate_flops
+        # Initialize log templates for extensibility
+        self.log_templates = TrainMonitor._init_log_templates()
+
+        self.consume_tokens = 0
+        self._last_iteration = 0
+        self._last_epoch = 0
+        self._last_avg_loss = 0.0
+        self._last_mfu = 0.0
+        self._last_tokens_per_second = 0.0
+        self._last_reserved_memory = 0.0  # in GB
+        self._last_grad_norm = 0.0
+
+    @staticmethod
+    def _init_log_templates() -&gt; Dict[str, str]:
+        &quot;&quot;&quot;
+        Initialize log templates to facilitate log format modification/extension
+        &quot;&quot;&quot;
+        return {
+            &quot;base&quot;: &quot; iteration {:8d}/{:8d} | consumed samples: {:10d} | consumed tokens: {:10d} | elapsed time per iteration (ms): {:.2f} |&quot;,
+            &quot;throughput&quot;: &quot; tokens/s: {:.2f} | mfu: {:.2f} |&quot;,
+            &quot;optimizer&quot;: &quot; learning rate: {:.6E} | global batch size: {:5d} | lm loss: {:.6E} | mtp loss: {:.6E} |&quot;,
+            &quot;grad_norm&quot;: &quot; grad norm: {:.3f} |&quot;,
+            &quot;npu_memory&quot;: &quot; max_memory_allocated(GB): {:.2f} | max_memory_reserved(GB): {:.2f} |&quot;,
+            &quot;cpu_memory&quot;: &quot; cpu_used_memory(GB): {:.2f} | cpu_available_memory(GB): {:.2f} | cpu_memory_usage(%): {:.1f} |&quot;,
+            &quot;sparse_attn&quot;: &quot; indexer loss: {:.6E} |&quot;,
+        }
+
+    def state_dict(self) -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;
+        Get state dictionary for saving/loading training monitor state
+
+        Returns:
+            Dict[str, Any]: Dictionary containing monitor state variables
+        &quot;&quot;&quot;
+        state_dict = {
+            &quot;consume_tokens&quot;: self.consume_tokens,
+            &quot;last_iteration&quot;: self._last_iteration,
+            &quot;last_epoch&quot;: self._last_epoch,
+            &quot;last_avg_loss&quot;: self._last_avg_loss,
+            &quot;last_mfu&quot;: self._last_mfu,
+            &quot;last_tokens_per_second&quot;: self._last_tokens_per_second,
+            &quot;last_reserved_memory&quot;: self._last_reserved_memory,
+            &quot;last_grad_norm&quot;: self._last_grad_norm,
+        }
+        return state_dict
+
+    def load_state_dict(self, state_dict: Dict[str, Any]):
+        &quot;&quot;&quot;
+        Load monitor state from a state dictionary (for resume training)
+
+        Args:
+            state_dict (Dict[str, Any]): State dictionary containing monitor variables
+
+        Returns:
+            None
+        &quot;&quot;&quot;
+        self.consume_tokens = state_dict.get(&quot;consume_tokens&quot;, 0)
+        self._last_iteration = state_dict.get(&quot;last_iteration&quot;, 0)
+        self._last_epoch = state_dict.get(&quot;last_epoch&quot;, 0)
+        self._last_avg_loss = state_dict.get(&quot;last_avg_loss&quot;, 0.0)
+        self._last_mfu = state_dict.get(&quot;last_mfu&quot;, 0.0)
+        self._last_tokens_per_second = state_dict.get(&quot;last_tokens_per_second&quot;, 0.0)
+        self._last_reserved_memory = state_dict.get(&quot;last_reserved_memory&quot;, 0.0)
+        self._last_grad_norm = state_dict.get(&quot;last_grad_norm&quot;, 0.0)
+
+    def step(
+        self,
+        epoch,
+        lr_scheduler,
+        batch_size: int,
+        grad_norm: float,
+        batch_seqlens,
+        _step_start_time,
+        total_steps,
+        current_step,
+        _last_logged_step,
+        _total_loss_scalar,
+        _total_lm_loss_scalar,
+        _total_mtp_loss_scalar,
+        _last_logged_loss_scalar,
+        _last_logged_lm_loss_scalar,
+        _last_logged_mtp_loss_scalar,
+        sparse_attn_reduce_group=None,
+    ) -&gt; Tuple[Dict[str, Any], Dict[str, Any]]:
+        &quot;&quot;&quot;
+        Calculate and log training metrics for the current training step
+
+        Args:
+            epoch (int): Current training epoch number
+            lr_scheduler: Learning rate scheduler object (must have get_last_lr() method)
+            batch_size (int): Global batch size for training
+            grad_norm (float): Gradient norm value for current step
+            batch_seqlens (list): List of sequence lengths for samples in current batch
+            _step_start_time (float): Timestamp of the start of the logging interval (seconds)
+            total_steps (int): Total number of training steps
+            current_step (int): Current training step number
+            _last_logged_step (int): Step number of the last logging
+            _total_loss_scalar (float): Cumulative total loss up to current step
+            _last_logged_loss_scalar (float): Cumulative loss at last logging step
+            sparse_attn_reduce_group: Process group used to reduce sparse-attention metrics
+
+        Returns:
+            Tuple[Dict[str, Any], Dict[str, Any]]:
+                - metrics: Dictionary of computed training efficiency metrics
+                - logging_state: Dictionary of updated logging state variables
+        &quot;&quot;&quot;
+        # 1. Boundary Validation
+        # Return empty results if no valid step interval (avoid calculations)
+        step_diff = current_step - _last_logged_step
+        if step_diff &lt;= 0:
+            return {}, TrainMonitor._get_empty_logging_state()
+
+        # 2. Time Base Calculation
+        # Calculate core time metrics for throughput/efficiency computation
+        current_time = time.time()
+        elapsed_time = current_time - _step_start_time if _step_start_time else 0.0
+        # Safe division: avoid zero division error for elapsed time per iteration
+        elapsed_time_second_per_iteration = elapsed_time / step_diff if elapsed_time &gt; 1e-6 else 0.0
+
+        # 3. Metric Calculation (Category-based)
+        # Each method follows single responsibility principle for specific metric category
+        # 3.1 Training Progress Metrics (iteration/epoch/lr/consumed samples)
+        training_progress_metrics = TrainMonitor._compute_training_progress_metrics(
+            epoch, lr_scheduler, current_step, batch_size
+        )
+
+        # 3.2 Loss &amp; Optimizer Metrics (avg loss/gradient norm)
+        loss_optimizer_metrics = TrainMonitor._compute_loss_optimizer_metrics(
+            _total_loss_scalar,
+            _total_lm_loss_scalar,
+            _total_mtp_loss_scalar,
+            _last_logged_loss_scalar,
+            _last_logged_lm_loss_scalar,
+            _last_logged_mtp_loss_scalar,
+            step_diff,
+            grad_norm,
+        )
+
+        # 3.3 Memory Metrics (merged NPU + CPU memory stats)
+        memory_metrics = TrainMonitor._compute_memory_metrics()
+
+        # 3.4 FLOPS &amp; MFU Metrics (computational efficiency)
+        batch_seqlens = TrainMonitor._flatten_seqlens(batch_seqlens)
+        flops_mfu_metrics = self._compute_flops_mfu_metrics(batch_seqlens, elapsed_time)
+
+        # 3.5 Throughput Metrics (token/s/sequence length stats)
+        throughput_metrics = self._compute_throughput_metrics(batch_seqlens, elapsed_time, batch_size)
+
+        # 3.6 Sparse Attention Metrics
+        sparse_attn_metrics = self._compute_sparse_attn_metrics(
+            loss_scale=1.0,
+            iteration=current_step,
+            reduce_group=sparse_attn_reduce_group,
+        )
+
+        # 4. Metric Merging
+        # Merge all metrics in the specified category order for consistency
+        metrics = {
+            # Training Progress
+            **training_progress_metrics,
+            # Loss/Optimizer
+            **loss_optimizer_metrics,
+            # Memory (merged NPU + CPU)
+            **memory_metrics,
+            # FLOPS/MFU
+            **flops_mfu_metrics,
+            # Throughput
+            **throughput_metrics,
+            # Sparse Attention
+            **sparse_attn_metrics,
+        }
+
+        # 5. Log Generation &amp; Output
+        # Generate formatted logs using predefined templates (Rank 0 process only)
+        # Note: elapsed_time_second_per_iteration will be converted to milliseconds in _generate_and_log_metrics
+        self._generate_and_log_metrics(metrics, total_steps, elapsed_time_second_per_iteration)
+
+        # 6. Logging State Update
+        # Update state for resume training (last logged step/loss/time)
+        logging_state = TrainMonitor._update_logging_state(
+            current_step, _total_loss_scalar, _total_lm_loss_scalar, _total_mtp_loss_scalar, current_time
+        )
+
+        # 7. Save key statistics for state_dict
+        self._last_iteration = metrics.get(&quot;iteration&quot;, 0)
+        self._last_epoch = metrics.get(&quot;epoch&quot;, 0)
+        self._last_avg_loss = metrics.get(&quot;avg_loss&quot;, 0.0)
+        self._last_mfu = metrics.get(&quot;mfu&quot;, 0.0)
+        self._last_tokens_per_second = metrics.get(&quot;tokens_per_second&quot;, 0.0)
+        self._last_reserved_memory = metrics.get(&quot;max_memory_reserved(GB)&quot;, 0.0)
+        self._last_grad_norm = metrics.get(&quot;grad_norm&quot;, 0.0)
+
+        return metrics, logging_state
+
+    # ------------------------------ Metrics method ------------------------------
+    @staticmethod
+    def _compute_training_progress_metrics(
+        epoch: int, lr_scheduler, current_step: int, batch_size: int
+    ) -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;
+        Compute training progress metrics (single responsibility)
+        &quot;&quot;&quot;
+        return {
+            &quot;iteration&quot;: current_step,
+            &quot;epoch&quot;: epoch,
+            &quot;lr&quot;: lr_scheduler.get_last_lr()[0] if (lr_scheduler and hasattr(lr_scheduler, &quot;get_last_lr&quot;)) else 0.0,
+            &quot;consumed_samples&quot;: current_step * batch_size,
+        }
+
+    @staticmethod
+    def _compute_loss_optimizer_metrics(
+        cumulative_loss: float,
+        lm_loss: float,
+        mtp_loss: float,
+        last_logged_loss: float,
+        last_logged_lm_loss: float,
+        last_logged_mtp_loss: float,
+        step_diff: int,
+        grad_norm: float,
+    ) -&gt; Dict[str, float]:
+        &quot;&quot;&quot;
+        Compute loss and optimizer metrics (single responsibility)
+        &quot;&quot;&quot;
+        # Calculate average loss over the logging interval
+        avg_loss = (cumulative_loss - last_logged_loss) / step_diff
+        # Safe handling: NaN/Inf protection
+        avg_loss = 0.0 if not (-1e10 &lt; avg_loss &lt; 1e10) else avg_loss  # pylint:disable=R1716
+
+        # Calculate average loss over the logging interval
+        avg_lm_loss = (lm_loss - last_logged_lm_loss) / step_diff
+        # Safe handling: NaN/Inf protection
+        avg_lm_loss = 0.0 if not (-1e10 &lt; avg_lm_loss &lt; 1e10) else avg_lm_loss  # pylint:disable=R1716
+
+        # Calculate average loss over the logging interval
+        avg_mtp_loss = (mtp_loss - last_logged_mtp_loss) / step_diff
+        # Safe handling: NaN/Inf protection
+        avg_mtp_loss = 0.0 if not (-1e10 &lt; avg_mtp_loss &lt; 1e10) else avg_mtp_loss  # pylint:disable=R1716
+
+        # Safe handling of gradient norm
+        grad_norm = grad_norm.item() if isinstance(grad_norm, torch.Tensor) else grad_norm
+        grad_norm = 0.0 if not (-1e10 &lt; grad_norm &lt; 1e10) else grad_norm
+
+        return {&quot;avg_loss&quot;: avg_loss, &quot;avg_lm_loss&quot;: avg_lm_loss, &quot;avg_mtp_loss&quot;: avg_mtp_loss, &quot;grad_norm&quot;: grad_norm}
+
+    @staticmethod
+    def _compute_memory_metrics() -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;
+        Compute merged NPU + CPU memory metrics (single responsibility)
+        &quot;&quot;&quot;
+        # Get NPU memory stats (max allocated/reserved during current step)
+        device = torch.accelerator
+        allocated_memory = device.max_memory_allocated()
+        reserved_memory = device.max_memory_reserved()
+        num_alloc_retries = device.memory_stats().get(&quot;num_alloc_retries&quot;, 0)
+
+        # All-reduce to get max values across all distributed processes
+        allocated_memory, reserved_memory, num_alloc_retries = all_reduce(
+            (allocated_memory, reserved_memory, num_alloc_retries), op=&quot;max&quot;
+        )
+
+        npu_memory = {
+            &quot;max_memory_allocated(GB)&quot;: allocated_memory / (1024**3),  # Convert bytes to GB
+            &quot;max_memory_reserved(GB)&quot;: reserved_memory / (1024**3),
+            &quot;num_alloc_retries&quot;: num_alloc_retries,
+        }
+
+        # CPU Memory Metrics
+        cpu_memory_info = psutil.virtual_memory()
+        cpu_memory = {
+            &quot;cpu_used_memory(GB)&quot;: cpu_memory_info.used / (1024**3),
+            &quot;cpu_available_memory(GB)&quot;: cpu_memory_info.available / (1024**3),
+            &quot;cpu_memory_usage(%)&quot;: cpu_memory_info.percent,
+        }
+
+        # Merge NPU and CPU memory metrics
+        return {**npu_memory, **cpu_memory}
+
+    def _compute_flops_mfu_metrics(self, batch_seqlens: List[int], elapsed_time: float) -&gt; Dict[str, float]:
+        &quot;&quot;&quot;
+        Compute FLOPS and MFU metrics (single responsibility)
+        &quot;&quot;&quot;
+        # Estimate achieved FLOPS and device peak FLOPS
+        flops_achieved, flops_promised_per_npu = self.estimate_flops(batch_seqlens, elapsed_time)
+
+        # All-reduce to sum flops_achieved across distributed processes
+        flops_achieved = all_reduce(flops_achieved, op=&quot;sum&quot;)
+
+        # Calculate total promised FLOPS (sum of peak FLOPS across all NPUs)
+        flops_promised = flops_promised_per_npu * self.world_size
+
+        # Safe handling: avoid division by zero/infinity
+        mfu = flops_achieved / flops_promised if (flops_promised &gt; 0 and flops_promised != float(&quot;inf&quot;)) else 0.0
+
+        return {&quot;flops_achieved(T)&quot;: flops_achieved, &quot;flops_promised(T)&quot;: flops_promised, &quot;mfu&quot;: mfu * 100}
+
+    def _compute_throughput_metrics(
+        self, batch_seqlens: List[int], elapsed_time: float, batch_size: int
+    ) -&gt; Dict[str, float]:
+        &quot;&quot;&quot;
+        Compute throughput metrics (single responsibility)
+        &quot;&quot;&quot;
+        # All-reduce to sum tokens and samples across distributed processes
+        batch_tokens = sum(batch_seqlens)
+        real_batch_size = len(batch_seqlens)
+        batch_tokens, real_batch_size = all_reduce((batch_tokens, real_batch_size), op=&quot;sum&quot;)
+
+        # Safe handling: avoid division by zero
+        avg_effective_len = batch_tokens / batch_size if batch_size &gt; 0 else 0.0
+        avg_sample_seq_len = batch_tokens / real_batch_size if real_batch_size &gt; 0 else 0.0
+        tokens_per_second = batch_tokens / elapsed_time if elapsed_time &gt; 1e-6 else 0.0
+
+        # Update cumulative token count
+        self.consume_tokens += batch_tokens
+
+        return {
+            &quot;training/avg_effective_len&quot;: avg_effective_len,
+            &quot;training/avg_sample_seq_len&quot;: avg_sample_seq_len,
+            &quot;tokens_per_second&quot;: tokens_per_second,
+            &quot;consumed_tokens&quot;: int(self.consume_tokens),
+        }
+
+    @staticmethod
+    def _compute_sparse_attn_metrics(loss_scale, iteration, writer=None, wandb_writer=None, reduce_group=None):
+        return IndexerLossLoggingHelper.track_indexer_metrics(
+            loss_scale,
+            iteration,
+            writer=writer,
+            wandb_writer=wandb_writer,
+            reduce_group=reduce_group,
+        )
+
+    # ------------------------------ Logging and State Management ------------------------------
+    def _generate_and_log_metrics(self, metrics: Dict[str, Any], total_steps: int, elapsed_time_per_iteration: float):
+        &quot;&quot;&quot;
+        Generate and print training logs using predefined templates (Rank 0 only)
+
+        Args:
+            metrics (Dict[str, Any]): Computed training efficiency metrics dictionary
+            total_steps (int): Total number of training steps
+            elapsed_time_per_iteration (float): Elapsed time per iteration in seconds (converted to ms for logging)
+
+        Returns:
+            None
+        &quot;&quot;&quot;
+        # Build base log string using predefined template
+        # Convert seconds to milliseconds for compatibility with test regex
+        elapsed_time_ms = elapsed_time_per_iteration * 1000.0
+        log_string = self.log_templates[&quot;base&quot;].format(
+            metrics[&quot;iteration&quot;],
+            int(total_steps),
+            metrics[&quot;consumed_samples&quot;],
+            metrics[&quot;consumed_tokens&quot;],
+            elapsed_time_ms,
+        )
+
+        # Append throughput metrics (optional, based on training args)
+        if self.training_args.log_throughput:
+            log_string += self.log_templates[&quot;throughput&quot;].format(metrics[&quot;tokens_per_second&quot;], metrics[&quot;mfu&quot;])
+
+        # Calculate global batch size (avoid division by zero)
+        global_batch_size = metrics[&quot;consumed_samples&quot;] // metrics[&quot;iteration&quot;] if metrics[&quot;iteration&quot;] &gt; 0 else 0
+
+        # Append optimizer/loss metrics using predefined template
+        log_string += self.log_templates[&quot;optimizer&quot;].format(
+            metrics[&quot;lr&quot;], global_batch_size, metrics[&quot;avg_lm_loss&quot;], metrics[&quot;avg_mtp_loss&quot;]
+        )
+
+        # Append sparse-attention metrics when a model reported an indexer loss.
+        if &quot;indexer_loss&quot; in metrics:
+            log_string += self.log_templates[&quot;sparse_attn&quot;].format(metrics[&quot;indexer_loss&quot;])
+
+        # Append gradient norm metrics (optional, if available)
+        if metrics[&quot;grad_norm&quot;] is not None:
+            log_string += self.log_templates[&quot;grad_norm&quot;].format(metrics[&quot;grad_norm&quot;])
+
+        # Append memory metrics
+        log_string += self.log_templates[&quot;npu_memory&quot;].format(
+            metrics[&quot;max_memory_allocated(GB)&quot;], metrics[&quot;max_memory_reserved(GB)&quot;]
+        )
+
+        # Optional: Print CPU memory metrics only if log_cpu_memory is True
+        if hasattr(self.training_args, &#x27;log_cpu_memory&#x27;) and self.training_args.log_cpu_memory:
+            log_string += self.log_templates[&quot;cpu_memory&quot;].format(
+                metrics[&quot;cpu_used_memory(GB)&quot;], metrics[&quot;cpu_available_memory(GB)&quot;], metrics[&quot;cpu_memory_usage(%)&quot;]
+            )
+
+        # Print logs only for Rank 0 process to avoid duplicate logs in distributed training
+        logger.info_rank0(log_string)
+
+    @staticmethod
+    def _update_logging_state(
+        current_step: int,
+        cumulative_loss: float,
+        cumulative_lm_loss: float,
+        cumulative_mtp_loss: float,
+        current_time: float,
+    ) -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;
+        Update logging state (for resume training)
+        &quot;&quot;&quot;
+        return {
+            &quot;logged_step&quot;: current_step,
+            &quot;logged_loss&quot;: cumulative_loss,
+            &quot;logged_lm_loss&quot;: cumulative_lm_loss,
+            &quot;logged_mtp_loss&quot;: cumulative_mtp_loss,
+            &quot;time&quot;: current_time,
+        }
+
+    @staticmethod
+    def _get_empty_logging_state() -&gt; Dict[str, Any]:
+        &quot;&quot;&quot;
+        Return empty logging state (boundary scenario)
+        &quot;&quot;&quot;
+        return {&quot;logged_step&quot;: 0, &quot;logged_loss&quot;: 0.0, &quot;time&quot;: time.time()}
+
+    @staticmethod
+    def _flatten_seqlens(batch_seqlens):
+        &quot;&quot;&quot;
+        Flatten and filter batch_seqlens to handle neat-pack mode.
+        neat-pack produces nested lists with -inf padding, e.g.:
+        [[512, 256, -inf, -inf], [1024, -inf, -inf, -inf]]
+        Normal mode produces flat int lists, e.g.:
+        [1024, 512, 768]
+        &quot;&quot;&quot;
+        flat = []
+        for item in batch_seqlens:
+            if isinstance(item, (list, tuple)):
+                for val in item:
+                    # Filter -inf and other non-positive padding values.
+                    if isinstance(val, (int, float)) and val &gt; 0 and val != float(&#x27;-inf&#x27;):
+                        flat.append(int(val))
+            else:
+                if isinstance(item, (int, float)) and item &gt; 0 and item != float(&#x27;-inf&#x27;):
+                    flat.append(int(item))
+        return flat
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

@@ -1,0 +1,616 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/distributed/clip_grad_norm.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/distributed/clip_grad_norm.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_11500ed309beee.html">◀ tokenizer.py</a> <a href="file_11ca39c72a0b27.html">context_parallel_functions.py ▶</a></nav></div>
+<div class="wrap">
+<h1>clip_grad_norm.py</h1><p class="goal">mindspeed_llm/fsdp2/distributed/clip_grad_norm.py · 8724B · 239 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L17" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def clip_grad_norm</a><a href="#L43" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def fsdp2_clip_grad_norm</a><a href="#L108" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def ep_fsdp2_clip_grad_norm</a><a href="#L162" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _local_pth_sum(params: List[torch.nn.Param</a><a href="#L189" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _local_max(params: List[torch.nn.Parameter</a><a href="#L211" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _fsdp2_reduce_group</a><a href="#L236" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_rank0_log(msg)</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep10.html">EP10</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="annot"><div class="seg"><p class="seglab">行 1-16 · 模块头部与导入</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :1-:16）</h5><pre data-lang="py" data-start="1" data-idprefix="A">import math
+import torch
+import torch.distributed as dist
+from torch.distributed.tensor import DTensor
+from torch.utils._foreach_utils import (
+    _device_has_foreach_support,
+    _group_tensors_by_device_and_dtype,
+    _has_foreach_support,
+)
+from typing import List, Optional, Iterable
+from mindspeed_llm.fsdp2.distributed.parallel_state import ParallelState
+import logging
+
+logger = logging.getLogger(__name__)
+
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">import torch
+import torch.distributed as dist
+# DDP 原生 clip 入口（对照）:
+# torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
+# 依赖: torch.distributed(NCCL) + 普通 torch.Tensor
+# 不需要 DTensor / 不需要 ParallelState / 不需要 foreach 内省</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>对照差异：标准 DDP clip 只要 <code>torch</code>+<code>dist</code> 两样，参数是普通 <code>torch.Tensor</code>，梯度也是普通张量，一个 <code>torch.nn.utils.clip_grad_norm_</code> 全包圆。FSDP2 这边多出 <code>DTensor</code>（分片张量）和 <code>ParallelState</code>（多组进程拓扑：FSDP/CP/EP/ep_fsdp），因为参数被沿不同维度切了多刀，clip 必须知道在哪个组上规约、要乘哪个 group_size 修正。多出来的这些导入，本质就是为「分片下的数学等价性」服务的。</p></div></div><div class="seg"><p class="seglab">行 17-41 · clip_grad_norm 入口：EP 与非 EP 双路分流</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :17-:41）</h5><pre data-lang="py" data-start="17" data-idprefix="A">def clip_grad_norm(
+    model, max_norm: float, norm_type: float = 2.0, error_if_nonfinite: bool = False, foreach: bool | None = None
+) -&gt; torch.Tensor:
+    # EP-aware path (FSDP2 + EP): maintain mathematical parity with FSDP1 clipper
+    if hasattr(model, &quot;_ep_param_groups&quot;):
+        return ep_fsdp2_clip_grad_norm(
+            model,
+            max_norm,
+            norm_type=norm_type,
+            error_if_nonfinite=error_if_nonfinite,
+            foreach=foreach,
+        )
+
+    grad_norm = fsdp2_clip_grad_norm(
+        model.parameters(),
+        max_norm,
+        norm_type=norm_type,
+        error_if_nonfinite=error_if_nonfinite,
+        foreach=foreach,
+    )
+    if isinstance(grad_norm, DTensor):
+        grad_norm = grad_norm.full_tensor()
+    return grad_norm
+
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># DDP 等价入口（无 EP 概念）:
+torch.nn.utils.clip_grad_norm_(
+    model.parameters(),
+    max_norm,
+    norm_type=2.0,
+    error_if_nonfinite=False,
+)
+# 直接返回全局 float 标量；无 DTensor 收尾、无 EP 分流</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>对照差异：DDP 下 <code>model.parameters()</code> 每张卡都持有完整副本（DDP 只在 backward 隐式 all-reduce 梯度，参数不分片），所以 <code>clip_grad_norm_</code> 拿到的梯度在每卡上数值一致，clip 系数天然全局一致，返回值直接就是标量。FSDP2 这边参数是分片的 <code>DTensor</code>，每卡只持一部分，clip 必须先跨卡聚合范数才能得到全局系数；:37 的 <code>full_tensor()</code> 就是在把这个「分片→全量」的收尾显式化。EP 路径还要处理「专家维」的额外切分，所以单独走一个函数。</p></div></div><div class="seg"><p class="seglab">行 42-74 · fsdp2_clip_grad_norm：DTensor 与普通 Tensor 严格分流</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :42-:74）</h5><pre data-lang="py" data-start="42" data-idprefix="A">@torch.no_grad()
+def fsdp2_clip_grad_norm(
+    parameters: torch.Tensor | Iterable[torch.Tensor],
+    max_norm: float,
+    norm_type: float = 2.0,
+    error_if_nonfinite: bool = False,
+    foreach: Optional[bool] = None,
+) -&gt; torch.Tensor:
+    r&quot;&quot;&quot;
+    Clip the gradient norm of parameters, with FSDP2 DTensor support.
+    Safely handles mixed models with both DTensors and ordinary Tensors.
+    &quot;&quot;&quot;
+    if isinstance(parameters, torch.Tensor):
+        parameters = [parameters]
+    else:
+        # prevent generators from being exhausted
+        parameters = list(parameters)
+
+    # Strictly separate DTensor and native Tensor
+    dtensor_params = []
+    tensor_params = []
+    dtensor_grads = []
+    tensor_grads = []
+
+    for p in parameters:
+        if p.grad is not None:
+            if isinstance(p.grad, DTensor):
+                dtensor_params.append(p)
+                dtensor_grads.append(p.grad)
+            else:
+                tensor_params.append(p)
+                tensor_grads.append(p.grad)
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># DDP: 参数全是普通 Tensor，无需分流
+total_norm = torch.nn.utils.get_total_norm(
+    [p.grad for p in model.parameters() if p.grad is not None],
+    norm_type, error_if_nonfinite, foreach,
+)
+# 一个 get_total_norm 吃下所有梯度，无 DTensor/Tensor 分桶</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>对照差异：DDP 下参数梯度全是同质的普通 <code>torch.Tensor</code>，一个 <code>get_total_norm</code> 全量算完即可。FSDP2 下梯度存在「DTensor（已分片）」和「普通 Tensor（未分片）」两种表示，混在一起调 foreach 会触发算子崩，所以 :60-:73 强制分桶。这本质是 FSDP2「部分参数被 fully_shard 包裹」带来的表示异构性——DDP 没有这层 shard 维度，自然不需要分桶。</p></div></div><div class="seg"><p class="seglab">行 75-97 · 两路局部范数合并 + CP scale 修正</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :75-:97）</h5><pre data-lang="py" data-start="75" data-idprefix="A">    # Compute gradient norms independently
+    if len(dtensor_grads) &gt; 0:
+        norm_d = torch.nn.utils.get_total_norm(dtensor_grads, norm_type, error_if_nonfinite, foreach)
+        if isinstance(norm_d, DTensor):
+            norm_d = norm_d.full_tensor()
+    else:
+        norm_d = torch.tensor(0.0, device=parameters[0].device if parameters else &#x27;cpu&#x27;)
+
+    if len(tensor_grads) &gt; 0:
+        norm_t = torch.nn.utils.get_total_norm(tensor_grads, norm_type, error_if_nonfinite, foreach)
+    else:
+        norm_t = torch.tensor(0.0, device=norm_d.device)
+
+    # Merge two norms mathematically rigorously
+    if norm_type &gt;= math.inf:
+        total_norm = torch.max(norm_d, norm_t)
+    else:
+        total_norm = (norm_d**norm_type + norm_t**norm_type) ** (1.0 / norm_type)
+
+    # Context Parallel (CP) scale handling
+    ps = ParallelState()
+    total_norm *= ps.get_group_size(&quot;cp&quot;)
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># DDP: 单次 get_total_norm 直接给全局范数，无 CP 修正
+total_norm = torch.nn.utils.get_total_norm(
+    grads, norm_type, error_if_nonfinite, foreach,
+)
+# total_norm 直接就是全局值；无 cp scale、无 full_tensor、无两路合并</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>对照差异：DDP 下一次 <code>get_total_norm</code> 直接给全局范数（梯度在每卡同值，all-reduce 已在 backward 隐式完成）。FSDP2 这边要：(1) 分 DTensor/普通两路各算局部范数；(2) DTensor 路 <code>full_tensor()</code> 隐式触发跨分片 gather 才合全；(3) 两路按幂和/取 max 合并；(4) 再乘 CP size 修正序列切分。多出来的三步都是「分片 + CP 切序列」的代价——DDP 既不分片也不切序列，自然一步到位。</p></div></div><div class="seg"><p class="seglab">行 98-106 · 分桶裁剪执行 + 返回全局范数</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :98-:106）</h5><pre data-lang="py" data-start="98" data-idprefix="A">    # Execute clipping separately to prevent foreach_mul operator crash
+    if len(dtensor_params) &gt; 0:
+        torch.nn.utils.clip_grads_with_norm_(dtensor_params, max_norm, total_norm, foreach)
+    if len(tensor_params) &gt; 0:
+        torch.nn.utils.clip_grads_with_norm_(tensor_params, max_norm, total_norm, foreach)
+
+    return total_norm
+
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># DDP: 单次调用一次裁剪完事
+torch.nn.utils.clip_grad_norm_(
+    model.parameters(), max_norm, norm_type,
+    error_if_nonfinite, foreach,
+)
+# 内部 get_total_norm + clip_grads_with_norm_ 一气呵成，无分桶</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>对照差异：DDP 一次 <code>clip_grad_norm_</code> 把 get_total_norm + 缩放 + 原地写梯度全包圆，因为参数同质。FSDP2 必须拆成两次 <code>clip_grads_with_norm_</code>（DTensor 桶 + 普通 Tensor 桶），且 total_norm 是预先算好的全局值（含 full_tensor 聚合 + CP 修正）传进去。返回值契约一致（都是全局范数标量），但内部路径因分片而必须分桶。</p></div></div><div class="seg"><p class="seglab">行 107-160 · ep_fsdp2_clip_grad_norm：EP 双重切分的两段规约</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :107-:160）</h5><pre data-lang="py" data-start="107" data-idprefix="A">@torch.no_grad()
+def ep_fsdp2_clip_grad_norm(
+    model, max_norm: float, norm_type: float = 2.0, error_if_nonfinite: bool = False, foreach: bool | None = None
+) -&gt; torch.Tensor:
+    &quot;&quot;&quot;
+    EP-aware gradient clipping for composable FSDP2 with reductions mirroring FSDP1:
+
+    - Compute local norms for non-EP and EP parameter groups separately.
+    - For finite p: sum p-th powers across the appropriate groups, then take 1/p.
+      • non-EP: all-reduce over FSDP group.
+      • EP: all-reduce over EP-FSDP group, then over EP group.
+    - For inf-norm: take elementwise MAX with the same reduction groups (MAX).
+    - Use a single global clip coefficient for both groups.
+    &quot;&quot;&quot;
+
+    ps = ParallelState()
+    fsdp_group = ps.get_fsdp_group()
+    ep_group = ps.get_ep_group() if ps.is_ep_enable() else None
+    # For EP params sharded by FSDP2 along hidden dimension
+    ep_fsdp_group = None
+    if ps.is_ep_enable() and ps.get_efsdp_device_mesh() is not None:
+        ep_fsdp_group = ps.get_efsdp_group()
+
+    # Build param groups (filter out params without grads)
+    ep_params: List[torch.nn.Parameter] = [p for p in model._ep_param_groups.get(&quot;ep&quot;, []) if p.grad is not None]
+    non_ep_params: List[torch.nn.Parameter] = [
+        p for p in model._ep_param_groups.get(&quot;non_ep&quot;, []) if p.grad is not None
+    ]
+
+    # Compute and reduce non-EP
+    non_ep_total = _fsdp2_reduce_group(
+        params=non_ep_params,
+        norm_type=norm_type,
+        reduce_groups=[(&quot;fsdp&quot;, fsdp_group)],
+    )
+    # Compute and reduce EP: first across ep_fsdp, then across ep
+    ep_total = _fsdp2_reduce_group(
+        params=ep_params,
+        norm_type=norm_type,
+        reduce_groups=[(&quot;ep_fsdp&quot;, ep_fsdp_group), (&quot;ep&quot;, ep_group)],
+    )
+
+    if math.isinf(norm_type):
+        total_norm = torch.maximum(non_ep_total, ep_total)
+    else:
+        total_norm = (non_ep_total + ep_total) ** (1.0 / float(norm_type))
+
+    # Apply the same clip coefficient to both groups
+    torch.nn.utils.clip_grads_with_norm_(ep_params, max_norm, total_norm, foreach=False)
+    torch.nn.utils.clip_grads_with_norm_(non_ep_params, max_norm, total_norm, foreach=False)
+
+    return total_norm
+
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># DDP 无 EP 概念；最接近的 MoE-DDP 对照:
+# 所有专家参数都在每卡完整副本，无 ep_fsdp / ep 分片维
+non_ep_total = get_total_norm(non_ep_grads, p)  # 隐式 all-reduce
+ep_total     = get_total_norm(ep_grads, p)        # 隐式 all-reduce
+total_norm = (non_ep_total + ep_total) ** (1/p)
+clip_grads_with_norm_(all_params, max_norm, total_norm)
+# 一次 all-reduce 合全，无「分片维/专家维」两段</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>对照差异：DDP（含 MoE-DDP）下专家参数也是每卡完整副本，backward 后梯度经一次 all-reduce 即全局一致，<code>get_total_norm</code> 内含这一次 reduce。FSDP2+EP 这边，EP 参数被「FSDP 分片 + 专家切分」<b>双重切</b>，必须两段规约：先 <code>ep_fsdp</code> 合分片维、再 <code>ep</code> 合专家维。多出来的这一段 all_reduce（见 :211-:233 的 <code>_fsdp2_reduce_group</code>）就是双重切分的通信代价。误区：别以为「分片越多 all_reduce 越快」——这里 :232 的 SUM 次数和参与 rank 数并不随分片数减少，每个分片组仍要规约到全局标量。</p></div></div><div class="seg"><p class="seglab">行 161-210 · _local_pth_sum / _local_max：本地幂和与本地 max</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :161-:210）</h5><pre data-lang="py" data-start="161" data-idprefix="A"># compute local sum of param guard norm
+def _local_pth_sum(params: List[torch.nn.Parameter], p: float) -&gt; torch.Tensor:
+    grads = [p.grad for p in params if p.grad is not None]
+    if not grads:
+        # At this point, 0.0 on the current device needs to be returned; otherwise, an error may occur in the subsequent all_reduce operation.
+        return torch.tensor(0.0, device=torch.accelerator.current_device(), dtype=torch.float32)
+
+    grads_local = [
+        g.to_local().detach().to(torch.float32) if isinstance(g, DTensor) else g.detach().to(torch.float32)
+        for g in grads
+    ]
+    default_device = (
+        grads_local[0].device if len(grads_local) &gt; 0 else torch.device(torch.accelerator.current_accelerator().type)
+    )
+    res = torch.tensor(0.0, device=default_device, dtype=torch.float32)
+    with torch.no_grad():
+        grouped_grads_local = _group_tensors_by_device_and_dtype([grads_local])
+        for (device, _), ([device_grads_local], _) in grouped_grads_local.items():
+            if _has_foreach_support(device_grads_local, device) or _device_has_foreach_support(device):
+                out = torch._foreach_pow_(torch._foreach_norm(device_grads_local, p), p)
+                res += torch.sum(torch.stack(out)).to(default_device)
+            else:
+                for grad_local in device_grads_local:
+                    gn = torch.norm(grad_local, p=p)
+                    res = res + (gn**p).to(default_device)
+    return res
+
+
+def _local_max(params: List[torch.nn.Parameter]) -&gt; torch.Tensor:
+    dev = None
+    mx = None
+    for q in params:
+        g = q.grad
+        if g is None:
+            continue
+        if isinstance(g, DTensor):
+            g_local = g.to_local()
+        else:
+            g_local = g
+        if dev is None:
+            dev = g_local.device
+            mx = torch.tensor(0.0, device=dev, dtype=torch.float32)
+        gn = torch.max(torch.abs(g_local.detach().to(torch.float32)))
+        mx = torch.maximum(mx, gn)
+    if mx is None:
+        dev = torch.device(torch.accelerator.current_accelerator().type)
+        mx = torch.tensor(0.0, device=dev, dtype=torch.float32)
+    return mx
+
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># DDP 本地范数（对照，参考实现）:
+def local_pth_sum(params, p):
+    return sum((g.detach().float()**p).sum()
+               for g in grads)
+# 梯度是普通 Tensor，无 to_local()；
+# 通常直接 get_total_norm 一步含 all-reduce，无需手写本地幂和</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>对照差异：DDP 通常直接用 <code>get_total_norm</code>（内含 all-reduce），不手写「本地幂和」。FSDP2 这边必须手写本地幂和 + 显式两段 all_reduce，因为：(1) DTensor 要 <code>to_local()</code> 取分片；(2) EP 参数要在 ep_fsdp/ep 两个不同组上规约，<code>get_total_norm</code> 只能在一个组上 all-reduce，无法表达两段。:166/:206 的 <code>torch.accelerator.current_device()</code> 是跨设备（NPU/GPU）取设备的抽象，不写死 cuda——这是 Ascend 适配点。</p></div></div><div class="seg"><p class="seglab">行 211-239 · _fsdp2_reduce_group：标量聚合（非梯度同步）+ rank0 日志</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :211-:239）</h5><pre data-lang="py" data-start="211" data-idprefix="A">def _fsdp2_reduce_group(
+    params: List[torch.nn.Parameter],
+    norm_type: float,
+    reduce_groups: List[tuple[str, dist.ProcessGroup | None]],
+) -&gt; torch.Tensor:
+    &quot;&quot;&quot;Compute local group statistic and reduce over provided groups.
+
+    For finite p, returns the globally-reduced sum of p-th powers (not the final norm).
+    For inf, returns the globally-reduced max.
+    &quot;&quot;&quot;
+    if math.isinf(norm_type):
+        val = _local_max(params)
+        for _, group in reduce_groups:
+            if group is not None:
+                dist.all_reduce(val, op=dist.ReduceOp.MAX, group=group)
+        return val
+    else:
+        p = float(norm_type)
+        val = _local_pth_sum(params, p)
+        for _, group in reduce_groups:
+            if group is not None:
+                dist.all_reduce(val, op=dist.ReduceOp.SUM, group=group)
+        return val
+
+
+def _get_rank0_log(msg):
+    if dist.is_initialized() and dist.get_rank() == 0:
+        logger.info(msg)
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># DDP 梯度同步（对照，发生在别处）:
+# loss.backward() 隐式触发 DDP hooks → all-reduce 梯度张量本身
+criterion(output, target).backward()
+# 之后每卡梯度全局一致，clip 直接读本地即可
+# clip 内部: get_total_norm 已含一次 all-reduce 标量聚合
+
+# 标量聚合（DDP clip 内部等价物）:
+dist.all_reduce(total_norm, op=ReduceOp.SUM)
+# 这里 SUM 的也是范数标量，不是梯度张量</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>对照差异：DDP 的梯度同步藏在 <code>backward()</code> 的 hooks 里（all-reduce 梯度张量本身），之后每卡梯度数值一致，clip 直接读本地梯度 + <code>get_total_norm</code>（内含一次标量 all-reduce）即可。FSDP2 这边梯度同步是 ReduceScatter（不是 all-reduce），藏在 <code>fsdp_turbo</code>；clip 这层（:232）只做<b>标量指标</b>的 SUM 聚合。<b>核心差异点</b>：DDP clip 的「梯度同步」和「标量聚合」都和 backward 耦合；FSDP2 把梯度同步（fsdp_turbo，张量级 ReduceScatter）和 clip 的标量聚合（:232 SUM）彻底解耦——clip 只读已同步的梯度、只发标量。所以标准 DDP <code>torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)</code>（全量 grad + 隐式 all-reduce）与本处分片聚合（DTensor full_tensor / 两段 SUM）是两套完全不同的通信模型。</p></div></div></div>
+<details class="src"><summary>📜 完整源码（239 行）— 大纲点跳行</summary><pre data-lang="py" data-start="1">import math
+import torch
+import torch.distributed as dist
+from torch.distributed.tensor import DTensor
+from torch.utils._foreach_utils import (
+    _device_has_foreach_support,
+    _group_tensors_by_device_and_dtype,
+    _has_foreach_support,
+)
+from typing import List, Optional, Iterable
+from mindspeed_llm.fsdp2.distributed.parallel_state import ParallelState
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def clip_grad_norm(
+    model, max_norm: float, norm_type: float = 2.0, error_if_nonfinite: bool = False, foreach: bool | None = None
+) -&gt; torch.Tensor:
+    # EP-aware path (FSDP2 + EP): maintain mathematical parity with FSDP1 clipper
+    if hasattr(model, &quot;_ep_param_groups&quot;):
+        return ep_fsdp2_clip_grad_norm(
+            model,
+            max_norm,
+            norm_type=norm_type,
+            error_if_nonfinite=error_if_nonfinite,
+            foreach=foreach,
+        )
+
+    grad_norm = fsdp2_clip_grad_norm(
+        model.parameters(),
+        max_norm,
+        norm_type=norm_type,
+        error_if_nonfinite=error_if_nonfinite,
+        foreach=foreach,
+    )
+    if isinstance(grad_norm, DTensor):
+        grad_norm = grad_norm.full_tensor()
+    return grad_norm
+
+
+@torch.no_grad()
+def fsdp2_clip_grad_norm(
+    parameters: torch.Tensor | Iterable[torch.Tensor],
+    max_norm: float,
+    norm_type: float = 2.0,
+    error_if_nonfinite: bool = False,
+    foreach: Optional[bool] = None,
+) -&gt; torch.Tensor:
+    r&quot;&quot;&quot;
+    Clip the gradient norm of parameters, with FSDP2 DTensor support.
+    Safely handles mixed models with both DTensors and ordinary Tensors.
+    &quot;&quot;&quot;
+    if isinstance(parameters, torch.Tensor):
+        parameters = [parameters]
+    else:
+        # prevent generators from being exhausted
+        parameters = list(parameters)
+
+    # Strictly separate DTensor and native Tensor
+    dtensor_params = []
+    tensor_params = []
+    dtensor_grads = []
+    tensor_grads = []
+
+    for p in parameters:
+        if p.grad is not None:
+            if isinstance(p.grad, DTensor):
+                dtensor_params.append(p)
+                dtensor_grads.append(p.grad)
+            else:
+                tensor_params.append(p)
+                tensor_grads.append(p.grad)
+
+    # Compute gradient norms independently
+    if len(dtensor_grads) &gt; 0:
+        norm_d = torch.nn.utils.get_total_norm(dtensor_grads, norm_type, error_if_nonfinite, foreach)
+        if isinstance(norm_d, DTensor):
+            norm_d = norm_d.full_tensor()
+    else:
+        norm_d = torch.tensor(0.0, device=parameters[0].device if parameters else &#x27;cpu&#x27;)
+
+    if len(tensor_grads) &gt; 0:
+        norm_t = torch.nn.utils.get_total_norm(tensor_grads, norm_type, error_if_nonfinite, foreach)
+    else:
+        norm_t = torch.tensor(0.0, device=norm_d.device)
+
+    # Merge two norms mathematically rigorously
+    if norm_type &gt;= math.inf:
+        total_norm = torch.max(norm_d, norm_t)
+    else:
+        total_norm = (norm_d**norm_type + norm_t**norm_type) ** (1.0 / norm_type)
+
+    # Context Parallel (CP) scale handling
+    ps = ParallelState()
+    total_norm *= ps.get_group_size(&quot;cp&quot;)
+
+    # Execute clipping separately to prevent foreach_mul operator crash
+    if len(dtensor_params) &gt; 0:
+        torch.nn.utils.clip_grads_with_norm_(dtensor_params, max_norm, total_norm, foreach)
+    if len(tensor_params) &gt; 0:
+        torch.nn.utils.clip_grads_with_norm_(tensor_params, max_norm, total_norm, foreach)
+
+    return total_norm
+
+
+@torch.no_grad()
+def ep_fsdp2_clip_grad_norm(
+    model, max_norm: float, norm_type: float = 2.0, error_if_nonfinite: bool = False, foreach: bool | None = None
+) -&gt; torch.Tensor:
+    &quot;&quot;&quot;
+    EP-aware gradient clipping for composable FSDP2 with reductions mirroring FSDP1:
+
+    - Compute local norms for non-EP and EP parameter groups separately.
+    - For finite p: sum p-th powers across the appropriate groups, then take 1/p.
+      • non-EP: all-reduce over FSDP group.
+      • EP: all-reduce over EP-FSDP group, then over EP group.
+    - For inf-norm: take elementwise MAX with the same reduction groups (MAX).
+    - Use a single global clip coefficient for both groups.
+    &quot;&quot;&quot;
+
+    ps = ParallelState()
+    fsdp_group = ps.get_fsdp_group()
+    ep_group = ps.get_ep_group() if ps.is_ep_enable() else None
+    # For EP params sharded by FSDP2 along hidden dimension
+    ep_fsdp_group = None
+    if ps.is_ep_enable() and ps.get_efsdp_device_mesh() is not None:
+        ep_fsdp_group = ps.get_efsdp_group()
+
+    # Build param groups (filter out params without grads)
+    ep_params: List[torch.nn.Parameter] = [p for p in model._ep_param_groups.get(&quot;ep&quot;, []) if p.grad is not None]
+    non_ep_params: List[torch.nn.Parameter] = [
+        p for p in model._ep_param_groups.get(&quot;non_ep&quot;, []) if p.grad is not None
+    ]
+
+    # Compute and reduce non-EP
+    non_ep_total = _fsdp2_reduce_group(
+        params=non_ep_params,
+        norm_type=norm_type,
+        reduce_groups=[(&quot;fsdp&quot;, fsdp_group)],
+    )
+    # Compute and reduce EP: first across ep_fsdp, then across ep
+    ep_total = _fsdp2_reduce_group(
+        params=ep_params,
+        norm_type=norm_type,
+        reduce_groups=[(&quot;ep_fsdp&quot;, ep_fsdp_group), (&quot;ep&quot;, ep_group)],
+    )
+
+    if math.isinf(norm_type):
+        total_norm = torch.maximum(non_ep_total, ep_total)
+    else:
+        total_norm = (non_ep_total + ep_total) ** (1.0 / float(norm_type))
+
+    # Apply the same clip coefficient to both groups
+    torch.nn.utils.clip_grads_with_norm_(ep_params, max_norm, total_norm, foreach=False)
+    torch.nn.utils.clip_grads_with_norm_(non_ep_params, max_norm, total_norm, foreach=False)
+
+    return total_norm
+
+
+# compute local sum of param guard norm
+def _local_pth_sum(params: List[torch.nn.Parameter], p: float) -&gt; torch.Tensor:
+    grads = [p.grad for p in params if p.grad is not None]
+    if not grads:
+        # At this point, 0.0 on the current device needs to be returned; otherwise, an error may occur in the subsequent all_reduce operation.
+        return torch.tensor(0.0, device=torch.accelerator.current_device(), dtype=torch.float32)
+
+    grads_local = [
+        g.to_local().detach().to(torch.float32) if isinstance(g, DTensor) else g.detach().to(torch.float32)
+        for g in grads
+    ]
+    default_device = (
+        grads_local[0].device if len(grads_local) &gt; 0 else torch.device(torch.accelerator.current_accelerator().type)
+    )
+    res = torch.tensor(0.0, device=default_device, dtype=torch.float32)
+    with torch.no_grad():
+        grouped_grads_local = _group_tensors_by_device_and_dtype([grads_local])
+        for (device, _), ([device_grads_local], _) in grouped_grads_local.items():
+            if _has_foreach_support(device_grads_local, device) or _device_has_foreach_support(device):
+                out = torch._foreach_pow_(torch._foreach_norm(device_grads_local, p), p)
+                res += torch.sum(torch.stack(out)).to(default_device)
+            else:
+                for grad_local in device_grads_local:
+                    gn = torch.norm(grad_local, p=p)
+                    res = res + (gn**p).to(default_device)
+    return res
+
+
+def _local_max(params: List[torch.nn.Parameter]) -&gt; torch.Tensor:
+    dev = None
+    mx = None
+    for q in params:
+        g = q.grad
+        if g is None:
+            continue
+        if isinstance(g, DTensor):
+            g_local = g.to_local()
+        else:
+            g_local = g
+        if dev is None:
+            dev = g_local.device
+            mx = torch.tensor(0.0, device=dev, dtype=torch.float32)
+        gn = torch.max(torch.abs(g_local.detach().to(torch.float32)))
+        mx = torch.maximum(mx, gn)
+    if mx is None:
+        dev = torch.device(torch.accelerator.current_accelerator().type)
+        mx = torch.tensor(0.0, device=dev, dtype=torch.float32)
+    return mx
+
+
+def _fsdp2_reduce_group(
+    params: List[torch.nn.Parameter],
+    norm_type: float,
+    reduce_groups: List[tuple[str, dist.ProcessGroup | None]],
+) -&gt; torch.Tensor:
+    &quot;&quot;&quot;Compute local group statistic and reduce over provided groups.
+
+    For finite p, returns the globally-reduced sum of p-th powers (not the final norm).
+    For inf, returns the globally-reduced max.
+    &quot;&quot;&quot;
+    if math.isinf(norm_type):
+        val = _local_max(params)
+        for _, group in reduce_groups:
+            if group is not None:
+                dist.all_reduce(val, op=dist.ReduceOp.MAX, group=group)
+        return val
+    else:
+        p = float(norm_type)
+        val = _local_pth_sum(params, p)
+        for _, group in reduce_groups:
+            if group is not None:
+                dist.all_reduce(val, op=dist.ReduceOp.SUM, group=group)
+        return val
+
+
+def _get_rank0_log(msg):
+    if dist.is_initialized() and dist.get_rank() == 0:
+        logger.info(msg)
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

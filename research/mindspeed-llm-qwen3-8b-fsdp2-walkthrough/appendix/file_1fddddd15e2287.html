@@ -1,0 +1,323 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/distributed/mindspeed_parallel_engine.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/distributed/mindspeed_parallel_engine.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_bd4acb2e17f3b6.html">◀ utils.py</a> <a href="file_e508408c704381.html">parallel_engine_config.py ▶</a></nav></div>
+<div class="wrap">
+<h1>mindspeed_parallel_engine.py</h1><p class="goal">mindspeed_llm/fsdp2/distributed/mindspeed_parallel_engine.py · 4816B · 109 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L19" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class MindSpeedParallelEngine(torch.nn.Module)</a><a href="#L20" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__</a><a href="#L48" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply_fsdp_modules(self)</a><a href="#L53" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply_tp_modules(self)</a><a href="#L58" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply_ep_modules(self)</a><a href="#L68" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply_cp_modules(self)</a><a href="#L80" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply_recompute_modules(self)</a><a href="#L85" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply_quantization_modules(self)</a><a href="#L100" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply_optimizer_hook(self, optimizer: torc</a><a href="#L107" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def forward(self, *args, **kwargs)</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep08.html">EP08</a><a href="../ep09.html">EP09</a><a href="../ep11.html">EP11</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="annot"><div class="seg"><p class="seglab">行 1-16 · 导入清单：fsdp_turbo 委托桥的本仓侧签名</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :1-:16）</h5><pre data-lang="py" data-start="1" data-idprefix="A"># Copyright (c) 2025, Huawei Technologies Co., Ltd. All rights reserved.
+from typing import Optional, Any
+import torch
+
+from fsdp_turbo.distributed.fully_shard_parallel.fully_shard_parallel import fully_shard_parallel_modules
+from fsdp_turbo.distributed.tensor_parallel.tensor_parallel import tensor_parallel_modules
+from fsdp_turbo.memory.recompute.recompute import recompute_modules
+from mindspeed_llm.fsdp2.distributed.parallel_state import init_parallel_state
+from mindspeed_llm.fsdp2.distributed.parallel_engine_config import ParallelEngineConfig
+from mindspeed_llm.fsdp2.distributed.context_parallel.context_parallel_manager import apply_context_parallelize_modules
+from mindspeed_llm.fsdp2.distributed.expert_parallel.expert_parallel import expert_parallelize_modules
+from mindspeed_llm.fsdp2.distributed.expert_parallel.expert_fully_shard_parallel import expert_fully_shard_modules
+from mindspeed_llm.fsdp2.models.model_loader import WeightLoader
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+
+logger = get_logger(__name__)</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">import torch
+from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+from torch.distributed.tensor.parallel import parallelize_module
+from torch.distributed.device_mesh import init_device_mesh
+import logging
+logger = logging.getLogger(__name__)</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>左侧是标准 PyTorch FSDP2 + TP 的典型 import：<code>FullyShardedDataParallel</code> 直接在脚本里 <code>FSDP.wrap</code> 包模型、<code>parallelize_module</code> 做 TP、<code>init_device_mesh</code> 造 mesh，logger 用标准库。右侧本厂把这些能力拆成三处：<code>fully_shard</code>/<code>tensor_parallel</code>/<code>recompute</code> 收敛进 <code>fsdp_turbo</code> 外部包（:5-7），CP/EP 留在本仓（:10-12），进程组 + mesh 又单独放 <code>parallel_state</code>（:8）。<b>差异本质</b>：NVIDIA 侧把并行原语直接当 API 用，本厂多了一层「编排引擎」做流程串接与 plan 注入——因为 Ascend 上 fully_shard 需要按 HCCL mesh 走自定义路径（:49 委托），而不是直接调 torch 原生 <code>fully_shard</code>。</p></div></div><div class="seg"><p class="seglab">行 19-33 · 引擎壳体：torch.nn.Module 子类与五个输入</p><pre data-lang="py" data-start="19" data-idprefix="A">class MindSpeedParallelEngine(torch.nn.Module):
+    def __init__(
+        self,
+        config: ParallelEngineConfig,
+        model: torch.nn.Module,
+        init_device: str = &quot;cpu&quot;,
+        weights_path: Optional[str] = None,
+        hf_config: Optional[Any] = None,
+    ):
+        super().__init__()
+        self.config = config
+        self.model = model
+        self.init_device = init_device
+        self.weights_path = weights_path
+        self.hf_config = hf_config</pre><div class="exp"><p><code>MindSpeedParallelEngine</code> 继承 <code>torch.nn.Module</code>（:19），所以它本身是个 module——但 <code>forward</code>（见后面 :107-108）只 <code>return self.model(*args, **kwargs)</code>，引擎不碰前向语义，只做<b>装配</b>。这个「薄壳 module」设计让引擎可以像普通模型一样被外层训练脚本持有、<code>.to(device)</code>、塞进 trainer。</p><p>:20-27 的 <code>__init__</code> 接五个参数：<code>config: ParallelEngineConfig</code>（并行 plan 的总容器）、<code>model</code>（原生 HF 模型，未切分）、<code>init_device='cpu'</code>（也可是 <code>'meta'</code>，决定权重回填时机，见 :44-46）、可选 <code>weights_path</code>/<code>hf_config</code>（meta 路径回填权重时需要）。:28 <code>super().__init__()</code> 先初始化 <code>nn.Module</code> 状态（注册 buffers/参数字典），:29-33 把五个输入原样存为字段——注意 <code>self.model = model</code>（:30）是直接引用，后续 <code>apply_*</code> 会用 <code>self.model = ...</code> 反复<b>重新赋值</b>，每次都拿到一个被改写后的新对象，这是「链式改写」的关键模式。</p></div></div><div class="seg"><p class="seglab">行 35-46 · apply 链顺序与 meta 权重回填：FSDP 必须最后</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :35-:46）</h5><pre data-lang="py" data-start="35" data-idprefix="A">        self.parallel_state = init_parallel_state(self.config)
+        self.apply_quantization_modules()
+        self.apply_tp_modules()
+        self.apply_ep_modules()
+        self.apply_cp_modules()
+        self.apply_recompute_modules()
+        self.apply_fsdp_modules()
+
+        # For meta device: load weights after fsdp wrapping
+        if self.init_device == &quot;meta&quot;:
+            logger.info_rank0(&quot;&gt; Loading weights after FSDP wrapping...&quot;)
+            WeightLoader.load(model=self.model, weights_path=self.weights_path, device=None, hf_config=self.hf_config)</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">model = AutoModelForCausalLM.from_pretrained(path, torch_dtype=dtype)
+model = model.to(&#x27;cuda&#x27;)
+# DDP: 直接包，无 apply 链
+model = DistributedDataParallel(model, device_ids=[local_rank],
+                                output_device=local_rank,
+                                find_unused_parameters=False)
+# 之后正常 forward + backward + step</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>左侧是标准 NVIDIA DDP 装配：把 dense 模型整体 <code>to('cuda')</code>，再一行 <code>DistributedDataParallel(model, device_ids=...)</code> 包成 DDP wrapper，<b>没有顺序敏感的 apply 链</b>——DDP 只在 backward 时挂梯度 all-reduce 钩子，不动参数 layout。</p><p>右侧本厂引擎（:36-41）是六步顺序改写：每步都可能把 <code>self.model</code> 替换成新对象，TP/EP/CP 改 module 结构、recompute 插钩子、FSDP 把参数变 <code>DTensor</code>。<b>差异本质</b>：DDP 是「包一层」（参数仍是 dense、全卡复制），FSDP2 是「改参数 layout」（参数被切分、各卡只存一片），所以 FSDP 必须在所有 module 级改写<b>之后</b>才能 shard，顺序不可逆；DDP 则无此约束，随时包都行。另外 DDP 不需要 <code>init_device='meta'</code>——它直接在实卡上 <code>from_pretrained</code> 拿 dense 权重，本厂 meta 路径（:44-46）是为了省显存先建空壳、shard 后再回填，这是 FSDP2 + 大模型才有的模式。</p></div></div><div class="seg"><p class="seglab">行 48-51 · apply_fsdp_modules：委托给 fsdp_turbo 的那一行</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :48-:51）</h5><pre data-lang="py" data-start="48" data-idprefix="A">    def apply_fsdp_modules(self):
+        self.model = fully_shard_parallel_modules(
+            self.model, self.parallel_state.get_fsdp_device_mesh(), self.config.fsdp_plan
+        )</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+from torch.distributed.fsdp import ShardingStrategy, MixedPrecision, FullyShardedDataParallel
+
+# 标准 FSDP1 装配：逐模块手动 fully_shard
+model = AutoModelForCausalLM.from_pretrained(path)
+for layer in model.layers:
+    layer = FSDP(layer, sharding_strategy=ShardingStrategy.FULL_SHARD,
+                 use_orig_params=True, device_id=local_rank)
+model = FSDP(model, cpu_offload=OffloadPolicy())  # root</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>左侧是 PyTorch 原生 FSDP1 的典型写法：<b>脚本里手写循环</b>对每个 layer 调 <code>FSDP(module, ...)</code>，root 再包一层，sharding strategy / mixed precision / cpu_offload 都作为 <code>FSDP()</code> 构造参数显式传。</p><p>右侧本厂 :49 一行委托：<code>fully_shard_parallel_modules(model, mesh, plan)</code>，把「逐模块 wrap + 策略注入」整件事收进一个函数，策略以 <code>FSDPPlanConfig</code> dataclass 形式传入（含 <code>ignored_modules</code> 通配、<code>reshard_after_forward</code>、<code>fsdp_implementation</code> 选 <code>'native'</code> 还是 <code>'custom'</code>）。<b>差异本质</b>：原生 FSDP1 是 imperative API（每个模块显式包、传一堆 kwargs），本厂是 declarative plan 驱动（一个 plan 描述「哪些模块包、怎么包」，委托函数负责展开通配与逐模块 wrap）。FSDP2 与 FSDP1 的另一处关键区别——FSDP2（右侧 plan 里 <code>fsdp_implementation='native'</code> 时走的就是 torch 的 <code>fully_shard</code> per-module API）把参数 shard 成 <code>DTensor</code> 而非 FSDP1 的 <code>FlatParameter</code>，reshard-after-forward 是 per-parameter 粒度；但<b>这层实现细节在本仓外</b>，:49 看不到。</p></div></div><div class="seg"><p class="seglab">行 53-66 · TP 与 EP：device mesh 维的分叉（EP07/EP08 场景）</p><pre data-lang="py" data-start="53" data-idprefix="A">    def apply_tp_modules(self):
+        if self.config.tensor_parallel_size == 1:
+            return
+        self.model = tensor_parallel_modules(self.model, self.parallel_state.get_tp_device_mesh(), self.config.tp_plan)
+
+    def apply_ep_modules(self):
+        if self.config.expert_parallel_size &gt; 1:
+            self.model = expert_parallelize_modules(
+                self.model, self.parallel_state.get_ep_device_mesh(), self.config.ep_plan
+            )
+        if self.config.expert_fully_shard_parallel_size &gt; 1:
+            self.model = expert_fully_shard_modules(
+                self.model, self.parallel_state.get_efsdp_device_mesh(), self.config.ep_plan
+            )</pre><div class="exp"><p>:53-56 <code>apply_tp_modules</code>：:54 若 <code>tensor_parallel_size==1</code> 直接 return（单卡无 TP）；否则 :56 <code>tensor_parallel_modules(self.model, self.parallel_state.get_tp_device_mesh(), self.config.tp_plan)</code>——同样是<b>委托</b>给 fsdp_turbo（:6 import），plan 是 <code>TPPlanConfig</code>（含 <code>colwise_parallel</code>：<code>*.q_proj/*.k_proj/*.v_proj</code>，<code>rowwise_parallel</code>：<code>*.o_proj</code>，<code>sequence_parallel</code>）。TP 沿 <code>tp</code> mesh 维切线性层权重。</p><p>:58-66 <code>apply_ep_modules</code> 是 MoE 场景（EP07/EP08）的分叉点，两个独立门控：<br>1. :59 <code>expert_parallel_size>1</code> 时走 :60-62 <code>expert_parallelize_modules</code>，沿 <code>ep</code> mesh 维切<b>专家</b>（把不同 expert 分到不同卡），用本仓自研（:11 import，非 fsdp_turbo）；<br>2. :63 <code>expert_fully_shard_parallel_size>1</code> 时走 :64-66 <code>expert_fully_shard_modules</code>，沿 <code>efsdp</code> mesh 维切<b>专家参数</b>（把每个 expert 的参数再 shard），同样本仓自研（:12 import）。<br>两者用同一个 <code>self.config.ep_plan</code> 但<b>不同 device mesh 维</b>——<code>ep</code> 切 expert 数量、<code>efsdp</code> 切 expert 参数。dense expert（不 shard 参数、只分卡）走前者，sharded expert（参数也 shard）走后者，EP07/EP08 的差异就在这两个开关的组合上。</p></div></div><div class="seg"><p class="seglab">行 68-83 · CP 校验与 recompute：ulysses 整除约束 + 钩子插入</p><pre data-lang="py" data-start="68" data-idprefix="A">    def apply_cp_modules(self):
+        VALID_CP_TYPES = (&quot;ulysses&quot;, &quot;ring&quot;)
+        cp_size = self.config.context_parallel_size
+        cp_type = self.config.context_parallel_type
+
+        if cp_size &gt; 1:
+            if cp_type not in VALID_CP_TYPES:
+                raise ValueError(f&quot;context_parallel_type must be one of {VALID_CP_TYPES}&quot;)
+            if cp_type == &quot;ulysses&quot; and self.model.config.num_attention_heads % cp_size != 0:
+                raise ValueError(f&quot;num_attention_heads must be divisible by context_parallel_size (current: {cp_size})&quot;)
+            apply_context_parallelize_modules(self.model, self.config.cp_plan)
+
+    def apply_recompute_modules(self):
+        if not self.config.recompute:
+            return
+        self.model = recompute_modules(self.model, self.config.recompute_plan)</pre><div class="exp"><p>:68-78 <code>apply_cp_modules</code> 先在 :69 定义 <code>VALID_CP_TYPES=('ulysses','ring')</code>，:70-71 取 <code>cp_size</code> 与 <code>cp_type</code>。:73 <code>cp_size>1</code> 时才生效，:74-75 校验 <code>cp_type</code> 必须在合法集里，:76-77 对 ulysses 类型额外要求 <code>num_attention_heads % cp_size == 0</code>——因为 Ulysses CP 要把 attention head 切分到不同卡，head 数不能整除会炸。:78 <code>apply_context_parallelize_modules</code>（本仓自研，:10 import）真正落 CP，沿 <code>cp</code> mesh 维切序列维度。注意 CP 这里不传 device mesh——它用 :39 调用时由 manager 内部取。</p><p>:80-83 <code>apply_recompute_modules</code>：:81 若没开 <code>recompute</code> 直接 return；:83 <code>recompute_modules(self.model, self.config.recompute_plan)</code>——再次委托 fsdp_turbo（:7 import），plan 是一个模块通配符列表，指明哪些模块挂 activation 重算钩子（前向不算激活、反向时重算，省显存换计算）。recompute 在 apply 链里排在 FSDP 之前（:40 在 :41 前），因为它是 module 级钩子，必须在参数被 shard 成 DTensor 之前落定。</p></div></div><div class="seg"><p class="seglab">行 85-108 · 量化 converter、optimizer 钩子与裸 forward</p><pre data-lang="py" data-start="85" data-idprefix="A">    def apply_quantization_modules(self):
+        &quot;&quot;&quot;Apply quantization based on quantization_format + quantization_recipe.&quot;&quot;&quot;
+        if not self.config.quantization_plan.recipe_name:
+            return
+        try:
+            if self.config.recompute:
+                self.config.quantization_plan.fsdp_low_precision_all_gather_mode = &quot;all&quot;
+
+            from fsdp_turbo.quantization.converter.model_converter import build_model_converter
+
+            model_converters = build_model_converter(self.config.quantization_plan)
+            model_converters.convert(self.model)
+        except Exception as e:
+            raise RuntimeError(&quot;Failed to convert quantization plan&quot;) from e
+
+    def apply_optimizer_hook(self, optimizer: torch.optim.Optimizer):
+        if not self.config.quantization_plan.recipe_name:
+            return
+        from mindspeed.fsdp.quantization.core.cache import hook_optimizer_step
+
+        hook_optimizer_step(self.model, optimizer)
+
+    def forward(self, *args, **kwargs):
+        return self.model(*args, **kwargs)</pre><div class="exp"><p>:85-98 <code>apply_quantization_modules</code> 按 <code>recipe_name</code> 门控（:87 没配 recipe 就 return），:90-91 有个交互：<code>recompute</code> 开启时强制把 <code>fsdp_low_precision_all_gather_mode='all'</code>——这是 NPU 显存受限下的低精度 all-gather 优化开关（FSDP all-gather 时用低精度 dtype 省显存）。:93-96 又是委托：<code>build_model_converter</code> 来自 <code>fsdp_turbo.quantization.converter.model_converter</code>（:93），<code>convert(self.model)</code> 把目标模块替换成量化版本。:97-98 用 try/except 包成 <code>RuntimeError('Failed to convert quantization plan')</code>——量化失败要硬报错，不能静默跳过（静默会训出错误精度的模型）。</p><p>:100-105 <code>apply_optimizer_hook</code> 在量化时给 optimizer 挂 <code>hook_optimizer_step</code>（:103-105），来源是 <code>mindspeed.fsdp.quantization.core.cache</code>——注意这是 <b>MindSpeed 侧</b>（非本仓 fsdp2 子包）的量化缓存钩子，NPU 上量化器需要在 optimizer step 处同步参数缓存（量化/反量化的 pending buffer）。:101 没 recipe 就 return，不挂钩子。</p><p>:107-108 <code>forward</code> 只有 <code>return self.model(*args, **kwargs)</code>——引擎本身不碰前向语义，FSDP2 的 all-gather/reduce-scatter 通信全由 fsdp_turbo 在各子模块的 pre/post-forward 钩子里触发，<b>引擎层不可见</b>。这也是为什么这个文件读完并不能解释 FSDP2 的运行期行为——通信原语在 fsdp_turbo 与各 apply 函数内部，引擎只是调度骨架。</p></div></div></div>
+<details class="src"><summary>📜 完整源码（109 行）— 大纲点跳行</summary><pre data-lang="py" data-start="1"># Copyright (c) 2025, Huawei Technologies Co., Ltd. All rights reserved.
+from typing import Optional, Any
+import torch
+
+from fsdp_turbo.distributed.fully_shard_parallel.fully_shard_parallel import fully_shard_parallel_modules
+from fsdp_turbo.distributed.tensor_parallel.tensor_parallel import tensor_parallel_modules
+from fsdp_turbo.memory.recompute.recompute import recompute_modules
+from mindspeed_llm.fsdp2.distributed.parallel_state import init_parallel_state
+from mindspeed_llm.fsdp2.distributed.parallel_engine_config import ParallelEngineConfig
+from mindspeed_llm.fsdp2.distributed.context_parallel.context_parallel_manager import apply_context_parallelize_modules
+from mindspeed_llm.fsdp2.distributed.expert_parallel.expert_parallel import expert_parallelize_modules
+from mindspeed_llm.fsdp2.distributed.expert_parallel.expert_fully_shard_parallel import expert_fully_shard_modules
+from mindspeed_llm.fsdp2.models.model_loader import WeightLoader
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+
+logger = get_logger(__name__)
+
+
+class MindSpeedParallelEngine(torch.nn.Module):
+    def __init__(
+        self,
+        config: ParallelEngineConfig,
+        model: torch.nn.Module,
+        init_device: str = &quot;cpu&quot;,
+        weights_path: Optional[str] = None,
+        hf_config: Optional[Any] = None,
+    ):
+        super().__init__()
+        self.config = config
+        self.model = model
+        self.init_device = init_device
+        self.weights_path = weights_path
+        self.hf_config = hf_config
+
+        self.parallel_state = init_parallel_state(self.config)
+        self.apply_quantization_modules()
+        self.apply_tp_modules()
+        self.apply_ep_modules()
+        self.apply_cp_modules()
+        self.apply_recompute_modules()
+        self.apply_fsdp_modules()
+
+        # For meta device: load weights after fsdp wrapping
+        if self.init_device == &quot;meta&quot;:
+            logger.info_rank0(&quot;&gt; Loading weights after FSDP wrapping...&quot;)
+            WeightLoader.load(model=self.model, weights_path=self.weights_path, device=None, hf_config=self.hf_config)
+
+    def apply_fsdp_modules(self):
+        self.model = fully_shard_parallel_modules(
+            self.model, self.parallel_state.get_fsdp_device_mesh(), self.config.fsdp_plan
+        )
+
+    def apply_tp_modules(self):
+        if self.config.tensor_parallel_size == 1:
+            return
+        self.model = tensor_parallel_modules(self.model, self.parallel_state.get_tp_device_mesh(), self.config.tp_plan)
+
+    def apply_ep_modules(self):
+        if self.config.expert_parallel_size &gt; 1:
+            self.model = expert_parallelize_modules(
+                self.model, self.parallel_state.get_ep_device_mesh(), self.config.ep_plan
+            )
+        if self.config.expert_fully_shard_parallel_size &gt; 1:
+            self.model = expert_fully_shard_modules(
+                self.model, self.parallel_state.get_efsdp_device_mesh(), self.config.ep_plan
+            )
+
+    def apply_cp_modules(self):
+        VALID_CP_TYPES = (&quot;ulysses&quot;, &quot;ring&quot;)
+        cp_size = self.config.context_parallel_size
+        cp_type = self.config.context_parallel_type
+
+        if cp_size &gt; 1:
+            if cp_type not in VALID_CP_TYPES:
+                raise ValueError(f&quot;context_parallel_type must be one of {VALID_CP_TYPES}&quot;)
+            if cp_type == &quot;ulysses&quot; and self.model.config.num_attention_heads % cp_size != 0:
+                raise ValueError(f&quot;num_attention_heads must be divisible by context_parallel_size (current: {cp_size})&quot;)
+            apply_context_parallelize_modules(self.model, self.config.cp_plan)
+
+    def apply_recompute_modules(self):
+        if not self.config.recompute:
+            return
+        self.model = recompute_modules(self.model, self.config.recompute_plan)
+
+    def apply_quantization_modules(self):
+        &quot;&quot;&quot;Apply quantization based on quantization_format + quantization_recipe.&quot;&quot;&quot;
+        if not self.config.quantization_plan.recipe_name:
+            return
+        try:
+            if self.config.recompute:
+                self.config.quantization_plan.fsdp_low_precision_all_gather_mode = &quot;all&quot;
+
+            from fsdp_turbo.quantization.converter.model_converter import build_model_converter
+
+            model_converters = build_model_converter(self.config.quantization_plan)
+            model_converters.convert(self.model)
+        except Exception as e:
+            raise RuntimeError(&quot;Failed to convert quantization plan&quot;) from e
+
+    def apply_optimizer_hook(self, optimizer: torch.optim.Optimizer):
+        if not self.config.quantization_plan.recipe_name:
+            return
+        from mindspeed.fsdp.quantization.core.cache import hook_optimizer_step
+
+        hook_optimizer_step(self.model, optimizer)
+
+    def forward(self, *args, **kwargs):
+        return self.model(*args, **kwargs)
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

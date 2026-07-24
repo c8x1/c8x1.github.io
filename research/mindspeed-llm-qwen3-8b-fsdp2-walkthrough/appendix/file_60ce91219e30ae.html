@@ -1,0 +1,186 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/models/common/fusions.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/models/common/fusions.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_2427fff250e65b.html">◀ __init__.py</a> <a href="file_b67083609a0779.html">indexer_loss.py ▶</a></nav></div>
+<div class="wrap">
+<h1>fusions.py</h1><p class="goal">mindspeed_llm/fsdp2/models/common/fusions.py · 778B · 27 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L8" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def fused_rmsnorm_forward(self, x)</a><a href="#L12" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply_rotary_pos_emb(q, k, cos, sin, posit</a><a href="#L20" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def fused_mlp_forward(self, x)</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep12.html">EP12</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="annot"><div class="seg"><p class="seglab">行 1-6 · 文件头：torch_npu 软导入（import 期不炸，调用期必须装）</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :1-:6）</h5><pre data-lang="py" data-start="1" data-idprefix="A">import torch
+try:
+    import torch_npu
+except ImportError:
+    pass
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">import torch
+import torch_npu  # 硬依赖，无 try/except 兜底</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>对照差异在“依赖强度”。NVIDIA + DDP 场景下你写 fused kernel 走的是 <b>apex / TransformerEngine / torch.compile</b>，PyTorch 侧无统一入口，且通常是<b>可选依赖</b>（没装 apex 就 fallback 到 eager）。右侧 Ascend 路线里 <code>torch_npu</code> 是<b>必装硬依赖</b>——一旦开了 <code>use_fused_*</code> 开关、patch 生效，前向就强制走 NPU 内核，没有 PyTorch eager 的等价 fallback。所以 MindSpeed 用 try/except 软导入来<b>解耦 import 与运行</b>：纯 GPU 机器能 import 本文件做静态分析，但跑训练必须装 torch_npu + CANN。这跟 NVIDIA 侧“apex 缺了还能跑”的心智模型不同，是 Ascend 适配的第一个认知落差。</p></div></div><div class="seg"><p class="seglab">行 8-9 · fused_rmsnorm_forward：一行转发 npu_rms_norm，取 [0] 丢 inv_std</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :8-:9）</h5><pre data-lang="py" data-start="8" data-idprefix="A">def fused_rmsnorm_forward(self, x):
+    return torch_npu.npu_rms_norm(x, self.weight, epsilon=self.variance_epsilon)[0]</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">class Qwen3RMSNorm(nn.Module):              # HF transformers 原版
+    def forward(self, hidden_states):
+        input_dtype = hidden_states.dtype
+        hidden_states = hidden_states.to(torch.float32)
+        variance = hidden_states.pow(2).mean(-1, keepdim=True)
+        hidden_states = hidden_states * torch.rsqrt(variance + self.variance_epsilon)
+        return self.weight * hidden_states.to(input_dtype)</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>左侧是 HF 上游 <code>Qwen3RMSNorm.forward</code> 在 NVIDIA GPU 上的标准实现：<b>upcast 到 fp32 → pow(2) → mean(-1) → rsqrt → 乘权重 → downcast</b>，五步、多个中间张量（variance、rsqrt 结果），每个中间张量都是一次显存访存。右侧 patch 后：<code>npu_rms_norm(x, w, epsilon=eps)</code> 把这五步<b>融成单个 CANN 算子</b>，一次 kernel launch、中间 fp32 不物化、权重乘法内置。<b>差异本质</b>：数学等价（数值上可对拍），省的是访存与 launch 开销；NPU 上 CANN 对这种 elementwise+reduce 融合有专门优化。对照 NVIDIA 侧若想要同等融合，得靠 <code>torch.compile</code> 或 TransformerEngine 的 fused RMSNorm，PyTorch eager 不会自动融。这也解释了为何 patch 受 <code>use_fused_rmsnorm</code> 开关保护——关掉即回左侧等价但更慢的路径，便于跨厂商数值对拍。</p></div></div><div class="seg"><p class="seglab">行 12-17 · apply_rotary_pos_emb：npu_rotary_mul 对 q/k 各一次，position_ids 是哑参数</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :12-:17）</h5><pre data-lang="py" data-start="12" data-idprefix="A">def apply_rotary_pos_emb(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
+    cos = cos.unsqueeze(unsqueeze_dim)
+    sin = sin.unsqueeze(unsqueeze_dim)
+    q_embed = torch_npu.npu_rotary_mul(q, cos, sin)
+    k_embed = torch_npu.npu_rotary_mul(k, cos, sin)
+    return q_embed, k_embed</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">def rotate_half(x):                       # HF helpers
+    x1 = x[..., : x.shape[-1] // 2]
+    x2 = x[..., x.shape[-1] // 2 :]
+    return torch.cat((-x2, x1), dim=-1)
+
+def apply_rotary_pos_emb(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
+    cos = cos.unsqueeze(unsqueeze_dim)
+    sin = sin.unsqueeze(unsqueeze_dim)
+    q_embed = (q * cos) + (rotate_half(q) * sin)
+    k_embed = (k * cos) + (rotate_half(k) * sin)
+    return q_embed, k_embed</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>左侧是 HF 上游 <code>apply_rotary_pos_emb</code> 在 GPU 上的标准实现：<code>rotate_half</code>（concat-flip 拆半取反）+ <code>(q*cos) + (rotate_half(q)*sin)</code> 的逐元素乘加，q 和 k 各跑一遍，<b>多个中间张量</b>（rotate_half 结果、两次乘法、一次加法）。右侧 patch 后：<code>npu_rotary_mul(q, cos, sin)</code> 把“rotate_half + cos 乘 + sin 乘 + 加”<b>融成单个 CANN 算子</b>，q/k 各一次 kernel launch。<b>差异本质</b>：数学等价（标准 RoPE），省的是 rotate_half 的 concat-flip 中间张量与多次逐元素访存；NPU CANN 对 RoPE 这种固定模式有专门融合内核。对照 NVIDIA 侧：HF 的 eager 实现就是左侧这样手写，要融合得靠 FlashAttention 内置的 RoPE 或 torch.compile；MindSpeed 这里用 patch 强制走融合内核，且<b>对调用方透明</b>（签名、返回值结构都不变，只是内部 mul 换了内核）。<code>position_ids</code> 哑参数两侧一致——HF 原版签名也带但实现里同样未用于算 cos/sin，MindSpeed 是照抄签名以兼容 patch 机制。</p></div></div><div class="seg"><p class="seglab">行 20-26 · fused_mlp_forward：cat+matmul+npu_swiglu（但全仓零调用，是死代码/预留样板）</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :20-:26）</h5><pre data-lang="py" data-start="20" data-idprefix="A">def fused_mlp_forward(self, x):
+    gate_up_w = torch.cat([self.gate_proj.weight, self.up_proj.weight], dim=0)
+    gate_up_output = torch.matmul(x, gate_up_w.t())
+
+    swiglu_output = torch_npu.npu_swiglu(gate_up_output, dim=-1)
+    down_proj = self.down_proj(swiglu_output)
+    return down_proj</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">class Qwen3MLP(nn.Module):                  # HF transformers 原版
+    def forward(self, x):
+        gate = self.gate_proj(x)            # Linear: matmul + bias
+        up = self.up_proj(x)                # Linear: matmul + bias
+        act = F.silu(gate)                  # 逐元素 SiLU
+        inter = act * up                    # 逐元素 mul
+        return self.down_proj(inter)        # Linear: matmul + bias</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>左侧是 HF 上游 <code>Qwen3MLP.forward</code> 在 GPU 上的标准实现：<b>gate/up 两次独立 Linear（两次 matmul）+ F.silu + 逐元素 mul</b>，四个 kernel、多个中间张量（gate、up、act、inter）。右侧 <code>fused_mlp_forward</code> 的思路是：<b>先 cat 权重再单次 matmul</b>（:21-22，把两次 Linear 合一次）、再用 <code>npu_swiglu(.., dim=-1)</code>（:24）把 silu+mul 融成单个 CANN 算子。数学上等价（cat 权重沿 dim=0 后单 matmul = 原两次 matmul 拼接），省的是<b>一次 matmul launch + silu/mul 中间张量</b>。<b>但重点</b>：右侧这段<b>没被接入</b>（全仓零调用，见讲解），它只是<b>正确的写法样板</b>；真正生效的 swiglu 融合在 MoE 专家里是直接内联调 <code>torch_npu.npu_swiglu</code>。NVIDIA 侧若想等价融合，得用 Megatron 的 <code>ColumnParallelLinear</code> + fused SiLU kernel，或 torch.compile；HF eager 就是左侧这样分开算。两侧对照凸显：本 wrapper 设计意图正确、但工程上未连线，别高估其运行时作用。</p></div></div><div class="seg"><p class="seglab">行 20-26 · 三座桥总览 + EP12 落点：融合算子 vs FSDP2 vs HF backbone 的正交关系</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :20-:26）</h5><pre data-lang="py" data-start="20" data-idprefix="A">def fused_mlp_forward(self, x):
+    gate_up_w = torch.cat([self.gate_proj.weight, self.up_proj.weight], dim=0)
+    gate_up_output = torch.matmul(x, gate_up_w.t())
+
+    swiglu_output = torch_npu.npu_swiglu(gate_up_output, dim=-1)
+    down_proj = self.down_proj(swiglu_output)
+    return down_proj</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># NVIDIA DDP + HF Qwen3 的等价改造点对照
+
+# 第一座桥：backbone
+model = transformers.Qwen3Model(config)   # 完全一致，两边都复用 HF
+
+# 第二座桥：融合算子（NVIDIA 侧无 patch，走 config 路由或 torch.compile）
+#   RMSNorm: F.rms_norm 或 torch.compile 融合，无 monkey-patch
+#   RoPE:    FlashAttention 内置 RoPE，或手写 rotate_half
+#   MLP:     Megatron fused_mlp 或 torch.compile
+
+# 第三座桥：分布式
+model = DDP(model, ...)                    # DDP 梯度 all-reduce
+#   vs FSDP2: fully_shard 切参数 + DTensor 本地视图</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>把三座桥在 NVIDIA DDP 与 Ascend FSDP2 两条路线上的落点并排看：<b>第一座桥（HF backbone 复用）两边完全一致</b>，都 <code>transformers.Qwen3Model(config)</code>——这是 MindSpeed 能跟 HF 上游升级的根基。</p><p><b>第二座桥差异最大</b>：NVIDIA 侧融合算子靠 <code>torch.compile</code> / TransformerEngine / FlashAttention <b>自动融合或库内置</b>，<b>不 monkey-patch HF 源符号</b>；Ascend 侧因 CANN 内核在 torch_npu、HF 上游不感知 NPU，只能用 <code>MindSpeedPatchesManager.register_patch</code> 按“符号全名”运行期替换 HF 的 <code>Qwen3RMSNorm.forward</code> / <code>apply_rotary_pos_emb</code>。两侧都数学等价，但替换机制不同：NVIDIA 是“库 + 编译器自动”，Ascend 是“运行期 monkey-patch + 开关保护”。<code>use_fused_*</code> 开关关掉即回 HF 原生，这是跨厂商数值对拍的逃生口。</p><p><b>第三座桥差异本质</b>：NVIDIA DDP 是<b>梯度后 all-reduce、参数不分片</b>；Ascend FSDP2 是<b>参数按 DTensor 分片、前向 unshard + 后向 reshard + 梯度 reduce</b>。但融合算子在这两套里<b>都不感知分布式</b>——:9 的 <code>self.weight</code> 在 DDP 下是全量 Tensor、在 FSDP2 下是本地分片视图，<code>npu_rms_norm</code> 都只跑本地数据。所以融合算子层与 FSDP2 层正交可叠加，EP12 下“全卡 patch norm/rope + 专家走 grouped_matmul + 全卡 fully_shard”三件套同时生效，互不踩脚。</p></div></div></div>
+<details class="src"><summary>📜 完整源码（27 行）— 大纲点跳行</summary><pre data-lang="py" data-start="1">import torch
+try:
+    import torch_npu
+except ImportError:
+    pass
+
+
+def fused_rmsnorm_forward(self, x):
+    return torch_npu.npu_rms_norm(x, self.weight, epsilon=self.variance_epsilon)[0]
+
+
+def apply_rotary_pos_emb(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
+    cos = cos.unsqueeze(unsqueeze_dim)
+    sin = sin.unsqueeze(unsqueeze_dim)
+    q_embed = torch_npu.npu_rotary_mul(q, cos, sin)
+    k_embed = torch_npu.npu_rotary_mul(k, cos, sin)
+    return q_embed, k_embed
+
+
+def fused_mlp_forward(self, x):
+    gate_up_w = torch.cat([self.gate_proj.weight, self.up_proj.weight], dim=0)
+    gate_up_output = torch.matmul(x, gate_up_w.t())
+
+    swiglu_output = torch_npu.npu_swiglu(gate_up_output, dim=-1)
+    down_proj = self.down_proj(swiglu_output)
+    return down_proj
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

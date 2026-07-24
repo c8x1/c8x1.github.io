@@ -1,0 +1,221 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/utils/flops/flops_base.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/utils/flops/flops_base.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_921da30474e990.html">◀ dist_op.py</a> <a href="file_98817ed281ef88.html">flops_factory.py ▶</a></nav></div>
+<div class="wrap">
+<h1>flops_base.py</h1><p class="goal">mindspeed_llm/fsdp2/utils/flops/flops_base.py · 3759B · 120 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L17" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class BaseFlopsEstimator(ABC)</a><a href="#L22" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, config: PretrainedConfig)</a><a href="#L26" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def calculate_achieved_flops</a><a href="#L48" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class UnknownModelFlopsEstimator(BaseFlopsEsti</a><a href="#L56" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def calculate_achieved_flops</a><a href="#L73" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def unit_convert(number: float, level: str) -&</a><a href="#L92" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_device_flops(unit: str = &quot;T&quot;</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<span class="mut">（未被正文 EP 引用）</span>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p>Base module for FLOPS/MFU calculation: abstract interface, fallback estimator, utilities.</p><p class="mut">（自动提取自模块 docstring；核心讲解待补——若该文件被某 EP 覆盖，见下方回链）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1">&quot;&quot;&quot;
+Base module for FLOPS/MFU calculation: abstract interface, fallback estimator, utilities.
+&quot;&quot;&quot;
+from abc import ABC, abstractmethod
+from typing import List
+import torch
+
+from transformers import PretrainedConfig
+
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+
+logger = get_logger(__name__)
+
+# --------------------------
+# BaseFlopsEstimator
+# --------------------------
+class BaseFlopsEstimator(ABC):
+    &quot;&quot;&quot;
+    Abstract base class for model-specific FLOPS estimation.
+    All model FLOPS calculators must implement this interface.
+    &quot;&quot;&quot;
+    def __init__(self, config: PretrainedConfig):
+        self.config = config
+
+    @abstractmethod
+    def calculate_achieved_flops(
+        self, 
+        tokens_sum: int, 
+        batch_seqlens: List[int], 
+        delta_time: float
+    ) -&gt; float:
+        &quot;&quot;&quot;
+        Calculate achieved FLOPS for one batch in TFLOPS.
+        
+        Args:
+            tokens_sum: total number of tokens in the batch
+            batch_seqlens: list of sequence lengths for each sample
+            delta_time: time spent processing the batch (seconds)
+        
+        Returns:
+            achieved TFLOPS for this batch
+        &quot;&quot;&quot;
+        pass
+
+# --------------------------
+# UnknownModelFlopsEstimator
+# --------------------------
+class UnknownModelFlopsEstimator(BaseFlopsEstimator):
+    &quot;&quot;&quot;
+    Fallback estimator for unsupported model types.
+    Returns 0.0 and logs a warning.
+    &quot;&quot;&quot;
+    # Class variable to track if warning has been printed
+    _warning_printed = False
+    
+    def calculate_achieved_flops(
+        self, 
+        tokens_sum: int, 
+        batch_seqlens: List[int], 
+        delta_time: float
+    ) -&gt; float:
+        if not UnknownModelFlopsEstimator._warning_printed:
+            logger.warn_rank0(
+                f&quot;Model type &#x27;{self.config.model_type}&#x27; is not supported for MFU calculation. &quot;
+                f&quot;Supported models are registered in flops_factory.py.&quot;
+            )
+            UnknownModelFlopsEstimator._warning_printed = True
+        return 0.0
+
+# --------------------------
+# Common utilities
+# --------------------------
+def unit_convert(number: float, level: str) -&gt; float:
+    &quot;&quot;&quot;
+    Convert numerical values between metric units (B/K/M/G/T/P) from base unit &quot;B&quot;
+    
+    Args:
+        number (float): Original value in &quot;B&quot; unit to be converted
+        level (str): Target unit (B/K/M/G/T/P)
+    
+    Returns:
+        float: Converted value in target unit (return original number if invalid input)
+    &quot;&quot;&quot;
+    units = [&quot;B&quot;, &quot;K&quot;, &quot;M&quot;, &quot;G&quot;, &quot;T&quot;, &quot;P&quot;]
+    # Basic edge case handling (keep consistent with original logic)
+    if number &lt;= 0 or level not in units:
+        return number
+    target_idx = units.index(level)
+    conversion_factor = 1000 ** target_idx  # 1000^0=1 (B), 1000^1=1000 (K), 1000^2=1000000 (M)...
+    return number / conversion_factor
+
+def get_device_flops(unit: str = &quot;T&quot;) -&gt; float:
+    &quot;&quot;&quot;
+    Get theoretical peak FLOPS of the current device with unit conversion
+
+    Args:
+        unit (str): Target unit for FLOPS value (B/K/M/G/T/P), default: &quot;T&quot;
+    
+    Returns:
+        float: Peak FLOPS value in the specified unit
+    &quot;&quot;&quot;
+    DEVICE_FLOPS_MAP = [
+        (&quot;H100&quot;, 989e12),
+        (&quot;H800&quot;, 989e12),
+        (&quot;A100&quot;, 312e12),
+        (&quot;A800&quot;, 312e12),
+        (&quot;L40&quot;, 181.05e12),
+        (&quot;L20&quot;, 119.5e12),
+        (&quot;H20&quot;, 148e12),
+        (&quot;910B&quot;, 354e12),
+        (&quot;B200&quot;, 2250e12),
+    ]
+
+    device_name = torch.accelerator.get_device_name()
+    flops = float(&quot;inf&quot;)
+    for key, val in DEVICE_FLOPS_MAP:
+        if key in device_name:
+            flops = val
+            break
+    return unit_convert(flops, unit)</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

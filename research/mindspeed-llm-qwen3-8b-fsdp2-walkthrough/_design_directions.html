@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>走读系列 · 视觉风格实时调</title>
+<style>
+  :root{
+    --ivory:#FAF9F5; --paper:#FFFFFF; --slate:#141413;
+    --clay:#D97757; --clay-d:#B85C3E; --olive:#788C5D;
+    --g100:#F0EEE6; --g200:#E6E3DA; --g300:#D1CFC5; --g500:#87867F; --g700:#3D3D3A;
+    --ascend:#C7000B;
+    --serif:ui-serif,Georgia,"Times New Roman",Times,serif;
+    --sans:system-ui,-apple-system,"PingFang SC","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ivory);color:var(--slate);font-family:var(--sans);line-height:1.6}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 24px 90px}
+  h1{font-family:var(--serif);font-size:28px;margin:0 0 4px}
+  .lede{color:var(--g700);margin:0 0 4px;font-size:15px}
+  .lede strong{color:var(--clay-d)}
+  .orient{color:var(--g500);font-size:13px;margin:0 0 18px}
+  .legend{font-size:12px;color:var(--g700);background:var(--g100);border:1px solid var(--g300);
+    padding:10px 14px;border-radius:8px;margin:0 0 18px}
+  .legend b{color:var(--clay-d)}
+
+  .presets{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 6px}
+  .preset{border:1.5px solid var(--g300);background:var(--paper);color:var(--g700);
+    font-size:13px;padding:8px 14px;border-radius:8px;cursor:pointer;transition:all .12s}
+  .preset:hover{border-color:var(--clay)}
+  .preset[data-active=1]{background:var(--clay);color:#fff;border-color:var(--clay-d)}
+  .preset .num{font-weight:700;margin-right:6px}
+  .presetline{font-size:12px;color:var(--g500);margin:0 0 14px}
+
+  .groups{display:flex;flex-wrap:wrap;gap:10px 22px;margin:0 0 12px}
+  .group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .glabel{font-size:12px;color:var(--g500);margin-right:4px;font-weight:600}
+  .chip{display:inline-flex;align-items:center;border:1.5px solid var(--g300);
+    background:var(--paper);color:var(--g700);font-size:13px;padding:6px 12px;border-radius:999px;
+    cursor:pointer;user-select:none;transition:all .12s}
+  .chip:hover{border-color:var(--clay);transform:translateY(-1px)}
+  .chip[data-on=1]{background:var(--clay);color:#fff;border-color:var(--clay-d)}
+  .chip[data-on=1]::before{content:"✓ "}
+  .dimline{font-size:12px;color:var(--g500);margin:0 0 18px}
+
+  /* ============ live canvas ============ */
+  .canvas{border:1px solid var(--g300);border-radius:10px;overflow:hidden;background:var(--paper);
+    color:var(--slate);transition:all .2s;font-family:var(--sans)}
+  .c-head{padding:16px 20px 10px}
+  .c-crumb{font-size:12px;color:var(--g500)}
+  .canvas h2{font-size:22px;margin:4px 0 2px;font-family:var(--sans)}
+  .c-goal{font-size:13px;color:var(--g700);margin:0}
+  .c-diag{padding:6px 20px 12px}
+  .c-body{display:block}
+  .c-main{padding:0 20px 18px}
+  .c-tree{display:none}
+  .canvas h3{font-size:15px;margin:14px 0 4px}
+  .canvas p{margin:6px 0;font-size:14px}
+  .canvas pre{font-family:var(--mono);font-size:12.5px;line-height:1.5;overflow:auto;
+    background:var(--g100);border:1px solid var(--g200);padding:10px 12px;border-radius:4px;
+    counter-reset:l}
+  .canvas pre .ln{display:none;color:var(--g300);user-select:none}
+  .c-codefig .codecap,.c-codefig .footnote{display:none}
+  .filelink{font-size:12px;color:var(--clay-d);margin:4px 0 10px}
+  .c-gnpu{font-size:13px}
+  .c-gnpu .split{display:none}
+  .c-gnpu table{border-collapse:collapse;width:100%}
+  .c-gnpu td{border:1px solid var(--g300);padding:5px 10px;font-size:12.5px}
+  .c-gnpu td.k{background:var(--g100);color:var(--g700);width:90px}
+  .c-sum{font-size:13px;color:var(--g700);border-top:1px solid var(--g200);margin-top:10px;padding-top:8px}
+  .c-sum b{color:var(--clay-d)}
+  .diag-inline{display:block}
+  .diag-hero{display:none}
+
+  .canvas.m-dark{background:#0f0f12;color:#e8e8e8;border-color:#000}
+  .canvas.m-dark h2,.canvas.m-dark h3{color:#fff}
+  .canvas.m-dark .c-crumb,.canvas.m-dark .c-goal{color:#9a9a9a}
+  .canvas.m-dark pre{background:#000;border-color:#222;color:#d4d4d4}
+  .canvas.m-dark .c-gnpu td{border-color:#333}
+  .canvas.m-dark .c-gnpu td.k{background:#1a1a1a;color:#bbb}
+  .canvas.m-dark .c-sum{color:#bbb;border-color:#222}
+  .canvas.m-dark .filelink{color:var(--clay)}
+
+  .canvas.m-serif{font-family:var(--serif)}
+  .canvas.m-serif h2,.canvas.m-serif h3{font-family:var(--serif);font-weight:600}
+  .canvas.m-serif .c-crumb,.canvas.m-serif .c-goal{font-style:italic}
+  .canvas.m-serif .filelink{font-style:italic}
+
+  .canvas.m-narrow{max-width:660px;margin:0 auto}
+
+  .canvas.m-tree .c-body{display:grid;grid-template-columns:150px 1fr}
+  .canvas.m-tree .c-tree{display:block;background:var(--g100);border-right:1px solid var(--g200);
+    padding:12px 8px;font-family:var(--mono);font-size:11px;color:var(--g500)}
+  .canvas.m-tree .c-tree .f{display:block;padding:2px 4px}
+  .canvas.m-tree .c-tree .f.act{color:var(--clay-d);border-left:2px solid var(--clay);padding-left:6px}
+  .canvas.m-dark.m-tree .c-tree{background:#1a1a1a;color:#6a6a6a;border-color:#000}
+  .canvas.m-dark.m-tree .c-tree .f.act{color:var(--clay)}
+  .canvas.m-tree pre .ln{display:inline-block;width:30px}
+
+  .canvas.m-codefig .c-codefig .codecap{display:block;font-family:var(--serif);font-style:italic;
+    font-size:12px;color:var(--g500);margin:0 0 4px}
+  .canvas.m-codefig .c-codefig .footnote{display:block;font-size:11px;color:var(--g500);
+    font-style:italic;margin-top:4px}
+  .canvas.m-codefig pre{border-left:3px solid var(--g500)}
+  .canvas.m-dark.m-codefig pre{border-left-color:#555}
+
+  .canvas.m-gnpu-split .c-gnpu table{display:none}
+  .canvas.m-gnpu-split .c-gnpu .split{display:grid;grid-template-columns:1fr 1fr;gap:0;
+    border:1px solid var(--g300);border-radius:6px;overflow:hidden}
+  .canvas.m-gnpu-split .c-gnpu .split .g{background:#eef4e7;color:var(--olive);padding:10px 14px}
+  .canvas.m-gnpu-split .c-gnpu .split .n{background:#fdecea;color:var(--clay-d);padding:10px 14px}
+  .canvas.m-gnpu-split .c-gnpu .split h4{margin:0 0 4px;font-size:13px}
+  .canvas.m-dark.m-gnpu-split .c-gnpu .split{border-color:#222}
+  .canvas.m-dark.m-gnpu-split .c-gnpu .split .g{background:#14241a;color:#7ab98a}
+  .canvas.m-dark.m-gnpu-split .c-gnpu .split .n{background:#2a0f10;color:#e88}
+
+  .canvas.m-poster-diag .c-diag{padding:0}
+  .canvas.m-poster-diag .diag-inline{display:none}
+  .canvas.m-poster-diag .diag-hero{display:flex;flex-direction:column}
+  .canvas.m-poster-diag .c-head{display:none}
+  .diag-hero .hero{background:radial-gradient(circle at 20% 0%,#3a0a0a,transparent 60%),#0f0f12;
+    padding:18px 20px;border-bottom:3px solid var(--ascend)}
+  .canvas.m-dark.m-poster-diag .hero{border-bottom:3px solid var(--clay)}
+  .canvas.m-poster-diag .hero h2{color:#fff;font-size:26px;margin:2px 0;font-weight:800;font-family:var(--sans)}
+  .canvas.m-poster-diag .hero .c-crumb{color:#9a9a9a}
+  .canvas.m-poster-diag .hero .c-goal{color:var(--clay);font-weight:600}
+  .diag-hero .steps{display:flex;gap:8px;padding:14px 20px;flex-wrap:wrap;background:var(--paper)}
+  .canvas.m-dark.m-poster-diag .steps{background:#0f0f12}
+  .diag-hero .step{flex:1;min-width:110px;background:var(--g100);border:1px solid var(--g200);
+    border-radius:8px;padding:8px 10px}
+  .canvas.m-dark.m-poster-diag .step{background:#1b1b22;border-color:#2a2a33}
+  .diag-hero .step .n{color:var(--clay);font-weight:800;font-size:16px}
+  .diag-hero .step .t{font-size:12px;color:var(--g700)}
+  .canvas.m-dark.m-poster-diag .step .t{color:#cfcfd6}
+
+  #replybar{position:fixed;left:16px;right:16px;bottom:12px;z-index:50;background:var(--paper);
+    border:1.5px solid var(--clay);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.16);
+    font-size:13px;overflow:hidden;transition:box-shadow .2s}
+  #replybar.flash{box-shadow:0 0 0 3px var(--clay),0 8px 32px rgba(0,0,0,.16)}
+  #replybar .rb-head{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer}
+  #replybar .rb-title{font-weight:600;color:var(--clay-d)}
+  #replybar .rb-count{color:var(--g500);font-size:12px}
+  #replybar .rb-spacer{flex:1}
+  #replybar .rb-btn{font-size:12px;border:1px solid var(--g300);background:var(--g100);color:var(--g700);
+    padding:5px 12px;border-radius:6px;cursor:pointer}
+  #replybar .rb-btn:hover{border-color:var(--clay);color:var(--clay-d)}
+  #replybar .rb-detail{padding:4px 14px 12px;white-space:pre-wrap;display:none;
+    border-top:1px solid var(--g200);max-height:32vh;overflow:auto}
+  #replybar:not(.collapsed) .rb-detail{display:block}
+  #replybar .rb-toggle::after{content:" ▾展开"}
+  #replybar:not(.collapsed) .rb-toggle::after{content:" ▴收起"}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>走读系列 · 视觉风格实时调</h1>
+  <p class="lede">同一块 EP03「DDP→FSDP2」样例，点下面的圆角标<strong>立刻看到效果</strong>。</p>
+  <p class="orient">orient：单块实时画布；圆角标=按维度单选的实时开关，点哪个套哪个；4 个预设一键套整方向。</p>
+  <div class="legend"><b>用法：</b>① 点 4 个预设按钮看完整方向 → ② 再点各维度圆角标微调（同维单选，橙=当前选中）→ ③ 底部汇总即你的取向，复制贴回对话。</div>
+
+  <div class="presets">
+    <button class="preset" data-preset="paper"><span class="num">①</span>学术论文派</button>
+    <button class="preset" data-preset="ide"><span class="num">②</span>深色 IDE 派</button>
+    <button class="preset" data-preset="diag"><span class="num">③</span>对角分屏派</button>
+    <button class="preset" data-preset="poster"><span class="num">④</span>信息海报派</button>
+    <button class="preset" data-preset="neutral">还原中性</button>
+  </div>
+  <div class="presetline">预设只是起点，点完可继续用下面的圆角标微调。</div>
+
+  <div class="groups">
+    <div class="group"><span class="glabel">底色</span>
+      <span class="chip" data-group="theme" data-opt="light" data-label="浅色底">浅色底</span>
+      <span class="chip" data-group="theme" data-opt="dark" data-label="深色 IDE 底">深色 IDE 底</span>
+    </div>
+    <div class="group"><span class="glabel">标题字体</span>
+      <span class="chip" data-group="font" data-opt="sans" data-label="无衬线标题">无衬线</span>
+      <span class="chip" data-group="font" data-opt="serif" data-label="衬线印刷感标题">衬线印刷感</span>
+    </div>
+    <div class="group"><span class="glabel">正文宽度</span>
+      <span class="chip" data-group="width" data-opt="full" data-label="全宽正文">全宽</span>
+      <span class="chip" data-group="width" data-opt="narrow" data-label="窄栏大留白">窄栏大留白</span>
+    </div>
+    <div class="group"><span class="glabel">侧栏</span>
+      <span class="chip" data-group="side" data-opt="none" data-label="无侧栏">无侧栏</span>
+      <span class="chip" data-group="side" data-opt="tree" data-label="文件树+行号常驻">文件树+行号</span>
+    </div>
+    <div class="group"><span class="glabel">对照卡</span>
+      <span class="chip" data-group="gnpu" data-opt="plain" data-label="纯文字对照表">纯文字表</span>
+      <span class="chip" data-group="gnpu" data-opt="split" data-label="双色对照卡">双色对照卡</span>
+    </div>
+    <div class="group"><span class="glabel">图示区</span>
+      <span class="chip" data-group="diag" data-opt="inline" data-label="内嵌小图">内嵌小图</span>
+      <span class="chip" data-group="diag" data-opt="poster" data-label="全幅图示+步骤卡">全幅+步骤卡</span>
+    </div>
+    <div class="group"><span class="glabel">代码块</span>
+      <span class="chip" data-group="code" data-opt="plain" data-label="普通代码块">普通块</span>
+      <span class="chip" data-group="code" data-opt="codefig" data-label="带编号插图+脚注">插图+脚注</span>
+    </div>
+  </div>
+  <div class="dimline">每个维度两个选项互斥；橙底=当前选中。画布会随你的选择实时变形。</div>
+
+  <div class="canvas" id="canvas">
+    <div class="c-head">
+      <div class="c-crumb">第一篇章 · 地基与心智桥 &nbsp;›&nbsp; EP03</div>
+      <h2>并行范式：DDP → FSDP1 → FSDP2</h2>
+      <div class="c-goal">目标：把 AllReduce 拆成 Reduce-Scatter + All-Gather。</div>
+    </div>
+
+    <div class="c-diag">
+      <div class="diag-inline">
+        <svg width="100%" height="86" viewBox="0 0 520 86" style="background:var(--g100);border:1px solid var(--g200);border-radius:4px">
+          <text x="6" y="15" font-size="11" fill="#87867F">DDP: AllReduce（每卡全量副本）</text>
+          <rect x="20" y="26" width="80" height="18" fill="#D97757"/><rect x="120" y="26" width="80" height="18" fill="#D97757"/>
+          <rect x="220" y="26" width="80" height="18" fill="#D97757"/><rect x="320" y="26" width="80" height="18" fill="#D97757"/>
+          <text x="410" y="38" font-size="11" fill="#3D3D3A">→ 同步全量梯度</text>
+          <text x="6" y="62" font-size="11" fill="#87867F">FSDP2: AllGather → Compute → ReduceScatter（每卡 1/N）</text>
+          <rect x="20" y="70" width="20" height="10" fill="#788C5D"/><rect x="120" y="70" width="20" height="10" fill="#788C5D"/>
+          <rect x="220" y="70" width="20" height="10" fill="#788C5D"/><rect x="320" y="70" width="20" height="10" fill="#788C5D"/>
+        </svg>
+      </div>
+      <div class="diag-hero">
+        <div class="hero">
+          <div class="c-crumb">EP03 · 地基与心智桥</div>
+          <h2>DDP → FSDP2</h2>
+          <div class="c-goal">把 AllReduce 拆成 ReduceScatter + AllGather</div>
+        </div>
+        <div class="steps">
+          <div class="step"><div class="n">①</div><div class="t">每卡全量副本</div></div>
+          <div class="step"><div class="n">②</div><div class="t">参数切片 1/N</div></div>
+          <div class="step"><div class="n">③</div><div class="t">AllGather 取参</div></div>
+          <div class="step"><div class="n">④</div><div class="t">ReduceScatter 散梯</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="c-body">
+      <div class="c-tree">
+        <span class="f">📁 distributed/</span>
+        <span class="f act">└ clip_grad_norm.py</span>
+        <span class="f">└ parallel_state.py</span>
+        <span class="f">└ dist_ops.py</span>
+        <span class="f">📁 models/qwen3/</span>
+        <span class="f">train/trainer.py</span>
+      </div>
+      <div class="c-main">
+        <h3>你已经熟悉的情况</h3>
+        <p>DDP 下每张卡持有完整模型副本，反向后用 AllReduce 同步梯度。模型放得进单卡时这就够用。</p>
+        <h3>本项目怎么做</h3>
+        <p>FSDP2 把 AllReduce 拆成 Reduce-Scatter（梯度）+ All-Gather（参数），参数、梯度、优化器状态都按卡切片，单卡只存 1/N。</p>
+        <h3>源码下钻</h3>
+        <div class="c-codefig">
+          <div class="codecap">图 3.1　clip_grad_norm.py:42 — FSDP 下梯度范数聚合（示意，最终以源码为准）</div>
+<pre><span class="ln">42 </span>def clip_grad_norm_(params, max_norm):
+<span class="ln">43 </span>    # grads already sharded -> aggregate across shards
+<span class="ln">44 </span>    total = torch._foreach_norm(params)
+<span class="ln">45 </span>    total = dist.all_reduce(total, op=SUM)   # HCCL under the hood
+<span class="ln">46 </span>    return total.clamp(max=max_norm)</pre>
+          <div class="footnote">注：行号为示意；分片梯度下需跨片聚合，HCCL 承担集合通信。</div>
+        </div>
+        <div class="filelink">↗ 打开完整文件：mindspeed_llm/fsdp2/distributed/clip_grad_norm.py</div>
+
+        <div class="c-gnpu">
+          <table>
+            <tr><td class="k">通信</td><td>NCCL all_reduce</td><td>→ HCCL all_reduce</td></tr>
+            <tr><td class="k">梯度范数</td><td>全量 reduce</td><td>→ 分片 reduce_scatter</td></tr>
+          </table>
+          <div class="split">
+            <div class="g"><h4>GPU</h4>NCCL all_reduce<br>全量 reduce</div>
+            <div class="n"><h4>NPU</h4>HCCL all_reduce<br>分片 reduce_scatter</div>
+          </div>
+        </div>
+
+        <div class="c-sum"><b>小结：</b>FSDP2 = DDP 的"参数也切片"版，用通信换显存。误区：① fsdp_size 须 = world_size；② 已无 AllReduce，拆成 RS+AG。</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="replybar" class="collapsed">
+    <div class="rb-head" id="rbHead">
+      <span class="rb-title">📋 当前视觉取向</span>
+      <span class="rb-count" id="rbCount"></span>
+      <span class="rb-spacer"></span>
+      <button class="rb-btn" id="rbCopy">复制</button>
+      <span class="rb-btn rb-toggle"></span>
+    </div>
+    <div class="rb-detail" id="rbDetail"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var state={theme:'light',font:'sans',width:'full',side:'none',gnpu:'plain',diag:'inline',code:'plain'};
+  var CLASS={theme:{dark:'m-dark'},font:{serif:'m-serif'},width:{narrow:'m-narrow'},
+    side:{tree:'m-tree'},gnpu:{split:'m-gnpu-split'},diag:{poster:'m-poster-diag'},code:{codefig:'m-codefig'}};
+  var PRESETS={
+    paper:  {theme:'light',font:'serif',width:'narrow',side:'none',gnpu:'plain',diag:'inline',code:'codefig'},
+    ide:    {theme:'dark', font:'sans', width:'full', side:'tree', gnpu:'plain',diag:'inline',code:'plain'},
+    diag:   {theme:'light',font:'sans', width:'full', side:'none',gnpu:'split',diag:'inline',code:'plain'},
+    poster: {theme:'dark', font:'sans', width:'full', side:'none',gnpu:'plain',diag:'poster',code:'plain'},
+    neutral:{theme:'light',font:'sans', width:'full', side:'none',gnpu:'plain',diag:'inline',code:'plain'}
+  };
+  var canvas=document.getElementById('canvas');
+  function apply(){
+    Object.keys(CLASS).forEach(function(g){
+      Object.keys(CLASS[g]).forEach(function(opt){ var cls=CLASS[g][opt]; if(cls) canvas.classList.remove(cls); });
+    });
+    Object.keys(state).forEach(function(g){ var cls=CLASS[g][state[g]]; if(cls) canvas.classList.add(cls); });
+    document.querySelectorAll('.chip').forEach(function(c){
+      var on=(state[c.getAttribute('data-group')]===c.getAttribute('data-opt'))?1:0; c.setAttribute('data-on',on);
+    });
+    document.querySelectorAll('.preset').forEach(function(b){
+      var p=PRESETS[b.getAttribute('data-preset')], match=1;
+      Object.keys(state).forEach(function(k){ if(state[k]!==p[k]) match=0; });
+      b.setAttribute('data-active',match);
+    });
+    render(true);
+  }
+  function render(flash){
+    var lines=[];
+    Object.keys(state).forEach(function(g){
+      var chip=document.querySelector('.chip[data-group="'+g+'"][data-opt="'+state[g]+'"]');
+      var lab=chip?chip.getAttribute('data-label'):state[g];
+      lines.push('  • '+g+'：'+lab);
+    });
+    var detail='<b>当前视觉取向（实时反映上方画布）：</b>\n'+lines.join('\n')+
+      '\n\n把这段贴回对话即可（或直接说"要 ② 再把对照卡换成双色"）。';
+    document.getElementById('rbDetail').innerHTML=detail;
+    document.getElementById('rbCount').textContent='（'+lines.length+' 维度已选）';
+    var bar=document.getElementById('replybar');
+    if(flash){bar.classList.remove('flash'); void bar.offsetWidth; bar.classList.add('flash');
+      setTimeout(function(){bar.classList.remove('flash')},350);}
+  }
+  function copyReply(){
+    var text=document.getElementById('rbDetail').innerText;
+    var done=function(){var b=document.getElementById('rbCopy');b.textContent='已复制 ✓';
+      setTimeout(function(){b.textContent='复制'},1200);};
+    if(navigator.clipboard&&window.isSecureContext){
+      navigator.clipboard.writeText(text).then(done).catch(function(){fallbackCopy(text,done);});
+    } else { fallbackCopy(text,done); }
+  }
+  function fallbackCopy(text,done){
+    try{
+      var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+      document.body.appendChild(ta);ta.select();
+      var ok=document.execCommand('copy');document.body.removeChild(ta);
+      if(ok){done();}else{alert('复制失败，请手动选中底部文字复制');}
+    }catch(e){alert('复制失败，请手动选中底部文字复制');}
+  }
+  document.getElementById('rbHead').addEventListener('click',function(e){
+    if(e.target.id==='rbCopy') return;             // 复制按钮自己处理，不触发折叠
+    document.getElementById('replybar').classList.toggle('collapsed');
+  });
+  document.getElementById('rbCopy').addEventListener('click',function(e){e.stopPropagation();copyReply();});
+  document.querySelectorAll('.chip').forEach(function(c){
+    c.addEventListener('click',function(){ state[c.getAttribute('data-group')]=c.getAttribute('data-opt'); apply(); });
+  });
+  document.querySelectorAll('.preset').forEach(function(b){
+    b.addEventListener('click',function(){ state=Object.assign({},PRESETS[b.getAttribute('data-preset')]); apply(); });
+  });
+  apply();
+})();
+</script>
+</body>
+</html>

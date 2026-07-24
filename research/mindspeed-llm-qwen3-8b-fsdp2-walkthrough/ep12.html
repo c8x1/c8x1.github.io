@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qwen3 建模精读 · 走读 EP12</title>
+<style>
+  :root{
+    --bg:#0f0f12; --bg2:#000; --side:#1a1a1a; --card:#16161c; --line:#2a2a33;
+    --txt:#e8e8e8; --mut:#9a9a9a; --mut2:#6a6a6a;
+    --serif:ui-serif,Georgia,"Times New Roman",Times,serif;
+    --sans:system-ui,-apple-system,"PingFang SC","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace;
+    --red:#C7000B; --red-bg:#2a0f10; --red-bd:#6e1a1c; --red-tx:#e88;
+    --grn:#788C5D; --grn-bg:#14241a; --grn-bd:#2e5a3a; --grn-tx:#7ab98a;
+    --acc:#C7000B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+  .page{max-width:1180px;margin:0 auto;padding:0}
+  /* breadcrumb + nav */
+  .topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);
+    font-size:13px;color:var(--mut)}
+  .topbar .crumb{font-family:var(--serif);font-style:italic}
+  .topbar nav{margin-left:auto;display:flex;gap:8px}
+  .topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:4px 10px;border-radius:6px}
+  .topbar nav a:hover{color:#fff;border-color:var(--acc)}
+  /* layout: tree + main */
+  .body{display:grid;grid-template-columns:160px 1fr;align-items:start}
+  .tree{background:var(--side);border-right:1px solid var(--line);padding:14px 8px;
+    font-family:var(--mono);font-size:11px;color:var(--mut2);min-height:80vh;position:sticky;top:0}
+  .tree .f{display:block;padding:2px 4px;white-space:pre}
+  .tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px}
+  .main{padding:22px 28px 80px}
+  /* headings */
+  h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:6px 0 2px;color:#fff}
+  .goal{font-family:var(--serif);font-style:italic;color:var(--mut);margin:0 0 4px}
+  .gain{font-size:13px;color:var(--mut);margin:0 0 20px}
+  .gain b{color:var(--red-tx)}
+  h2{font-family:var(--serif);font-weight:600;font-size:18px;color:#fff;margin:26px 0 6px;
+    border-bottom:1px solid var(--line);padding-bottom:3px}
+  h2 .sec{color:var(--mut2);font-style:italic;font-size:13px;margin-left:8px}
+  p{margin:8px 0}
+  /* code as numbered figure */
+  .figcap{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);
+    margin:10px 0 2px}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--mut2);
+    padding:10px 12px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55}
+  pre .ln{display:inline-block;width:32px;color:var(--mut2);user-select:none}
+  .filelink{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--red-tx);margin:4px 0 14px}
+  .filelink a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--red-bd)}
+  .footnote{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--mut2);margin:4px 0 14px}
+  /* highlight tints */
+  /* PyCharm Darcula 主题 token 配色 */
+  pre[data-lang]{color:#d4d4d4}
+  .tok-kw{color:#cc7832;font-weight:600}
+  .tok-bi{color:#9876aa;font-style:italic}
+  .tok-fn{color:#ffc66d}
+  .tok-cl{color:#a9b7c6;font-style:italic}
+  .tok-st{color:#6a8759}
+  .tok-cm{color:#808080;font-style:italic}
+  .tok-nm{color:#6897bb}
+  .tok-dc{color:#bbb33b}
+  .tok-key{color:#cc7832}
+  .tok-var{color:#9876aa}
+  .tree .f,.tree a.f{color:#6a6a6a;text-decoration:none;display:block;padding:2px 4px;white-space:pre;border-radius:3px}
+  .tree a.f:hover{background:#2a2a33;color:#d4d4d4}
+  .tree a.f.act,.tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px;font-weight:600}
+  /* gnpu split card */
+  .gnpu{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:14px 0}
+  .gnpu .g{background:var(--grn-bg);border-right:1px solid var(--line);padding:10px 14px}
+  .gnpu .n{background:var(--red-bg);padding:10px 14px}
+  .gnpu h4{margin:0 0 6px;font-family:var(--serif);font-size:13px}
+  .gnpu .g h4{color:var(--grn-tx)}.gnpu .n h4{color:var(--red-tx)}
+  .gnpu .row{display:grid;grid-template-columns:90px 1fr;gap:6px;font-size:12.5px;margin:4px 0}
+  .gnpu .row .k{color:var(--mut2)}
+  /* inline svg */
+  .diag{margin:10px 0 6px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:8px}
+  /* summary */
+  .sum{border-top:1px solid var(--line);margin-top:22px;padding-top:10px;font-size:13.5px}
+  .sum .pit{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12.5px;margin-top:6px}
+  /* file list at end */
+  .filelist{font-family:var(--mono);font-size:11px;color:var(--mut2);margin-top:22px;border-top:1px dashed var(--line);padding-top:10px}
+  .filelist b{color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <span class="crumb">第四篇章 · 模型与数据 › EP12</span>
+    <span style="color:var(--mut2)">EP12</span>
+    <nav>
+      <a href="ep11.html">◀ 上一篇</a>
+      <a href="index.html">索引</a>
+      <a href="ep13.html">下一篇 ▶</a>
+    </nav>
+  </div>
+  <div class="body">
+    <aside class="tree">
+      <a class="f" href="appendix/index.html" target="_blank">📁 附录·项目文件走读</a>
+      <span class="f">MindSpeed-LLM/</span>
+      <a class="f" href="appendix/file_089411e68e5d5b.html" target="_blank">├ train_fsdp2.py</a>
+      <span class="f">├ examples/fsdp2/</span>
+      <a class="f" href="appendix/file_d04a217944c522.html" target="_blank">│  ├ env_config.sh</a>
+      <span class="f">│  └ qwen3/</span>
+      <span class="f">├ mindspeed_llm/fsdp2/</span>
+      <span class="f">│  └ models/</span>
+      <span class="f">│    ├ qwen3/</span>
+      <a class="f act" href="appendix/file_483d36e3f5db66.html" target="_blank">│    │  ├ qwen3.py</a>
+      <span class="f">│    │  ├ modules.py</span>
+      <a class="f" href="appendix/file_2c494e7d192c0a.html" target="_blank">│    │  └ qwen3_moe.py</a>
+      <span class="f">│    └ common/</span>
+      <a class="f" href="appendix/file_60ce91219e30ae.html" target="_blank">│       ├ fusions.py</a>
+      <span class="f">│       └ modules.py</span>
+      <span class="f">└ ...</span>
+    </aside>
+    <main class="main">
+      <h1>Qwen3 建模精读</h1>
+      <p class="goal">目标：讲清 fsdp2 的 Qwen3 建模如何适配分片与 NPU 融合算子。前置：EP11 重计算与显存策略。</p>
+      <p class="gain">你将获得：<b>①</b> 看懂 fsdp2 后端 dense Qwen3 是一层薄壳——它直接复用 HF 的 <code>transformers.Qwen3Model</code>，只在外层包 <code>LMHead</code> 与三处融合算子 patch <b>②</b> 能对照 HF transformers 实现，定位三开关 <code>use_fused_rmsnorm</code>/<code>use_fused_rotary_pos_emb</code>/<code>use_flash_attn</code> 各自落在哪条 patch / 配置链上，并理解 MoE 变体多出的 grouped-GEMM 与 token permute 路径</p>
+
+      <h2>你已经熟悉的情况 <span class="sec">桥接开场</span></h2>
+      <p>你在 HuggingFace transformers 里用 Qwen3，打开 <code>modeling_qwen3.py</code>，看到的是一套自洽的标准 decoder 堆：每一层 = <b>Qwen3RMSNorm → Qwen3Attention（带 RoPE）→ 残差 → Qwen3RMSNorm → Qwen3MLP（SwiGLU）→ 残差</b>。RMSNorm 是平方-均值-归一化三步手写算式（<code>x.pow(2).mean(-1, keepdim=True)</code> 再加 epsilon 开方再乘 weight），RoPE 是 <code>rotate_half</code> + 复数乘法的手写实现（对 q/k 各做一次 cos/sin 旋转），MLP 是 <code>gate_proj/up_proj/down_proj</code> 三个 <code>nn.Linear</code> 加 SiLU 激活（<code>silu(gate) * up</code> 再过 down_proj），attention 默认走 <code>nn.functional.scaled_dot_product_attention</code>（SDPA，PyTorch 会按后端选 FlashAttention 或 math fallback）。这套实现 GPU 友好、可读，但每个小算子都是拆开的——RMSNorm 的三步是三次 kernel launch + 一个中间平方张量落盘，RoPE 的 rotate_half 要 concat-rotate 两次，MLP 的 SiLU+乘是两个算子串行。在 NPU 上这些拆开的算子会带来大量小 kernel launch 与中间张量落盘，吞吐吃亏；Ascend 侧把这些 fused 成单算子（<code>npu_rms_norm</code> 把三步合一、<code>npu_rotary_mul</code> 把 cos/sin 旋转合一、<code>npu_swiglu</code> 把 gate/up 拼接 + SiLU + 乘合一），省的就是中间张量往返与 launch 开销。</p>
+      <p>在 MindSpeed-LLM 的 fsdp2 后端里，Qwen3 的建模文件 <code>qwen3.py</code> 看起来出奇地短——只有一百多行。原因正是：<b>它不是把 HF 的 modeling_qwen3 拷贝重写一遍，而是用继承 + 运行时 patch 的方式"借壳"</b>。稠密版的 <code>Qwen3ForCausalLM</code> 直接 <code>transformers.Qwen3PreTrainedModel</code> 做父类，decoder 堆整个交给 <code>self.model = transformers.Qwen3Model(config)</code>——attention / RoPE / MLP / RMSNorm 的<b>前向逻辑仍走 HF 原版</b>。fsdp2 这层只做两件事：一是把输出头 <code>lm_head</code> 换成支持 DTensor 的 <code>LMHead</code>（分片落地的那一钩），二是用一个静态方法 <code>register_patches</code> 把 HF 原版的 RMSNorm.forward 和 apply_rotary_pos_emb 在运行时<b>替换成 NPU 融合算子版本</b>。换句话说，fsdp2 的 Qwen3 = HF 结构 + NPU 融合算子 patch + 输出头分片适配，三件事都在这薄薄一层里收口。这种"借壳"思路的妙处在于：HF 升级 modeling_qwen3（比如改 attention 实现、修 bug），fsdp2 这层基本不用动——它 patch 的是符号名（<code>Qwen3RMSNorm.forward</code>），HF 内部怎么改 RMSNorm 的实现都无所谓，只要那个符号还在，patch 就接得上。代价是：你得清楚"哪些符号被换、哪些没换"，否则会以为某段是 HF 原版、其实是 NPU 融合版——这正是本篇要逐符号厘清的。</p>
+      <p>这三处融合算子切换的开关，就摆在启动脚本 <code>pretrain_qwen3_8b_4k_fsdp2_A3.sh</code> 末尾三行 CLI 参数里——这也是本篇要逐行核对的入口。需要先打个预防针：三个开关里只有<b>前两个</b>（fused_rmsnorm / fused_rotary_pos_emb）真在 dense Qwen3 的 patch 链上落地；第三个 <code>use_flash_attn</code> 在 dense Qwen3 里<b>并不走 qwen3.py 的 patch</b>，它的作用点是另一条配置链——下面会专门讲清这个 nuance，免得你以为三开关同源。另外要分清"融合算子的 Python 调用包装"与"融合算子的 C++ kernel 实现"：前者本仓 <code>common/fusions.py</code> 里有（就是 <code>torch_npu.npu_rms_norm</code> 那几行调用），后者在 torch_npu/Ascend 仓里（本仓不可见）——别把"本仓只见开关"当成"融合算子全在外部"。</p>
+
+      <h2>本项目怎么做 <span class="sec">原理</span></h2>
+      <p>把 Qwen3 的一层 decoder 摊开看，融合算子作用在三处热路径上：<b>RMSNorm</b>（每层前后各一次）、<b>RoPE</b>（attention 内部对 q/k 各一次）、<b>attention score</b>（SDPA / FlashAttention）。fsdp2 的策略不是重写这三处，而是用 <code>mindspeed.patch_utils</code> 的 <code>MindSpeedPatchesManager</code>（下称 <code>pm</code>）做<b>运行时方法替换</b>：HF 模型对象照常构造、照常前向，但在前向真正跑到 RMSNorm.forward 之前，<code>pm</code> 已经把 <code>transformers.models.qwen3.modeling_qwen3.Qwen3RMSNorm.forward</code> 这个符号指向了 <code>fused_rmsnorm_forward</code>——于是同一份 HF 代码，跑出来的算子已经换成 <code>torch_npu.npu_rms_norm</code>。RoPE 同理：<code>apply_rotary_pos_emb</code> 被换成调用 <code>torch_npu.npu_rotary_mul</code> 的版本。这种 patch 是<b>符号级替换</b>而非装饰器或子类——<code>pm.register_patch(目标符号全名字符串, 新函数)</code> 直接改写 module 里那个符号的绑定，HF 代码里所有 <code>self.forward()</code> / <code>apply_rotary_pos_emb(...)</code> 调用都会无感地落到新函数上。timing 也很关键：<code>register_patches</code> 在 model_factory.py:106-107 于模型实例化<b>之前</b>被调（<code>hasattr(model_cls,'register_patches')</code> 判定），<code>pm.apply_patches()</code> 落地后 HF 模型对象才构造——所以 HF 的 <code>__init__</code> 跑到哪、前向跑到哪，算子都已是 NPU 版。attention 的融合则更隐蔽：dense Qwen3 不改 attention 代码，而是<b>在加载 HF config 时</b>把 <code>attn_implementation</code> 设好，让 HF 的 SDPA 路径在 NPU 上自动落到 <code>FlashAttentionScore</code> 算子。下面这张图把一层 Qwen3 的数据流与三处融合点标出来。</p>
+
+      <div class="diag">
+        <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace,monospace" font-size="11">
+          <!-- frame -->
+          <rect x="10" y="10" width="740" height="340" fill="none" stroke="#2a2a33"/>
+          <text x="20" y="28" fill="#9a9a9a">Qwen3DecoderLayer（一层，hf 原版前向 + fsdp2 patch）</text>
+
+          <!-- input -->
+          <text x="30" y="60" fill="#e8e8e8">hidden_states in</text>
+          <line x1="150" y1="56" x2="185" y2="56" stroke="#6a6a6a" marker-end="url(#arr)"/>
+
+          <!-- RMSNorm 1 + fused point -->
+          <rect x="185" y="42" width="120" height="32" rx="4" fill="#14241a" stroke="#2e5a3a"/>
+          <text x="245" y="62" fill="#7ab98a" text-anchor="middle">Qwen3RMSNorm</text>
+          <line x1="305" y1="58" x2="340" y2="58" stroke="#6a6a6a" marker-end="url(#arr)"/>
+          <!-- fused badge rmsnorm -->
+          <rect x="200" y="78" width="90" height="18" rx="3" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="245" y="91" fill="#e88" text-anchor="middle">★ fused_rmsnorm</text>
+          <line x1="245" y1="78" x2="245" y2="74" stroke="#6e1a1c"/>
+
+          <!-- Attention + RoPE + flash -->
+          <rect x="340" y="42" width="160" height="32" rx="4" fill="#16161c" stroke="#2a2a33"/>
+          <text x="420" y="62" fill="#e8e8e8" text-anchor="middle">Qwen3Attention (q/k/v, RoPE, sdpa)</text>
+          <line x1="500" y1="58" x2="535" y2="58" stroke="#6a6a6a" marker-end="url(#arr)"/>
+          <!-- RoPE fused badge -->
+          <rect x="345" y="78" width="90" height="18" rx="3" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="390" y="91" fill="#e88" text-anchor="middle">★ fused_rotary</text>
+          <line x1="390" y1="78" x2="390" y2="74" stroke="#6e1a1c"/>
+          <!-- flash badge -->
+          <rect x="445" y="78" width="80" height="18" rx="3" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="485" y="91" fill="#e88" text-anchor="middle">★ flash_attn</text>
+          <line x1="485" y1="78" x2="485" y2="74" stroke="#6e1a1c"/>
+
+          <!-- residual + add -->
+          <circle cx="555" cy="58" r="9" fill="#16161c" stroke="#2a2a33"/>
+          <text x="555" y="62" fill="#e8e8e8" text-anchor="middle">+</text>
+          <line x1="30" y1="100" x2="30" y2="58" stroke="#6a6a6a"/>
+          <line x1="30" y1="100" x2="546" y2="100" stroke="#6a6a6a" stroke-dasharray="3 3"/>
+          <line x1="546" y1="100" x2="546" y2="66" stroke="#6a6a6a" marker-end="url(#arr)"/>
+
+          <!-- RMSNorm 2 -->
+          <rect x="185" y="150" width="120" height="32" rx="4" fill="#14241a" stroke="#2e5a3a"/>
+          <text x="245" y="170" fill="#7ab98a" text-anchor="middle">Qwen3RMSNorm</text>
+          <line x1="305" y1="166" x2="340" y2="166" stroke="#6a6a6a" marker-end="url(#arr)"/>
+          <rect x="200" y="186" width="90" height="18" rx="3" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="245" y="199" fill="#e88" text-anchor="middle">★ fused_rmsnorm</text>
+          <line x1="245" y1="186" x2="245" y2="182" stroke="#6e1a1c"/>
+
+          <!-- MLP SwiGLU -->
+          <rect x="340" y="150" width="160" height="32" rx="4" fill="#16161c" stroke="#2a2a33"/>
+          <text x="420" y="170" fill="#e8e8e8" text-anchor="middle">Qwen3MLP (SwiGLU: gate/up/down)</text>
+          <line x1="500" y1="166" x2="535" y2="166" stroke="#6a6a6a" marker-end="url(#arr)"/>
+
+          <!-- residual + add 2 -->
+          <circle cx="555" cy="166" r="9" fill="#16161c" stroke="#2a2a33"/>
+          <text x="555" y="170" fill="#e8e8e8" text-anchor="middle">+</text>
+          <line x1="30" y1="166" x2="546" y2="166" stroke="#6a6a6a" stroke-dasharray="3 3"/>
+
+          <!-- output to lm_head -->
+          <text x="30" y="240" fill="#e8e8e8">hidden_states out → ... ×N layers → norm → LMHead</text>
+          <line x1="305" y1="246" x2="340" y2="246" stroke="#6a6a6a" marker-end="url(#arr)"/>
+          <rect x="340" y="230" width="140" height="32" rx="4" fill="#16161c" stroke="#C7000B"/>
+          <text x="410" y="250" fill="#e88" text-anchor="middle">LMHead (DTensor.to_local)</text>
+          <line x1="480" y1="246" x2="515" y2="246" stroke="#6a6a6a" marker-end="url(#arr)"/>
+          <text x="520" y="250" fill="#9a9a9a">logits / loss_ctx</text>
+
+          <!-- legend -->
+          <g font-size="10" fill="#9a9a9a">
+            <rect x="30" y="285" width="14" height="10" fill="#14241a" stroke="#2e5a3a"/>
+            <text x="50" y="294">HF 原版算子</text>
+            <rect x="150" y="285" width="14" height="10" fill="#2a0f10" stroke="#6e1a1c"/>
+            <text x="170" y="294">★ fsdp2 patch 接 NPU 融合算子（fusions.py → torch_npu.*）</text>
+            <rect x="30" y="305" width="14" height="10" fill="#16161c" stroke="#C7000B"/>
+            <text x="50" y="314">fsdp2 改写层（LMHead：分片适配钩子）</text>
+            <text x="30" y="334" fill="#6a6a6a">三融合点：RMSNorm×2 + RoPE + attention(SDPA→FlashAttentionScore)。MLP 的 fused_mlp_forward 在 fusions.py 有实现，但 dense Qwen3 的 register_patches 未挂它（见源码下钻脚注）。</text>
+          </g>
+
+          <defs>
+            <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L6,4 L0,8" fill="#6a6a6a"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      <div class="footnote">图示：★ 标的三个融合点是本篇主线。RMSNorm 与 RoPE 走 <code>pm.register_patch</code> 运行时替换 HF 符号；attention 的 flash 走 config-load 时设 <code>attn_implementation</code>（不在 qwen3.py 内）。<code>LMHead</code> 是 fsdp2 唯一"改写"过的层——其余 decoder 堆全复用 HF。</div>
+
+      <h2>源码下钻 <span class="sec">file:line</span></h2>
+
+      <div class="figcap">稠密 Qwen3ForCausalLM：继承 + 借壳 + register_patches（行 21-34）</div>
+      <pre data-lang="py">class Qwen3ForCausalLM(transformers.Qwen3PreTrainedModel):
+    _tied_weights_keys = ["lm_head.weight"]
+    _tp_plan = {"lm_head": "colwise_rep"}
+    _pp_plan = {"lm_head": (["hidden_states"], ["logits"])}
+
+    def __init__(self, config):
+        super().__init__(config)
+        self.config = config
+        self.model = transformers.Qwen3Model(config)
+        self.vocab_size = config.vocab_size
+        self.lm_head = LMHead(config.hidden_size, config.vocab_size, bias=False)
+
+        # Initialize weights and apply final processing
+        self.post_init()</pre>
+      <div class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3.py">mindspeed_llm/fsdp2/models/qwen3/qwen3.py:21</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3.py#L29">:29 借壳 transformers.Qwen3Model</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3.py#L31">:31 LMHead</a></div>
+      <div class="footnote">这就是"薄壳"的全部：<code>transformers.Qwen3PreTrainedModel</code> 是 HF 父类，<code>self.model = transformers.Qwen3Model(config)</code>（:29）把整段 decoder 堆（RMSNorm/Attention/MLP/RoPE）原样拿来——attention 怎么算、SwiGLU 怎么拼、残差怎么接，fsdp2 一个字都不改。fsdp2 自己只插了一个 <code>LMHead</code>（:31，从 <code>common.modules</code> 导入）。<code>_tp_plan</code>/<code>_pp_plan</code>（:23-24）是 HF 4.x 的分片计划声明（列切/流水线分段），与 fsdp2 的 <code>fully_shard</code> 是两套体系，这里声明给 HF 的 <code>dtensor</code> 兼容路径用，真正的 FSDP2 分片在引擎层做（见 EP08）。</div>
+
+      <div class="figcap">register_patches：两处 patch 的开关出处（行 105-115）</div>
+      <pre data-lang="py">    @staticmethod
+    def register_patches(config):
+        """patching the transformers model."""
+        if getattr(config, "use_fused_rmsnorm", False):
+            pm.register_patch("transformers.models.qwen3.modeling_qwen3.Qwen3RMSNorm.forward",
+                              fused_rmsnorm_forward)
+        if getattr(config, "use_fused_rotary_pos_emb", False):
+            pm.register_patch("transformers.models.qwen3.modeling_qwen3.apply_rotary_pos_emb",
+                              apply_rotary_pos_emb)
+
+        pm.apply_patches()</pre>
+      <div class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3.py#L108">mindspeed_llm/fsdp2/models/qwen3/qwen3.py:108</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3.py#L111">:111 fused_rotary</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3.py#L115">:115 apply_patches</a></div>
+      <div class="footnote">关键事实：<code>register_patches</code> 用 <code>getattr(config, "use_fused_rmsnorm", False)</code>（:108）读开关，<b>只挂两条 patch</b>——RMSNorm.forward（:109-110）与 apply_rotary_pos_emb（:112-113）。<b>这里没有 <code>use_flash_attn</code> 的分支</b>。这说明 dense Qwen3 的 attention 融合不在此处接。开关来源：config 上的 <code>use_fused_rmsnorm</code> / <code>use_fused_rotary_pos_emb</code> 两个字段，由 OptimizationArgs（arguments.py:664/669）注入。调用时机见 model_factory.py:106-107（<code>hasattr(model_cls,'register_patches')</code> 则调用），发生在模型构造<b>之前</b>——这样 <code>pm.apply_patches()</code>（:115）落地的符号替换，能在 HF 模型对象实例化时即生效。</div>
+
+      <div class="figcap">Qwen3ForCausalLM.forward：logits_to_keep 切片 + loss_ctx 分支（行 36-50, 84-91）</div>
+      <pre data-lang="py">    @can_return_tuple
+    def forward(
+            self,
+            input_ids: Optional[torch.LongTensor] = None,
+            attention_mask: Optional[torch.Tensor] = None,
+            position_ids: Optional[torch.LongTensor] = None,
+            past_key_values: Optional[Cache] = None,
+            inputs_embeds: Optional[torch.FloatTensor] = None,
+            labels: Optional[torch.LongTensor] = None,
+            use_cache: Optional[bool] = None,
+            cache_position: Optional[torch.LongTensor] = None,
+            logits_to_keep: Union[int, torch.Tensor] = 0,
+            loss_ctx: Optional[callable] = None,
+            **kwargs,
+    ) -> CausalLMOutputWithPast:
+        ...
+        outputs: BaseModelOutputWithPast = self.model(...)
+        hidden_states = outputs.last_hidden_state
+        # Only compute necessary logits, and do not upcast them to float if we are not computing the loss
+        slice_indices = slice(-logits_to_keep, None) if isinstance(logits_to_keep, int) else logits_to_keep
+
+        if loss_ctx:
+            logits, loss = self.lm_head(hidden_states[:, slice_indices, :], loss_ctx=loss_ctx)
+        else:
+            logits, loss = self.lm_head(hidden_states[:, slice_indices, :])</pre>
+      <div class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3.py#L36">mindspeed_llm/fsdp2/models/qwen3/qwen3.py:36</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3.py#L47">:47 logits_to_keep</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3.py#L48">:48 loss_ctx</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3.py#L86">:86 slice_indices</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3.py#L89">:89 loss_ctx 分支</a></div>
+      <div class="footnote">forward 主体也基本是 HF 原版：先 <code>self.model(...)</code>（:73，调借壳来的 Qwen3Model）拿 last_hidden_state，再 <code>logits_to_keep</code>（:47，默认 0 即只取最后若干 token 的 logits，省 vocab 维度的全量计算），最后交给 <code>self.lm_head</code>（:89-91）。<b>fsdp2 在 forward 上唯一加的东西</b>是 <code>loss_ctx</code>（:48）这个可选 callable 参数与对应分支（:88-89）：传了就走 LMHead 的 loss_ctx 路径（跳过 logits 物化、直接分块算 loss，对接 EP11 的 chunkloss），不传就走标准 logits + 交叉熵。所以连前向这一层，fsdp2 也只在"出口处"插了一个 loss_ctx 钩子，中间的 self.model 调用完全照 HF。<code>@can_return_tuple</code>（:36）是 HF 5.x 的装饰器，让函数可以直接 return 一个 tuple 而不必包成 dataclass——纯 HF 设施，与 fsdp2 无关。</div>
+
+      <div class="figcap">common/fusions · 两处融合算子的真实实现（NPU 算子调用点）</div>
+      <pre data-lang="py">import torch
+try:
+    import torch_npu
+except ImportError:
+    pass
+
+
+def fused_rmsnorm_forward(self, x):
+    return torch_npu.npu_rms_norm(x, self.weight, epsilon=self.variance_epsilon)[0]
+
+
+def apply_rotary_pos_emb(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
+    cos = cos.unsqueeze(unsqueeze_dim)
+    sin = sin.unsqueeze(unsqueeze_dim)
+    q_embed = torch_npu.npu_rotary_mul(q, cos, sin)
+    k_embed = torch_npu.npu_rotary_mul(k, cos, sin)
+    return q_embed, k_embed
+
+
+def fused_mlp_forward(self, x):
+    gate_up_w = torch.cat([self.gate_proj.weight, self.up_proj.weight], dim=0)
+    gate_up_output = torch.matmul(x, gate_up_w.t())
+
+    swiglu_output = torch_npu.npu_swiglu(gate_up_output, dim=-1)
+    down_proj = self.down_proj(swiglu_output)
+    return down_proj</pre>
+      <div class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/common/fusions.py#L8">mindspeed_llm/fsdp2/models/common/fusions.py:8</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/common/fusions.py#L9">:9 fused_rmsnorm_forward → npu_rms_norm</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/common/fusions.py#L12">:12 apply_rotary_pos_emb → npu_rotary_mul</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/common/fusions.py#L20">:20 fused_mlp_forward → npu_swiglu（未挂 dense qwen3）</a></div>
+      <div class="footnote">这与"融合算子实现在 torch_npu/Ascend 侧、本仓只见开关"的直觉相反——<b>本仓的 fusions.py 确实给出了融合算子的 Python 调用点</b>：<code>torch_npu.npu_rms_norm</code>（:9，替代 HF 手写的平方-均值-归一化三步）、<code>torch_npu.npu_rotary_mul</code>（:15-16，替代 HF 的 rotate_half + 复乘）、<code>torch_npu.npu_swiglu</code>（:24，融合 gate/up 拼接 + SiLU + 乘）。需诚实区分：<b>这里只是"调用包装"</b>——真正的高性能 kernel 仍在 torch_npu/Ascend C++ 侧（核实：融合算子的 C++ kernel 实现在 torch_npu/Ascend 侧，本仓 fusions.py 仅见 Python 调用包装与算子选择）。另一处诚实标注：<code>fused_mlp_forward</code>（:20）虽定义在 fusions.py，但 dense Qwen3 的 <code>register_patches</code>（qwen3.py:105-115）<b>并未挂它</b>——dense Qwen3 的 MLP 仍走 HF 原版的三个 Linear + SiLU；fused_mlp 主要在 MoE/其他模型路径用（见 qwen3_moe.py:194 的 <code>torch_npu.npu_swiglu</code> 内联调用）。</div>
+
+      <div class="figcap">Qwen3LMHead：DTensor.to_local() 分片适配钩子（行 7-32）</div>
+      <pre data-lang="py">class Qwen3LMHead(nn.Linear):
+    def forward(self, hidden_states: torch.Tensor, loss_ctx: callable = None):
+        # Handle distributed tensor (DTensor) weights and biases by converting to local tensors.
+        if isinstance(self.weight, DTensor):
+            w = self.weight.to_local()
+            if self.bias is not None:
+                if not isinstance(self.bias, DTensor):
+                    raise TypeError(
+                        f"Expected bias to be a DTensor when weight is a DTensor, "
+                        f"but got bias of type {type(self.bias)}."
+                    )
+                b = self.bias.to_local()
+            else:
+                b = None
+        else:
+            w = self.weight
+            b = self.bias
+
+        if loss_ctx is None:
+            logits = F.linear(hidden_states, w, b)
+            return logits, None
+        else:
+            return None, loss_ctx(hidden_states, w, b)</pre>
+      <div class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/modules.py#L7">mindspeed_llm/fsdp2/models/qwen3/modules.py:7</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/modules.py#L10">:10 isinstance DTensor</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/modules.py#L11">:11 to_local</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/modules.py#L32">:32 loss_ctx 分支</a></div>
+      <div class="footnote">这是 fsdp2 在 dense Qwen3 里<b>唯一改写过前向逻辑的层</b>。FSDP2 把参数变成 <code>DTensor</code>（按 <code>fsdp_modules</code> 清单分片，见 EP08），输出头的 weight 被切到各卡后，前向算 logits 前必须 <code>.to_local()</code>（:11）取回本卡分片才能做 <code>F.linear</code>（:27）。<code>loss_ctx</code> 分支（:32）是为 EP11 讲过的 <code>chunkloss</code> 留的钩子——传 loss_ctx 时跳过 logits 物化、直接把 (hidden, w, b) 交给分块 loss 算，省 logits 峰值显存。这个 DTensor 感知是"分片落地"在建模侧的唯一显式接缝：其余 decoder 层为什么不用改？因为 FSDP2 引擎在 <code>MindSpeedParallelEngine</code>（EP05/EP08）里按 <code>fsdp_modules</code> 清单统一给所有匹配模块的参数上 DTensor，前向时 <code>DTensor</code> 的算子（<code>torch.matmul</code> 等）会自动走 all_gather 拼回——而 <code>nn.Linear</code> 的 <code>F.linear</code> 对 DTensor 的隐式支持不如显式 <code>to_local</code> 直接，所以输出头这一处单独手写。诚实标注：dense <code>qwen3.py</code> 实际导入的是 <code>common.modules.LMHead</code>（qwen3.py:18），与此处的 <code>Qwen3LMHead</code> 是<b>同逻辑的两个副本</b>（grep 全仓未见 <code>Qwen3LMHead</code> 被引用，疑为历史遗留/模板）；两者代码一字不差，只是类名不同——原理同源，以 <code>common.LMHead</code> 为准，本处仍按 brief 要求展示 qwen3/modules.py。</div>
+
+      <div class="figcap">use_flash_attn 真正的作用点：config-load 时设 attn_implementation（行 79-97）</div>
+      <pre data-lang="py">        attn_implementation = "eager" if parallel_args.cp_size > 1 else None
+
+        hf_config = None
+        model_id = getattr(model_args, 'model_id', None)
+        if model_id:
+            config_cls = _get_config_class(model_id)
+            if config_cls is not None:
+                hf_config = config_cls.from_pretrained(
+                    model_args.model_name_or_path,
+                    trust_remote_code=trust_remote_code,
+                    attn_implementation=attn_implementation,
+                )
+        if hf_config is None:
+            hf_config = AutoConfig.from_pretrained(
+                model_args.model_name_or_path,
+                trust_remote_code=trust_remote_code,
+                attn_implementation=attn_implementation,
+            )</pre>
+      <div class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py#L79">mindspeed_llm/fsdp2/models/model_factory.py:79</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py#L90">:90 / :96 attn_implementation 传入</a></div>
+      <div class="footnote">这里解释"第三开关去哪了"。dense Qwen3 的 attention <b>不</b>在 qwen3.py 里被 patch——它在 config 加载时由 <code>attn_implementation</code>（:79）决定：cp_size>1 时强制 <code>"eager"</code>（上下文并行需统一 attention 实现），否则 <code>None</code> 交 HF 默认（NPU 上 SDPA 会落到 <code>FlashAttentionScore</code>，参见 qwen3_next/modeling_qwen3_next.py:401-406 的注释："the Ascend NPU's SDPA interface ... invoke the FlashAttentionScore"）。而 A3.sh 里的 <code>--optimization.use_flash_attn True</code>（arguments.py:671）这个<b>独立开关</b>，在 dense Qwen3 路径下<b>实际不触发</b>任何额外分支——它由 gpt_oss/modeling_gpt_oss.py:627、minimax/modeling_minimax_m2.py:402/666 等模型各自 <code>if args.use_flash_attn:</code> 消费，dense Qwen3 没有这条 if。（核实：use_flash_attn 对 dense Qwen3 的具体语义以 arguments.py:671 docstring "use FlashAttention implementation of attention" 为准；本仓 dense qwen3.py 无消费点，flash 走 attn_implementation 默认链。）</div>
+
+      <div class="figcap">A3 启动脚本三开关 CLI 落点（行 28-30）</div>
+      <pre data-lang="sh">    --optimization.use_fused_rmsnorm True \
+    --optimization.use_fused_rotary_pos_emb True \
+    --optimization.use_flash_attn True</pre>
+      <div class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.sh#L28">examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.sh:28</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.sh#L29">:29 fused_rotary</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.sh#L30">:30 use_flash_attn</a></div>
+      <div class="footnote">三行就是 dense Qwen3 融合算子的全部入口。前两行经 OptimizationArgs → config → <code>register_patches</code>（qwen3.py:108/111）→ fusions.py 的 npu_rms_norm/npu_rotary_mul 落地。第三行 <code>use_flash_attn</code> 如上脚注所述，dense Qwen3 走的是 attn_implementation 默认链而非这条 if；这行更像是 fsdp2 通用 OptimizationArgs 的习惯写法（gpt_oss/minimax 也都带这三行）。注意 <code>fsdp_size 16</code>（:24）=world_size，dense Qwen3-8B 无专家（ep_size 默认 1，参见 EP09）。</div>
+
+      <div class="figcap">MoE 变体 register_patches：多出 moe_grouped_gemm / activation_offload 两 patch（行 147-171）</div>
+      <pre data-lang="py">    @staticmethod
+    def register_patches(config):
+        """patching the transformers model."""
+        args = get_args()
+        if getattr(args, "moe_grouped_gemm", False):
+            pm.register_patch(
+                "transformers.models.qwen3_moe.modeling_qwen3_moe.Qwen3MoeSparseMoeBlock", Qwen3MoeSparseFusedMoeBlock
+            )
+
+        if getattr(args, "activation_offload", False):
+            pm.register_patch(
+                "transformers.models.qwen3_moe.modeling_qwen3_moe.Qwen3MoeModel.forward", qwen3_moe_model_forward
+            )
+
+        if getattr(args, "use_fused_rmsnorm", False):
+            pm.register_patch(
+                "transformers.models.qwen3_moe.modeling_qwen3_moe.Qwen3MoeRMSNorm.forward", fused_rmsnorm_forward
+            )
+
+        if getattr(args, "use_fused_rotary_pos_emb", False):
+            pm.register_patch(
+                "transformers.models.qwen3_moe.modeling_qwen3_moe.apply_rotary_pos_emb", apply_rotary_pos_emb
+            )
+
+        pm.apply_patches()</pre>
+      <div class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L147">mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py:147</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L151">:151 moe_grouped_gemm → Qwen3MoeSparseFusedMoeBlock</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L161">:161 fused_rmsnorm</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L166">:166 fused_rotary</a></div>
+      <div class="footnote">MoE 与 dense 的对照在此一句话讲清：dense 的 <code>register_patches</code> 只 2 条（RMSNorm/RoPE），MoE 的有 4 条——多出 <code>moe_grouped_gemm</code>（:151，把 HF 的 SparseMoeBlock 整个换成自写的 <code>Qwen3MoeSparseFusedMoeBlock</code>，走 grouped GEMM）和 <code>activation_offload</code>（:156，把 Qwen3MoeModel.forward 换成带 <code>async_save_on_cpu</code> 的版本，即 EP11 的激活换页钩子，qwen3_moe.py:306-317）。RMSNorm/RoPE 两条 patch 与 dense 同源（同 fusions.py），只是 patch 的目标符号从 <code>modeling_qwen3.*</code> 换成 <code>modeling_qwen3_moe.*</code>。MoE 的 attention 仍走 HF Qwen3MoeModel，flash 路径同 dense。这条延伸说明：dense 是"借壳 + 2 patch"，MoE 是"借壳 + 4 patch + 自写专家块"，复杂度全在专家路径（详见 EP09）。</div>
+      <p>把 dense 与 MoE 放在一张表上看更清楚。两者<b>共用</b>的：HF Qwen3(PreTrained)Model 作父类、<code>common.LMHead</code> 作输出头、RMSNorm/RoPE 两条融合 patch（同 fusions.py，仅目标符号路径不同）、attention 走 attn_implementation 默认链。两者<b>不同</b>的：MoE 多 <code>num_experts</code>/<code>num_experts_per_tok</code>/<code>router_aux_loss_coef</code> 三个 config 字段（qwen3_moe.py:49-51）与对应的 aux_loss 计算分支（forward 行 126-135，调 HF 的 <code>load_balancing_loss_func</code>）；MoE 多两组 patch（grouped_gemm + activation_offload）；MoE 的 MLP 换成了 <code>Qwen3MoeSparseFusedMoeBlock</code>（自写类，行 223-260），里面是门控 + topk + 专家分发 + 还原。一句话：dense 的"模型本体"几乎全交 HF，fsdp2 只管出口头与两处融合 patch；MoE 因为 HF 的专家实现跑不动 NPU grouped GEMM，fsdp2 不得不把专家块整个自写一遍——这就是 MoE 文件比 dense 长一个数量级（14KB vs 4.8KB）的根本原因。但两者的"借壳"骨架一致，只是 MoE 在专家那一段把壳的局部换成了自己的实现。</p>
+
+      <div class="figcap">Qwen3MoeExperts：NPU grouped GEMM + token permute 的专家前向（行 187-199）</div>
+      <pre data-lang="py">    def forward(self, hidden_states, routing_weights=None, selected_experts=None):
+        gate_up_proj, down_proj = self._view_experts_weight()
+        # permute
+        permuted_hidden_states, row_ids_map = npu_moe_token_permute(hidden_states, selected_experts.to(torch.int32))
+        tokens_per_expert = torch.histc(selected_experts, bins=self.num_experts, min=0, max=self.num_experts)
+
+        fc1_output = Ops.gmm(permuted_hidden_states, gate_up_proj, tokens_per_expert, trans_b=False)
+        fc1_activation = torch_npu.npu_swiglu(fc1_output, dim=-1)
+        fc2_out = Ops.gmm(fc1_activation, down_proj, tokens_per_expert, trans_b=False)
+
+        # unpermute
+        output = npu_moe_token_unpermute(fc2_out, row_ids_map, probs=routing_weights)
+        return output</pre>
+      <div class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L187">mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py:187</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L190">:190 npu_moe_token_permute</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L193">:193 Ops.gmm grouped GEMM</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L194">:194 npu_swiglu</a> · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L198">:198 npu_moe_token_unpermute</a></div>
+      <div class="footnote">这段是 MoE 相对 dense 的延伸点（非深挖，详见 EP09）。dense Qwen3 的 MLP 是三个 Linear + SiLU（HF 原版），MoE 的专家前向则是 <code>npu_moe_token_permute</code>（:190，按选中专家重排 token）→ <code>Ops.gmm</code>（:193/195，grouped GEMM，一次 launch 跑所有专家的 fc1/fc2）→ <code>torch_npu.npu_swiglu</code>（:194，融合 SiLU+乘）→ <code>npu_moe_token_unpermute</code>（:198，按 routing_weights 加权还原）。ep_size>1 时走 <code>ep_forward</code>（:201-212）的 DTensor to_local 路径（与 dense LMHead 的分片适配同思路）。一句话：dense 的融合点在 RMSNorm/RoPE/attention，MoE 多出的融合点在 grouped GEMM + token permute + swiglu，全靠 torch_npu/Ascend 算子（核实：npu_moe_token_permute/unpermute、Ops.gmm 的 kernel 在 torch_npu/mindspeed core 侧，本仓只见调用）。</div>
+
+      <div class="gnpu">
+        <div class="g"><h4>GPU / 已知（HF + CUDA）</h4>
+          <div class="row"><span class="k">RMSNorm</span><span>HF 手写：x²→mean→rsqrt→x*weight（多个小 kernel）</span></div>
+          <div class="row"><span class="k">RoPE</span><span>HF rotate_half + 复数乘（torch 张量拼接）</span></div>
+          <div class="row"><span class="k">attention</span><span>FlashAttention 2/3（CUDA）或 SDPA</span></div>
+          <div class="row"><span class="k">MLP</span><span>三个 nn.Linear + F.silu，不融合</span></div>
+          <div class="row"><span class="k">建模形态</span><span>整份 modeling_qwen3.py 自洽，参数为普通 torch.Tensor</span></div>
+          <div class="row"><span class="k">分片</span><span>无原生 FSDP2 DTensor；DDP/TP 各自一套</span></div>
+        </div>
+        <div class="n"><h4>NPU / 本项目（借壳 + patch + DTensor）</h4>
+          <div class="row"><span class="k">RMSNorm</span><span>torch_npu.npu_rms_norm（fusions.py:8→qwen3.py:109 patch）</span></div>
+          <div class="row"><span class="k">RoPE</span><span>torch_npu.npu_rotary_mul（fusions.py:12→qwen3.py:112 patch）</span></div>
+          <div class="row"><span class="k">attention</span><span>SDPA → Ascend FlashAttentionScore（attn_implementation 默认链，model_factory.py:79）</span></div>
+          <div class="row"><span class="k">MLP</span><span>dense 仍 HF 原版；MoE 用 npu_swiglu + Ops.gmm（qwen3_moe.py:193-195）</span></div>
+          <div class="row"><span class="k">建模形态</span><span>薄壳：继承 HF Qwen3PreTrainedModel + 借壳 Qwen3Model + 仅改 LMHead（qwen3.py:21-34）</span></div>
+          <div class="row"><span class="k">分片</span><span>weight 变 DTensor，LMHead.to_local() 取本卡分片（modules.py:11）</span></div>
+        </div>
+      </div>
+
+      <div class="sum">
+        <b>小结</b>　心智模型：fsdp2 的 Qwen3 建模 = <b>HF 结构 + NPU 融合算子 patch + 输出头分片适配</b>。dense 版的 <code>qwen3.py</code> 是一层薄壳——decoder 堆整段复用 HF <code>transformers.Qwen3Model</code>（attention/RoPE/MLP/RMSNorm 全不改），fsdp2 自己只动手两处：把输出头换成支持 DTensor 的 <code>LMHead</code>（分片落地的钩子），并用 <code>register_patches</code> 在运行时把 HF 的 RMSNorm.forward / apply_rotary_pos_emb 符号替换成调 <code>torch_npu.npu_rms_norm</code> / <code>npu_rotary_mul</code> 的版本。三开关里，<code>use_fused_rmsnorm</code>、<code>use_fused_rotary_pos_emb</code> 走这条 patch 链，<code>use_flash_attn</code> 在 dense Qwen3 走的是 config-load 时的 <code>attn_implementation</code> 默认链（NPU 上 SDPA→FlashAttentionScore），不是 qwen3.py 里的 if——这是最容易看走眼的一点。MoE 变体（<code>qwen3_moe.py</code>）同思路但多两组 patch（grouped GEMM 专家块、activation_offload 模型前向），融合点从"RMSNorm/RoPE/attention"扩到再加"grouped GEMM + token permute + swiglu"，全靠 torch_npu/Ascend 算子。一句话总结：fsdp2 不重造模型，它"借 HF 的壳、patch 进 NPU 的核、再给输出头接上 DTensor"——三招合一，就完成了从 CUDA/HF 到 Ascend/分片的建模迁移。
+        <div class="pit">常见误区：①以为 fsdp2 的 Qwen3 是把 HF 的 modeling_qwen3.py 整份拷贝重写——<b>不是直接拷 HF 模型，需改写以接 fully_shard 与 NPU 融合算子</b>，但改写极薄：decoder 堆原样复用 HF，只动 LMHead + 两处 patch。②以为三开关同源、都在 qwen3.py 里 if——前两个（fused_rmsnorm/fused_rotary）真在 register_patches（qwen3.py:108/111），<code>use_flash_attn</code> 在 dense Qwen3 不走 qwen3.py 的 if，走 model_factory.py:79 的 attn_implementation 默认链，别在 qwen3.py 里找它。③以为融合算子实现在本仓外、本仓只见开关——<b>fusions.py 实际给出了 npu_rms_norm/npu_rotary_mul/npu_swiglu 的 Python 调用点</b>（核实：C++ kernel 仍在 torch_npu/Ascend 侧，本仓只见调用包装与算子选择）。④以为 fused_mlp_forward 也是 dense Qwen3 的 patch——它定义在 fusions.py:20，但 dense 的 register_patches 没挂它，dense MLP 仍走 HF 原版；fused_mlp 主要服务 MoE 路径（qwen3_moe.py 内联 npu_swiglu）。⑤以为 LMHead 就是个普通 Linear——它的核心是 <code>isinstance(weight, DTensor)</code> 时 <code>.to_local()</code>（modules.py:10-11），这是 FSDP2 分片后输出头能正常前向的前提，外加 loss_ctx 分支对接 chunkloss（EP11）。⑥把 dense Qwen3 与 MoE 的 patch 数记混——dense 2 条（RMSNorm/RoPE），MoE 4 条（多 grouped_gemm + activation_offload），MoE 多出来的复杂度全在专家前向，attention 部分两者同源。⑦以为 Qwen3-8B 的层数在本仓某处硬编码——<code>num_hidden_layers</code> 来自外部 HF config（A3.sh:22 指向 <code>/home/data/Qwen3-8B/</code>），本仓镜像未收录该 config.json（核实：Qwen3-8B 层数与超参，以 HF config.json 为准，本仓 examples 仅引用路径）。</div>
+      </div>
+
+      <div class="filelist"><b>本篇涉及文件</b><br>
+mindspeed_llm/fsdp2/models/qwen3/qwen3.py（Qwen3ForCausalLM 类 行 21 / 借壳 Qwen3Model 行 29 / LMHead 行 31 / register_patches 行 105-115 / fused_rmsnorm patch 行 108-110 / fused_rotary patch 行 111-113 / apply_patches 行 115）<br>
+mindspeed_llm/fsdp2/models/qwen3/modules.py（Qwen3LMHead 类 行 7 / DTensor.to_local 行 10-11 / loss_ctx 分支 行 32；与 common/modules.py 同逻辑）<br>
+mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py（Qwen3MoEForCausalLM 行 38 / register_patches 行 147-171 / moe_grouped_gemm patch 行 151 / activation_offload patch 行 156 / fused_rmsnorm 行 161 / fused_rotary 行 166 / Qwen3MoeExperts.forward 行 187-199 / npu_moe_token_permute 行 190 / Ops.gmm 行 193,195 / npu_swiglu 行 194 / npu_moe_token_unpermute 行 198 / ep_forward 行 201-212 / async_save_on_cpu 调用 行 306-317）<br>
+mindspeed_llm/fsdp2/models/common/fusions.py（fused_rmsnorm_forward 行 8 → npu_rms_norm 行 9 / apply_rotary_pos_emb 行 12 → npu_rotary_mul 行 15-16 / fused_mlp_forward 行 20 → npu_swiglu 行 24，dense qwen3 未挂）<br>
+mindspeed_llm/fsdp2/models/common/modules.py（LMHead 类 行 7 / to_local 行 10-11，dense qwen3.py:18 实际导入此版）<br>
+mindspeed_llm/fsdp2/models/model_factory.py（attn_implementation 行 79 / from_pretrained 行 87-97 / register_patches 调用 行 106-107）<br>
+mindspeed_llm/fsdp2/models/model_loader.py（attn_implementation 行 97，cp_size>1 eager）<br>
+mindspeed_llm/fsdp2/utils/arguments.py（use_fused_rmsnorm 行 664 / use_fused_rotary_pos_emb 行 669 / use_flash_attn 行 671）<br>
+examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.sh（三开关 CLI 行 28-30 / fsdp_size 16 行 24 / model_name_or_path 行 22）<br>
+examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.yaml（fsdp_modules 清单 行 14-17，分片落点，详见 EP08）<br>
+mindspeed_llm/fsdp2/models/qwen3_next/modeling_qwen3_next.py（NPU SDPA→FlashAttentionScore 注释 行 401-406，flash 路径旁证）</div>
+    </main>
+  </div>
+</div>
+<script>
+// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre[data-lang]').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];if(!rules)return;
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      return '<span class="ln">'+(i+1)+'</span>'+tokLine(l,rules);
+    }).join('\n');
+  });
+})();
+</script>
+</body>
+</html>

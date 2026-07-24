@@ -1,0 +1,1028 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/optim/optimizer.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/optim/optimizer.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_01d9e187c49eb3.html">◀ muon.py</a> <a href="file_804fc689ea4b82.html">scheduler.py ▶</a></nav></div>
+<div class="wrap">
+<h1>optimizer.py</h1><p class="goal">mindspeed_llm/fsdp2/optim/optimizer.py · 20325B · 478 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L25" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class MultiOptimizer(Optimizer, Stateful)</a><a href="#L26" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, root_model: nn.Module, opti</a><a href="#L32" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def step(self) -&gt; None</a><a href="#L36" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def zero_grad(self) -&gt; None</a><a href="#L40" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def state_dict(self) -&gt; Dict[str, Any]</a><a href="#L51" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def load_state_dict(self, state_dict: Dict[str</a><a href="#L61" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __len__(self) -&gt; int</a><a href="#L65" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class OptimizerFactory</a><a href="#L69" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _split_muon_and_adamw_params</a><a href="#L109" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def create</a><a href="#L170" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _create_single_optimizer</a><a href="#L271" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _create_optimizer_instance</a><a href="#L306" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_parameter_names(model, forbidden_laye</a><a href="#L324" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _make_param_groups_for_subset</a><a href="#L347" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _build_ep_fsdp2_optimizer</a><a href="#L430" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _build_optimizer(groups: Sequence[Dict[str</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep16.html">EP16</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="annot"><div class="seg"><p class="seglab">行 1-22 · 模块头与导入：AdamW 来自 torch stdlib，分片在别处</p><pre data-lang="py" data-start="1" data-idprefix="A">&quot;&quot;&quot;
+Optimizer factory for unified construction of single optimizer and EP+FSDP2 multi-optimizer, support Adamw and Muon now.
+&quot;&quot;&quot;
+
+import torch
+from torch import nn
+from typing import Any, Dict, List, Iterable, Optional, Sequence, Tuple
+from torch.distributed._tensor import DTensor
+from torch.distributed.checkpoint.state_dict import (
+    StateDictOptions,
+    get_optimizer_state_dict,
+    set_optimizer_state_dict,
+)
+from torch.distributed.checkpoint.stateful import Stateful
+from torch.optim import AdamW
+from torch.optim.optimizer import Optimizer
+from transformers.utils import is_torch_npu_available
+from mindspeed_llm.fsdp2.optim.muon import Muon
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+
+
+logger = get_logger(__name__)</pre><div class="exp"><p>文件头注释 (:2) 说本模块是统一装配 single optimizer 与 EP+FSDP2 multi-optimizer 的工厂，支持 AdamW 和 Muon。看 :5-19 的导入关键：<code>from torch.optim import AdamW</code> (:15) 与 <code>from torch.optim.optimizer import Optimizer</code> (:16) 都是 <b>torch 标准库</b>；<code>DTensor</code> (:8) 来自 <code>torch.distributed._tensor</code>；DCP 的 <code>get_optimizer_state_dict/set_optimizer_state_dict</code> (:9-13) 与 <code>Stateful</code> (:14) 也是 torch stdlib；:17 <code>is_torch_npu_available</code> 来自 transformers，用来分支 NPU；:18 <code>Muon</code> 是同仓 <code>fsdp2/optim/muon</code>。</p><p>如实讲一个常被误读的点：<b>本文件本身并不实现优化器状态分片</b>。它只是“装配”——把参数分组喂给标准 <code>torch.optim.AdamW</code>。FSDP2 对优化器状态的切分是 <code>fully_shard</code> 的副作用（参数本身已是 <code>DTensor</code> 的局部视图，AdamW 拿到的就是本 rank 的分片参数，于是 m/v 自然只在本 rank 上维护对应分片）。真正驱动 <code>fully_shard</code> 分片的外部实现在 <code>fsdp_turbo</code>（主模型侧）与本仓的 <code>expert_fully_shard_parallel.py</code>（expert 侧）——本文件不碰这些。这是它与 DDP 最根本的显存差异，后面 :287 处会再点一次。</p></div></div><div class="seg"><p class="seglab">行 25-38 · MultiOptimizer：多优化器的 step/zero_grad 聚合器</p><pre data-lang="py" data-start="25" data-idprefix="A">class MultiOptimizer(Optimizer, Stateful):
+    def __init__(self, root_model: nn.Module, optimizers: dict, key_names: list[str]):
+        self.model = root_model
+        self.optimizers_dict = optimizers
+        self._is_multi_optimizer: bool = True
+        self.key_names = key_names
+
+    def step(self) -&gt; None:
+        for opt in self.optimizers_dict.values():
+            opt.step()
+
+    def zero_grad(self) -&gt; None:
+        for opt in self.optimizers_dict.values():
+            opt.zero_grad()</pre><div class="exp"><p>:25 <code>class MultiOptimizer(Optimizer, Stateful)</code> 同时继承 <code>Optimizer</code>（满足上层对 <code>optimizer.step()</code> 的鸭子类型）和 <code>Stateful</code>（满足 DCP <code>get_optimizer_state_dict</code> 的接口要求）。构造 (:26-30) 不调父类 <code>Optimizer.__init__</code>，而是手动存 <code>root_model</code>、<code>optimizers_dict</code>（EP/non_ep 两个子优化器）和 <code>key_names</code>，并置 <code>_is_multi_optimizer=True</code> 当标志位。</p><p>:32-34 的 <code>step</code> 与 :36-38 的 <code>zero_grad</code> 都是简单 <code>for opt in optimizers_dict.values(): opt.step()/opt.zero_grad()</code>——顺序触发 EP 子优化器与 non-EP 子优化器。<b>这里没有 allreduce</b>：每个子优化器只更新本 rank 持有的分片参数，梯度同步在 <code>fully_shard</code> 的 backward hook 里已经做掉（unshard→reduce_scatter），到 <code>step</code> 时梯度已是本 rank 的最终分片梯度。</p><p>EP16 场景下这个聚合器尤其关键：16 个 expert 分布在各 EP rank，每个 rank 只为自己持有的 expert 建一个 <code>ep</code> 子优化器，再为 dense 参数建一个 <code>non_ep</code> 子优化器——两个优化器各自的 param group 完全不相交（:45-48 的 key clash 检测就是兜底）。</p></div></div><div class="seg"><p class="seglab">行 40-62 · state_dict/load_state_dict：DCP 扁平化多优化器存取</p><pre data-lang="py" data-start="40" data-idprefix="A">    def state_dict(self) -&gt; Dict[str, Any]:
+        merged: Dict[str, Any] = {}
+        for name in self.key_names:
+            opt = self.optimizers_dict.get(name)
+            sd = get_optimizer_state_dict(self.model, opt, options=StateDictOptions(flatten_optimizer_state_dict=True))
+            overlap = set(merged.keys()) &amp; set(sd.keys())
+            if overlap:
+                raise KeyError(f&quot;Key clash detected for optimizer &#x27;{name}&#x27;: {&#x27;, &#x27;.join(sorted(overlap))}&quot;)
+            merged.update(sd)
+        return merged
+
+    def load_state_dict(self, state_dict: Dict[str, Any]) -&gt; None:
+        for name in self.key_names:
+            opt = self.optimizers_dict.get(name)
+            set_optimizer_state_dict(
+                self.model,
+                opt,
+                optim_state_dict=state_dict,
+                options=StateDictOptions(flatten_optimizer_state_dict=True),
+            )
+
+    def __len__(self) -&gt; int:
+        return len(self.optimizers_dict)</pre><div class="exp"><p>:40-49 的 <code>state_dict</code> 遍历 <code>key_names</code>（ep/non_ep），对每个子优化器调 <code>get_optimizer_state_dict(self.model, opt, options=StateDictOptions(flatten_optimizer_state_dict=True))</code> (:44)，再把多个子优化器的 flat state dict merge 进一个 <code>merged</code>。:45-47 的 <code>overlap</code> 检测保证 key 不撞——若两个子优化器都对同一个参数产出 state key 就直接抛 <code>KeyError</code>。</p><p>:51-59 的 <code>load_state_dict</code> 镜像处理，用 <code>set_optimizer_state_dict</code> + <code>flatten_optimizer_state_dict=True</code>。<b>关键在 flatten_optimizer_state_dict=True</b>：FSDP2 下参数是 flat 的（一个 flat param DTensor 覆盖一整个 module），optimizer state 也必须按 flat 参数名来索引，否则恢复时对不上。:61-62 <code>__len__</code> 返回子优化器个数，让上层 <code>len(optimizer)</code> 能判单/多优化器。</p><p>注意这里 <code>self.model</code> 必须是 FSDP2 已 wrap 过的模型——DCP 的 <code>get_optimizer_state_dict</code> 要靠模型上的 FSDP 元信息（flat param 名、mesh）才能把分片 state 正确还原。本文件不负责建元信息，只是消费方。</p></div></div><div class="seg"><p class="seglab">行 65-106 · _split_muon_and_adamw_params：2D 非 embed/lm_head 走 Muon</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :65-:106）</h5><pre data-lang="py" data-start="65" data-idprefix="A">class OptimizerFactory:
+    &quot;&quot;&quot;Optimizer factory class for unified construction of single optimizer/EP+FSDP2 multi-optimizer&quot;&quot;&quot;
+
+    @staticmethod
+    def _split_muon_and_adamw_params(
+        model: nn.Module, all_params: Optional[List[nn.Parameter]] = None
+    ) -&gt; Tuple[List[nn.Parameter], List[nn.Parameter]]:
+        &quot;&quot;&quot;
+        Split parameters into Muon parameters and AdamW parameters
+        - Muon params: 2D parameters that aren&#x27;t embeddings or lm_head (requires_grad=True)
+        - AdamW params: All other trainable parameters
+        Args:
+            model: Model to be optimized (for parameter name matching)
+            all_params: Optional, only split parameters in this list (for EP+FSDP2 subset splitting)
+        &quot;&quot;&quot;
+        muon_params, adamw_params = [], []
+        # Build a mapping from parameter names to parameters
+        name_to_param = dict(model.named_parameters())
+
+        # For EP+FSDP2, split the specified all_params
+        if all_params is not None:
+            for param in all_params:
+                # Find the corresponding name of the parameter
+                param_name = next((n for n, p in name_to_param.items() if p is param), None)
+                if param_name is None or not param.requires_grad:
+                    adamw_params.append(param)
+                    continue
+                # Use Muon for 2D parameters that aren&#x27;t embeddings or heads
+                if param.ndim == 2 and &quot;embed&quot; not in param_name and &quot;lm_head&quot; not in param_name:
+                    muon_params.append(param)
+                else:
+                    adamw_params.append(param)
+        # For single optimizer, iterate through all parameters of the model
+        else:
+            for name, param in model.named_parameters():
+                if param.requires_grad:
+                    if param.ndim == 2 and &quot;embed&quot; not in name and &quot;lm_head&quot; not in name:
+                        muon_params.append(param)
+                    else:
+                        adamw_params.append(param)
+
+        return muon_params, adamw_params</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># 标准 DDP/GPU 单卡写法
+import torch
+from torch.optim import AdamW
+
+model = MyModel().cuda()
+model = nn.parallel.DDP(model, device_ids=[rank])
+opt = AdamW(model.parameters(), lr=2e-4,
+            betas=(0.9, 0.95), eps=1e-8,
+            weight_decay=0.1)
+# m/v 是整张参数的完整副本，每卡各存一份（冗余）</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>左：标准 DDP 单优化器，<code>AdamW(model.parameters())</code> 拿到的是<b>整张参数</b>，于是每个 rank 上的 AdamW 各自维护一份<b>全量</b> m、v 状态（显存浪费——N 卡就存 N 份完整 optimizer state）。右（FSDP2 本文件）：参数在 <code>fully_shard</code> 后是 <code>DTensor</code> 的本 rank 局部视图，<code>AdamW</code> (:287) 拿到的就是分片参数，m/v 只在本 rank 上维护<b>对应分片</b>的那一份。这是 FSDP2 vs DDP 在 optimizer 侧最硬核的显存差异：DDP 的 optimizer state 是全量×N 冗余，FSDP2 是分片×N 合起来等于一份。</p></div></div><div class="seg"><p class="seglab">行 108-167 · create：ep_size>1 分流到 multi-optimizer，否则 single</p><pre data-lang="py" data-start="108" data-idprefix="A">    @staticmethod
+    def create(
+        model: torch.nn.Module,
+        ep_size: int,
+        lr: float,
+        optimizer_type: str,
+        weight_decay: float,
+        betas: Tuple[float, float],
+        adam_epsilon: float,
+        fused: bool = False,
+        param_groups: Optional[Sequence[Dict[str, Any]]] = None,
+        no_decay_modules: Optional[List[str]] = None,
+        no_decay_params: Optional[List[str]] = None,
+    ) -&gt; torch.optim.Optimizer:
+        &quot;&quot;&quot;
+        Build optimizer instance
+
+        Args:
+            model: Model to be optimized
+            ep_size: Expert parallel size
+            lr: Base learning rate
+            optimizer_type: Type of optimizer
+            weight_decay: Weight decay coefficient
+            betas: Tuple of AdamW beta1 and beta2 parameters
+            adam_epsilon: AdamW epsilon parameter
+            fused: Whether to enable fused optimizer kernel
+            param_groups: Custom parameter groups
+            no_decay_modules: List of module names that do not require weight decay
+            no_decay_params: List of parameter names that do not require weight decay
+        &quot;&quot;&quot;
+        # Multi-optimizer (EP+FSDP2) Processing
+        if ep_size &gt; 1:
+            logger.info_rank0(&quot;Building EP+FSDP2 optimizer (MultiOptimizer)&quot;)
+            return OptimizerFactory._build_ep_fsdp2_optimizer(
+                model=model,
+                lr=lr,
+                betas=betas,
+                eps=adam_epsilon,
+                weight_decay=weight_decay,
+                fused=fused,
+                optimizer_type=optimizer_type.lower(),
+                param_groups=param_groups,
+                no_decay_modules=no_decay_modules,
+                no_decay_params=no_decay_params,
+            )
+
+        # Single Optimizer Processing
+        single_optimizer = OptimizerFactory._create_single_optimizer(
+            model=model,
+            lr=lr,
+            optimizer_type=optimizer_type,
+            weight_decay=weight_decay,
+            betas=betas,
+            adam_epsilon=adam_epsilon,
+            fused=fused,
+            param_groups=param_groups,
+            no_decay_modules=no_decay_modules,
+            no_decay_params=no_decay_params,
+        )
+        return single_optimizer</pre><div class="exp"><p>:108-121 是对外入口 <code>create</code> 的签名，参数含 <code>ep_size</code>（expert parallel size）、<code>optimizer_type</code>、<code>weight_decay</code>、<code>betas</code>、<code>fused</code>、自定义 <code>param_groups</code> 与 <code>no_decay_modules/params</code>。</p><p>:139-152 的分支是 EP16 的总开关：<code>if ep_size > 1</code> 走 <code>_build_ep_fsdp2_optimizer</code> 返回 <code>MultiOptimizer</code>；否则 :155-166 走 <code>_create_single_optimizer</code> 返回单优化器。也就是说“16 个 expert 并行”这件事，在优化器装配层面就是“建两个子优化器（ep + non_ep）再包成 MultiOptimizer”——并不建 16 个优化器，16 是 EP rank 数，不是子优化器数。</p><p>:148 <code>optimizer_type.lower()</code> 注意 EP 路径里被显式小写化（后面 :438 的 muon 分支靠这个小写串匹配），而单优化器路径 (:158) 传的是原样大小写，到 :185 才再 lower。两条路径对大小写的处理时机不同，是易踩坑点。</p></div></div><div class="seg"><p class="seglab">行 169-268 · _create_single_optimizer：DTensor 与 native 物理隔离的 4 桶</p><pre data-lang="py" data-start="169" data-idprefix="A">    @staticmethod
+    def _create_single_optimizer(
+        model,
+        lr,
+        optimizer_type,
+        weight_decay,
+        betas,
+        adam_epsilon,
+        fused,
+        param_groups,
+        no_decay_modules,
+        no_decay_params,
+    ):
+        &quot;&quot;&quot;
+        Create single optimizer instance.
+        &quot;&quot;&quot;
+        optimizer_type = optimizer_type.lower()
+        # The foreach mode organizes all parameters into a list and performs the update logic via batch traversal.
+        # The fused mode fuses the multi-step computations of parameter updates into a single kernel for one-time execution.
+        # They are mutually exclusive.
+        foreach = not fused
+        muon_params = None
+        adamw_params = None
+
+        if optimizer_type == &quot;muon&quot;:
+            # Split Muon and AdamW parameters
+            muon_params, adamw_params = OptimizerFactory._split_muon_and_adamw_params(model)
+            logger.info_rank0(
+                f&quot;Using Muon optimizer with {len(muon_params)} Muon params and {len(adamw_params)} AdamW params.&quot;
+            )
+            param_groups = []
+
+        # Build parameter groups for single optimizer, automatically split parameters that need/don&#x27;t need decay
+        # when no custom parameter groups are provided
+        else:
+            if param_groups is None:
+                decay_param_names = OptimizerFactory._get_parameter_names(model, no_decay_modules, no_decay_params)
+
+                # Prepare 4 containers to physically isolate DTensor and native Tensor
+                decay_dtensors = []
+                decay_tensors = []
+                no_decay_dtensors = []
+                no_decay_tensors = []
+
+                no_decay_param_names = []
+
+                # Iterate and distribute
+                for n, p in model.named_parameters():
+                    if not p.requires_grad:
+                        continue
+
+                    is_dtensor = isinstance(p, DTensor)
+
+                    if n in decay_param_names:
+                        if is_dtensor:
+                            decay_dtensors.append(p)
+                        else:
+                            decay_tensors.append(p)
+                    else:
+                        no_decay_param_names.append(n)
+                        if is_dtensor:
+                            no_decay_dtensors.append(p)
+                        else:
+                            no_decay_tensors.append(p)
+
+                # Build Parameter Groups (only add non-empty groups)
+                param_groups = []
+
+                if decay_dtensors:
+                    param_groups.append({&quot;params&quot;: decay_dtensors, &quot;weight_decay&quot;: weight_decay})
+                if decay_tensors:
+                    param_groups.append({&quot;params&quot;: decay_tensors, &quot;weight_decay&quot;: weight_decay})
+
+                if no_decay_dtensors:
+                    logger.debug_rank0(f&quot;DTensor parameters without weight decay: {len(no_decay_dtensors)} tensors&quot;)
+                    param_groups.append({&quot;params&quot;: no_decay_dtensors, &quot;weight_decay&quot;: 0.0})
+                if no_decay_tensors:
+                    logger.debug_rank0(
+                        f&quot;Native Tensor parameters without weight decay: {len(no_decay_tensors)} tensors&quot;
+                    )
+                    param_groups.append({&quot;params&quot;: no_decay_tensors, &quot;weight_decay&quot;: 0.0})
+
+        # Call unified method to instantiate single optimizer
+        optimizer = OptimizerFactory._create_optimizer_instance(
+            optimizer_type=optimizer_type,
+            param_groups=param_groups,
+            lr=lr,
+            betas=betas,
+            eps=adam_epsilon,
+            weight_decay=weight_decay,
+            fused=fused,
+            foreach=foreach,
+            muon_params=muon_params,
+            adamw_params=adamw_params,
+        )
+
+        logger.info_rank0(
+            f&quot;Created single optimizer {optimizer_type} | lr={lr}, weight_decay={weight_decay} | Total Param Groups: {len(param_groups) if param_groups else &#x27;N/A&#x27;}&quot;
+        )
+        return optimizer</pre><div class="exp"><p>:185 先 <code>optimizer_type = optimizer_type.lower()</code>。:186-189 注释讲 foreach vs fused 互斥：<code>foreach = not fused</code> (:189)。</p><p>:203-249 是非 muon 单优化器的 param_group 构造，核心是 :207-211 的<b>四个物理隔离桶</b>：<code>decay_dtensors / decay_tensors / no_decay_dtensors / no_decay_tensors</code>。:220 <code>is_dtensor = isinstance(p, DTensor)</code> 判类型，:222-232 按“是否在 decay 名单”+“是否 DTensor”二维分桶。</p><p><b>为什么要按 DTensor 分桶</b>：FSDP2 下大部分参数是 <code>DTensor</code>，但未必全部——比如未参与分片的 small buffer 或某些 hook 注入的 native tensor。把 DTensor 与 native 分到不同 group，避免 <code>AdamW</code> 内部 foreach 路径在混合类型上出问题（foreach 要求同 group 内张量形状/类型可批量处理）。:237-249 只 push 非空桶，并给 no_decay 桶打 <code>weight_decay=0.0</code>。</p><p>:252-263 调 <code>_create_optimizer_instance</code> 实例化，:265-267 rank0 日志打印 lr/wd/group 数。整段没有 NPU 分支——NPU 的 foreach/fused 屏蔽只在 EP 路径 :432-433 出现，单优化器路径默认信任 torch 能处理。</p></div></div><div class="seg"><p class="seglab">行 270-321 · _create_optimizer_instance 与 _get_parameter_names</p><pre data-lang="py" data-start="270" data-idprefix="A">    @staticmethod
+    def _create_optimizer_instance(
+        optimizer_type: str,
+        param_groups: Sequence[Dict[str, Any]],
+        lr: float,
+        betas: Tuple[float, float],
+        eps: float,
+        weight_decay: float,
+        fused: bool = False,
+        foreach: bool = False,
+        muon_params: Optional[List[nn.Parameter]] = None,
+        adamw_params: Optional[List[nn.Parameter]] = None,
+    ) -&gt; Optimizer:
+        &quot;&quot;&quot;
+        Unified optimizer instantiation entry point, add branches here for newly extended optimizers
+        &quot;&quot;&quot;
+        if optimizer_type == &quot;adamw&quot;:
+            return AdamW(
+                param_groups, lr=lr, betas=betas, eps=eps, weight_decay=weight_decay, fused=fused, foreach=foreach
+            )
+        elif optimizer_type == &quot;muon&quot;:
+            # Validate required parameters for Muon
+            if muon_params is None or adamw_params is None:
+                raise ValueError(&quot;muon_params and adamw_params must be provided for Muon optimizer.&quot;)
+            return Muon(
+                lr=lr,
+                wd=weight_decay,
+                muon_params=muon_params,
+                adamw_params=adamw_params,
+                adamw_betas=betas,
+                adamw_eps=eps,
+            )
+        else:
+            raise ValueError(f&quot;Unsupported optimizer type: {optimizer_type}, supported types: [adamw, muon]&quot;)
+
+    @staticmethod
+    def _get_parameter_names(model, forbidden_layer_types, forbidden_param_names):
+        forbidden_layer_types = forbidden_layer_types or []
+        forbidden_param_names = forbidden_param_names or []
+        result = []
+        # Traverse submodules
+        for name, child in model.named_children():
+            child_params = OptimizerFactory._get_parameter_names(child, forbidden_layer_types, forbidden_param_names)
+            result += [
+                f&quot;{name}.{n}&quot;
+                for n in child_params
+                if child.__class__.__name__ not in forbidden_layer_types
+                and not any(f in f&quot;{name}.{n}&quot;.lower() for f in forbidden_param_names)
+            ]
+        # Traverse parameters directly owned by current module
+        result += [k for k in model._parameters.keys() if not any(f in k.lower() for f in forbidden_param_names)]
+        return result</pre><div class="exp"><p>:286-289 的 <code>adamw</code> 分支是本文件最关键的一行——<code>return AdamW(param_groups, lr=lr, betas=betas, eps=eps, weight_decay=weight_decay, fused=fused, foreach=foreach)</code>。<b>这就是标准 <code>torch.optim.AdamW</code></b>，没有任何自定义。FSDP2 的“分片 optimizer state”不是这里实现的：它只是因为 <code>param_groups</code> 里的 <code>params</code> 已是 DTensor 局部视图，所以 AdamW 自然只为本 rank 分片建 m/v。这个副作用是外部 <code>fully_shard</code>（主模型走 fsdp_turbo、expert 走 <code>expert_fully_shard_parallel.py</code>）造成的，本文件如实不揽功。</p><p>:290-301 的 <code>muon</code> 分支校验 <code>muon_params/adamw_params</code> 非空 (:292-293)，再调同仓 <code>Muon</code>。:302-303 兜底抛 <code>Unsupported optimizer type</code>，把可扩展点固定在 :284 注释说的“add branches here”。</p><p>:305-321 <code>_get_parameter_names</code> 递归遍历 <code>named_children()</code>，按 <code>forbidden_layer_types</code>（模块类名，:316）和 <code>forbidden_param_names</code>（参数名子串，:317/:320）排除——用来界定“哪些参数不 weight decay”（典型：LayerNorm、bias）。这是 HF 风格的 decay/no_decay 划分法，与 DDP 侧一致。</p></div></div><div class="seg"><p class="seglab">行 323-344 · _make_param_groups_for_subset：EP 子集的 decay/no_decay 分组</p><pre data-lang="py" data-start="323" data-idprefix="A">    @staticmethod
+    def _make_param_groups_for_subset(
+        model: nn.Module,
+        params: Iterable[torch.nn.Parameter],
+        weight_decay: float,
+        no_decay_modules: Optional[List[str]],
+        no_decay_params: Optional[List[str]],
+    ) -&gt; List[Dict[str, Any]]:
+        decay_param_names = set(OptimizerFactory._get_parameter_names(model, no_decay_modules, no_decay_params))
+        name_by_param = {p: n for n, p in model.named_parameters()}
+        # Filter trainable parameters
+        params = [p for p in params if p.requires_grad]
+        # Split parameters that need/don&#x27;t need decay
+        decayed = [p for p in params if name_by_param.get(p) in decay_param_names]
+        undecayed = [p for p in params if name_by_param.get(p) not in decay_param_names]
+        # Build parameter groups
+        groups = []
+        if decayed:
+            groups.append({&quot;params&quot;: decayed, &quot;weight_decay&quot;: weight_decay})
+        if undecayed:
+            groups.append({&quot;params&quot;: undecayed, &quot;weight_decay&quot;: 0.0})
+        return groups</pre><div class="exp"><p>:323-344 是给 EP 子集参数建 decay/undecay 两组的小工具。:331 用 <code>_get_parameter_names</code> 算出 decay 名单，:332 建 <code>{param: name}</code> 反查表。:334 先按 <code>requires_grad</code> 过滤，:336-337 用 <code>name_by_param.get(p) in decay_param_names</code> 切 decayed/undecayed，:339-343 各自 push 带 <code>weight_decay</code> 的 group。</p><p>它与 :322 之前的单优化器分桶的差别：<b>这里不分 DTensor/native</b>——EP 路径里参数默认都是 efsdp DTensor，桶隔离的必要性下降，直接按 decay 切两组即可。:332 的反查表用 <code>{p: n}</code>（以 param 对象为 key），与 :88 的 <code>p is param</code> 身份匹配一脉相承——都是因为 DTensor 参数跨 rank 是同一对象、靠身份而非名字定位。</p></div></div><div class="seg"><p class="seglab">行 346-407 · _build_ep_fsdp2_optimizer：按 mesh 名 'efsdp' 切 EP/non-EP 参数</p><pre data-lang="py" data-start="346" data-idprefix="A">    @staticmethod
+    def _build_ep_fsdp2_optimizer(
+        model: nn.Module,
+        lr: float,
+        betas: Tuple[float, float],
+        eps: float,
+        weight_decay: float,
+        fused: bool,
+        optimizer_type: str,
+        param_groups: Optional[List[Dict[str, Any]]],
+        no_decay_modules: Optional[List[str]],
+        no_decay_params: Optional[List[str]],
+    ) -&gt; MultiOptimizer:
+        ep_groups: List[Dict[str, Any]] = []
+        non_ep_groups: List[Dict[str, Any]] = []
+
+        # Process custom parameter groups
+        if param_groups is not None:
+            if not isinstance(param_groups, list):
+                raise ValueError(&quot;param_groups must be a list&quot;)
+            for group_config in param_groups:
+                if &quot;params&quot; not in group_config:
+                    raise ValueError(f&quot;Group missing &#x27;params&#x27; key: {group_config}&quot;)
+                # Extract group configuration
+                group_lr = group_config.get(&quot;lr&quot;, lr)
+                group_params = group_config[&quot;params&quot;]
+                # Split EP/non-EP parameters
+                group_ep_params, group_non_ep_params = [], []
+                for p in group_params:
+                    if not p.requires_grad:
+                        continue
+                    # Determine whether it is an EP parameter: it is a DTensor and its device_mesh contains the &quot;efsdp&quot; dimension.
+                    if DTensor is not None and isinstance(p, DTensor):
+                        mesh = getattr(p, &quot;device_mesh&quot;, None)
+                        names = getattr(mesh, &quot;mesh_dim_names&quot;, []) if mesh is not None else []
+                        if &quot;efsdp&quot; in names:
+                            group_ep_params.append(p)
+                            continue
+                    group_non_ep_params.append(p)
+                # Build weight decay subgroups for EP parameters
+                if group_ep_params:
+                    ep_subgroups = OptimizerFactory._make_param_groups_for_subset(
+                        model, group_ep_params, weight_decay, no_decay_modules, no_decay_params
+                    )
+                    for subgroup in ep_subgroups:
+                        subgroup[&quot;lr&quot;] = group_lr
+                        # Preserve custom hyperparameters
+                        for k, v in group_config.items():
+                            if k not in [&quot;params&quot;, &quot;lr&quot;, &quot;weight_decay&quot;]:
+                                subgroup[k] = v
+                    ep_groups.extend(ep_subgroups)
+                # Build weight decay subgroups for non-EP parameters
+                if group_non_ep_params:
+                    non_ep_subgroups = OptimizerFactory._make_param_groups_for_subset(
+                        model, group_non_ep_params, weight_decay, no_decay_modules, no_decay_params
+                    )
+                    for subgroup in non_ep_subgroups:
+                        subgroup[&quot;lr&quot;] = group_lr
+                        for k, v in group_config.items():
+                            if k not in [&quot;params&quot;, &quot;lr&quot;, &quot;weight_decay&quot;]:
+                                subgroup[k] = v
+                    non_ep_groups.extend(non_ep_subgroups)</pre><div class="exp"><p>:346-358 签名。:359-360 两个空桶 <code>ep_groups/non_ep_groups</code>。</p><p>:377-384 是 EP 判定的核心：<code>isinstance(p, DTensor)</code> 后取 <code>p.device_mesh</code>，再取 <code>mesh.mesh_dim_names</code>，若 <b>含 "efsdp" 维</b>则归 EP 参数。:385-396 给 EP 参数子集建 decay 子组并继承 group_lr/自定义超参；:397-407 对 non-EP 参数镜像处理。:408-427 是无自定义 group 的默认路径，遍历全模型按同样 "efsdp" 名切分。</p><p><b>关键认知</b>：<code>"efsdp" in names</code> 这个字符串判定是本仓 expert FSDP 与主 FSDP 的分界——expert 侧 <code>fully_shard(expert, mesh=efsdp_mesh, ...)</code>（见 <code>expert_fully_shard_parallel.py:30-37</code>）会给参数打上 efsdp mesh 维，本文件据此把 expert 参数路由到 <code>ep</code> 子优化器、dense 参数路由到 <code>non_ep</code> 子优化器。EP16 下各 rank 只持有自己那份 expert，<code>ep</code> 子优化器自然只更新本 rank expert。这是 EP+FSDP2 双层分片在 optimizer 装配层的落点。</p></div></div><div class="seg"><p class="seglab">行 429-477 · _build_optimizer 闭包 + MultiOptimizer 装配 + NPU foreach 屏蔽</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :429-:477）</h5><pre data-lang="py" data-start="429" data-idprefix="A">        # Internal function to build optimizer
+        def _build_optimizer(groups: Sequence[Dict[str, Any]]) -&gt; Optimizer:
+            # Multiple optimizers do not support the foreach/fused modes in NPU.
+            foreach = False if is_torch_npu_available() else (not fused)
+            fused_ = False if is_torch_npu_available() else fused
+            muon_params = None
+            adamw_params = None
+            param_groups = groups
+
+            if optimizer_type == &quot;muon&quot;:
+                # Extract all parameters from weight decay groups, then split into Muon/AdamW parameters
+                all_params = [p for g in groups for p in g.get(&quot;params&quot;, [])]
+                muon_params, adamw_params = OptimizerFactory._split_muon_and_adamw_params(model, all_params)
+                logger.info_rank0(
+                    f&quot;EP+FSDP2 Muon sub-optimizer: {len(muon_params)} Muon params, {len(adamw_params)} AdamW params.&quot;
+                )
+                param_groups = []
+
+            return OptimizerFactory._create_optimizer_instance(
+                optimizer_type=optimizer_type,
+                param_groups=param_groups,
+                lr=lr,
+                betas=betas,
+                eps=eps,
+                weight_decay=weight_decay,
+                fused=fused_,
+                foreach=foreach,
+                muon_params=muon_params,
+                adamw_params=adamw_params,
+            )
+
+        # Build EP/non-EP optimizer dictionary
+        optimizer_dict = {}
+        if ep_groups:
+            optimizer_dict[&quot;ep&quot;] = _build_optimizer(ep_groups)
+        if non_ep_groups:
+            optimizer_dict[&quot;non_ep&quot;] = _build_optimizer(non_ep_groups)
+
+        # Cache EP/non-EP parameter groups to model
+        model._ep_param_groups = {
+            &quot;ep&quot;: [p for g in ep_groups for p in g.get(&quot;params&quot;, [])] if ep_groups else [],
+            &quot;non_ep&quot;: [p for g in non_ep_groups for p in g.get(&quot;params&quot;, [])] if non_ep_groups else [],
+        }
+
+        # Wrap as MultiOptimizer
+        multi_opt = MultiOptimizer(root_model=model, optimizers=optimizer_dict, key_names=list(optimizer_dict.keys()))
+
+        logger.info_rank0(f&quot;Created EP+FSDP2 MultiOptimizer {optimizer_type} | lr={lr}, weight_decay={weight_decay}&quot;)
+        return multi_opt</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># NPU vs GPU foreach/fused 差异对照（GPU 侧）
+foreach = not fused          # GPU: 可批量处理
+fused_ = fused               # GPU: 可开 fused kernel
+opt = AdamW(groups, lr=lr, betas=betas, eps=eps,
+           weight_decay=wd, fused=fused_, foreach=foreach)</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>左是 GPU 侧的默认行为：<code>foreach = not fused</code>、<code>fused_ = fused</code>，都允许开——GPU 的 foreach/fused kernel 在多优化器场景下也工作。右是本文件 :432-433 的 NPU 分支：<code>is_torch_npu_available()</code> 为真时强制 <code>foreach=False, fused_=False</code>，走逐参数 Python 循环的慢路径。原因：Ascend NPU 上多优化器（MultiOptimizer 的 ep/non_ep 双子优化器）场景下 foreach/fused kernel 支持不全，强开会报错或精度异常。这是 EP16 在 Ascend 上落地时与 NVIDIA GPU 最实际的差异之一——不是算法差异，是后端 kernel 可用性差异，且<b>只在 EP 多优化器路径</b>触发，单优化器路径 (:189) 不屏蔽。</p></div></div></div>
+<details class="src"><summary>📜 完整源码（478 行）— 大纲点跳行</summary><pre data-lang="py" data-start="1">&quot;&quot;&quot;
+Optimizer factory for unified construction of single optimizer and EP+FSDP2 multi-optimizer, support Adamw and Muon now.
+&quot;&quot;&quot;
+
+import torch
+from torch import nn
+from typing import Any, Dict, List, Iterable, Optional, Sequence, Tuple
+from torch.distributed._tensor import DTensor
+from torch.distributed.checkpoint.state_dict import (
+    StateDictOptions,
+    get_optimizer_state_dict,
+    set_optimizer_state_dict,
+)
+from torch.distributed.checkpoint.stateful import Stateful
+from torch.optim import AdamW
+from torch.optim.optimizer import Optimizer
+from transformers.utils import is_torch_npu_available
+from mindspeed_llm.fsdp2.optim.muon import Muon
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+
+
+logger = get_logger(__name__)
+
+
+class MultiOptimizer(Optimizer, Stateful):
+    def __init__(self, root_model: nn.Module, optimizers: dict, key_names: list[str]):
+        self.model = root_model
+        self.optimizers_dict = optimizers
+        self._is_multi_optimizer: bool = True
+        self.key_names = key_names
+
+    def step(self) -&gt; None:
+        for opt in self.optimizers_dict.values():
+            opt.step()
+
+    def zero_grad(self) -&gt; None:
+        for opt in self.optimizers_dict.values():
+            opt.zero_grad()
+
+    def state_dict(self) -&gt; Dict[str, Any]:
+        merged: Dict[str, Any] = {}
+        for name in self.key_names:
+            opt = self.optimizers_dict.get(name)
+            sd = get_optimizer_state_dict(self.model, opt, options=StateDictOptions(flatten_optimizer_state_dict=True))
+            overlap = set(merged.keys()) &amp; set(sd.keys())
+            if overlap:
+                raise KeyError(f&quot;Key clash detected for optimizer &#x27;{name}&#x27;: {&#x27;, &#x27;.join(sorted(overlap))}&quot;)
+            merged.update(sd)
+        return merged
+
+    def load_state_dict(self, state_dict: Dict[str, Any]) -&gt; None:
+        for name in self.key_names:
+            opt = self.optimizers_dict.get(name)
+            set_optimizer_state_dict(
+                self.model,
+                opt,
+                optim_state_dict=state_dict,
+                options=StateDictOptions(flatten_optimizer_state_dict=True),
+            )
+
+    def __len__(self) -&gt; int:
+        return len(self.optimizers_dict)
+
+
+class OptimizerFactory:
+    &quot;&quot;&quot;Optimizer factory class for unified construction of single optimizer/EP+FSDP2 multi-optimizer&quot;&quot;&quot;
+
+    @staticmethod
+    def _split_muon_and_adamw_params(
+        model: nn.Module, all_params: Optional[List[nn.Parameter]] = None
+    ) -&gt; Tuple[List[nn.Parameter], List[nn.Parameter]]:
+        &quot;&quot;&quot;
+        Split parameters into Muon parameters and AdamW parameters
+        - Muon params: 2D parameters that aren&#x27;t embeddings or lm_head (requires_grad=True)
+        - AdamW params: All other trainable parameters
+        Args:
+            model: Model to be optimized (for parameter name matching)
+            all_params: Optional, only split parameters in this list (for EP+FSDP2 subset splitting)
+        &quot;&quot;&quot;
+        muon_params, adamw_params = [], []
+        # Build a mapping from parameter names to parameters
+        name_to_param = dict(model.named_parameters())
+
+        # For EP+FSDP2, split the specified all_params
+        if all_params is not None:
+            for param in all_params:
+                # Find the corresponding name of the parameter
+                param_name = next((n for n, p in name_to_param.items() if p is param), None)
+                if param_name is None or not param.requires_grad:
+                    adamw_params.append(param)
+                    continue
+                # Use Muon for 2D parameters that aren&#x27;t embeddings or heads
+                if param.ndim == 2 and &quot;embed&quot; not in param_name and &quot;lm_head&quot; not in param_name:
+                    muon_params.append(param)
+                else:
+                    adamw_params.append(param)
+        # For single optimizer, iterate through all parameters of the model
+        else:
+            for name, param in model.named_parameters():
+                if param.requires_grad:
+                    if param.ndim == 2 and &quot;embed&quot; not in name and &quot;lm_head&quot; not in name:
+                        muon_params.append(param)
+                    else:
+                        adamw_params.append(param)
+
+        return muon_params, adamw_params
+
+    @staticmethod
+    def create(
+        model: torch.nn.Module,
+        ep_size: int,
+        lr: float,
+        optimizer_type: str,
+        weight_decay: float,
+        betas: Tuple[float, float],
+        adam_epsilon: float,
+        fused: bool = False,
+        param_groups: Optional[Sequence[Dict[str, Any]]] = None,
+        no_decay_modules: Optional[List[str]] = None,
+        no_decay_params: Optional[List[str]] = None,
+    ) -&gt; torch.optim.Optimizer:
+        &quot;&quot;&quot;
+        Build optimizer instance
+
+        Args:
+            model: Model to be optimized
+            ep_size: Expert parallel size
+            lr: Base learning rate
+            optimizer_type: Type of optimizer
+            weight_decay: Weight decay coefficient
+            betas: Tuple of AdamW beta1 and beta2 parameters
+            adam_epsilon: AdamW epsilon parameter
+            fused: Whether to enable fused optimizer kernel
+            param_groups: Custom parameter groups
+            no_decay_modules: List of module names that do not require weight decay
+            no_decay_params: List of parameter names that do not require weight decay
+        &quot;&quot;&quot;
+        # Multi-optimizer (EP+FSDP2) Processing
+        if ep_size &gt; 1:
+            logger.info_rank0(&quot;Building EP+FSDP2 optimizer (MultiOptimizer)&quot;)
+            return OptimizerFactory._build_ep_fsdp2_optimizer(
+                model=model,
+                lr=lr,
+                betas=betas,
+                eps=adam_epsilon,
+                weight_decay=weight_decay,
+                fused=fused,
+                optimizer_type=optimizer_type.lower(),
+                param_groups=param_groups,
+                no_decay_modules=no_decay_modules,
+                no_decay_params=no_decay_params,
+            )
+
+        # Single Optimizer Processing
+        single_optimizer = OptimizerFactory._create_single_optimizer(
+            model=model,
+            lr=lr,
+            optimizer_type=optimizer_type,
+            weight_decay=weight_decay,
+            betas=betas,
+            adam_epsilon=adam_epsilon,
+            fused=fused,
+            param_groups=param_groups,
+            no_decay_modules=no_decay_modules,
+            no_decay_params=no_decay_params,
+        )
+        return single_optimizer
+
+    @staticmethod
+    def _create_single_optimizer(
+        model,
+        lr,
+        optimizer_type,
+        weight_decay,
+        betas,
+        adam_epsilon,
+        fused,
+        param_groups,
+        no_decay_modules,
+        no_decay_params,
+    ):
+        &quot;&quot;&quot;
+        Create single optimizer instance.
+        &quot;&quot;&quot;
+        optimizer_type = optimizer_type.lower()
+        # The foreach mode organizes all parameters into a list and performs the update logic via batch traversal.
+        # The fused mode fuses the multi-step computations of parameter updates into a single kernel for one-time execution.
+        # They are mutually exclusive.
+        foreach = not fused
+        muon_params = None
+        adamw_params = None
+
+        if optimizer_type == &quot;muon&quot;:
+            # Split Muon and AdamW parameters
+            muon_params, adamw_params = OptimizerFactory._split_muon_and_adamw_params(model)
+            logger.info_rank0(
+                f&quot;Using Muon optimizer with {len(muon_params)} Muon params and {len(adamw_params)} AdamW params.&quot;
+            )
+            param_groups = []
+
+        # Build parameter groups for single optimizer, automatically split parameters that need/don&#x27;t need decay
+        # when no custom parameter groups are provided
+        else:
+            if param_groups is None:
+                decay_param_names = OptimizerFactory._get_parameter_names(model, no_decay_modules, no_decay_params)
+
+                # Prepare 4 containers to physically isolate DTensor and native Tensor
+                decay_dtensors = []
+                decay_tensors = []
+                no_decay_dtensors = []
+                no_decay_tensors = []
+
+                no_decay_param_names = []
+
+                # Iterate and distribute
+                for n, p in model.named_parameters():
+                    if not p.requires_grad:
+                        continue
+
+                    is_dtensor = isinstance(p, DTensor)
+
+                    if n in decay_param_names:
+                        if is_dtensor:
+                            decay_dtensors.append(p)
+                        else:
+                            decay_tensors.append(p)
+                    else:
+                        no_decay_param_names.append(n)
+                        if is_dtensor:
+                            no_decay_dtensors.append(p)
+                        else:
+                            no_decay_tensors.append(p)
+
+                # Build Parameter Groups (only add non-empty groups)
+                param_groups = []
+
+                if decay_dtensors:
+                    param_groups.append({&quot;params&quot;: decay_dtensors, &quot;weight_decay&quot;: weight_decay})
+                if decay_tensors:
+                    param_groups.append({&quot;params&quot;: decay_tensors, &quot;weight_decay&quot;: weight_decay})
+
+                if no_decay_dtensors:
+                    logger.debug_rank0(f&quot;DTensor parameters without weight decay: {len(no_decay_dtensors)} tensors&quot;)
+                    param_groups.append({&quot;params&quot;: no_decay_dtensors, &quot;weight_decay&quot;: 0.0})
+                if no_decay_tensors:
+                    logger.debug_rank0(
+                        f&quot;Native Tensor parameters without weight decay: {len(no_decay_tensors)} tensors&quot;
+                    )
+                    param_groups.append({&quot;params&quot;: no_decay_tensors, &quot;weight_decay&quot;: 0.0})
+
+        # Call unified method to instantiate single optimizer
+        optimizer = OptimizerFactory._create_optimizer_instance(
+            optimizer_type=optimizer_type,
+            param_groups=param_groups,
+            lr=lr,
+            betas=betas,
+            eps=adam_epsilon,
+            weight_decay=weight_decay,
+            fused=fused,
+            foreach=foreach,
+            muon_params=muon_params,
+            adamw_params=adamw_params,
+        )
+
+        logger.info_rank0(
+            f&quot;Created single optimizer {optimizer_type} | lr={lr}, weight_decay={weight_decay} | Total Param Groups: {len(param_groups) if param_groups else &#x27;N/A&#x27;}&quot;
+        )
+        return optimizer
+
+    @staticmethod
+    def _create_optimizer_instance(
+        optimizer_type: str,
+        param_groups: Sequence[Dict[str, Any]],
+        lr: float,
+        betas: Tuple[float, float],
+        eps: float,
+        weight_decay: float,
+        fused: bool = False,
+        foreach: bool = False,
+        muon_params: Optional[List[nn.Parameter]] = None,
+        adamw_params: Optional[List[nn.Parameter]] = None,
+    ) -&gt; Optimizer:
+        &quot;&quot;&quot;
+        Unified optimizer instantiation entry point, add branches here for newly extended optimizers
+        &quot;&quot;&quot;
+        if optimizer_type == &quot;adamw&quot;:
+            return AdamW(
+                param_groups, lr=lr, betas=betas, eps=eps, weight_decay=weight_decay, fused=fused, foreach=foreach
+            )
+        elif optimizer_type == &quot;muon&quot;:
+            # Validate required parameters for Muon
+            if muon_params is None or adamw_params is None:
+                raise ValueError(&quot;muon_params and adamw_params must be provided for Muon optimizer.&quot;)
+            return Muon(
+                lr=lr,
+                wd=weight_decay,
+                muon_params=muon_params,
+                adamw_params=adamw_params,
+                adamw_betas=betas,
+                adamw_eps=eps,
+            )
+        else:
+            raise ValueError(f&quot;Unsupported optimizer type: {optimizer_type}, supported types: [adamw, muon]&quot;)
+
+    @staticmethod
+    def _get_parameter_names(model, forbidden_layer_types, forbidden_param_names):
+        forbidden_layer_types = forbidden_layer_types or []
+        forbidden_param_names = forbidden_param_names or []
+        result = []
+        # Traverse submodules
+        for name, child in model.named_children():
+            child_params = OptimizerFactory._get_parameter_names(child, forbidden_layer_types, forbidden_param_names)
+            result += [
+                f&quot;{name}.{n}&quot;
+                for n in child_params
+                if child.__class__.__name__ not in forbidden_layer_types
+                and not any(f in f&quot;{name}.{n}&quot;.lower() for f in forbidden_param_names)
+            ]
+        # Traverse parameters directly owned by current module
+        result += [k for k in model._parameters.keys() if not any(f in k.lower() for f in forbidden_param_names)]
+        return result
+
+    @staticmethod
+    def _make_param_groups_for_subset(
+        model: nn.Module,
+        params: Iterable[torch.nn.Parameter],
+        weight_decay: float,
+        no_decay_modules: Optional[List[str]],
+        no_decay_params: Optional[List[str]],
+    ) -&gt; List[Dict[str, Any]]:
+        decay_param_names = set(OptimizerFactory._get_parameter_names(model, no_decay_modules, no_decay_params))
+        name_by_param = {p: n for n, p in model.named_parameters()}
+        # Filter trainable parameters
+        params = [p for p in params if p.requires_grad]
+        # Split parameters that need/don&#x27;t need decay
+        decayed = [p for p in params if name_by_param.get(p) in decay_param_names]
+        undecayed = [p for p in params if name_by_param.get(p) not in decay_param_names]
+        # Build parameter groups
+        groups = []
+        if decayed:
+            groups.append({&quot;params&quot;: decayed, &quot;weight_decay&quot;: weight_decay})
+        if undecayed:
+            groups.append({&quot;params&quot;: undecayed, &quot;weight_decay&quot;: 0.0})
+        return groups
+
+    @staticmethod
+    def _build_ep_fsdp2_optimizer(
+        model: nn.Module,
+        lr: float,
+        betas: Tuple[float, float],
+        eps: float,
+        weight_decay: float,
+        fused: bool,
+        optimizer_type: str,
+        param_groups: Optional[List[Dict[str, Any]]],
+        no_decay_modules: Optional[List[str]],
+        no_decay_params: Optional[List[str]],
+    ) -&gt; MultiOptimizer:
+        ep_groups: List[Dict[str, Any]] = []
+        non_ep_groups: List[Dict[str, Any]] = []
+
+        # Process custom parameter groups
+        if param_groups is not None:
+            if not isinstance(param_groups, list):
+                raise ValueError(&quot;param_groups must be a list&quot;)
+            for group_config in param_groups:
+                if &quot;params&quot; not in group_config:
+                    raise ValueError(f&quot;Group missing &#x27;params&#x27; key: {group_config}&quot;)
+                # Extract group configuration
+                group_lr = group_config.get(&quot;lr&quot;, lr)
+                group_params = group_config[&quot;params&quot;]
+                # Split EP/non-EP parameters
+                group_ep_params, group_non_ep_params = [], []
+                for p in group_params:
+                    if not p.requires_grad:
+                        continue
+                    # Determine whether it is an EP parameter: it is a DTensor and its device_mesh contains the &quot;efsdp&quot; dimension.
+                    if DTensor is not None and isinstance(p, DTensor):
+                        mesh = getattr(p, &quot;device_mesh&quot;, None)
+                        names = getattr(mesh, &quot;mesh_dim_names&quot;, []) if mesh is not None else []
+                        if &quot;efsdp&quot; in names:
+                            group_ep_params.append(p)
+                            continue
+                    group_non_ep_params.append(p)
+                # Build weight decay subgroups for EP parameters
+                if group_ep_params:
+                    ep_subgroups = OptimizerFactory._make_param_groups_for_subset(
+                        model, group_ep_params, weight_decay, no_decay_modules, no_decay_params
+                    )
+                    for subgroup in ep_subgroups:
+                        subgroup[&quot;lr&quot;] = group_lr
+                        # Preserve custom hyperparameters
+                        for k, v in group_config.items():
+                            if k not in [&quot;params&quot;, &quot;lr&quot;, &quot;weight_decay&quot;]:
+                                subgroup[k] = v
+                    ep_groups.extend(ep_subgroups)
+                # Build weight decay subgroups for non-EP parameters
+                if group_non_ep_params:
+                    non_ep_subgroups = OptimizerFactory._make_param_groups_for_subset(
+                        model, group_non_ep_params, weight_decay, no_decay_modules, no_decay_params
+                    )
+                    for subgroup in non_ep_subgroups:
+                        subgroup[&quot;lr&quot;] = group_lr
+                        for k, v in group_config.items():
+                            if k not in [&quot;params&quot;, &quot;lr&quot;, &quot;weight_decay&quot;]:
+                                subgroup[k] = v
+                    non_ep_groups.extend(non_ep_subgroups)
+        # No custom parameter groups: traverse all model parameters and split
+        else:
+            ep_params, non_ep_params = [], []
+            for _, p in model.named_parameters():
+                if not p.requires_grad:
+                    continue
+                if DTensor is not None and isinstance(p, DTensor):
+                    mesh = getattr(p, &quot;device_mesh&quot;, None)
+                    names = getattr(mesh, &quot;mesh_dim_names&quot;, []) if mesh is not None else []
+                    if &quot;efsdp&quot; in names:
+                        ep_params.append(p)
+                        continue
+                non_ep_params.append(p)
+            # Build weight decay groups
+            ep_groups = OptimizerFactory._make_param_groups_for_subset(
+                model, ep_params, weight_decay, no_decay_modules, no_decay_params
+            )
+            non_ep_groups = OptimizerFactory._make_param_groups_for_subset(
+                model, non_ep_params, weight_decay, no_decay_modules, no_decay_params
+            )
+
+        # Internal function to build optimizer
+        def _build_optimizer(groups: Sequence[Dict[str, Any]]) -&gt; Optimizer:
+            # Multiple optimizers do not support the foreach/fused modes in NPU.
+            foreach = False if is_torch_npu_available() else (not fused)
+            fused_ = False if is_torch_npu_available() else fused
+            muon_params = None
+            adamw_params = None
+            param_groups = groups
+
+            if optimizer_type == &quot;muon&quot;:
+                # Extract all parameters from weight decay groups, then split into Muon/AdamW parameters
+                all_params = [p for g in groups for p in g.get(&quot;params&quot;, [])]
+                muon_params, adamw_params = OptimizerFactory._split_muon_and_adamw_params(model, all_params)
+                logger.info_rank0(
+                    f&quot;EP+FSDP2 Muon sub-optimizer: {len(muon_params)} Muon params, {len(adamw_params)} AdamW params.&quot;
+                )
+                param_groups = []
+
+            return OptimizerFactory._create_optimizer_instance(
+                optimizer_type=optimizer_type,
+                param_groups=param_groups,
+                lr=lr,
+                betas=betas,
+                eps=eps,
+                weight_decay=weight_decay,
+                fused=fused_,
+                foreach=foreach,
+                muon_params=muon_params,
+                adamw_params=adamw_params,
+            )
+
+        # Build EP/non-EP optimizer dictionary
+        optimizer_dict = {}
+        if ep_groups:
+            optimizer_dict[&quot;ep&quot;] = _build_optimizer(ep_groups)
+        if non_ep_groups:
+            optimizer_dict[&quot;non_ep&quot;] = _build_optimizer(non_ep_groups)
+
+        # Cache EP/non-EP parameter groups to model
+        model._ep_param_groups = {
+            &quot;ep&quot;: [p for g in ep_groups for p in g.get(&quot;params&quot;, [])] if ep_groups else [],
+            &quot;non_ep&quot;: [p for g in non_ep_groups for p in g.get(&quot;params&quot;, [])] if non_ep_groups else [],
+        }
+
+        # Wrap as MultiOptimizer
+        multi_opt = MultiOptimizer(root_model=model, optimizers=optimizer_dict, key_names=list(optimizer_dict.keys()))
+
+        logger.info_rank0(f&quot;Created EP+FSDP2 MultiOptimizer {optimizer_type} | lr={lr}, weight_decay={weight_decay}&quot;)
+        return multi_opt
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

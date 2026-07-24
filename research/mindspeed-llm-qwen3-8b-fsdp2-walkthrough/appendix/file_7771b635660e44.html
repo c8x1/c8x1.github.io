@@ -1,0 +1,407 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/data/formatter.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/data/formatter.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_8f61455f04b597.html">◀ data_utils.py</a> <a href="file_3b2e0b91005787.html">__init__.py ▶</a></nav></div>
+<div class="wrap">
+<h1>formatter.py</h1><p class="goal">mindspeed_llm/fsdp2/data/formatter.py · 10327B · 306 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L14" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class FunctionCall(NamedTuple)</a><a href="#L40" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class ToolUtils(ABC)</a><a href="#L45" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def tool_formatter(tools: list[dict[str, Any]]</a><a href="#L51" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def function_formatter(functions: list[&quot;F</a><a href="#L57" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def tool_extractor(content: str) -&gt; Union[s</a><a href="#L65" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class DefaultToolUtils(ToolUtils)</a><a href="#L70" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def tool_formatter(tools: list[dict[str, Any]]</a><a href="#L105" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def function_formatter(functions: list[&quot;F</a><a href="#L110" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def tool_extractor(content: str) -&gt; Union[s</a><a href="#L129" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class QwenToolUtils(ToolUtils)</a><a href="#L134" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def tool_formatter(tools: list[dict[str, Any]]</a><a href="#L144" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def function_formatter(functions: list[&quot;F</a><a href="#L153" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def tool_extractor(content: str) -&gt; Union[s</a><a href="#L180" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_tool_utils(name: str) -&gt; &quot;Tool</a><a href="#L189" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class Formatter(ABC)</a><a href="#L194" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply(self, **kwargs) -&gt; SLOTS</a><a href="#L198" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def extract(self, content: str) -&gt; Union[st</a><a href="#L207" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class EmptyFormatter(Formatter)</a><a href="#L208" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __post_init__(self)</a><a href="#L218" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply(self, **kwargs) -&gt; SLOTS</a><a href="#L223" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class StringFormatter(Formatter)</a><a href="#L224" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __post_init__(self)</a><a href="#L234" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply(self, **kwargs) -&gt; SLOTS</a><a href="#L253" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class FunctionFormatter(StringFormatter)</a><a href="#L254" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __post_init__(self)</a><a href="#L259" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply(self, **kwargs) -&gt; SLOTS</a><a href="#L291" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class ToolFormatter(Formatter)</a><a href="#L292" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __post_init__(self)</a><a href="#L296" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply(self, **kwargs) -&gt; SLOTS</a><a href="#L305" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def extract(self, content: str) -&gt; Union[st</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep13.html">EP13</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p>Copyright 2025 the LlamaFactory team.</p><p class="mut">（自动提取自首行注释）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1"># Copyright 2025 the LlamaFactory team.
+
+import json
+import re
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any, NamedTuple, Optional, Union
+from typing_extensions import override
+
+SLOTS = list[Union[str, set[str], dict[str, str]]]
+
+
+class FunctionCall(NamedTuple):
+    name: str
+    arguments: str
+
+
+DEFAULT_TOOL_PROMPT = (
+    &quot;You have access to the following tools:\n{tool_text}&quot;
+    &quot;Use the following format if using a tool:\n&quot;
+    &quot;```\n&quot;
+    &quot;Action: tool name (one of [{tool_names}])\n&quot;
+    &quot;Action Input: the input to the tool, in a JSON format representing the kwargs &quot;
+    &quot;&quot;&quot;(e.g. ```{{&quot;input&quot;: &quot;hello world&quot;, &quot;num_beams&quot;: 5}}```)\n&quot;&quot;&quot;
+    &quot;```\n&quot;
+)
+
+
+QWEN_TOOL_PROMPT = (
+    &quot;\n\n# Tools\n\nYou may call one or more functions to assist with the user query.\n\n&quot;
+    &quot;You are provided with function signatures within &lt;tools&gt;&lt;/tools&gt; XML tags:\n&lt;tools&gt;{tool_text}&quot;
+    &quot;\n&lt;/tools&gt;\n\nFor each function call, return a json object with function name and arguments within &quot;
+    &quot;&quot;&quot;&lt;tool_call&gt;&lt;/tool_call&gt; XML tags:\n&lt;tool_call&gt;\n{{&quot;name&quot;: &lt;function-name&gt;, &quot;&quot;&quot;
+    &quot;&quot;&quot;&quot;arguments&quot;: &lt;args-json-object&gt;}}\n&lt;/tool_call&gt;&quot;&quot;&quot;
+)
+
+
+@dataclass
+class ToolUtils(ABC):
+    &quot;&quot;&quot;Base class for tool utilities.&quot;&quot;&quot;
+
+    @staticmethod
+    @abstractmethod
+    def tool_formatter(tools: list[dict[str, Any]]) -&gt; str:
+        r&quot;&quot;&quot;Generate the system message describing all the available tools.&quot;&quot;&quot;
+        ...
+
+    @staticmethod
+    @abstractmethod
+    def function_formatter(functions: list[&quot;FunctionCall&quot;]) -&gt; str:
+        r&quot;&quot;&quot;Generate the assistant message including all the tool calls.&quot;&quot;&quot;
+        ...
+
+    @staticmethod
+    @abstractmethod
+    def tool_extractor(content: str) -&gt; Union[str, list[&quot;FunctionCall&quot;]]:
+        r&quot;&quot;&quot;Extract all the function calls from the assistant message.
+
+        It should be an inverse function of `function_formatter`.
+        &quot;&quot;&quot;
+        ...
+
+
+class DefaultToolUtils(ToolUtils):
+    r&quot;&quot;&quot;Default tool using template.&quot;&quot;&quot;
+
+    
+    @staticmethod
+    def tool_formatter(tools: list[dict[str, Any]]) -&gt; str:
+        tool_text = &quot;&quot;
+        tool_names = []
+        for tool in tools:
+            tool = tool.get(&quot;function&quot;, &quot;&quot;) if tool.get(&quot;type&quot;) == &quot;function&quot; else tool
+            param_text = &quot;&quot;
+            for name, param in tool[&quot;parameters&quot;][&quot;properties&quot;].items():
+                required, enum, items = &quot;&quot;, &quot;&quot;, &quot;&quot;
+                if name in tool[&quot;parameters&quot;].get(&quot;required&quot;, []):
+                    required = &quot;, required&quot;
+
+                if param.get(&quot;enum&quot;, None):
+                    enum = &quot;, should be one of [{}]&quot;.format(&quot;, &quot;.join(param[&quot;enum&quot;]))
+
+                if param.get(&quot;items&quot;, None):
+                    items = &quot;, where each item should be {}&quot;.format(param[&quot;items&quot;].get(&quot;type&quot;, &quot;&quot;))
+
+                param_text += &quot;  - {name} ({type}{required}): {desc}{enum}{items}\n&quot;.format(
+                    name=name,
+                    type=param.get(&quot;type&quot;, &quot;&quot;),
+                    required=required,
+                    desc=param.get(&quot;description&quot;, &quot;&quot;),
+                    enum=enum,
+                    items=items,
+                )
+
+            tool_text += &quot;&gt; Tool Name: {name}\nTool Description: {desc}\nTool Args:\n{args}\n&quot;.format(
+                name=tool[&quot;name&quot;], desc=tool.get(&quot;description&quot;, &quot;&quot;), args=param_text
+            )
+            tool_names.append(tool[&quot;name&quot;])
+
+        return DEFAULT_TOOL_PROMPT.format(tool_text=tool_text, tool_names=&quot;, &quot;.join(tool_names))
+
+    
+    @staticmethod
+    def function_formatter(functions: list[&quot;FunctionCall&quot;]) -&gt; str:
+        return &quot;\n&quot;.join([f&quot;Action: {name}\nAction Input: {arguments}&quot; for name, arguments in functions])
+
+    
+    @staticmethod
+    def tool_extractor(content: str) -&gt; Union[str, list[&quot;FunctionCall&quot;]]:
+        regex = re.compile(r&quot;Action:\s*([a-zA-Z0-9_]+)\s*Action Input:\s*(.+?)(?=\s*Action:|\s*$)&quot;, re.DOTALL)
+        action_match: list[tuple[str, str]] = re.findall(regex, content)
+        if not action_match:
+            return content
+
+        results = []
+        for match in action_match:
+            tool_name = match[0].strip()
+            tool_input = match[1].strip().strip(&#x27;&quot;&#x27;).strip(&quot;```&quot;)
+            try:
+                arguments = json.loads(tool_input)
+                results.append(FunctionCall(tool_name, json.dumps(arguments, ensure_ascii=False)))
+            except json.JSONDecodeError:
+                return content
+
+        return results
+
+
+class QwenToolUtils(ToolUtils):
+    r&quot;&quot;&quot;Qwen 2.5 tool using template.&quot;&quot;&quot;
+
+
+    @staticmethod
+    def tool_formatter(tools: list[dict[str, Any]]) -&gt; str:
+        tool_text = &quot;&quot;
+        for tool in tools:
+            wrapped_tool = tool if tool.get(&quot;type&quot;) == &quot;function&quot; else {&quot;type&quot;: &quot;function&quot;, &quot;function&quot;: tool}
+            tool_text += &quot;\n&quot; + json.dumps(wrapped_tool, ensure_ascii=False)
+
+        return QWEN_TOOL_PROMPT.format(tool_text=tool_text)
+
+    
+    @staticmethod
+    def function_formatter(functions: list[&quot;FunctionCall&quot;]) -&gt; str:
+        function_texts = [
+            json.dumps({&quot;name&quot;: name, &quot;arguments&quot;: json.loads(arguments)}, ensure_ascii=False)
+            for name, arguments in functions
+        ]
+        return &quot;\n&quot;.join([f&quot;&lt;tool_call&gt;\n{text}\n&lt;/tool_call&gt;&quot; for text in function_texts])
+
+    
+    @staticmethod
+    def tool_extractor(content: str) -&gt; Union[str, list[&quot;FunctionCall&quot;]]:
+        regex = re.compile(r&quot;&lt;tool_call&gt;(.+?)&lt;/tool_call&gt;(?=\s*&lt;tool_call&gt;|\s*$)&quot;, re.DOTALL)
+        tool_match: list[str] = re.findall(regex, content)
+        if not tool_match:
+            return content
+
+        results = []
+        for tool in tool_match:
+            try:
+                tool = json.loads(tool.strip())
+            except json.JSONDecodeError:
+                return content
+
+            if &quot;name&quot; not in tool or &quot;arguments&quot; not in tool:
+                return content
+
+            results.append(FunctionCall(tool[&quot;name&quot;], json.dumps(tool[&quot;arguments&quot;], ensure_ascii=False)))
+
+        return results
+
+
+TOOLS = {
+    &quot;default&quot;: DefaultToolUtils(),
+    &quot;qwen&quot;: QwenToolUtils(),
+}
+
+
+def get_tool_utils(name: str) -&gt; &quot;ToolUtils&quot;:
+    tool_utils = TOOLS.get(name, None)
+    if tool_utils is None:
+        raise ValueError(f&quot;Tool utils `{name}` not found.&quot;)
+
+    return tool_utils
+
+
+@dataclass
+class Formatter(ABC):
+    slots: SLOTS = field(default_factory=list)
+    tool_format: Optional[str] = None
+
+    @abstractmethod
+    def apply(self, **kwargs) -&gt; SLOTS:
+        r&quot;&quot;&quot;Forms a list of slots according to the inputs to encode.&quot;&quot;&quot;
+        ...
+
+    def extract(self, content: str) -&gt; Union[str, list[&quot;FunctionCall&quot;]]:
+        r&quot;&quot;&quot;Extract a list of tuples from the response message if using tools.
+
+        Each tuple consists of function name and function arguments.
+        &quot;&quot;&quot;
+        raise NotImplementedError
+
+
+@dataclass
+class EmptyFormatter(Formatter):
+    def __post_init__(self):
+        has_placeholder = False
+        for slot in filter(lambda s: isinstance(s, str), self.slots):
+            if re.search(r&quot;\{\{[a-zA-Z_][a-zA-Z0-9_]*\}\}&quot;, slot):
+                has_placeholder = True
+
+        if has_placeholder:
+            raise ValueError(&quot;Empty formatter should not contain any placeholder.&quot;)
+
+    
+    def apply(self, **kwargs) -&gt; SLOTS:
+        return self.slots
+
+
+@dataclass
+class StringFormatter(Formatter):
+    def __post_init__(self):
+        has_placeholder = False
+        for slot in filter(lambda s: isinstance(s, str), self.slots):
+            if re.search(r&quot;\{\{[a-zA-Z_][a-zA-Z0-9_]*\}\}&quot;, slot):
+                has_placeholder = True
+
+        if not has_placeholder:
+            raise ValueError(&quot;A placeholder is required in the string formatter.&quot;)
+
+    
+    def apply(self, **kwargs) -&gt; SLOTS:
+        elements = []
+        for slot in self.slots:
+            if isinstance(slot, str):
+                for name, value in kwargs.items():
+                    if not isinstance(value, str):
+                        raise RuntimeError(f&quot;Expected a string, got {value}&quot;)
+
+                    slot = slot.replace(&quot;{{&quot; + name + &quot;}}&quot;, value, 1)
+                elements.append(slot)
+            elif isinstance(slot, (dict, set)):
+                elements.append(slot)
+            else:
+                raise RuntimeError(f&quot;Input must be string, set[str] or dict[str, str], got {type(slot)}.&quot;)
+
+        return elements
+
+
+@dataclass
+class FunctionFormatter(StringFormatter):
+    def __post_init__(self):
+        super().__post_init__()
+        self.tool_utils = get_tool_utils(self.tool_format)
+
+    
+    def apply(self, **kwargs) -&gt; SLOTS:
+        content: str = kwargs.pop(&quot;content&quot;)
+        thought_words, thought = kwargs.pop(&quot;thought_words&quot;, None), None
+        if thought_words and len(thought_words) == 2:
+            regex = re.compile(rf&quot;{re.escape(thought_words[0])}(.*?){re.escape(thought_words[1])}&quot;, re.DOTALL)
+            thought = re.search(regex, content)
+
+        if thought:
+            content = content.replace(thought.group(0), &quot;&quot;)
+
+        functions: list[FunctionCall] = []
+        try:
+            tool_calls = json.loads(content)
+            if not isinstance(tool_calls, list):  
+                tool_calls = [tool_calls]
+
+            for tool_call in tool_calls:
+                functions.append(
+                    FunctionCall(tool_call[&quot;name&quot;], json.dumps(tool_call[&quot;arguments&quot;], ensure_ascii=False))
+                )
+
+        except json.JSONDecodeError:
+            raise RuntimeError(f&quot;Invalid JSON format in function message: {str([content])}.&quot;)
+
+        function_str = self.tool_utils.function_formatter(functions)
+        if thought:
+            function_str = thought.group(0) + function_str
+
+        return super().apply(content=function_str)
+
+
+@dataclass
+class ToolFormatter(Formatter):
+    def __post_init__(self):
+        self.tool_utils = get_tool_utils(self.tool_format)
+
+    
+    def apply(self, **kwargs) -&gt; SLOTS:
+        content = kwargs.pop(&quot;content&quot;)
+        try:
+            tools = json.loads(content)
+            return [self.tool_utils.tool_formatter(tools) if len(tools) != 0 else &quot;&quot;]
+        except json.JSONDecodeError:
+            raise RuntimeError(f&quot;Invalid JSON format in tool description: {str([content])}.&quot;)
+
+    
+    def extract(self, content: str) -&gt; Union[str, list[&quot;FunctionCall&quot;]]:
+        return self.tool_utils.tool_extractor(content)</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

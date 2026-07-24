@@ -1,0 +1,299 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/distributed/context_parallel/context_parallel_manager.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/distributed/context_parallel/context_parallel_manager.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_11ca39c72a0b27.html">◀ context_parallel_functions.py</a> <a href="file_3f694ebfb23b73.html">context_parallel_mappings.py ▶</a></nav></div>
+<div class="wrap">
+<h1>context_parallel_manager.py</h1><p class="goal">mindspeed_llm/fsdp2/distributed/context_parallel/context_parallel_manager.py · 9657B · 198 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L14" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class CPTypeConfig</a><a href="#L18" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __post_init__(self)</a><a href="#L22" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class ContextParallelMappingManager</a><a href="#L26" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self)</a><a href="#L29" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _generate_model_id_mapping(self) -&gt; Dic</a><a href="#L36" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def detect_duplicate_mappings(self, mappings: </a><a href="#L61" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_model_attention_config(self, model_id</a><a href="#L74" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_model_cp_mappings(self, model_id: str,</a><a href="#L124" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply_transformers_modules(self, modules: </a><a href="#L186" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def cp_parallelize_modules(cls, modules: torch</a><a href="#L195" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply_context_parallelize_modules(modules:</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<span class="mut">（未被正文 EP 引用）</span>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p class="mut">（context_parallel_manager.py：无 docstring/注释可提取，请直接看下方源码）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1">import importlib
+from dataclasses import dataclass
+from typing import List, Tuple, Dict, Optional, Set, Counter
+from collections import defaultdict, Counter
+
+import torch
+import torch.distributed as dist
+
+from mindspeed_llm.fsdp2.distributed.context_parallel.context_parallel_mappings import COMMON_CP_MAPPINGS, MODEL_CP_CONFIG
+from mindspeed_llm.fsdp2.distributed.parallel_engine_config import CPPlanConfig
+
+
+@dataclass
+class CPTypeConfig:
+    cp_type: str
+    cp_specific_mappings: Optional[List[Tuple[str, str]]] = None
+
+    def __post_init__(self):
+        self.cp_specific_mappings = self.cp_specific_mappings or []
+
+
+class ContextParallelMappingManager:
+    COMMON_CP_MAPPINGS = COMMON_CP_MAPPINGS
+    MODEL_CP_CONFIG = MODEL_CP_CONFIG
+
+    def __init__(self):
+        self.model_id_to_att_type: Dict[str, str] = self._generate_model_id_mapping()
+
+    def _generate_model_id_mapping(self) -&gt; Dict[str, str]:
+        mapping = {}
+        for att_type, config in self.MODEL_CP_CONFIG.items():
+            for model_id in config[&quot;models&quot;]:
+                mapping[model_id] = att_type
+        return mapping
+
+    def detect_duplicate_mappings(self, mappings: List[Tuple[str, str]], model_id: str) -&gt; None:
+        if not mappings:
+            return
+
+        tuple_counter = Counter(mappings)
+        duplicate_tuples = {item: cnt for item, cnt in tuple_counter.items() if cnt &gt; 1}
+        if duplicate_tuples:
+            duplicate_info = &quot;\n  - &quot;.join([f&quot;{item} (appeared {cnt} times)&quot; for item, cnt in duplicate_tuples.items()])
+            warning_msg = f&quot;[Model {model_id}] Detected duplicate mapping tuples:\n  - {duplicate_info}&quot;
+            raise ValueError(f&quot;WARNING: {warning_msg}&quot;)
+
+        target_counter = defaultdict(list)
+        for idx, (target, patch) in enumerate(mappings):
+            target_counter[target].append((idx, patch))
+
+        duplicate_targets = {t: patches for t, patches in target_counter.items() if len(patches) &gt; 1}
+        if duplicate_targets:
+            duplicate_info = []
+            for target, patches in duplicate_targets.items():
+                patch_info = &quot;, &quot;.join([f&quot;Mapping #{idx + 1}: {patch}&quot; for idx, patch in patches])
+                duplicate_info.append(f&quot;{target} -&gt; [{patch_info}]&quot;)
+            warning_msg = f&quot;[Model {model_id}] Detected duplicate target function (same target replaced multiple times):\n  - &quot; + &quot;\n  - &quot;.join(
+                duplicate_info)
+            raise ValueError(f&quot;ERROR: {warning_msg}&quot;)
+
+    def _get_model_attention_config(self, model_id: str) -&gt; Tuple[str, List[Tuple[str, str]]]:
+        # ====================== Core validation: raise error if model_id is not supported ======================
+        if model_id not in self.model_id_to_att_type:
+            supported_models = sorted(list(self.model_id_to_att_type.keys()))
+            raise ValueError(
+                f&quot;Unsupported model type: &#x27;{model_id}&#x27;\n&quot;
+                f&quot;Context Parallel only supports the following models: {&#x27;, &#x27;.join(supported_models)}&quot;
+            )
+
+        att_type = self.model_id_to_att_type[model_id]
+        model_specific_mappings = self.MODEL_CP_CONFIG[att_type][&quot;model_specific&quot;].get(model_id, [])
+        return att_type, model_specific_mappings
+
+    def get_model_cp_mappings(self, model_id: str, cp_type_config: CPTypeConfig) -&gt; List[Tuple[str, str]]:
+        &quot;&quot;&quot;
+        Core method: Generate mappings with override logic.
+        Priority: model_specific &gt; common templates
+        &quot;&quot;&quot;
+        # Use dict to ensure unique targets (auto-override)
+        mapping_dict: Dict[str, str] = {}
+        cp_type = cp_type_config.cp_type
+
+        # 1. Get model configuration
+        att_type, model_specific_mappings = self._get_model_attention_config(model_id)
+
+        # ======================== Step 1: Load common templates first ========================
+        cp_att_templates = self.MODEL_CP_CONFIG[att_type][&quot;cp_to_att_template&quot;]
+        for template_name in cp_att_templates:
+            template = self.COMMON_CP_MAPPINGS[template_name]
+
+            # Normalize to list
+            mappings_to_add = template if isinstance(template, list) else [template]
+
+            for target, patch in mappings_to_add:
+                # Fill model_id placeholder
+                target_filled = target.format(model_id=model_id) if &quot;{model_id}&quot; in target else target
+                mapping_dict[target_filled] = patch
+
+        # ======================== Step 2: Load model_specific (OVERRIDE if conflict) ========================
+        for target, patch in model_specific_mappings:
+            target_filled = target.format(model_id=model_id) if &quot;{model_id}&quot; in target else target
+
+            # Check for conflict and print override message
+            if target_filled in mapping_dict:
+                old_patch = mapping_dict[target_filled]
+                print(f&quot;[Model {model_id}] OVERRIDE CONFLICT&quot;)
+                print(f&quot;             Target:    {target_filled}&quot;)
+                print(f&quot;             Old patch: {old_patch}&quot;)
+                print(f&quot;             New patch: {patch}&quot;)
+                print(f&quot;             Reason:    model_specific takes precedence over common templates\n&quot;)
+
+            # Override (or add if new)
+            mapping_dict[target_filled] = patch
+
+        # ======================== Step 3: Convert back to list and add CP-specific mappings ========================
+        final_mappings = [(target, patch) for target, patch in mapping_dict.items()]
+        final_mappings.extend(cp_type_config.cp_specific_mappings)
+
+        # Optional: Keep duplicate detection (though dict ensures unique targets)
+        self.detect_duplicate_mappings(final_mappings, model_id)
+
+        return final_mappings
+
+    def apply_transformers_modules(self, modules: torch.nn.Module, cp_type_config: CPTypeConfig) -&gt; None:
+        model_id = modules.config.model_type
+        model_patch_list = self.get_model_cp_mappings(model_id, cp_type_config)
+
+        for target_name, func_patch_name in model_patch_list:
+            # ========== Core Modification Part ==========
+            # 1. Handle the replacement logic for target function/method
+            # Split rule: The part before the last dot is &quot;module.class/function&quot;,
+            # the last dot is the method name (if it&#x27;s a class method)
+            parts = target_name.rsplit(&quot;.&quot;, 1)
+            if len(parts) == 2:
+                obj_path, method_name = parts
+            else:
+                obj_path = target_name
+                method_name = None
+
+            # Split module path and target object name (class/function)
+            obj_parts = obj_path.rsplit(&quot;.&quot;, 1)
+            if len(obj_parts) == 2:
+                module_path, obj_name = obj_parts
+            else:
+                # If there&#x27;s no class name, it&#x27;s a direct function in the module
+                module_path = obj_path
+                obj_name = None
+
+            # 2. Import the target module
+            try:
+                target_module = importlib.import_module(module_path)
+            except ModuleNotFoundError as e:
+                raise ModuleNotFoundError(
+                    f&quot;Failed to import module &#x27;{module_path}&#x27; for target &#x27;{target_name}&#x27;. &quot;
+                    f&quot;Original error: {str(e)}&quot;
+                )
+
+            # 3. Get the target object (class/function) and replace the method/function
+            if obj_name:
+                # Target is a class method
+                target_obj = getattr(target_module, obj_name)
+                # Import the function to be replaced
+                patch_parts = func_patch_name.rsplit(&quot;.&quot;, 1)
+                patch_module_path = patch_parts[0]
+                patch_func_name = patch_parts[1]
+                patch_module = importlib.import_module(patch_module_path)
+                patch_func = getattr(patch_module, patch_func_name)
+
+                # Replace the class method
+                setattr(target_obj, method_name, patch_func)
+                if not dist.is_initialized() or dist.get_rank() == 0:
+                    print(f&quot;CP Applied patch: {target_name} -&gt; {func_patch_name}&quot;)
+            else:
+                # Target is a direct function in the module
+                target_func_name = obj_path.split(&quot;.&quot;)[-1]
+                patch_parts = func_patch_name.rsplit(&quot;.&quot;, 1)
+                patch_module_path = patch_parts[0]
+                patch_func_name = patch_parts[1]
+                patch_module = importlib.import_module(patch_module_path)
+                # Replace the function in the module
+                target_module.__dict__[target_func_name] = patch_module.__dict__[patch_func_name]
+                if not dist.is_initialized() or dist.get_rank() == 0:
+                    print(f&quot;CP Applied patch: {target_name} -&gt; {func_patch_name}&quot;)
+
+    @classmethod
+    def cp_parallelize_modules(cls, modules: torch.nn.Module, plan: CPPlanConfig) -&gt; None:
+        if plan.context_parallel_type not in [&quot;ulysses&quot;, &quot;ring&quot;]:
+            raise ValueError(f&quot;Unsupported CP type: {plan.context_parallel_type}, only &#x27;ulysses&#x27;/&#x27;ring&#x27; are supported&quot;)
+
+        manager = cls()
+        cp_type_config = CPTypeConfig(cp_type=plan.context_parallel_type)
+        manager.apply_transformers_modules(modules, cp_type_config)
+
+
+def apply_context_parallelize_modules(modules: torch.nn.Module, plan: CPPlanConfig):
+    &quot;&quot;&quot;Compatibility wrapper for original ulysses function&quot;&quot;&quot;
+    ContextParallelMappingManager.cp_parallelize_modules(modules, plan)
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

@@ -1,0 +1,473 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/data/megatron_data/megatron_preprocess_dataset.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/data/megatron_data/megatron_preprocess_dataset.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_8ced1ee4360997.html">◀ megatron_gpt_dataset.py</a> <a href="file_d862f983eebe4e.html">megatron_tokenizer.py ▶</a></nav></div>
+<div class="wrap">
+<h1>megatron_preprocess_dataset.py</h1><p class="goal">mindspeed_llm/fsdp2/data/megatron_data/megatron_preprocess_dataset.py · 16503B · 372 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L50" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class CustomLanguageVars(nltk.tokenize.punkt.P</a><a href="#L63" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class IdentitySplitter(object)</a><a href="#L64" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def tokenize(self, *text)</a><a href="#L68" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def build_splitter(args)</a><a href="#L90" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def add_data_args(parser)</a><a href="#L155" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def add_tokenizer_args(parser)</a><a href="#L193" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def add_output_args(parser)</a><a href="#L209" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def add_merge_args(parser)</a><a href="#L215" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_args()</a><a href="#L238" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def validate_args(args)</a><a href="#L263" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def cut_range_to_subs(n, gap)</a><a href="#L272" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def handle_subset(params)</a><a href="#L279" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def merge_datasets(args)</a><a href="#L312" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def main()</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<span class="mut">（未被正文 EP 引用）</span>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p>coding=utf-8</p><p class="mut">（自动提取自首行注释）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1"># coding=utf-8
+# Copyright (c) 2023, HUAWEI CORPORATION.  All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+&quot;&quot;&quot;Processing data for pretraining and finetuning.&quot;&quot;&quot;
+
+import argparse
+import json
+import multiprocessing
+import os
+import sys
+import copy
+import logging
+from pathlib import Path
+
+try:
+    import nltk
+except ImportError:
+    nltk = None
+
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                             os.path.pardir)))
+
+from mindspeed_llm.fsdp2.data.megatron_data.indexed_dataset import IndexedDatasetBuilder, IndexedDataset, get_bin_path, get_idx_path
+from mindspeed_llm.fsdp2.data.megatron_data.megatron_tokenizer import _AutoTokenizer
+from mindspeed_llm.fsdp2.data.megatron_data.megatron_dataset_handler import build_dataset, get_dataset_handler
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+cur_file_dir = Path(__file__).absolute().parent
+
+TEMPLATES_DIR = os.path.join(cur_file_dir, &quot;configs/finetune/templates.json&quot;)
+
+
+class CustomLanguageVars(nltk.tokenize.punkt.PunktLanguageVars if nltk else object):
+
+    _period_context_fmt = r&quot;&quot;&quot;
+        \S*                          # some word material
+        %(SentEndChars)s             # a potential sentence ending
+        \s*                       #  &lt;-- THIS is what I changed
+        (?=(?P&lt;after_tok&gt;
+            %(NonWord)s              # either other punctuation
+            |
+            (?P&lt;next_tok&gt;\S+)     #  &lt;-- Normally you would have \s+ here
+        ))&quot;&quot;&quot;
+
+
+class IdentitySplitter(object):
+    def tokenize(self, *text):
+        return text
+
+
+def build_splitter(args):
+    if nltk and args.split_sentences:
+        nltk.download(&quot;punkt&quot;, quiet=True)
+    if args.split_sentences:
+        if not nltk:
+            logger.error(&quot;NLTK is not available to split sentences.&quot;)
+            raise Exception(&quot;nltk is not available&quot;)
+        logger.warning(&quot;Warning: nltk.load() uses pickle. Ensure the source of the corpus is trusted.&quot;)
+        splitter = nltk.load(&quot;tokenizers/punkt/english.pickle&quot;)
+        if args.keep_newlines:
+            # this prevents punkt from eating newlines after sentences
+            final_splitter = nltk.tokenize.punkt.PunktSentenceTokenizer(
+                train_text=splitter._params,
+                lang_vars=CustomLanguageVars())
+        else:
+            final_splitter = splitter
+
+    else:
+        final_splitter = IdentitySplitter()
+    return final_splitter
+
+
+def add_data_args(parser):
+    group = parser.add_argument_group(title=&#x27;input data&#x27;)
+    group.add_argument(&#x27;--input&#x27;, type=str, required=True,
+                       help=&#x27;Path to input JSON or path or a huggingface dataset name; for merge datasets, it is the directory path containing all document files to merge&#x27;)
+    group.add_argument(&#x27;--handler-name&#x27;, type=str, default=&quot;&quot;,
+                       help=&#x27;specify a dataset handler&#x27;)
+    group.add_argument(&#x27;--streaming&#x27;, action=&#x27;store_true&#x27;,
+                       help=&#x27;weather to use streaming&#x27;)
+    group.add_argument(&#x27;--hf-datasets-params&#x27;, default=None,
+                       help=&#x27;huggingface load_dataset params&#x27;)
+    group.add_argument(&#x27;--datasets&#x27;, nargs=&#x27;+&#x27;, default=None,
+                       help=&#x27;Paths to one or more input datasets to merge&#x27;)
+    group.add_argument(&#x27;--json-keys&#x27;, nargs=&#x27;+&#x27;, default=[&#x27;text&#x27;],
+                       help=&#x27;space separate listed of keys to extract from json&#x27;)
+    group.add_argument(&#x27;--split-sentences&#x27;, action=&#x27;store_true&#x27;,
+                       help=&#x27;Split documents into sentences.&#x27;)
+    group.add_argument(&#x27;--keep-newlines&#x27;, action=&#x27;store_true&#x27;,
+                       help=&#x27;Keep newlines between sentences when splitting.&#x27;)
+    # LlamaFactory
+    group.add_argument(&#x27;--prompt-type&#x27;, type=str, default=None,
+                       choices=[&#x27;default&#x27;, &#x27;empty&#x27;, &#x27;trl&#x27;, &#x27;chatglm2&#x27;, &#x27;chatglm3&#x27;, &#x27;chatglm3_system&#x27;, &#x27;glm4&#x27;, &#x27;glm4_moe&#x27;, &#x27;chatml&#x27;, &#x27;bailing_mini&#x27;,
+                                &#x27;chatml_de&#x27;, &#x27;qwen&#x27;, &#x27;qwen_r1&#x27;, &quot;qwen_math_r1&quot;, &#x27;llama3&#x27;, &#x27;llama2&#x27;, &#x27;mistral&#x27;, &#x27;mixtral&#x27;, &#x27;gemma&#x27;, &#x27;alpaca&#x27;,
+                                &#x27;deepseek2&#x27;, &#x27;deepseek2-lite&#x27;, &#x27;cpm&#x27;, &#x27;baichuan2&#x27;, &#x27;deepseek3&#x27;, &#x27;intern2&#x27;, &#x27;hunyuan&#x27;, &#x27;qwen3&#x27;, &#x27;magistral&#x27;, &#x27;plm&#x27;, &#x27;qwen_lf&#x27;, &#x27;gpt_oss&#x27;],
+                       help=&#x27;Which template to use for constructing prompts in training.&#x27;
+                            &#x27;e.g., &quot;qwen&quot;&#x27;)
+    group.add_argument(&#x27;--prompt-type-path&#x27;, type=str, default=TEMPLATES_DIR,
+                       help=&#x27;Path to the json file of templates.&#x27;)
+    group.add_argument(&#x27;--dataset-additional-keys&#x27;, 
+                       nargs=&#x27;*&#x27;,
+                       default=[],
+                       help=&#x27;Additional keys need to be add from dataset.&#x27;
+                      )
+    group.add_argument(&quot;--interleave-probs&quot;, default=None,
+                       help=&#x27;Probabilities to sample data from datasets. Use commas to separate multiple datasets. &#x27;
+                            &#x27;probabilities should sum to 1. ex: &quot;0.1, 0.2, 0.3, 0.4&quot;&#x27;)
+    group.add_argument(&#x27;--mix-strategy&#x27;, type=str,
+                       default=&#x27;concat&#x27;,
+                       choices=[&#x27;concat&#x27;,
+                                &#x27;interleave_under&#x27;,
+                                &#x27;interleave_over&#x27;],
+                       help=&#x27;Strategy to use in dataset mixing (concat/interleave) (undersampling/oversampling).&#x27;)
+    group.add_argument(&quot;--dataset-dir&quot;, default=None,
+                       help=&quot;Path to the folder containing the datasets.&quot;)
+    group.add_argument(&quot;--overwrite-cache&quot;, action=&#x27;store_true&#x27;,
+                       help=&quot;Overwrite the cached training and evaluation sets.&quot;)
+    group.add_argument(&quot;--max-samples&quot;, type=int, default=None,
+                       help=&quot;For debugging purposes, truncate the number of examples for each dataset.&quot;)
+    group.add_argument(&quot;--seed&quot;, type=int, default=1234,
+                       help=&quot;Random seed to be used with data mix.&quot;)
+    group.add_argument(&quot;--cache-dir&quot;, type=str, default=&quot;~/tmp&quot;,
+                       help=&quot;Where to store the cache of dataset from local.&quot;)
+    group.add_argument(&quot;--map-keys&quot;, type=json.loads, default=None,
+                       help=&quot;Dataset field mapping.&quot;)
+    group.add_argument(&quot;--pack&quot;, action=&#x27;store_true&#x27;,
+                       help=&quot;Package multiple samples into one sample in a fine tuning dataset&quot;)
+    group.add_argument(&quot;--neat-pack&quot;, action=&#x27;store_true&#x27;,
+                       help=&quot;Use a zigzag attention mask.&quot;)
+    group.add_argument(&quot;--script-data-dir&quot;, type=str, default=None,
+                       help=&quot;Python script dataset direction&quot;)
+    group.add_argument(&quot;--enable-thinking&quot;, type=lambda x: {&quot;true&quot;: True, &quot;false&quot;: False, &quot;none&quot;: None}[x.lower()], default=None,
+                       help=&quot;Whether or not to enable thinking mode for reasoning models.&quot;)
+    group.add_argument(&quot;--pad-to-multiple-of&quot;, type=int, default=1,
+                       help=&quot;Pad each of the data to the multiple of...&quot;)
+
+
+def add_tokenizer_args(parser):
+    group = parser.add_argument_group(title=&#x27;tokenizer&#x27;)
+    group.add_argument(&#x27;--tokenizer-type&#x27;, type=str, default=&#x27;PretrainedFromHF&#x27;,
+                       choices=[&#x27;BertWordPieceLowerCase&#x27;, &#x27;BertWordPieceCase&#x27;,
+                                &#x27;GPT2BPETokenizer&#x27;, &#x27;GPTSentencePieceTokenizer&#x27;, &#x27;PretrainedFromHF&#x27;, &#x27;MagistralTokenizer&#x27;],
+                       help=&#x27;What type of tokenizer to use.&#x27;)
+    group.add_argument(&quot;--tokenizer-not-use-fast&quot;, action=&#x27;store_false&#x27;,
+                       help=&quot;HuggingFace tokenizer not use the fast version.&quot;)
+    group.add_argument(&#x27;--vocab-file&#x27;, type=str, default=None,
+                       help=&#x27;Path to the vocab file&#x27;)
+    group.add_argument(&#x27;--merge-file&#x27;, type=str, default=None,
+                       help=&#x27;Path to the BPE merge file (if necessary).&#x27;)
+    group.add_argument(&#x27;--append-eod&#x27;, action=&#x27;store_true&#x27;,
+                       help=&#x27;Append an &lt;eod&gt; token to the end of a document.&#x27;)
+    group.add_argument(&quot;--model-name-or-path&quot;, type=str, default=None,
+                       help=&quot;Name or path of the huggingface tokenizer.&quot;)
+    group.add_argument(&quot;--tokenizer-model&quot;, type=str, default=None,
+                       help=&quot;tokenizer model file.&quot;)                       
+    group.add_argument(&#x27;--seq-length&#x27;, type=int, default=None,
+                       help=&#x27;Maximum sequence length to process.&#x27;)
+    group.add_argument(&#x27;--make-vocab-size-divisible-by&#x27;, type=int, default=128,
+                       help=&#x27;Pad the vocab size to be divisible by this value.&#x27;
+                            &#x27;This is added for computational efficieny reasons.&#x27;)
+    group.add_argument(&#x27;--pad-vocab-size-to&#x27;, type=int, default=None,
+                       help=&#x27;Pad the vocab size to be divisible by this value.&#x27;
+                            &#x27;Value of the size of the vocabulary of the tokenizer to reach.&#x27;
+                            &#x27;This value must be greater than the initial size of the tokenizer.&#x27;
+                            &#x27; If this argument is used the value of `make-vocab-size-divisible-by` &#x27;
+                            &#x27;will be ignored.&#x27;)
+    group.add_argument(
+        &#x27;--reward-tokens&#x27;,
+        nargs=&#x27;+&#x27;,
+        type=str,
+        default=[],
+        help=&quot;The labels represent the correctness of each reasoning step in the entire reasoning process.&quot;,
+    )
+
+
+def add_output_args(parser):
+    group = parser.add_argument_group(title=&#x27;output data&#x27;)
+    group.add_argument(&#x27;--output-prefix&#x27;, type=str, required=True,
+                       help=&#x27;Path to binary output file without suffix&#x27;)
+    group.add_argument(&#x27;--dataset-impl&#x27;, type=str, default=&#x27;mmap&#x27;,
+                       choices=[&#x27;lazy&#x27;, &#x27;cached&#x27;, &#x27;mmap&#x27;])
+
+    group = parser.add_argument_group(title=&#x27;runtime&#x27;)
+    group.add_argument(&#x27;--workers&#x27;, type=int, default=1,
+                       help=&#x27;Number of worker processes to launch&#x27;)
+    group.add_argument(&#x27;--n-subs&#x27;, type=int, default=1,
+                       help=&#x27;Number of subsets to cut for multiprocessing&#x27;)
+    group.add_argument(&#x27;--log-interval&#x27;, type=int, default=100,
+                       help=&#x27;Interval between progress updates&#x27;)
+
+
+def add_merge_args(parser):
+    group = parser.add_argument_group(title=&#x27;merge data&#x27;)
+    group.add_argument(&#x27;--merge-group-keys&#x27;, nargs=&#x27;+&#x27;, default=None, const=None,
+                       help=&#x27;The `bin-idx` pair files with the same key in their filename will be merged.&#x27;)
+
+
+def get_args():
+    parser = argparse.ArgumentParser()
+
+    add_data_args(parser)
+    add_tokenizer_args(parser)
+    add_output_args(parser)
+    add_merge_args(parser)
+
+    args = parser.parse_args()
+    args.keep_empty = False
+
+    if args.tokenizer_type.lower().startswith(&#x27;bert&#x27;):
+        if not args.split_sentences:
+            logger.warning(&quot;Bert tokenizer detected, are you sure you don&#x27;t want to split sentences?&quot;)
+
+    # some default/dummy values for the tokenizer
+    args.rank = 0
+    args.tensor_model_parallel_size = 1
+    args.vocab_extra_ids = 0
+
+    return args
+
+
+def validate_args(args):
+    support_prompt_type_handler = [
+        &quot;LlamaFactoryInstructionHandler&quot;,
+        &quot;AlpacaStyleInstructionHandler&quot;,
+        &quot;SharegptStyleInstructionHandler&quot;,
+        &quot;AlpacaStylePairwiseHandler&quot;,
+        &quot;SharegptStylePairwiseHandler&quot;,
+        &quot;PPOAlpacaStyleInstructionHandler&quot;,
+        &quot;HunyuanInstructionHandler&quot;,
+        &quot;R1AlpacaStyleInstructionHandler&quot;,
+        &quot;R1SharegptStyleInstructionHandler&quot;
+    ]
+    if args.prompt_type is not None and args.handler_name not in support_prompt_type_handler:
+        raise AssertionError(f&#x27;If specify prompt_type , handler name must be in:\n{support_prompt_type_handler}.&#x27;)
+
+    if (args.merge_group_keys is not None) and (not os.path.isdir(args.input)):
+        raise ValueError(f&quot;{args.input} is not a directory or does not exist&quot;)
+
+    if not os.path.isdir(os.path.dirname(args.output_prefix)):
+        raise ValueError(f&quot;{os.path.dirname(args.output_prefix)} is not a directory or does not exist&quot;)
+
+    if not args.pack and args.neat_pack:
+        raise ValueError(&quot;Require set `--pack` when `--neat-pack` is set.&quot;)
+
+
+def cut_range_to_subs(n, gap):
+    n_ = n // gap
+    mod = n % gap
+    if mod != 0:
+        return [(k * gap, (k + 1) * gap) for k in range(0, n_)] + [(gap * n_, n)]
+    else:
+        return [(k * gap, (k + 1) * gap) for k in range(0, n_)]
+
+
+def handle_subset(params):
+    &quot;&quot;&quot;params: [args, dataset, tokenizer, splitter]&quot;&quot;&quot;
+    handler = get_dataset_handler(params[0], params[1], params[2], params[3])
+    handler.serialize_to_disk()
+    return handler.output_idx_files
+
+
+def merge_datasets(args):
+    prefixes = {key: set() for key in args.merge_group_keys}
+    for key in prefixes:
+        for basename in os.listdir(args.input):
+            prefix, ext = os.path.splitext(basename)
+    
+            if prefix in prefixes[key] or key not in prefix:
+                continue
+    
+            if not os.path.isfile(os.path.join(args.input, basename)):
+                continue
+    
+            ext_pair = &quot;.bin&quot; if ext == &quot;.idx&quot; else &quot;.idx&quot;
+            if not os.path.isfile(os.path.join(args.input, prefix) + ext_pair):
+                raise FileNotFoundError(f&quot;{ext_pair} file not provided for {os.path.join(args.input, prefix)}&quot;)
+    
+            prefixes[key].add(prefix)
+    
+    for key in prefixes:
+        builder = None
+        for prefix in sorted(prefixes[key]):
+            if builder is None:
+                dataset = IndexedDataset(os.path.join(args.input, prefix), multimodal=False)
+                builder = IndexedDatasetBuilder(
+                    get_bin_path(f&#x27;{args.output_prefix}_{key}&#x27;), dtype=dataset.index.dtype, multimodal=False
+                )
+                del dataset
+    
+            builder.add_index(os.path.join(args.input, prefix))
+    
+        builder.finalize(get_idx_path(f&#x27;{args.output_prefix}_{key}&#x27;))
+
+
+def main():
+    args = get_args()
+    validate_args(args)
+
+    if args.merge_group_keys is not None:
+        merge_datasets(args)
+        return
+
+    tokenizer =  _AutoTokenizer(
+        args.model_name_or_path,
+        vocab_extra_ids=0,
+        model_max_length=args.seq_length,
+        use_fast=False,
+        prompt_type=None,
+    )
+    splitter = build_splitter(args)
+
+    logger.info(&quot;building dataset: %s&quot;, args.input)
+    raw_data = build_dataset(args)
+
+    if args.n_subs == 1:
+        handler = get_dataset_handler(args, raw_data, tokenizer, splitter)
+        # serialize to bin&amp;idx
+        handler.serialize_to_disk()
+    else:
+        target_prefix = args.output_prefix
+        target_prefixname = os.path.basename(target_prefix)
+        
+        num_samples = len(raw_data)
+        start_ends = cut_range_to_subs(num_samples, num_samples // args.n_subs)
+        subsets = [raw_data.select(range(x[0], x[1])) for x in start_ends]
+        
+        # multiprocessing
+        params_list = []
+        for k, subset in enumerate(subsets):
+            args_ = copy.deepcopy(args)
+            args_.output_prefix = target_prefix.replace(target_prefixname, f&#x27;{str(k).zfill(3)}_of_{str(len(subsets)-1).zfill(3)}_{target_prefixname}&#x27;)
+            params = [args_, subset, tokenizer, splitter]
+            params_list.append(params)
+        pool = multiprocessing.Pool()
+        sub_idx_files = pool.map(handle_subset, params_list)
+        pool.close()
+        pool.join()
+        
+        for key in sub_idx_files[0].keys():
+            idx_files = [x[key] for x in sub_idx_files]
+            idx_files.sort()
+            target_idx = idx_files[0].replace(f&#x27;000_of_{str(len(subsets)-1).zfill(3)}_{target_prefixname}&#x27;, target_prefixname)
+            target_bin = target_idx.replace(&#x27;.idx&#x27;, &#x27;.bin&#x27;)
+            idx = IndexedDatasetBuilder(target_bin)
+            for idx_file in idx_files:
+                idx.add_index(idx_file.replace(&#x27;.idx&#x27;, &#x27;&#x27;))
+            idx.finalize(target_idx)
+            
+            for idx_file in idx_files:
+                os.remove(idx_file)
+                os.remove(idx_file.replace(&#x27;.idx&#x27;, &#x27;.bin&#x27;))
+
+if __name__ == &#x27;__main__&#x27;:
+    main()
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

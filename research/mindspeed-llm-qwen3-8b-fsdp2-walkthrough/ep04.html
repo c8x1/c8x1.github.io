@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>项目全景与目录地图 · 走读 EP04</title>
+<style>
+  :root{
+    --bg:#0f0f12; --bg2:#000; --side:#1a1a1a; --card:#16161c; --line:#2a2a33;
+    --txt:#e8e8e8; --mut:#9a9a9a; --mut2:#6a6a6a;
+    --serif:ui-serif,Georgia,"Times New Roman",Times,serif;
+    --sans:system-ui,-apple-system,"PingFang SC","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace;
+    --red:#C7000B; --red-bg:#2a0f10; --red-bd:#6e1a1c; --red-tx:#e88;
+    --grn:#788C5D; --grn-bg:#14241a; --grn-bd:#2e5a3a; --grn-tx:#7ab98a;
+    --acc:#C7000B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+  .page{max-width:1180px;margin:0 auto;padding:0}
+  /* breadcrumb + nav */
+  .topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);
+    font-size:13px;color:var(--mut)}
+  .topbar .crumb{font-family:var(--serif);font-style:italic}
+  .topbar nav{margin-left:auto;display:flex;gap:8px}
+  .topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:4px 10px;border-radius:6px}
+  .topbar nav a:hover{color:#fff;border-color:var(--acc)}
+  /* layout: tree + main */
+  .body{display:grid;grid-template-columns:160px 1fr;align-items:start}
+  .tree{background:var(--side);border-right:1px solid var(--line);padding:14px 8px;
+    font-family:var(--mono);font-size:11px;color:var(--mut2);min-height:80vh;position:sticky;top:0}
+  .tree .f{display:block;padding:2px 4px;white-space:pre}
+  .tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px}
+  .main{padding:22px 28px 80px}
+  /* headings */
+  h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:6px 0 2px;color:#fff}
+  .goal{font-family:var(--serif);font-style:italic;color:var(--mut);margin:0 0 4px}
+  .gain{font-size:13px;color:var(--mut);margin:0 0 20px}
+  .gain b{color:var(--red-tx)}
+  h2{font-family:var(--serif);font-weight:600;font-size:18px;color:#fff;margin:26px 0 6px;
+    border-bottom:1px solid var(--line);padding-bottom:3px}
+  h2 .sec{color:var(--mut2);font-style:italic;font-size:13px;margin-left:8px}
+  p{margin:8px 0}
+  /* code as numbered figure */
+  .figcap{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);
+    margin:10px 0 2px}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--mut2);
+    padding:10px 12px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55}
+  pre .ln{display:inline-block;width:32px;color:var(--mut2);user-select:none}
+  .filelink{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--red-tx);margin:4px 0 14px}
+  .filelink a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--red-bd)}
+  .footnote{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--mut2);margin:4px 0 14px}
+  /* highlight tints */
+  /* PyCharm Darcula 主题 token 配色 */
+  pre[data-lang]{color:#d4d4d4}
+  .tok-kw{color:#cc7832;font-weight:600}
+  .tok-bi{color:#9876aa;font-style:italic}
+  .tok-fn{color:#ffc66d}
+  .tok-cl{color:#a9b7c6;font-style:italic}
+  .tok-st{color:#6a8759}
+  .tok-cm{color:#808080;font-style:italic}
+  .tok-nm{color:#6897bb}
+  .tok-dc{color:#bbb33b}
+  .tok-key{color:#cc7832}
+  .tok-var{color:#9876aa}
+  .tree .f,.tree a.f{color:#6a6a6a;text-decoration:none;display:block;padding:2px 4px;white-space:pre;border-radius:3px}
+  .tree a.f:hover{background:#2a2a33;color:#d4d4d4}
+  .tree a.f.act,.tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px;font-weight:600}
+  /* gnpu split card */
+  .gnpu{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:14px 0}
+  .gnpu .g{background:var(--grn-bg);border-right:1px solid var(--line);padding:10px 14px}
+  .gnpu .n{background:var(--red-bg);padding:10px 14px}
+  .gnpu h4{margin:0 0 6px;font-family:var(--serif);font-size:13px}
+  .gnpu .g h4{color:var(--grn-tx)}.gnpu .n h4{color:var(--red-tx)}
+  .gnpu .row{display:grid;grid-template-columns:90px 1fr;gap:6px;font-size:12.5px;margin:4px 0}
+  .gnpu .row .k{color:var(--mut2)}
+  /* inline svg */
+  .diag{margin:10px 0 6px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:8px}
+  /* summary */
+  .sum{border-top:1px solid var(--line);margin-top:22px;padding-top:10px;font-size:13.5px}
+  .sum .pit{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12.5px;margin-top:6px}
+  /* file list at end */
+  .filelist{font-family:var(--mono);font-size:11px;color:var(--mut2);margin-top:22px;border-top:1px dashed var(--line);padding-top:10px}
+  .filelist b{color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <span class="crumb">第二篇章 · 工程全局 › EP04</span>
+    <span style="color:var(--mut2)">EP04</span>
+    <nav>
+      <a href="ep03.html">◀ 上一篇</a>
+      <a href="index.html">索引</a>
+      <a href="ep05.html">下一篇 ▶</a>
+    </nav>
+  </div>
+  <div class="body">
+    <aside class="tree">
+      <a class="f" href="appendix/index.html" target="_blank">📁 附录·项目文件走读</a>
+      <span class="f">MindSpeed-LLM/</span>
+      <a class="f" href="appendix/file_089411e68e5d5b.html" target="_blank">├ train_fsdp2.py</a>
+      <span class="f">├ examples/fsdp2/</span>
+      <a class="f" href="appendix/file_d04a217944c522.html" target="_blank">│  ├ env_config.sh</a>
+      <span class="f">│  └ qwen3/</span>
+      <span class="f">├ mindspeed_llm/fsdp2/</span>
+      <!-- 本篇相关文件高亮 .act，按篇替换 -->
+      <a class="f act" href="appendix/file_089411e68e5d5b.html" target="_blank">train_fsdp2.py</a>
+      <span class="f act">mindspeed_llm/fsdp2/</span>
+      <span class="f">└ ...</span>
+    </aside>
+    <main class="main">
+      <h1>项目全景与目录地图</h1>
+      <p class="goal">目标：建立 fsdp2 后端的模块依赖地图。前置：EP03 并行范式。</p>
+      <p class="gain">你将获得：<b>①</b> 一张能说清"train_fsdp2.py 到底依赖哪些工厂与子模块"的全景图 <b>②</b> 区分 fsdp2 后端与 mcore 后端、以及它对外部 MindSpeed Core 仓库的依赖边界</p>
+
+      <h2>你已经熟悉的情况 <span class="sec">桥接开场</span></h2>
+      <p>你大概写过或读过的那种"小项目"长这样：根目录一个 <code>train.py</code>、一个 <code>model.py</code>，再加个 <code>dataset.py</code> 就齐活了——<code>if __name__ == "__main__"</code> 里直接 <code>model = MyModel()</code>、<code>optim = Adam(...)</code>、<code>for batch in loader: loss.backward(); optim.step()</code>。整个工程的结构就是文件名本身，依赖关系一眼到底。</p>
+      <p>而 MindSpeed-LLM 的 fsdp2 路线不是这种"平铺"工程。它是一个面向多模型（Qwen3、DeepSeek、GLM5.2、Mamba3…）、多并行策略（TP/PP/CP/EP/SP…）、多后端的训练框架——同一个 <code>train_fsdp2.py</code> 入口要能根据命令行参数，装配出"模型 + 数据 + 优化器 + 调度器 + 检查点 + 训练器"这一整套组合，而不是写死任何一条路径。所以它的目录不是"几个脚本"，而是一组按职责切分的子包 + 一层"工厂（Factory）"胶水。这一篇就是先把这张地图摊开给你看。</p>
+
+      <h2>本项目怎么做 <span class="sec">原理</span></h2>
+      <p>fsdp2 后端的组织原则是<b>工厂装配式</b>：入口脚本 <code>train_fsdp2.py</code> 自己几乎不写训练逻辑，它只负责"按参数去工厂里取零件，再把零件交给 <code>Trainer</code> 组装运行"。各零件由 <code>mindspeed_llm/fsdp2/</code> 下的子包提供，每个子包对应一个职责域；而真正和昇腾硬件、和 PyTorch FSDP2 机制打交道的那一层（HCCL 通信补丁、随机种子、分片原语）则下沉到外部依赖 <code>mindspeed</code>（即 MindSpeed Core 仓库）里，fsdp2 后端只通过 <code>from mindspeed.fsdp.utils.* import ...</code> 来借用。</p>
+      <p>下面的依赖图把这条链路画清楚了：从入口脚本出发，经六类工厂/管理器，落到 fsdp2 包的十个子模块，最终触达 MindSpeed Core。</p>
+      <div class="diag">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 430" width="100%" style="max-width:920px" font-family="ui-monospace,Menlo,monospace" font-size="11">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#6a6a6a"/>
+    </marker>
+  </defs>
+  <!-- L1: entry -->
+  <rect x="330" y="10" width="260" height="34" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+  <text x="460" y="31" fill="#e88" text-anchor="middle" font-weight="600">train_fsdp2.py（入口脚本）</text>
+
+  <!-- arrow L1->L2 -->
+  <line x1="460" y1="44" x2="460" y2="66" stroke="#6a6a6a" stroke-width="1.2" marker-end="url(#arr)"/>
+
+  <!-- L2: factories / trainer -->
+  <g font-size="10.5">
+    <rect x="40"  y="70" width="130" height="30" rx="5" fill="#14241a" stroke="#2e5a3a"/><text x="105" y="89" fill="#7ab98a" text-anchor="middle">ModelFactory</text>
+    <rect x="180" y="70" width="130" height="30" rx="5" fill="#14241a" stroke="#2e5a3a"/><text x="245" y="89" fill="#7ab98a" text-anchor="middle">DataFactory</text>
+    <rect x="320" y="70" width="130" height="30" rx="5" fill="#14241a" stroke="#2e5a3a"/><text x="385" y="89" fill="#7ab98a" text-anchor="middle">TokenizerFactory</text>
+    <rect x="460" y="70" width="130" height="30" rx="5" fill="#14241a" stroke="#2e5a3a"/><text x="525" y="89" fill="#7ab98a" text-anchor="middle">OptimizerFactory</text>
+    <rect x="600" y="70" width="130" height="30" rx="5" fill="#14241a" stroke="#2e5a3a"/><text x="665" y="89" fill="#7ab98a" text-anchor="middle">SchedulerFactory</text>
+    <rect x="740" y="70" width="140" height="30" rx="5" fill="#14241a" stroke="#2e5a3a"/><text x="810" y="89" fill="#7ab98a" text-anchor="middle">CheckpointManager</text>
+    <rect x="320" y="108" width="280" height="30" rx="5" fill="#14241a" stroke="#2e5a3a"/><text x="460" y="127" fill="#7ab98a" text-anchor="middle">Trainer（装配并驱动训练循环）</text>
+  </g>
+
+  <!-- arrows L2 -> L3 (factories fan into submodules) -->
+  <g stroke="#6a6a6a" stroke-width="0.9" fill="none">
+    <line x1="105" y1="100" x2="105" y2="160" marker-end="url(#arr)"/>
+    <line x1="245" y1="100" x2="200" y2="160" marker-end="url(#arr)"/>
+    <line x1="385" y1="100" x2="200" y2="160" marker-end="url(#arr)"/>
+    <line x1="525" y1="100" x2="460" y2="160" marker-end="url(#arr)"/>
+    <line x1="665" y1="100" x2="460" y2="160" marker-end="url(#arr)"/>
+    <line x1="810" y1="100" x2="745" y2="160" marker-end="url(#arr)"/>
+    <line x1="460" y1="138" x2="460" y2="160" marker-end="url(#arr)"/>
+    <line x1="460" y1="138" x2="105" y2="160" marker-end="url(#arr)"/>
+    <line x1="460" y1="138" x2="880" y2="160" marker-end="url(#arr)"/>
+    <line x1="460" y1="138" x2="320" y2="160" marker-end="url(#arr)"/>
+  </g>
+
+  <!-- L3: 10 submodules -->
+  <g font-size="10">
+    <rect x="40"  y="164" width="120" height="26" rx="4" fill="#16161c" stroke="#2a2a33"/><text x="100" y="181" fill="#e8e8e8" text-anchor="middle">models/</text>
+    <rect x="170" y="164" width="120" height="26" rx="4" fill="#16161c" stroke="#2a2a33"/><text x="230" y="181" fill="#e8e8e8" text-anchor="middle">data/</text>
+    <rect x="300" y="164" width="120" height="26" rx="4" fill="#16161c" stroke="#2a2a33"/><text x="360" y="181" fill="#e8e8e8" text-anchor="middle">distributed/</text>
+    <rect x="430" y="164" width="120" height="26" rx="4" fill="#16161c" stroke="#2a2a33"/><text x="490" y="181" fill="#e8e8e8" text-anchor="middle">optim/</text>
+    <rect x="560" y="164" width="120" height="26" rx="4" fill="#16161c" stroke="#2a2a33"/><text x="620" y="181" fill="#e8e8e8" text-anchor="middle">checkpoint/</text>
+    <rect x="690" y="164" width="120" height="26" rx="4" fill="#16161c" stroke="#2a2a33"/><text x="750" y="181" fill="#e8e8e8" text-anchor="middle">train/</text>
+    <rect x="820" y="164" width="90"  height="26" rx="4" fill="#16161c" stroke="#2a2a33"/><text x="865" y="181" fill="#e8e8e8" text-anchor="middle">utils/</text>
+  </g>
+  <g font-size="9.5" fill="#6a6a6a">
+    <text x="100" y="204" text-anchor="middle">Qwen3等模型实现</text>
+    <text x="230" y="204" text-anchor="middle">数据/分词/模板</text>
+    <text x="360" y="204" text-anchor="middle">并行状态/通信</text>
+    <text x="490" y="204" text-anchor="middle">优化器/调度</text>
+    <text x="620" y="204" text-anchor="middle">权重转换/保存</text>
+    <text x="750" y="204" text-anchor="middle">训练主循环</text>
+    <text x="865" y="204" text-anchor="middle">参数/日志/设备</text>
+  </g>
+  <!-- remaining 3 submodules row -->
+  <g font-size="10">
+    <rect x="170" y="224" width="120" height="26" rx="4" fill="#16161c" stroke="#2a2a33"/><text x="230" y="241" fill="#e8e8e8" text-anchor="middle">features/</text>
+    <rect x="300" y="224" width="120" height="26" rx="4" fill="#16161c" stroke="#2a2a33"/><text x="360" y="241" fill="#e8e8e8" text-anchor="middle">inference/</text>
+    <rect x="430" y="224" width="120" height="26" rx="4" fill="#16161c" stroke="#2a2a33"/><text x="490" y="241" fill="#e8e8e8" text-anchor="middle">ops/</text>
+  </g>
+  <g font-size="9.5" fill="#6a6a6a">
+    <text x="230" y="252" text-anchor="middle">异步offload/分块loss</text>
+    <text x="360" y="252" text-anchor="middle">推理引擎/聊天</text>
+    <text x="490" y="252" text-anchor="middle">NPU自定义算子</text>
+  </g>
+
+  <!-- arrow L3 -> L4 (only utils submodule touches core) -->
+  <line x1="865" y1="190" x2="865" y2="300" stroke="#6a6a6a" stroke-width="1.2" marker-end="url(#arr)"/>
+  <line x1="360" y1="190" x2="360" y2="300" stroke="#6a6a6a" stroke-width="1.2" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+  <text x="690" y="290" fill="#6a6a6a" font-style="italic" font-size="9.5" text-anchor="middle">fsdp2 后端经 from mindspeed.fsdp.* 借用核心库</text>
+
+  <!-- L4: MindSpeed Core -->
+  <rect x="300" y="304" width="320" height="46" rx="6" fill="#000" stroke="#6e1a1c" stroke-width="1.3"/>
+  <text x="460" y="324" fill="#e88" text-anchor="middle" font-weight="600">MindSpeed Core（外部依赖仓库 mindspeed）</text>
+  <text x="460" y="340" fill="#9a9a9a" text-anchor="middle" font-size="9.5">mindspeed/fsdp/utils/{random,torch_patch,…}　HCCL 通信补丁/种子</text>
+
+  <text x="460" y="380" fill="#6a6a6a" text-anchor="middle" font-style="italic" font-size="10">实线＝主装配链路；虚线＝distributed 借用核心库并行原语</text>
+</svg>
+      </div>
+      <p class="footnote">这张图只标"谁依赖谁"的方向，不展开各工厂内部实现——那是 EP07 起逐模块下钻的内容。</p>
+
+      <h2>源码下钻 <span class="sec">file:line</span></h2>
+      <p>先看入口脚本顶部的 import 段。这一段几乎就是 fsdp2 后端依赖地图的"目录索引"——按行读，就能对上图中每一格。</p>
+
+      <div class="figcap">入口脚本 import 段（设备桥 + 六大工厂 + 外部核心库）</div>
+      <pre data-lang="py">import os
+import types
+
+from dataclasses import dataclass, field, fields
+import torch
+
+try:
+    import torch_npu  # noqa: F401
+    from torch_npu.contrib import transfer_to_npu  # noqa: F401
+except ImportError:
+    pass
+from transformers import AutoConfig, is_torch_npu_available
+
+from mindspeed_llm.fsdp2.models.model_factory import ModelFactory
+from mindspeed_llm.fsdp2.optim.optimizer import OptimizerFactory
+from mindspeed_llm.fsdp2.optim.scheduler import SchedulerFactory
+from mindspeed_llm.fsdp2.checkpoint.checkpoint_manager import CheckpointManager
+from mindspeed_llm.fsdp2.train.trainer import Trainer
+from mindspeed_llm.fsdp2.data.data_factory import DataFactory
+from mindspeed_llm.fsdp2.data.tokenizer import TokenizerFactory
+from mindspeed_llm.fsdp2.data.template import get_template_and_fix_tokenizer
+from mindspeed_llm.fsdp2.utils.logging import setup_global_logging, get_logger
+from mindspeed_llm.fsdp2.utils.arguments import (
+    ModelArguments,
+    DataArguments,
+    ParallelArguments,
+    TrainingArguments,
+    OptimizationArguments,
+    fsdp2_parse_args,
+)
+from mindspeed_llm.fsdp2.utils.global_vars import set_args
+from mindspeed_llm.fsdp2.utils.train_monitor import TrainMonitor
+from mindspeed_llm.fsdp2.utils.device import set_accelerator_compatible
+from mindspeed_llm.fsdp2.utils.coverage import auto_coverage
+
+from mindspeed.fsdp.utils.random import set_seed
+from mindspeed.fsdp.utils.torch_patch import apply_hccl_premul_sum_patch</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py">../train_fsdp2.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L8">:8</a>–<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L37">:37</a></div>
+
+      <p>逐块拆：</p>
+      <ul>
+        <li><b>设备桥（行 8–9）</b>：<code>import torch_npu</code> 把"昇腾 NPU 后端"注册进 PyTorch；<code>from torch_npu.contrib import transfer_to_npu</code> 则把默认张量设备从 CUDA 切到 NPU——之后代码里写 <code>.to("npu")</code> 或干脆不写设备都默认落在 NPU 上。这一段是<b>所有</b> NPU 脚本的固定开场，不是 fsdp2 专属。被 <code>try/except ImportError</code> 包住，意味着这份脚本在纯 CUDA 环境也能 import（只是跑不起来），方便做静态分析/单测。</li>
+        <li><b>六大装配件（行 14–19）</b>：六行 <code>from mindspeed_llm.fsdp2.* import</code> 正好对应依赖图 L2 的六个格子——<code>ModelFactory</code>（行 14）、<code>OptimizerFactory</code>（行 15）、<code>SchedulerFactory</code>（行 16）、<code>CheckpointManager</code>（行 17）、<code>Trainer</code>（行 18）、<code>DataFactory</code>（行 19）。入口脚本靠这六个名字 + 参数就能拼出一条完整训练链，而不用 <code>if model_name == "qwen3": ... elif ...</code> 的硬编码分支。注意 <code>Trainer</code> 不叫 Factory——它是"已装配好的零件被送进去运转"的那个引擎，其余五个才是"造零件"的工厂。</li>
+        <li><b>数据与参数配套（行 20–34）</b>：<code>TokenizerFactory</code>（行 20）、<code>get_template_and_fix_tokenizer</code>（行 21）归 <code>data</code> 子包管；<code>arguments</code>（行 23–30）把所有命令行参数拆成五类 dataclass（Model/Data/Parallel/Training/Optimization），这是 EP06 的重头戏；<code>logging/global_vars/train_monitor/device/coverage</code>（行 22、31–34）是 <code>utils</code> 子包提供的横切设施。</li>
+        <li><b>外部核心库借用（行 36–37）</b>：这两行是<b>跨仓库</b>依赖——<code>from mindspeed.fsdp.utils.random import set_seed</code> 与 <code>from mindspeed.fsdp.utils.torch_patch import apply_hccl_premul_sum_patch</code>。这里 <code>mindspeed</code> 不是本仓库（<code>mindspeed_llm</code>），而是另一个独立仓库 MindSpeed Core，pip 装好后以 <code>mindspeed</code> 为包名存在。<code>set_seed</code> 管可复现性，<code>apply_hccl_premul_sum_patch</code> 是给 HCCL（昇腾集合通信库，对应 GPU 的 NCCL）打"premul-sum"补丁——EP03 讲过 CP/SP 这类对通信原语有特殊语义，这个补丁就是让 FSDP2 的 reduce-scatter 在昇腾上行为正确。fsdp2 后端<b>不自己实现</b>这些，只借用。</li>
+      </ul>
+
+      <div class="figcap">fsdp2 包子目录一览（十个子模块，各司一职）</div>
+      <pre data-lang="sh">mindspeed_llm/fsdp2/
+├── models/        # 各模型实现：qwen3/ deepseek_v4/ glm52/ gpt_oss/ mamba3/ ... + model_factory.py
+├── data/          # data_factory / tokenizer / template / parser / collator / converter
+├── distributed/   # parallel_state / parallel_engine / clip_grad_norm / context_parallel / expert_parallel
+├── optim/         # optimizer / scheduler / muon
+├── checkpoint/    # checkpoint_manager / weight_conv_adapter / merge_dcp_to_hf
+├── train/         # trainer.py（训练主循环）
+├── utils/         # arguments / logging / device / global_vars / train_monitor / coverage / profiler
+├── features/      # async_offload / chunkloss（可选加速特性）
+├── inference/     # chat_model / inferencer / engine（推理出口）
+└── ops/           # npu_sparse_flash_mla / npu_lightning_indexer（NPU 自定义算子）</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/__init__.py">../mindspeed_llm/fsdp2/__init__.py</a>（包定义，无显式导出，靠子包各自 <code>__init__</code> 暴露）</div>
+      <p class="footnote">Qwen3-8B 的位置就在 <code>models/qwen3/</code> 下，含 <code>qwen3.py</code>、<code>qwen3_moe.py</code>、<code>modules.py</code>——EP12 专门讲它的建模。<code>features</code>、<code>inference</code>、<code>ops</code> 三个子包在本系列训练主线里出现较少，列出来是为完整性，不逐个展开。</p>
+
+      <div class="figcap">MindSpeed Core 仓库定位（fsdp2 后端的外部依赖来源）</div>
+      <pre data-lang="sh">└── mindspeed/                    # 核心代码目录
+│   ├── core/                     # 核心功能模块，包含并行策略、内存管理、优化器等核心能力
+│   ├── features_manager/         # 特性管理模块，统一管理各种优化特性的注册与配置
+│   ...
+此外在 MindSpeed Core 加速库的基础之上也提供了大语言模型、多模态模型套件加速库:
+- 📝 大语言模型库: [MindSpeed LLM]（即本仓库）</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed/blob/master/README.md">../_deps_mindspeed_core/README.md</a>：<a href="https://gitcode.com/Ascend/MindSpeed/blob/master/README.md#L28">:28</a>（核心/套件分层）、<a href="https://gitcode.com/Ascend/MindSpeed/blob/master/README.md#L39">:39</a>（核心代码目录）</div>
+      <p>这段 README 明确了分层：MindSpeed Core 是"昇腾大模型加速库"底座（<code>mindspeed/</code> 核心代码目录），在其<b>之上</b>才叠了 MindSpeed-LLM（大语言模型套件，即本仓库）。fsdp2 后端的 <code>from mindspeed.fsdp.utils.*</code> 就是这个分层在 import 层的体现——底层能力（HCCL 补丁、种子、FSDP2 原语）在 Core，套件层只负责"模型/数据/训练流程"的装配。这也解释了为什么本仓库还放了一份 <code>_deps_mindspeed_core/</code> 镜像：走读时要随时能跳进 Core 源码核对外部 API。</p>
+
+      <div class="gnpu">
+        <div class="g"><h4>GPU / 已知（小项目范式）</h4>
+          <div class="row"><span class="k">入口</span><span>单文件 train.py：main 里直接 new 模型/优化器/数据</span></div>
+          <div class="row"><span class="k">结构</span><span>平铺几个脚本，依赖关系＝文件名顺序，无工厂</span></div>
+          <div class="row"><span class="k">启动</span><span>python train.py；多卡用 torchrun --nproc_per_node …</span></div>
+          <div class="row"><span class="k">通信后端</span><span>torchrun 默认 backend=nccl（NVIDIA 集合通信库）</span></div>
+          <div class="row"><span class="k">设备</span><span>.to("cuda")，torch.cuda 默认张量设备</span></div>
+        </div>
+        <div class="n"><h4>NPU / 本项目（fsdp2 后端）</h4>
+          <div class="row"><span class="k">入口</span><span>train_fsdp2.py：DI 容器式装配，按参数向工厂取件</span></div>
+          <div class="row"><span class="k">结构</span><span>十个子包 + 六类 Factory/Manager，职责按目录切</span></div>
+          <div class="row"><span class="k">启动</span><span>仍是 torchrun（脚本同形），但进程组 backend=mindspeed_fsdp</span></div>
+          <div class="row"><span class="k">通信后端</span><span>mindspeed_fsdp 经 HCCL；需 apply_hccl_premul_sum_patch 修正语义</span></div>
+          <div class="row"><span class="k">设备</span><span>transfer_to_npu 把默认设备切到 "npu"，torch_npu 注册后端</span></div>
+        </div>
+      </div>
+      <p class="footnote">一句话定位 mcore vs fsdp2：本仓库同时维护两条后端——<b>mcore</b>（Megatron-Core 路线，靠 <code>mindspeed_llm/tasks/</code> 那套 Megatron 训练栈）与 <b>fsdp2</b>（PyTorch 原生 FSDP2 路线，靠本篇讲的 <code>mindspeed_llm/fsdp2/</code> 子包 + <code>train_fsdp2.py</code> 入口）。两者是<b>独立后端</b>，不是同一套代码加个开关。本系列只走 fsdp2，mcore 略过。</p>
+
+      <div class="sum">
+        <b>小结</b>　心智模型：fsdp2 后端是一个"工厂装配式"训练框架——入口脚本只取件不写逻辑，十个子包按职责供件，硬件/FSDP2 原语下沉到外部 MindSpeed Core；Qwen3-8B 是 <code>models/qwen3/</code> 这一个供件格里的具体型号。读这一路代码的姿势是"顺着 import 找工厂，再进工厂找实现"，而不是从头到尾线性读 <code>train_fsdp2.py</code>。
+        <div class="pit">常见误区：① 别把 fsdp2 当 mcore 的配置分支——它是独立后端，有自己的入口、子包、参数体系，和 mcore 共用的只是"同属一个仓库"这层外壳。② 别以为 <code>mindspeed.fsdp.*</code> 在本仓库里——它在另一个仓库 MindSpeed Core，本仓库只是镜像了一份到 <code>_deps_mindspeed_core/</code> 方便走读。③ 别把"六个 Factory"当成六个并列模块——<code>Trainer</code> 是消费者，其余五个才是生产者，<code>CheckpointManager</code> 既是生产（装配）也是消费（运行时存读）。</div>
+      </div>
+
+      <div class="filelist"><b>本篇涉及文件</b><br>
+../train_fsdp2.py（入口，import 段 行 8–37）<br>
+../mindspeed_llm/fsdp2/__init__.py（包定义）<br>
+../mindspeed_llm/fsdp2/models/qwen3/（Qwen3-8B 模型实现）<br>
+../_deps_mindspeed_core/README.md（MindSpeed Core 定位，行 28、39）<br>
+../_deps_mindspeed_core/mindspeed/fsdp/utils/{random,torch_patch}.py（外部借用来源）</div>
+    </main>
+  </div>
+</div>
+<script>
+// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre[data-lang]').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];if(!rules)return;
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      return '<span class="ln">'+(i+1)+'</span>'+tokLine(l,rules);
+    }).join('\n');
+  });
+})();
+</script>
+</body>
+</html>

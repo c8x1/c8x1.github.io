@@ -1,0 +1,821 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/data/template.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/data/template.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_8e4354a4b6d576.html">◀ sft_processor.py</a> <a href="file_11500ed309beee.html">tokenizer.py ▶</a></nav></div>
+<div class="wrap">
+<h1>template.py</h1><p class="goal">mindspeed_llm/fsdp2/data/template.py · 23103B · 542 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L36" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class Template</a><a href="#L53" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _add_or_replace_eos_token(tokenizer: &quot</a><a href="#L70" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _jinja_escape(content: str) -&gt; str</a><a href="#L75" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _convert_slots_to_jinja(slots: &quot;SLOTS</a><a href="#L98" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def encode_oneturn</a><a href="#L114" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def encode_multiturn</a><a href="#L125" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def extract_tool(self, content: str) -&gt; Uni</a><a href="#L129" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_stop_token_ids(self, tokenizer: &quot;</a><a href="#L137" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def add_thought(self, content: str = &quot;&qu</a><a href="#L141" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def remove_thought(self, content: str) -&gt; s</a><a href="#L146" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_thought_word_ids(self, tokenizer: &quo</a><a href="#L150" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def fix_special_tokens(self, tokenizer: &quot;</a><a href="#L173" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def fix_jinja_template(self, tokenizer: &quot;</a><a href="#L181" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _convert_elements_to_ids(self, tokenizer: </a><a href="#L200" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _encode</a><a href="#L238" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_jinja_template(self, tokenizer: &quot</a><a href="#L268" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class ReasoningTemplate(Template)</a><a href="#L272" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def encode_oneturn</a><a href="#L303" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def encode_multiturn</a><a href="#L336" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def register_template</a><a href="#L405" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def parse_template(tokenizer: &quot;PreTrained</a><a href="#L408" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def find_diff(short_str: str, long_str: str) -</a><a href="#L468" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_template_and_fix_tokenizer(tokenizer: </a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep13.html">EP13</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="annot"><div class="seg"><p class="seglab">行 35-50 · Template dataclass：Formatter 槽位 + 模板元数据</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :35-:50）</h5><pre data-lang="py" data-start="35" data-idprefix="A">@dataclass
+class Template:
+    format_user: &quot;Formatter&quot;
+    format_assistant: &quot;Formatter&quot;
+    format_system: &quot;Formatter&quot;
+    format_function: &quot;Formatter&quot;
+    format_observation: &quot;Formatter&quot;
+    format_tools: &quot;Formatter&quot;
+    format_prefix: &quot;Formatter&quot;
+    default_system: str
+    stop_words: list[str]
+    thought_words: tuple[str, str]
+    efficient_eos: bool
+    replace_eos: bool
+    replace_jinja_template: bool
+    enable_thinking: Optional[bool]</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># 标准 HF chat_template 路径（NVIDIA GPU 训练常用）
+text = tokenizer.apply_chat_template(
+    messages,
+    add_generation_prompt=True,
+    tokenize=True,            # 直接出 id
+)
+input_ids = text            # 一个扁平 id 列表，loss mask 另算</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>左侧是 NVIDIA GPU 训练里最常见的写法：<code>tokenizer.apply_chat_template</code> 一把梭，直接把 messages 喂给 HF tokenizer 自带的 Jinja chat_template，拿到一串扁平 <code>input_ids</code>，loss mask 在外层 collator 另打。右侧本文件走的是<strong>仓内 Template 体系</strong>：把 user/assistant/system 拆成独立 Formatter 槽位、显式切 <code>prompt_ids</code>/<code>response_ids</code> 两段、并对 reasoning 模型做 <code>thought</code> 剥离——比裸 <code>apply_chat_template</code> 多了 loss 边界的物理切分和 CoT 控制。</p><p><strong>差异本质</strong>：左侧靠 tokenizer 自带的 chat_template Jinja（社区维护、格式漂移风险），右侧靠仓内 dataclass 字段（版本可控、能在 <code>fix_jinja_template</code> <code>:173-179</code> 反向覆盖 tokenizer 自带模板）。两者硬件无关，差异在“格式权威来自 tokenizer 还是来自仓内 Template”。</p></div></div><div class="seg"><p class="seglab">行 98-112 · encode_oneturn：prompt_ids / response_ids 双段切分</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :98-:112）</h5><pre data-lang="py" data-start="98" data-idprefix="A">    def encode_oneturn(
+        self,
+        tokenizer: &quot;PreTrainedTokenizer&quot;,
+        messages: list[dict[str, str]],
+        system: Optional[str] = None,
+        tools: Optional[str] = None,
+    ) -&gt; tuple[list[int], list[int]]:
+        r&quot;&quot;&quot;Return a single pair of token ids representing prompt and response respectively.&quot;&quot;&quot;
+        encoded_messages = self._encode(tokenizer, messages, system, tools)
+        prompt_ids = []
+        for encoded_ids in encoded_messages[:-1]:
+            prompt_ids += encoded_ids
+
+        response_ids = encoded_messages[-1]
+        return prompt_ids, response_ids</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># DDP 训练里典型 loss mask（NVIDIA GPU）
+labels = input_ids.clone()
+labels[:, :prompt_len] = IGNORE_INDEX   # prompt 段不算 loss
+loss = F.cross_entropy(logits.view(-1, V),
+                       labels.view(-1),
+                       ignore_index=-100)</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>左侧是 NVIDIA GPU DDP 训练里典型的 loss mask 写法：拿到扁平 <code>input_ids</code> 后，靠外层维护的 <code>prompt_len</code> 把 prompt 段置 <code>IGNORE_INDEX</code>，再用 <code>F.cross_entropy(..., ignore_index=-100)</code> 让那些位置不进梯度。<strong>右侧本文件做的事是它的上游</strong>：<code>encode_oneturn</code> <code>:112</code> 直接返回物理切好的 <code>(prompt_ids, response_ids)</code> 两段，下游 collator 只要把这两段拼回扁平序列、在 <code>prompt_ids</code> 范围打 -100 即可，省去外层再切 <code>prompt_len</code> 的歧义。</p><p><strong>差异</strong>：左侧“先扁平再事后 mask”，靠外部 prompt_len；右侧“编码时就切好两段”，prompt/response 边界由 Formatter 槽位 + 末轮判定决定，CoT 区间还能再细分（见 ReasoningTemplate 段）。硬件无关——两段 id 一旦进 embedding，NPU/CUDA 的 cross_entropy 行为一致（Ascend 侧的 fused_cross_entropy 在算子层）。</p></div></div><div class="seg"><p class="seglab">行 150-171 · fix_special_tokens：replace_eos 把 <|im_end|> 抬成 EOS</p><pre data-lang="py" data-start="150" data-idprefix="A">    def fix_special_tokens(self, tokenizer: &quot;PreTrainedTokenizer&quot;) -&gt; None:
+        r&quot;&quot;&quot;Add eos token and pad token to the tokenizer.&quot;&quot;&quot;
+        stop_words = self.stop_words
+        if self.replace_eos:
+            if not stop_words:
+                raise ValueError(&quot;Stop words are required to replace the EOS token.&quot;)
+
+            self._add_or_replace_eos_token(tokenizer, eos_token=stop_words[0])
+            stop_words = stop_words[1:]
+
+        if tokenizer.eos_token_id is None:
+            self._add_or_replace_eos_token(tokenizer, eos_token=&quot;&lt;|endoftext|&gt;&quot;)  # nosec
+
+        if tokenizer.pad_token_id is None:
+            tokenizer.pad_token = tokenizer.eos_token
+            logger.info_rank0(f&quot;Add pad token: {tokenizer.pad_token}&quot;)
+
+        if stop_words:
+            num_added_tokens = tokenizer.add_special_tokens(dict(additional_special_tokens=stop_words))
+            logger.info_rank0(&quot;Add {} to stop words.&quot;.format(&quot;,&quot;.join(stop_words)))
+            if num_added_tokens &gt; 0:
+                logger.info_rank0(&quot;New tokens have been added, make sure `resize_vocab` is True.&quot;)</pre><div class="exp"><p>第 :150-171 <code>fix_special_tokens</code> 负责“把 stop_words 接管成 tokenizer 的特殊 token”。流程：:152 取 <code>stop_words</code>；:153 若 <code>self.replace_eos</code>（qwen3 注册时 :521 设为 True）则 :157 调 <code>_add_or_replace_eos_token(tokenizer, eos_token=stop_words[0])</code>，把第一个 stop word 设成新 EOS，:158 再把它从待加 stop_words 里剔除；:160-161 若 tokenizer 本来没 EOS 则兜底设空串 EOS；:163-165 若没 pad 则 pad=eos（Qwen3 这类 decoder 通常 pad 复用 EOS）；:167-171 把剩余 stop_words 补进 <code>additional_special_tokens</code>，并提醒“新增 token 要 <code>resize_vocab=True</code>”。</p><p>对 qwen3：<code>stop_words=["&lt;|im_end|&gt;"]</code>（:520）+ <code>replace_eos=True</code>（:521），结果是 <code>&lt;|im_end|&gt;</code> 被抬成新 EOS，<code>get_stop_token_ids</code>（:129-135）据此把它列入停止集。这一步<strong>所有后端行为一致</strong>——tokenizer.add_special_tokens 是 HF 的 CPU 端 Python 路径，NPU 无特例；与它无关的是“新 EOS token 的 embedding 行被 resize 后落到哪张卡”，那是 FSDP2 的 <code>resize_vocab</code> 侧。</p></div></div><div class="seg"><p class="seglab">行 200-236 · _encode：按 role 套 Formatter + 0 轮拼 prefix/system</p><pre data-lang="py" data-start="200" data-idprefix="A">    def _encode(
+        self,
+        tokenizer: &quot;PreTrainedTokenizer&quot;,
+        messages: list[dict[str, str]],
+        system: Optional[str],
+        tools: Optional[str],
+    ) -&gt; list[list[int]]:
+        r&quot;&quot;&quot;Encode formatted inputs to pairs of token ids.
+
+        Turn 0: prefix + system + query        resp
+        Turn t: query                          resp.
+        &quot;&quot;&quot;
+        system = system or self.default_system
+        encoded_messages = []
+        for i, message in enumerate(messages):
+            elements = []
+
+            if i == 0:
+                elements += self.format_prefix.apply()
+                if system or tools:
+                    tool_text = self.format_tools.apply(content=tools)[0] if tools else &quot;&quot;
+                    elements += self.format_system.apply(content=(system + tool_text))
+
+            if message[&quot;role&quot;] == Role.USER:
+                elements += self.format_user.apply(content=message[&quot;content&quot;], idx=str(i // 2))
+            elif message[&quot;role&quot;] == Role.ASSISTANT:
+                elements += self.format_assistant.apply(content=message[&quot;content&quot;])
+            elif message[&quot;role&quot;] == Role.OBSERVATION:
+                elements += self.format_observation.apply(content=message[&quot;content&quot;])
+            elif message[&quot;role&quot;] == Role.FUNCTION:
+                elements += self.format_function.apply(content=message[&quot;content&quot;], thought_words=self.thought_words)
+            else:
+                raise NotImplementedError(&quot;Unexpected role: {}&quot;.format(message[&quot;role&quot;]))
+
+            encoded_messages.append(self._convert_elements_to_ids(tokenizer, elements))
+
+        return encoded_messages</pre><div class="exp"><p>第 :200-236 <code>_encode</code> 是编码主干。注释 :209-210 说清结构：<strong>Turn 0</strong> = <code>prefix + system + query</code> 然后 resp；<strong>Turn t</strong> = query 然后 resp。:212 <code>system = system or self.default_system</code> 兜底默认 system。:214 遍历 messages：:217 若 <code>i == 0</code>（首轮），:218 先 <code>format_prefix.apply()</code>（如 qwen3 的 BOS/无），:219-221 若有 system 或 tools，把 tools 文本（<code>format_tools.apply</code>）拼到 system 后再 <code>format_system.apply</code>；:223-232 按 <code>message["role"]</code> 分派到 user/assistant/observation/function 四种 Formatter，未知 role 抛 <code>NotImplementedError</code>（:232）；:234 每轮把 elements 经 <code>_convert_elements_to_ids</code>（:181-198，逐段 <code>tokenizer.encode</code> 或 <code>convert_tokens_to_ids</code>）编成 id 列表，append 进 <code>encoded_messages</code>。</p><p>这是“对话语义→token id 序列”那座桥的物理实现：role 决定套哪个 Formatter 槽位，Formatter 槽位决定拼接的棋盘格串。qwen3 的 user 槽（:512）<code>&lt;|im_start|&gt;user\n{{content}}&lt;|im_end|&gt;\n&lt;|im_start|&gt;assistant\n</code> 会把每轮 user 内容包进 <code>&lt;im_start|&gt;...&lt;|im_end|&gt;</code> 围栏，并在末尾留 <code>&lt;|im_start|&gt;assistant\n</code> 给模型接续——纯格式、硬件无关。</p></div></div><div class="seg"><p class="seglab">行 271-300 · ReasoningTemplate.encode_oneturn：CoT 剥离与 loss 边界</p><pre data-lang="py" data-start="271" data-idprefix="A">    @override
+    def encode_oneturn(
+        self,
+        tokenizer: &quot;PreTrainedTokenizer&quot;,
+        messages: list[dict[str, str]],
+        system: Optional[str] = None,
+        tools: Optional[str] = None,
+    ) -&gt; tuple[list[int], list[int]]:
+        messages = deepcopy(messages)
+        for i in range(1, len(messages) - 2, 2):
+            messages[i][&quot;content&quot;] = self.remove_thought(messages[i][&quot;content&quot;])
+
+        if self.enable_thinking is False:
+            # remove all cot
+            messages[-1][&quot;content&quot;] = self.remove_thought(messages[-1][&quot;content&quot;])
+
+        prompt_ids, response_ids = super().encode_oneturn(tokenizer, messages, system, tools)
+        if (
+            self.thought_words[0].strip() not in messages[-1][&quot;content&quot;]
+            and self.thought_words[1].strip() not in messages[-1][&quot;content&quot;]
+        ):
+            # add empty cot
+            if not self.enable_thinking:
+                # do not compute loss
+                prompt_ids += self.get_thought_word_ids(tokenizer)
+            else:
+                # do compute loss
+                response_ids = self.get_thought_word_ids(tokenizer) + response_ids
+
+        return prompt_ids, response_ids</pre><div class="exp"><p>第 :271-300 <code>ReasoningTemplate.encode_oneturn</code> override 父类，给 reasoning 模型（qwen3）做 CoT 精细切分。:279 <code>messages = deepcopy(messages)</code> 深拷贝避免污染原数据；:280-281 对历史轮（<code>range(1, len-2, 2)</code>，即除末轮外的 assistant 轮）调 <code>self.remove_thought</code>（正则见 :143-144）把 <code>&lt;think&gt;...&lt;/think&gt;</code> 区间剥掉——历史 CoT 不进序列。:283-285 若 <code>enable_thinking is False</code>，连末轮 thought 也剥掉（无思维链训练）。</p><p>:287 调 <code>super().encode_oneturn</code> 拿到 <code>(prompt_ids, response_ids)</code>。:288-298 的关键判定：若末轮 content 里既不含 <code>thought_words[0]</code> 也不含 <code>thought_words[1]</code>（即缺 thought 标记），则按 <code>enable_thinking</code> 二选一塞空 thought——:293-295 若 <code>not enable_thinking</code>（关闭思维），把 <code>get_thought_word_ids</code>（:146-148 编 <code>&lt;think&gt;&lt;/think&gt;</code> 空标记）拼进 <code>prompt_ids</code>（<strong>不算 loss</strong>）；:296-298 若开思维，拼到 <code>response_ids</code> 头部（<strong>算 loss</strong>，教模型生成空 think 标记）。</p><p>这决定了哪些 token 进 FSDP2 梯度计算：<code>enable_thinking</code> 由 <code>data_args.enable_thinking</code> 注入（:502）。<code>encode_multiturn</code> 的 override（:302-330）是它的多轮版，同样按轮判定塞 prompt 还是 response。硬件维度仍弱——CoT 切分是语义层操作，与 NPU/CUDA 无关。</p></div></div><div class="seg"><p class="seglab">行 468-507 · get_template_and_fix_tokenizer：总入口取模板+修 tokenizer</p><pre data-lang="py" data-start="468" data-idprefix="A">def get_template_and_fix_tokenizer(tokenizer: &quot;PreTrainedTokenizer&quot;, data_args: &quot;DataArguments&quot;) -&gt; &quot;Template&quot;:
+    r&quot;&quot;&quot;Get chat template and fixes the tokenizer.&quot;&quot;&quot;
+    if data_args.template is None:
+        if isinstance(tokenizer.chat_template, str):
+            logger.info_rank0(&quot;`template` was not specified, try parsing the chat template from the tokenizer.&quot;)
+            template = parse_template(tokenizer)
+        else:
+            logger.info_rank0(&quot;`template` was not specified, use `empty` template.&quot;)
+            template = TEMPLATES[&quot;empty&quot;]
+    else:
+        if data_args.template not in TEMPLATES:
+            raise ValueError(f&quot;Template {data_args.template} does not exist.&quot;)
+
+        template = TEMPLATES[data_args.template]
+
+    if data_args.train_on_prompt and template.efficient_eos:
+        raise ValueError(&quot;Current template does not support `train_on_prompt`.&quot;)
+
+    if data_args.tool_format is not None:
+        logger.info_rank0(f&quot;Using tool format: {data_args.tool_format}.&quot;)
+        default_slots = [&quot;{{content}}&quot;] if template.efficient_eos else [&quot;{{content}}&quot;, {&quot;eos_token&quot;}]
+        template.format_function = FunctionFormatter(slots=default_slots, tool_format=data_args.tool_format)
+        template.format_tools = ToolFormatter(tool_format=data_args.tool_format)
+
+    if data_args.default_system is not None:
+        logger.info_rank0(f&quot;Using default system message: {data_args.default_system}.&quot;)
+        template.default_system = data_args.default_system
+
+    if isinstance(template, ReasoningTemplate):
+        logger.info_rank0(
+            &quot;You are using reasoning template, &quot;
+            &quot;please add `_nothink` suffix if the model is not a reasoning model. &quot;
+            &quot;e.g., qwen3_vl_nothink&quot;
+        )
+        template.enable_thinking = data_args.enable_thinking
+
+    template.fix_special_tokens(tokenizer)
+    template.fix_jinja_template(tokenizer)
+
+    return template</pre><div class="exp"><p>第 :468-507 是外部调用的总入口 <code>get_template_and_fix_tokenizer(tokenizer, data_args)</code>。:470-481 取模板：若 <code>data_args.template is None</code>，:471-473 若 tokenizer 自带 <code>chat_template</code> 就 <code>parse_template</code>（:405-465，从 tokenizer 反推 Formatter 槽位，:437 靠 assistant_slot 里是否含 <code>&lt;think&gt;</code> 决定用 <code>ReasoningTemplate</code> 还是 <code>Template</code>）反推，否则:475-476 退回 <code>TEMPLATES["empty"]</code>；:477-481 若显式传了 template 名但不在注册表则抛 <code>ValueError</code>，在则直接取。</p><p>:483-484 校验：<code>train_on_prompt</code> 与 <code>efficient_eos</code> 互斥（efficient_eos 模板不重复加 EOS，prompt 段没法稳定算 loss）。:486-490 若指定 <code>tool_format</code>，用带 eos 的默认 slots 重造 <code>format_function/format_tools</code>。:492-494 若指定 <code>default_system</code> 则覆盖。:496-502 若是 <code>ReasoningTemplate</code>，打提醒“非推理模型加 <code>_nothink</code> 后缀”并 :502 注入 <code>enable_thinking</code>。:504-505 最后跑 <code>fix_special_tokens</code>（EOS/PAD）和 <code>fix_jinja_template</code>（可能覆盖 tokenizer 自带 chat_template，见 :173-179），:507 返回 template。</p><p>这是“HF tokenizer → 仓内模板体系”那座桥的总闸：显式传 <code>template=qwen3</code> 才稳，靠 <code>parse_template</code> 反推 qwen3 棋盘格不保证正确。硬件无关。</p></div></div><div class="seg"><p class="seglab">行 510-523 · qwen3 模板注册：棋盘格 Formatter + ReasoningTemplate</p><pre data-lang="py" data-start="510" data-idprefix="A">register_template(
+    name=&quot;qwen3&quot;,
+    format_user=StringFormatter(slots=[&quot;&lt;|im_start|&gt;user\n{{content}}&lt;|im_end|&gt;\n&lt;|im_start|&gt;assistant\n&quot;]),
+    format_assistant=StringFormatter(slots=[&quot;{{content}}&lt;|im_end|&gt;\n&quot;]),
+    format_system=StringFormatter(slots=[&quot;&lt;|im_start|&gt;system\n{{content}}&lt;|im_end|&gt;\n&quot;]),
+    format_function=FunctionFormatter(slots=[&quot;{{content}}&lt;|im_end|&gt;\n&quot;], tool_format=&quot;qwen&quot;),
+    format_observation=StringFormatter(
+        slots=[&quot;&lt;|im_start|&gt;user\n&lt;tool_response&gt;\n{{content}}\n&lt;/tool_response&gt;&lt;|im_end|&gt;\n&lt;|im_start|&gt;assistant\n&quot;]
+    ),
+    format_tools=ToolFormatter(tool_format=&quot;qwen&quot;),
+    stop_words=[&quot;&lt;|im_end|&gt;&quot;],
+    replace_eos=True,
+    template_class=ReasoningTemplate,
+)</pre><div class="exp"><p>第 :510-523 是本次走读的主角——<code>register_template(name="qwen3", ...)</code>。逐字段：<code>format_user</code>（:512）<code>&lt;|im_start|&gt;user\n{{content}}&lt;|im_end|&gt;\n&lt;|im_start|&gt;assistant\n</code>，把 user 内容包进 <code>&lt;|im_start|&gt;user...&lt;|im_end|&gt;</code> 围栏并在末尾留 assistant 接续头；<code>format_assistant</code>（:513）<code>{{content}}&lt;|im_end|&gt;\n</code>，assistant 内容后接 <code>&lt;|im_end|&gt;</code> 收尾；<code>format_system</code>（:514）同形但 role=system；<code>format_function</code>（:515）<code>FunctionFormatter(..., tool_format="qwen")</code>，工具调用按 qwen 格式串；<code>format_observation</code>（:516-518）带工具回执围栏 <code>&lt;|im_start|&gt;user\n&lt;tool&gt;...&lt;/tool&gt;&lt;|im_end|&gt;...&lt;|im_start|&gt;assistant\n</code>；<code>format_tools</code>（:519）<code>ToolFormatter(tool_format="qwen")</code>。</p><p>元数据：<code>stop_words=["&lt;|im_end|&gt;"]</code>（:520）+ <code>replace_eos=True</code>（:521）→ <code>&lt;|im_end|&gt;</code> 被抬成新 EOS（见 fix_special_tokens :157）；<code>template_class=ReasoningTemplate</code>（:522）→ 走 CoT 切分路径，<code>thought_words</code> 用默认值 <code>("&lt;think&gt;\n", "\n&lt;/think&gt;\n\n")</code>（:397）。未显式传的 <code>efficient_eos/replace_jinja_template/enable_thinking</code> 用 register_template 默认值（False/False/True，:348-351）。</p><p>对照 gpt 模板（:526-535，<code>&lt;|start|&gt;...&lt;|message|&gt;...&lt;|end|&gt;</code> 串、efficient_eos=True、自定义 thought_words）和 empty 模板（:538-541，仅 assistant 槽）可见：本仓模板体系是<strong>一套 dataclass + 不同 Formatter 槽位配置</strong>的产物，硬件无关，NPU/CUDA 一致。EP13/EP14 的训练数据最终都经此 qwen3 模板编码成 id 对，再喂进被 FSDP2 shard 的模型。</p></div></div></div>
+<details class="src"><summary>📜 完整源码（542 行）— 大纲点跳行</summary><pre data-lang="py" data-start="1"># Copyright 2025 The LLaMA-Factory Team. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# This file is based on LLaMA-Factory (https://github.com/hiyouga/LLaMA-Factory),
+# licensed under the Apache License, Version 2.0. Modifications have been made.
+
+import re
+from copy import deepcopy
+from dataclasses import dataclass
+from typing import Optional, Union
+from typing_extensions import override
+from transformers import PreTrainedTokenizer
+
+from .converter import Role
+from .formatter import FunctionCall
+from .formatter import SLOTS, Formatter, EmptyFormatter, FunctionFormatter, StringFormatter, ToolFormatter
+from ..utils.arguments import DataArguments
+
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+
+logger = get_logger(__name__)
+
+
+@dataclass
+class Template:
+    format_user: &quot;Formatter&quot;
+    format_assistant: &quot;Formatter&quot;
+    format_system: &quot;Formatter&quot;
+    format_function: &quot;Formatter&quot;
+    format_observation: &quot;Formatter&quot;
+    format_tools: &quot;Formatter&quot;
+    format_prefix: &quot;Formatter&quot;
+    default_system: str
+    stop_words: list[str]
+    thought_words: tuple[str, str]
+    efficient_eos: bool
+    replace_eos: bool
+    replace_jinja_template: bool
+    enable_thinking: Optional[bool]
+
+    @staticmethod
+    def _add_or_replace_eos_token(tokenizer: &quot;PreTrainedTokenizer&quot;, eos_token: str) -&gt; None:
+        r&quot;&quot;&quot;Add or replace eos token to the tokenizer.&quot;&quot;&quot;
+        if tokenizer.eos_token == eos_token:
+            return
+
+        is_added = tokenizer.eos_token_id is None
+        num_added_tokens = tokenizer.add_special_tokens({&quot;eos_token&quot;: eos_token})
+
+        if is_added:
+            logger.info_rank0(f&quot;Add eos token: {tokenizer.eos_token}.&quot;)
+        else:
+            logger.info_rank0(f&quot;Replace eos token: {tokenizer.eos_token}.&quot;)
+
+        if num_added_tokens &gt; 0:
+            logger.info_rank0(&quot;New tokens have been added, make sure `resize_vocab` is True.&quot;)
+
+    @staticmethod
+    def _jinja_escape(content: str) -&gt; str:
+        r&quot;&quot;&quot;Escape single quotes in content.&quot;&quot;&quot;
+        return content.replace(&quot;&#x27;&quot;, r&quot;\&#x27;&quot;)
+
+    @staticmethod
+    def _convert_slots_to_jinja(slots: &quot;SLOTS&quot;, tokenizer: &quot;PreTrainedTokenizer&quot;, placeholder: str = &quot;content&quot;) -&gt; str:
+        r&quot;&quot;&quot;Convert slots to jinja template.&quot;&quot;&quot;
+        slot_items = []
+        for slot in slots:
+            if isinstance(slot, str):
+                slot_pieces = slot.split(&quot;{{content}}&quot;)
+                if slot_pieces[0]:
+                    slot_items.append(&quot;&#x27;&quot; + Template._jinja_escape(slot_pieces[0]) + &quot;&#x27;&quot;)
+                if len(slot_pieces) &gt; 1:
+                    slot_items.append(placeholder)
+                    if slot_pieces[1]:
+                        slot_items.append(&quot;&#x27;&quot; + Template._jinja_escape(slot_pieces[1]) + &quot;&#x27;&quot;)
+            elif isinstance(slot, set):
+                # do not use {{ eos_token }} since it may be replaced
+                if &quot;bos_token&quot; in slot and tokenizer.bos_token_id is not None:
+                    slot_items.append(&quot;&#x27;&quot; + tokenizer.bos_token + &quot;&#x27;&quot;)
+                elif &quot;eos_token&quot; in slot and tokenizer.eos_token_id is not None:
+                    slot_items.append(&quot;&#x27;&quot; + tokenizer.eos_token + &quot;&#x27;&quot;)
+            elif isinstance(slot, dict):
+                raise ValueError(&quot;Dict is not supported.&quot;)
+
+        return &quot; + &quot;.join(slot_items)
+
+    def encode_oneturn(
+        self,
+        tokenizer: &quot;PreTrainedTokenizer&quot;,
+        messages: list[dict[str, str]],
+        system: Optional[str] = None,
+        tools: Optional[str] = None,
+    ) -&gt; tuple[list[int], list[int]]:
+        r&quot;&quot;&quot;Return a single pair of token ids representing prompt and response respectively.&quot;&quot;&quot;
+        encoded_messages = self._encode(tokenizer, messages, system, tools)
+        prompt_ids = []
+        for encoded_ids in encoded_messages[:-1]:
+            prompt_ids += encoded_ids
+
+        response_ids = encoded_messages[-1]
+        return prompt_ids, response_ids
+
+    def encode_multiturn(
+        self,
+        tokenizer: &quot;PreTrainedTokenizer&quot;,
+        messages: list[dict[str, str]],
+        system: Optional[str] = None,
+        tools: Optional[str] = None,
+    ) -&gt; list[tuple[list[int], list[int]]]:
+        r&quot;&quot;&quot;Return multiple pairs of token ids representing prompts and responses respectively.&quot;&quot;&quot;
+        encoded_messages = self._encode(tokenizer, messages, system, tools)
+        return [(encoded_messages[i], encoded_messages[i + 1]) for i in range(0, len(encoded_messages), 2)]
+
+    def extract_tool(self, content: str) -&gt; Union[str, list[&quot;FunctionCall&quot;]]:
+        r&quot;&quot;&quot;Extract tool message.&quot;&quot;&quot;
+        return self.format_tools.extract(content)
+
+    def get_stop_token_ids(self, tokenizer: &quot;PreTrainedTokenizer&quot;) -&gt; list[int]:
+        r&quot;&quot;&quot;Return stop token ids.&quot;&quot;&quot;
+        stop_token_ids = {tokenizer.eos_token_id}
+        for token in self.stop_words:
+            stop_token_ids.add(tokenizer.convert_tokens_to_ids(token))
+
+        return list(stop_token_ids)
+
+    def add_thought(self, content: str = &quot;&quot;) -&gt; str:
+        r&quot;&quot;&quot;Add empty thought to assistant message.&quot;&quot;&quot;
+        return f&quot;{self.thought_words[0]}{self.thought_words[1]}&quot; + content
+
+    def remove_thought(self, content: str) -&gt; str:
+        r&quot;&quot;&quot;Remove thought from assistant message.&quot;&quot;&quot;
+        pattern = re.compile(f&quot;{re.escape(self.thought_words[0])}(.*?){re.escape(self.thought_words[1])}&quot;, re.DOTALL)
+        return re.sub(pattern, &quot;&quot;, content).lstrip(&quot;\n&quot;)
+
+    def get_thought_word_ids(self, tokenizer: &quot;PreTrainedTokenizer&quot;) -&gt; list[int]:
+        r&quot;&quot;&quot;Get the token ids of thought words.&quot;&quot;&quot;
+        return tokenizer.encode(self.add_thought(), add_special_tokens=False)
+
+    def fix_special_tokens(self, tokenizer: &quot;PreTrainedTokenizer&quot;) -&gt; None:
+        r&quot;&quot;&quot;Add eos token and pad token to the tokenizer.&quot;&quot;&quot;
+        stop_words = self.stop_words
+        if self.replace_eos:
+            if not stop_words:
+                raise ValueError(&quot;Stop words are required to replace the EOS token.&quot;)
+
+            self._add_or_replace_eos_token(tokenizer, eos_token=stop_words[0])
+            stop_words = stop_words[1:]
+
+        if tokenizer.eos_token_id is None:
+            self._add_or_replace_eos_token(tokenizer, eos_token=&quot;&lt;|endoftext|&gt;&quot;)  # nosec
+
+        if tokenizer.pad_token_id is None:
+            tokenizer.pad_token = tokenizer.eos_token
+            logger.info_rank0(f&quot;Add pad token: {tokenizer.pad_token}&quot;)
+
+        if stop_words:
+            num_added_tokens = tokenizer.add_special_tokens(dict(additional_special_tokens=stop_words))
+            logger.info_rank0(&quot;Add {} to stop words.&quot;.format(&quot;,&quot;.join(stop_words)))
+            if num_added_tokens &gt; 0:
+                logger.info_rank0(&quot;New tokens have been added, make sure `resize_vocab` is True.&quot;)
+
+    def fix_jinja_template(self, tokenizer: &quot;PreTrainedTokenizer&quot;) -&gt; None:
+        r&quot;&quot;&quot;Replace the jinja template in the tokenizer.&quot;&quot;&quot;
+        if tokenizer.chat_template is None or self.replace_jinja_template:
+            try:
+                tokenizer.chat_template = self._get_jinja_template(tokenizer)
+            except ValueError as e:
+                logger.info_rank0(f&quot;Cannot add this chat template to tokenizer: {e}.&quot;)
+
+    def _convert_elements_to_ids(self, tokenizer: &quot;PreTrainedTokenizer&quot;, elements: &quot;SLOTS&quot;) -&gt; list[int]:
+        r&quot;&quot;&quot;Convert elements to token ids.&quot;&quot;&quot;
+        token_ids = []
+        for elem in elements:
+            if isinstance(elem, str):
+                if len(elem) != 0:
+                    token_ids += tokenizer.encode(elem, add_special_tokens=False)
+            elif isinstance(elem, dict):
+                token_ids += [tokenizer.convert_tokens_to_ids(elem.get(&quot;token&quot;))]
+            elif isinstance(elem, set):
+                if &quot;bos_token&quot; in elem and tokenizer.bos_token_id is not None:
+                    token_ids += [tokenizer.bos_token_id]
+                elif &quot;eos_token&quot; in elem and tokenizer.eos_token_id is not None:
+                    token_ids += [tokenizer.eos_token_id]
+            else:
+                raise ValueError(f&quot;Input must be string, set[str] or dict[str, str], got {type(elem)}&quot;)
+
+        return token_ids
+
+    def _encode(
+        self,
+        tokenizer: &quot;PreTrainedTokenizer&quot;,
+        messages: list[dict[str, str]],
+        system: Optional[str],
+        tools: Optional[str],
+    ) -&gt; list[list[int]]:
+        r&quot;&quot;&quot;Encode formatted inputs to pairs of token ids.
+
+        Turn 0: prefix + system + query        resp
+        Turn t: query                          resp.
+        &quot;&quot;&quot;
+        system = system or self.default_system
+        encoded_messages = []
+        for i, message in enumerate(messages):
+            elements = []
+
+            if i == 0:
+                elements += self.format_prefix.apply()
+                if system or tools:
+                    tool_text = self.format_tools.apply(content=tools)[0] if tools else &quot;&quot;
+                    elements += self.format_system.apply(content=(system + tool_text))
+
+            if message[&quot;role&quot;] == Role.USER:
+                elements += self.format_user.apply(content=message[&quot;content&quot;], idx=str(i // 2))
+            elif message[&quot;role&quot;] == Role.ASSISTANT:
+                elements += self.format_assistant.apply(content=message[&quot;content&quot;])
+            elif message[&quot;role&quot;] == Role.OBSERVATION:
+                elements += self.format_observation.apply(content=message[&quot;content&quot;])
+            elif message[&quot;role&quot;] == Role.FUNCTION:
+                elements += self.format_function.apply(content=message[&quot;content&quot;], thought_words=self.thought_words)
+            else:
+                raise NotImplementedError(&quot;Unexpected role: {}&quot;.format(message[&quot;role&quot;]))
+
+            encoded_messages.append(self._convert_elements_to_ids(tokenizer, elements))
+
+        return encoded_messages
+
+    def _get_jinja_template(self, tokenizer: &quot;PreTrainedTokenizer&quot;) -&gt; str:
+        r&quot;&quot;&quot;Return the jinja template.&quot;&quot;&quot;
+        prefix = self._convert_slots_to_jinja(self.format_prefix.apply(), tokenizer)
+        system = self._convert_slots_to_jinja(self.format_system.apply(), tokenizer, placeholder=&quot;system_message&quot;)
+        user = self._convert_slots_to_jinja(self.format_user.apply(), tokenizer)
+        assistant = self._convert_slots_to_jinja(self.format_assistant.apply(), tokenizer)
+        jinja_template = &quot;&quot;
+        if prefix:
+            jinja_template += &quot;{{ &quot; + prefix + &quot; }}&quot;
+
+        if self.default_system:
+            jinja_template += &quot;{% set system_message = &#x27;&quot; + self._jinja_escape(self.default_system) + &quot;&#x27; %}&quot;
+
+        jinja_template += (
+            &quot;{% if messages[0][&#x27;role&#x27;] == &#x27;system&#x27; %}{% set loop_messages = messages[1:] %}&quot;
+            &quot;{% set system_message = messages[0][&#x27;content&#x27;] %}{% else %}{% set loop_messages = messages %}{% endif %}&quot;
+            &quot;{% if system_message is defined %}{{ &quot; + system + &quot; }}{% endif %}&quot;
+            &quot;{% for message in loop_messages %}&quot;
+            &quot;{% set content = message[&#x27;content&#x27;] %}&quot;
+            &quot;{% if message[&#x27;role&#x27;] == &#x27;user&#x27; %}&quot;
+            &quot;{{ &quot; + user + &quot; }}&quot;
+            &quot;{% elif message[&#x27;role&#x27;] == &#x27;assistant&#x27; %}&quot;
+            &quot;{{ &quot; + assistant + &quot; }}&quot;
+            &quot;{% endif %}&quot;
+            &quot;{% endfor %}&quot;
+        )
+        return jinja_template
+
+
+@dataclass
+class ReasoningTemplate(Template):
+    r&quot;&quot;&quot;A template that add thought to assistant message.&quot;&quot;&quot;
+
+    @override
+    def encode_oneturn(
+        self,
+        tokenizer: &quot;PreTrainedTokenizer&quot;,
+        messages: list[dict[str, str]],
+        system: Optional[str] = None,
+        tools: Optional[str] = None,
+    ) -&gt; tuple[list[int], list[int]]:
+        messages = deepcopy(messages)
+        for i in range(1, len(messages) - 2, 2):
+            messages[i][&quot;content&quot;] = self.remove_thought(messages[i][&quot;content&quot;])
+
+        if self.enable_thinking is False:
+            # remove all cot
+            messages[-1][&quot;content&quot;] = self.remove_thought(messages[-1][&quot;content&quot;])
+
+        prompt_ids, response_ids = super().encode_oneturn(tokenizer, messages, system, tools)
+        if (
+            self.thought_words[0].strip() not in messages[-1][&quot;content&quot;]
+            and self.thought_words[1].strip() not in messages[-1][&quot;content&quot;]
+        ):
+            # add empty cot
+            if not self.enable_thinking:
+                # do not compute loss
+                prompt_ids += self.get_thought_word_ids(tokenizer)
+            else:
+                # do compute loss
+                response_ids = self.get_thought_word_ids(tokenizer) + response_ids
+
+        return prompt_ids, response_ids
+
+    @override
+    def encode_multiturn(
+        self,
+        tokenizer: &quot;PreTrainedTokenizer&quot;,
+        messages: list[dict[str, str]],
+        system: Optional[str] = None,
+        tools: Optional[str] = None,
+    ) -&gt; list[tuple[list[int], list[int]]]:
+        messages = deepcopy(messages)
+        if self.enable_thinking is False:
+            # remove all cot
+            for i in range(1, len(messages), 2):
+                messages[i][&quot;content&quot;] = self.remove_thought(messages[i][&quot;content&quot;])
+
+        encoded_messages = self._encode(tokenizer, messages, system, tools)
+        for i in range(0, len(messages), 2):
+            if (
+                self.thought_words[0].strip() not in messages[i + 1][&quot;content&quot;]
+                and self.thought_words[1].strip() not in messages[i + 1][&quot;content&quot;]
+            ):
+                # add empty cot
+                if not self.enable_thinking:
+                    # do not compute loss
+                    encoded_messages[i] += self.get_thought_word_ids(tokenizer)
+                else:
+                    # do compute loss
+                    encoded_messages[i + 1] = self.get_thought_word_ids(tokenizer) + encoded_messages[i + 1]
+
+        return [(encoded_messages[i], encoded_messages[i + 1]) for i in range(0, len(encoded_messages), 2)]
+
+
+TEMPLATES: dict[str, &quot;Template&quot;] = {}
+
+
+def register_template(
+    name: str,
+    format_user: Optional[&quot;Formatter&quot;] = None,
+    format_assistant: Optional[&quot;Formatter&quot;] = None,
+    format_system: Optional[&quot;Formatter&quot;] = None,
+    format_function: Optional[&quot;Formatter&quot;] = None,
+    format_observation: Optional[&quot;Formatter&quot;] = None,
+    format_tools: Optional[&quot;Formatter&quot;] = None,
+    format_prefix: Optional[&quot;Formatter&quot;] = None,
+    default_system: str = &quot;&quot;,
+    stop_words: Optional[list[str]] = None,
+    thought_words: Optional[tuple[str, str]] = None,
+    efficient_eos: bool = False,
+    replace_eos: bool = False,
+    replace_jinja_template: bool = False,
+    enable_thinking: Optional[bool] = True,
+    template_class: type[&quot;Template&quot;] = Template,
+) -&gt; None:
+    r&quot;&quot;&quot;Register a chat template.
+
+    To add the following chat template:
+    ```
+    &lt;s&gt;&lt;user&gt;user prompt here
+    &lt;model&gt;model response here&lt;/s&gt;
+    &lt;user&gt;user prompt here
+    &lt;model&gt;model response here&lt;/s&gt;
+    ```
+
+    The corresponding code should be:
+    ```
+    register_template(
+        name=&quot;custom&quot;,
+        format_user=StringFormatter(slots=[&quot;&lt;user&gt;{{content}}\n&lt;model&gt;&quot;]),
+        format_assistant=StringFormatter(slots=[&quot;{{content}}&lt;/s&gt;\n&quot;]),
+        format_prefix=EmptyFormatter(&quot;&lt;s&gt;&quot;),
+    )
+    ```
+    &quot;&quot;&quot;
+    if name in TEMPLATES:
+        raise ValueError(f&quot;Template {name} already exists.&quot;)
+
+    default_slots = [&quot;{{content}}&quot;] if efficient_eos else [&quot;{{content}}&quot;, {&quot;eos_token&quot;}]
+    default_user_formatter = StringFormatter(slots=[&quot;{{content}}&quot;])
+    default_assistant_formatter = StringFormatter(slots=default_slots)
+    if format_assistant is not None:
+        default_function_formatter = FunctionFormatter(slots=format_assistant.slots, tool_format=&quot;default&quot;)
+    else:
+        default_function_formatter = FunctionFormatter(slots=default_slots, tool_format=&quot;default&quot;)
+
+    default_tool_formatter = ToolFormatter(tool_format=&quot;default&quot;)
+    default_prefix_formatter = EmptyFormatter()
+    TEMPLATES[name] = template_class(
+        format_user=format_user or default_user_formatter,
+        format_assistant=format_assistant or default_assistant_formatter,
+        format_system=format_system or default_user_formatter,
+        format_function=format_function or default_function_formatter,
+        format_observation=format_observation or format_user or default_user_formatter,
+        format_tools=format_tools or default_tool_formatter,
+        format_prefix=format_prefix or default_prefix_formatter,
+        default_system=default_system,
+        stop_words=stop_words or [],
+        thought_words=thought_words or (&quot;&lt;think&gt;\n&quot;, &quot;\n&lt;/think&gt;\n\n&quot;),
+        efficient_eos=efficient_eos,
+        replace_eos=replace_eos,
+        replace_jinja_template=replace_jinja_template,
+        enable_thinking=enable_thinking,
+    )
+
+
+def parse_template(tokenizer: &quot;PreTrainedTokenizer&quot;) -&gt; &quot;Template&quot;:
+    r&quot;&quot;&quot;Extract a chat template from the tokenizer.&quot;&quot;&quot;
+
+    def find_diff(short_str: str, long_str: str) -&gt; str:
+        i, j = 0, 0
+        diff = &quot;&quot;
+        while i &lt; len(short_str) and j &lt; len(long_str):
+            if short_str[i] == long_str[j]:
+                i += 1
+                j += 1
+            else:
+                diff += long_str[j]
+                j += 1
+
+        return diff
+
+    prefix = tokenizer.decode(tokenizer.encode(&quot;&quot;))
+
+    messages = [{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;{{content}}&quot;}]
+    system_slot = tokenizer.apply_chat_template(messages, add_generation_prompt=False, tokenize=False)[len(prefix) :]
+
+    messages = [{&quot;role&quot;: &quot;system&quot;, &quot;content&quot;: &quot;&quot;}, {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;{{content}}&quot;}]
+    user_slot_empty_system = tokenizer.apply_chat_template(messages, add_generation_prompt=True, tokenize=False)
+    user_slot_empty_system = user_slot_empty_system[len(prefix) :]
+
+    messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;{{content}}&quot;}]
+    user_slot = tokenizer.apply_chat_template(messages, add_generation_prompt=True, tokenize=False)
+    user_slot = user_slot[len(prefix) :]
+
+    messages = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;{{content}}&quot;}, {&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: &quot;{{content}}&quot;}]
+    assistant_slot = tokenizer.apply_chat_template(messages, add_generation_prompt=False, tokenize=False)
+    assistant_slot = assistant_slot[len(prefix) + len(user_slot) :]
+    template_class = ReasoningTemplate if &quot;&lt;think&gt;&quot; in assistant_slot else Template
+
+    # remove thought tags
+    assistant_slot = assistant_slot.replace(&quot;&lt;think&gt;&quot;, &quot;&quot;).replace(&quot;&lt;/think&gt;&quot;, &quot;&quot;).lstrip(&quot;\n&quot;)
+
+    if len(user_slot) &gt; len(user_slot_empty_system):
+        default_system = find_diff(user_slot_empty_system, user_slot)
+        sole_system = system_slot.replace(&quot;{{content}}&quot;, default_system, 1)
+        user_slot = user_slot[len(sole_system) :]
+    else:
+        # if defaut_system is empty, user_slot_empty_system will be longer than user_slot
+        default_system = &quot;&quot;
+
+    return template_class(
+        format_user=StringFormatter(slots=[user_slot]),
+        format_assistant=StringFormatter(slots=[assistant_slot]),
+        format_system=StringFormatter(slots=[system_slot]),
+        format_function=FunctionFormatter(slots=[assistant_slot], tool_format=&quot;default&quot;),
+        format_observation=StringFormatter(slots=[user_slot]),
+        format_tools=ToolFormatter(tool_format=&quot;default&quot;),
+        format_prefix=EmptyFormatter(slots=[prefix]) if prefix else EmptyFormatter(),
+        default_system=default_system,
+        stop_words=[],
+        thought_words=(&quot;&lt;think&gt;\n&quot;, &quot;\n&lt;/think&gt;\n\n&quot;),
+        efficient_eos=False,
+        replace_eos=False,
+        replace_jinja_template=False,
+        enable_thinking=True,
+    )
+
+
+def get_template_and_fix_tokenizer(tokenizer: &quot;PreTrainedTokenizer&quot;, data_args: &quot;DataArguments&quot;) -&gt; &quot;Template&quot;:
+    r&quot;&quot;&quot;Get chat template and fixes the tokenizer.&quot;&quot;&quot;
+    if data_args.template is None:
+        if isinstance(tokenizer.chat_template, str):
+            logger.info_rank0(&quot;`template` was not specified, try parsing the chat template from the tokenizer.&quot;)
+            template = parse_template(tokenizer)
+        else:
+            logger.info_rank0(&quot;`template` was not specified, use `empty` template.&quot;)
+            template = TEMPLATES[&quot;empty&quot;]
+    else:
+        if data_args.template not in TEMPLATES:
+            raise ValueError(f&quot;Template {data_args.template} does not exist.&quot;)
+
+        template = TEMPLATES[data_args.template]
+
+    if data_args.train_on_prompt and template.efficient_eos:
+        raise ValueError(&quot;Current template does not support `train_on_prompt`.&quot;)
+
+    if data_args.tool_format is not None:
+        logger.info_rank0(f&quot;Using tool format: {data_args.tool_format}.&quot;)
+        default_slots = [&quot;{{content}}&quot;] if template.efficient_eos else [&quot;{{content}}&quot;, {&quot;eos_token&quot;}]
+        template.format_function = FunctionFormatter(slots=default_slots, tool_format=data_args.tool_format)
+        template.format_tools = ToolFormatter(tool_format=data_args.tool_format)
+
+    if data_args.default_system is not None:
+        logger.info_rank0(f&quot;Using default system message: {data_args.default_system}.&quot;)
+        template.default_system = data_args.default_system
+
+    if isinstance(template, ReasoningTemplate):
+        logger.info_rank0(
+            &quot;You are using reasoning template, &quot;
+            &quot;please add `_nothink` suffix if the model is not a reasoning model. &quot;
+            &quot;e.g., qwen3_vl_nothink&quot;
+        )
+        template.enable_thinking = data_args.enable_thinking
+
+    template.fix_special_tokens(tokenizer)
+    template.fix_jinja_template(tokenizer)
+
+    return template
+
+
+register_template(
+    name=&quot;qwen3&quot;,
+    format_user=StringFormatter(slots=[&quot;&lt;|im_start|&gt;user\n{{content}}&lt;|im_end|&gt;\n&lt;|im_start|&gt;assistant\n&quot;]),
+    format_assistant=StringFormatter(slots=[&quot;{{content}}&lt;|im_end|&gt;\n&quot;]),
+    format_system=StringFormatter(slots=[&quot;&lt;|im_start|&gt;system\n{{content}}&lt;|im_end|&gt;\n&quot;]),
+    format_function=FunctionFormatter(slots=[&quot;{{content}}&lt;|im_end|&gt;\n&quot;], tool_format=&quot;qwen&quot;),
+    format_observation=StringFormatter(
+        slots=[&quot;&lt;|im_start|&gt;user\n&lt;tool_response&gt;\n{{content}}\n&lt;/tool_response&gt;&lt;|im_end|&gt;\n&lt;|im_start|&gt;assistant\n&quot;]
+    ),
+    format_tools=ToolFormatter(tool_format=&quot;qwen&quot;),
+    stop_words=[&quot;&lt;|im_end|&gt;&quot;],
+    replace_eos=True,
+    template_class=ReasoningTemplate,
+)
+
+
+register_template(
+    name=&quot;gpt&quot;,
+    format_user=StringFormatter(slots=[&quot;&lt;|start|&gt;user&lt;|message|&gt;{{content}}&lt;|end|&gt;&lt;|start|&gt;assistant&quot;]),
+    format_assistant=StringFormatter(slots=[&quot;{{content}}&lt;|end|&gt;&quot;]),
+    format_system=StringFormatter(slots=[&quot;&lt;|start|&gt;system&lt;|message|&gt;{{content}}&lt;|end|&gt;&quot;]),
+    default_system=&quot;You are ChatGPT, a large language model trained by OpenAI.&quot;,
+    thought_words=(&quot;&lt;|channel|&gt;analysis&lt;|message|&gt;&quot;, &quot;&lt;|end|&gt;&lt;|start|&gt;assistant&lt;|channel|&gt;final&lt;|message|&gt;&quot;),
+    efficient_eos=True,
+    template_class=ReasoningTemplate,
+)
+
+
+register_template(
+    name=&quot;empty&quot;,
+    format_assistant=StringFormatter(slots=[&quot;{{content}}&quot;]),
+)
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

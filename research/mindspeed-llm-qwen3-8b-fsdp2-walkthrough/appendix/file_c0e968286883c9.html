@@ -1,0 +1,1823 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/train/trainer.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/train/trainer.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_12f1425e7d19aa.html">◀ __init__.py</a> <a href="file_7081f2a3f5db15.html">__init__.py ▶</a></nav></div>
+<div class="wrap">
+<h1>trainer.py</h1><p class="goal">mindspeed_llm/fsdp2/train/trainer.py · 40267B · 861 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L30" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class LossOutput</a><a href="#L37" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class Trainer</a><a href="#L43" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__</a><a href="#L106" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _build_chunk_loss(labels, ignore_index=-10</a><a href="#L133" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def loss_ctx(hidden_states, head_weight, head_</a><a href="#L145" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def train(self, resume_from_checkpoint: Option</a><a href="#L453" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def training_step(self, inputs: Dict[str, Any]</a><a href="#L487" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_batch_samples_func(self)</a><a href="#L498" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_batch_samples_ulysses(self, parallel_</a><a href="#L542" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_batch_samples_megatron(self, parallel</a><a href="#L590" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_batch_samples(self, parallel_state, e</a><a href="#L641" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_num_items_in_batch(self, batch_sample</a><a href="#L675" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _compute_loss(self, inputs, return_outputs</a><a href="#L757" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _compute_language_model_pretrain_loss(self</a><a href="#L782" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _log_metrics(self, grad_norm=None, batch_s</a><a href="#L841" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_fsdp_root(self)</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep10.html">EP10</a><a href="../ep15.html">EP15</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="annot"><div class="seg"><p class="seglab">行 1-26 · 模块导入与 in-repo 工具栈</p><pre data-lang="py" data-start="1" data-idprefix="A">import os
+import gc
+import torch
+import torch.distributed as dist
+import torch.nn.functional as F
+import time
+import contextlib
+from typing import Optional, Dict, Any
+
+from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+from torch.distributed.checkpoint.state_dict import get_model_state_dict, StateDictOptions
+
+from mindspeed_llm.fsdp2.distributed.parallel_state import ParallelState
+from mindspeed_llm.fsdp2.distributed.clip_grad_norm import clip_grad_norm
+from mindspeed_llm.fsdp2.data.processor.processor_utils import IGNORE_INDEX
+from mindspeed_llm.fsdp2.features.chunkloss import chunk_loss, calculate_lm_loss
+from mindspeed_llm.fsdp2.checkpoint.utils import empty_cache, cleanup_old_checkpoints
+from mindspeed_llm.fsdp2.utils.dist_op import all_reduce
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+from mindspeed_llm.fsdp2.utils.train_monitor import TrainMonitor
+from mindspeed_llm.fsdp2.utils.profiler import ProfilerConfig, ProfilerManager
+from mindspeed_llm.fsdp2.models.common.mtp import roll_tensor
+from dataclasses import dataclass
+
+
+logger = get_logger(__name__)</pre><div class="exp"><p>头部 import 决定了整份文件的「并行原语从哪来」。这里 <b>没有</b> 直接调 <code>torch.distributed.all_reduce</code> 做梯度同步——梯度同步压根不在这层。值得逐行点名：</p>
+<ul>
+<li>:10 <code>FullyShardedDataParallel as FSDP</code>——只在 <code>_get_fsdp_root</code>（:847）里做 <code>isinstance</code> 判包装深度用，<b>不是</b>真正包模型的 FSDP2 wrapper（那在外层装配，见 <code>fsdp_turbo</code>）；</li>
+<li>:11 <code>get_model_state_dict / StateDictOptions</code>——只在末尾导 HF 权重（:434）时用 <code>full_state_dict=True, cpu_offload=True</code> 把分片 gather 到 CPU；</li>
+<li>:14 <code>clip_grad_norm</code> 是 <b>in-repo</b> 实现（<code>distributed.clip_grad_norm</code>），在 FSDP2 分片梯度上算全局范数，内部仍借 FSDP2 reduce 算跨分片之和；</li>
+<li>:16 <code>chunk_loss / calculate_lm_loss</code>——超长序列切 chunk 算交叉熵省显存；</li>
+<li>:18 <code>from ...dist_op import all_reduce</code>——这是<b>关键的 in-repo 标量聚合器</b>，:322 调用它聚合 loss/grad_norm。它把 Python 标量/张量打包成 NPU tensor 走 <code>dist.all_reduce</code> 再按组大小 mean。它<b>只碰标量，不碰梯度</b>——这是全文最易踩的对照点；</li>
+<li>:20 <code>TrainMonitor</code>——接管训练状态、loss 累计、吞吐记录；</li>
+<li>:21 <code>ProfilerManager</code>——Ascend 上的 profiler 包装。</li>
+</ul>
+<p>整份文件没有任何 <code>import torch.distributed.all_reduce as grad_sync</code> 之类的痕迹——梯度同步职责被推给了 FSDP2 autograd hook，文件里出现的每个 <code>all_reduce</code> 都是指标/标量聚合。</p></div></div><div class="seg"><p class="seglab">行 29-103 · Trainer.__init__：装配训练状态与 profiler</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :29-:103）</h5><pre data-lang="py" data-start="29" data-idprefix="A">@dataclass
+class LossOutput:
+    loss: torch.Tensor
+    lm_loss_output: torch.Tensor
+    mtp_loss_output: torch.Tensor
+    outputs: dict | None = None
+
+
+class Trainer:
+    &quot;&quot;&quot;
+    Orchestrates the training loop, coordinating Model, Optimizer, Scheduler, Data, and IO.
+    Strictly follows the gradient accumulation and loop logic found in HuggingFace Transformers.
+    &quot;&quot;&quot;
+
+    def __init__(
+        self,
+        model: torch.nn.Module,
+        optimizer: torch.optim.Optimizer,
+        lr_scheduler: torch.optim.lr_scheduler.LRScheduler,
+        train_dataloader,
+        args,  # TrainingArguments
+        parallel_args,
+        optimization_args,
+        data_args,
+        ckpt_manager,
+        monitor: TrainMonitor,
+        tokenizer=None,
+    ):
+        self.model = model
+        self.optimizer = optimizer
+        self.lr_scheduler = lr_scheduler
+        self.train_dataloader = train_dataloader
+        self.args = args
+        self.parallel_args = parallel_args
+        self.optimization_args = optimization_args
+        self.data_args = data_args
+        self.ckpt_manager = ckpt_manager
+        self.train_monitor = monitor
+        self.tokenizer = tokenizer
+
+        # Training state
+        self.epoch = 0
+        self.global_step = 0
+        self._last_logged_step = 0
+        self._total_loss_scalar = 0.0
+        self._total_lm_loss_scalar = 0.0
+        self._total_mtp_loss_scalar = 0.0
+        self._logging_loss_scalar = 0.0
+        self._global_step_last_logged = 0
+        self._last_logged_loss_scalar = 0.0
+        self._last_logged_lm_loss_scalar = 0.0
+        self._last_logged_mtp_loss_scalar = 0.0
+        self.batch_seqlens = []
+
+        # Timing state
+        self._step_start_time = None
+
+        # Profiling support
+        current_rank = dist.get_rank() if dist.is_initialized() else 0
+        prof_config = ProfilerConfig(
+            enabled=args.profile,
+            profile_step_start=args.profile_step_start,
+            profile_step_end=args.profile_step_end,
+            profile_ranks=args.profile_ranks,
+            profile_level=args.profile_level,
+            profile_export_type=args.profile_export_type,
+            profile_data_simplification=args.profile_data_simplification,
+            profile_with_cpu=args.profile_with_cpu,
+            profile_with_stack=args.profile_with_stack,
+            profile_with_memory=args.profile_with_memory,
+            profile_record_shapes=args.profile_record_shapes,
+            profile_save_path=args.profile_save_path,
+            current_rank=current_rank,
+        )
+        self.profiler_manager = ProfilerManager(prof_config)</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># 标准 PyTorch DDP Trainer 的 __init__
+class Trainer:
+    def __init__(self, model, optimizer, ...):
+        self.model = model          # DDP(model, ...) 已在外面包好
+        self.optimizer = optimizer
+        ...
+        self.global_step = 0
+        # DDP 下 device 直接 torch.cuda.current_device()
+        # 无需 dist.get_rank() 兜底——DDP 起来必先 init_process_group</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异点：DDP 版构造函数里 model 已经是 <code>DDP(model)</code>，<code>loss.backward()</code> 会自动 AllReduce 梯度；这里 model 是被外部 FSDP2（或 fsdp_turbo）包过的<b>分片参数</b>，backward 触发的是 AllGather+ReduceScatter。profiler 的 rank 兜底也只在 NPU/混合启动下才需要。</p></div></div><div class="seg"><p class="seglab">行 105-143 · _build_chunk_loss：超长序列的 chunk 交叉熵闭包</p><pre data-lang="py" data-start="105" data-idprefix="A">    @staticmethod
+    def _build_chunk_loss(labels, ignore_index=-100, chunk_size=1024):
+        # For supervised finetuning stages (SFT), labels must be shifted by one position, for pretraining, labels already include shift.
+
+        shift_labels = labels
+
+        # Create a mask to identify valid tokens
+        loss_mask = shift_labels != ignore_index
+
+        # Default: normalize loss by total number of valid tokens in the batch.
+        alpha = loss_mask.sum()  # scalar
+        reduction = &quot;sum&quot;
+
+        # Split shifted labels into chunks along the sequence dimension for memory-efficient processing.
+        chunk_labels = torch.split(shift_labels, chunk_size, dim=1)
+
+        # Prepare keyword arguments for each chunk to be passed to the chunked loss function.
+        loss_ctx_kwargs = [
+            {
+                &quot;shift_labels&quot;: chunk_labels[i],
+                &quot;ignore_index&quot;: ignore_index,
+                &quot;reduction&quot;: reduction,
+                &quot;alpha&quot;: alpha,
+            }
+            for i in range(len(chunk_labels))
+        ]
+
+        # Return a closure that computes the chunked language modeling loss using the prepared config.
+        def loss_ctx(hidden_states, head_weight, head_bias):
+            return chunk_loss(
+                hidden_states,
+                head_weight,
+                head_bias,
+                loss_forward=calculate_lm_loss,
+                loss_kwargs_chunks=loss_ctx_kwargs,
+                chunk_size=chunk_size,
+            )
+
+        return loss_ctx, loss_mask</pre><div class="exp"><p>:105 静态方法，SFT 阶段 labels 已 shift 过、PT 阶段 labels 自带 shift（注释 :107 说明）。:112 <code>loss_mask = shift_labels != ignore_index</code> 构有效 token 掩码，:115 <code>alpha = loss_mask.sum()</code> 取全 batch 有效 token 数当归一化分母，<code>reduction="sum"</code>——即先 sum 再除 alpha，等价于按 token 平均。</p>
+<p>:119 把 labels 沿 seq 维按 <code>chunk_size</code>（默认 1024）切，:122-130 给每段拼一份 kwargs。:133-141 返回一个<b>闭包</b> <code>loss_ctx(hidden_states, head_weight, head_bias)</code>，把 head 权重/bias 外提出来——这样前向算到 head 之前可以释放 hidden_states 省显存，逐 chunk 喂给 <code>chunk_loss</code> 算交叉熵。这是 Qwen3-8B 长上下文场景下避免一次性 logits=[bs, seq, vocab] 爆显存的标准手法。</p>
+<p>注意 :143 返回 <code>(loss_ctx, loss_mask)</code>——loss_mask 后续用来做 token 统计。</p></div></div><div class="seg"><p class="seglab">行 145-218 · train() 入口：reduce_group 与断点恢复</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :145-:218）</h5><pre data-lang="py" data-start="145" data-idprefix="A">    def train(self, resume_from_checkpoint: Optional[str] = None):
+        &quot;&quot;&quot;
+        Main training loop.
+        &quot;&quot;&quot;
+        args = self.args
+        train_dataloader = self.train_dataloader
+        ps = ParallelState()
+
+        # Determine the reduction group
+        if ps.is_fsdp_enable():
+            reduce_group = ps.get_fsdp_group()
+        else:
+            reduce_group = None
+
+        # 1. Calculate total steps and current step in the epoch
+        steps_in_epoch = len(train_dataloader)
+        # Calculate total updates per epoch considering gradient accumulation
+        total_updates_per_epoch = steps_in_epoch // args.gradient_accumulation_steps + int(
+            steps_in_epoch % args.gradient_accumulation_steps &gt; 0
+        )
+        total_steps = args.max_steps if args.max_steps &gt; 0 else (total_updates_per_epoch * args.num_train_epochs)
+        epochs_trained = 0
+        steps_trained_in_current_epoch = 0
+        save_checkpoint_path = None
+        # Calculate global batch size safely
+        global_batch_size = (
+            args.per_device_train_batch_size * args.gradient_accumulation_steps * ps.get_group_size(&#x27;dp_fsdp&#x27;)
+        )
+
+        logger.info_rank0(&quot;***** Running training (FSDP2) *****&quot;)
+        logger.info_rank0(f&quot;  Num examples = {len(train_dataloader.dataset)}&quot;)
+        logger.info_rank0(f&quot;  Num Epochs = {args.num_train_epochs}&quot;)
+        logger.info_rank0(f&quot;  Total Batch Size = {global_batch_size}&quot;)
+        logger.info_rank0(f&quot;  Gradient Accumulation steps = {args.gradient_accumulation_steps}&quot;)
+        logger.info_rank0(f&quot;  Total optimization steps = {total_steps}&quot;)
+
+        # 2. Resume training from checkpoint
+        if resume_from_checkpoint:
+            # Prepare state dict containing model, optimizer and extra state
+            state = {&quot;model&quot;: self.model, &quot;optimizer&quot;: self.optimizer, &quot;extra_state&quot;: {}}
+            # Load checkpoint from the specified path
+            self.ckpt_manager.load(resume_from_checkpoint, state)
+            extra_state = state.get(&quot;extra_state&quot;, {})
+
+            if extra_state:
+                # Restore training step counters
+                self.global_step = state[&quot;extra_state&quot;][&quot;global_step&quot;]
+                self._global_step_last_logged = state[&#x27;extra_state&#x27;][&#x27;_global_step_last_logged&#x27;]
+                self._last_logged_step = state[&#x27;extra_state&#x27;][&#x27;_global_step_last_logged&#x27;]
+
+                # Calculate completed epochs and steps within current epoch based on global step
+                epochs_trained = int(self.global_step // total_updates_per_epoch)
+                steps_trained_in_current_epoch = self.global_step % total_updates_per_epoch
+
+                # Restore learning rate scheduler and RNG state for reproducibility
+                self.lr_scheduler.load_state_dict(state[&quot;extra_state&quot;][&quot;lr_scheduler&quot;])
+                torch.set_rng_state(state[&quot;extra_state&quot;][&quot;torch_rng_state&quot;])
+
+                # Synchronize all processes before continuing
+                dist.barrier()
+                logger.info_rank0(f&quot;Load distributed checkpoint from {resume_from_checkpoint} successfully!&quot;)
+                logger.info_rank0(f&quot;Resuming from epoch {epochs_trained}, step {steps_trained_in_current_epoch}&quot;)
+                logger.info_rank0(f&quot;Global step = {self.global_step}&quot;)
+            else:
+                # No extra state found, only model weights were loaded, start from scratch
+                logger.info_rank0(&quot;Loaded model weights only, starting training from step 0&quot;)
+
+        self.model.train()
+        train_start_time = time.time()
+        self._step_start_time = time.time()
+
+        # Start profiler
+        if self.profiler_manager.profiler is not None:
+            self.profiler_manager.start()</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># DDP 版断点恢复
+state = {&quot;model&quot;: self.model, &quot;optimizer&quot;: self.optimizer, &quot;extra_state&quot;: {}}
+self.ckpt_manager.load(resume_from_checkpoint, state)
+self.global_step = state[&quot;extra_state&quot;][&quot;global_step&quot;]
+torch.set_rng_state(state[&quot;extra_state&quot;][&quot;torch_rng_state&quot;])
+dist.barrier()  # 同步后继续</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异点：DDP 下 checkpoint 通常存全量 state_dict（每 rank 一份完整权重），load 也是各 rank 独立读全量。FSDP2 下 <code>ckpt_manager.load</code> 各 rank 只读自己那片分片（sharded load），<code>dist.barrier()</code> 同步语义一样但落盘/读盘量降为 1/N。reduce_group 的命名在 DDP 版里通常就是梯度同步组本身，这里却被<b>降级</b>为纯指标组——是 FSDP2 把梯度同步职责「上交」给 hook 的直接体现。</p></div></div><div class="seg"><p class="seglab">行 220-268 · Epoch 循环与梯度累积步的 batch 预取</p><pre data-lang="py" data-start="220" data-idprefix="A">        # --- Epoch Loop ---
+        for epoch in range(epochs_trained, int(args.num_train_epochs)):
+            self.epoch = epoch
+
+            if hasattr(train_dataloader.sampler, &quot;set_epoch&quot;):
+                train_dataloader.sampler.set_epoch(epoch)
+
+            epoch_iterator = iter(train_dataloader)
+
+            # --- Gradient Accumulation Loop ---
+            # Handle the remainder batch at the end of an epoch
+            remainder = steps_in_epoch % args.gradient_accumulation_steps
+            if remainder == 0:
+                remainder = args.gradient_accumulation_steps
+
+            total_updates = total_updates_per_epoch
+            # Calculate the starting update_step for this epoch
+            # If resuming in the first epoch after checkpoint, start from steps_trained_in_current_epoch
+            # Otherwise start from 0
+            if epoch == epochs_trained and steps_trained_in_current_epoch &gt; 0:
+                # Calculate number of batches to skip (accounting for gradient accumulation)
+                steps_to_skip = steps_trained_in_current_epoch * args.gradient_accumulation_steps
+                logger.info_rank0(f&quot;  Skipping {steps_to_skip} batches in epoch {epoch}&quot;)
+
+                # Skip already trained batches by advancing the iterator
+                for _ in range(steps_to_skip):
+                    try:
+                        next(epoch_iterator)
+                    except StopIteration:
+                        break
+
+                start_update_step = steps_trained_in_current_epoch
+            else:
+                start_update_step = 0
+
+            for update_step in range(start_update_step, total_updates):
+                # Determine how many micro-batches are in this update
+                num_batches = args.gradient_accumulation_steps if update_step != (total_updates - 1) else remainder
+
+                # [Helper] Fetch N samples from the iterator and calculate valid token count
+                batch_samples, batch_seqlens, num_items_in_batch = self.get_batch_samples_func()(
+                    ps, epoch_iterator, num_batches
+                )
+                self.current_gradient_accumulation_steps = len(batch_samples)
+                # Initialize accumulated loss for the current step
+                current_step_loss = 0.0
+                current_step_lm_loss = 0.0
+                current_step_mtp_loss = 0.0
+</pre><div class="exp"><p>:221 外层 epoch 循环，<code>range(epochs_trained, num_train_epochs)</code> 从断点处接着跑。:224-225 <code>sampler.set_epoch(epoch)</code>——保证每个 epoch 数据顺序不同且跨 rank 一致。</p>
+<p>:231-233 处理 epoch 末尾不整除的余数 batch：<code>remainder = steps_in_epoch % gradient_accumulation_steps</code>，为 0 则整取 accum_steps。:239-253 若在断点 epoch 恢复，<code>steps_to_skip = steps_trained_in_current_epoch * gradient_accumulation_steps</code>，然后 <code>next(epoch_iterator)</code> 推进迭代器跳过已训 batch——这里<b>不</b>重新 shuffle，靠 rng 恢复保证可复现。</p>
+<p>:255 进入 <code>update_step</code> 循环，一次 update_step = 一次优化器更新。:257 <code>num_batches</code> 取 accum_steps，最后一个 update 取 remainder。:260-262 一次性从迭代器预取 <code>num_batches</code> 个 sample（走 <code>get_batch_samples_func()</code> 根据 cp_type 选 Ulysses/Ring/普通），:263 <code>current_gradient_accumulation_steps = len(batch_samples)</code> 给后面 loss 除法用。:265-267 三个 loss 累加器清零。</p>
+<p>这里 <code>get_batch_samples_func</code>（:487）按 <code>cp_size > 1</code> 切换：Ulysses 走 <code>_get_batch_samples_ulysses</code>，Ring 走 <code>_get_batch_samples_megatron</code>，否则普通 <code>_get_batch_samples</code>。CP 切片是上下文并行的数据侧准备。</p></div></div><div class="seg"><p class="seglab">行 269-296 · Micro-batch 循环：no_sync 控制梯度同步窗口</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :269-:296）</h5><pre data-lang="py" data-start="269" data-idprefix="A">                # --- Micro-Batch Loop ---
+                for i, inputs in enumerate(batch_samples):
+                    do_sync_step = i == len(batch_samples) - 1
+
+                    # FSDP Communication Optimization
+                    # Only synchronize gradients on the last micro-batch
+                    fsdp_root = self._get_fsdp_root()
+
+                    sync_context = (
+                        fsdp_root.no_sync()
+                        if (not do_sync_step and hasattr(fsdp_root, &quot;no_sync&quot;))
+                        else contextlib.nullcontext()
+                    )
+
+                    with sync_context:
+                        # Forward &amp; Backward
+                        # Note: training_step already divides loss by accum_steps
+                        loss, lm_loss, mtp_loss = self.training_step(inputs, num_items_in_batch)
+
+                    # Accumulate Loss for logging (restore to original scale for display)
+                    # Check for NaN/Inf to avoid polluting metrics
+                    if not torch.isnan(loss) and not torch.isinf(loss):
+                        current_step_loss += loss.item()
+                    if not torch.isnan(lm_loss) and not torch.isinf(lm_loss):
+                        current_step_lm_loss += lm_loss.item()
+                    if not torch.isnan(mtp_loss) and not torch.isinf(mtp_loss):
+                        current_step_mtp_loss += mtp_loss.item()
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># 标准 DDP 梯度累积
+def train_iter():
+    for i, inputs in enumerate(batch_samples):
+        is_last = i == len(batch_samples) - 1
+        # DDP: no_sync() 抑制 backward 里的 AllReduce
+        with model.no_sync() if not is_last else nullcontext():
+            loss = training_step(inputs)
+            loss.backward()
+    # 最后一个 micro-batch 出循环时梯度已 AllReduce
+    optimizer.step(); optimizer.zero_grad()</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>对照点：DDP 的 <code>model.no_sync()</code> 抑制的是 backward 里 autograd hook 触发的 <code>AllReduce</code>（梯度平均）；FSDP2 的 <code>fsdp_root.no_sync()</code> 抑制的是 backward 里 unshard(AllGather)+ReduceScatter 的<b>分片梯度同步</b>。语义对称——都把同步推到最后一个 micro-batch——但底层通信算子从 AllReduce 变成成对的 AG/RS，且 reduce 后梯度直接以分片形式落回各 rank 的 <code>param.grad</code>（而非完整梯度）。少套 no_sync 会在每个 micro-batch 都触发一次 AG/RS，通信量翻 N 倍且语义错误。</p></div></div><div class="seg"><p class="seglab">行 297-330 · optimizer.step + all_reduce：指标聚合而非梯度同步</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :297-:330）</h5><pre data-lang="py" data-start="297" data-idprefix="A">                # --- Optimizer Step (Executed only after accumulation) ---
+                # At this point, the micro-batch loop is finished, gradients are accumulated
+
+                # 1. Clip Gradients and get Norm
+                grad_norm = clip_grad_norm(self.model, args.max_grad_norm)
+                # Compatibility: Ensure grad_norm is a float
+                if isinstance(grad_norm, torch.Tensor):
+                    grad_norm = grad_norm.item()
+
+                # 2. Update Parameters
+                self.optimizer.step()
+                self.lr_scheduler.step()
+                self.optimizer.zero_grad()
+
+                self.global_step += 1
+
+                # PROFILING HOOK
+                if self.profiler_manager.profiler is not None:
+                    self.profiler_manager.step()
+                # HOOK END
+
+                # 3. Distributed Aggregation of Loss and GradNorm
+                # Only perform this when global_step updates.
+                # current_step_loss is sum(micro_batches), conceptually it represents the loss of the mini-batch.
+
+                reduced_loss, reduced_lm_loss, reduced_mtp_loss, reduced_grad_norm = all_reduce(
+                    (current_step_loss, current_step_lm_loss, current_step_mtp_loss, grad_norm), group=reduce_group
+                )
+
+                self._total_loss_scalar += reduced_loss
+                self._total_lm_loss_scalar += reduced_lm_loss
+                self._total_mtp_loss_scalar += reduced_mtp_loss
+                self.batch_seqlens.extend(batch_seqlens)
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># 标准 DDP：梯度同步在 backward 里，step 前梯度已平均
+for i, inputs in enumerate(batch_samples):
+    with model.no_sync() if not is_last else nullcontext():
+        loss = training_step(inputs)
+        loss.backward()        # 最后一步在此 AllReduce 梯度
+torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
+optimizer.step()
+optimizer.zero_grad()
+# 指标聚合（与上分离）：
+dist.all_reduce(loss_tensor, op=ReduceOp.AVG)</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>核心对照：DDP 下 <code>loss.backward()</code> 触发 <code>AllReduce</code> 把<b>完整梯度</b>平均到各 rank，之后 <code>clip_grad_norm_</code> / <code>step()</code> 都在完整梯度上做。FSDP2 下 <code>loss.backward()</code> 触发 <code>ReduceScatter</code>，各 rank 只拿到<b>自己那片</b>分片梯度；<code>clip_grad_norm</code>（in-repo）内部仍要跨分片 reduce 算全局范数。<b>本文件里所有 <code>all_reduce</code> 都只聚合标量 metric，没有一个碰梯度</b>——从 DDP 迁过来的人最易在这行（:322）误以为是梯度同步而画蛇添足再加一遍 <code>dist.all_reduce(grad)</code>。</p></div></div><div class="seg"><p class="seglab">行 331-391 · TrainMonitor 调用与按步保存</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :331-:391）</h5><pre data-lang="py" data-start="331" data-idprefix="A">                # 4. Logging
+                if self.global_step % args.logging_steps == 0:
+                    _, record_info = self.train_monitor.step(
+                        self.epoch,
+                        self.lr_scheduler,
+                        global_batch_size,
+                        reduced_grad_norm,
+                        self.batch_seqlens,
+                        self._step_start_time,
+                        total_steps,
+                        self.global_step,
+                        self._last_logged_step,
+                        self._total_loss_scalar,
+                        self._total_lm_loss_scalar,
+                        self._total_mtp_loss_scalar,
+                        self._last_logged_loss_scalar,
+                        self._last_logged_lm_loss_scalar,
+                        self._last_logged_mtp_loss_scalar,
+                        sparse_attn_reduce_group=reduce_group,
+                    )
+                    # update record
+                    self._step_start_time = record_info[&#x27;time&#x27;]
+                    self._last_logged_loss_scalar = record_info[&#x27;logged_loss&#x27;]
+                    self._last_logged_lm_loss_scalar = record_info[&#x27;logged_lm_loss&#x27;]
+                    self._last_logged_mtp_loss_scalar = record_info[&#x27;logged_mtp_loss&#x27;]
+                    self._last_logged_step = record_info[&#x27;logged_step&#x27;]
+                    self.batch_seqlens.clear()
+
+                # 5. Saving
+                if args.save_steps &gt; 0 and self.global_step % args.save_steps == 0:
+                    if not args.output_dir:
+                        logger.info_rank0(&quot;output_dir is not set, skipping checkpoint saving&quot;)
+                    else:
+                        empty_cache()
+                        save_checkpoint_path = os.path.join(
+                            args.output_dir, &quot;checkpoints&quot;, f&quot;global_step_{self.global_step}&quot;
+                        )
+                        state = {
+                            &quot;model&quot;: self.model,
+                            &quot;optimizer&quot;: self.optimizer,
+                            &quot;extra_state&quot;: {
+                                &quot;global_step&quot;: self.global_step,
+                                &quot;_global_step_last_logged&quot;: self._global_step_last_logged,
+                                &quot;_last_logged_step&quot;: self._last_logged_step,
+                                &quot;lr_scheduler&quot;: self.lr_scheduler.state_dict(),
+                                &quot;train_metric&quot;: self.train_monitor.state_dict(),
+                                &quot;torch_rng_state&quot;: torch.get_rng_state(),
+                            },
+                        }
+                        self.ckpt_manager.save(
+                            path=save_checkpoint_path,
+                            state=state,
+                            save_only_model=args.save_only_model,
+                            global_steps=self.global_step,
+                        )
+                        dist.barrier()
+                        logger.info_rank0(f&quot;Distributed checkpoint saved at {save_checkpoint_path} successfully!&quot;)
+                        cleanup_old_checkpoints(args, self.data_args.data_shared_file_system)
+
+                if self.global_step &gt;= total_steps:
+                    break</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># DDP 版保存（全量）
+state = {
+    &quot;model&quot;: self.model.state_dict(),   # 完整权重
+    &quot;optimizer&quot;: self.optimizer.state_dict(),
+    &quot;extra_state&quot;: {&quot;global_step&quot;: ..., &quot;lr_scheduler&quot;: ...,
+                    &quot;torch_rng_state&quot;: torch.get_rng_state()},
+}
+torch.save(state, path)  # rank0 写全量
+dist.barrier()</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异点：DDP 版每 rank 持完整权重，存 ckpt 通常只 rank0 <code>torch.save</code> 全量 state_dict；FSDP2 版各 rank 持分片，<code>ckpt_manager.save</code> 走分布式 checkpoint 各 rank 写自己那片，<b>无需</b>手写 all_gather 拼全量。HF 权重导出（见下一段 :434）才用 <code>get_model_state_dict(full_state_dict=True, cpu_offload=True)</code> 把分片 gather 到 CPU。rng_state / lr_scheduler / global_step 的恢复语义两版一致。</p></div></div><div class="seg"><p class="seglab">行 392-451 · Epoch 末保存 + HF 权重导出 + 收尾</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :392-:451）</h5><pre data-lang="py" data-start="392" data-idprefix="A">            # Reset counter after completing an epoch
+            steps_trained_in_current_epoch = 0
+            # Save checkpoint at specified epoch intervals
+            already_saved = args.save_steps &gt; 0 and self.global_step % args.save_steps == 0
+            if args.save_epochs and (epoch + 1) % args.save_epochs == 0 and not already_saved:
+                if not args.output_dir:
+                    logger.info_rank0(&quot;output_dir is not set, skipping checkpoint saving&quot;)
+                else:
+                    empty_cache()
+                    save_checkpoint_path = os.path.join(
+                        args.output_dir, &quot;checkpoints&quot;, f&quot;global_step_{self.global_step}&quot;
+                    )
+                    state = {
+                        &quot;model&quot;: self.model,
+                        &quot;optimizer&quot;: self.optimizer,
+                        &quot;extra_state&quot;: {
+                            &quot;global_step&quot;: self.global_step,
+                            &quot;_global_step_last_logged&quot;: self._global_step_last_logged,
+                            &quot;_last_logged_step&quot;: self._last_logged_step,
+                            &quot;lr_scheduler&quot;: self.lr_scheduler.state_dict(),
+                            &quot;train_metric&quot;: self.train_monitor.state_dict(),
+                            &quot;torch_rng_state&quot;: torch.get_rng_state(),
+                        },
+                    }
+                    self.ckpt_manager.save(
+                        path=save_checkpoint_path,
+                        state=state,
+                        save_only_model=args.save_only_model,
+                        global_steps=self.global_step,
+                    )
+                    dist.barrier()
+                    logger.info_rank0(f&quot;Distributed checkpoint saved at {save_checkpoint_path} successfully!&quot;)
+                    cleanup_old_checkpoints(args, self.data_args.data_shared_file_system)
+
+            if self.global_step &gt;= total_steps:
+                break
+        # Stop profiler
+        if self.profiler_manager.profiler is not None:
+            self.profiler_manager.stop()
+
+        # Save model in HF format — all ranks participate in gather, rank 0 writes
+        if args.save_hf_weights and save_checkpoint_path is not None:
+            options = StateDictOptions(full_state_dict=True, cpu_offload=True)
+            model_state_dict = get_model_state_dict(self.model.model, options=options)
+
+            if dist.get_rank() == 0:
+                model_configs = [self.model.model.config, self.tokenizer]
+                self.ckpt_manager.save_model_weights(args.output_dir, model_state_dict, model_configs=model_configs)
+                logger.info_rank0(f&quot;Huggingface checkpoint saved at {args.output_dir} successfully!&quot;)
+
+            del model_state_dict
+            gc.collect()
+            empty_cache()
+            dist.barrier()
+
+        # Save training args — rank 0 only
+        if dist.get_rank() == 0 and args.output_dir:
+            self.ckpt_manager.save_args(args, args.output_dir)
+            logger.info_rank0(f&quot;Training arguments saved at {args.output_dir} successfully!&quot;)
+        logger.info_rank0(f&quot;Training completed in {time.time() - train_start_time:.2f}s&quot;)</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># DDP 版 HF 导出（已是全量）
+if args.save_hf_weights:
+    sd = self.model.state_dict()  # 本就是完整权重
+    if dist.get_rank() == 0:
+        save_model_weights(args.output_dir, sd,
+                          model_configs=[config, tokenizer])
+    del sd; gc.collect()
+    dist.barrier()</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异点：DDP 下 model.state_dict() 直接返回完整权重（每 rank 都有），无需 gather；FSDP2 下各 rank 只有分片，<b>必须</b> <code>get_model_state_dict(full_state_dict=True, cpu_offload=True)</code> 触发一次全量 AllGather 且 offload 到 CPU 才能拿到完整权重。<code>cpu_offload=True</code> 是 8B 模型下避免在 NPU 上同时驻留完整+分片两份导致 OOM 的关键开关。通信量上这是<b>额外</b>的一次全量 gather，训练循环里没有——只在导出时付一次。</p></div></div><div class="seg"><p class="seglab">行 453-485 · training_step：单次前向 + backward（隐式 ReduceScatter）</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :453-:485）</h5><pre data-lang="py" data-start="453" data-idprefix="A">    def training_step(self, inputs: Dict[str, Any], num_items_in_batch: Optional[int]) -&gt; torch.Tensor:
+        &quot;&quot;&quot;
+        Performs a single forward and backward pass.
+        &quot;&quot;&quot;
+        # 1. Set model to train mode
+        self.model.train()
+        # Some custom optimizers require explicit train() calls
+        if hasattr(self.optimizer, &quot;train&quot;) and callable(self.optimizer.train):
+            self.optimizer.train()
+
+        # 2. Forward pass
+        loss_all = self._compute_loss(inputs, return_outputs=False, num_items_in_batch=num_items_in_batch)
+        if self.args.stage == &#x27;pt&#x27;:
+            loss_all.loss = loss_all.loss / self.current_gradient_accumulation_steps
+            loss_all.lm_loss_output = loss_all.lm_loss_output / self.current_gradient_accumulation_steps
+            loss_all.mtp_loss_output = loss_all.mtp_loss_output / self.current_gradient_accumulation_steps
+
+        loss = loss_all.loss
+        # 3. Clean up inputs to save memory
+        del inputs
+
+        # 4. Multi-device parallelism: Average loss across devices (if not using FSDP internal handling)
+        if torch.cuda.device_count() &gt; 1:
+            # Note: Standard FSDP usually handles loss averaging via the reduction of gradients or explicit loss reduction.
+            # If using DDP logic manually without DDP wrapper, this might be needed.
+            # For FSDP2, loss is usually local until aggregation.
+            loss = loss.mean()
+
+        # 5. Backward pass
+        loss.backward()
+
+        # 6. Return detached loss
+        return loss.detach(), loss_all.lm_loss_output.detach(), loss_all.mtp_loss_output.detach()</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># 标准 DDP training_step
+def training_step(self, inputs, num_items_in_batch):
+    loss_all = self._compute_loss(inputs, num_items_in_batch=num_items_in_batch)
+    loss = loss_all.loss / self.current_gradient_accumulation_steps
+    loss.backward()   # autograd hook 触发 AllReduce 平均梯度
+    return loss.detach(), ...</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>核心对照（全文最关键的一行）：<b>DDP</b>：<code>loss.backward()</code> 触发 autograd hook 对<b>完整梯度</b>做 <code>AllReduce</code>（平均），各 rank 拿到相同的完整梯度。<b>FSDP2</b>：<code>loss.backward()</code> 触发 unshard(AllGather 参数分片)→本地反向→ReduceScatter（把梯度 reduce 后 scatter 成分片），各 rank 只拿到<b>自己那片</b>梯度。通信模式从「一次 AllReduce」变成「成对的 AG/RS」。<b>结论：从 DDP 迁到 FSDP2，这一行代码字面不变，但底层通信完全换了</b>——这也是为什么本文件里再也找不到 <code>dist.all_reduce(grad)</code>。:475 <code>cuda.device_count()</code> 是残留坑，NPU 上应以 <code>torch.accelerator.device_count()</code> 替代。</p></div></div><div class="seg"><p class="seglab">行 487-673 · batch 预取 + CP 切片（Ulysses/Ring）+ num_items_in_batch 全局聚合</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :487-:673）</h5><pre data-lang="py" data-start="487" data-idprefix="A">    def get_batch_samples_func(self):
+        if self.parallel_args.cp_size &gt; 1:
+            if self.parallel_args.cp_type == &quot;ulysses&quot;:
+                return self._get_batch_samples_ulysses
+            elif self.parallel_args.cp_type == &quot;ring&quot;:
+                return self._get_batch_samples_megatron
+            else:
+                raise ValueError(f&quot;Unsupported cp_type: &#x27;{self.parallel_args.cp_type}&#x27; when cp_size &gt; 1.&quot;)
+        else:
+            return self._get_batch_samples
+
+    def _get_batch_samples_ulysses(self, parallel_state, epoch_iterator, num_batches):
+        cp_size = parallel_state.get_group_size(&quot;cp&quot;)
+        cp_rank = parallel_state.get_rank(&quot;cp&quot;)
+        batch, batch_seqlens, num_items_in_batch = self._get_batch_samples(parallel_state, epoch_iterator, num_batches)
+
+        for sample in batch:
+            labels = torch.nn.functional.pad(sample[&#x27;labels&#x27;], (0, 1), value=IGNORE_INDEX)
+            shift_labels = labels[..., 1:]
+            sample[&#x27;shift_labels&#x27;] = shift_labels
+            if &quot;position_ids&quot; not in sample:
+                position_ids = torch.arange(0, shift_labels.shape[1], device=shift_labels.device).unsqueeze(0)
+                sample[&#x27;position_ids&#x27;] = position_ids
+
+            for key, val in sample.items():
+                if key in (&#x27;attention_mask&#x27;, &#x27;actual_seq_len&#x27;):
+                    continue
+                if val is not None:
+                    seq_dim = 1
+                    # 2. Calculate total sequence length
+                    seq_total_len = val.size(seq_dim)
+
+                    # 3. Calculate the sequence length each rank is responsible for (handle indivisible cases)
+                    chunk_size = seq_total_len // cp_size
+                    remainder = seq_total_len % cp_size  # Remainder, the first &#x27;remainder&#x27; ranks take 1 more token each
+
+                    # 4. Calculate the start and end indices of the slice for current rank (core logic of Ring slicing)
+                    if cp_rank &lt; remainder:
+                        # For the first &#x27;remainder&#x27; ranks, each rank is responsible for (chunk_size + 1) tokens
+                        start_idx = cp_rank * (chunk_size + 1)
+                        end_idx = start_idx + (chunk_size + 1)
+                    else:
+                        # For the remaining ranks, each rank is responsible for &#x27;chunk_size&#x27; tokens
+                        start_idx = remainder * (chunk_size + 1) + (cp_rank - remainder) * chunk_size
+                        end_idx = start_idx + chunk_size
+                    # 5. Perform slicing: retain only the sequence part responsible for current rank
+                    val_sliced = val.narrow(seq_dim, start_idx, end_idx - start_idx)
+                    # 6. Update the value in sample with the sliced tensor
+                    if key == &#x27;shift_labels&#x27;:
+                        val_sliced = val_sliced.contiguous()
+                    device = torch.accelerator.current_device()
+                    sample[key] = val_sliced.to(device, non_blocking=True)
+
+        return batch, batch_seqlens, num_items_in_batch
+
+    def _get_batch_samples_megatron(self, parallel_state, epoch_iterator, num_batches):
+        cp_size = parallel_state.get_group_size(&quot;cp&quot;)
+        cp_rank = parallel_state.get_rank(&quot;cp&quot;)
+        batch, batch_seqlens, num_items_in_batch = self._get_batch_samples(parallel_state, epoch_iterator, num_batches)
+
+        for sample in batch:
+            # ===================== Original logic: generate shift_labels =====================
+            labels = torch.nn.functional.pad(sample[&#x27;labels&#x27;], (0, 1), value=IGNORE_INDEX)
+            shift_labels = labels[..., 1:]
+            sample[&#x27;shift_labels&#x27;] = shift_labels
+
+            # Original logic: generate position_ids
+            if &quot;position_ids&quot; not in sample:
+                position_ids = torch.arange(0, shift_labels.shape[1], device=shift_labels.device).unsqueeze(0)
+                sample[&#x27;position_ids&#x27;] = position_ids
+
+            # ===================== Core modification: Replace with Ring CP load-balanced splitting =====================
+            for key, val in sample.items():
+                # Skip attention_mask
+                if key == &#x27;attention_mask&#x27;:
+                    continue
+                if val is not None:
+                    seq_dim = 1  # Fixed sequence dimension, consistent with reference code
+
+                    # ========== Core logic of Ring CP load-balanced splitting (fully aligned with reference code) ==========
+                    # 1. Reshape: [bs, seq_len, ...] -&gt; [bs, 2*cp_size, seq_len/(2*cp_size), ...]
+                    val = val.view(
+                        *val.shape[0:seq_dim],
+                        2 * cp_size,
+                        val.shape[seq_dim] // (2 * cp_size),
+                        *val.shape[(seq_dim + 1) :],
+                    )
+                    # 2. Generate ring symmetric indices (core of load balancing)
+                    index = torch.tensor([cp_rank, (2 * cp_size - cp_rank - 1)], device=val.device)
+                    # 3. Select tensor by indices
+                    val = val.index_select(seq_dim, index)
+                    # 4. Merge dimensions and restore shape
+                    val = val.view(*val.shape[0:seq_dim], -1, *val.shape[(seq_dim + 2) :])
+                    # ====================================================================================================
+
+                    # ===================== Original logic: Contiguous + device migration =====================
+                    if key == &#x27;shift_labels&#x27;:
+                        val = val.contiguous()
+                    device = torch.accelerator.current_device()
+                    sample[key] = val.to(device, non_blocking=True)
+
+        return batch, batch_seqlens, num_items_in_batch
+
+    def _get_batch_samples(self, parallel_state, epoch_iterator, num_batches):
+        &quot;&quot;&quot;
+        Fetch num_batches samples from the iterator at once.
+
+        Args:
+            parallel_state: Parallel state object (unused, kept for interface consistency)
+            epoch_iterator: Data iterator for the current epoch
+            num_batches: Number of batches to fetch
+
+        Returns:
+            tuple: Three values with distinct purposes:
+
+            batch_samples (List[Dict[str, torch.Tensor]]):
+                Raw input data for model forward pass. Example: [{&quot;input_ids&quot;: tensor1, &quot;labels&quot;: tensor1_labels, ...}, ...]
+
+            batch_seqlens (List[int]):
+                Sequence length of each sample across all fetched batches. Example: [128, 256, 64, 192]
+
+            num_items_in_batch (int):
+                Total valid tokens across all fetched batches (distributed aggregation). Example: 640
+        &quot;&quot;&quot;
+        batch_samples = []
+        batch_seqlens = []
+        for _ in range(num_batches):
+            try:
+                device = torch.accelerator.current_device()
+                data = next(epoch_iterator)
+                data[&quot;input_ids&quot;] = data[&quot;input_ids&quot;].to(device, non_blocking=True)
+                data[&quot;labels&quot;] = data[&quot;labels&quot;].to(device, non_blocking=True)
+                if &quot;attention_mask&quot; in data:
+                    data[&quot;attention_mask&quot;] = data[&quot;attention_mask&quot;].to(device, non_blocking=True)
+                if &quot;position_ids&quot; in data:
+                    data[&quot;position_ids&quot;] = data[&quot;position_ids&quot;].to(device, non_blocking=True)
+                if &quot;actual_seq_len&quot; in data:
+                    data[&quot;actual_seq_len&quot;] = data[&quot;actual_seq_len&quot;].view(-1)
+                batch_samples.append(data)
+
+                # Calculate sequence lengths for each sample in the current batch
+                sample_seqlens = []
+                if &quot;attention_mask&quot; in data:
+                    sample_seqlens = data[&quot;attention_mask&quot;].sum(-1).tolist()
+                elif &quot;labels&quot; in data:
+                    sample_seqlens = (data[&quot;labels&quot;].ne(-100)).sum(-1).tolist()
+                batch_seqlens.extend(sample_seqlens)
+            except StopIteration:
+                break
+
+        # Calculate total valid tokens across all fetched batches (distributed aggregation)
+        num_items_in_batch = self._get_num_items_in_batch(batch_samples)
+        return batch_samples, batch_seqlens, num_items_in_batch
+
+    def _get_num_items_in_batch(self, batch_samples):
+        &quot;&quot;&quot;
+        Calculate the number of valid tokens in a batch (i.e., labels != -100).
+        Aggregates this count across all ranks.
+        &quot;&quot;&quot;
+        num_items_in_batch = None
+        device = torch.accelerator.current_device()
+        ps = ParallelState()
+
+        # Check if &#x27;labels&#x27; exist in the data
+        count_num_items_in_batch = len(batch_samples) &gt; 0 and &quot;labels&quot; in batch_samples[0]
+
+        if count_num_items_in_batch:
+            try:
+                # Local sum of valid tokens
+                num_items_in_batch = sum((batch[&quot;labels&quot;].ne(-100)).sum().item() for batch in batch_samples)
+            except (TypeError, AttributeError):
+                pass
+
+        if num_items_in_batch is not None:
+            # Distributed Aggregation
+            if dist.is_initialized():
+                num_items_tensor = torch.tensor(num_items_in_batch, device=device, dtype=torch.int64)
+                # Note: Using all_reduce(SUM) is often more efficient than all_gather + sum
+                dist.all_reduce(num_items_tensor, op=dist.ReduceOp.SUM, group=ps.get_group(&quot;dp_fsdp&quot;))
+                num_items_in_batch = num_items_tensor.item()
+
+            # Adjustment for non-data-parallel ranks (e.g., pipeline parallelism)
+            pc = getattr(self.args, &quot;non_data_parallel_size&quot;, None)
+            if pc:
+                num_items_in_batch = num_items_in_batch // pc
+
+        return num_items_in_batch</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># DDP 版：无 CP，无 token 全局聚合
+batch_samples = [next(epoch_iterator) for _ in range(num_batches)]
+for d in batch_samples:
+    d[&quot;input_ids&quot;] = d[&quot;input_ids&quot;].cuda(non_blocking=True)
+    ...
+# token-weighted loss 直接用本地 token 数
+num_items = sum(d[&quot;labels&quot;].ne(-100).sum() for d in batch_samples)</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异点：DDP 单卡或无 CP 场景，token 数本地就算够，不需要跨 rank all_reduce；FSDP2+CP 场景下每个 rank 只看到部分序列，必须 all_reduce 拿全局 token 数才能正确做 token-weighted 归一化（:665）。CP 切片逻辑（Ulysses :520 / Ring :575）在 DDP 版里完全没有——这是上下文并行引入的额外数据准备层。再次强调：:665 的 <code>dist.all_reduce</code> 聚合的是 int64 token 计数，<b>不碰梯度</b>。</p></div></div><div class="seg"><p class="seglab">行 675-780 · _compute_loss + LM loss + CP 组的标量 all_reduce</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :675-:780）</h5><pre data-lang="py" data-start="675" data-idprefix="A">    def _compute_loss(self, inputs, return_outputs=False, num_items_in_batch=None):
+        &quot;&quot;&quot;
+        Computes the loss for the batch.
+        &quot;&quot;&quot;
+        args = self.args
+        device = torch.accelerator.current_device()
+        # 1. Inject num_items_in_batch into inputs if present (for token-weighted loss)
+        kwargs = {}
+        if num_items_in_batch is not None:
+            kwargs[&quot;num_items_in_batch&quot;] = num_items_in_batch
+
+        labels = inputs[&#x27;labels&#x27;].to(device, non_blocking=True)
+        if args.stage == &#x27;pt&#x27;:
+            inputs[&#x27;labels&#x27;] = None
+
+        if self.optimization_args.chunk_loss_size and args.stage == &#x27;pt&#x27;:
+            loss_ctx, loss_mask = self._build_chunk_loss(labels, chunk_size=self.optimization_args.chunk_loss_size)
+            kwargs[&#x27;loss_ctx&#x27;] = loss_ctx
+            kwargs[&#x27;loss_mask&#x27;] = loss_mask
+        # Merge inputs without modifying the original dictionary in-place
+        model_inputs = {**inputs, **kwargs}
+
+        # 2. Forward pass
+        outputs = self.model(**model_inputs)
+
+        lm_loss_output = torch.tensor(0.0, device=device, dtype=torch.float32)
+        mtp_loss_output = torch.tensor(0.0, device=device, dtype=torch.float32)
+
+        # 3. Extract loss from outputs
+        if args.stage == &#x27;pt&#x27; and &quot;loss&quot; not in outputs:
+            logits = outputs.logits.contiguous().float()
+            loss = self._compute_language_model_pretrain_loss(logits, labels, **kwargs)
+            lm_loss_output = loss.clone()
+            aux_loss = getattr(outputs, &#x27;aux_loss&#x27;, None)
+            if aux_loss is not None and isinstance(aux_loss, torch.Tensor):
+                router_aux_loss_coef = getattr(self.model.config, &#x27;router_aux_loss_coef&#x27;, 0.0)
+                loss = loss + router_aux_loss_coef * aux_loss.to(loss.device)
+        else:
+            if isinstance(outputs, dict) and &quot;loss&quot; not in outputs:
+                raise ValueError(f&quot;Model outputs have no loss key: {list(outputs.keys())}&quot;)
+            loss = outputs[&quot;loss&quot;] if isinstance(outputs, dict) else outputs[0]
+            lm_loss_output = loss.clone()
+
+        if args.stage == &#x27;pt&#x27; and getattr(outputs, &#x27;mtp_logits&#x27;, None) is not None:
+            mtp_losses = []
+            for one_mtp_logits in outputs.mtp_logits:
+                labels, _ = roll_tensor(labels, fill_value=-100)
+                mtp_loss = self._compute_language_model_pretrain_loss(
+                    one_mtp_logits.contiguous().float(), labels, **kwargs
+                )
+                mtp_losses.append(mtp_loss)
+        else:
+            mtp_losses = getattr(outputs, &#x27;mtp_loss&#x27;, None)
+        if mtp_losses:
+            final_mtp_loss = 0
+            for i in range(len(mtp_losses)):
+                final_mtp_loss += mtp_losses[i] / len(mtp_losses)
+            mtp_loss_output = final_mtp_loss.clone()
+            loss += final_mtp_loss * getattr(args, &#x27;mtp_loss_scaling_factor&#x27;, 0.3)
+
+        # 4. Cross-device token averaging adjustment
+        # If the loss was calculated using &#x27;mean&#x27; locally but needs global scaling based on tokens
+        # sometimes we multiply by world size here so standard all_reduce(mean) works correctly.
+        # This depends heavily on the specific loss function implementation.
+        ps = ParallelState()
+        if dist.is_initialized() and args.stage != &#x27;pt&#x27;:
+            loss *= ps.get_group_size(&quot;dp_fsdp&quot;)
+            lm_loss_output *= ps.get_group_size(&quot;dp_fsdp&quot;)
+            if mtp_losses:
+                final_mtp_loss = 0
+                for i in range(len(mtp_losses)):
+                    final_mtp_loss += mtp_losses[i] * ps.get_group_size(&quot;dp_fsdp&quot;) / len(mtp_losses)
+                loss += final_mtp_loss * getattr(args, &#x27;mtp_loss_scaling_factor&#x27;, 0.3)
+                mtp_loss_output *= ps.get_group_size(&quot;dp_fsdp&quot;)
+
+        # 5. Return loss (or tuple of loss + outputs)
+        model_outputs = outputs if return_outputs else None
+        loss_result = LossOutput(
+            loss=loss, lm_loss_output=lm_loss_output, mtp_loss_output=mtp_loss_output, outputs=model_outputs
+        )
+        return loss_result
+
+    def _compute_language_model_pretrain_loss(self, logits, labels, ignore_index: int = -100, **kwargs) -&gt; torch.Tensor:
+        args = self.args
+
+        shift_labels = labels
+        shift_labels = shift_labels.reshape(-1)
+        logits = logits.view(-1, logits.shape[-1])
+
+        ps = ParallelState()
+
+        if ps.get_group_size(&quot;cp&quot;) &gt; 1:
+            loss = F.cross_entropy(logits, shift_labels, reduction=&#x27;sum&#x27;, ignore_index=ignore_index)
+
+            num_items_in_batch = (labels.ne(ignore_index)).sum()
+            dist.all_reduce(num_items_in_batch, op=dist.ReduceOp.SUM, group=ps.get_group(&quot;cp&quot;))
+            dist.all_reduce(loss, op=dist.ReduceOp.SUM, group=ps.get_group(&quot;cp&quot;))
+
+            loss = loss / num_items_in_batch.item()
+        else:
+            if args.calculate_per_token_loss:
+                loss = F.cross_entropy(logits, shift_labels, reduction=&#x27;none&#x27;, ignore_index=ignore_index)
+            else:
+                loss = F.cross_entropy(logits, shift_labels, ignore_index=ignore_index)
+
+        return loss</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># DDP 版 LM loss（无 CP，无跨 rank 聚合）
+def _compute_lm_loss(logits, labels, ignore_index=-100):
+    shift_labels = labels.reshape(-1)
+    logits = logits.view(-1, logits.shape[-1])
+    loss = F.cross_entropy(logits, shift_labels,
+                           ignore_index=ignore_index)  # 已 mean
+    return loss
+# backward 时 AllReduce 梯度；loss 本身无需跨 rank 聚合</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异点：DDP 单卡/无 CP 场景，<code>F.cross_entropy</code> 本地 mean 即可，无需跨 rank all_reduce loss；FSDP2+CP 场景每个 rank 只算部分序列，:770-771 必须 all_reduce 把 cp 组内的 sum loss / sum token 拼起来再除。<b>三处 all_reduce 的职责对照</b>：:322 聚 dp_fsdp 组的 loss/grad_norm 标量（日志显示）；:665 聚 dp_fsdp 组的 token 计数（归一化分母）；:770-771 聚 cp 组的 sum loss/token（CP 跨 rank 拼序列）。<b>三个都是标量聚合，没有一个碰梯度</b>——梯度同步永远只在 :482 <code>loss.backward()</code> 隐式完成。这是全文要刻进脑子里的对照锚点。</p></div></div><div class="seg"><p class="seglab">行 841-861 · _get_fsdp_root：按包装深度兜底拿 FSDP 根</p><pre data-lang="py" data-start="841" data-idprefix="A">    def _get_fsdp_root(self):
+        &quot;&quot;&quot;
+        Helper to get the inner FSDP module to access context managers like `no_sync`.
+        Handles different wrapping depths.
+        &quot;&quot;&quot;
+        # Direct check
+        if isinstance(self.model, FSDP):
+            return self.model
+
+        # Check one level deep (standard DDP/Wrapper)
+        if hasattr(self.model, &quot;module&quot;):
+            if isinstance(self.model.module, FSDP):
+                return self.model.module
+
+            # Check two levels deep (complex wrapping)
+            if hasattr(self.model.module, &quot;model&quot;) and isinstance(self.model.module.model, FSDP):
+                return self.model.module.model
+
+        # Fallback to the model itself (context manager might fail if not FSDP, hence the check in caller)
+        return self.model
+</pre><div class="exp"><p>:841-860 是个 helper，为 :275 的 <code>fsdp_root.no_sync()</code> 服务。FSDP2 模型可能被多层 wrapper 包过（外层 fsdp_turbo、内层标准 FSDP），<code>no_sync()</code> 必须作用在最内层的 FSDP 根上才有效。</p>
+<p>:847 直接判 <code>isinstance(self.model, FSDP)</code>。:851-853 往下挖一层 <code>self.model.module</code>，若是 FSDP 就返回。:856-857 再挖两层 <code>self.model.module.model</code>。:860 都不是就 fallback 返回 <code>self.model</code>——此时 no_sync 可能失效，调用方 :279 用 <code>hasattr(fsdp_root, "no_sync")</code> 兜底判，没有就走 <code>nullcontext()</code>。</p>
+<p>这段的存在说明本项目的 FSDP2 包装层级不固定（取决于外层装配方式），所以用多层 isinstance 链兜底。配 no_sync（:277-281）控制梯度同步窗口是 FSDP2 梯度累积的正确姿势。</p></div></div></div>
+<details class="src"><summary>📜 完整源码（861 行）— 大纲点跳行</summary><pre data-lang="py" data-start="1">import os
+import gc
+import torch
+import torch.distributed as dist
+import torch.nn.functional as F
+import time
+import contextlib
+from typing import Optional, Dict, Any
+
+from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+from torch.distributed.checkpoint.state_dict import get_model_state_dict, StateDictOptions
+
+from mindspeed_llm.fsdp2.distributed.parallel_state import ParallelState
+from mindspeed_llm.fsdp2.distributed.clip_grad_norm import clip_grad_norm
+from mindspeed_llm.fsdp2.data.processor.processor_utils import IGNORE_INDEX
+from mindspeed_llm.fsdp2.features.chunkloss import chunk_loss, calculate_lm_loss
+from mindspeed_llm.fsdp2.checkpoint.utils import empty_cache, cleanup_old_checkpoints
+from mindspeed_llm.fsdp2.utils.dist_op import all_reduce
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+from mindspeed_llm.fsdp2.utils.train_monitor import TrainMonitor
+from mindspeed_llm.fsdp2.utils.profiler import ProfilerConfig, ProfilerManager
+from mindspeed_llm.fsdp2.models.common.mtp import roll_tensor
+from dataclasses import dataclass
+
+
+logger = get_logger(__name__)
+
+
+@dataclass
+class LossOutput:
+    loss: torch.Tensor
+    lm_loss_output: torch.Tensor
+    mtp_loss_output: torch.Tensor
+    outputs: dict | None = None
+
+
+class Trainer:
+    &quot;&quot;&quot;
+    Orchestrates the training loop, coordinating Model, Optimizer, Scheduler, Data, and IO.
+    Strictly follows the gradient accumulation and loop logic found in HuggingFace Transformers.
+    &quot;&quot;&quot;
+
+    def __init__(
+        self,
+        model: torch.nn.Module,
+        optimizer: torch.optim.Optimizer,
+        lr_scheduler: torch.optim.lr_scheduler.LRScheduler,
+        train_dataloader,
+        args,  # TrainingArguments
+        parallel_args,
+        optimization_args,
+        data_args,
+        ckpt_manager,
+        monitor: TrainMonitor,
+        tokenizer=None,
+    ):
+        self.model = model
+        self.optimizer = optimizer
+        self.lr_scheduler = lr_scheduler
+        self.train_dataloader = train_dataloader
+        self.args = args
+        self.parallel_args = parallel_args
+        self.optimization_args = optimization_args
+        self.data_args = data_args
+        self.ckpt_manager = ckpt_manager
+        self.train_monitor = monitor
+        self.tokenizer = tokenizer
+
+        # Training state
+        self.epoch = 0
+        self.global_step = 0
+        self._last_logged_step = 0
+        self._total_loss_scalar = 0.0
+        self._total_lm_loss_scalar = 0.0
+        self._total_mtp_loss_scalar = 0.0
+        self._logging_loss_scalar = 0.0
+        self._global_step_last_logged = 0
+        self._last_logged_loss_scalar = 0.0
+        self._last_logged_lm_loss_scalar = 0.0
+        self._last_logged_mtp_loss_scalar = 0.0
+        self.batch_seqlens = []
+
+        # Timing state
+        self._step_start_time = None
+
+        # Profiling support
+        current_rank = dist.get_rank() if dist.is_initialized() else 0
+        prof_config = ProfilerConfig(
+            enabled=args.profile,
+            profile_step_start=args.profile_step_start,
+            profile_step_end=args.profile_step_end,
+            profile_ranks=args.profile_ranks,
+            profile_level=args.profile_level,
+            profile_export_type=args.profile_export_type,
+            profile_data_simplification=args.profile_data_simplification,
+            profile_with_cpu=args.profile_with_cpu,
+            profile_with_stack=args.profile_with_stack,
+            profile_with_memory=args.profile_with_memory,
+            profile_record_shapes=args.profile_record_shapes,
+            profile_save_path=args.profile_save_path,
+            current_rank=current_rank,
+        )
+        self.profiler_manager = ProfilerManager(prof_config)
+
+    @staticmethod
+    def _build_chunk_loss(labels, ignore_index=-100, chunk_size=1024):
+        # For supervised finetuning stages (SFT), labels must be shifted by one position, for pretraining, labels already include shift.
+
+        shift_labels = labels
+
+        # Create a mask to identify valid tokens
+        loss_mask = shift_labels != ignore_index
+
+        # Default: normalize loss by total number of valid tokens in the batch.
+        alpha = loss_mask.sum()  # scalar
+        reduction = &quot;sum&quot;
+
+        # Split shifted labels into chunks along the sequence dimension for memory-efficient processing.
+        chunk_labels = torch.split(shift_labels, chunk_size, dim=1)
+
+        # Prepare keyword arguments for each chunk to be passed to the chunked loss function.
+        loss_ctx_kwargs = [
+            {
+                &quot;shift_labels&quot;: chunk_labels[i],
+                &quot;ignore_index&quot;: ignore_index,
+                &quot;reduction&quot;: reduction,
+                &quot;alpha&quot;: alpha,
+            }
+            for i in range(len(chunk_labels))
+        ]
+
+        # Return a closure that computes the chunked language modeling loss using the prepared config.
+        def loss_ctx(hidden_states, head_weight, head_bias):
+            return chunk_loss(
+                hidden_states,
+                head_weight,
+                head_bias,
+                loss_forward=calculate_lm_loss,
+                loss_kwargs_chunks=loss_ctx_kwargs,
+                chunk_size=chunk_size,
+            )
+
+        return loss_ctx, loss_mask
+
+    def train(self, resume_from_checkpoint: Optional[str] = None):
+        &quot;&quot;&quot;
+        Main training loop.
+        &quot;&quot;&quot;
+        args = self.args
+        train_dataloader = self.train_dataloader
+        ps = ParallelState()
+
+        # Determine the reduction group
+        if ps.is_fsdp_enable():
+            reduce_group = ps.get_fsdp_group()
+        else:
+            reduce_group = None
+
+        # 1. Calculate total steps and current step in the epoch
+        steps_in_epoch = len(train_dataloader)
+        # Calculate total updates per epoch considering gradient accumulation
+        total_updates_per_epoch = steps_in_epoch // args.gradient_accumulation_steps + int(
+            steps_in_epoch % args.gradient_accumulation_steps &gt; 0
+        )
+        total_steps = args.max_steps if args.max_steps &gt; 0 else (total_updates_per_epoch * args.num_train_epochs)
+        epochs_trained = 0
+        steps_trained_in_current_epoch = 0
+        save_checkpoint_path = None
+        # Calculate global batch size safely
+        global_batch_size = (
+            args.per_device_train_batch_size * args.gradient_accumulation_steps * ps.get_group_size(&#x27;dp_fsdp&#x27;)
+        )
+
+        logger.info_rank0(&quot;***** Running training (FSDP2) *****&quot;)
+        logger.info_rank0(f&quot;  Num examples = {len(train_dataloader.dataset)}&quot;)
+        logger.info_rank0(f&quot;  Num Epochs = {args.num_train_epochs}&quot;)
+        logger.info_rank0(f&quot;  Total Batch Size = {global_batch_size}&quot;)
+        logger.info_rank0(f&quot;  Gradient Accumulation steps = {args.gradient_accumulation_steps}&quot;)
+        logger.info_rank0(f&quot;  Total optimization steps = {total_steps}&quot;)
+
+        # 2. Resume training from checkpoint
+        if resume_from_checkpoint:
+            # Prepare state dict containing model, optimizer and extra state
+            state = {&quot;model&quot;: self.model, &quot;optimizer&quot;: self.optimizer, &quot;extra_state&quot;: {}}
+            # Load checkpoint from the specified path
+            self.ckpt_manager.load(resume_from_checkpoint, state)
+            extra_state = state.get(&quot;extra_state&quot;, {})
+
+            if extra_state:
+                # Restore training step counters
+                self.global_step = state[&quot;extra_state&quot;][&quot;global_step&quot;]
+                self._global_step_last_logged = state[&#x27;extra_state&#x27;][&#x27;_global_step_last_logged&#x27;]
+                self._last_logged_step = state[&#x27;extra_state&#x27;][&#x27;_global_step_last_logged&#x27;]
+
+                # Calculate completed epochs and steps within current epoch based on global step
+                epochs_trained = int(self.global_step // total_updates_per_epoch)
+                steps_trained_in_current_epoch = self.global_step % total_updates_per_epoch
+
+                # Restore learning rate scheduler and RNG state for reproducibility
+                self.lr_scheduler.load_state_dict(state[&quot;extra_state&quot;][&quot;lr_scheduler&quot;])
+                torch.set_rng_state(state[&quot;extra_state&quot;][&quot;torch_rng_state&quot;])
+
+                # Synchronize all processes before continuing
+                dist.barrier()
+                logger.info_rank0(f&quot;Load distributed checkpoint from {resume_from_checkpoint} successfully!&quot;)
+                logger.info_rank0(f&quot;Resuming from epoch {epochs_trained}, step {steps_trained_in_current_epoch}&quot;)
+                logger.info_rank0(f&quot;Global step = {self.global_step}&quot;)
+            else:
+                # No extra state found, only model weights were loaded, start from scratch
+                logger.info_rank0(&quot;Loaded model weights only, starting training from step 0&quot;)
+
+        self.model.train()
+        train_start_time = time.time()
+        self._step_start_time = time.time()
+
+        # Start profiler
+        if self.profiler_manager.profiler is not None:
+            self.profiler_manager.start()
+
+        # --- Epoch Loop ---
+        for epoch in range(epochs_trained, int(args.num_train_epochs)):
+            self.epoch = epoch
+
+            if hasattr(train_dataloader.sampler, &quot;set_epoch&quot;):
+                train_dataloader.sampler.set_epoch(epoch)
+
+            epoch_iterator = iter(train_dataloader)
+
+            # --- Gradient Accumulation Loop ---
+            # Handle the remainder batch at the end of an epoch
+            remainder = steps_in_epoch % args.gradient_accumulation_steps
+            if remainder == 0:
+                remainder = args.gradient_accumulation_steps
+
+            total_updates = total_updates_per_epoch
+            # Calculate the starting update_step for this epoch
+            # If resuming in the first epoch after checkpoint, start from steps_trained_in_current_epoch
+            # Otherwise start from 0
+            if epoch == epochs_trained and steps_trained_in_current_epoch &gt; 0:
+                # Calculate number of batches to skip (accounting for gradient accumulation)
+                steps_to_skip = steps_trained_in_current_epoch * args.gradient_accumulation_steps
+                logger.info_rank0(f&quot;  Skipping {steps_to_skip} batches in epoch {epoch}&quot;)
+
+                # Skip already trained batches by advancing the iterator
+                for _ in range(steps_to_skip):
+                    try:
+                        next(epoch_iterator)
+                    except StopIteration:
+                        break
+
+                start_update_step = steps_trained_in_current_epoch
+            else:
+                start_update_step = 0
+
+            for update_step in range(start_update_step, total_updates):
+                # Determine how many micro-batches are in this update
+                num_batches = args.gradient_accumulation_steps if update_step != (total_updates - 1) else remainder
+
+                # [Helper] Fetch N samples from the iterator and calculate valid token count
+                batch_samples, batch_seqlens, num_items_in_batch = self.get_batch_samples_func()(
+                    ps, epoch_iterator, num_batches
+                )
+                self.current_gradient_accumulation_steps = len(batch_samples)
+                # Initialize accumulated loss for the current step
+                current_step_loss = 0.0
+                current_step_lm_loss = 0.0
+                current_step_mtp_loss = 0.0
+
+                # --- Micro-Batch Loop ---
+                for i, inputs in enumerate(batch_samples):
+                    do_sync_step = i == len(batch_samples) - 1
+
+                    # FSDP Communication Optimization
+                    # Only synchronize gradients on the last micro-batch
+                    fsdp_root = self._get_fsdp_root()
+
+                    sync_context = (
+                        fsdp_root.no_sync()
+                        if (not do_sync_step and hasattr(fsdp_root, &quot;no_sync&quot;))
+                        else contextlib.nullcontext()
+                    )
+
+                    with sync_context:
+                        # Forward &amp; Backward
+                        # Note: training_step already divides loss by accum_steps
+                        loss, lm_loss, mtp_loss = self.training_step(inputs, num_items_in_batch)
+
+                    # Accumulate Loss for logging (restore to original scale for display)
+                    # Check for NaN/Inf to avoid polluting metrics
+                    if not torch.isnan(loss) and not torch.isinf(loss):
+                        current_step_loss += loss.item()
+                    if not torch.isnan(lm_loss) and not torch.isinf(lm_loss):
+                        current_step_lm_loss += lm_loss.item()
+                    if not torch.isnan(mtp_loss) and not torch.isinf(mtp_loss):
+                        current_step_mtp_loss += mtp_loss.item()
+
+                # --- Optimizer Step (Executed only after accumulation) ---
+                # At this point, the micro-batch loop is finished, gradients are accumulated
+
+                # 1. Clip Gradients and get Norm
+                grad_norm = clip_grad_norm(self.model, args.max_grad_norm)
+                # Compatibility: Ensure grad_norm is a float
+                if isinstance(grad_norm, torch.Tensor):
+                    grad_norm = grad_norm.item()
+
+                # 2. Update Parameters
+                self.optimizer.step()
+                self.lr_scheduler.step()
+                self.optimizer.zero_grad()
+
+                self.global_step += 1
+
+                # PROFILING HOOK
+                if self.profiler_manager.profiler is not None:
+                    self.profiler_manager.step()
+                # HOOK END
+
+                # 3. Distributed Aggregation of Loss and GradNorm
+                # Only perform this when global_step updates.
+                # current_step_loss is sum(micro_batches), conceptually it represents the loss of the mini-batch.
+
+                reduced_loss, reduced_lm_loss, reduced_mtp_loss, reduced_grad_norm = all_reduce(
+                    (current_step_loss, current_step_lm_loss, current_step_mtp_loss, grad_norm), group=reduce_group
+                )
+
+                self._total_loss_scalar += reduced_loss
+                self._total_lm_loss_scalar += reduced_lm_loss
+                self._total_mtp_loss_scalar += reduced_mtp_loss
+                self.batch_seqlens.extend(batch_seqlens)
+
+                # 4. Logging
+                if self.global_step % args.logging_steps == 0:
+                    _, record_info = self.train_monitor.step(
+                        self.epoch,
+                        self.lr_scheduler,
+                        global_batch_size,
+                        reduced_grad_norm,
+                        self.batch_seqlens,
+                        self._step_start_time,
+                        total_steps,
+                        self.global_step,
+                        self._last_logged_step,
+                        self._total_loss_scalar,
+                        self._total_lm_loss_scalar,
+                        self._total_mtp_loss_scalar,
+                        self._last_logged_loss_scalar,
+                        self._last_logged_lm_loss_scalar,
+                        self._last_logged_mtp_loss_scalar,
+                        sparse_attn_reduce_group=reduce_group,
+                    )
+                    # update record
+                    self._step_start_time = record_info[&#x27;time&#x27;]
+                    self._last_logged_loss_scalar = record_info[&#x27;logged_loss&#x27;]
+                    self._last_logged_lm_loss_scalar = record_info[&#x27;logged_lm_loss&#x27;]
+                    self._last_logged_mtp_loss_scalar = record_info[&#x27;logged_mtp_loss&#x27;]
+                    self._last_logged_step = record_info[&#x27;logged_step&#x27;]
+                    self.batch_seqlens.clear()
+
+                # 5. Saving
+                if args.save_steps &gt; 0 and self.global_step % args.save_steps == 0:
+                    if not args.output_dir:
+                        logger.info_rank0(&quot;output_dir is not set, skipping checkpoint saving&quot;)
+                    else:
+                        empty_cache()
+                        save_checkpoint_path = os.path.join(
+                            args.output_dir, &quot;checkpoints&quot;, f&quot;global_step_{self.global_step}&quot;
+                        )
+                        state = {
+                            &quot;model&quot;: self.model,
+                            &quot;optimizer&quot;: self.optimizer,
+                            &quot;extra_state&quot;: {
+                                &quot;global_step&quot;: self.global_step,
+                                &quot;_global_step_last_logged&quot;: self._global_step_last_logged,
+                                &quot;_last_logged_step&quot;: self._last_logged_step,
+                                &quot;lr_scheduler&quot;: self.lr_scheduler.state_dict(),
+                                &quot;train_metric&quot;: self.train_monitor.state_dict(),
+                                &quot;torch_rng_state&quot;: torch.get_rng_state(),
+                            },
+                        }
+                        self.ckpt_manager.save(
+                            path=save_checkpoint_path,
+                            state=state,
+                            save_only_model=args.save_only_model,
+                            global_steps=self.global_step,
+                        )
+                        dist.barrier()
+                        logger.info_rank0(f&quot;Distributed checkpoint saved at {save_checkpoint_path} successfully!&quot;)
+                        cleanup_old_checkpoints(args, self.data_args.data_shared_file_system)
+
+                if self.global_step &gt;= total_steps:
+                    break
+            # Reset counter after completing an epoch
+            steps_trained_in_current_epoch = 0
+            # Save checkpoint at specified epoch intervals
+            already_saved = args.save_steps &gt; 0 and self.global_step % args.save_steps == 0
+            if args.save_epochs and (epoch + 1) % args.save_epochs == 0 and not already_saved:
+                if not args.output_dir:
+                    logger.info_rank0(&quot;output_dir is not set, skipping checkpoint saving&quot;)
+                else:
+                    empty_cache()
+                    save_checkpoint_path = os.path.join(
+                        args.output_dir, &quot;checkpoints&quot;, f&quot;global_step_{self.global_step}&quot;
+                    )
+                    state = {
+                        &quot;model&quot;: self.model,
+                        &quot;optimizer&quot;: self.optimizer,
+                        &quot;extra_state&quot;: {
+                            &quot;global_step&quot;: self.global_step,
+                            &quot;_global_step_last_logged&quot;: self._global_step_last_logged,
+                            &quot;_last_logged_step&quot;: self._last_logged_step,
+                            &quot;lr_scheduler&quot;: self.lr_scheduler.state_dict(),
+                            &quot;train_metric&quot;: self.train_monitor.state_dict(),
+                            &quot;torch_rng_state&quot;: torch.get_rng_state(),
+                        },
+                    }
+                    self.ckpt_manager.save(
+                        path=save_checkpoint_path,
+                        state=state,
+                        save_only_model=args.save_only_model,
+                        global_steps=self.global_step,
+                    )
+                    dist.barrier()
+                    logger.info_rank0(f&quot;Distributed checkpoint saved at {save_checkpoint_path} successfully!&quot;)
+                    cleanup_old_checkpoints(args, self.data_args.data_shared_file_system)
+
+            if self.global_step &gt;= total_steps:
+                break
+        # Stop profiler
+        if self.profiler_manager.profiler is not None:
+            self.profiler_manager.stop()
+
+        # Save model in HF format — all ranks participate in gather, rank 0 writes
+        if args.save_hf_weights and save_checkpoint_path is not None:
+            options = StateDictOptions(full_state_dict=True, cpu_offload=True)
+            model_state_dict = get_model_state_dict(self.model.model, options=options)
+
+            if dist.get_rank() == 0:
+                model_configs = [self.model.model.config, self.tokenizer]
+                self.ckpt_manager.save_model_weights(args.output_dir, model_state_dict, model_configs=model_configs)
+                logger.info_rank0(f&quot;Huggingface checkpoint saved at {args.output_dir} successfully!&quot;)
+
+            del model_state_dict
+            gc.collect()
+            empty_cache()
+            dist.barrier()
+
+        # Save training args — rank 0 only
+        if dist.get_rank() == 0 and args.output_dir:
+            self.ckpt_manager.save_args(args, args.output_dir)
+            logger.info_rank0(f&quot;Training arguments saved at {args.output_dir} successfully!&quot;)
+        logger.info_rank0(f&quot;Training completed in {time.time() - train_start_time:.2f}s&quot;)
+
+    def training_step(self, inputs: Dict[str, Any], num_items_in_batch: Optional[int]) -&gt; torch.Tensor:
+        &quot;&quot;&quot;
+        Performs a single forward and backward pass.
+        &quot;&quot;&quot;
+        # 1. Set model to train mode
+        self.model.train()
+        # Some custom optimizers require explicit train() calls
+        if hasattr(self.optimizer, &quot;train&quot;) and callable(self.optimizer.train):
+            self.optimizer.train()
+
+        # 2. Forward pass
+        loss_all = self._compute_loss(inputs, return_outputs=False, num_items_in_batch=num_items_in_batch)
+        if self.args.stage == &#x27;pt&#x27;:
+            loss_all.loss = loss_all.loss / self.current_gradient_accumulation_steps
+            loss_all.lm_loss_output = loss_all.lm_loss_output / self.current_gradient_accumulation_steps
+            loss_all.mtp_loss_output = loss_all.mtp_loss_output / self.current_gradient_accumulation_steps
+
+        loss = loss_all.loss
+        # 3. Clean up inputs to save memory
+        del inputs
+
+        # 4. Multi-device parallelism: Average loss across devices (if not using FSDP internal handling)
+        if torch.cuda.device_count() &gt; 1:
+            # Note: Standard FSDP usually handles loss averaging via the reduction of gradients or explicit loss reduction.
+            # If using DDP logic manually without DDP wrapper, this might be needed.
+            # For FSDP2, loss is usually local until aggregation.
+            loss = loss.mean()
+
+        # 5. Backward pass
+        loss.backward()
+
+        # 6. Return detached loss
+        return loss.detach(), loss_all.lm_loss_output.detach(), loss_all.mtp_loss_output.detach()
+
+    def get_batch_samples_func(self):
+        if self.parallel_args.cp_size &gt; 1:
+            if self.parallel_args.cp_type == &quot;ulysses&quot;:
+                return self._get_batch_samples_ulysses
+            elif self.parallel_args.cp_type == &quot;ring&quot;:
+                return self._get_batch_samples_megatron
+            else:
+                raise ValueError(f&quot;Unsupported cp_type: &#x27;{self.parallel_args.cp_type}&#x27; when cp_size &gt; 1.&quot;)
+        else:
+            return self._get_batch_samples
+
+    def _get_batch_samples_ulysses(self, parallel_state, epoch_iterator, num_batches):
+        cp_size = parallel_state.get_group_size(&quot;cp&quot;)
+        cp_rank = parallel_state.get_rank(&quot;cp&quot;)
+        batch, batch_seqlens, num_items_in_batch = self._get_batch_samples(parallel_state, epoch_iterator, num_batches)
+
+        for sample in batch:
+            labels = torch.nn.functional.pad(sample[&#x27;labels&#x27;], (0, 1), value=IGNORE_INDEX)
+            shift_labels = labels[..., 1:]
+            sample[&#x27;shift_labels&#x27;] = shift_labels
+            if &quot;position_ids&quot; not in sample:
+                position_ids = torch.arange(0, shift_labels.shape[1], device=shift_labels.device).unsqueeze(0)
+                sample[&#x27;position_ids&#x27;] = position_ids
+
+            for key, val in sample.items():
+                if key in (&#x27;attention_mask&#x27;, &#x27;actual_seq_len&#x27;):
+                    continue
+                if val is not None:
+                    seq_dim = 1
+                    # 2. Calculate total sequence length
+                    seq_total_len = val.size(seq_dim)
+
+                    # 3. Calculate the sequence length each rank is responsible for (handle indivisible cases)
+                    chunk_size = seq_total_len // cp_size
+                    remainder = seq_total_len % cp_size  # Remainder, the first &#x27;remainder&#x27; ranks take 1 more token each
+
+                    # 4. Calculate the start and end indices of the slice for current rank (core logic of Ring slicing)
+                    if cp_rank &lt; remainder:
+                        # For the first &#x27;remainder&#x27; ranks, each rank is responsible for (chunk_size + 1) tokens
+                        start_idx = cp_rank * (chunk_size + 1)
+                        end_idx = start_idx + (chunk_size + 1)
+                    else:
+                        # For the remaining ranks, each rank is responsible for &#x27;chunk_size&#x27; tokens
+                        start_idx = remainder * (chunk_size + 1) + (cp_rank - remainder) * chunk_size
+                        end_idx = start_idx + chunk_size
+                    # 5. Perform slicing: retain only the sequence part responsible for current rank
+                    val_sliced = val.narrow(seq_dim, start_idx, end_idx - start_idx)
+                    # 6. Update the value in sample with the sliced tensor
+                    if key == &#x27;shift_labels&#x27;:
+                        val_sliced = val_sliced.contiguous()
+                    device = torch.accelerator.current_device()
+                    sample[key] = val_sliced.to(device, non_blocking=True)
+
+        return batch, batch_seqlens, num_items_in_batch
+
+    def _get_batch_samples_megatron(self, parallel_state, epoch_iterator, num_batches):
+        cp_size = parallel_state.get_group_size(&quot;cp&quot;)
+        cp_rank = parallel_state.get_rank(&quot;cp&quot;)
+        batch, batch_seqlens, num_items_in_batch = self._get_batch_samples(parallel_state, epoch_iterator, num_batches)
+
+        for sample in batch:
+            # ===================== Original logic: generate shift_labels =====================
+            labels = torch.nn.functional.pad(sample[&#x27;labels&#x27;], (0, 1), value=IGNORE_INDEX)
+            shift_labels = labels[..., 1:]
+            sample[&#x27;shift_labels&#x27;] = shift_labels
+
+            # Original logic: generate position_ids
+            if &quot;position_ids&quot; not in sample:
+                position_ids = torch.arange(0, shift_labels.shape[1], device=shift_labels.device).unsqueeze(0)
+                sample[&#x27;position_ids&#x27;] = position_ids
+
+            # ===================== Core modification: Replace with Ring CP load-balanced splitting =====================
+            for key, val in sample.items():
+                # Skip attention_mask
+                if key == &#x27;attention_mask&#x27;:
+                    continue
+                if val is not None:
+                    seq_dim = 1  # Fixed sequence dimension, consistent with reference code
+
+                    # ========== Core logic of Ring CP load-balanced splitting (fully aligned with reference code) ==========
+                    # 1. Reshape: [bs, seq_len, ...] -&gt; [bs, 2*cp_size, seq_len/(2*cp_size), ...]
+                    val = val.view(
+                        *val.shape[0:seq_dim],
+                        2 * cp_size,
+                        val.shape[seq_dim] // (2 * cp_size),
+                        *val.shape[(seq_dim + 1) :],
+                    )
+                    # 2. Generate ring symmetric indices (core of load balancing)
+                    index = torch.tensor([cp_rank, (2 * cp_size - cp_rank - 1)], device=val.device)
+                    # 3. Select tensor by indices
+                    val = val.index_select(seq_dim, index)
+                    # 4. Merge dimensions and restore shape
+                    val = val.view(*val.shape[0:seq_dim], -1, *val.shape[(seq_dim + 2) :])
+                    # ====================================================================================================
+
+                    # ===================== Original logic: Contiguous + device migration =====================
+                    if key == &#x27;shift_labels&#x27;:
+                        val = val.contiguous()
+                    device = torch.accelerator.current_device()
+                    sample[key] = val.to(device, non_blocking=True)
+
+        return batch, batch_seqlens, num_items_in_batch
+
+    def _get_batch_samples(self, parallel_state, epoch_iterator, num_batches):
+        &quot;&quot;&quot;
+        Fetch num_batches samples from the iterator at once.
+
+        Args:
+            parallel_state: Parallel state object (unused, kept for interface consistency)
+            epoch_iterator: Data iterator for the current epoch
+            num_batches: Number of batches to fetch
+
+        Returns:
+            tuple: Three values with distinct purposes:
+
+            batch_samples (List[Dict[str, torch.Tensor]]):
+                Raw input data for model forward pass. Example: [{&quot;input_ids&quot;: tensor1, &quot;labels&quot;: tensor1_labels, ...}, ...]
+
+            batch_seqlens (List[int]):
+                Sequence length of each sample across all fetched batches. Example: [128, 256, 64, 192]
+
+            num_items_in_batch (int):
+                Total valid tokens across all fetched batches (distributed aggregation). Example: 640
+        &quot;&quot;&quot;
+        batch_samples = []
+        batch_seqlens = []
+        for _ in range(num_batches):
+            try:
+                device = torch.accelerator.current_device()
+                data = next(epoch_iterator)
+                data[&quot;input_ids&quot;] = data[&quot;input_ids&quot;].to(device, non_blocking=True)
+                data[&quot;labels&quot;] = data[&quot;labels&quot;].to(device, non_blocking=True)
+                if &quot;attention_mask&quot; in data:
+                    data[&quot;attention_mask&quot;] = data[&quot;attention_mask&quot;].to(device, non_blocking=True)
+                if &quot;position_ids&quot; in data:
+                    data[&quot;position_ids&quot;] = data[&quot;position_ids&quot;].to(device, non_blocking=True)
+                if &quot;actual_seq_len&quot; in data:
+                    data[&quot;actual_seq_len&quot;] = data[&quot;actual_seq_len&quot;].view(-1)
+                batch_samples.append(data)
+
+                # Calculate sequence lengths for each sample in the current batch
+                sample_seqlens = []
+                if &quot;attention_mask&quot; in data:
+                    sample_seqlens = data[&quot;attention_mask&quot;].sum(-1).tolist()
+                elif &quot;labels&quot; in data:
+                    sample_seqlens = (data[&quot;labels&quot;].ne(-100)).sum(-1).tolist()
+                batch_seqlens.extend(sample_seqlens)
+            except StopIteration:
+                break
+
+        # Calculate total valid tokens across all fetched batches (distributed aggregation)
+        num_items_in_batch = self._get_num_items_in_batch(batch_samples)
+        return batch_samples, batch_seqlens, num_items_in_batch
+
+    def _get_num_items_in_batch(self, batch_samples):
+        &quot;&quot;&quot;
+        Calculate the number of valid tokens in a batch (i.e., labels != -100).
+        Aggregates this count across all ranks.
+        &quot;&quot;&quot;
+        num_items_in_batch = None
+        device = torch.accelerator.current_device()
+        ps = ParallelState()
+
+        # Check if &#x27;labels&#x27; exist in the data
+        count_num_items_in_batch = len(batch_samples) &gt; 0 and &quot;labels&quot; in batch_samples[0]
+
+        if count_num_items_in_batch:
+            try:
+                # Local sum of valid tokens
+                num_items_in_batch = sum((batch[&quot;labels&quot;].ne(-100)).sum().item() for batch in batch_samples)
+            except (TypeError, AttributeError):
+                pass
+
+        if num_items_in_batch is not None:
+            # Distributed Aggregation
+            if dist.is_initialized():
+                num_items_tensor = torch.tensor(num_items_in_batch, device=device, dtype=torch.int64)
+                # Note: Using all_reduce(SUM) is often more efficient than all_gather + sum
+                dist.all_reduce(num_items_tensor, op=dist.ReduceOp.SUM, group=ps.get_group(&quot;dp_fsdp&quot;))
+                num_items_in_batch = num_items_tensor.item()
+
+            # Adjustment for non-data-parallel ranks (e.g., pipeline parallelism)
+            pc = getattr(self.args, &quot;non_data_parallel_size&quot;, None)
+            if pc:
+                num_items_in_batch = num_items_in_batch // pc
+
+        return num_items_in_batch
+
+    def _compute_loss(self, inputs, return_outputs=False, num_items_in_batch=None):
+        &quot;&quot;&quot;
+        Computes the loss for the batch.
+        &quot;&quot;&quot;
+        args = self.args
+        device = torch.accelerator.current_device()
+        # 1. Inject num_items_in_batch into inputs if present (for token-weighted loss)
+        kwargs = {}
+        if num_items_in_batch is not None:
+            kwargs[&quot;num_items_in_batch&quot;] = num_items_in_batch
+
+        labels = inputs[&#x27;labels&#x27;].to(device, non_blocking=True)
+        if args.stage == &#x27;pt&#x27;:
+            inputs[&#x27;labels&#x27;] = None
+
+        if self.optimization_args.chunk_loss_size and args.stage == &#x27;pt&#x27;:
+            loss_ctx, loss_mask = self._build_chunk_loss(labels, chunk_size=self.optimization_args.chunk_loss_size)
+            kwargs[&#x27;loss_ctx&#x27;] = loss_ctx
+            kwargs[&#x27;loss_mask&#x27;] = loss_mask
+        # Merge inputs without modifying the original dictionary in-place
+        model_inputs = {**inputs, **kwargs}
+
+        # 2. Forward pass
+        outputs = self.model(**model_inputs)
+
+        lm_loss_output = torch.tensor(0.0, device=device, dtype=torch.float32)
+        mtp_loss_output = torch.tensor(0.0, device=device, dtype=torch.float32)
+
+        # 3. Extract loss from outputs
+        if args.stage == &#x27;pt&#x27; and &quot;loss&quot; not in outputs:
+            logits = outputs.logits.contiguous().float()
+            loss = self._compute_language_model_pretrain_loss(logits, labels, **kwargs)
+            lm_loss_output = loss.clone()
+            aux_loss = getattr(outputs, &#x27;aux_loss&#x27;, None)
+            if aux_loss is not None and isinstance(aux_loss, torch.Tensor):
+                router_aux_loss_coef = getattr(self.model.config, &#x27;router_aux_loss_coef&#x27;, 0.0)
+                loss = loss + router_aux_loss_coef * aux_loss.to(loss.device)
+        else:
+            if isinstance(outputs, dict) and &quot;loss&quot; not in outputs:
+                raise ValueError(f&quot;Model outputs have no loss key: {list(outputs.keys())}&quot;)
+            loss = outputs[&quot;loss&quot;] if isinstance(outputs, dict) else outputs[0]
+            lm_loss_output = loss.clone()
+
+        if args.stage == &#x27;pt&#x27; and getattr(outputs, &#x27;mtp_logits&#x27;, None) is not None:
+            mtp_losses = []
+            for one_mtp_logits in outputs.mtp_logits:
+                labels, _ = roll_tensor(labels, fill_value=-100)
+                mtp_loss = self._compute_language_model_pretrain_loss(
+                    one_mtp_logits.contiguous().float(), labels, **kwargs
+                )
+                mtp_losses.append(mtp_loss)
+        else:
+            mtp_losses = getattr(outputs, &#x27;mtp_loss&#x27;, None)
+        if mtp_losses:
+            final_mtp_loss = 0
+            for i in range(len(mtp_losses)):
+                final_mtp_loss += mtp_losses[i] / len(mtp_losses)
+            mtp_loss_output = final_mtp_loss.clone()
+            loss += final_mtp_loss * getattr(args, &#x27;mtp_loss_scaling_factor&#x27;, 0.3)
+
+        # 4. Cross-device token averaging adjustment
+        # If the loss was calculated using &#x27;mean&#x27; locally but needs global scaling based on tokens
+        # sometimes we multiply by world size here so standard all_reduce(mean) works correctly.
+        # This depends heavily on the specific loss function implementation.
+        ps = ParallelState()
+        if dist.is_initialized() and args.stage != &#x27;pt&#x27;:
+            loss *= ps.get_group_size(&quot;dp_fsdp&quot;)
+            lm_loss_output *= ps.get_group_size(&quot;dp_fsdp&quot;)
+            if mtp_losses:
+                final_mtp_loss = 0
+                for i in range(len(mtp_losses)):
+                    final_mtp_loss += mtp_losses[i] * ps.get_group_size(&quot;dp_fsdp&quot;) / len(mtp_losses)
+                loss += final_mtp_loss * getattr(args, &#x27;mtp_loss_scaling_factor&#x27;, 0.3)
+                mtp_loss_output *= ps.get_group_size(&quot;dp_fsdp&quot;)
+
+        # 5. Return loss (or tuple of loss + outputs)
+        model_outputs = outputs if return_outputs else None
+        loss_result = LossOutput(
+            loss=loss, lm_loss_output=lm_loss_output, mtp_loss_output=mtp_loss_output, outputs=model_outputs
+        )
+        return loss_result
+
+    def _compute_language_model_pretrain_loss(self, logits, labels, ignore_index: int = -100, **kwargs) -&gt; torch.Tensor:
+        args = self.args
+
+        shift_labels = labels
+        shift_labels = shift_labels.reshape(-1)
+        logits = logits.view(-1, logits.shape[-1])
+
+        ps = ParallelState()
+
+        if ps.get_group_size(&quot;cp&quot;) &gt; 1:
+            loss = F.cross_entropy(logits, shift_labels, reduction=&#x27;sum&#x27;, ignore_index=ignore_index)
+
+            num_items_in_batch = (labels.ne(ignore_index)).sum()
+            dist.all_reduce(num_items_in_batch, op=dist.ReduceOp.SUM, group=ps.get_group(&quot;cp&quot;))
+            dist.all_reduce(loss, op=dist.ReduceOp.SUM, group=ps.get_group(&quot;cp&quot;))
+
+            loss = loss / num_items_in_batch.item()
+        else:
+            if args.calculate_per_token_loss:
+                loss = F.cross_entropy(logits, shift_labels, reduction=&#x27;none&#x27;, ignore_index=ignore_index)
+            else:
+                loss = F.cross_entropy(logits, shift_labels, ignore_index=ignore_index)
+
+        return loss
+
+    def _log_metrics(self, grad_norm=None, batch_size=0):
+        &quot;&quot;&quot;
+        Logs training metrics:
+        1. Calculate average loss since last log.
+        2. Calculate throughput (elapsed time).
+        3. Log current Grad Norm.
+        &quot;&quot;&quot;
+        # Calculate step difference
+        step_diff = self.global_step - self._global_step_last_logged
+        if step_diff == 0:
+            return
+
+        # 1. Calculate average interval loss
+        # (Total Loss - Total Loss at last log) / steps elapsed
+        avg_loss = (self._total_loss_scalar - self._logging_loss_scalar) / step_diff
+
+        # 2. Update logging cursor
+        self._logging_loss_scalar = self._total_loss_scalar
+        self._global_step_last_logged = self.global_step
+
+        # 3. Calculate timing and throughput
+        current_time = time.time()
+        if self._step_start_time is None:
+            elapsed_time_seconds = 0.0
+        else:
+            elapsed_time_seconds = current_time - self._step_start_time
+
+        # Reset start time for next interval
+        self._step_start_time = current_time
+
+        # Avoid division by zero
+        elapsed_time_per_iteration_ms = (elapsed_time_seconds / step_diff) * 1000
+        throughput = (batch_size / (elapsed_time_seconds / step_diff)) if elapsed_time_seconds &gt; 0 else 0.0
+
+        # 4. Assemble metrics
+        metrics = {
+            &quot;loss&quot;: avg_loss,
+            &quot;lr&quot;: self.lr_scheduler.get_last_lr()[0],
+            &quot;epoch&quot;: self.epoch,
+            &quot;global_step&quot;: self.global_step,
+        }
+
+        if grad_norm is not None:
+            metrics[&quot;grad_norm&quot;] = grad_norm
+
+        # 5. Log (Rank 0 only)
+        # Note: consumed samples is estimated
+        consumed_samples = self.global_step * batch_size
+        logger.info_rank0(
+            f&quot;iteration: {self.global_step} | &quot;
+            f&quot;consumed samples: {consumed_samples} | &quot;
+            f&quot;elapsed time per iteration (ms): {elapsed_time_per_iteration_ms:.1f} | &quot;
+            f&quot;throughput(samples/s): {throughput:.1f} | &quot;
+            f&quot;learning rate: {metrics[&#x27;lr&#x27;]:.6E} | &quot;
+            f&quot;global batch size: {batch_size:4d} | &quot;
+            f&quot;lm loss: {avg_loss:.4f} | &quot;
+            f&quot;grad norm: {grad_norm:.4f}&quot;
+        )
+
+    def _get_fsdp_root(self):
+        &quot;&quot;&quot;
+        Helper to get the inner FSDP module to access context managers like `no_sync`.
+        Handles different wrapping depths.
+        &quot;&quot;&quot;
+        # Direct check
+        if isinstance(self.model, FSDP):
+            return self.model
+
+        # Check one level deep (standard DDP/Wrapper)
+        if hasattr(self.model, &quot;module&quot;):
+            if isinstance(self.model.module, FSDP):
+                return self.model.module
+
+            # Check two levels deep (complex wrapping)
+            if hasattr(self.model.module, &quot;model&quot;) and isinstance(self.model.module.model, FSDP):
+                return self.model.module.model
+
+        # Fallback to the model itself (context manager might fail if not FSDP, hence the check in caller)
+        return self.model
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

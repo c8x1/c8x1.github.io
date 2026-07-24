@@ -1,0 +1,702 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>train_fsdp2.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">train_fsdp2.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_80c8fadfec289d.html">◀ pretrain_qwen3_8b_4k_fsdp2.sh</a> <span class="mut">终点 ▶</span></nav></div>
+<div class="wrap">
+<h1>train_fsdp2.py</h1><p class="goal">train_fsdp2.py · 11666B · 298 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L47" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class Arguments</a><a href="#L60" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class MindSpeedAutoTrainer</a><a href="#L66" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self)</a><a href="#L104" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _initialize(seed: int)</a><a href="#L158" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def train(self)</a><a href="#L161" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _parse_args(self)</a><a href="#L185" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _print_parsed_args(self)</a><a href="#L203" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _build_tokenizer(self)</a><a href="#L207" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _build_model(self)</a><a href="#L211" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _build_optimizer(self, model)</a><a href="#L223" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _build_scheduler(self, optimizer)</a><a href="#L243" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _build_data_manager(self, tokenizer, templ</a><a href="#L256" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _build_monitor(self)</a><a href="#L261" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _build_checkpointer(self)</a><a href="#L270" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class AutoTrainer</a><a href="#L276" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self)</a><a href="#L282" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def train(self)</a><a href="#L288" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def main()</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep01.html">EP01</a><a href="../ep02.html">EP02</a><a href="../ep03.html">EP03</a><a href="../ep04.html">EP04</a><a href="../ep05.html">EP05</a><a href="../ep06.html">EP06</a><a href="../ep07.html">EP07</a><a href="../ep08.html">EP08</a><a href="../ep09.html">EP09</a><a href="../ep10.html">EP10</a><a href="../ep11.html">EP11</a><a href="../ep12.html">EP12</a><a href="../ep13.html">EP13</a><a href="../ep14.html">EP14</a><a href="../ep15.html">EP15</a><a href="../ep16.html">EP16</a><a href="../ep17.html">EP17</a><a href="../ep18.html">EP18</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="annot"><div class="seg"><p class="seglab">行 1-11 · 导入与环境嗅探：torch_npu 的软依赖</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :1-:11）</h5><pre data-lang="py" data-start="1" data-idprefix="A">import os
+import types
+
+from dataclasses import dataclass, field, fields
+import torch
+
+try:
+    import torch_npu  # noqa: F401
+    from torch_npu.contrib import transfer_to_npu  # noqa: F401
+except ImportError:
+    pass</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">import torch
+# NVIDIA 路线：没有 torch_npu 这一步，直接依赖 torch.cuda
+# DDP 训练脚本里通常直接 torch.cuda.set_device(local_rank)
+# 无需 monkey-patch，因为上游就是为 CUDA 写的</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>GPU/DDP 脚本里这一整段 <code>try/except</code> 通常不存在——<code>import torch</code> 之后直接用 <code>torch.cuda</code>，因为 PyTorch 原生支持 CUDA，不需要额外算子库，也不需要把 <code>.cuda()</code> 重定向到别的后端。<code>torch_npu</code> + <code>transfer_to_npu</code> 这对组合是<b>昇腾专属的适配层</b>，它的存在本身就在告诉你：这份脚本的目标硬件不是 GPU，而是 NPU，只是代码骨架尽量复用了 transformers 那套 CUDA 写法。</p></div></div><div class="seg"><p class="seglab">行 12-40 · 工厂与基础设施导入：fsdp2 子包的整体装配</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :12-:40）</h5><pre data-lang="py" data-start="12" data-idprefix="A">from transformers import AutoConfig, is_torch_npu_available
+
+from mindspeed_llm.fsdp2.models.model_factory import ModelFactory
+from mindspeed_llm.fsdp2.optim.optimizer import OptimizerFactory
+from mindspeed_llm.fsdp2.optim.scheduler import SchedulerFactory
+from mindspeed_llm.fsdp2.checkpoint.checkpoint_manager import CheckpointManager
+from mindspeed_llm.fsdp2.train.trainer import Trainer
+from mindspeed_llm.fsdp2.data.data_factory import DataFactory
+from mindspeed_llm.fsdp2.data.tokenizer import TokenizerFactory
+from mindspeed_llm.fsdp2.data.template import get_template_and_fix_tokenizer
+from mindspeed_llm.fsdp2.utils.logging import setup_global_logging, get_logger
+from mindspeed_llm.fsdp2.utils.arguments import (
+    ModelArguments,
+    DataArguments,
+    ParallelArguments,
+    TrainingArguments,
+    OptimizationArguments,
+    fsdp2_parse_args,
+)
+from mindspeed_llm.fsdp2.utils.global_vars import set_args
+from mindspeed_llm.fsdp2.utils.train_monitor import TrainMonitor
+from mindspeed_llm.fsdp2.utils.device import set_accelerator_compatible
+from mindspeed_llm.fsdp2.utils.coverage import auto_coverage
+
+from mindspeed.fsdp.utils.random import set_seed
+from mindspeed.fsdp.utils.torch_patch import apply_hccl_premul_sum_patch
+
+
+logger = get_logger(__name__)</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># GPU/DDP 训练脚本典型导入
+import torch
+from transformers import AutoConfig, AutoTokenizer
+# 没有「工厂层」，通常直接 trainer = Trainer(model, args, train_dataset)
+# DDP 时再包一层 model = DDP(model, device_ids=[local_rank])</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>GPU/DDP 路线通常不需要这么重的工厂层——<code>transformers.Trainer</code> 直接吃 model+args+dataset 就能跑，DDP 只是给 model 套一层 <code>torch.nn.parallel.DistributedDataParallel</code>。这里之所以用一堆 Factory，是因为 fsdp2 路线要在<b>工厂内部</b>决定 FSDP2 如何分片、EP（专家并行）大小、混合精度策略等，这些决策不该散落在入口脚本里。把「造零件」集中到工厂，入口脚本就只剩「装配顺序「——这是 EP05 讲的」容器装配」哲学。</p></div></div><div class="seg"><p class="seglab">行 43-55 · Arguments 根 dataclass：五段参数的聚合容器</p><pre data-lang="py" data-start="43" data-idprefix="A"># ==============================================================================
+# [Arguments Definition] Arguments Class for MindSpeed FSDP Scheme
+# ==============================================================================
+@dataclass
+class Arguments:
+    &quot;&quot;&quot;Root arguments class containing model, data, parallel, and training arguments.&quot;&quot;&quot;
+
+    model: ModelArguments = field(default_factory=ModelArguments)
+    data: DataArguments = field(default_factory=DataArguments)
+    parallel: ParallelArguments = field(default_factory=ParallelArguments)
+    training: TrainingArguments = field(default_factory=TrainingArguments)
+    optimization: OptimizationArguments = field(default_factory=OptimizationArguments)
+</pre><div class="exp"><p>这是一个用 <code>@dataclass</code> + <code>field(default_factory=...)</code> 拼出来的<b>根参数容器</b>，把 Model/Data/Parallel/Training/Optimization 五段子参数类挂在一棵树上。每个字段都 <code>default_factory</code> 出对应子类的默认实例，所以 <code>Arguments()</code> 不传参也能构造出一个全默认的参数树。</p><p>它存在的意义是给 :162 的 <code>fsdp2_parse_args(Arguments)</code> 当根类型——解析器递归地遍历这棵 dataclass 树，把 YAML + CLI 的值填进对应字段。这正是 EP05 反复强调的「参数合参」：物理上一份 YAML，程序内是五段 dataclass 实例，而 <code>Arguments</code> 就是把它们拢在一起的根。</p><p>对算法工程师的提示：新增一个可调超参时，要去对应子参数类（如 <code>TrainingArguments</code>）里加字段，而不是改这里——这里只是聚合，不定义具体参数。</p></div></div><div class="seg"><p class="seglab">行 60-101 · MindSpeedAutoTrainer.__init__：依赖注入容器的装配顺序</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :60-:101）</h5><pre data-lang="py" data-start="60" data-idprefix="A">class MindSpeedAutoTrainer:
+    &quot;&quot;&quot;
+    AutoTrainer: Dependency Injection Container.
+    Based on FSDP2 Arguments (HfArgumentParser style).
+    &quot;&quot;&quot;
+
+    def __init__(self):
+        # 1. Parse arguments
+        self._parse_args()
+
+        # 2. Initialize distributed environment
+        self._initialize(seed=self.training_args.seed)
+
+        self.rank = torch.distributed.get_rank()
+        self._print_parsed_args()
+
+        # 3. Build components
+        self.model = self._build_model()
+        self.tokenizer = self._build_tokenizer()
+        self.template = get_template_and_fix_tokenizer(self.tokenizer, self.data_args)
+        self.data_manager = self._build_data_manager(self.tokenizer, self.template)
+        self.train_dataloader = self.data_manager.create_train_dataloader()
+        self.optimizer = self._build_optimizer(self.model)
+        self.lr_scheduler = self._build_scheduler(self.optimizer)
+        self.checkpoint_manager = self._build_checkpointer()
+        self.train_monitor = self._build_monitor()
+        self.model.apply_optimizer_hook(self.optimizer)  # hook optimizer step for clearing quantization cache
+
+        # 4. Dependency Injection
+        self.trainer = Trainer(
+            model=self.model,
+            optimizer=self.optimizer,
+            lr_scheduler=self.lr_scheduler,
+            train_dataloader=self.train_dataloader,
+            args=self.training_args,
+            parallel_args=self.parallel_args,
+            optimization_args=self.optimization_args,
+            data_args=self.data_args,
+            ckpt_manager=self.checkpoint_manager,
+            monitor=self.train_monitor,
+            tokenizer=self.tokenizer,
+        )</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># GPU/DDP 典型装配（极简）
+model = AutoModelForCausalLM.from_pretrained(name)
+model = model.to(local_rank)
+model = DDP(model, device_ids=[local_rank])
+optimizer = AdamW(model.parameters(), lr=lr)
+scheduler = get_linear_schedule(model, max_steps)
+trainer = Trainer(model, args, optimizer=optimizer, lr_scheduler=scheduler)
+trainer.train()</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>GPU/DDP 路线的装配通常只有 5–6 行，model→DDP→optimizer→scheduler→trainer 顺序固定但<b>全写在一个函数里</b>。这里之所以拆成容器 + 一堆 <code>_build_*</code>，是因为 fsdp2 要在工厂内部做三件 DDP 不做的事：① FSDP2 分片（按 world_size/shard 切权重）；② EP（专家并行，按 ep_size 切专家）；③ Ascend 量化的缓存失效钩子。这些决策的复杂度远超 <code>DDP(model, device_ids=...)</code>，必须靠工厂封装，入口脚本只保留「装配顺序」本身。</p></div></div><div class="seg"><p class="seglab">行 103-156 · _initialize：后端选择、设备绑定、进程组（核心 Ascend 适配段）</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :103-:156）</h5><pre data-lang="py" data-start="103" data-idprefix="A">    @staticmethod
+    def _initialize(seed: int):
+        &quot;&quot;&quot;
+        Static initialization method: Receives external seed and local_rank,
+        avoiding dependency on hardcoding or self.
+        &quot;&quot;&quot;
+        if is_torch_npu_available():
+            fallback = torch.npu
+            dist_backend = &quot;hccl&quot;
+            apply_hccl_premul_sum_patch()
+        elif torch.cuda.is_available():
+            fallback = torch.cuda
+            dist_backend = &quot;nccl&quot;
+        else:
+            raise RuntimeError(&quot;No supported accelerator found (NPU/CUDA)&quot;)
+
+        set_accelerator_compatible(fallback)
+        setup_global_logging(level=&quot;INFO&quot;)
+
+        # --- 1. Handle Local Rank (Device Index) ---
+        # Logic: Prioritize environment variables (injected by torchrun/accelerate),
+        # then fallback to arguments, and finally default to 0.
+        env_local_rank = int(os.environ.get(&quot;LOCAL_RANK&quot;, -1))
+
+        if env_local_rank != -1:
+            target_device_index = env_local_rank
+        else:
+            # Fallback for single-node single-card or incorrect configuration
+            target_device_index = 0
+            os.environ[&quot;LOCAL_RANK&quot;] = str(target_device_index)
+
+        # Set the NPU device for the current process
+        torch.accelerator.set_device_index(target_device_index)
+        torch.accelerator.set_device(target_device_index)
+
+        # --- 2. Dynamically set random seed ---
+        # MindSpeed&#x27;s set_seed usually handles offset for different ranks.
+        set_seed(seed, set_deterministic=True)
+
+        # --- 3. Initialize distributed process group ---
+        # Simple fault tolerance: Manual injection for single-script runs (non-torchrun)
+        if &quot;RANK&quot; not in os.environ:
+            os.environ[&quot;RANK&quot;] = &quot;0&quot;
+            os.environ[&quot;WORLD_SIZE&quot;] = &quot;1&quot;
+            # Ensure LOCAL_RANK is also set
+            if &quot;LOCAL_RANK&quot; not in os.environ:
+                os.environ[&quot;LOCAL_RANK&quot;] = &quot;0&quot;
+
+        # Get final global rank and world size from environment variables
+        rank = int(os.environ[&quot;RANK&quot;])
+        world_size = int(os.environ[&quot;WORLD_SIZE&quot;])
+
+        if not torch.distributed.is_initialized():
+            torch.distributed.init_process_group(backend=dist_backend, rank=rank, world_size=world_size)</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># GPU/DDP 典型 _initialize（对比用）
+import torch.distributed as dist
+def _initialize(seed, local_rank):
+    torch.cuda.set_device(local_rank)  # 直接写死 CUDA
+    torch.manual_seed(seed)
+    if not dist.is_initialized():
+        dist.init_process_group(backend=&#x27;nccl&#x27;)  # 写死 NCCL
+    # 没有 set_accelerator_compatible，没有 premul_sum patch</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异集中在三处：</p><ul><li><b>后端字符串</b>：GPU 写死 <code>'nccl'</code>，这里运行时在 <code>'hccl'</code>/<code>'nccl'</code> 间二选一——这是 CUDA→CANN 那座桥的落点。</li><li><b>设备抽象层</b>：GPU 直接 <code>torch.cuda.set_device</code>，这里走 <code>torch.accelerator</code> 并用 <code>set_accelerator_compatible</code> 把它重映射到实际后端——多一层间接，换来一份代码两硬件。</li><li><b>HCCL premul_sum patch（:112）</b>：GPU 没有这一步，见下段单独讲。</li></ul><p>另一点：<code>init_process_group</code> 这里显式传 <code>rank=rank, world_size=world_size</code>，而 GPU 脚本常省略这两个参数、让 torch 注入的环境变量自动填——本质等价，但显式传更稳，尤其配合 :144 的手动兜底时。</p></div></div><div class="seg"><p class="seglab">行 109-112 · apply_hccl_premul_sum_patch：HCCL 对 PREMUL_SUM 的补偿</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :109-:112）</h5><pre data-lang="py" data-start="109" data-idprefix="A">        if is_torch_npu_available():
+            fallback = torch.npu
+            dist_backend = &quot;hccl&quot;
+            apply_hccl_premul_sum_patch()</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># GPU: NCCL 原生支持 PREMUL_SUM，无需 patch
+torch.distributed.all_reduce(
+    grad, op=ReduceOp.PREMUL_SUM
+)  # 内部直接做 premul，精度最优
+
+# NPU(HCCL): 被 patch 改成等价的 SUM + 后乘
+torch.distributed.all_reduce(grad, op=ReduceOp.PREMUL_SUM)
+# 实际执行: all_reduce(grad, op=SUM) 然后 grad.mul_(factor)</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>这一段是「诚实说外部机制」的典型：<code>apply_hccl_premul_sum_patch</code> 来自底层 <code>mindspeed.fsdp.utils.torch_patch</code>，它不是 PyTorch 原生能力，而是 MindSpeed 团队为补 HCCL 算子缺口写的运行时补丁。GPU 侧 NCCL 一步到位，NPU 侧要靠 wrapper 拆成两步、损失一点精度特性。理解了这一点，你在排查「NPU 上 bf16 梯度累积数值和 GPU 对不上」时就不会只怀疑随机种子——通信算子的实现差异也是嫌疑源之一。</p></div></div><div class="seg"><p class="seglab">行 158-181 · train / _parse_args：启动入口与五段参数合并</p><pre data-lang="py" data-start="158" data-idprefix="A">    def train(self):
+        self.trainer.train(resume_from_checkpoint=self.training_args.resume_from_checkpoint)
+
+    def _parse_args(self):
+        root_args = fsdp2_parse_args(Arguments)
+        self.model_args = root_args.model
+        self.data_args = root_args.data
+        self.parallel_args = root_args.parallel
+        self.training_args = root_args.training
+        self.optimization_args = root_args.optimization
+
+        self.args = types.SimpleNamespace(
+            **{
+                k: v
+                for ns in [
+                    root_args.model,
+                    root_args.data,
+                    root_args.parallel,
+                    root_args.training,
+                    root_args.optimization,
+                ]
+                for k, v in ns.__dict__.items()
+            }
+        )</pre><div class="exp"><p>:158–159 的 <code>train()</code> 极薄，只把 <code>resume_from_checkpoint</code> 透传给 <code>self.trainer.train()</code>——真正的训练循环在 <code>Trainer</code> 内部，本文件不碰。这是「入口脚本只装配、不跑逻辑」原则的体现。</p><p>:161–183 的 <code>_parse_args</code> 干两件事：</p><ul><li><b>解析</b>：<code>fsdp2_parse_args(Arguments)</code> 递归遍历根 dataclass，把 YAML 默认值 + CLI 覆盖值填进五段子参数，返回 <code>root_args</code>。这就是 EP05 说的「CLI 优先、YAML 兜底」的实现点——CLI 显式传的覆盖 YAML 的同名键。</li><li><b>扁平化</b>（:169–181）：把五段 dataclass 的所有字段<b>展平</b>成一个 <code>types.SimpleNamespace</code>，再 <code>set_args(self.args)</code> 写进进程级全局态。为什么要展平？因为下游很多模块（工厂、Trainer）习惯从一个「扁平 args 对象」按属性名取值（如 <code>args.lr</code>），而不是从五段树里逐层挖（<code>args.optimization.lr</code>）。展平是兼容旧代码访问习惯的桥接。</li></ul><p>注意 :180 的字典推导式遍历了五个 ns 的 <code>__dict__</code>——如果五段里有<b>同名字段</b>，后遍历的会覆盖先遍历的（顺序是 model→data→parallel→training→optimization）。这是个潜在坑：若 ParallelArguments 和 TrainingArguments 都叫 <code>batch_size</code>，最终留下的会是 optimization 段的值。生产中各子类字段命名一般做了去重，但扩展时需留意。</p></div></div><div class="seg"><p class="seglab">行 185-197 · _print_parsed_args：rank0 只打印、不阻塞</p><pre data-lang="py" data-start="185" data-idprefix="A">    def _print_parsed_args(self):
+        arg_modules = [
+            (&quot;ModelArguments&quot;, self.model_args),
+            (&quot;DataArguments&quot;, self.data_args),
+            (&quot;ParallelArguments&quot;, self.parallel_args),
+            (&quot;TrainingArguments&quot;, self.training_args),
+        ]
+        for module_name, arg_instance in arg_modules:
+            logger.info_plain_rank0(f&quot;\n {module_name}&quot;)
+            logger.info_plain_rank0(&quot;-&quot; * 60)
+            for f in fields(arg_instance):
+                val = getattr(arg_instance, f.name)
+                logger.info_plain_rank0(f&quot;  {f.name:&lt;30}  {val if val is not None else &#x27;None&#x27;}&quot;)</pre><div class="exp"><p>这是一个调试可见性工具：遍历 Model/Data/Parallel/Training 四段子参数，用 <code>fields(arg_instance)</code> 取每个 dataclass 字段，逐行打印字段名和值。</p><p>关键在 <code>logger.info_plain_rank0</code>——<b>只在 rank0 打印</b>。分布式训练里每个 rank 都跑这段代码，若都打印会输出 N 份重复日志（8 卡就是 8 份），淹没真正的信息。rank0 过滤是 DDP/FSDP 通用的日志卫生实践。</p><p>对算法工程师：启动后若日志里看不到参数表，先确认当前进程是不是 rank0（:73 设的 <code>self.rank</code>），以及 logger 的 rank 过滤是否生效。OptimizationArguments 没进打印列表（只列了四段），属作者取舍——优化相关超参要去别处查。</p></div></div><div class="seg"><p class="seglab">行 203-264 · _build_* 系列：各工厂的薄封装</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :203-:264）</h5><pre data-lang="py" data-start="203" data-idprefix="A">    def _build_tokenizer(self):
+        logger.info_rank0(&quot;&gt; Building Tokenizer...&quot;)
+        return TokenizerFactory.create(self.model_args)
+
+    def _build_model(self):
+        logger.info_rank0(&quot;&gt; Building FSDP2 Model...&quot;)
+        return ModelFactory.create(self.model_args, self.parallel_args)
+
+    def _build_optimizer(self, model):
+        logger.info_rank0(&quot;&gt; Building Optimizer...&quot;)
+        return OptimizerFactory.create(
+            model=model,
+            ep_size=self.parallel_args.ep_size,
+            lr=self.training_args.lr,
+            optimizer_type=self.training_args.optimizer,
+            weight_decay=self.training_args.weight_decay,
+            betas=(self.training_args.adam_beta1, self.training_args.adam_beta2),
+            adam_epsilon=self.training_args.adam_epsilon,
+        )
+
+    def _build_scheduler(self, optimizer):
+        logger.info_rank0(&quot;&gt; Building LR Scheduler...&quot;)
+        if self.training_args.max_steps &gt; 0:
+            max_steps = self.training_args.max_steps
+        else:
+            steps_in_epoch = len(self.train_dataloader)
+            total_updates_per_epoch = steps_in_epoch // self.training_args.gradient_accumulation_steps + int(
+                steps_in_epoch % self.training_args.gradient_accumulation_steps &gt; 0
+            )
+            max_steps = total_updates_per_epoch * self.training_args.num_train_epochs
+
+        return SchedulerFactory.create(
+            optimizer=optimizer,
+            train_steps=max_steps,
+            lr=self.training_args.lr,
+            lr_decay_style=self.training_args.lr_scheduler_type,
+            lr_warmup_ratio=self.training_args.warmup_ratio,
+            lr_min=self.training_args.min_lr,
+        )
+
+    def _build_data_manager(self, tokenizer, template):
+        logger.info_rank0(&quot;&gt; Building DataFactory...&quot;)
+        return DataFactory.create(
+            data_manager_type=self.data_args.data_manager_type,
+            model_args=self.model_args,
+            data_args=self.data_args,
+            parallel_args=self.parallel_args,
+            training_args=self.training_args,
+            stage=&quot;sft&quot;,
+            tokenizer=tokenizer,
+            template=template,
+        )
+
+    def _build_monitor(self):
+        logger.info_rank0(&quot;&gt; Building Monitor...&quot;)
+        hf_config = AutoConfig.from_pretrained(self.model_args.model_name_or_path, trust_remote_code=True)
+        return TrainMonitor(self.training_args, hf_config)
+
+    def _build_checkpointer(self):
+        logger.info_rank0(&quot;&gt; Building Checkpointer...&quot;)
+        return CheckpointManager
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># GPU/DDP: 优化器/调度器通常就地建，无工厂
+optimizer = torch.optim.AdamW(
+    model.parameters(), lr=lr,
+    weight_decay=weight_decay, eps=adam_epsilon)
+scheduler = get_linear_schedule_with_warmup(
+    optimizer, num_warmup_steps=w, num_training_steps=max_steps)
+# 不传 ep_size：DDP 下没有 EP，参数不需分组</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异点：① GPU 路线优化器直接吃 <code>model.parameters()</code>，FSDP2 这里要传 <code>ep_size</code>——因为 EP（专家并行）下 dense 参数和 expert 参数的更新/分片方式不同，优化器要按组处理。② max_steps 的反推逻辑两边都需要，但 FSDP2 因为有梯度累积的显式处理（:229）写得更显式。③ <code>_build_checkpointer</code> 返回类而非实例，体现了 FSDP2 checkpoint 的复杂度——分片权重存取要等进程组/分片拓扑都就绪后才能正确实例化，所以推迟到 Trainer 内。</p></div></div><div class="seg"><p class="seglab">行 270-290 · AutoTrainer 门面 + auto_coverage + main：入口分发与覆盖率门</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :270-:290）</h5><pre data-lang="py" data-start="270" data-idprefix="A">class AutoTrainer:
+    &quot;&quot;&quot;
+    Unified entry point for Training.
+    Dispatches to MindSpeedAutoTrainer (New) or McoreAutoTrainer (Old) based on configuration.
+    &quot;&quot;&quot;
+
+    def __init__(self):
+        # Strategy Dispatch: Prioritize environment variable TRAINING_BACKEND
+        # To run MindSpeed FSDP code, set: export TRAINING_BACKEND=mindspeed_fsdp
+        logger.info_rank0(&quot;&gt;&gt;&gt; [AutoTrainer] Initializing MindSpeed FSDP backend...&quot;)
+        self.trainer = MindSpeedAutoTrainer()
+
+    def train(self):
+        &quot;&quot;&quot;Delegate to the implementation&quot;&quot;&quot;
+        self.trainer.train()
+
+
+@auto_coverage
+def main():
+    trainer = AutoTrainer()
+    trainer.train()</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># GPU 多后端脚本的常见分发写法
+backend = os.environ.get(&#x27;TRAINING_BACKEND&#x27;, &#x27;transformers&#x27;)
+if backend == &#x27;transformers&#x27;:
+    trainer = HFTrainer()
+elif backend == &#x27;deepspeed&#x27;:
+    trainer = DeepSpeedTrainer()
+trainer.train()</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异点不在「门面模式」本身（GPU 生态也常用），而在<b>门面是否真的分发</b>。GPU 生态里 transformers/DeepSpeed/Megatron 的切换通常真有 if 分支；这里目前只挂了 MindSpeedAutoTrainer 一条实路，McoreAutoTrainer 分支是注释预留——反映了 fsdp2 路线还在建设中、尚未与旧 megatron 路线在同一入口下并轨。理解这一点，你在读 EP05 的「TRAINING_BACKEND 决定走哪条分支」时就知道：当前那句话是<b>设计意图</b>而非<b>已实现行为</b>，真正生效的只有 fsdp2 这条路。</p></div></div></div>
+<details class="src"><summary>📜 完整源码（298 行）— 大纲点跳行</summary><pre data-lang="py" data-start="1">import os
+import types
+
+from dataclasses import dataclass, field, fields
+import torch
+
+try:
+    import torch_npu  # noqa: F401
+    from torch_npu.contrib import transfer_to_npu  # noqa: F401
+except ImportError:
+    pass
+from transformers import AutoConfig, is_torch_npu_available
+
+from mindspeed_llm.fsdp2.models.model_factory import ModelFactory
+from mindspeed_llm.fsdp2.optim.optimizer import OptimizerFactory
+from mindspeed_llm.fsdp2.optim.scheduler import SchedulerFactory
+from mindspeed_llm.fsdp2.checkpoint.checkpoint_manager import CheckpointManager
+from mindspeed_llm.fsdp2.train.trainer import Trainer
+from mindspeed_llm.fsdp2.data.data_factory import DataFactory
+from mindspeed_llm.fsdp2.data.tokenizer import TokenizerFactory
+from mindspeed_llm.fsdp2.data.template import get_template_and_fix_tokenizer
+from mindspeed_llm.fsdp2.utils.logging import setup_global_logging, get_logger
+from mindspeed_llm.fsdp2.utils.arguments import (
+    ModelArguments,
+    DataArguments,
+    ParallelArguments,
+    TrainingArguments,
+    OptimizationArguments,
+    fsdp2_parse_args,
+)
+from mindspeed_llm.fsdp2.utils.global_vars import set_args
+from mindspeed_llm.fsdp2.utils.train_monitor import TrainMonitor
+from mindspeed_llm.fsdp2.utils.device import set_accelerator_compatible
+from mindspeed_llm.fsdp2.utils.coverage import auto_coverage
+
+from mindspeed.fsdp.utils.random import set_seed
+from mindspeed.fsdp.utils.torch_patch import apply_hccl_premul_sum_patch
+
+
+logger = get_logger(__name__)
+
+
+# ==============================================================================
+# [Arguments Definition] Arguments Class for MindSpeed FSDP Scheme
+# ==============================================================================
+@dataclass
+class Arguments:
+    &quot;&quot;&quot;Root arguments class containing model, data, parallel, and training arguments.&quot;&quot;&quot;
+
+    model: ModelArguments = field(default_factory=ModelArguments)
+    data: DataArguments = field(default_factory=DataArguments)
+    parallel: ParallelArguments = field(default_factory=ParallelArguments)
+    training: TrainingArguments = field(default_factory=TrainingArguments)
+    optimization: OptimizationArguments = field(default_factory=OptimizationArguments)
+
+
+# ==============================================================================
+# AutoTrainer
+# ==============================================================================
+class MindSpeedAutoTrainer:
+    &quot;&quot;&quot;
+    AutoTrainer: Dependency Injection Container.
+    Based on FSDP2 Arguments (HfArgumentParser style).
+    &quot;&quot;&quot;
+
+    def __init__(self):
+        # 1. Parse arguments
+        self._parse_args()
+
+        # 2. Initialize distributed environment
+        self._initialize(seed=self.training_args.seed)
+
+        self.rank = torch.distributed.get_rank()
+        self._print_parsed_args()
+
+        # 3. Build components
+        self.model = self._build_model()
+        self.tokenizer = self._build_tokenizer()
+        self.template = get_template_and_fix_tokenizer(self.tokenizer, self.data_args)
+        self.data_manager = self._build_data_manager(self.tokenizer, self.template)
+        self.train_dataloader = self.data_manager.create_train_dataloader()
+        self.optimizer = self._build_optimizer(self.model)
+        self.lr_scheduler = self._build_scheduler(self.optimizer)
+        self.checkpoint_manager = self._build_checkpointer()
+        self.train_monitor = self._build_monitor()
+        self.model.apply_optimizer_hook(self.optimizer)  # hook optimizer step for clearing quantization cache
+
+        # 4. Dependency Injection
+        self.trainer = Trainer(
+            model=self.model,
+            optimizer=self.optimizer,
+            lr_scheduler=self.lr_scheduler,
+            train_dataloader=self.train_dataloader,
+            args=self.training_args,
+            parallel_args=self.parallel_args,
+            optimization_args=self.optimization_args,
+            data_args=self.data_args,
+            ckpt_manager=self.checkpoint_manager,
+            monitor=self.train_monitor,
+            tokenizer=self.tokenizer,
+        )
+
+    @staticmethod
+    def _initialize(seed: int):
+        &quot;&quot;&quot;
+        Static initialization method: Receives external seed and local_rank,
+        avoiding dependency on hardcoding or self.
+        &quot;&quot;&quot;
+        if is_torch_npu_available():
+            fallback = torch.npu
+            dist_backend = &quot;hccl&quot;
+            apply_hccl_premul_sum_patch()
+        elif torch.cuda.is_available():
+            fallback = torch.cuda
+            dist_backend = &quot;nccl&quot;
+        else:
+            raise RuntimeError(&quot;No supported accelerator found (NPU/CUDA)&quot;)
+
+        set_accelerator_compatible(fallback)
+        setup_global_logging(level=&quot;INFO&quot;)
+
+        # --- 1. Handle Local Rank (Device Index) ---
+        # Logic: Prioritize environment variables (injected by torchrun/accelerate),
+        # then fallback to arguments, and finally default to 0.
+        env_local_rank = int(os.environ.get(&quot;LOCAL_RANK&quot;, -1))
+
+        if env_local_rank != -1:
+            target_device_index = env_local_rank
+        else:
+            # Fallback for single-node single-card or incorrect configuration
+            target_device_index = 0
+            os.environ[&quot;LOCAL_RANK&quot;] = str(target_device_index)
+
+        # Set the NPU device for the current process
+        torch.accelerator.set_device_index(target_device_index)
+        torch.accelerator.set_device(target_device_index)
+
+        # --- 2. Dynamically set random seed ---
+        # MindSpeed&#x27;s set_seed usually handles offset for different ranks.
+        set_seed(seed, set_deterministic=True)
+
+        # --- 3. Initialize distributed process group ---
+        # Simple fault tolerance: Manual injection for single-script runs (non-torchrun)
+        if &quot;RANK&quot; not in os.environ:
+            os.environ[&quot;RANK&quot;] = &quot;0&quot;
+            os.environ[&quot;WORLD_SIZE&quot;] = &quot;1&quot;
+            # Ensure LOCAL_RANK is also set
+            if &quot;LOCAL_RANK&quot; not in os.environ:
+                os.environ[&quot;LOCAL_RANK&quot;] = &quot;0&quot;
+
+        # Get final global rank and world size from environment variables
+        rank = int(os.environ[&quot;RANK&quot;])
+        world_size = int(os.environ[&quot;WORLD_SIZE&quot;])
+
+        if not torch.distributed.is_initialized():
+            torch.distributed.init_process_group(backend=dist_backend, rank=rank, world_size=world_size)
+
+    def train(self):
+        self.trainer.train(resume_from_checkpoint=self.training_args.resume_from_checkpoint)
+
+    def _parse_args(self):
+        root_args = fsdp2_parse_args(Arguments)
+        self.model_args = root_args.model
+        self.data_args = root_args.data
+        self.parallel_args = root_args.parallel
+        self.training_args = root_args.training
+        self.optimization_args = root_args.optimization
+
+        self.args = types.SimpleNamespace(
+            **{
+                k: v
+                for ns in [
+                    root_args.model,
+                    root_args.data,
+                    root_args.parallel,
+                    root_args.training,
+                    root_args.optimization,
+                ]
+                for k, v in ns.__dict__.items()
+            }
+        )
+
+        set_args(self.args)
+
+    def _print_parsed_args(self):
+        arg_modules = [
+            (&quot;ModelArguments&quot;, self.model_args),
+            (&quot;DataArguments&quot;, self.data_args),
+            (&quot;ParallelArguments&quot;, self.parallel_args),
+            (&quot;TrainingArguments&quot;, self.training_args),
+        ]
+        for module_name, arg_instance in arg_modules:
+            logger.info_plain_rank0(f&quot;\n {module_name}&quot;)
+            logger.info_plain_rank0(&quot;-&quot; * 60)
+            for f in fields(arg_instance):
+                val = getattr(arg_instance, f.name)
+                logger.info_plain_rank0(f&quot;  {f.name:&lt;30}  {val if val is not None else &#x27;None&#x27;}&quot;)
+
+    # =========================================================================
+    # Component Builders
+    # =========================================================================
+
+    def _build_tokenizer(self):
+        logger.info_rank0(&quot;&gt; Building Tokenizer...&quot;)
+        return TokenizerFactory.create(self.model_args)
+
+    def _build_model(self):
+        logger.info_rank0(&quot;&gt; Building FSDP2 Model...&quot;)
+        return ModelFactory.create(self.model_args, self.parallel_args)
+
+    def _build_optimizer(self, model):
+        logger.info_rank0(&quot;&gt; Building Optimizer...&quot;)
+        return OptimizerFactory.create(
+            model=model,
+            ep_size=self.parallel_args.ep_size,
+            lr=self.training_args.lr,
+            optimizer_type=self.training_args.optimizer,
+            weight_decay=self.training_args.weight_decay,
+            betas=(self.training_args.adam_beta1, self.training_args.adam_beta2),
+            adam_epsilon=self.training_args.adam_epsilon,
+        )
+
+    def _build_scheduler(self, optimizer):
+        logger.info_rank0(&quot;&gt; Building LR Scheduler...&quot;)
+        if self.training_args.max_steps &gt; 0:
+            max_steps = self.training_args.max_steps
+        else:
+            steps_in_epoch = len(self.train_dataloader)
+            total_updates_per_epoch = steps_in_epoch // self.training_args.gradient_accumulation_steps + int(
+                steps_in_epoch % self.training_args.gradient_accumulation_steps &gt; 0
+            )
+            max_steps = total_updates_per_epoch * self.training_args.num_train_epochs
+
+        return SchedulerFactory.create(
+            optimizer=optimizer,
+            train_steps=max_steps,
+            lr=self.training_args.lr,
+            lr_decay_style=self.training_args.lr_scheduler_type,
+            lr_warmup_ratio=self.training_args.warmup_ratio,
+            lr_min=self.training_args.min_lr,
+        )
+
+    def _build_data_manager(self, tokenizer, template):
+        logger.info_rank0(&quot;&gt; Building DataFactory...&quot;)
+        return DataFactory.create(
+            data_manager_type=self.data_args.data_manager_type,
+            model_args=self.model_args,
+            data_args=self.data_args,
+            parallel_args=self.parallel_args,
+            training_args=self.training_args,
+            stage=&quot;sft&quot;,
+            tokenizer=tokenizer,
+            template=template,
+        )
+
+    def _build_monitor(self):
+        logger.info_rank0(&quot;&gt; Building Monitor...&quot;)
+        hf_config = AutoConfig.from_pretrained(self.model_args.model_name_or_path, trust_remote_code=True)
+        return TrainMonitor(self.training_args, hf_config)
+
+    def _build_checkpointer(self):
+        logger.info_rank0(&quot;&gt; Building Checkpointer...&quot;)
+        return CheckpointManager
+
+
+# ==============================================================================
+# [Facade] Unified AutoTrainer
+# This is the single public entry point responsible for logic dispatch.
+# ==============================================================================
+class AutoTrainer:
+    &quot;&quot;&quot;
+    Unified entry point for Training.
+    Dispatches to MindSpeedAutoTrainer (New) or McoreAutoTrainer (Old) based on configuration.
+    &quot;&quot;&quot;
+
+    def __init__(self):
+        # Strategy Dispatch: Prioritize environment variable TRAINING_BACKEND
+        # To run MindSpeed FSDP code, set: export TRAINING_BACKEND=mindspeed_fsdp
+        logger.info_rank0(&quot;&gt;&gt;&gt; [AutoTrainer] Initializing MindSpeed FSDP backend...&quot;)
+        self.trainer = MindSpeedAutoTrainer()
+
+    def train(self):
+        &quot;&quot;&quot;Delegate to the implementation&quot;&quot;&quot;
+        self.trainer.train()
+
+
+@auto_coverage
+def main():
+    trainer = AutoTrainer()
+    trainer.train()
+
+
+# ==============================================================================
+# [Entry Point]
+# ==============================================================================
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

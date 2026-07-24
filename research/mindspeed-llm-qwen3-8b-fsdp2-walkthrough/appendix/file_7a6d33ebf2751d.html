@@ -1,0 +1,519 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/data/megatron_data/megatron_dataset_handler.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/data/megatron_data/megatron_dataset_handler.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_236fb0ac5ed031.html">◀ megatron_dataset_generate.py</a> <a href="file_0c5ed41549f539.html">megatron_dataset_iter.py ▶</a></nav></div>
+<div class="wrap">
+<h1>megatron_dataset_handler.py</h1><p class="goal">mindspeed_llm/fsdp2/data/megatron_data/megatron_dataset_handler.py · 17293B · 418 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L45" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class BaseDatasetHandler(object)</a><a href="#L50" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, args, raw_datasets, tokeniz</a><a href="#L59" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _unwrapped_tokenizer(self)</a><a href="#L63" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_tokenized_data(self)</a><a href="#L70" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _pack_serialize_to_disk(self)</a><a href="#L161" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _serialize_to_disk(self, iteration_batch_s</a><a href="#L227" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def serialize_to_disk(self, iteration_batch_si</a><a href="#L238" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _tokenize(self, prompt)</a><a href="#L244" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _filter(self, sample)</a><a href="#L249" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class GeneralPretrainHandler(BaseDatasetHandle</a><a href="#L254" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, args, raw_datasets, tokeniz</a><a href="#L260" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _text_keys(self)</a><a href="#L263" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _pre_process(self, sample)</a><a href="#L266" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _filter(self, sample)</a><a href="#L294" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_handler_cls(handler_name=None)</a><a href="#L306" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_dataset_handler(args, raw_dataset, tok</a><a href="#L316" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_data_format(files)</a><a href="#L339" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _has_py_script(input_name)</a><a href="#L354" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def build_dataset(args)</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<span class="mut">（未被正文 EP 引用）</span>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p>coding=utf-8</p><p class="mut">（自动提取自首行注释）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1"># coding=utf-8
+# Copyright (c) 2024, HUAWEI CORPORATION.  All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+__all__ = [&quot;get_dataset_handler&quot;, &quot;build_dataset&quot;]
+
+import os
+import sys
+import time
+import glob
+import json
+import logging
+from typing import Dict, List
+
+import torch
+import numpy as np
+from datasets import load_dataset
+
+from mindspeed_llm.fsdp2.data.megatron_data.indexed_dataset import IndexedDatasetBuilder, IndexedDatasetBuilder
+
+from mindspeed_llm.tasks.preprocess.utils import (
+    get_dataset_list,
+    get_handler_dataset_attr,
+    load_single_dataset,
+    merge_dataset,
+    align_dataset,
+    greedy_knapsack
+)
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+class BaseDatasetHandler(object):
+    &quot;&quot;&quot;
+    a base handler to tokenize or/and prompt your own dataset
+    &quot;&quot;&quot;
+
+    def __init__(self, args, raw_datasets, tokenizer, splitter):
+        self.args = args
+        self.tokenizer = tokenizer
+        self.splitter = splitter
+        self.raw_datasets = raw_datasets
+        self.max_seq_len = args.seq_length
+        self.tokenized_dataset = None
+
+    @property
+    def _unwrapped_tokenizer(self):
+        &quot;&quot;&quot;get huggingface tokenizer&quot;&quot;&quot;
+        return self.tokenizer.tokenizer
+
+    def get_tokenized_data(self):
+        &quot;&quot;&quot;get tokenized(and prompted) data&quot;&quot;&quot;
+        columns = next(iter(self.raw_datasets)).keys()
+        remove_columns = list(set(columns) - set(self.args.json_keys))
+        proc_kwargs = {} if self.args.streaming else {&quot;num_proc&quot;: self.args.workers}
+        return self.raw_datasets.map(self._filter, remove_columns=remove_columns, **proc_kwargs)
+
+    def _pack_serialize_to_disk(self):
+        &quot;&quot;&quot;save idx and bin to disk&quot;&quot;&quot;
+        startup_start = time.time()
+        if not self.tokenized_dataset:
+            self.tokenized_dataset = self.get_tokenized_data()
+        output_bin_files = {}
+        output_idx_files = {}
+        builders = {}
+        level = &quot;document&quot;
+        if self.args.split_sentences:
+            level = &quot;sentence&quot;
+
+        logger.info(&quot;Vocab size: %s&quot;, self.tokenizer.vocab_size)
+        logger.info(&quot;Output prefix: %s&quot;, self.args.output_prefix)
+        for key in self.args.json_keys:
+            output_bin_files[key] = f&quot;{self.args.output_prefix}_{key}_{level}.bin&quot;
+            output_idx_files[key] = f&quot;{self.args.output_prefix}_{key}_{level}.idx&quot;
+            # vocab_size=None : use int32 dtype for -100 will be used in labels
+            builders[key] = IndexedDatasetBuilder(output_bin_files[key])
+
+        self.output_idx_files = output_idx_files
+        startup_end = time.time()
+        proc_start = time.time()
+        logger.info(&quot;Time to startup:%s&quot;, startup_end - startup_start)
+
+        valid_num = 0
+        key_data_dict = {key: [] for key in self.args.json_keys}
+        lengths = []
+        from collections import defaultdict
+        length2indexes = defaultdict(list)
+        for _, doc in enumerate(iter(self.tokenized_dataset), start=1):
+            batch = doc[&quot;input_ids&quot;]
+            for idx, sample in enumerate(batch):
+                length = len(sample)
+                if (length &gt;= self.args.seq_length) and (not self.args.neat_pack):
+                    logger.warning(f&quot;Dropped lengthy example with length {length} &gt;= {self.args.seq_length}.&quot;)
+                else:
+                    if length &gt;= self.args.seq_length:
+                        logger.warning(f&quot;Sequence length {length} &gt;= {self.args.seq_length}.&quot;)
+                        sample = sample[:self.args.seq_length - 1]
+                        length = len(sample)
+                    lengths.append(length)
+                    length2indexes[length].append(valid_num)
+                    for key in self.args.json_keys:
+                        key_data_dict[key].append(
+                            sample if key == &#x27;input_ids&#x27; else doc[key][idx][:self.args.seq_length - 1]
+                        )
+                    valid_num += 1
+
+        logger.info(f&quot;valid_num = {valid_num}, total_num = {len(self.tokenized_dataset)}, &quot;
+                    f&quot;percentage : {valid_num / len(self.tokenized_dataset) * 100}%&quot;)
+
+        knapsacks = greedy_knapsack(lengths, self.args.seq_length - 1)  # reserved for the padding token
+        logger.info(f&quot;new samples num : {len(knapsacks)}&quot;)
+        for k, knapsack in enumerate(knapsacks):
+            packed_data_dict = {key: [] for key in self.args.json_keys}
+
+            for i, length in enumerate(knapsack):
+                index = length2indexes[length].pop()
+                for key in self.args.json_keys:
+                    key_data = key_data_dict[key][index]
+                    packed_data_dict[key] += [i + 1] * len(key_data) \
+                        if (self.args.neat_pack and &quot;attention_mask&quot; in key) else key_data
+
+            if k % self.args.log_interval == 0:
+                current = time.time()
+                elapsed = current - proc_start
+                logger.info(&quot;Processed %s documents (%s docs/s).&quot;, k, self.args.log_interval / elapsed)
+
+            pad_length = self.args.seq_length - len(packed_data_dict[&#x27;input_ids&#x27;])
+            if hasattr(self.tokenizer, &quot;pad_token_id&quot;):
+                pad_token_id = self.tokenizer.pad_token_id
+            elif hasattr(self.tokenizer, &quot;tokenizer&quot;) and hasattr(self.tokenizer.tokenizer, &quot;pad_token_id&quot;):
+                pad_token_id = self.tokenizer.tokenizer.pad_token_id
+            else:
+                raise ValueError(&quot;The pad_token_id attribute is missing for this tokenizer.&quot;)
+            packed_data_dict[&#x27;input_ids&#x27;] += [pad_token_id] * pad_length
+            packed_data_dict[&#x27;attention_mask&#x27;] += [0] * pad_length if self.args.neat_pack else [1] * pad_length
+            packed_data_dict[&#x27;labels&#x27;] += [self.ignored_label] * pad_length
+
+            for key in self.args.json_keys:
+                if len(packed_data_dict[key]) != self.args.seq_length:
+                    raise ValueError(&quot;The length of packed example should be identical to the seq_length.&quot;)
+
+                sentence = torch.IntTensor(packed_data_dict[key])
+                builders[key].add_item(sentence)
+                builders[key].end_document()
+
+        for key in self.args.json_keys:
+            builders[key].finalize(output_idx_files[key])
+
+    def _serialize_to_disk(self, iteration_batch_size=50):
+        startup_start = time.time()
+        if not self.tokenized_dataset:
+            self.tokenized_dataset = self.get_tokenized_data()
+        output_bin_files = {}
+        output_idx_files = {}
+        builders = {}
+        level = &quot;document&quot;
+        if self.args.split_sentences:
+            level = &quot;sentence&quot;
+
+        logger.info(&quot;Vocab size: %s&quot;, self.tokenizer.vocab_size)
+        logger.info(&quot;Output prefix: %s&quot;, self.args.output_prefix)
+        for key in self.args.json_keys:
+            output_bin_files[key] = f&quot;{self.args.output_prefix}_{key}_{level}.bin&quot;
+            output_idx_files[key] = f&quot;{self.args.output_prefix}_{key}_{level}.idx&quot;
+            # vocab_size=None : use int32 dtype for -100 will be used in labels
+            builders[key] = IndexedDatasetBuilder(output_bin_files[key])
+        self.output_idx_files = output_idx_files
+        startup_end = time.time()
+        proc_start = time.time()
+        total_bytes_processed = 0
+        logger.info(&quot;Time to startup:%s&quot;, startup_end - startup_start)
+
+        skip_num = 0
+        for i, doc in enumerate(self.tokenized_dataset.iter(batch_size=iteration_batch_size), start=1):
+            # In post-training stage, we need to drop the data exceeded set sequence-length
+            skip_indices = set()
+            for key in self.args.json_keys:
+                batch = [sentences for sentences in doc[key] if len(sentences) &gt; 0]
+
+                if len(batch) == 0:
+                    continue
+
+                for j, sentences in enumerate(batch):
+                    for k, sentence in enumerate(sentences):
+                        if self.args.seq_length is not None and len(sentence) &gt;= self.args.seq_length:
+                            skip_indices.add((j, k))
+
+            for key in self.args.json_keys:
+                batch = [sentences for sentences in doc[key] if len(sentences) &gt; 0]
+
+                if len(batch) == 0:
+                    continue
+
+                for j, sentences in enumerate(batch):
+                    for k, sentence in enumerate(sentences):
+                        if (j, k) in skip_indices:
+                            skip_num = skip_num + 1
+                            continue
+
+                        total_bytes_processed += len(sentence) * np.int32().itemsize
+                        builders[key].add_item(sentence)
+                    builders[key].end_document()
+
+            batch_id = i * iteration_batch_size
+            if batch_id % self.args.log_interval == 0:
+                current = time.time()
+                elapsed = current - proc_start
+                mbs = total_bytes_processed / elapsed / 1024 / 1024
+                logger.info(&quot;Processed %s documents (%s docs/s, %s MB/s).&quot;, batch_id, batch_id / elapsed, mbs)
+
+        logger.info(&quot;Skip %s sample exceeded seq-length(%s)&quot;, skip_num / len(self.args.json_keys), self.args.seq_length)
+        for key in self.args.json_keys:
+            builders[key].finalize(output_idx_files[key])
+
+    def serialize_to_disk(self, iteration_batch_size=50):
+        &quot;&quot;&quot;save idx and bin to disk&quot;&quot;&quot;
+        if self.args.pack:
+            if len(self.args.json_keys) == 1:  # PretrainHandler
+                raise ValueError(&quot;Pre-training data processing does not need to be packed. &quot;
+                                 &quot;Therefore, the --pack parameter is not required.&quot;)
+            else:
+                self._pack_serialize_to_disk()
+        else:
+            self._serialize_to_disk(iteration_batch_size=iteration_batch_size)
+
+    def _tokenize(self, prompt):
+        result = self._unwrapped_tokenizer(text=prompt)
+        result[&quot;labels&quot;] = result[&quot;input_ids&quot;].copy()
+
+        return result
+
+    def _filter(self, sample):
+        &quot;&quot;&quot;prompt and tokenize&quot;&quot;&quot;
+        return NotImplemented
+
+
+class GeneralPretrainHandler(BaseDatasetHandler):
+    &quot;&quot;&quot;
+    a general pretrain dataset handler
+    &quot;&quot;&quot;
+
+    def __init__(self, args, raw_datasets, tokenizer, splitter):
+        super().__init__(args, raw_datasets, tokenizer, splitter)
+        if self._text_keys:
+            self.args.json_keys = self._text_keys
+
+    @property
+    def _text_keys(self):
+        return []
+
+    def _pre_process(self, sample):
+        return sample
+
+    def _filter(self, sample):
+        sample = self._pre_process(sample)
+        for key in self.args.json_keys:
+            text = sample[key]
+            doc_ids = []
+            for sentence in self.splitter.tokenize(text):
+                if len(sentence) &gt; 0:
+                    sentence_ids = self._tokenize(sentence)
+                    doc_ids.append(sentence_ids)
+            if len(doc_ids) &gt; 0 and self.args.pad_to_multiple_of &gt; 1:
+                # padding each of the input data in the case of context parallel
+                local_length = len(doc_ids[-1][&#x27;input_ids&#x27;])
+                num_tokens_to_pad = (((local_length // self.args.pad_to_multiple_of) + 1) * self.args.pad_to_multiple_of) - local_length
+                if self.args.append_eod:
+                    num_tokens_to_pad = num_tokens_to_pad - 1
+                doc_ids[-1][&#x27;input_ids&#x27;].extend([self.tokenizer.vocab_size] * num_tokens_to_pad)
+                doc_ids[-1][&#x27;attention_mask&#x27;].extend([1] * num_tokens_to_pad)
+                doc_ids[-1][&#x27;labels&#x27;].extend([self.tokenizer.vocab_size] * num_tokens_to_pad)
+            if len(doc_ids) &gt; 0 and self.args.append_eod:
+                doc_ids[-1][&#x27;input_ids&#x27;].append(self.tokenizer.eod)
+                doc_ids[-1][&#x27;attention_mask&#x27;].append(1)
+                doc_ids[-1][&#x27;labels&#x27;].append(self.tokenizer.eod)
+            sample[key] = doc_ids
+            # for now, only input_ids are saved
+            sample[key] = list(map(lambda x: x[&#x27;input_ids&#x27;], sample[key]))
+        return sample
+
+
+def _get_handler_cls(handler_name=None):
+    &quot;&quot;&quot;choose dataset class by dataset_name&quot;&quot;&quot;
+    current_module = sys.modules.get(__name__)
+    if not current_module:
+        raise Exception(&quot;curent module not found&quot;)
+    handler = getattr(current_module, handler_name, None)
+    if handler is None:
+        handler = GeneralPretrainHandler
+    logger.info(&quot;dataset will use %s to handle dataset&quot;, handler.__name__)
+    return handler
+
+
+def get_dataset_handler(args, raw_dataset, tokenizer, splitter):
+    &quot;&quot;&quot;
+    get a handler instance
+    &quot;&quot;&quot;
+    handler = _get_handler_cls(args.handler_name)
+
+    handler_instance = handler(args, raw_dataset, tokenizer, splitter)
+    return handler_instance
+
+
+def _get_data_format(files):
+    &quot;&quot;&quot;get format with largest number&quot;&quot;&quot;
+    all_support_format = {
+        &#x27;parquet&#x27;: &#x27;parquet&#x27;,
+        &#x27;arrow&#x27;: &#x27;arrow&#x27;,
+        &#x27;csv&#x27;: &#x27;csv&#x27;,
+        &#x27;json&#x27;: &#x27;json&#x27;,
+        &#x27;jsonl&#x27;: &#x27;json&#x27;,
+        &#x27;txt&#x27;: &#x27;text&#x27;
+    }
+    format_num = {}
+    for file in files:
+        ext = file.split(&#x27;.&#x27;)[-1]
+        format_num[ext] = format_num.get(ext, 0) + 1
+    exts_with_num = sorted(format_num.items(), key=lambda x: x[1], reverse=True)
+    has_data_file = False
+    for ext, _ in exts_with_num:
+        if ext in all_support_format:
+            has_data_file = True
+            break
+    return (ext, all_support_format.get(ext)) if has_data_file else (None, None)
+
+
+def _has_py_script(input_name):
+    if os.path.isdir(input_name):
+        dir_name = os.path.basename(input_name)
+        if os.path.exists(os.path.join(input_name, dir_name + &#x27;.py&#x27;)):
+            has_py_script = True
+        else:
+            has_py_script = False
+    else:
+        if input_name.split(&#x27;.&#x27;)[-1] == &#x27;py&#x27;:
+            has_py_script = True
+        else:
+            has_py_script = False
+    return has_py_script
+
+
+def build_dataset(args):
+    &quot;&quot;&quot;loading dataset by huggingface&quot;&quot;&quot;
+    raw_datasets = None
+    if args.handler_name == &quot;LlamaFactoryInstructionHandler&quot;:
+        all_datasets = []
+        for dataset_attr in get_dataset_list(args):
+            all_datasets.append(load_single_dataset(dataset_attr, args))
+        raw_datasets = merge_dataset(all_datasets, args)
+    else:
+        if args.handler_name == &quot;MOSSInstructionHandler&quot; or args.handler_name == &quot;MOSSMultiTurnHandler&quot;:
+            # for MOSS, streaming is needed.
+            args.streaming = True
+        if args.hf_datasets_params:
+            with open(args.hf_datasets_params, &#x27;r&#x27;) as fin:
+                param_dict = json.load(fin)
+            return load_dataset(**param_dict)
+        cache_dir = args.cache_dir
+        split_flag = &quot;train&quot;
+        load_from_local = os.path.exists(args.input)
+        if load_from_local:
+            if _has_py_script(args.input):
+                logger.info(&quot;loading data from a local python script&quot;)
+                raw_datasets = load_dataset(
+                    args.input,
+                    data_dir=&#x27;./&#x27; if not args.script_data_dir else args.script_data_dir,
+                    split=split_flag,
+                    num_proc=None if args.streaming else args.workers,
+                    cache_dir=cache_dir,
+                    streaming=args.streaming,
+                    trust_remote_code=False
+                )
+            else:
+                data_files = [args.input] if os.path.isfile(args.input) else \
+                    glob.glob(os.path.join(args.input, &#x27;*&#x27;))
+                ext, data_format = _get_data_format(data_files)
+                filtered_data_files = list(filter(lambda x: x.split(&#x27;.&#x27;)[-1] == ext, data_files))
+                if filtered_data_files:
+                    logger.info(&quot;loading data from local file, format: %s,&quot;
+                                &quot; file num: %s&quot;, data_format, len(data_files))
+                    raw_datasets = load_dataset(
+                        data_format,
+                        split=split_flag,
+                        data_files=filtered_data_files,
+                        num_proc=None if args.streaming else args.workers,
+                        cache_dir=cache_dir,
+                        streaming=args.streaming,
+                        trust_remote_code=False
+                    )
+                else:
+                    raise Exception(&quot;unknown local data!&quot;)
+        else:
+            logger.info(&quot;loading data from remote huggingface&quot;)
+            raw_datasets = load_dataset(
+                args.input,
+                split=split_flag,
+                num_proc=None if args.streaming else args.workers,
+                cache_dir=cache_dir,
+                streaming=args.streaming,
+                trust_remote_code=False
+            )
+        if raw_datasets is None:
+            raise Exception(&quot;unknown data!&quot;)
+
+    return raw_datasets
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

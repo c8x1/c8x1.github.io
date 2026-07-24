@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>系列导览与三座桥总图 · 走读 EP01</title>
+<style>
+  :root{
+    --bg:#0f0f12; --bg2:#000; --side:#1a1a1a; --card:#16161c; --line:#2a2a33;
+    --txt:#e8e8e8; --mut:#9a9a9a; --mut2:#6a6a6a;
+    --serif:ui-serif,Georgia,"Times New Roman",Times,serif;
+    --sans:system-ui,-apple-system,"PingFang SC","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace;
+    --red:#C7000B; --red-bg:#2a0f10; --red-bd:#6e1a1c; --red-tx:#e88;
+    --grn:#788C5D; --grn-bg:#14241a; --grn-bd:#2e5a3a; --grn-tx:#7ab98a;
+    --acc:#C7000B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+  .page{max-width:1180px;margin:0 auto;padding:0}
+  /* breadcrumb + nav */
+  .topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);
+    font-size:13px;color:var(--mut)}
+  .topbar .crumb{font-family:var(--serif);font-style:italic}
+  .topbar nav{margin-left:auto;display:flex;gap:8px}
+  .topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:4px 10px;border-radius:6px}
+  .topbar nav a:hover{color:#fff;border-color:var(--acc)}
+  /* layout: tree + main */
+  .body{display:grid;grid-template-columns:160px 1fr;align-items:start}
+  .tree{background:var(--side);border-right:1px solid var(--line);padding:14px 8px;
+    font-family:var(--mono);font-size:11px;color:var(--mut2);min-height:80vh;position:sticky;top:0}
+  .tree .f{display:block;padding:2px 4px;white-space:pre}
+  .tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px}
+  .main{padding:22px 28px 80px}
+  /* headings */
+  h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:6px 0 2px;color:#fff}
+  .goal{font-family:var(--serif);font-style:italic;color:var(--mut);margin:0 0 4px}
+  .gain{font-size:13px;color:var(--mut);margin:0 0 20px}
+  .gain b{color:var(--red-tx)}
+  h2{font-family:var(--serif);font-weight:600;font-size:18px;color:#fff;margin:26px 0 6px;
+    border-bottom:1px solid var(--line);padding-bottom:3px}
+  h2 .sec{color:var(--mut2);font-style:italic;font-size:13px;margin-left:8px}
+  p{margin:8px 0}
+  /* code as numbered figure */
+  .figcap{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);
+    margin:10px 0 2px}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--mut2);
+    padding:10px 12px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55}
+  pre .ln{display:inline-block;width:32px;color:var(--mut2);user-select:none}
+  .filelink{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--red-tx);margin:4px 0 14px}
+  .filelink a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--red-bd)}
+  .footnote{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--mut2);margin:4px 0 14px}
+  /* highlight tints */
+  /* PyCharm Darcula 主题 token 配色 */
+  pre[data-lang]{color:#d4d4d4}
+  .tok-kw{color:#cc7832;font-weight:600}
+  .tok-bi{color:#9876aa;font-style:italic}
+  .tok-fn{color:#ffc66d}
+  .tok-cl{color:#a9b7c6;font-style:italic}
+  .tok-st{color:#6a8759}
+  .tok-cm{color:#808080;font-style:italic}
+  .tok-nm{color:#6897bb}
+  .tok-dc{color:#bbb33b}
+  .tok-key{color:#cc7832}
+  .tok-var{color:#9876aa}
+  .tree .f,.tree a.f{color:#6a6a6a;text-decoration:none;display:block;padding:2px 4px;white-space:pre;border-radius:3px}
+  .tree a.f:hover{background:#2a2a33;color:#d4d4d4}
+  .tree a.f.act,.tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px;font-weight:600}
+  /* gnpu split card */
+  .gnpu{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:14px 0}
+  .gnpu .g{background:var(--grn-bg);border-right:1px solid var(--line);padding:10px 14px}
+  .gnpu .n{background:var(--red-bg);padding:10px 14px}
+  .gnpu h4{margin:0 0 6px;font-family:var(--serif);font-size:13px}
+  .gnpu .g h4{color:var(--grn-tx)}.gnpu .n h4{color:var(--red-tx)}
+  .gnpu .row{display:grid;grid-template-columns:90px 1fr;gap:6px;font-size:12.5px;margin:4px 0}
+  .gnpu .row .k{color:var(--mut2)}
+  /* inline svg */
+  .diag{margin:10px 0 6px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:8px}
+  .diag svg{display:block;width:100%;height:auto}
+  .diagcap{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:6px 0 2px}
+  /* summary */
+  .sum{border-top:1px solid var(--line);margin-top:22px;padding-top:10px;font-size:13.5px}
+  .sum .pit{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12.5px;margin-top:6px}
+  /* file list at end */
+  .filelist{font-family:var(--mono);font-size:11px;color:var(--mut2);margin-top:22px;border-top:1px dashed var(--line);padding-top:10px}
+  .filelist b{color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <span class="crumb">第一篇章 · 地基与心智桥 › EP01</span>
+    <span style="color:var(--mut2)">EP01</span>
+    <nav>
+      <a href="index.html">◀ 上一篇</a>
+      <a href="index.html">索引</a>
+      <a href="ep02.html">下一篇 ▶</a>
+    </nav>
+  </div>
+  <div class="body">
+    <aside class="tree">
+      <a class="f" href="appendix/index.html" target="_blank">📁 附录·项目文件走读</a>
+      <span class="f">MindSpeed-LLM/</span>
+      <a class="f" href="appendix/file_089411e68e5d5b.html" target="_blank">├ train_fsdp2.py</a>
+      <span class="f">├ examples/fsdp2/</span>
+      <a class="f" href="appendix/file_d04a217944c522.html" target="_blank">│  ├ env_config.sh</a>
+      <span class="f">│  └ qwen3/</span>
+      <span class="f">├ mindspeed_llm/fsdp2/</span>
+      <!-- 本篇相关文件高亮 .act，按篇替换 -->
+      <a class="f act" href="appendix/file_089411e68e5d5b.html" target="_blank">train_fsdp2.py</a>
+      <span class="f">└ ...</span>
+    </aside>
+    <main class="main">
+      <h1>系列导览与三座桥总图</h1>
+      <p class="goal">目标：画清三座桥的学习地图。前置：（本系列首页，无前置）。</p>
+      <p class="gain">你将获得：<b>①</b> 一张贯穿全系列的"三座桥"学习路径图 <b>②</b> 从你熟悉的 DDP/CUDA/单卡世界到本项目 NPU/FSDP2 多机世界的宏观坐标</p>
+
+      <h2>你已经熟悉的情况 <span class="sec">桥接开场</span></h2>
+      <p>作为算法工程师，你大概率已经习惯这样的世界：一块 NVIDIA GPU、一个 PyTorch 进程，用 <code style="font-family:var(--mono);color:var(--mut)">torch.cuda</code> 管显存、<code style="font-family:var(--mono);color:var(--mut)">torch.distributed</code> 配 NCCL 跑 DDP——每张卡一份完整模型副本、各自算一份 Batch、梯度 <b>All-Reduce</b> 对齐。模型再大就上 <code style="font-family:var(--mono);color:var(--mut)">FSDP1</code> 把参数打平成一个大向量切分，或叠一层 Megatron 的 TP/mcore。这套心智已经足够你在单机或小集群里跑通大多数训练。</p>
+      <p>本项目要带你走的，是从这条"左岸"出发，跨过三座桥，站到另一侧：华为 Ascend 910B NPU 上、用 <b>FSDP2</b> 后端、跑在多机多卡 <code style="font-family:var(--mono);color:var(--mut)">DeviceMesh</code> 拓扑里的 Qwen3-8B 训练链路。这条链路的入口就在仓库根目录的 <code style="font-family:var(--mono);color:var(--mut)">train_fsdp2.py</code>——它在 README 目录树里被标注为"FSDP2 训练流程"（README.md:96），而在文件第一段 import 里就出现了 <code style="font-family:var(--mono);color:var(--mut)">torch_npu</code> 与 <code style="font-family:var(--mono);color:var(--mut)">transfer_to_npu</code>（train_fsdp2.py:8 起）——三座桥的右岸，从入口文件就能一眼看到影子。本篇不深入任一座桥——那是 EP02–EP18 的事——只把地图画清楚，让你在后续每一篇都能回来对一眼"我现在站在哪座桥上"。</p>
+
+      <h2>本项目怎么做 <span class="sec">原理</span></h2>
+      <p>本系列的脊柱是三座桥。每一座桥的<b>左端</b>是你已经熟悉的 PyTorch/GPU 单卡世界，<b>右端</b>是本项目实际运行的 NPU/FSDP2 多机世界。三座桥并非独立——它们叠加在一起，才构成"在 Ascend 上用 FSDP2 训 Qwen3-8B"这件事的全部坐标。</p>
+      <p>下面这张图是全系列索引页那张总图的精简版，留给本篇做宏观坐标用。绿色＝左岸（已知）、红色＝右岸（本项目），三行分别对应三座桥。</p>
+
+      <div class="diag">
+        <svg viewBox="0 0 760 240" role="img" aria-label="三座桥总图（EP01 精简版）">
+          <text x="120" y="22" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-style="italic" font-size="13" fill="#9a9a9a">你熟悉（左）</text>
+          <text x="640" y="22" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-style="italic" font-size="13" fill="#9a9a9a">本项目（右）</text>
+          <line x1="30" y1="32" x2="730" y2="32" stroke="#2a2a33" stroke-width="1"/>
+          <!-- 桥① 并行 -->
+          <text x="30" y="62" font-family="ui-serif,Georgia,serif" font-size="13" fill="#788C5D">① 并行</text>
+          <rect x="50" y="72" width="140" height="36" rx="6" fill="#14241a" stroke="#2e5a3a"/>
+          <text x="120" y="95" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#7ab98a">DDP / FSDP1</text>
+          <rect x="570" y="72" width="140" height="36" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="640" y="95" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#e88">FSDP2 · DTensor</text>
+          <path d="M190,90 Q380,40 570,90" fill="none" stroke="#6e1a1c" stroke-width="2"/>
+          <text x="380" y="40" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-style="italic" font-size="11" fill="#9a9a9a">FlatParam → Per-Param 分片</text>
+          <line x1="30" y1="118" x2="730" y2="118" stroke="#2a2a33" stroke-width="1" stroke-dasharray="3 4"/>
+          <!-- 桥② 硬件/运行时 -->
+          <text x="30" y="142" font-family="ui-serif,Georgia,serif" font-size="13" fill="#788C5D">② 硬件 / 运行时</text>
+          <rect x="50" y="152" width="140" height="36" rx="6" fill="#14241a" stroke="#2e5a3a"/>
+          <text x="120" y="175" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#7ab98a">CUDA / NCCL</text>
+          <rect x="570" y="152" width="140" height="36" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="640" y="175" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#e88">CANN / HCCL · torch_npu</text>
+          <path d="M190,170 Q380,200 570,170" fill="none" stroke="#6e1a1c" stroke-width="2"/>
+          <text x="380" y="214" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-style="italic" font-size="11" fill="#9a9a9a">torch.cuda → torch.npu · 通信原语替换</text>
+          <line x1="30" y1="224" x2="730" y2="224" stroke="#2a2a33" stroke-width="1"/>
+          <!-- 桥③ 规模 -->
+          <text x="30" y="232" font-family="ui-serif,Georgia,serif" font-size="13" fill="#788C5D">③ 规模</text>
+          <rect x="50" y="242" width="140" height="36" rx="6" fill="#14241a" stroke="#2e5a3a"/>
+          <text x="120" y="265" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#7ab98a">单卡 / 单进程</text>
+          <rect x="570" y="242" width="140" height="36" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="640" y="265" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#e88">多机多卡 · DeviceMesh</text>
+          <path d="M190,260 Q380,290 570,260" fill="none" stroke="#6e1a1c" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="diagcap">图 1.1　三座桥总图（精简版）：每行左端"你熟悉"→ 右端"本项目"。绿色＝已知，红色＝本项目。本篇只画地图，三座桥的下钻分别在 EP02 / EP03 / EP07–09。</div>
+      <p>注意三座桥的<b>叠加关系</b>：右岸不是三个独立终点，而是同一套运行时的三个侧面——你最终跑的是"②的硬件上 + ③的拓扑里 + ①的分片范式下"的同一个训练循环。换一种说法：①决定"参数怎么切、梯度怎么同步"，②决定"这些切分与同步在哪种芯片、用哪套通信库上发生"，③决定"这一切跨几张卡、跨几台机、按什么拓扑组织"。三者只要有一个对不上，链路就跑不通或跑不出预期显存/吞吐。这就是为什么本系列要先花 EP01–03 把地图立起来，再按篇章逐层下钻。</p>
+
+      <h2>源码下钻 <span class="sec">file:line</span></h2>
+      <p>本篇不下钻代码，只从镜像里摘三组"立足点"事实，给三座桥各找一个真实落处。先看 README 的新闻时间线——它把本项目的"为什么是 FSDP2"摆在了显眼位置。</p>
+
+      <p class="figcap">README.md 最新消息时间线，FSDP2 后端上线与 Qwen3-Next 首发落在同一行</p>
+      <pre data-lang="sh">
+- [Feb. 10, 2026]: 🚀 [FSDP2训练后端上线，支持**Qwen3-Next** 模型](./examples/fsdp2/qwen3_next) 【Prototype】
+- [Sep. 16, 2025]: 🚀 **Qwen3-Next** 模型支持
+- [Dec. 11, 2025]: 🚀 **Qwen3-Next** 模型训练支持triton融合加速GDN模块计算 【Prototype】</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/README.md">README.md:36</a>（同段相邻事实见 README.md:49、README.md:42）</p>
+      <p class="footnote">注意：Qwen3-Next 是 FSDP2 后端上线时的"首发"模型，但本系列走读对象是 Qwen3-8B（同 examples/fsdp2/ 目录下的另一个模型族）。两者共用 FSDP2 后端与同一套训练链路骨架，差别主要在建模与配置层——这是 EP12 会展开的点。本篇只引"后端已上线、链路已存在"这一事实。</p>
+
+      <p class="figcap">README.md 目录树节选，FSDP2 训练流程入口即 train_fsdp2.py</p>
+      <pre data-lang="sh">
+ ├── inference_fsdp2.py        # FSDP2推理工具
+ ├── train_fsdp2.py            # FSDP2 训练流程</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/README.md">README.md:96</a>（同段见 README.md:88 推理入口）</p>
+
+      <p class="figcap">train_fsdp2.py 顶部导入——NPU 侧的"硬件/运行时桥"在入口就显形</p>
+      <pre data-lang="py">
+    import torch_npu  # noqa: F401
+    from torch_npu.contrib import transfer_to_npu  # noqa: F401
+from mindspeed.fsdp.utils.torch_patch import apply_hccl_premul_sum_patch</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py">train_fsdp2.py:8</a>（续见 train_fsdp2.py:9、train_fsdp2.py:37；dist_backend="hccl" 见 train_fsdp2.py:111）</p>
+      <p class="footnote">这就是桥②的"入口级"证据：<code style="font-family:var(--mono);color:var(--mut)">torch.cuda</code> 那一侧的 import 在这里被换成了 <code style="font-family:var(--mono);color:var(--mut)">torch_npu</code>，并显式挂上 HCCL 的 pre-mul-sum patch。具体每行怎么落到通信原语，留给 EP02 / EP10。</p>
+
+      <p class="figcap">docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md 开篇定义——桥①右岸"FSDP2"到底是什么</p>
+      <pre data-lang="py">
+# PyTorch FSDP2 后端特性介绍
+FSDP2 是 PyTorch 分布式并行的下一代范式 ... 它不再通过 Python 类包装模型，
+而是通过 torch.distributed.fsdp.fully_shard API 对模型进行原位（In-place）的并行化处理。</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md">docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md:1</a>（In-place API 见同文件第 3 行）</p>
+      <p class="footnote">把这段当本系列的术语锚点：FSDP2 不是"把 FSDP1 升级一下"，而是换了一条用 <code style="font-family:var(--mono);color:var(--mut)">fully_shard</code> 原位分片、以 <code style="font-family:var(--mono);color:var(--mut)">DTensor</code> 为底层基石的新范式（DTensor 见 docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md:36）。EP03 会把 FSDP1→FSDP2 的范式跃迁讲透。</p>
+
+      <p>有了这三段事实，三座桥的右岸就不再是抽象名词：①的右岸是 <code style="font-family:var(--mono);color:var(--mut)">fully_shard</code>+<code style="font-family:var(--mono);color:var(--mut)">DTensor</code>，②的右岸是 <code style="font-family:var(--mono);color:var(--mut)">torch_npu</code>+HCCL，③的右岸是 <code style="font-family:var(--mono);color:var(--mut)">DeviceMesh</code> 多维拓扑。本篇到此为止——入口文件 <code style="font-family:var(--mono);color:var(--mut)">train_fsdp2.py</code> 内部如何把这三者串成主循环，是 EP05 的下钻范围。</p>
+
+      <div class="gnpu">
+        <div class="g"><h4>GPU / 已知</h4>
+          <div class="row"><span class="k">并行范式</span><span>DDP（All-Reduce）/ FSDP1（FlatParameter 包装器）</span></div>
+          <div class="row"><span class="k">硬件运行时</span><span>CUDA · NCCL · torch.cuda（NVIDIA GPU）</span></div>
+          <div class="row"><span class="k">规模形态</span><span>单卡 / 单进程；多卡靠 world_size 拉平</span></div>
+        </div>
+        <div class="n"><h4>NPU / 本项目</h4>
+          <div class="row"><span class="k">并行范式</span><span>FSDP2（fully_shard 原位分片 · DTensor · Per-Param）</span></div>
+          <div class="row"><span class="k">硬件运行时</span><span>CANN · HCCL · torch_npu（Ascend 910B）</span></div>
+          <div class="row"><span class="k">规模形态</span><span>多机多卡 · DeviceMesh 2D 组合（FSDP+TP 等）</span></div>
+        </div>
+      </div>
+
+      <div class="sum">
+        <b>小结</b>　心智模型：三座桥即学习路径。把"在 Ascend 上用 FSDP2 训 Qwen3-8B"拆成三条可独立理解、又能叠加回同一运行时的迁移轴——并行范式 / 硬件运行时 / 规模拓扑。每读一篇 EP，先问"它在过哪座桥"，再看"左右两岸各自对应什么"。三座桥的右岸加起来，才是本项目真正的运行时全貌，任何一座单独看都会失真。
+        <div class="pit">常见误区：把 FSDP2 当成 Megatron mcore 的"升级版"或"FSDP1 的下一个版本号"。实际上 FSDP2 是 PyTorch 上游的另一套后端范式（fully_shard 原位 API + DTensor），与 mcore 的 FlatParameter 包装器是并行的两套思路，不是同一棵树的版本递进。本系列里 Qwen3-8B 走的是 FSDP2 这条线，而非 mcore 那条线。</div>
+      </div>
+
+      <div class="filelist"><b>本篇涉及文件</b><br>
+README.md（最新消息时间线 / 目录树）<br>
+docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md（FSDP2 概念介绍）<br>
+train_fsdp2.py（入口存在性引用，内部下钻见 EP05）</div>
+    </main>
+  </div>
+</div>
+<script>
+// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre[data-lang]').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];if(!rules)return;
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      return '<span class="ln">'+(i+1)+'</span>'+tokLine(l,rules);
+    }).join('\n');
+  });
+})();
+</script>
+</body>
+</html>

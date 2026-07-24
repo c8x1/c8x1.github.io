@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>推理与产物出口 · 走读 EP18</title>
+<style>
+  :root{
+    --bg:#0f0f12; --bg2:#000; --side:#1a1a1a; --card:#16161c; --line:#2a2a33;
+    --txt:#e8e8e8; --mut:#9a9a9a; --mut2:#6a6a6a;
+    --serif:ui-serif,Georgia,"Times New Roman",Times,serif;
+    --sans:system-ui,-apple-system,"PingFang SC","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace;
+    --red:#C7000B; --red-bg:#2a0f10; --red-bd:#6e1a1c; --red-tx:#e88;
+    --grn:#788C5D; --grn-bg:#14241a; --grn-bd:#2e5a3a; --grn-tx:#7ab98a;
+    --acc:#C7000B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+  .page{max-width:1180px;margin:0 auto;padding:0}
+  .topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);
+    font-size:13px;color:var(--mut)}
+  .topbar .crumb{font-family:var(--serif);font-style:italic}
+  .topbar nav{margin-left:auto;display:flex;gap:8px}
+  .topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:4px 10px;border-radius:6px}
+  .topbar nav a:hover{color:#fff;border-color:var(--acc)}
+  .body{display:grid;grid-template-columns:160px 1fr;align-items:start}
+  .tree{background:var(--side);border-right:1px solid var(--line);padding:14px 8px;
+    font-family:var(--mono);font-size:11px;color:var(--mut2);min-height:80vh;position:sticky;top:0}
+  .tree .f{display:block;padding:2px 4px;white-space:pre}
+  .tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px}
+  .main{padding:22px 28px 80px}
+  h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:6px 0 2px;color:#fff}
+  .goal{font-family:var(--serif);font-style:italic;color:var(--mut);margin:0 0 4px}
+  .gain{font-size:13px;color:var(--mut);margin:0 0 20px}
+  .gain b{color:var(--red-tx)}
+  h2{font-family:var(--serif);font-weight:600;font-size:18px;color:#fff;margin:26px 0 6px;
+    border-bottom:1px solid var(--line);padding-bottom:3px}
+  h2 .sec{color:var(--mut2);font-style:italic;font-size:13px;margin-left:8px}
+  p{margin:8px 0}
+  .figcap{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);
+    margin:10px 0 2px}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--mut2);
+    padding:10px 12px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55}
+  pre .ln{display:inline-block;width:32px;color:var(--mut2);user-select:none}
+  .filelink{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--red-tx);margin:4px 0 14px}
+  .filelink a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--red-bd)}
+  .footnote{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--mut2);margin:4px 0 14px}
+  /* PyCharm Darcula 主题 token 配色 */
+  pre[data-lang]{color:#d4d4d4}
+  .tok-kw{color:#cc7832;font-weight:600}
+  .tok-bi{color:#9876aa;font-style:italic}
+  .tok-fn{color:#ffc66d}
+  .tok-cl{color:#a9b7c6;font-style:italic}
+  .tok-st{color:#6a8759}
+  .tok-cm{color:#808080;font-style:italic}
+  .tok-nm{color:#6897bb}
+  .tok-dc{color:#bbb33b}
+  .tok-key{color:#cc7832}
+  .tok-var{color:#9876aa}
+  .tree .f,.tree a.f{color:#6a6a6a;text-decoration:none;display:block;padding:2px 4px;white-space:pre;border-radius:3px}
+  .tree a.f:hover{background:#2a2a33;color:#d4d4d4}
+  .tree a.f.act,.tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px;font-weight:600}
+  .gnpu{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:14px 0}
+  .gnpu .g{background:var(--grn-bg);border-right:1px solid var(--line);padding:10px 14px}
+  .gnpu .n{background:var(--red-bg);padding:10px 14px}
+  .gnpu h4{margin:0 0 6px;font-family:var(--serif);font-size:13px}
+  .gnpu .g h4{color:var(--grn-tx)}.gnpu .n h4{color:var(--red-tx)}
+  .gnpu .row{display:grid;grid-template-columns:110px 1fr;gap:6px;font-size:12.5px;margin:4px 0}
+  .gnpu .row .k{color:var(--mut2)}
+  .diag{margin:10px 0 6px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:8px}
+  .sum{border-top:1px solid var(--line);margin-top:22px;padding-top:10px;font-size:13.5px}
+  .sum .pit{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12.5px;margin-top:6px}
+  .filelist{font-family:var(--mono);font-size:11px;color:var(--mut2);margin-top:22px;border-top:1px dashed var(--line);padding-top:10px}
+  .filelist b{color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <span class="crumb">第六篇章 · 权重与产物 › EP18</span>
+    <span style="color:var(--mut2)">EP18</span>
+    <nav>
+      <a href="ep17.html">◀ 上一篇</a>
+      <a href="index.html">索引</a>
+      <a href="index.html">下一篇 ▶</a>
+    </nav>
+  </div>
+  <div class="body">
+    <aside class="tree">
+      <a class="f" href="appendix/index.html" target="_blank">📁 附录·项目文件走读</a>
+      <span class="f">MindSpeed-LLM/</span>
+      <a class="f" href="appendix/file_089411e68e5d5b.html" target="_blank">├ train_fsdp2.py</a>
+      <span class="f">├ examples/fsdp2/</span>
+      <a class="f" href="appendix/file_d04a217944c522.html" target="_blank">│  ├ env_config.sh</a>
+      <span class="f">│  └ qwen3/</span>
+      <span class="f">├ mindspeed_llm/fsdp2/</span>
+      <a class="f act" href="appendix/file_cf503126785451.html" target="_blank">inference_fsdp2.py</a>
+      <a class="f act" href="appendix/file_2eabf148097731.html" target="_blank">inference/inferencer.py</a>
+      <a class="f act" href="appendix/file_4f91b0ba67ebb1.html" target="_blank">inference/chat_model.py</a>
+      <a class="f act" href="appendix/file_d56204e34b2239.html" target="_blank">inference/engine/hf_engine.py</a>
+      <span class="f">└ ...</span>
+    </aside>
+    <main class="main">
+      <h1>推理与产物出口</h1>
+      <p class="goal">目标：讲清训练 dcp→merge→HF→推理 的产物出口链。前置：EP17 Checkpoint 与权重转换。</p>
+      <p class="gain">你将获得：<b>①</b> 四个推理文件的逐段精读——<code>inference_fsdp2.py</code> 如何像 <code>train_fsdp2.py</code> 一样起 NPU/HCCL、用 <code>ModelFactory.create</code> 加载<b>合并后的 HF 权重</b>并交给 <code>Inferencer</code>；<code>chat_model.py</code> 如何用工厂选 <code>HuggingfaceEngine</code> 并在后台 asyncio 线程里桥接同步 <code>generate</code> 与流式 <code>stream_chat</code>；<code>hf_engine.py</code> 如何用 transformers 的 <code>apply_chat_template</code>/<code>TextIteratorStreamer</code> 调 <code>model.generate()</code>、并强制 <code>do_sample=False</code> 防 FSDP 采样死锁；<code>inferencer.py</code> 如何在多 rank 下用 <code>broadcast_object_list</code> 把 rank0 的键盘输入广播给所有卡同步进 <code>while True</code> 聊天循环，每段贴真实 file:line <b>②</b> 一个反直觉点——<b>训练 dcp 不能直接喂推理</b>：dcp 存的是每 rank 的分片 + DTensor 布局元信息，推理入口加载的是 <b>EP17 merge 出来的 HF 全量 safetensors</b>，这条"训练→推理"的衔接点完全压在 EP17 的 <code>merge_dcp_to_hf</code> 上；<code>model.generate()</code> 那一行（hf_engine.py:100）才是你熟悉的旧大陆被这条新链路最后接回去的地方。</p>
+
+      <h2>你已经熟悉的情况 <span class="sec">桥接开场</span></h2>
+      <p>你写过 <code>outputs = model.generate(input_ids, max_new_tokens=512)</code>。单卡 GPU 世界里推理很简单：<code>AutoModelForCausalLM.from_pretrained("Qwen/Qwen3-8B")</code> 从 HF Hub 拉一份全量 safetensors、整份 mmap 到一张卡、<code>model.eval()</code>、<code>torch.no_grad()</code>、然后 <code>model.generate()</code> 自回归吐 token——KV cache 在框架内部按 <code>past_key_values</code> 维护，你不用操心分片。想做成聊天就再包一层 <code>apply_chat_template</code> 把 messages 拼成 prompt、配一个 <code>TextIteratorStreamer</code> + 后台线程做打字机效果——这套 HuggingFace transformers 的"老三样"你很熟。</p>
+      <p>问题来了：<b>本项目训练完的权重不是全量 safetensors</b>。EP08 讲过 FSDP2 下没有任何一张卡持有完整模型，EP16 讲过优化器 m/v 只跟本地分片，EP17 讲过训练期落盘走的是 <b>dcp 分片 ckpt</b>（每 rank 一份 <code>__RANK_0.distcp</code> + 一份 metadata）。而推理入口 <code>inference_fsdp2.py:67</code> 调 <code>ModelFactory.create</code>、再下钻到 <code>model_loader.py:129</code> 的 <code>AutoModelForCausalLM.from_pretrained</code>——这一步<b>只认 HF 全量 safetensors</b>，不认 dcp。中间这道鸿沟，就是 EP17 的 <code>merge_dcp_to_hf</code> 负责填的：它把 dcp 的分片读 metadata、按 shard 贪心装箱、逐 shard <code>full_tensor()</code> 拼回全量、写成 <code>model-0000X-of-0000Y.safetensors</code> + <code>model.safetensors.index.json</code>——产物格式与 HF <code>save_pretrained</code> 完全同构。所以本篇要厘清的关键认知是：<b>推理加载的是"merge 后的 HF"，不是"训练里的 dcp"</b>，<code>model.generate()</code> 那一行在两个世界里长得一模一样，但它脚底下的权重来源完全不同。</p>
+      <p>另一处熟悉又陌生的点是<b>多卡推理</b>。单卡世界你不必关心 rank，多卡 FSDP2 推理里每张卡只有 1/N 的参数（和训练一样的分片），<code>model.generate</code> 在 FSDP 包装下跑时各 rank 必须步调一致——否则一个 rank 采样到 EOS 提前退出、别的 rank 还在算，集合通信就对不上、死锁。<code>hf_engine.py:78</code> 的 <code>do_sample=False</code>（贪婪解码、所有 rank 同一输入同一输出）和 <code>:86</code> 的 <code>synced_gpus=False</code> 就是围绕这个的——这两个参数你在单卡从来不设，多卡 FSDP 推理里却成了硬约束。下面把整条产物出口链摊开读。</p>
+
+      <h2>本项目怎么做 <span class="sec">原理</span></h2>
+      <p>核心原理一句话：<b>推理是"merge 后用 HF 引擎跑"</b>。训练侧产物（dcp 分片）不能直接喂推理，必须先经 EP17 的 <code>merge_dcp_to_hf</code> 合并成 HF 全量 safetensors——这一步把"训练的并行格式"翻译回"推理的通用格式"。合并后的目录结构跟从 HF Hub 下载的一模一样：<code>config.json</code>、<code>model.safetensors.index.json</code>、若干 <code>model-0000X-of-0000Y.safetensors</code>、<code>tokenizer.json</code> 等。推理入口 <code>inference_fsdp2.py</code> 把这个目录路径喂给 <code>ModelFactory.create</code>，后者走 <code>ModelLoader</code> 用 transformers 的 <code>AutoModelForCausalLM.from_pretrained</code> 加载——加载时模型还是全量在 CPU/meta 上，加载完才被 FSDP 的 <code>fully_shard</code> 重新切成每卡 1/N（<b>训练切一次、加载再切一次</b>，两次切分的拓扑可以不同，因为中间经过的全量 HF 是拓扑无关的中立格式）。模型就绪后，<code>AutoInferencer</code> 把 (model, tokenizer, args) 交给应用层 <code>Inferencer</code>，后者持一个 <code>ChatModel</code>，<code>ChatModel</code> 按参数选 <code>HuggingfaceEngine</code>（目前只有这一种 backend）并在后台 asyncio 线程里把同步的 <code>model.generate</code> 包装成异步的 <code>chat</code>/<code>stream_chat</code>。<code>inferencer.run_interactive_chat</code> 进 <code>while True</code> 循环：rank0 读键盘、<code>broadcast_object_list</code> 广播给所有 rank、各 rank 用同样的 messages 调 <code>stream_chat</code>、rank0 打印流式 token。</p>
+      <p>这条链路的<b>关键衔接点</b>压在 EP17 的 merge 上——这是"训练→推理"之间唯一的桥。merge 失败（比如忘传 <code>--model-configs</code> 导致产物目录没有 <code>config.json</code>），<code>from_pretrained</code> 直接报错，推理根本起不来。下图把整条产物出口流摊开。</p>
+      <div class="diag">
+        <svg viewBox="0 0 940 340" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace,monospace" font-size="11">
+          <text x="470" y="18" text-anchor="middle" fill="#9a9a9a" font-style="italic">产物出口流：训练 dcp 分片 → merge_dcp_to_hf → HF 全量 safetensors → inference_fsdp2 → hf_engine.generate → chat</text>
+          <!-- stage 1: training dcp -->
+          <rect x="20" y="40" width="180" height="110" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="110" y="58" text-anchor="middle" fill="#e88">① 训练期 dcp 分片</text>
+          <text x="30" y="78" fill="#9a9a9a">__0_0.distcp (1/N)</text>
+          <text x="30" y="94" fill="#9a9a9a">__1_0.distcp (1/N)</text>
+          <text x="30" y="110" fill="#9a9a9a">.metadata</text>
+          <text x="30" y="130" fill="#6a6a6a" font-size="10">分片+DTensor 布局，拓扑相关</text>
+          <!-- arrow: merge -->
+          <line x1="205" y1="95" x2="280" y2="95" stroke="#6a6a6a" marker-end="url(#a18)"/>
+          <text x="242" y="86" text-anchor="middle" fill="#6a6a6a" font-size="10">EP17 merge</text>
+          <text x="242" y="100" text-anchor="middle" fill="#6a6a6a" font-size="10">full_tensor()</text>
+          <!-- stage 2: HF safetensors -->
+          <rect x="285" y="40" width="200" height="110" rx="6" fill="#000" stroke="#2e5a3a"/>
+          <text x="385" y="58" text-anchor="middle" fill="#7ab98a">② HF 全量 safetensors</text>
+          <text x="295" y="78" fill="#9a9a9a">model-00001-of-00002.safetensors</text>
+          <text x="295" y="94" fill="#9a9a9a">model.safetensors.index.json</text>
+          <text x="295" y="110" fill="#9a9a9a">config.json / tokenizer.json</text>
+          <text x="295" y="130" fill="#6a6a6a" font-size="10">全量+HF 键名，拓扑无关（中立中转）</text>
+          <!-- arrow: from_pretrained -->
+          <line x1="490" y1="95" x2="565" y2="95" stroke="#6a6a6a" marker-end="url(#a18)"/>
+          <text x="527" y="86" text-anchor="middle" fill="#6a6a6a" font-size="10">ModelFactory</text>
+          <text x="527" y="100" text-anchor="middle" fill="#6a6a6a" font-size="10">from_pretrained</text>
+          <!-- stage 3: inference entry -->
+          <rect x="570" y="40" width="200" height="110" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="670" y="58" text-anchor="middle" fill="#e88">③ inference_fsdp2.py</text>
+          <text x="580" y="78" fill="#9a9a9a">AutoInferencer.__init__</text>
+          <text x="580" y="94" fill="#9a9a9a">  set_accelerator (NPU)</text>
+          <text x="580" y="110" fill="#9a9a9a">  ModelFactory.create</text>
+          <text x="580" y="130" fill="#6a6a6a" font-size="10">FSDP 再次 fully_shard 切分</text>
+          <!-- arrow down to engine -->
+          <line x1="670" y1="155" x2="670" y2="200" stroke="#6a6a6a" marker-end="url(#a18)"/>
+          <text x="755" y="180" fill="#6a6a6a" font-size="10">Inferencer→ChatModel</text>
+          <!-- stage 4: engine + chat -->
+          <rect x="430" y="205" width="460" height="110" rx="6" fill="#000" stroke="#6e1a1c"/>
+          <text x="660" y="223" text-anchor="middle" fill="#e88">④ hf_engine → chat</text>
+          <text x="440" y="243" fill="#9a9a9a">HuggingfaceEngine(model, tok, args)</text>
+          <text x="440" y="259" fill="#9a9a9a">  apply_chat_template → input_ids</text>
+          <text x="440" y="275" fill="#9a9a9a">  model.generate(**gen_kwargs)  [hf_engine.py:100]</text>
+          <text x="440" y="291" fill="#9a9a9a">  TextIteratorStreamer → stream_chat</text>
+          <text x="440" y="307" fill="#6a6a6a" font-size="10">do_sample=False 防 FSDP 采样死锁；inference_mode</text>
+          <!-- ①→④ 的贯穿箭头（终篇符号） -->
+          <path d="M110,150 Q110,275 430,275" fill="none" stroke="#6e1a1c" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <text x="118" y="270" fill="#6e1a1c" font-size="10" font-style="italic">dcp 不直喂推理，必经 ②merge</text>
+          <defs>
+            <marker id="a18" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L6,4 L0,8 z" fill="#6a6a6a"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      <p>注意图里那条红色虚线——<b>① 的 dcp 不能跳过 ② 直接进 ④</b>，这是本篇的核心误区。② 的 HF 全量是训练和推理之间唯一的中立中转格式（EP17 已述），<code>inference_fsdp2.py</code> 加载的就是 ② 的产物。下面把四个文件逐段拆开。</p>
+
+      <h2>源码下钻 <span class="sec">file:line</span></h2>
+
+      <p class="figcap">inference_fsdp2.py —— 推理入口：AutoInferencer 起环境、建 tokenizer/model、交给应用层 Inferencer</p>
+      <pre data-lang="py">class AutoInferencer:
+    """
+    Responsible for setting up the runtime environment: NPU initialization,
+    distributed setup, and loading the FSDP model.
+    """
+    def __init__(self):
+        # 1. Parse arguments
+        root_args = fsdp2_parse_args(Arguments)
+        self.model_args = root_args.model
+        self.parallel_args = root_args.parallel
+        self.inference_args = root_args.inference
+        self.args = types.SimpleNamespace(**{...})
+
+        set_args(self.args)
+
+        # 2. Initialize NPU and distributed environment
+        self._initialize()
+
+        # 3. Build Tokenizer
+        logger.info_rank0("> Building Tokenizer...")
+        self.tokenizer = TokenizerFactory.create(self.model_args)
+
+        # 4. Build Model (FSDP automatic sharding strategies take effect here)
+        # Force disable recomputation during inference to save overhead
+        self.parallel_args.recompute = False
+        logger.info_rank0("> Building Model for Inference...")
+
+        # The model returned here is already FSDP-wrapped, each card only holds its own shard
+        self.model = ModelFactory.create(self.model_args, self.parallel_args)
+
+        # 5. Instantiate the application-level Inferencer
+        self.inferencer = Inferencer(
+            model=self.model,
+            tokenizer=self.tokenizer,
+            args=self.inference_args
+        )
+
+    @staticmethod
+    def _initialize():
+        """Initialize underlying hardware and distributed environment."""
+        if is_torch_npu_available():
+            fallback = torch.npu
+            dist_backend = "hccl"
+            apply_hccl_premul_sum_patch()
+        elif torch.cuda.is_available():
+            fallback = torch.cuda
+            dist_backend = "nccl"
+        set_accelerator_compatible(fallback)
+        local_rank = int(os.environ.get("LOCAL_RANK", 0))
+        torch.accelerator.set_device_index(local_rank)
+        if not torch.distributed.is_initialized():
+            torch.distributed.init_process_group(backend=dist_backend)
+
+    def chat(self):
+        """Launch interactive chat."""
+        self.inferencer.run_interactive_chat()</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/inference_fsdp2.py#L36">inference_fsdp2.py:36</a>（class AutoInferencer —— 基础设施层入口） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/inference_fsdp2.py#L43">:43</a>（root_args = fsdp2_parse_args(Arguments) —— 复用训练侧参数体系，EP06） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/inference_fsdp2.py#L52">:52</a>（set_args(self.args) —— 写全局 args） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/inference_fsdp2.py#L55">:55</a>（self._initialize() —— 起 NPU/HCCL） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/inference_fsdp2.py#L59">:59</a>（TokenizerFactory.create —— 建 tokenizer） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/inference_fsdp2.py#L63">:63</a>（self.parallel_args.recompute = False —— 推理强制关重计算省开销，呼应 EP11） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/inference_fsdp2.py#L67">:67</a>（self.model = ModelFactory.create(model_args, parallel_args) —— 加载合并后 HF 权重并 FSDP 包装，每卡 1/N） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/inference_fsdp2.py#L71">:71</a>（Inferencer(model=..., tokenizer=..., args=...) —— 交给应用层） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/inference_fsdp2.py#L80">:80</a>（if is_torch_npu_available(): fallback=torch.npu, dist_backend="hccl" —— NPU 分支） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/inference_fsdp2.py#L83">:83</a>（apply_hccl_premul_sum_patch() —— HCCL 通信补丁，呼应 EP03/EP10） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/inference_fsdp2.py#L87">:87</a>（set_accelerator_compatible(fallback) —— 设当前 accelerator） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/inference_fsdp2.py#L95">:95</a>（torch.distributed.init_process_group(backend=dist_backend) —— 起进程组） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/inference_fsdp2.py#L102">:102</a>（self.inferencer.run_interactive_chat() —— 进聊天循环） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/inference_fsdp2.py#L108">:108</a>（if __name__ == "__main__": runner = AutoInferencer(); runner.chat()） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/inference_fsdp2.py#L119">:119</a>（torch.distributed.destroy_process_group() —— finally 收尾）</p>
+      <p class="footnote"><code>inference_fsdp2.py</code> 是<b>推理侧的 <code>train_fsdp2.py</code></b>——结构上和训练入口同构：① <code>fsdp2_parse_args(Arguments)</code>（:43，复用 EP06 的参数体系，只是把 <code>InferenceArguments</code> 换进来）→ ② <code>_initialize()</code>（:55/:77，NPU/HCCL 起环境，和 EP02 一致；:83 还 apply 了 <code>hccl_premul_sum_patch</code>，呼应 EP10 的 pre_mul_sum 通信原语）→ ③ 建 tokenizer（:59）→ ④ <code>ModelFactory.create</code>（:67，模型）→ ⑤ 交给 <code>Inferencer</code>（:71）。<b>关键差异在 :63 <code>recompute=False</code></b>——推理时强制关重计算（EP11 讲过训练用 recompute 换显存，推理不需要反传，关掉省开销）；以及 <code>ModelFactory.create</code> 加载的是<b>EP17 merge 后的 HF 全量 safetensors</b>（下钻到 <code>model_loader.py:129</code> 的 <code>AutoModelForCausalLM.from_pretrained</code>），加载后由 FSDP 的 <code>fully_shard</code> 重新切成每卡 1/N——训练切一次（按训练拓扑）、加载再切一次（按推理拓扑，<b>可不同</b>，因为中间经过的全量 HF 拓扑无关）。<code>chat()</code>（:99/:102）只是转发到 <code>Inferencer.run_interactive_chat</code>；<code>__main__</code>（:108）起 <code>AutoInferencer()</code> 并 <code>chat()</code>，<code>finally</code>（:118-120）销毁进程组，<code>KeyboardInterrupt</code>（:113）保证 Ctrl-C 不挂终端。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/models/model_loader.py —— 推理加载的真正落点：AutoModelForCausalLM.from_pretrained 读合并后的 HF 权重</p>
+      <pre data-lang="py">def _create_on_cpu(self, model_cls=None) -> Tuple[nn.Module, None]:
+    """Create and load model on CPU."""
+    if model_cls is not None:
+        logger.info_rank0(f"> Loading {model_cls.__name__} on CPU...")
+        model = model_cls.from_pretrained(
+            self.model_path,
+            config=self.hf_config,
+            low_cpu_mem_usage=True,
+            device_map="cpu",
+            torch_dtype=torch.float32,
+        )
+    elif self.train_from_scratch:
+        logger.info_rank0("> Creating model with random weights on CPU...")
+        model = AutoModelForCausalLM.from_config(
+            self.hf_config, trust_remote_code=self.trust_remote_code, torch_dtype=torch.float32
+        )
+    else:
+        logger.info_rank0(f"> Loading pretrained model on CPU from {self.model_path}...")
+        model = AutoModelForCausalLM.from_pretrained(
+            self.model_path,
+            config=self.hf_config,
+            trust_remote_code=self.trust_remote_code,
+            torch_dtype=torch.float32,
+            low_cpu_mem_usage=True,
+            device_map="cpu",
+        )
+    return model, None</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_loader.py#L111">mindspeed_llm/fsdp2/models/model_loader.py:111</a>（def _create_on_cpu —— CPU 加载分支） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_loader.py#L115">:115</a>（model_cls.from_pretrained(self.model_path, ...) —— 指定模型类加载） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_loader.py#L116">:116</a>（self.model_path —— EP17 merge 产出的 HF 目录） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_loader.py#L118">:118</a>（low_cpu_mem_usage=True —— 省 CPU 内存加载） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_loader.py#L120">:120</a>（torch_dtype=torch.float32 —— 加载默认 fp32，后续 FSDP 分片再转） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_loader.py#L124">:124</a>（AutoModelForCausalLM.from_config —— 从零训练分支，推理不走） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_loader.py#L129">:129</a>（AutoModelForCausalLM.from_pretrained(self.model_path, ...) —— 默认推理加载路径） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_loader.py#L92">:92</a>（AutoConfig.from_pretrained(self.model_path, ...) —— 先读 config，EP17 merge 时一并拷过来） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_loader.py#L97">:97</a>（attn_implementation="eager" if cp_size>1 else None —— CP>1 时强制 eager，呼应 EP11/EP12）</p>
+      <p class="footnote">这一段是<b>本篇与 EP17 的衔接点</b>——<code>self.model_path</code>（:116/:129）就是 EP17 <code>merge_dcp_to_hf</code> 产出的 HF 目录（<code>&lt;load-dir&gt;/hf_ckpt</code>，EP17 merge_dcp_to_hf.py:448）。:129 <code>AutoModelForCausalLM.from_pretrained</code> 按 transformers 标准流程读 <code>config.json</code>（:92 先 <code>AutoConfig.from_pretrained</code>）、再 mmap 读 <code>model-*.safetensors</code> + <code>model.safetensors.index.json</code>、按 <code>low_cpu_mem_usage</code>（:118/:134）省内存加载到 CPU。<b>如果 EP17 merge 时忘传 <code>--model-configs</code>，产物目录就没有 config.json，这里 <code>AutoConfig.from_pretrained</code>（:92）会直接报错</b>——这正是 EP17 footnote 反复强调"merge 必须把 config/tokenizer 一并拷到产物目录"的原因。:97 <code>attn_implementation="eager" if cp_size>1</code> 是 CP（上下文并行）>1 时强制 eager attention（CP 要求对 attention 组件统一 patch，呼应 EP12 的 attention 实现）。加载完的模型在 CPU 上是<b>全量</b>，随后被 <code>ModelFactory.create</code> 里的 FSDP <code>fully_shard</code> 切成每卡 1/N——训练切一次、加载再切一次，两次切分拓扑可不同，中间的全量 HF 是拓扑无关的中立格式。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/inference/engine/hf_engine.py —— HuggingfaceEngine：用 transformers 的 apply_chat_template + TextIteratorStreamer 调 model.generate()</p>
+      <pre data-lang="py">class HuggingfaceEngine(BaseEngine):
+    def __init__(self, model, tokenizer, args) -> None:
+        self.name = "huggingface"
+        self.can_generate = True
+
+        self.model = getattr(model, "model", model)
+        self.tokenizer = tokenizer
+        self.args = args
+
+        if self.tokenizer.pad_token_id is None:
+            self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
+
+        self.model.eval()
+        # Initialize asyncio loop safely
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            asyncio.set_event_loop(asyncio.new_event_loop())
+        self.semaphore = asyncio.Semaphore(int(os.getenv("MAX_CONCURRENT", "1")))
+
+    @staticmethod
+    def _process_args(model, tokenizer, args, messages, **input_kwargs):
+        target_device = HuggingfaceEngine._get_target_device()
+        # Build prompt using chat template or fallback to raw text
+        try:
+            tokenizer_output = tokenizer.apply_chat_template(
+                messages, add_generation_prompt=True, return_tensors="pt"
+            ).to(target_device)
+        except Exception:
+            raw_text = "\n".join([m["content"] for m in messages])
+            input_ids = tokenizer(raw_text, return_tensors="pt").input_ids.to(target_device)
+        ...
+        gen_config = model.generation_config
+        gen_config.max_new_tokens = getattr(args, "max_new_tokens", 512)
+        gen_config.do_sample = getattr(args, "do_sample", False)  # Disabled to prevent FSDP sampling deadlocks
+        gen_config.pad_token_id = tokenizer.pad_token_id
+        gen_kwargs = dict(
+            inputs=input_ids,
+            attention_mask=attention_mask,
+            generation_config=gen_config,
+            synced_gpus=False,
+        )
+        return gen_kwargs, prompt_length
+
+    @staticmethod
+    @torch.inference_mode()
+    def _chat(model, tokenizer, args, messages, **input_kwargs) -> list["Response"]:
+        target_device = HuggingfaceEngine._get_target_device()
+        torch.accelerator.set_device(target_device)
+        gen_kwargs, prompt_length = HuggingfaceEngine._process_args(...)
+        # Ensure generation runs strictly on the assigned NPU
+        with torch.device(target_device):
+            outputs = model.generate(**gen_kwargs)
+        response_ids = outputs[:, prompt_length:]
+        responses = tokenizer.batch_decode(response_ids, skip_special_tokens=True)
+        ...</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L20">mindspeed_llm/fsdp2/inference/engine/hf_engine.py:20</a>（class HuggingfaceEngine(BaseEngine)） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L25">:25</a>（self.model = getattr(model, "model", model) —— 剥 FSDP wrapper 取底层） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L29">:29</a>（if pad_token_id is None: pad=eos —— 兜底 pad） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L32">:32</a>（self.model.eval() —— 切推理模式） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L40">:40</a>（asyncio.Semaphore(MAX_CONCURRENT=1) —— 并发限流） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L43">:43</a>（def _get_target_device —— LOCAL_RANK 取本卡 NPU） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L46">:46</a>（torch.device(accelerator.type, local_rank) —— 本卡 device） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L56">:56</a>（target_device = _get_target_device()） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L60">:60</a>（tokenizer.apply_chat_template(messages, add_generation_prompt=True, return_tensors="pt") —— 拼对话 prompt） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L64">:64</a>（except Exception: 退化 raw_text —— 无 chat template 兜底） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L76">:76</a>（gen_config = model.generation_config） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L77">:77</a>（gen_config.max_new_tokens = getattr(args, "max_new_tokens", 512)） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L78">:78</a>（gen_config.do_sample = getattr(args, "do_sample", False) —— 强制贪婪，防 FSDP 采样死锁） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L80">:80</a>（gen_config.pad_token_id = tokenizer.pad_token_id） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L86">:86</a>（synced_gpus=False —— 不走 transformers 的跨卡同步 EOS） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L91">:91</a>（@torch.inference_mode() —— 推理无梯度上下文，比 no_grad 更省） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L99">:99</a>（with torch.device(target_device): —— 限定生成在本卡 NPU） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L100">:100</a>（outputs = model.generate(**gen_kwargs) —— 你熟悉的旧大陆，被新链路最后接回） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L102">:102</a>（response_ids = outputs[:, prompt_length:] —— 截掉 prompt 取新生成） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L103">:103</a>（tokenizer.batch_decode(response_ids, skip_special_tokens=True)） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L118">:118</a>（def _stream_chat —— 流式分支） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L122">:122</a>（TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True) —— 打字机 streamer） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L127">:127</a>（gen_kwargs["streamer"] = streamer —— 注入 generate） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L135">:135</a>（Thread(target=generate, daemon=True) —— 后台线程跑 generate） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L146">:146</a>（async def chat —— 异步包装 _chat） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L149">:149</a>（await asyncio.to_thread(self._chat, ...) —— 同步 generate 转异步） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/engine/hf_engine.py#L151">:151</a>（async def stream_chat —— 异步流式）</p>
+      <p class="footnote"><code>hf_engine.py</code> 是<b>本系列最后把你拉回旧大陆的地方</b>——:100 <code>model.generate(**gen_kwargs)</code> 这一行你见过无数次，但它脚底下的权重来源（EP17 merge 的 HF 全量、再 FSDP 重新切分）、运行的 device（:99 <code>with torch.device(target_device)</code> 限定本卡 NPU）、以及周围两个<b>多卡硬约束</b>都是新大陆给的：① <code>:78 do_sample=False</code>——注释明说"Disabled to prevent FSDP sampling deadlocks"，贪婪解码保证所有 rank 同输入同输出、步调一致，一旦 do_sample=True 各 rank 采样不同 token、一个提前 EOS 就死锁；② <code>:86 synced_gpus=False</code>——不启用 transformers 原生的跨卡 EOS 同步（FSDP2 自己管集合通信）。<code>_process_args</code>（:48）先用 <code>apply_chat_template</code>（:60，transformers 标准）把 messages 拼成 prompt、退化时用 raw_text（:64）兜底；:67-72 按 transformers 版本（≥5.0.0 走 input_ids+attention_mask，<5.0 走单一 input_ids 自己补 mask）——这和 EP17 <code>weight_conv_adapter.py:41</code> 的 <code>version("transformers") &lt; "5.0.0"</code> 校验同源，说明本仓库整体钉在 transformers 5.0+。<code>@torch.inference_mode()</code>（:91）比 <code>no_grad</code> 更激进地关梯度追踪；<code>self.semaphore</code>（:40，<code>MAX_CONCURRENT=1</code>）限并发。流式分支 <code>_stream_chat</code>（:118）用 <code>TextIteratorStreamer</code>（:122）+ 后台 <code>Thread</code>（:135）跑 <code>generate</code>，主线程 <code>next(streamer)</code> 逐 token yield——这套 HF 老三样你熟。<code>chat</code>（:146）/ <code>stream_chat</code>（:151）用 <code>asyncio.to_thread</code>（:149/:157）把同步 <code>generate</code> 包成异步，供 <code>ChatModel</code> 调度。<code>_get_target_device</code>（:43/:46）按 <code>LOCAL_RANK</code> 取本卡 device——和训练侧 <code>inference_fsdp2.py:89</code> 的 <code>LOCAL_RANK</code> 同源。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/inference/chat_model.py —— ChatModel：工厂选 engine + 后台 asyncio 线程桥接同步/异步</p>
+      <pre data-lang="py">class InferBackend(str, Enum):
+    HUGGINGFACE = "huggingface"
+
+
+class ChatModel:
+    r"""General class for chat models. Bridges Async engine."""
+
+    def __init__(self, model, tokenizer, args) -> None:
+        # 1. Get the inference backend from args, default to huggingface
+        infer_backend = getattr(args, "infer_backend", InferBackend.HUGGINGFACE).lower()
+
+        # 2. Factory pattern to select the appropriate inference engine
+        if infer_backend == InferBackend.HUGGINGFACE:
+            self.engine: BaseEngine = HuggingfaceEngine(model, tokenizer, args)
+        else:
+            raise ValueError(f"Unknown infer_backend: {infer_backend}. Only choose from: {InferBackend.HUGGINGFACE}.")
+
+        # 3. Start the background asyncio event loop
+        self._loop = asyncio.new_event_loop()
+        self._thread = Thread(target=_start_background_loop, args=(self._loop,), daemon=True)
+        self._thread.start()
+
+    def chat(self, messages, **input_kwargs) -> list["Response"]:
+        task = asyncio.run_coroutine_threadsafe(
+            self.engine.chat(messages, **input_kwargs), self._loop
+        )
+        return task.result()
+
+    def stream_chat(self, messages, **input_kwargs) -> Generator[str, None, None]:
+        generator = self.engine.stream_chat(messages, **input_kwargs)
+        while True:
+            try:
+                task = asyncio.run_coroutine_threadsafe(generator.__anext__(), self._loop)
+                yield task.result()
+            except StopAsyncIteration:
+                break</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/chat_model.py#L15">mindspeed_llm/fsdp2/inference/chat_model.py:15</a>（class InferBackend(str, Enum): HUGGINGFACE —— 目前仅一种 backend） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/chat_model.py#L19">:19</a>（class ChatModel —— Bridges Async engine） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/chat_model.py#L24">:24</a>（infer_backend = getattr(args, "infer_backend", HUGGINGFACE).lower() —— 默认 HF） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/chat_model.py#L27">:27</a>（if infer_backend == HUGGINGFACE: self.engine = HuggingfaceEngine(...) —— 工厂选 engine） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/chat_model.py#L30">:30</a>（raise ValueError —— 未知 backend 报错） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/chat_model.py#L33">:33</a>（asyncio.new_event_loop() —— 建独立事件循环） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/chat_model.py#L34">:34</a>（Thread(target=_start_background_loop, daemon=True) —— 后台线程跑 loop） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/chat_model.py#L35">:35</a>（self._thread.start() —— 启动） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/chat_model.py#L37">:37</a>（def chat —— 同步入口） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/chat_model.py#L38">:38</a>（asyncio.run_coroutine_threadsafe(self.engine.chat(...), self._loop) —— 把异步 coroutine 投到后台 loop） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/chat_model.py#L39">:39</a>（task.result() —— 阻塞等结果，同步接口） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/chat_model.py#L43">:43</a>（def stream_chat —— 生成器入口） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/chat_model.py#L44">:44</a>（generator = self.engine.stream_chat(...) —— 取异步 generator） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/chat_model.py#L47">:47</a>（asyncio.run_coroutine_threadsafe(generator.__anext__(), self._loop) —— 逐个投递 next） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/chat_model.py#L48">:48</a>（yield task.result() —— 同步 yield token） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/chat_model.py#L49">:49</a>（except StopAsyncIteration: break —— 异步生成器结束）</p>
+      <p class="footnote"><code>ChatModel</code> 是<b>应用层和 engine 之间的胶水</b>——它本身不实现生成逻辑，只做两件事：① 工厂选 engine（:27，目前 <code>InferBackend</code> 只有 <code>HUGGINGFACE</code> 一种，:15/:30 未知 backend 直接 raise，<b>预留了 vLLM 等扩展位但目前未实现</b>——「（若后续接入 vLLM 等 backend，以源码为准）」）；② 起一个后台 asyncio 线程（:33-35 <code>new_event_loop</code> + <code>Thread(target=_start_background_loop)</code>，:10 <code>_start_background_loop</code> 设 loop 并 <code>run_forever</code>），把 engine 的<b>异步</b> <code>chat</code>/<code>stream_chat</code> 包装成<b>同步</b>接口给上层调用。<code>chat</code>（:37）用 <code>asyncio.run_coroutine_threadsafe</code>（:38）把 coroutine 投到后台 loop、<code>task.result()</code>（:39）阻塞等——这样上层（<code>Inferencer</code>）拿到的是普通同步返回。<code>stream_chat</code>（:43）同理，但用 <code>while True</code>（:46）逐个 <code>generator.__anext__()</code>（:47）投递、<code>yield task.result()</code>（:48）同步 yield——把异步 generator 拍平成同步 generator，<code>StopAsyncIteration</code>（:49）收尾。<b>这套"后台 loop + run_coroutine_threadsafe"是 LLM serving 圈常见模式</b>（vLLM、LMDeploy 类似），把阻塞的 <code>generate</code> 隔离在独立线程、主线程用 asyncio 调度多请求并发——只是这里 <code>MAX_CONCURRENT=1</code>（hf_engine.py:40）暂时单请求。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/inference/inferencer.py —— Inferencer：多 rank 广播输入 + while True 聊天循环</p>
+      <pre data-lang="py">class Inferencer:
+    """
+    Executes inference tasks, backed by an extensible ChatModel engine.
+    """
+    def __init__(self, model, tokenizer, args):
+        self.chat_model = ChatModel(model, tokenizer, args)
+        self.rank = dist.get_rank() if dist.is_initialized() else 0
+
+    def run_interactive_chat(self):
+        """Starts an interactive chat loop (CLI Demo) with streaming support."""
+        logger.info_rank0(">>> Entering Interactive Chat Mode. Type 'exit' to quit.")
+        history = []
+        EXIT_COMMANDS = ("exit", "quit")
+        ROLE_USER, ROLE_ASSISTANT = ("user", "assistant")
+        ASSISTANT_PREFIX = "Assistant: "
+        VISUAL_SEPARATOR = "\n" + "-" * 40
+        while True:
+            # 1. Sync input across all FSDP ranks to prevent deadlocks
+            user_input = self._get_sync_input()
+            if user_input.lower() in EXIT_COMMANDS:
+                break
+            if not user_input:
+                continue
+            history.append({"role": ROLE_USER, "content": user_input})
+            if self.rank == 0:
+                print(ASSISTANT_PREFIX, end="", flush=True)
+            response = ""
+            # 2. Use the streaming API for the typewriter effect
+            for new_text in self.chat_model.stream_chat(history):
+                if self.rank == 0:
+                    print(new_text, end="", flush=True)
+                response += new_text
+            logger.info_plain_rank0(VISUAL_SEPARATOR)
+            history.append({"role": ROLE_ASSISTANT, "content": response})
+
+    def _get_sync_input(self):
+        """Only Rank 0 reads keyboard; broadcast to other Ranks for sync collective comm."""
+        if self.rank == 0:
+            try:
+                user_input = input("\nUser: ").strip()
+            except EOFError:
+                user_input = "exit"
+        else:
+            user_input = None
+        if dist.is_initialized():
+            objects = [user_input]
+            dist.broadcast_object_list(objects, src=0)
+            user_input = objects[0]
+        return user_input</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L10">mindspeed_llm/fsdp2/inference/inferencer.py:10</a>（class Inferencer —— 应用层执行类） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L15">:15</a>（self.chat_model = ChatModel(model, tokenizer, args) —— 持有 ChatModel） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L16">:16</a>（self.rank = dist.get_rank() —— 本 rank） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L18">:18</a>（def run_interactive_chat —— CLI Demo 聊天循环） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L24">:24</a>（history = [] —— 维护对话历史） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L28">:28</a>（EXIT_COMMANDS = ("exit", "quit")） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L33">:33</a>（while True —— 主循环） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L35">:35</a>（user_input = self._get_sync_input() —— 同步输入防死锁） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L37">:37</a>（if user_input in EXIT_COMMANDS: break） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L43">:43</a>（history.append({"role":"user",...})） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L45">:45</a>（if self.rank == 0: print("Assistant: ") —— 仅 rank0 打印） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L51">:51</a>（for new_text in self.chat_model.stream_chat(history) —— 流式生成） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L52">:52</a>（if self.rank == 0: print(new_text, flush=True) —— rank0 打字机） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L59">:59</a>（history.append({"role":"assistant",...})） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L61">:61</a>（def _get_sync_input —— 同步输入广播） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L67">:67</a>（if self.rank == 0: user_input = input(...) —— 仅 rank0 读键盘） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L70">:70</a>（except EOFError: user_input = "exit" —— 管道 EOF 兜底） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L75">:75</a>（if dist.is_initialized(): —— 多卡分支） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L77">:77</a>（dist.broadcast_object_list(objects, src=0) —— rank0 输入广播给所有 rank） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/inference/inferencer.py#L78">:78</a>（user_input = objects[0] —— 各 rank 拿到同一 prompt）</p>
+      <p class="footnote"><code>Inferencer</code> 是<b>应用层执行类</b>——它持 <code>ChatModel</code>（:15）并跑 <code>while True</code> 交互循环（:33）。<b>多卡的关键在 :61 <code>_get_sync_input</code></b>：:67 只有 rank0 读键盘（<code>input()</code>），:70 <code>EOFError</code> 兜底为 "exit"（管道输入场景，如 <code>echo hi | python inference_fsdp2.py</code>），:75-78 若分布式初始化了，用 <code>dist.broadcast_object_list(objects, src=0)</code>（:77，集合通信原语，呼应 EP03）把 rank0 的输入<b>广播</b>给所有 rank——这样所有 rank 拿到<b>完全相同的 prompt</b>，进 <code>stream_chat</code>（:51）后各 rank 在 FSDP 包装下同步集合通信、步调一致地 <code>generate</code>。:45/:52 仅 rank0 打印（避免 N 份重复输出）。<b>这一步和 hf_engine.py:78 的 <code>do_sample=False</code> 是同一件事的两面</b>——:77 广播保证输入一致、:78 强制贪婪保证生成路径一致，二者缺一都会死锁。:59 把 assistant 回复 append 进 history 维持多轮对话。整套循环退出靠 :37 的 exit/quit 命令。注意 <code>Inferencer</code> 不直接碰 <code>model.generate</code>——它只调 <code>chat_model.stream_chat</code>（:51），生成逻辑全在 engine 里，<code>Inferencer</code> 只管多卡同步输入和 UI。</p>
+
+      <div class="gnpu">
+        <div class="g"><h4>GPU / 已知（单卡 transformers）</h4>
+          <div class="row"><span class="k">generate</span><span>model.generate() 直接单卡跑，KV cache 由框架 past_key_values 维护，无需关心分片</span></div>
+          <div class="row"><span class="k">权重来源</span><span>from_pretrained 拉 HF Hub 全量 safetensors，一张卡 mmap 整份</span></div>
+          <div class="row"><span class="k">采样</span><span>do_sample 自由设，多卡不涉及同步（单卡无 rank 死锁）</span></div>
+          <div class="row"><span class="k">KV cache</span><span>显存里一份，FP16/BF16 紧凑布局，单卡够用</span></div>
+          <div class="row"><span class="k">输入</span><span>input() 直接读，无需广播</span></div>
+        </div>
+        <div class="n"><h4>NPU / 本项目（FSDP2 多卡推理）</h4>
+          <div class="row"><span class="k">generate</span><span>model.generate() 走 FSDP 包装，各卡只持 1/N 参数，集合通信对齐（hf_engine.py:100）</span></div>
+          <div class="row"><span class="k">权重来源</span><span>加载 EP17 merge 后的 HF 全量，加载后 fully_shard 再切分（model_loader.py:129）</span></div>
+          <div class="row"><span class="k">采样</span><span>do_sample=False 强制贪婪防 FSDP 采样死锁；synced_gpus=False（hf_engine.py:78/:86）</span></div>
+          <div class="row"><span class="k">KV cache</span><span>NPU HBM 内存语义，多卡下各 rank 自管本地 KV 分片，eager/CP 时 attention patch 统一（model_loader.py:97）</span></div>
+          <div class="row"><span class="k">输入</span><span>rank0 读键盘 + broadcast_object_list 广播同步 prompt（inferencer.py:67/:77）</span></div>
+        </div>
+      </div>
+
+      <div class="sum">
+        <b>小结　心智模型</b>：推理 = "merge 后用 HF 引擎跑"。训练产物是 dcp 分片（每 rank 一份 + DTensor 布局元信息），<b>不能直接喂推理</b>——推理入口 <code>inference_fsdp2.py:67</code> 的 <code>ModelFactory.create</code> 下钻到 <code>model_loader.py:129</code> 的 <code>AutoModelForCausalLM.from_pretrained</code>，<b>只认 EP17 merge 出来的 HF 全量 safetensors</b>。所以"训练→推理"这条链路压在 EP17 的 <code>merge_dcp_to_hf</code> 上：它把分片合并回全量、写成 HF 标准格式（safetensors + index.json + config + tokenizer），推理加载这份全量、再用 FSDP <code>fully_shard</code> 重新切成每卡 1/N（<b>训练切一次、加载再切一次，两次拓扑可不同</b>，中间的全量 HF 是拓扑无关的中立中转）。模型就绪后 <code>Inferencer</code> 持 <code>ChatModel</code>→<code>HuggingfaceEngine</code>，<code>model.generate()</code>（hf_engine.py:100）这一行回到你熟悉的旧大陆，但脚底下多了两个多卡硬约束：<code>do_sample=False</code>（贪婪防采样死锁）和 <code>synced_gpus=False</code>（不走 transformers 跨卡 EOS 同步）；输入侧 <code>inferencer.py:77</code> 的 <code>broadcast_object_list</code> 把 rank0 的键盘输入广播给所有 rank，保证各 rank 同 prompt 同步集合通信。<b>三座桥在这里合龙</b>：① DDP→FSDP2（EP01/EP03/EP08）——推理也是 FSDP 分片、DTensor；② CUDA→CANN-NPU（EP02）——<code>inference_fsdp2.py:80</code> 的 NPU/HCCL 分支、<code>hccl_premul_sum_patch</code>；③ 单卡→多机（EP07-EP09）——<code>DeviceMesh</code> 拓扑下多 rank 同步 generate。整个系列从 EP01 的地图走到 EP18 的产物出口，闭环。
+        <div class="pit">常见误区：① <b>以为训练 dcp 能直接喂推理</b>——不行，dcp 存的是每 rank 分片 + DTensor 布局元信息，<code>from_pretrained</code> 不认，必须先经 EP17 <code>merge_dcp_to_hf</code> 合并成 HF 全量 safetensors；忘传 <code>--model-configs</code> 导致产物无 config.json，推理直接报错。② 以为多卡推理和单卡一样随便设 <code>do_sample</code>——FSDP2 下各 rank 采样不同 token 会死锁，必须 <code>do_sample=False</code> 贪婪。③ 以为 <code>Inferencer</code> 直接调 <code>model.generate</code>——不是，它只调 <code>chat_model.stream_chat</code>，生成逻辑全在 <code>HuggingfaceEngine</code>，<code>Inferencer</code> 只管多卡同步输入和 UI。④ 以为推理加载会复用训练时的切分——不会，加载的是全量 HF、FSDP 再切一次（拓扑可变），训练与推理是两次独立切分。</div>
+        <div class="pit" style="margin-top:8px"><b>三座桥回顾（系列收束）</b>：本篇为走读终篇。回望全系列，<b>桥① DDP→FSDP2</b>——EP01 立地图、EP03 讲 FSDP2/DTensor 的 per-param 分片取代 FSDP1 的 FlatParam、EP08 讲分片如何落地；推理侧 <code>ModelFactory.create</code> 加载后再 <code>fully_shard</code>，正是这座桥的延伸。<b>桥② CUDA→CANN-NPU</b>——EP02 讲 <code>torch.cuda</code>→<code>torch.npu</code>、NCCL→HCCL、<code>hccl_premul_sum_patch</code>；推理入口 <code>inference_fsdp2.py:80-83</code> 的 NPU/HCCL 分支 + premul_sum patch 是这座桥的镜像。<b>桥③ 单卡→多机</b>——EP07 讲并行状态引擎/DeviceMesh、EP09 讲专家并行、EP10 讲通信掩盖；推理侧 <code>inferencer.py:77</code> 的 <code>broadcast_object_list</code> 跨 rank 同步、<code>do_sample=False</code> 保步调一致，是这座桥在产物出口处的回响。三座桥叠加，才构成"在 Ascend 上用 FSDP2 训练并推理 Qwen3-8B"的全部坐标——从 EP01 的"你现在站在哪座桥上"到 EP18 的"产物从这里出口"，全系列闭环。完整地图见 <a href="index.html" style="color:var(--red-tx);border-bottom:1px dashed var(--red-bd)">index.html</a>。</div>
+      </div>
+
+      <div class="filelist"><b>本篇涉及文件</b><br>
+inference_fsdp2.py （推理入口，AutoInferencer）<br>
+mindspeed_llm/fsdp2/inference/inferencer.py （应用层 Inferencer + 多 rank 同步输入）<br>
+mindspeed_llm/fsdp2/inference/chat_model.py （ChatModel 工厂 + 后台 asyncio loop）<br>
+mindspeed_llm/fsdp2/inference/engine/hf_engine.py （HuggingfaceEngine，model.generate 落点）<br>
+mindspeed_llm/fsdp2/inference/engine/base_engine.py （BaseEngine 抽象 + Response dataclass）<br>
+mindspeed_llm/fsdp2/models/model_loader.py （from_pretrained 加载 merge 后 HF 权重，衔 EP17）<br>
+mindspeed_llm/fsdp2/models/model_factory.py （ModelFactory.create，加载后 FSDP 包装）
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre[data-lang]').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];if(!rules)return;
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      return '<span class="ln">'+(i+1)+'</span>'+tokLine(l,rules);
+    }).join('\n');
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,876 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/data/megatron_data/indexed_dataset.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/data/megatron_data/indexed_dataset.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_3eb604116ccbd5.html">◀ helpers.py</a> <a href="file_eec21249880fa5.html">megatron_dataset.py ▶</a></nav></div>
+<div class="wrap">
+<h1>indexed_dataset.py</h1><p class="goal">mindspeed_llm/fsdp2/data/megatron_data/indexed_dataset.py · 25544B · 775 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L34" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class BufferWriter</a><a href="#L38" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, data_file, dtype, buffer_ch</a><a href="#L44" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def reset_buffer(self)</a><a href="#L47" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def write(self)</a><a href="#L53" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def add(self, lst: List)</a><a href="#L60" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class DType(Enum)</a><a href="#L73" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def code_from_dtype(cls, value: Type[numpy.num</a><a href="#L85" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def dtype_from_code(cls, value: int) -&gt; Typ</a><a href="#L97" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def size(key: Union[int, Type[numpy.number]]) </a><a href="#L117" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def optimal_dtype(cardinality: Optional[int]) </a><a href="#L132" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class _IndexWriter(object)</a><a href="#L141" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, idx_path: str, dtype: Type[</a><a href="#L145" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __enter__(self) -&gt; &quot;_IndexWriter&q</a><a href="#L160" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __exit__</a><a href="#L180" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def write</a><a href="#L225" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _sequence_pointers(self, sequence_lengths:</a><a href="#L243" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class _IndexReader(object)</a><a href="#L252" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, idx_path: str, multimodal: </a><a href="#L328" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __del__(self) -&gt; None</a><a href="#L334" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __len__(self) -&gt; int</a><a href="#L343" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __getitem__(self, idx: int) -&gt; Tuple[nu</a><a href="#L359" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class _BinReader(ABC)</a><a href="#L363" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def read(self, dtype: Type[numpy.number], coun</a><a href="#L379" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class _MMapBinReader(_BinReader)</a><a href="#L386" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, bin_path: str) -&gt; None</a><a href="#L390" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def read(self, dtype: Type[numpy.number], coun</a><a href="#L405" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __del__(self) -&gt; None</a><a href="#L412" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class _FileBinReader(_BinReader)</a><a href="#L419" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, bin_path: str) -&gt; None</a><a href="#L422" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def read(self, dtype: Type[numpy.number], coun</a><a href="#L442" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class IndexedDataset(torch.utils.data.Dataset)</a><a href="#L453" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__</a><a href="#L469" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def initialize</a><a href="#L496" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __getstate__(self) -&gt; Tuple[str, bool, </a><a href="#L504" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __setstate__(self, state: Tuple[str, bool,</a><a href="#L513" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __del__(self) -&gt; None</a><a href="#L518" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __len__(self) -&gt; int</a><a href="#L526" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __getitem__</a><a href="#L567" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get(self, idx: int, offset: int = 0, lengt</a><a href="#L593" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def sequence_lengths(self) -&gt; numpy.ndarray</a><a href="#L602" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def document_indices(self) -&gt; numpy.ndarray</a><a href="#L610" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_document_indices(self) -&gt; numpy.nda</a><a href="#L620" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def set_document_indices(self, document_indice</a><a href="#L631" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def sequence_modes(self) -&gt; numpy.ndarray</a><a href="#L640" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def exists(path_prefix: str) -&gt; bool</a><a href="#L654" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class IndexedDatasetBuilder(object)</a><a href="#L665" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__</a><a href="#L677" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def add_item(self, tensor: torch.Tensor, mode:</a><a href="#L697" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def add_document</a><a href="#L716" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def end_document(self) -&gt; None</a><a href="#L720" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def add_index(self, path_prefix: str) -&gt; No</a><a href="#L741" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def finalize(self, idx_path: str) -&gt; None</a><a href="#L753" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_idx_path(path_prefix: str) -&gt; str</a><a href="#L765" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_bin_path(path_prefix: str) -&gt; str</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep13.html">EP13</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p>Copyright (c) Facebook, Inc. and its affiliates.</p><p class="mut">（自动提取自首行注释）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1"># Copyright (c) Facebook, Inc. and its affiliates.
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Essentially re-written in entirety
+
+import logging
+import os
+import shutil
+import struct
+import time
+from abc import ABC, abstractmethod
+from enum import Enum
+from functools import lru_cache
+from itertools import accumulate
+from types import TracebackType
+from typing import List, Optional, Tuple, Type, Union
+
+try:
+    import boto3
+except ModuleNotFoundError:
+    pass
+import numpy
+import torch
+
+
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+logger = get_logger(__name__)
+
+_INDEX_HEADER = b&quot;MMIDIDX\x00\x00&quot;
+
+
+class BufferWriter:
+    &quot;&quot;&quot;
+    Write the sequences in chunks rather than one by one
+    &quot;&quot;&quot;
+    def __init__(self, data_file, dtype, buffer_chunk_size=10 ** 5):
+        self.data_file = data_file
+        self.dtype = dtype
+        self.buffer_threshold = buffer_chunk_size
+        self.buffer = []
+
+    def reset_buffer(self):
+        self.buffer = []
+
+    def write(self):
+        if self.buffer:
+            buffer_array = numpy.array(self.buffer, dtype=self.dtype)
+            self.data_file.write(buffer_array.tobytes(order=&quot;C&quot;))
+            self.reset_buffer()
+
+    def add(self, lst: List):
+        self.buffer.extend(lst)
+
+        if len(self.buffer) &gt;= self.buffer_threshold:
+            self.write()
+
+
+class DType(Enum):
+    &quot;&quot;&quot;The NumPy data type Enum for writing/reading the IndexedDataset indices&quot;&quot;&quot;
+
+    uint8 = 1
+    int8 = 2
+    int16 = 3
+    int32 = 4
+    int64 = 5
+    float64 = 6
+    float32 = 7
+    uint16 = 8
+
+    @classmethod
+    def code_from_dtype(cls, value: Type[numpy.number]) -&gt; int:
+        &quot;&quot;&quot;Get the code from the dtype
+
+        Args:
+            value (Type[numpy.number]): The dtype
+
+        Returns:
+            int: The code
+        &quot;&quot;&quot;
+        return cls[value.__name__].value
+
+    @classmethod
+    def dtype_from_code(cls, value: int) -&gt; Type[numpy.number]:
+        &quot;&quot;&quot;Get the dtype from the code
+
+        Args:
+            value (int): The code
+
+        Returns:
+            Type[numpy.number]: The dtype
+        &quot;&quot;&quot;
+        return getattr(numpy, cls(value).name)
+
+    @staticmethod
+    def size(key: Union[int, Type[numpy.number]]) -&gt; int:
+        &quot;&quot;&quot;Get the size of the dtype/code in bytes
+
+        Args:
+            key (Union[int, Type[numpy.number]]): The dtype or code
+
+        Raises:
+            ValueError: If the key is neither dtype nor integer code
+
+        Returns:
+            int: The size of the dtype/code in in bytes
+        &quot;&quot;&quot;
+        if isinstance(key, int):
+            return DType.dtype_from_code(key)().itemsize
+        elif numpy.number in key.__mro__:
+            return key().itemsize
+        else:
+            raise ValueError
+
+    @staticmethod
+    def optimal_dtype(cardinality: Optional[int]) -&gt; Type[numpy.number]:
+        &quot;&quot;&quot;Get the dtype to use for an index of a certain cardinality
+
+        Args:
+            cardinality (Optional[int]): The number of elements to be indexed
+
+        Returns:
+            Type[numpy.number]: The dtype to use for the index
+        &quot;&quot;&quot;
+        if cardinality is not None and cardinality &lt; 65500:
+            return numpy.uint16
+        else:
+            return numpy.int32
+
+
+class _IndexWriter(object):
+    &quot;&quot;&quot;Object class to write the index (.idx) file
+
+    Args:
+        idx_path (str): The path to the index file
+
+        dtype (Type[numpy.number]): The dtype of the index file
+    &quot;&quot;&quot;
+
+    def __init__(self, idx_path: str, dtype: Type[numpy.number]) -&gt; None:
+        self.idx_path = idx_path
+        self.dtype = dtype
+
+    def __enter__(self) -&gt; &quot;_IndexWriter&quot;:
+        &quot;&quot;&quot;Enter the context introduced by the &#x27;with&#x27; keyword
+
+        Returns:
+            _IndexWriter: The instance
+        &quot;&quot;&quot;
+        self.idx_writer = open(self.idx_path, &quot;wb&quot;)
+        # fixed, vestigial practice
+        self.idx_writer.write(_INDEX_HEADER)
+        # fixed, vestigial practice
+        self.idx_writer.write(struct.pack(&quot;&lt;Q&quot;, 1))
+        # the numeric code for the dtype
+        self.idx_writer.write(struct.pack(&quot;&lt;B&quot;, DType.code_from_dtype(self.dtype)))
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -&gt; Optional[bool]:
+        &quot;&quot;&quot;Exit the context introduced by the &#x27;with&#x27; keyword
+
+        Args:
+            exc_type (Optional[Type[BaseException]]): Exception type
+
+            exc_val (Optional[BaseException]): Exception value
+
+            exc_tb (Optional[TracebackType]): Exception traceback object
+
+        Returns:
+            Optional[bool]: Whether to silence the exception
+        &quot;&quot;&quot;
+        self.idx_writer.close()
+
+    def write(
+        self,
+        sequence_lengths: List[int],
+        sequence_modes: Optional[List[int]],
+        document_indices: List[int],
+    ) -&gt; None:
+        &quot;&quot;&quot;Write the index (.idx) file
+
+        Args:
+            sequence_lengths (List[int]): The length of each sequence
+
+            sequence_modes (Optional[List[int]]): The mode of each sequences
+
+            document_indices (List[int]): The seqyebce indices demarcating the end of each document
+        &quot;&quot;&quot;
+        sequence_pointers = self._sequence_pointers(sequence_lengths)
+
+        # the number of sequences in the dataset
+        sequence_count = len(sequence_lengths)
+        self.idx_writer.write(struct.pack(&quot;&lt;Q&quot;, sequence_count))
+
+        # the number of documents in the dataset
+        document_count = len(document_indices)
+        self.idx_writer.write(struct.pack(&quot;&lt;Q&quot;, document_count))
+
+        # the number of tokens per sequence
+        sequence_lengths = numpy.array(sequence_lengths, dtype=numpy.int32)
+        self.idx_writer.write(sequence_lengths.tobytes(order=&quot;C&quot;))
+        del sequence_lengths
+
+        # the byte offsets for all sequences
+        sequence_pointers = numpy.array(sequence_pointers, dtype=numpy.int64)
+        self.idx_writer.write(sequence_pointers.tobytes(order=&quot;C&quot;))
+        del sequence_pointers
+
+        # the sequence indices marking the end of each document
+        document_indices = numpy.array(document_indices, dtype=numpy.int64)
+        self.idx_writer.write(document_indices.tobytes(order=&quot;C&quot;))
+
+        # the mode per sequence
+        if sequence_modes is not None:
+            sequence_modes = numpy.array(sequence_modes, dtype=numpy.int8)
+            self.idx_writer.write(sequence_modes.tobytes(order=&#x27;C&#x27;))
+            del sequence_modes
+
+    def _sequence_pointers(self, sequence_lengths: List[int]) -&gt; List[int]:
+        &quot;&quot;&quot;Build the sequence pointers per the sequence lengths and dtype size
+
+        Args:
+            sequence_lengths (List[int]): The length of each sequence
+
+        Returns:
+            List[int]: The pointer to the beginning of each sequence
+        &quot;&quot;&quot;
+        itemsize = DType.size(self.dtype)
+        curr_ptr = 0
+        list_ptr = []
+        for length in sequence_lengths:
+            list_ptr.append(curr_ptr)
+            curr_ptr += length * itemsize
+        return list_ptr
+
+
+class _IndexReader(object):
+    &quot;&quot;&quot;Object class to read the index (.idx) file
+
+    Args:
+        idx_path (str): The path to the index file
+
+        multimodal (bool): Whether the dataset is multimodal
+    &quot;&quot;&quot;
+
+    def __init__(self, idx_path: str, multimodal: bool) -&gt; None:
+
+        logger.info_rank0(f&quot;Load the {type(self).__name__} from {idx_path}.&quot;)
+
+        with open(idx_path, &quot;rb&quot;) as stream:
+            header = stream.read(9)
+            assert header == _INDEX_HEADER, f&quot;bad header, cannot read: {idx_path}&quot;
+
+            version = struct.unpack(&quot;&lt;Q&quot;, stream.read(8))[0]
+            assert version == 1, f&quot;bad version, cannot read: {idx_path}&quot;
+
+            code = struct.unpack(&quot;&lt;B&quot;, stream.read(1))[0]
+            self.dtype = DType.dtype_from_code(code)
+            self.dtype_size = DType.size(self.dtype)
+
+            self.sequence_count = struct.unpack(&quot;&lt;Q&quot;, stream.read(8))[0]
+            self.document_count = struct.unpack(&quot;&lt;Q&quot;, stream.read(8))[0]
+
+            offset = stream.tell()
+
+        self.bin_buffer_mmap = numpy.memmap(idx_path, mode=&quot;r&quot;, order=&quot;C&quot;)
+        self.bin_buffer = memoryview(self.bin_buffer_mmap)
+
+        logger.info_rank0(f&quot;\tExtract the sequence lengths&quot;)
+        t_beg = time.time()
+        self.sequence_lengths = numpy.frombuffer(
+            self.bin_buffer, dtype=numpy.int32, count=self.sequence_count, offset=offset
+        )
+        t_end = time.time()
+        logger.info_rank0(f&quot;\t&gt; time elapsed: {t_end - t_beg:4f} seconds&quot;)
+
+        logger.info_rank0(f&quot;\tExtract the sequence pointers&quot;)
+        t_beg = time.time()
+        self.sequence_pointers = numpy.frombuffer(
+            self.bin_buffer,
+            dtype=numpy.int64,
+            count=self.sequence_count,
+            offset=offset + self.sequence_lengths.nbytes,
+        )
+        t_end = time.time()
+        logger.info_rank0(f&quot;\t&gt; time elapsed: {t_end - t_beg:4f} seconds&quot;)
+
+        logger.info_rank0(f&quot;\tExtract the document indices&quot;)
+        t_beg = time.time()
+        self.document_indices = numpy.frombuffer(
+            self.bin_buffer,
+            dtype=numpy.int64,
+            count=self.document_count,
+            offset=offset + self.sequence_lengths.nbytes + self.sequence_pointers.nbytes,
+        )
+        t_end = time.time()
+        logger.info_rank0(f&quot;\t&gt; time elapsed: {t_end - t_beg:4f} seconds&quot;)
+
+        self.sequence_modes = None
+        if multimodal:
+            logger.info_rank0(f&quot;\tExtract the sequence modes&quot;)
+            t_beg = time.time()
+            self.sequence_modes = numpy.frombuffer(
+                self.bin_buffer,
+                dtype=numpy.int8,
+                count=self.sequence_count,
+                offset=offset
+                + self.sequence_lengths.nbytes
+                + self.sequence_pointers.nbytes
+                + self.document_indices.nbytes,
+            )
+            t_end = time.time()
+            logger.info_rank0(f&quot;\t&gt; time elapsed: {t_end - t_beg:4f} seconds&quot;)
+
+        assert self.sequence_lengths.shape[0] == len(self)
+        assert self.sequence_lengths.shape[0] == self.sequence_count
+        assert self.sequence_lengths.shape[0] == self.document_indices[-1]
+
+        logger.info_rank0(f&quot;&gt; total number of sequences: {len(self)}&quot;)
+        logger.info_rank0(f&quot;&gt; total number of documents: {self.document_indices.shape[0] - 1}&quot;)
+
+    def __del__(self) -&gt; None:
+        &quot;&quot;&quot;Clean up the object&quot;&quot;&quot;
+        if hasattr(self, &quot;bin_buffer_mmap&quot;):
+            self.bin_buffer_mmap._mmap.close()
+            del self.bin_buffer_mmap
+
+    def __len__(self) -&gt; int:
+        &quot;&quot;&quot;Return the length of the dataset
+
+        Returns:
+            int: The length of the dataset
+        &quot;&quot;&quot;
+        return self.sequence_count
+
+    @lru_cache(maxsize=8)
+    def __getitem__(self, idx: int) -&gt; Tuple[numpy.int32, numpy.int64, Optional[numpy.int8]]:
+        &quot;&quot;&quot;Return the pointer, length, and mode at the index
+
+        Args:
+            idx (int): The index into the dataset
+
+        Returns:
+            Tuple[numpy.int32, numpy.int64, Optional[numpy.int8]]: The pointer, length and mode at the index
+        &quot;&quot;&quot;
+        return (
+            self.sequence_pointers[idx],
+            self.sequence_lengths[idx],
+            self.sequence_modes[idx] if self.sequence_modes is not None else None,
+        )
+
+
+class _BinReader(ABC):
+    &quot;&quot;&quot;Abstract class to read the data (.bin) file&quot;&quot;&quot;
+
+    @abstractmethod
+    def read(self, dtype: Type[numpy.number], count: int, offset: int) -&gt; numpy.ndarray:
+        &quot;&quot;&quot;Read bytes into a numpy array.
+
+        Args:
+            dtype (Type[numpy.number]): Data-type of the returned array.
+
+            count (int): Number of items to read.
+
+            offset (int): Start reading from this offset (in bytes).
+
+        Returns:
+            numpy.ndarray: An array with `count` items and data-type `dtype` constructed from reading bytes from the data file starting at `offset`.
+        &quot;&quot;&quot;
+        pass
+
+
+class _MMapBinReader(_BinReader):
+    &quot;&quot;&quot;A _BinReader that memory maps the data (.bin) file
+
+    Args:
+        bin_path (str): bin_path (str): The path to the data (.bin) file.
+    &quot;&quot;&quot;
+
+    def __init__(self, bin_path: str) -&gt; None:
+        self._bin_buffer_mmap = numpy.memmap(bin_path, mode=&quot;r&quot;, order=&quot;C&quot;)
+        self._bin_buffer = memoryview(self._bin_buffer_mmap)
+
+    def read(self, dtype: Type[numpy.number], count: int, offset: int) -&gt; numpy.ndarray:
+        &quot;&quot;&quot;Read bytes into a numpy array.
+
+        Args:
+            dtype (Type[numpy.number]): Data-type of the returned array.
+
+            count (int): Number of items to read.
+
+            offset (int): Start reading from this offset (in bytes).
+
+        Returns:
+            numpy.ndarray: An array with `count` items and data-type `dtype` constructed from reading bytes from the data file starting at `offset`.
+        &quot;&quot;&quot;
+        return numpy.frombuffer(self._bin_buffer, dtype=dtype, count=count, offset=offset)
+
+    def __del__(self) -&gt; None:
+        &quot;&quot;&quot;Clean up the object.&quot;&quot;&quot;
+        if self._bin_buffer_mmap is not None:
+            self._bin_buffer_mmap._mmap.close()
+        del self._bin_buffer_mmap
+
+
+class _FileBinReader(_BinReader):
+    &quot;&quot;&quot;A _BinReader that reads from the data (.bin) file using a file pointer
+
+    Args:
+        bin_path (str): bin_path (str): The path to the data (.bin) file.
+    &quot;&quot;&quot;
+
+    def __init__(self, bin_path: str) -&gt; None:
+        self._bin_path = bin_path
+
+    def read(self, dtype: Type[numpy.number], count: int, offset: int) -&gt; numpy.ndarray:
+        &quot;&quot;&quot;Read bytes into a numpy array.
+
+        Args:
+            dtype (Type[numpy.number]): Data-type of the returned array.
+
+            count (int): Number of items to read.
+
+            offset (int): Start reading from this offset (in bytes).
+
+        Returns:
+            numpy.ndarray: An array with `count` items and data-type `dtype` constructed from reading bytes from the data file starting at `offset`.
+        &quot;&quot;&quot;
+        sequence = numpy.empty(count, dtype=dtype)
+        with open(self._bin_path, mode=&#x27;rb&#x27;, buffering=0) as bin_buffer_file:
+            bin_buffer_file.seek(offset)
+            bin_buffer_file.readinto(sequence)
+        return sequence
+
+
+class IndexedDataset(torch.utils.data.Dataset):
+    &quot;&quot;&quot;The low-level interface dataset class
+
+    Args:
+        path_prefix (str): The index (.idx) and data (.bin) prefix
+
+        multimodal (bool): Whether the dataset is multimodal. Defaults to False.
+
+        mmap (bool): Whether to mmap the .bin files. Defaults to True.
+    &quot;&quot;&quot;
+
+    def __init__(
+        self,
+        path_prefix: str,
+        multimodal: bool = False,
+        mmap: bool = True,
+    ) -&gt; None:
+        super().__init__()
+        self.path_prefix = None
+        self.multimodal = None
+        self.mmap = None
+
+        self.index = None
+        self.bin_reader = None
+
+        self.initialize(path_prefix, multimodal, mmap)
+
+    def initialize(
+        self, path_prefix: str, multimodal: bool, mmap: bool) -&gt; None:
+        &quot;&quot;&quot;Initialize the dataset
+
+        This method is called by IndexedDataset.__init__ during object creation and by
+        IndexedDataset.__setstate__ during un-pickling
+
+        Args:
+            path_prefix (str): The index (.idx) and data (.bin) prefix
+
+            multimodal (bool): Whether the dataset is multimodal
+
+            mmap (bool): Whether to mmap the .bin file
+
+        &quot;&quot;&quot;
+        idx_path = get_idx_path(path_prefix)
+        bin_path = get_bin_path(path_prefix)
+
+        self.path_prefix = path_prefix
+        self.multimodal = multimodal
+        self.mmap = mmap
+        if mmap:
+            self.bin_reader = _MMapBinReader(bin_path)
+        else:
+            self.bin_reader = _FileBinReader(bin_path)
+        self.index = _IndexReader(idx_path, self.multimodal)
+
+    def __getstate__(self) -&gt; Tuple[str, bool, bool]:
+        &quot;&quot;&quot;Get the state during pickling
+
+        Returns:
+            Tuple[str, bool, bool]: The state tuple
+        &quot;&quot;&quot;
+        return self.path_prefix, self.multimodal, self.mmap
+
+    def __setstate__(self, state: Tuple[str, bool, bool]) -&gt; None:
+        &quot;&quot;&quot;Set the state during un-pickling
+
+        Args:
+            state (Tuple[str, bool, bool: The state tuple
+        &quot;&quot;&quot;
+        path_prefix, multimodal, mmap = state
+        self.initialize(path_prefix, multimodal, mmap)
+
+    def __del__(self) -&gt; None:
+        &quot;&quot;&quot;Clean up the object&quot;&quot;&quot;
+        del self.bin_reader
+        del self.index
+
+    def __len__(self) -&gt; int:
+        &quot;&quot;&quot;Return the length of the dataset i.e. the number of sequences in the index
+
+        Returns:
+            int: The length of the dataset
+        &quot;&quot;&quot;
+        return len(self.index)
+
+    def __getitem__(
+        self, idx: Union[int, numpy.integer, slice]
+    ) -&gt; Union[numpy.ndarray, Tuple[numpy.ndarray, numpy.ndarray]]:
+        &quot;&quot;&quot;Return from the dataset
+
+        Args:
+            idx (Union[int, numpy.integer, slice]): The index or index slice into the dataset
+
+        Raises:
+            ValueError: When the index slice is non-contiguous
+
+            TypeError: When the index is of an unexpected type
+
+        Returns:
+            Union[numpy.ndarray, Tuple[numpy.ndarray, numpy.ndarray]]: The sequence tokens and modes at the index or index slice
+        &quot;&quot;&quot;
+        if isinstance(idx, (int, numpy.integer)):
+            sequence_pointer, sequence_length, sequence_mode = self.index[idx]
+            sequence = self.bin_reader.read(
+                dtype=self.index.dtype, count=sequence_length, offset=sequence_pointer
+            )
+            return (sequence, sequence_mode) if sequence_mode is not None else sequence
+        elif isinstance(idx, slice):
+            start, stop, step = idx.indices(len(self))
+            if step != 1:
+                raise ValueError(&quot;Slices into indexed_dataset must be contiguous&quot;)
+            sequence_lengths = self.index.sequence_lengths[idx]
+            sequence_modes = self.index.sequence_modes[idx] if self.multimodal else None
+            sequence_offsets = list(accumulate(sequence_lengths))
+            sequences = numpy.split(
+                self.bin_reader.read(
+                    dtype=self.index.dtype,
+                    count=sum(sequence_lengths),
+                    offset=self.index.sequence_pointers[start],
+                ),
+                sequence_offsets[:-1],
+            )
+            return (sequences, sequence_modes) if sequence_modes is not None else sequences
+        else:
+            raise TypeError(&quot;Unexpected type received for idx: {}&quot;.format(type(idx)))
+
+    def get(self, idx: int, offset: int = 0, length: Optional[int] = None) -&gt; numpy.ndarray:
+        &quot;&quot;&quot;Retrieve a single item from the dataset with the option to only
+        return a portion of the item.
+
+        get(idx) is the same as [idx] but get() does not support slicing.
+
+        Args:
+            idx (Union[int, numpy.integer]): The index into the dataset
+
+            offset (int): The integer token offset in the sequence
+
+            length (int): The number of tokens to grab from the sequence
+
+        Returns:
+            Union[numpy.ndarray, Tuple[numpy.ndarray, numpy.ndarray]]: The sequence tokens and modes at the index
+        &quot;&quot;&quot;
+        sequence_pointer, sequence_length, sequence_mode = self.index[idx]
+        if length is None:
+            length = sequence_length - offset
+        sequence_pointer += offset * DType.size(self.index.dtype)
+        sequence = self.bin_reader.read(
+            dtype=self.index.dtype, count=length, offset=sequence_pointer
+        )
+        return (sequence, sequence_mode) if sequence_mode is not None else sequence
+
+    @property
+    def sequence_lengths(self) -&gt; numpy.ndarray:
+        &quot;&quot;&quot;Get the sequence lengths
+
+        Returns:
+            numpy.ndarray: The sequence lengths
+        &quot;&quot;&quot;
+        return self.index.sequence_lengths
+
+    @property
+    def document_indices(self) -&gt; numpy.ndarray:
+        &quot;&quot;&quot;Get the document indices
+
+        Returns:
+            numpy.ndarray: The document indices
+        &quot;&quot;&quot;
+        return self.index.document_indices
+
+    def get_document_indices(self) -&gt; numpy.ndarray:
+        &quot;&quot;&quot;Get the document indices
+
+        This method is slated for deprecation.
+
+        Returns:
+            numpy.ndarray: The document indices
+        &quot;&quot;&quot;
+        return self.index.document_indices
+
+    def set_document_indices(self, document_indices: numpy.ndarray) -&gt; None:
+        &quot;&quot;&quot;Set the document indices
+
+        This method is slated for deprecation.
+
+        Args:
+            document_indices (numpy.ndarray): The document indices
+        &quot;&quot;&quot;
+        self.index.document_indices = document_indices
+
+    @property
+    def sequence_modes(self) -&gt; numpy.ndarray:
+        &quot;&quot;&quot;Get the sequence modes
+
+        Returns:
+            numpy.ndarray: The sequence modes
+        &quot;&quot;&quot;
+        return self.index.sequence_modes
+
+    @staticmethod
+    def exists(path_prefix: str) -&gt; bool:
+        &quot;&quot;&quot;Return whether the IndexedDataset exists on disk at the prefix
+
+        Args:
+            path_prefix (str): The prefix to the index (.idx) and data (.bin) files
+
+        Returns:
+            bool: Whether the IndexedDataset exists on disk at the prefix
+        &quot;&quot;&quot;
+        return os.path.exists(get_idx_path(path_prefix)) and os.path.exists(
+            get_bin_path(path_prefix)
+        )
+
+
+class IndexedDatasetBuilder(object):
+    &quot;&quot;&quot;Builder class for the IndexedDataset class
+
+    Args:
+        bin_path (str): The path to the data (.bin) file
+
+        dtype (Type[numpy.number], optional): The dtype of the index file. Defaults to numpy.int32.
+
+        multimodal (bool, optional): Whether the dataset is multimodal. Defaults to False.
+    &quot;&quot;&quot;
+
+    def __init__(
+        self, bin_path: str, dtype: Type[numpy.number] = numpy.int32, multimodal: bool = False
+    ) -&gt; None:
+        self.data_file = open(bin_path, &quot;wb&quot;)
+        self.dtype = dtype
+        self.multimodal = multimodal
+
+        self.sequence_lengths = []
+        self.document_indices = [0]
+        self.sequence_modes = [] if self.multimodal else None
+        self.buffer_writer = BufferWriter(data_file=self.data_file, dtype=self.dtype)
+
+    def add_item(self, tensor: torch.Tensor, mode: int = 0) -&gt; None:
+        &quot;&quot;&quot;Add a single item to the dataset
+
+        Args:
+            tensor (torch.Tensor): The item to add to the data file
+
+            mode (int, optional): The mode for the item. Defaults to 0.
+        &quot;&quot;&quot;
+        if isinstance(tensor, list):
+            self.buffer_writer.add(tensor)
+            self.sequence_lengths.append(len(tensor))
+            if self.multimodal:
+                self.sequence_modes.append(mode)
+        else:
+            np_array = numpy.array(tensor.numpy(), dtype=self.dtype)
+            self.data_file.write(np_array.tobytes(order=&quot;C&quot;))
+            self.sequence_lengths.append(np_array.size)
+            if self.multimodal:
+                self.sequence_modes.append(mode)
+
+    def add_document(
+        self, tensor: torch.Tensor, lengths: List[int], modes: Optional[List[int]] = None
+    ) -&gt; None:
+        &quot;&quot;&quot;Add an entire document to the dataset
+
+        Args:
+            tensor (torch.Tensor): The document to add
+
+            lengths (List[int]): The lengths of each item in the document
+
+            modes (Optional[List[int]], optional): The modes for each item in the document. Defaults to None.
+        &quot;&quot;&quot;
+        np_array = numpy.array(tensor, dtype=self.dtype)
+        self.data_file.write(np_array.tobytes(order=&quot;C&quot;))
+        self.sequence_lengths.extend(lengths)
+        self.document_indices.append(len(self.sequence_lengths))
+        if self.multimodal:
+            self.sequence_modes.extend(modes if modes is not None else [0] * lengths)
+
+    def end_document(self) -&gt; None:
+        &quot;&quot;&quot;Finalize the document, for use with IndexedDatasetBuilder.add_item&quot;&quot;&quot;
+        self.document_indices.append(len(self.sequence_lengths))
+
+    def add_index(self, path_prefix: str) -&gt; None:
+        &quot;&quot;&quot;Add an entire IndexedDataset to the dataset
+
+        Args:
+            path_prefix (str): The index (.idx) and data (.bin) prefix
+        &quot;&quot;&quot;
+        # Concatenate index
+        index = _IndexReader(get_idx_path(path_prefix), multimodal=self.multimodal)
+        assert index.dtype == self.dtype
+
+        offset = len(self.sequence_lengths)
+        self.sequence_lengths.extend(index.sequence_lengths)
+        self.document_indices.extend((offset + index.document_indices)[1:])
+
+        if self.multimodal:
+            self.sequence_modes.extend(index.sequence_modes)
+
+        # Concatenate data
+        with open(get_bin_path(path_prefix), &quot;rb&quot;) as f:
+            shutil.copyfileobj(f, self.data_file)
+
+    def finalize(self, idx_path: str) -&gt; None:
+        &quot;&quot;&quot;Clean up and write the index (.idx) file
+
+        Args:
+            idx_path (str): The path to the index file
+        &quot;&quot;&quot;
+        self.buffer_writer.write()
+        self.data_file.close()
+        with _IndexWriter(idx_path, self.dtype) as writer:
+            writer.write(self.sequence_lengths, self.sequence_modes, self.document_indices)
+
+
+def get_idx_path(path_prefix: str) -&gt; str:
+    &quot;&quot;&quot;Get the path to the index file from the prefix
+
+    Args:
+        path_prefix (str): The prefix
+
+    Returns:
+        str: The path to the index file
+    &quot;&quot;&quot;
+    return path_prefix + &quot;.idx&quot;
+
+
+def get_bin_path(path_prefix: str) -&gt; str:
+    &quot;&quot;&quot;Get the path to the data file from the prefix
+
+    Args:
+        path_prefix (str): The prefix
+
+    Returns:
+        str: The path to the data file
+    &quot;&quot;&quot;
+    return path_prefix + &quot;.bin&quot;
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

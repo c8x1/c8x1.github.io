@@ -1,0 +1,237 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/distributed/context_parallel/context_parallel_functions.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/distributed/context_parallel/context_parallel_functions.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_6ab6af91a1662f.html">◀ clip_grad_norm.py</a> <a href="file_0615d0f589cc75.html">context_parallel_manager.py ▶</a></nav></div>
+<div class="wrap">
+<h1>context_parallel_functions.py</h1><p class="goal">mindspeed_llm/fsdp2/distributed/context_parallel/context_parallel_functions.py · 4993B · 136 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L16" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def context_parallel_attention_forward</a><a href="#L116" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def fixed_cross_entropy_with_cp</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<span class="mut">（未被正文 EP 引用）</span>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p class="mut">（context_parallel_functions.py：无 docstring/注释可提取，请直接看下方源码）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1">from typing import Optional
+
+import torch
+import torch.nn as nn
+from einops import rearrange
+
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+from mindspeed_llm.fsdp2.distributed.parallel_state import ParallelState
+from mindspeed_llm.fsdp2.utils.global_vars import get_args
+from mindspeed_llm.fsdp2.distributed.context_parallel.ulysses_context_parallel.ulysses_cp_attention import _ulysses_context_parallel_attention
+from mindspeed_llm.fsdp2.distributed.context_parallel.ring_context_parallel.ring_cp_attention import do_ring_attention
+
+logger = get_logger(__name__)
+
+
+def context_parallel_attention_forward(
+        module: torch.nn.Module,
+        query: torch.Tensor,
+        key: torch.Tensor,
+        value: torch.Tensor,
+        attention_mask: Optional[torch.Tensor],
+        dropout: float = 0.0,
+        scaling: Optional[float] = None,
+        sliding_window: Optional[int] = None,
+        ring_fa_layout: str = &quot;BNSD&quot;,  # activated only when using Ring Attention, supported layout: TND/SBH/BNSD
+        is_causal: bool = True,
+
+        **kwargs,
+) -&gt; tuple[torch.Tensor, None]:
+    &quot;&quot;&quot;
+    Currently only supports GQA and MHA.
+    &quot;&quot;&quot;
+
+    ps = ParallelState()
+    args = get_args()
+    cp_size = ps.context_parallel_size
+    cp_rank = ps.get_rank(&quot;cp&quot;)
+
+    q_head_num = query.shape[1]
+
+    use_ulysses = args.cp_type == &quot;ulysses&quot;
+    use_ring = args.cp_type == &quot;ring&quot;
+
+    if use_ulysses:
+        return _ulysses_context_parallel_attention(
+            module,
+            query,
+            key,
+            value,
+            attention_mask,
+            dropout,
+            scaling,
+            is_causal,
+            **kwargs, )
+
+    if use_ring:
+
+        query = query.transpose(1, 2)  # bsnd or 1tnd
+        key = key.transpose(1, 2)
+        value = value.transpose(1, 2)
+
+        # Validate tensor layout for Ring Attention
+        # For TND format, ensure input is [1, n, t, d] where t = seq_len * batch_size
+        if ring_fa_layout.upper() == &quot;TND&quot; and query.shape[0] != 1:
+            raise ValueError(
+                f&quot;When Ring Attention&#x27;s fa layout is `TND`, input format should be [1, n, t, d], which t equals seq_len * batch_size.&quot;)
+
+        # For causal attention, Ring Attention doesn&#x27;t need mask
+        if is_causal:
+            attention_mask = None
+
+        # Split attention mask across ring groups
+        if attention_mask is not None:
+            if len(attention_mask.shape) == 2:  # [S_q, S_k]
+                seq_dim = 0
+            elif len(attention_mask.shape) == 3:  # [B, S_q, S_k]
+                seq_dim = 1
+            else:  # [B, 1, S_q, S_k]
+                seq_dim = 2
+
+            mask_row = attention_mask.chunk(cp_size, dim=seq_dim)[cp_rank].contiguous()
+            attention_mask = [m.contiguous() for m in mask_row.chunk(cp_size, dim=seq_dim + 1)]
+
+        # ring attention only support input layout: TND or SBH
+        if ring_fa_layout.upper() == &quot;TND&quot;:
+            query = query.reshape(-1, query.shape[-2], query.shape[-1])
+            key = key.reshape(-1, key.shape[-2], key.shape[-1])
+            value = value.reshape(-1, value.shape[-2], value.shape[-1])
+        else:
+            query = rearrange(query, &quot;B S N D -&gt; S B (N D)&quot;)
+            key = rearrange(key, &quot;B S N D -&gt; S B (N D)&quot;)
+            value = rearrange(value, &quot;B S N D -&gt; S B (N D)&quot;)
+
+        # ring attention calculate
+        attn_output = do_ring_attention(
+            query,
+            key,
+            value,
+            q_head_num,
+            softmax_scale=scaling,
+            is_causal=is_causal,
+            fa_layout=ring_fa_layout,
+            attn_mask=attention_mask,
+            dropout_p=dropout,
+        )  # Output in sbh or tnd layout
+
+        # Convert back to original layout: BSND or 1TND
+        if ring_fa_layout.upper() == &quot;TND&quot;:
+            attn_output = attn_output.unsqueeze(0)
+        else:
+            attn_output = rearrange(attn_output, &quot;S B (N D) -&gt; B S N D&quot;, N=q_head_num)
+
+        return attn_output, None
+
+
+def fixed_cross_entropy_with_cp(
+        source: torch.Tensor,
+        target: torch.Tensor,
+        num_items_in_batch: Optional[torch.Tensor] = None,
+        ignore_index: int = -100,
+        **kwargs,
+) -&gt; torch.Tensor:
+    ps = ParallelState()
+
+    reduction = &quot;sum&quot; if num_items_in_batch is not None else &quot;mean&quot;
+    loss = nn.functional.cross_entropy(source, target, ignore_index=ignore_index, reduction=reduction)
+    if ps.get_group_size(&quot;cp&quot;) &gt; 1:
+        torch.distributed.all_reduce(loss, op=torch.distributed.ReduceOp.SUM, group=ps.get_group(&quot;cp&quot;))
+    if reduction == &quot;sum&quot;:
+        # just in case users pass an int for num_items_in_batch, which could be the case for custom trainer
+        if torch.is_tensor(num_items_in_batch):
+            num_items_in_batch = num_items_in_batch.to(loss.device)
+        loss = loss / num_items_in_batch
+
+    return loss
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

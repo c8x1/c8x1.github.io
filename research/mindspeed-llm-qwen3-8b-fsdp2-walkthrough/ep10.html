@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>通信与计算掩盖 · 走读 EP10</title>
+<style>
+  :root{
+    --bg:#0f0f12; --bg2:#000; --side:#1a1a1a; --card:#16161c; --line:#2a2a33;
+    --txt:#e8e8e8; --mut:#9a9a9a; --mut2:#6a6a6a;
+    --serif:ui-serif,Georgia,"Times New Roman",Times,serif;
+    --sans:system-ui,-apple-system,"PingFang SC","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace;
+    --red:#C7000B; --red-bg:#2a0f10; --red-bd:#6e1a1c; --red-tx:#e88;
+    --grn:#788C5D; --grn-bg:#14241a; --grn-bd:#2e5a3a; --grn-tx:#7ab98a;
+    --acc:#C7000B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+  .page{max-width:1180px;margin:0 auto;padding:0}
+  /* breadcrumb + nav */
+  .topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);
+    font-size:13px;color:var(--mut)}
+  .topbar .crumb{font-family:var(--serif);font-style:italic}
+  .topbar nav{margin-left:auto;display:flex;gap:8px}
+  .topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:4px 10px;border-radius:6px}
+  .topbar nav a:hover{color:#fff;border-color:var(--acc)}
+  /* layout: tree + main */
+  .body{display:grid;grid-template-columns:160px 1fr;align-items:start}
+  .tree{background:var(--side);border-right:1px solid var(--line);padding:14px 8px;
+    font-family:var(--mono);font-size:11px;color:var(--mut2);min-height:80vh;position:sticky;top:0}
+  .tree .f{display:block;padding:2px 4px;white-space:pre}
+  .tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px}
+  .main{padding:22px 28px 80px}
+  /* headings */
+  h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:6px 0 2px;color:#fff}
+  .goal{font-family:var(--serif);font-style:italic;color:var(--mut);margin:0 0 4px}
+  .gain{font-size:13px;color:var(--mut);margin:0 0 20px}
+  .gain b{color:var(--red-tx)}
+  h2{font-family:var(--serif);font-weight:600;font-size:18px;color:#fff;margin:26px 0 6px;
+    border-bottom:1px solid var(--line);padding-bottom:3px}
+  h2 .sec{color:var(--mut2);font-style:italic;font-size:13px;margin-left:8px}
+  p{margin:8px 0}
+  /* code as numbered figure */
+  .figcap{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);
+    margin:10px 0 2px}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--mut2);
+    padding:10px 12px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55}
+  pre .ln{display:inline-block;width:32px;color:var(--mut2);user-select:none}
+  .filelink{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--red-tx);margin:4px 0 14px}
+  .filelink a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--red-bd)}
+  .footnote{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--mut2);margin:4px 0 14px}
+  /* highlight tints */
+  /* PyCharm Darcula 主题 token 配色 */
+  pre[data-lang]{color:#d4d4d4}
+  .tok-kw{color:#cc7832;font-weight:600}
+  .tok-bi{color:#9876aa;font-style:italic}
+  .tok-fn{color:#ffc66d}
+  .tok-cl{color:#a9b7c6;font-style:italic}
+  .tok-st{color:#6a8759}
+  .tok-cm{color:#808080;font-style:italic}
+  .tok-nm{color:#6897bb}
+  .tok-dc{color:#bbb33b}
+  .tok-key{color:#cc7832}
+  .tok-var{color:#9876aa}
+  .tree .f,.tree a.f{color:#6a6a6a;text-decoration:none;display:block;padding:2px 4px;white-space:pre;border-radius:3px}
+  .tree a.f:hover{background:#2a2a33;color:#d4d4d4}
+  .tree a.f.act,.tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px;font-weight:600}
+  /* gnpu split card */
+  .gnpu{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:14px 0}
+  .gnpu .g{background:var(--grn-bg);border-right:1px solid var(--line);padding:10px 14px}
+  .gnpu .n{background:var(--red-bg);padding:10px 14px}
+  .gnpu h4{margin:0 0 6px;font-family:var(--serif);font-size:13px}
+  .gnpu .g h4{color:var(--grn-tx)}.gnpu .n h4{color:var(--red-tx)}
+  .gnpu .row{display:grid;grid-template-columns:90px 1fr;gap:6px;font-size:12.5px;margin:4px 0}
+  .gnpu .row .k{color:var(--mut2)}
+  /* inline svg */
+  .diag{margin:10px 0 6px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:8px}
+  /* summary */
+  .sum{border-top:1px solid var(--line);margin-top:22px;padding-top:10px;font-size:13.5px}
+  .sum .pit{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12.5px;margin-top:6px}
+  /* file list at end */
+  .filelist{font-family:var(--mono);font-size:11px;color:var(--mut2);margin-top:22px;border-top:1px dashed var(--line);padding-top:10px}
+  .filelist b{color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <span class="crumb">第三篇章 · 并行引擎 › EP10</span>
+    <span style="color:var(--mut2)">EP10</span>
+    <nav>
+      <a href="ep09.html">◀ 上一篇</a>
+      <a href="index.html">索引</a>
+      <a href="ep11.html">下一篇 ▶</a>
+    </nav>
+  </div>
+  <div class="body">
+    <aside class="tree">
+      <a class="f" href="appendix/index.html" target="_blank">📁 附录·项目文件走读</a>
+      <span class="f">MindSpeed-LLM/</span>
+      <a class="f" href="appendix/file_089411e68e5d5b.html" target="_blank">├ train_fsdp2.py</a>
+      <span class="f">├ examples/fsdp2/</span>
+      <a class="f" href="appendix/file_d04a217944c522.html" target="_blank">│  ├ env_config.sh</a>
+      <span class="f">│  └ qwen3/</span>
+      <span class="f">├ mindspeed_llm/fsdp2/</span>
+      <a class="f act" href="appendix/file_6ab6af91a1662f.html" target="_blank">distributed/clip_grad_norm.py</a>
+      <span class="f act">├ _deps_mindspeed_core/</span>
+      <a class="f act" href="appendix/file_4765648173b435.html" target="_blank">│  └ mindspeed/fsdp/utils/torch_patch.py</a>
+      <span class="f">└ ...</span>
+    </aside>
+    <main class="main">
+      <h1>通信与计算掩盖</h1>
+      <p class="goal">目标：讲清 HCCL premul_sum、Prefetch、Zero-Copy 与分片梯度范数聚合。前置：EP09 专家并行。</p>
+      <p class="gain">你将获得：<b>①</b> 一条从 <code>train_fsdp2.py:112</code> 在 NPU 分支把 <code>torch.distributed.all_reduce/reduce_scatter</code> 三处替换成 <code>hccl_premul_sum_wrapper</code>、让 HCCL 在 reduce 阶段就完成梯度缩放（省一次 kernel 启动）的 patch 链路，再到 <code>clip_grad_norm.py</code> 把 DTensor 分片梯度本地算 <code>norm**p</code> 后跨 fsdp/ep_fsdp/ep 多组 <code>all_reduce</code> 聚合出全局范数的完整落地 <b>②</b> 弄懂"通信掩盖"在 NPU 侧由谁负责——<code>apply_hccl_premul_sum_patch</code> 与 <code>clip_grad_norm</code> 在仓内、<code>TORCH_HCCL_ZERO_COPY=1</code> 是环境变量、而 Prefetch 的真正重叠逻辑在 <code>fsdp_turbo</code>/torch FSDP2（仓内只见配置透传）——配 <code>A3.sh</code> 三项融合算子开关把 kernel 调用次数压到最低</p>
+
+      <h2>你已经熟悉的情况 <span class="sec">桥接开场</span></h2>
+      <p>你在 GPU 侧练过 DDP/FSDP：反向算完梯度后 <code>torch.distributed.all_reduce</code> 跨卡求和、再 <code>clamp</code> 做梯度裁剪，通信是 NCCL 的 <code>ReduceOp.SUM</code>；想缩放梯度（比如梯度除以 world_size 或乘 loss scale），常在 reduce 之后单独 <code>mul_</code> 一次——多一次 kernel 启动。你还用过 FSDP 的"通信计算掩盖"：PyTorch 在 <code>fully_shard</code> 的反向里把<b>当前层</b>的 reduce-scatter 和<b>下一层</b>的反向计算用不同 stream 重叠起来，让通信和算力并发跑。这一层"掩盖"的实现散落在 torch 的 FSDP2 unshard/prefetch 逻辑里，对你是黑盒。到了 NPU 这边，通信后端从 NCCL 换成 <b>HCCL</b>（华为集合通信库），上面的两条需求（reduce 期缩放、通信计算重叠）都要重新落地——MindSpeed-LLM 的做法是：<b>patch</b> 掉裸 <code>all_reduce</code> 让它支持 <code>PREMUL_SUM</code>（pre-multiplied sum，reduce 期乘系数），<b>配置</b>透传 prefetch 参数到 FSDP2 实现，<b>环境变量</b>开 <code>TORCH_HCCL_ZERO_COPY</code> 让通信 buffer 免拷贝，再把 FSDP2 分片梯度范数的<b>跨分片聚合</b>自己重写一遍（torch 原生不直接支持 EP 混合组）。本篇就讲清这四件事各自落在哪个文件、哪些是仓内可见、哪些是委派给外部。</p>
+
+      <h2>本项目怎么做 <span class="sec">原理</span></h2>
+      <p>通信掩盖的核心诉求是<b>把每次反向里的两类工作——"通信"（all-gather 拼参数 / reduce-scatter 散梯度 / all-reduce 聚范数）与"计算"（matmul、norm、kernel）——并发跑，别让 NPU 干等通信</b>。NPU 侧的掩盖分三层：<b>① 通信后端层</b>，HCCL 替代 NCCL，并通过 <code>apply_hccl_premul_sum_patch</code> 给 <code>all_reduce</code> 增加"reduce 期预乘系数"能力——梯度除以 world_size、loss-scale 反除、EP 梯度除数（EP09 讲的 <code>ep*efsdp*edp</code> factor）这类缩放，原本要 reduce 完再单独 <code>mul_</code>，patch 后在 reduce 内核里一次完成；<b>② FSDP2 流水线层</b>，前向 prefetch（算第 L 层时异步 all-gather 第 L+1 层参数）、反向 prefetch（reduce-scatter 第 L 层梯度时异步拉第 L-1 层全参），让"下一层通信"与"当前层计算"用两个 stream 重叠——这部分的重叠调度逻辑不在本仓（EP08 已述 dense 路径的 <code>fully_shard</code> 实现在外部 <code>fsdp_turbo</code> 包），仓内只见 <code>num_to_forward_prefetch / num_to_backward_prefetch</code> 两个透传参数；<b>③ buffer 零拷贝层</b>，<code>export TORCH_HCCL_ZERO_COPY=1</code> 让 HCCL 通信 buffer 与框架 tensor 共享底层显存、省去通信前的 host↔device 或 device↔device 拷贝。再把分片梯度范数聚合（<code>clip_grad_norm</code>）单独算一笔账：FSDP2 下每个参数的梯度是 <code>DTensor</code>（本卡只持 1/N 片），算局部 <code>norm**p</code> 后需跨 fsdp 组 all-reduce 求和、再开 p 次方——EP 模型还要把 ep/efsdp 两组也算进来。下面的 SVG 把这三层与一次反向的时序画在一起。</p>
+      <div class="diag">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 620" width="100%" style="max-width:940px" font-family="ui-monospace,Menlo,monospace" font-size="11">
+  <defs>
+    <marker id="arr10" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#6a6a6a"/></marker>
+    <marker id="arr10r" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e88"/></marker>
+    <marker id="arr10g" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#7ab98a"/></marker>
+  </defs>
+  <text x="20" y="20" fill="#9a9a9a" font-weight="600">一次反向里的通信/计算掩盖时序（NPU 侧三层）</text>
+
+  <!-- three lanes -->
+  <text x="20" y="50" fill="#7ab98a" font-weight="600">① 通信后端层（HCCL + premul_sum patch）</text>
+  <rect x="20" y="58" width="900" height="40" rx="4" fill="#14241a" stroke="#2e5a3a"/>
+  <text x="30" y="76" fill="#7ab98a" font-size="10">train_fsdp2.py:112 apply_hccl_premul_sum_patch()</text>
+  <text x="30" y="92" fill="#e8e8e8" font-size="9">all_reduce / reduce_scatter / reduce_scatter_tensor 三处被包成 hccl_premul_sum_wrapper（torch_patch.py:5-23）</text>
+
+  <text x="20" y="120" fill="#e88" font-weight="600">② FSDP2 流水线层（prefetch 重叠，调度逻辑在 fsdp_turbo/torch）</text>
+  <rect x="20" y="128" width="900" height="120" rx="4" fill="#1a1a1a" stroke="#3a3a44"/>
+  <!-- forward prefetch -->
+  <text x="30" y="146" fill="#e8e8e8" font-size="10">前向 prefetch（forward stream）</text>
+  <rect x="30" y="152" width="120" height="22" fill="#2a0f10" stroke="#6e1a1c"/><text x="36" y="167" fill="#e88" font-size="9">AG 层 L+1 参数</text>
+  <rect x="160" y="152" width="120" height="22" fill="#14241a" stroke="#2e5a3a"/><text x="166" y="167" fill="#7ab98a" font-size="9">计算 层 L 前向</text>
+  <line x1="150" y1="163" x2="158" y2="163" stroke="#6a6a6a" marker-end="url(#arr10)"/>
+  <text x="290" y="167" fill="#6a6a6a" font-size="9" font-style="italic">下一层 AllGather 与当前层计算重叠</text>
+  <!-- backward prefetch -->
+  <text x="30" y="196" fill="#e8e8e8" font-size="10">反向 prefetch（backward stream）</text>
+  <rect x="30" y="202" width="120" height="22" fill="#2a0f10" stroke="#6e1a1c"/><text x="36" y="217" fill="#e88" font-size="9">RS 层 L 梯度</text>
+  <rect x="160" y="202" width="120" height="22" fill="#14241a" stroke="#2e5a3a"/><text x="166" y="217" fill="#7ab98a" font-size="9">AG 层 L-1 全参</text>
+  <line x1="150" y1="213" x2="158" y2="213" stroke="#6a6a6a" marker-end="url(#arr10)"/>
+  <text x="290" y="217" fill="#6a6a6a" font-size="9" font-style="italic">reduce-scatter 与下一层 all-gather 重叠</text>
+  <text x="30" y="242" fill="#6a6a6a" font-size="9" font-style="italic">仓内仅透传 num_to_forward_prefetch / num_to_backward_prefetch（model_factory.py:168-169），实际重叠调度在 fsdp_turbo/torch FSDP2 侧（核实：本仓未见 prefetch 重叠实现源码）</text>
+
+  <text x="20" y="270" fill="#9a9a9a" font-weight="600">③ buffer 零拷贝层（TORCH_HCCL_ZERO_COPY）</text>
+  <rect x="20" y="278" width="900" height="40" rx="4" fill="#1a1a1a" stroke="#3a3a44"/>
+  <text x="30" y="296" fill="#e8e8e8" font-size="10">A3.sh:2  export TORCH_HCCL_ZERO_COPY=1</text>
+  <text x="30" y="312" fill="#6a6a6a" font-size="9" font-style="italic">HCCL 通信 buffer 与框架 tensor 共享底层显存，省去通信前的 device↔device 拷贝（HCCL 运行时行为，仓内无实现）</text>
+
+  <!-- clip grad norm aggregation -->
+  <text x="20" y="344" fill="#9a9a9a" font-weight="600">④ 分片梯度范数聚合（clip_grad_norm.py 仓内自实现）</text>
+  <rect x="20" y="352" width="900" height="96" rx="4" fill="#1a1a1a" stroke="#3a3a44"/>
+  <text x="30" y="370" fill="#e8e8e8" font-size="10">本地：每片 DTensor grad → to_local → foreach_norm/pow → _local_pth_sum（行 162-186）</text>
+  <text x="30" y="386" fill="#e8e8e8" font-size="10">非 EP 组：all_reduce(SUM, fsdp_group)           （行 137-141, 230-232）</text>
+  <text x="30" y="402" fill="#e8e8e8" font-size="10">EP 组：all_reduce(SUM, ep_fsdp_group) → all_reduce(SUM, ep_group)  （行 143-147）</text>
+  <text x="30" y="418" fill="#e8e8e8" font-size="10">合并：(non_ep_total + ep_total)**(1/p)；CP: ×= get_group_size('cp')   （行 92, 96, 152）</text>
+  <text x="30" y="436" fill="#6a6a6a" font-size="9" font-style="italic">注意：上面的 all_reduce 全部命中 ① 层的 premul_sum wrapper——clip 本身没传 PREMUL_SUM，故走普通 SUM 路径</text>
+
+  <!-- fused ops -->
+  <text x="20" y="472" fill="#9a9a9a" font-weight="600">⑤ 三项融合算子开关（A3.sh，把 kernel 调用次数压到最低）</text>
+  <rect x="20" y="480" width="900" height="56" rx="4" fill="#1a1a1a" stroke="#3a3a44"/>
+  <text x="30" y="498" fill="#e8e8e8" font-size="10">--optimization.use_fused_rmsnorm True          :28    （fused RMSNorm，单 kernel）</text>
+  <text x="30" y="514" fill="#e8e8e8" font-size="10">--optimization.use_fused_rotary_pos_emb True   :29    （fused RoPE，单 kernel）</text>
+  <text x="30" y="530" fill="#e8e8e8" font-size="10">--optimization.use_flash_attn True             :30    （FlashAttention，IO↓kernel↓）</text>
+
+  <text x="20" y="568" fill="#6a6a6a" font-size="9" font-style="italic">关键：① ③ 在仓内（patch + 环境变量），② 是配置透传 + 外部调度，④ 仓内自实现，⑤ CLI 开关 + modeling 层 fused 算子。</text>
+  <text x="20" y="584" fill="#6a6a6a" font-size="9" font-style="italic">（核实：Prefetch 真正的重叠调度实现在 fsdp_turbo / torch FSDP2 侧，本仓未见；本图时序以 torch FSDP2 prefetch 语义与本仓配置透传为准）</text>
+  <text x="20" y="600" fill="#6a6a6a" font-size="9" font-style="italic">（核实：HCCL all-reduce / zero-copy 的内核行为属 HCCL 运行时，本仓仅以环境变量与 patch 入口标注，以 HCCL 文档为准）</text>
+</svg>
+      </div>
+      <p class="footnote">这张图的诚实之处在于<b>把"在仓内"与"委派外部"分得很清</b>：① 通信后端 patch（<code>torch_patch.py</code> 经 <code>train_fsdp2.py:112</code> 调用）和 ④ 梯度范数聚合（<code>clip_grad_norm.py</code>）是<b>仓内可见、可逐行读</b>的实现；③ <code>TORCH_HCCL_ZERO_COPY=1</code> 是<b>环境变量</b>（<code>A3.sh:2</code>），生效与否在 HCCL 运行时；② Prefetch 的<b>透传参数</b>在仓内（<code>model_factory.py:168-169</code>），但<b>真正的"下一层通信与当前层计算重叠"的调度逻辑在外部 <code>fsdp_turbo</code> / torch FSDP2</b>（EP08 已述 dense 路径 <code>fully_shard</code> 在 <code>fsdp_turbo</code>，本仓无 prefetch 重叠源码）——所以图里 ② 这一条是按 torch FSDP2 的 prefetch <b>语义</b>画的，不是贴仓内某行代码。⑤ 是 CLI 开关 + modeling 层的 fused 算子，与通信掩盖是"另一条减 kernel 数"的互补路径。</p>
+
+      <h2>源码下钻 <span class="sec">file:line</span></h2>
+      <p>本篇下钻三个主文件 + 两处接线，按"<b>入口 patch → premul_sum wrapper → zero-copy 环境变量 → prefetch 配置透传 → clip_grad_norm 跨分片聚合 → EP 混合组 → CP 缩放 → 三项融合算子</b>"的顺序。先贴入口在 NPU 分支调 patch，再贴 wrapper 如何拦截 PREMUL_SUM、贴 A3 的 zero-copy 行、贴 prefetch 配置如何灌进 FSDPPlanConfig、贴 clip_grad_norm 的本地 p-范数求和与多组 all-reduce、贴 EP 路径两组 all-reduce 的顺序、贴 CP 组缩放，最后贴三项融合算子开关。</p>
+
+      <div class="figcap">train_fsdp2：NPU 分支装 HCCL patch（与 NCCL 分支对照）</div>
+<pre data-lang="py">    @staticmethod
+    def _initialize(seed: int):
+        if is_torch_npu_available():
+            fallback = torch.npu
+            dist_backend = "hccl"
+            apply_hccl_premul_sum_patch()
+        elif torch.cuda.is_available():
+            fallback = torch.cuda
+            dist_backend = "nccl"
+        else:
+            raise RuntimeError("No supported accelerator found (NPU/CUDA)")</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py">../train_fsdp2.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L37">:37</a>（from mindspeed.fsdp.utils.torch_patch import apply_hccl_premul_sum_patch——导入 patch，来自 _deps_mindspeed_core 镜像）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L109">:109</a>（if is_torch_npu_available() NPU 分支起）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L111">:111</a>（dist_backend = "hccl"——NPU 侧通信后端名）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L112">:112</a>（apply_hccl_premul_sum_patch()——patch 入口，仅在 NPU 分支调，CUDA 分支不调）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L113">:113</a>（elif torch.cuda.is_available() CUDA 分支，走 nccl 不打 patch）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/train_fsdp2.py#L156">:156</a>（init_process_group(backend=dist_backend, ...)——hccl 在此后端生效）</div>
+      <p>这是 patch 的<b>唯一入口</b>（推理侧 <code>inference_fsdp2.py:83</code> 也调一次）。关键设计：<code>apply_hccl_premul_sum_patch()</code> 只在 NPU 分支调，CUDA 分支走原生 NCCL——即同一个 <code>train_fsdp2.py</code> 可在 GPU/NPU 双侧跑，patch 是否打由后端类型决定。patch 打在 <code>init_process_group</code>（行 156）<b>之前</b>，这样后续所有 <code>torch.distributed.all_reduce</code> 调用都已是包过的版本——包括下文 <code>clip_grad_norm</code> 里的 all-reduce。</p>
+
+      <div class="figcap">torch_patch：apply_hccl_premul_sum_patch 把三处集合通信原语替换成 wrapper（行 21-23）</div>
+<pre data-lang="py">def apply_hccl_premul_sum_patch():
+    torch.distributed.all_reduce = hccl_premul_sum_wrapper(torch.distributed.all_reduce, 'tensor')
+    torch.distributed.reduce_scatter = hccl_premul_sum_wrapper(torch.distributed.reduce_scatter, 'output')
+    torch.distributed.reduce_scatter_tensor = hccl_premul_sum_wrapper(torch.distributed.reduce_scatter_tensor, 'output')</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed/blob/master/mindspeed/fsdp/utils/torch_patch.py">../_deps_mindspeed_core/mindspeed/fsdp/utils/torch_patch.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed/blob/master/mindspeed/fsdp/utils/torch_patch.py#L21">:21</a>（def apply_hccl_premul_sum_patch）、<a href="https://gitcode.com/Ascend/MindSpeed/blob/master/mindspeed/fsdp/utils/torch_patch.py#L22">:22</a>（all_reduce = ...wrapper(all_reduce, 'tensor')——替换 all_reduce，输出参数名为 'tensor'）、<a href="https://gitcode.com/Ascend/MindSpeed/blob/master/mindspeed/fsdp/utils/torch_patch.py#L23">:23</a>（reduce_scatter 与 reduce_scatter_tensor 各包一次，输出参数名为 'output'）、<a href="https://gitcode.com/Ascend/MindSpeed/blob/master/mindspeed/fsdp/utils/torch_patch.py#L5">:5</a>（def hccl_premul_sum_wrapper——wrapper 工厂）、<a href="https://gitcode.com/Ascend/MindSpeed/blob/master/mindspeed/fsdp/utils/torch_patch.py#L2">:2</a>（from torch.distributed.distributed_c10d import ReduceOp——取 ReduceOp.PREMUL_SUM 判定）</div>
+      <p>三行 <code>torch.distributed.xxx = wrapper(xxx, ...)</code> 是<b>猴子补丁</b>——直接替换全局函数指针。被包的三处原语恰好覆盖 FSDP2 反向的通信骨架：all_reduce（梯度范数聚合、loss 缩放）、reduce_scatter / reduce_scatter_tensor（FSDP 梯度分片散回）。第二个参数 <code>'tensor'</code> / <code>'output'</code> 是各原语"输出张量"的 kwarg 名——wrapper 要靠它在 <code>wait</code> 之后定位输出 tensor 做 <code>mul_</code>。</p>
+
+      <div class="figcap">hccl_premul_sum_wrapper：拦截 PREMUL_SUM、reduce 后乘系数（行 5-18）</div>
+<pre data-lang="py">def hccl_premul_sum_wrapper(op, output_name):
+    def wrapper(*args, **kwargs):
+        factor = None
+        if 'op' in kwargs and kwargs['op'] == ReduceOp.PREMUL_SUM:
+            factor = kwargs['op'].__getstate__()[1]
+            kwargs['op'] = ReduceOp.SUM
+        handle = op(*args, **kwargs)
+        if handle is not None:
+            handle.wait()
+        if factor is not None:
+            output = args[0] if len(args) > 0 else kwargs[output_name]
+            output.data.mul_(factor)
+        return handle
+    return wrapper</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed/blob/master/mindspeed/fsdp/utils/torch_patch.py">../_deps_mindspeed_core/mindspeed/fsdp/utils/torch_patch.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed/blob/master/mindspeed/fsdp/utils/torch_patch.py#L5">:5</a>（def hccl_premul_sum_wrapper(op, output_name)——闭包工厂）、<a href="https://gitcode.com/Ascend/MindSpeed/blob/master/mindspeed/fsdp/utils/torch_patch.py#L8">:8</a>（if kwargs['op'] == ReduceOp.PREMUL_SUM——只对 PREMUL_SUM 这种 reduce-with-scale 起作用，普通 SUM/MAX 不动）、<a href="https://gitcode.com/Ascend/MindSpeed/blob/master/mindspeed/fsdp/utils/torch_patch.py#L9">:9</a>（factor = kwargs['op'].__getstate__()[1]——从 ReduceOp 状态里取出预乘系数，PREMUL_SUM 的语义即 "sum then multiply by factor"）、<a href="https://gitcode.com/Ascend/MindSpeed/blob/master/mindspeed/fsdp/utils/torch_patch.py#L10">:10</a>（kwargs['op'] = ReduceOp.SUM——把 PREMUL_SUM 降级成普通 SUM，让底层 HCCL 认得）、<a href="https://gitcode.com/Ascend/MindSpeed/blob/master/mindspeed/fsdp/utils/torch_patch.py#L11">:11</a>（handle = op(*args, **kwargs)——调用原 all_reduce/reduce_scatter）、<a href="https://gitcode.com/Ascend/MindSpeed/blob/master/mindspeed/fsdp/utils/torch_patch.py#L13">:13</a>（handle.wait()——同步等通信完成）、<a href="https://gitcode.com/Ascend/MindSpeed/blob/master/mindspeed/fsdp/utils/torch_patch.py#L15">:15</a>（output = args[0] if len(args)>0 else kwargs[output_name]——定位输出 tensor，all_reduce 是位置参数 'tensor'，reduce_scatter 是 kwarg 'output'）、<a href="https://gitcode.com/Ascend/MindSpeed/blob/master/mindspeed/fsdp/utils/torch_patch.py#L16">:16</a>（output.data.mul_(factor)——reduce 完就地把结果乘系数，省去单独一次 mul kernel）、<a href="https://gitcode.com/Ascend/MindSpeed/blob/master/mindspeed/fsdp/utils/torch_patch.py#L17">:17</a>（return handle——保持原返回签名）</div>
+      <p>这是 premul_sum 的核心。<b>PREMUL_SUM</b> 是一种带系数的 sum-reduce：语义上等价于"先求和、再每个元素乘 factor"——常见用途是梯度除以 world_size、loss scale 反除、EP 梯度除数（EP09 的 <code>ep*efsdp*edp</code> factor）。torch 在新版本把 PREMUL_SUM 做进了 <code>ReduceOp</code>，但<b>HCCL 当时不一定原生支持</b>——这个 wrapper 的作用就是<b>在 Python 层把 PREMUL_SUM 拆成 "SUM + 事后 mul_"</b>：先取系数、把 op 降级成 SUM 调底层 HCCL、<code>wait</code> 完再 <code>output.data.mul_(factor)</code>。注意行 16 的 <code>mul_</code> 是<b>原地乘</b>、且在 <code>wait()</code> 之后——意味着 reduce 结果落盘后立刻乘，省一次独立 kernel 启动（虽然 mul 本身仍在 reduce 之后，但比"reduce→return→用户再调 mul"少一次往返）。<b>何时触发 PREMUL_SUM</b>？看上层谁传了 <code>op=ReduceOp.PREMUL_SUM</code>——torch FSDP2 在梯度 reduce 时会带系数（如 1/world_size），本仓的 <code>clip_grad_norm</code> 用的是普通 <code>SUM</code>（见下行 232），<b>不触发</b>这条 premul 分支，走的是 wrapper 里 <code>factor=None</code> 的直通路径。</p>
+
+      <div class="figcap">A3 脚本：TORCH_HCCL_ZERO_COPY + 三项融合算子（行 1-2, 28-30）</div>
+<pre data-lang="sh">source examples/fsdp2/env_config.sh
+export TORCH_HCCL_ZERO_COPY=1
+# ... (NPUS_PER_NODE=16, WORLD_SIZE=16, torchrun ...) ...
+torchrun $DISTRIBUTED_ARGS train_fsdp2.py examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.yaml \
+    --model.model_name_or_path /home/data/Qwen3-8B/ \
+    --parallel.fsdp_size 16 \
+    --training.per_device_train_batch_size 1 \
+    --training.gradient_accumulation_steps 1 \
+    --training.output_dir ./output \
+    --optimization.use_fused_rmsnorm True \
+    --optimization.use_fused_rotary_pos_emb True \
+    --optimization.use_flash_attn True</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.sh">../examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.sh</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.sh#L1">:1</a>（source env_config.sh——先 source HCCL 环境变量集合，含 HCCL_CONNECT_TIMEOUT=1800、TASK_QUEUE_ENABLE=2、MULTI_STREAM_MEMORY_REUSE=2 等）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.sh#L2">:2</a>（export TORCH_HCCL_ZERO_COPY=1——本篇核心环境变量，开 HCCL 零拷贝）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.sh#L4">:4</a>（NPUS_PER_NODE=16）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.sh#L9">:9</a>（WORLD_SIZE=16）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.sh#L21">:21</a>（torchrun ... train_fsdp2.py + A3.yaml）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.sh#L24">:24</a>（--parallel.fsdp_size 16，单节点 16 卡全分片）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.sh#L28">:28</a>（--optimization.use_fused_rmsnorm True——融合 RMSNorm）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.sh#L29">:29</a>（--optimization.use_fused_rotary_pos_emb True——融合 RoPE）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.sh#L30">:30</a>（--optimization.use_flash_attn True——FlashAttention）</div>
+      <p><code>TORCH_HCCL_ZERO_COPY=1</code>（行 2）是 NPU 通信掩盖的<b>第三层</b>——它不在 Python 代码里生效，而是被 HCCL 运行时读到：开启后 HCCL 的通信 buffer 与框架持有的 tensor 共享底层 NPU 显存，省去通信发起前一次 device→device 的拷贝（torch FSDP2 给通信原语传的 tensor 往往是临时 buffer，zero-copy 让它直接复用梯度/参数的显存）。<b>核实</b>：这条环境变量的确切行为属 HCCL 运行时范畴，本仓无实现代码，生效与否以 HCCL 文档与实际 NPU 环境为准。三项融合算子（行 28-30）是"另一条掩盖路径"——不是并发通信与计算，而是<b>把多个 kernel 融成一个</b>：fused RMSNorm 把 mean/rms/normalize/scale 四步融成单 kernel、fused RoPE 把 cos/sin/rotate 融成单 kernel、FlashAttention 把 tiling+softmax+matmul 融成 IO 友好的大 kernel。这 trio 把<b>每层 kernel 调用次数</b>压到最低，间接减少通信与计算之间的空隙——是通信掩盖的"减负"互补项。注意 <code>fsdp_size 16</code>（行 24）等于 world_size（行 9），即 EP08 的硬约束"fsdp_size==world_size"，dense 8B 走单轴全分片。</p>
+
+      <div class="figcap">model_factory：prefetch 配置透传进 FSDPPlanConfig（行 166-170）</div>
+<pre data-lang="py">        fsdp_plan = FSDPPlanConfig(
+            ignored_modules=parallel_args.ignored_modules if parallel_args.ignored_modules else [],
+            apply_modules=apply_modules,
+            param_dtype=parallel_args.param_dtype,
+            reduce_dtype=parallel_args.reduce_dtype,
+            num_to_forward_prefetch=parallel_args.num_to_forward_prefetch,
+            num_to_backward_prefetch=parallel_args.num_to_backward_prefetch,
+        )</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py">../mindspeed_llm/fsdp2/models/model_factory.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py#L162">:162</a>（fsdp_plan = FSDPPlanConfig(...) 装配起）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py#L168">:168</a>（num_to_forward_prefetch=parallel_args.num_to_forward_prefetch——前向 prefetch 层数透传）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py#L169">:169</a>（num_to_backward_prefetch=parallel_args.num_to_backward_prefetch——反向 prefetch 层数透传）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py#L160">:160</a>（param_dtype 透传）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py#L161">:161</a>（reduce_dtype 透传）</div>
+      <p>这是 prefetch 在仓内的<b>唯一可见处</b>——配置透传。<code>num_to_forward_prefetch</code> / <code>num_to_backward_prefetch</code> 两个值从 CLI/YAML 进 <code>ParallelArguments</code>（<code>arguments.py:445/451</code>，默认 1），再由 <code>model_factory.py:168-169</code> 灌进 <code>FSDPPlanConfig</code>（<code>parallel_engine_config.py:22-23</code> 默认 0）。<b>但这两个值真正被消费、用来调度"下一层 all-gather 与当前层计算重叠"的代码不在本仓</b>——它在外部 <code>fsdp_turbo</code>（custom 路径）或 torch 原生 FSDP2（native 路径，见 <code>parallel_engine_config.py:25-27</code> 注释：'custom' = FSDPTurbo 自定义实现、'native' = PyTorch 原生，默认 'native'）。这与 EP08 的发现一致：dense 路径 <code>fully_shard</code> 的 unshard/prefetch 调度在 <code>fsdp_turbo</code> 侧，仓内只见"声明配置 + 透传"。<b>诚实结论</b>：本篇讲 Prefetch 只能讲到"配置层"，真正的重叠时序实现属外部依赖，以 torch FSDP2 / fsdp_turbo 源码为准。</p>
+
+      <div class="sidecap"><b class="llm">仓内自实现</b> 以下 clip_grad_norm 是本仓对 FSDP2 分片梯度范数聚合的<b>自写版</b>，逐行可读（torch 原生 clip 不直接支持 EP 混合组）</div>
+      <div class="figcap">clip_grad_norm：入口分 EP / 非 EP 两条路（行 17-39）</div>
+<pre data-lang="py">def clip_grad_norm(
+    model, max_norm: float, norm_type: float = 2.0, error_if_nonfinite: bool = False, foreach: bool | None = None
+) -> torch.Tensor:
+    # EP-aware path (FSDP2 + EP): maintain mathematical parity with FSDP1 clipper
+    if hasattr(model, "_ep_param_groups"):
+        return ep_fsdp2_clip_grad_norm(model, max_norm, norm_type=norm_type,
+            error_if_nonfinite=error_if_nonfinite, foreach=foreach)
+
+    grad_norm = fsdp2_clip_grad_norm(model.parameters(), max_norm, norm_type=norm_type,
+        error_if_nonfinite=error_if_nonfinite, foreach=foreach)
+    if isinstance(grad_norm, DTensor):
+        grad_norm = grad_norm.full_tensor()
+    return grad_norm</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py">../mindspeed_llm/fsdp2/distributed/clip_grad_norm.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L17">:17</a>（def clip_grad_norm(model, max_norm, norm_type=2.0, ...)——与 torch.nn.utils.clip_grad_norm_ 同名签名的替换版）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L21">:21</a>（if hasattr(model, "_ep_param_groups")——模型上挂了 EP 参数组就走 EP 路径，EP09 讲的 expert_parallel 装配会挂这个属性）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L22">:22</a>（return ep_fsdp2_clip_grad_norm(...)——EP 混合组路径）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L30">:30</a>（grad_norm = fsdp2_clip_grad_norm(model.parameters(), ...)——dense 路径，对全参数做范数）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L37">:37</a>（if isinstance(grad_norm, DTensor)——若返回是 DTensor（未 reduce 全量））、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L38">:38</a>（grad_norm = grad_norm.full_tensor()——full_tensor 跨分片拼回标量）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L14">:14</a>（logger = logging.getLogger(__name__)）</div>
+      <p>这是裁剪的总入口，被 <code>trainer.py:301</code> 的 <code>grad_norm = clip_grad_norm(self.model, args.max_grad_norm)</code> 调用（<code>max_grad_norm</code> 默认 1.0，<code>arguments.py:488</code>）。关键分叉在行 21：<code>hasattr(model, "_ep_param_groups")</code>——<b>稠密 Qwen3-8B 没挂这个属性</b>（EP09 讲过 dense 时 EP 装配整条短路、不会挂 <code>_ep_param_groups</code>），故走行 30 的 <code>fsdp2_clip_grad_norm</code>；MoE 且 ep_size&gt;1 时才挂属性、走行 22 的 <code>ep_fsdp2_clip_grad_norm</code>。本镜像 A3 dense 走行 30。</p>
+
+      <div class="figcap">fsdp2_clip_grad_norm：DTensor 与普通 Tensor 严格分流，分别算范数再合并（行 42-104）</div>
+<pre data-lang="py">@torch.no_grad()
+def fsdp2_clip_grad_norm(parameters, max_norm, norm_type=2.0, error_if_nonfinite=False, foreach=None):
+    # ... separate DTensor and native Tensor grads ...
+    for p in parameters:
+        if p.grad is not None:
+            if isinstance(p.grad, DTensor):
+                dtensor_params.append(p); dtensor_grads.append(p.grad)
+            else:
+                tensor_params.append(p); tensor_grads.append(p.grad)
+
+    if len(dtensor_grads) > 0:
+        norm_d = torch.nn.utils.get_total_norm(dtensor_grads, norm_type, error_if_nonfinite, foreach)
+        if isinstance(norm_d, DTensor):
+            norm_d = norm_d.full_tensor()
+    else:
+        norm_d = torch.tensor(0.0, device=parameters[0].device if parameters else 'cpu')
+    # ... same for native tensor_params → norm_t ...
+    if norm_type >= math.inf:
+        total_norm = torch.max(norm_d, norm_t)
+    else:
+        total_norm = (norm_d**norm_type + norm_t**norm_type) ** (1.0 / norm_type)
+
+    # Context Parallel (CP) scale handling
+    ps = ParallelState()
+    total_norm *= ps.get_group_size("cp")
+    # Execute clipping separately to prevent foreach_mul operator crash
+    if len(dtensor_params) > 0:
+        torch.nn.utils.clip_grads_with_norm_(dtensor_params, max_norm, total_norm, foreach)
+    if len(tensor_params) > 0:
+        torch.nn.utils.clip_grads_with_norm_(tensor_params, max_norm, total_norm, foreach)
+    return total_norm</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py">../mindspeed_llm/fsdp2/distributed/clip_grad_norm.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L42">:42</a>（@torch.no_grad() 装饰，clip 期间不记梯度）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L43">:43</a>（def fsdp2_clip_grad_norm，dense 路径主函数）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L66">:66</a>（for p in parameters 逐参数分流）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L68">:68</a>（if isinstance(p.grad, DTensor)——FSDP2 分片梯度判定，本卡只持 1/N 片）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L76">:76</a>（if len(dtensor_grads)>0 算分片梯度范数）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L77">:77</a>（get_total_norm——torch 工具算总范数，对 DTensor 会内部 all-reduce）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L79">:79</a>（norm_d.full_tensor()——DTensor 范数跨分片拼回标量）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L89">:89</a>（if norm_type >= inf 取 max，否则 Lp 合并）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L92">:92</a>（total_norm = (norm_d**p + norm_t**p)**(1/p)——数学严格的 Lp 合并，分片与非分片分开算再合）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L95">:95</a>（ps = ParallelState() 取并行状态）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L96">:96</a>（total_norm *= ps.get_group_size("cp")——CP 缩放！跨 CP 组的张量被各片各算一次，需乘 cp 组大小补偿）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L99">:99</a>（clip_grads_with_norm_ 分片参数单独裁剪——防 foreach_mul 崩）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L101">:101</a>（普通参数单独裁剪）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L104">:104</a>（return total_norm）</div>
+      <p>这是 dense 路径的核心。设计要点三条：<b>① DTensor 与普通 Tensor 分流</b>（行 66-73）——FSDP2 下大部分参数梯度是 DTensor（本卡持 1/N 片），但如 dynamic-shape 或未分片参数的梯度是普通 Tensor，两类分开算范数再数学合并。<b>② Lp 范数分片聚合</b>——<code>get_total_norm</code>（行 77）对 DTensor 内部会跨分片 all-reduce 求和再开 p 次方，<code>full_tensor</code>（行 79）把结果拼回标量；非分片 <code>norm_t</code> 本地算即可；最后行 92 的 <code>(norm_d**p + norm_t**p)**(1/p)</code> 把两段合并——<b>不能直接 sqrt(norm_d² + norm_t²)</b>？其实就是，只是写成 Lp 一般形式以支持 inf-norm（行 90 取 max）。<b>③ CP 缩放</b>（行 96）——<code>total_norm *= ps.get_group_size("cp")</code>：当开 Context Parallel 时，序列被沿 CP 轴切了 cp_size 片，每片各算一次梯度范数（张量被沿序列切，范数平方也按比例缩），all-reduce 出来的是"每片的范数"而非"全局范数"，需乘 <code>cp_size</code> 补偿。<code>get_group_size("cp")</code>（<code>parallel_state.py:133</code> 的通用 accessor，CP 组在行 83-86 以 mesh_dim_name 'cp' 建出）。<b>A3 dense cp_size=1</b>（行 96 乘 1，no-op）。行 99-101 <b>分别</b>对 DTensor/普通参数调 <code>clip_grads_with_norm_</code>——注释"prevent foreach_mul operator crash"说明 NPU 上 <code>foreach_mul</code> 对混合类型有坑，故分流裁剪。</p>
+
+      <div class="figcap">ep_fsdp2_clip_grad_norm：EP 混合组两组 all-reduce、单系数裁剪（行 107-158）</div>
+<pre data-lang="py">@torch.no_grad()
+def ep_fsdp2_clip_grad_norm(model, max_norm, norm_type=2.0, error_if_nonfinite=False, foreach=None):
+    ps = ParallelState()
+    fsdp_group = ps.get_fsdp_group()
+    ep_group = ps.get_ep_group() if ps.is_ep_enable() else None
+    ep_fsdp_group = None
+    if ps.is_ep_enable() and ps.get_efsdp_device_mesh() is not None:
+        ep_fsdp_group = ps.get_efsdp_group()
+
+    ep_params = [p for p in model._ep_param_groups.get("ep", []) if p.grad is not None]
+    non_ep_params = [p for p in model._ep_param_groups.get("non_ep", []) if p.grad is not None]
+
+    non_ep_total = _fsdp2_reduce_group(params=non_ep_params, norm_type=norm_type,
+        reduce_groups=[("fsdp", fsdp_group)])
+    ep_total = _fsdp2_reduce_group(params=ep_params, norm_type=norm_type,
+        reduce_groups=[("ep_fsdp", ep_fsdp_group), ("ep", ep_group)])
+
+    if math.isinf(norm_type):
+        total_norm = torch.maximum(non_ep_total, ep_total)
+    else:
+        total_norm = (non_ep_total + ep_total) ** (1.0 / float(norm_type))
+
+    torch.nn.utils.clip_grads_with_norm_(ep_params, max_norm, total_norm, foreach=False)
+    torch.nn.utils.clip_grads_with_norm_(non_ep_params, max_norm, total_norm, foreach=False)
+    return total_norm</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py">../mindspeed_llm/fsdp2/distributed/clip_grad_norm.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L107">:107</a>（@torch.no_grad()）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L108">:108</a>（def ep_fsdp2_clip_grad_norm，EP 路径主函数）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L112">:112</a>（docstring：与 FSDP1 clipper 数值对齐，non-EP 走 fsdp 组、EP 走 ep_fsdp 再 ep 组）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L122">:122</a>（ps = ParallelState()）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L123">:123</a>（fsdp_group = ps.get_fsdp_group()——非 EP 参数的 reduce 组）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L124">:124</a>（ep_group = ps.get_ep_group() if ps.is_ep_enable() else None）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L127">:127</a>（if is_ep_enable and efsdp mesh 存在，取 ep_fsdp_group——EP09 二维 mesh 的 efsdp 轴）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L131">:131</a>（ep_params = model._ep_param_groups["ep"] 过滤有梯度者）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L132">:132</a>（non_ep_params 同理取 non_ep 组）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L137">:137</a>（non_ep_total = _fsdp2_reduce_group(...)——非 EP 组只对 fsdp 组 all-reduce）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L140">:140</a>（reduce_groups=[("fsdp", fsdp_group)]——单组）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L143">:143</a>（ep_total = _fsdp2_reduce_group(...)——EP 组先 ep_fsdp 再 ep 两组）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L146">:146</a>（reduce_groups=[("ep_fsdp", ep_fsdp_group), ("ep", ep_group)]——两组顺序 reduce）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L149">:149</a>（inf-norm 取 max 否则 Lp 合并）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L152">:152</a>（total_norm = (non_ep_total + ep_total)**(1/p)）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L155">:155</a>（clip_grads_with_norm_ 用同一 total_norm 裁 ep 组）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L156">:156</a>（同一 total_norm 裁 non_ep 组——单全局系数）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L158">:158</a>（return total_norm）</div>
+      <p>这是 EP 路径的精华——dense 不走，但它是"<b>分片梯度范数如何跨分片聚合</b>"的最完整体现。参数被分成 <code>ep</code>（专家参数，走 EP 轴）与 <code>non_ep</code>（共享参数，走 fsdp 轴）两组（行 131-134），各自调 <code>_fsdp2_reduce_group</code>（下行）：<b>非 EP 组</b>只在 <code>fsdp_group</code> 上 all-reduce 一次（行 137-141），<b>EP 组</b>先在 <code>ep_fsdp_group</code> 上 reduce 再在 <code>ep_group</code> 上 reduce（行 143-147，两组顺序）——对应 EP09 的二维 mesh：专家参数先沿 efsdp 轴（参数切片）reduce 出片内和、再沿 ep 轴（expert 划分）reduce 出全局和。两组各拿到一个"<code>sum of p-th powers</code>"（未开方），行 152 把两者相加再开 p 次方得全局 <code>total_norm</code>——<b>数学上等价于把所有参数的 p-范数一起算</b>。行 155-156 用<b>同一个</b> <code>total_norm</code> 给两组裁剪（单全局系数）——保证数值正确。注意 <code>foreach=False</code>（行 155-156）——EP 组强制关 foreach，与 dense 路径行 99-101 的分流裁剪同理，避开 NPU <code>foreach_mul</code> 坑。</p>
+
+      <div class="figcap">_fsdp2_reduce_group + _local_pth_sum：本地 p-范数求和 + 多组 all-reduce（行 162-233）</div>
+<pre data-lang="py">def _local_pth_sum(params, p):
+    grads = [p.grad for p in params if p.grad is not None]
+    if not grads:
+        return torch.tensor(0.0, device=torch.accelerator.current_device(), dtype=torch.float32)
+    grads_local = [
+        g.to_local().detach().to(torch.float32) if isinstance(g, DTensor) else g.detach().to(torch.float32)
+        for g in grads
+    ]
+    # ... foreach_pow_(foreach_norm(grads, p), p) -> sum stack ...
+    return res
+
+def _fsdp2_reduce_group(params, norm_type, reduce_groups):
+    if math.isinf(norm_type):
+        val = _local_max(params)
+        for _, group in reduce_groups:
+            if group is not None:
+                dist.all_reduce(val, op=dist.ReduceOp.MAX, group=group)
+        return val
+    else:
+        p = float(norm_type)
+        val = _local_pth_sum(params, p)
+        for _, group in reduce_groups:
+            if group is not None:
+                dist.all_reduce(val, op=dist.ReduceOp.SUM, group=group)
+        return val</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py">../mindspeed_llm/fsdp2/distributed/clip_grad_norm.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L162">:162</a>（def _local_pth_sum——本地 sum of p-th powers）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L166">:166</a>（无梯度时返回 0.0 on current_device——保证后续 all_reduce 不报错）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L168">:168</a>（grads_local 列表推导：DTensor→to_local()、普通→原样，统一 detach().to(float32)）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L169">:169</a>（isinstance(g, DTensor) 分流——取本地分片）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L177">:177</a>（_group_tensors_by_device_and_dtype 按 device/dtype 分组，支持 foreach）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L180">:180</a>（torch._foreach_pow_(torch._foreach_norm(device_grads_local, p), p)——foreach 算各 grad 的 p-范数再 p 次方，单 kernel 批量）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L181">:181</a>（res += sum(stack(out))——累加进 res）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L183">:183</a>（else 分支：无 foreach 支持时逐个 torch.norm 累加——兜底）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L186">:186</a>（return res——本地 sum of p-th powers，未 all-reduce）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L189">:189</a>（def _local_max——inf-norm 本地 max）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L211">:211</a>（def _fsdp2_reduce_group——本地算 + 多组 all-reduce 的总装）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L221">:221</a>（if isinf 取 max-reduce）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L225">:225</a>（dist.all_reduce(val, op=ReduceOp.MAX, group=group)——inf-norm 跨组 max）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L228">:228</a>（else 有限 p 走 sum）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L229">:229</a>（val = _local_pth_sum(params, p)——本地先算 sum of p-th powers）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/clip_grad_norm.py#L232">:232</a>（dist.all_reduce(val, op=dist.ReduceOp.SUM, group=group)——跨组 SUM reduce，注意这里 op=SUM 不是 PREMUL_SUM，故 wrapper 的 premul 分支不触发）</div>
+      <p>这是"分片梯度范数跨分片聚合"的<b>原子实现</b>。<code>_local_pth_sum</code>（行 162）先在<b>本地</b>把每个梯度片的 <code>‖g‖_p ** p</code> 算出来并求和——关键在行 169 <code>g.to_local()</code>：DTensor 只取本卡那 1/N 片（不 all-gather 全参），在 float32 上算 <code>_foreach_norm</code>（行 180，批量算各片范数）+ <code>_foreach_pow_</code>（p 次方）+ <code>sum</code>（行 181）——得到本地 <code>Σ ‖g_i‖_p**p</code>。然后 <code>_fsdp2_reduce_group</code>（行 211）把它在传入的 <code>reduce_groups</code> 列表上<b>逐组 all-reduce</b>（行 232，<code>op=SUM</code>）——注意行 232 用的是 <code>ReduceOp.SUM</code>（普通 sum），不是 <code>PREMUL_SUM</code>，所以 <code>hccl_premul_sum_wrapper</code> 里 <code>factor=None</code>、走直通路径（不 <code>mul_</code>）。最终全局 <code>Σ Σ ‖g_i‖_p**p</code> 开 p 次方即全局梯度范数——<b>不 all-gather 梯度本身，只 all-gather 范数的平方和</b>，通信量是 O(1) 标量而非 O(参数量)。<code>_local_max</code>（行 189）是 inf-norm 的对应版（取 abs max 再 max-reduce）。</p>
+
+      <div class="figcap">三项融合算子 CLI：defaults False，A3 显式开 True（arguments）</div>
+<pre data-lang="py">    use_fused_rmsnorm: bool = field(default=False, metadata={"help": "Use fused rmsnorm."})
+    use_fused_rotary_pos_emb: bool = field(default=False, metadata={"help": "Use fused rotary-pos-emb."})
+    use_flash_attn: bool = field(default=False, metadata={"help": "use FlashAttention implementation of attention."})</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py">../mindspeed_llm/fsdp2/utils/arguments.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L663">:663</a>（use_fused_rmsnorm: bool = field(default=False, ...)——默认关，A3.sh:28 显式开 True）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L670">:670</a>（use_fused_rotary_pos_emb: bool = field(default=False, ...)——默认关，A3.sh:29 开）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py#L671">:671</a>（use_flash_attn: bool = field(default=False, ...)——默认关，A3.sh:30 开）</div>
+      <p>这三项是 EP10 的"减负"互补项——它们不直接做通信计算掩盖，而是<b>把每层的 kernel 数压到最少</b>，让 NPU 的算力流尽量连续、减少与通信 stream 抢占的空隙。默认全 <code>False</code>（关），A3 脚本显式 <code>True</code>（开）。<code>use_flash_attn</code> 开了之后，attention 走 FlashAttention 的 tiling 实现（IO 复杂度从 O(n²) 降到 O(n)），在 NPU 侧对应 <code>torch_npu.npu_fusion_attention</code>（EP10 旁注：context_parallel 路径大量调用此算子，见 <code>ring_context_parallel.py</code>）。<code>use_fused_rmsnorm</code> / <code>use_fused_rotary_pos_emb</code> 把 norm/rope 的多步融成单 kernel。三项与通信掩盖的关系是<b>间接</b>的：kernel 越少、每层耗时越短、留给 prefetch 重叠的"窗口"越宽——但若把它们当"通信掩盖本身"就误解了，它们是"计算端瘦身"，掩盖调度仍在外部 FSDP2。</p>
+
+      <div class="gnpu">
+        <div class="g"><h4>GPU / 已知（NCCL + torch FSDP2）</h4>
+          <div class="row"><span class="k">通信后端</span><span>NCCL，all_reduce 原生支持 PREMUL_SUM</span></div>
+          <div class="row"><span class="k">reduce 期缩放</span><span>torch 直接 op=PREMUL_SUM，无需 patch</span></div>
+          <div class="row"><span class="k">流重叠</span><span>NCCL stream + torch FSDP2 unshard/prefetch 调度</span></div>
+          <div class="row"><span class="k">零拷贝</span><span>无对应环境变量（NCCL 自管 buffer）</span></div>
+          <div class="row"><span class="k">梯度范数</span><span>torch.nn.utils.clip_grad_norm_ 原生</span></div>
+          <div class="row"><span class="k">融合算子</span><span>flash-attn / fused RMSNorm 在 CUDA 侧成熟</span></div>
+        </div>
+        <div class="n"><h4>NPU / 本项目（HCCL + premul_sum patch + 自写 clip）</h4>
+          <div class="row"><span class="k">通信后端</span><span>HCCL，dist_backend="hccl"（train_fsdp2.py:111）</span></div>
+          <div class="row"><span class="k">reduce 期缩放</span><span>apply_hccl_premul_sum_patch（:112）把 all_reduce/reduce_scatter 包成 wrapper，PREMUL_SUM→SUM+mul_</span></div>
+          <div class="row"><span class="k">流重叠</span><span>HCCL + 配置透传 num_to_*_prefetch，重叠调度在 fsdp_turbo/torch FSDP2（核实：仓内未见）</span></div>
+          <div class="row"><span class="k">零拷贝</span><span>export TORCH_HCCL_ZERO_COPY=1（A3.sh:2），HCCL 运行时生效</span></div>
+          <div class="row"><span class="k">梯度范数</span><span>clip_grad_norm.py 自写：DTensor/普通分流 + 多组 all_reduce + CP 缩放</span></div>
+          <div class="row"><span class="k">融合算子</span><span>use_fused_rmsnorm/rotary/flash_attn 三开关（A3.sh:28-30）+ npu_fusion_attention</span></div>
+        </div>
+      </div>
+
+      <div class="sum">
+        <b>小结</b>　心智模型：NPU 侧的"通信与计算掩盖"是<b>三层 + 一个自写聚合</b>的分工——<b>① 通信后端层</b> HCCL 替 NCCL，<code>apply_hccl_premul_sum_patch</code>（<code>train_fsdp2.py:112</code>→<code>torch_patch.py:21-23</code>）把 <code>all_reduce/reduce_scatter/reduce_scatter_tensor</code> 包成 <code>hccl_premul_sum_wrapper</code>（<code>torch_patch.py:5-18</code>），拦截 <code>ReduceOp.PREMUL_SUM</code> 降级成 <code>SUM</code>+事后 <code>mul_</code>，让"reduce 期乘系数"在 HCCL 上可用；<b>② FSDP2 流水线层</b> prefetch 的<b>配置</b>在仓内（<code>model_factory.py:168-169</code> 透传 <code>num_to_forward/backward_prefetch</code>），但<b>真正的重叠调度</b>在 <code>fsdp_turbo</code> / torch FSDP2 侧（与 EP08 dense <code>fully_shard</code> 同源，仓内未见）；<b>③ 零拷贝层</b> <code>TORCH_HCCL_ZERO_COPY=1</code>（<code>A3.sh:2</code>）属 HCCL 运行时；<b>④ 分片梯度范数聚合</b> 是仓内自写的 <code>clip_grad_norm.py</code>：<code>fsdp2_clip_grad_norm</code>（dense，行 43）把 DTensor/普通梯度分流算 Lp、CP 缩放（行 96 <code>*= get_group_size("cp")</code>）、分流裁剪；<code>ep_fsdp2_clip_grad_norm</code>（EP，行 108）把参数分 ep/non_ep 两组，EP 组<b>顺序</b>在 ep_fsdp 与 ep 两组上 all-reduce（行 143-147），<b>不 all-gather 梯度本身、只 all-reduce 标量平方和</b>（通信量 O(1)），最后单全局系数裁剪。三项融合算子（<code>A3.sh:28-30</code>）是"计算端瘦身"的互补项——kernel 越少，留给 prefetch 重叠的窗口越宽，但它们本身不是掩盖调度。
+        <div class="pit">常见误区：<b>① premul_sum patch 加速了所有 all-reduce</b>——错，<code>hccl_premul_sum_wrapper</code> 只在 <code>op==ReduceOp.PREMUL_SUM</code> 时取 factor 做 <code>mul_</code>（<code>torch_patch.py:8-16</code>），普通 <code>SUM</code>/<code>MAX</code> 走 <code>factor=None</code> 直通，<code>clip_grad_norm</code> 的 all-reduce 用的是 <code>SUM</code>（行 232），<b>不触发</b> premul 分支、无加速也无副作用。<b>② 以为 Prefetch 重叠逻辑在本仓</b>——不，仓内只有 <code>num_to_*_prefetch</code> 的<b>配置透传</b>（<code>model_factory.py:168-169</code>），重叠调度在 <code>fsdp_turbo</code> / torch FSDP2 侧（核实：本仓未见 prefetch 重叠实现源码，以外部实现为准）。<b>③ 以为 <code>TORCH_HCCL_ZERO_COPY</code> 是 Python 开关</b>——它是<b>环境变量</b>（<code>A3.sh:2</code>），被 HCCL 运行时读，仓内无实现代码，生效与否以 HCCL 文档为准。<b>④ 分片越多通信开销越大，不是越多越快</b>——FSDP2 fsdp_size 越大，每卡参数片越小、显存省，但<b>每层前向 all-gather 的通信量不变</b>（拼回全参大小固定），而<b>通信次数随分片数线性上升</b>（每层都要 all-gather/reduce-scatter 一次），且 all-gather 的延迟在小消息上不随分片数下降反而因启动开销占比上升——分片省显存是"空间"换"时间"，<code>fsdp_size==world_size</code>（<code>parallel_state.py:91</code> 硬约束）在 8B 这个量级是因为单卡装得下 1/16 片，<b>不是为了更快</b>；盲目加大分片（如多节点小卡数）会因通信开销把训练拖慢。<b>⑤ 以为 clip_grad_norm 会 all-gather 全部梯度</b>——不，<code>_local_pth_sum</code>（行 162）只取 <code>g.to_local()</code>（本卡那片）算 <code>‖g‖_p**p</code>，再 all-reduce <b>标量</b>平方和（行 232），通信量 O(1) 而非 O(参数量)；若 all-gather 全梯度做范数就违背 FSDP 省显存的初衷。<b>⑥ 以为 EP 组的范数与非 EP 组用不同 clip 系数</b>——不，行 155-156 用<b>同一</b> <code>total_norm</code> 裁两组，保证全局数值一致。<b>⑦ 以为三项融合算子就是通信掩盖</b>——它们是"计算端减 kernel 数"的互补项，与通信掩盖是两条不同的优化轴，别混为一谈。<b>⑧ 以为 CP 缩放（行 96）是 bug</b>——不是，CP 把张量沿序列切 cp_size 片，各片各算范数，all-reduce 出来需乘 cp_size 补偿才得全局范数；dense A3 cp_size=1 时乘 1 no-op。</div>
+      </div>
+
+      <div class="filelist"><b>本篇涉及文件</b><br>
+mindspeed_llm/fsdp2/distributed/clip_grad_norm.py（clip_grad_norm 入口 行 17 / fsdp2_clip_grad_norm dense 行 43 / ep_fsdp2_clip_grad_norm EP 行 108 / _local_pth_sum 行 162 / _local_max 行 189 / _fsdp2_reduce_group 行 211 / CP 缩放 行 96）<br>
+_deps_mindspeed_core/mindspeed/fsdp/utils/torch_patch.py（apply_hccl_premul_sum_patch 行 21 / hccl_premul_sum_wrapper 行 5 / PREMUL_SUM 拦截 行 8-10 / 事后 mul_ 行 16）<br>
+train_fsdp2.py（NPU 分支调 patch 行 112 / hccl 后端 行 111 / 导入 行 37 / init_process_group 行 156）<br>
+examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.sh（TORCH_HCCL_ZERO_COPY 行 2 / fsdp_size 16 行 24 / 三项融合算子 行 28-30 / NPUS 16 行 4-9）<br>
+examples/fsdp2/env_config.sh（HCCL_CONNECT_TIMEOUT / TASK_QUEUE_ENABLE / MULTI_STREAM_MEMORY_REUSE 等 HCCL 环境变量集合）<br>
+mindspeed_llm/fsdp2/models/model_factory.py（prefetch 配置透传进 FSDPPlanConfig 行 168-169）<br>
+mindspeed_llm/fsdp2/distributed/parallel_engine_config.py（num_to_forward/backward_prefetch 行 22-23 / fsdp_implementation 'custom'/'native' 行 25-27 注释 fsdp_turbo）<br>
+mindspeed_llm/fsdp2/utils/arguments.py（num_to_*_prefetch 行 445/451 / use_fused_rmsnorm 行 663 / use_fused_rotary_pos_emb 行 670 / use_flash_attn 行 671 / max_grad_norm 行 488）<br>
+mindspeed_llm/fsdp2/train/trainer.py（clip_grad_norm 调用 行 301 / 导入 行 14）<br>
+mindspeed_llm/fsdp2/distributed/parallel_state.py（get_group_size('cp') accessor 行 133 / CP mesh 行 83-86 / fsdp mesh 行 66 / ep mesh 行 76）<br>
+mindspeed_llm/fsdp2/distributed/context_parallel/ring_context_parallel.py（npu_fusion_attention 调用，flash_attn 在 CP 路径的旁证 行 164 等）</div>
+    </main>
+  </div>
+</div>
+<script>
+// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre[data-lang]').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];if(!rules)return;
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      return '<span class="ln">'+(i+1)+'</span>'+tokLine(l,rules);
+    }).join('\n');
+  });
+})();
+</script>
+</body>
+</html>

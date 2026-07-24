@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>专家并行与 2D 组合 · 走读 EP09</title>
+<style>
+  :root{
+    --bg:#0f0f12; --bg2:#000; --side:#1a1a1a; --card:#16161c; --line:#2a2a33;
+    --txt:#e8e8e8; --mut:#9a9a9a; --mut2:#6a6a6a;
+    --serif:ui-serif,Georgia,"Times New Roman",Times,serif;
+    --sans:system-ui,-apple-system,"PingFang SC","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace;
+    --red:#C7000B; --red-bg:#2a0f10; --red-bd:#6e1a1c; --red-tx:#e88;
+    --grn:#788C5D; --grn-bg:#14241a; --grn-bd:#2e5a3a; --grn-tx:#7ab98a;
+    --acc:#C7000B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+  .page{max-width:1180px;margin:0 auto;padding:0}
+  .topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);
+    font-size:13px;color:var(--mut)}
+  .topbar .crumb{font-family:var(--serif);font-style:italic}
+  .topbar nav{margin-left:auto;display:flex;gap:8px}
+  .topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:4px 10px;border-radius:6px}
+  .topbar nav a:hover{color:#fff;border-color:var(--acc)}
+  .body{display:grid;grid-template-columns:160px 1fr;align-items:start}
+  .tree{background:var(--side);border-right:1px solid var(--line);padding:14px 8px;
+    font-family:var(--mono);font-size:11px;color:var(--mut2);min-height:80vh;position:sticky;top:0}
+  .tree .f{display:block;padding:2px 4px;white-space:pre}
+  .tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px}
+  .main{padding:22px 28px 80px}
+  h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:6px 0 2px;color:#fff}
+  .goal{font-family:var(--serif);font-style:italic;color:var(--mut);margin:0 0 4px}
+  .gain{font-size:13px;color:var(--mut);margin:0 0 20px}
+  .gain b{color:var(--red-tx)}
+  h2{font-family:var(--serif);font-weight:600;font-size:18px;color:#fff;margin:26px 0 6px;
+    border-bottom:1px solid var(--line);padding-bottom:3px}
+  h2 .sec{color:var(--mut2);font-style:italic;font-size:13px;margin-left:8px}
+  p{margin:8px 0}
+  .figcap{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);
+    margin:10px 0 2px}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--mut2);
+    padding:10px 12px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55}
+  pre .ln{display:inline-block;width:32px;color:var(--mut2);user-select:none}
+  .filelink{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--red-tx);margin:4px 0 14px}
+  .filelink a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--red-bd)}
+  .footnote{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--mut2);margin:4px 0 14px}
+  /* PyCharm Darcula 主题 token 配色 */
+  pre[data-lang]{color:#d4d4d4}
+  .tok-kw{color:#cc7832;font-weight:600}
+  .tok-bi{color:#9876aa;font-style:italic}
+  .tok-fn{color:#ffc66d}
+  .tok-cl{color:#a9b7c6;font-style:italic}
+  .tok-st{color:#6a8759}
+  .tok-cm{color:#808080;font-style:italic}
+  .tok-nm{color:#6897bb}
+  .tok-dc{color:#bbb33b}
+  .tok-key{color:#cc7832}
+  .tok-var{color:#9876aa}
+  .tree .f,.tree a.f{color:#6a6a6a;text-decoration:none;display:block;padding:2px 4px;white-space:pre;border-radius:3px}
+  .tree a.f:hover{background:#2a2a33;color:#d4d4d4}
+  .tree a.f.act,.tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px;font-weight:600}
+  .gnpu{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:14px 0}
+  .gnpu .g{background:var(--grn-bg);border-right:1px solid var(--line);padding:10px 14px}
+  .gnpu .n{background:var(--red-bg);padding:10px 14px}
+  .gnpu h4{margin:0 0 6px;font-family:var(--serif);font-size:13px}
+  .gnpu .g h4{color:var(--grn-tx)}.gnpu .n h4{color:var(--red-tx)}
+  .gnpu .row{display:grid;grid-template-columns:90px 1fr;gap:6px;font-size:12.5px;margin:4px 0}
+  .gnpu .row .k{color:var(--mut2)}
+  .diag{margin:10px 0 6px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:8px}
+  .sum{border-top:1px solid var(--line);margin-top:22px;padding-top:10px;font-size:13.5px}
+  .sum .pit{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12.5px;margin-top:6px}
+  .filelist{font-family:var(--mono);font-size:11px;color:var(--mut2);margin-top:22px;border-top:1px dashed var(--line);padding-top:10px}
+  .filelist b{color:var(--mut)}
+  .sidecap{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--mut2);margin:14px 0 2px}
+  .sidecap b.llm{color:var(--red-tx)}.sidecap b.core{color:var(--grn-tx)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <span class="crumb">第三篇章 · 并行引擎 › EP09</span>
+    <span style="color:var(--mut2)">EP09</span>
+    <nav>
+      <a href="ep08.html">◀ 上一篇</a>
+      <a href="index.html">索引</a>
+      <a href="ep10.html">下一篇 ▶</a>
+    </nav>
+  </div>
+  <div class="body">
+    <aside class="tree">
+      <a class="f" href="appendix/index.html" target="_blank">📁 附录·项目文件走读</a>
+      <span class="f">MindSpeed-LLM/</span>
+      <a class="f" href="appendix/file_089411e68e5d5b.html" target="_blank">├ train_fsdp2.py</a>
+      <span class="f">├ examples/fsdp2/</span>
+      <span class="f">│  ├ qwen3/</span>
+      <span class="f">│  └ qwen3_moe/</span>
+      <span class="f">├ mindspeed_llm/fsdp2/</span>
+      <span class="f act">distributed/expert_parallel/</span>
+      <a class="f act" href="appendix/file_fa8e1ad5d05bae.html" target="_blank">├ expert_parallel.py</a>
+      <a class="f act" href="appendix/file_2bf950a78b92cb.html" target="_blank">├ dispatcher.py</a>
+      <a class="f act" href="appendix/file_e37b14b444edd9.html" target="_blank">├ expert_fully_shard_parallel.py</a>
+      <span class="f">└ ...</span>
+    </aside>
+    <main class="main">
+      <h1>专家并行与 2D 组合</h1>
+      <p class="goal">目标：理清 FSDP×EP 二维 DeviceMesh 与为何稠密模型 ep_size=1。前置：EP08 FSDP2 分片落地。</p>
+      <p class="gain">你将获得：<b>①</b> 一条从 YAML 的 <code>ep_modules / ep_fsdp_modules / ep_dispatcher: eager</code> 三行声明、经 <code>model_factory</code> 装成 <code>EPPlanConfig</code>、由 <code>ParallelState</code> 建出<b>第二张 DeviceMesh（edp/efsdp/ep）</b>、再由 <code>apply_ep_modules</code> 拿专家 DeviceMesh 对 <code>model.layers.{*}.mlp.experts</code> 做 all-to-all 路由 + <code>distribute_tensor(Shard(0))</code> 切权重——而稠密 Qwen3-8B 因 <code>ep_size=1</code> 让这两个 guard 全部短路、整条 EP 路径不触发的完整落地链路 <b>②</b> 弄懂"专家参数走 EP 轴、共享参数走 FSDP 轴"的二维分工、以及为何 dense 模型虽然 YAML 里也写了 <code>ep_modules</code> 却永远走不到这条路径——配 <code>ep_dispatcher: eager</code> 的 all-to-all dispatch→grouped_matmul→all-to-all combine 三段式专家前向</p>
+
+      <h2>你已经熟悉的情况 <span class="sec">桥接开场</span></h2>
+      <p>EP08 你看清了稠密模型怎么分片：一张 <code>DeviceMesh</code> 的 fsdp 轴上，<code>fully_shard</code> 把每层参数切成 1/N 片，前向 all-gather 临时拼、反向 reduce_scatter——这条 axis 是"<b>同一份参数被切成 N 份</b>"。但 MoE（混合专家）模型有个新麻烦：<b>专家太多了</b>。Qwen3-MoE 一层有几十个 expert，每个 expert 是一组独立的 FFN 权重，8B 那种"每层一个 MLP"的稠密结构在 MoE 这里变成"每层 N 个 expert MLP 堆在一起"。把 N 个 expert 全摆到每张卡上，显存爆；但用 FSDP 把它们像稠密参数那样"全切成 N 份"也不太对——因为 MoE 的精髓是<b>每个 token 只去找 top-k 个 expert 算</b>，天然就只有一部分 expert 被激活，把不激活的 expert 整块切散反而丢了"按需路由"的好处。</p>
+      <p>专家并行（EP）的解法是<b>换一种切法：不切参数，切"专家归属"</b>。把 E 个 expert 沿 EP 轴<b>整块划分</b>到 ep_size 张卡上，每卡只持 E/ep_size 个 expert 的<b>完整</b>权重（不是切碎成片），前向时 token 按路由表 all-to-all 发到"该 expert 所在的那张卡"算完再 all-to-all 收回来。这和 FSDP 的"参数切片 + all-gather"是两种完全不同的并行——FSDP 切的是<b>同一份参数</b>，EP 切的是<b>不同份参数（不同 expert）</b>。于是 MoE 训练里两条 axis 同时存在：专家权重走 EP 轴（按 expert 整块划分），共享权重（attention、embed、norm、router gate）走 FSDP 轴（按参数切片）。这就是"<b>2D 组合</b>"——EP08 的单轴 fsdp 升维成 fsdp×ep 二维。但 Qwen3-8B 是稠密模型，<b>根本没有 expert</b>，于是 <code>ep_size=1</code> 让 EP 轴塌缩成单卡、整条 EP 代码路径短路——本篇要讲清这条短路<b>为什么发生</b>，以及一旦换成 MoE 这条路径会怎么走。</p>
+
+      <h2>本项目怎么做 <span class="sec">原理</span></h2>
+      <p>EP 的核心模型是"<b>两张 DeviceMesh 共享同一组物理 rank</b>"。第一张是 EP08 讲过的<b>共享参数 mesh</b>，维度名 <code>('dp','fsdp','tp')</code>——attention/embed/norm 这类<b>每个 token 都要走</b>的参数挂在这张 mesh 的 fsdp 轴上，被切成片。第二张是<b>专家 mesh</b>，维度名 <code>('edp','efsdp','ep')</code>——专家权重挂在这张 mesh 的 ep 轴上，被整块划分。两张 mesh 形状不同、维度名不同、<code>get_fsdp_device_mesh()</code> 与 <code>get_ep_device_mesh()</code> 取的是不同子组，但它们的<b>底层物理 rank 是同一批 NPU</b>——每张卡既持共享参数的 1/N 片（fsdp 角色），又持某几个 expert 的完整权重（ep 角色）。这就是"2D"的真义：不是一张二维 mesh，而是<b>对同一组卡建两张不同视角的 mesh，按参数类别分挂</b>。</p>
+      <p>专家前向走 <code>ep_dispatcher: eager</code> 这条路时，是经典的三段式 all-to-all：<b>① dispatch_preprocess</b> 用 <code>bincount</code> 数每卡本地各 expert 收到多少 token、<code>gather_along_first_dim</code> 跨 EP 组汇总成全局分布、算出每张卡要发/收多少 token 的 split size；<b>② alltoall_dispatch + experts_computation</b> 先 <code>permute</code> 把 token 按 expert 重排、<code>all_to_all</code> 把 token 派发到对应 expert 所在的卡、再 <code>permute</code> 按本卡 local expert 重排、最后 <code>eager_grouped_matmul</code> 一次算完本卡所有 expert 的 FFN；<b>③ alltoall_combine</b> 反向 <code>unpermute</code> + <code>all_to_all</code> 把结果收回原 rank、再 <code>unpermute</code> 按原 token 顺序拼回 + 乘路由权重。三段式的通信原语是<b>两次 all-to-all</b>（dispatch + combine），不是 FSDP 的 all-gather/reduce_scatter——这是 EP 与 FSDP 在通信模式上的根本分野。下面的 SVG 把两张 mesh 与三段式画在一起。</p>
+      <div class="diag">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 600" width="100%" style="max-width:940px" font-family="ui-monospace,Menlo,monospace" font-size="11">
+  <defs>
+    <marker id="arr9" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#6a6a6a"/>
+    </marker>
+    <marker id="arr9r" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#e88"/>
+    </marker>
+    <marker id="arr9g" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#7ab98a"/>
+    </marker>
+  </defs>
+  <text x="20" y="20" fill="#9a9a9a" font-weight="600">两张 DeviceMesh 共享同一组物理 NPU（rank 0..7）</text>
+
+  <!-- Mesh 1: shared params (dp/fsdp/tp) -->
+  <g>
+    <text x="20" y="48" fill="#7ab98a" font-weight="600">① 共享参数 mesh　mesh_dim_names=('dp','fsdp','tp')　parallel_state.py:66</text>
+    <rect x="20" y="56" width="430" height="76" rx="5" fill="#14241a" stroke="#2e5a3a"/>
+    <text x="30" y="74" fill="#7ab98a" font-size="10">attention · embed_tokens · norm · router.gate</text>
+    <text x="30" y="90" fill="#e8e8e8" font-size="10">fsdp 轴：每参数切成 8 片 DTensor（fully_shard，EP08）</text>
+    <text x="30" y="106" fill="#6a6a6a" font-size="9" font-style="italic">mesh_shape=(fsdp_size=8, tp_size=1)，dp=world_size//(fsdp*tp)=1</text>
+    <text x="30" y="122" fill="#6a6a6a" font-size="9" font-style="italic">约束：fsdp_size==world_size(行 91)、dp==1(行 88)</text>
+    <text x="470" y="74" fill="#6a6a6a" font-size="9" font-style="italic">get_fsdp_device_mesh()</text>
+    <text x="470" y="90" fill="#6a6a6a" font-size="9" font-style="italic">→ fully_shard_parallel_modules</text>
+  </g>
+
+  <!-- Mesh 2: expert params (edp/efsdp/ep) -->
+  <g>
+    <text x="490" y="48" fill="#e88" font-weight="600">② 专家 mesh　mesh_dim_names=('edp','efsdp','ep')　行 76</text>
+    <rect x="490" y="56" width="430" height="76" rx="5" fill="#2a0f10" stroke="#6e1a1c"/>
+    <text x="500" y="74" fill="#e88" font-size="10">model.layers.{*}.mlp.experts（E 个 expert 整块）</text>
+    <text x="500" y="90" fill="#e8e8e8" font-size="10">ep 轴：E 个 expert 整块划分到 8 卡（distribute_tensor Shard(0)）</text>
+    <text x="500" y="106" fill="#6a6a6a" font-size="9" font-style="italic">mesh_shape=(efsdp_size, ep_size,)，edp=余项</text>
+    <text x="500" y="122" fill="#6a6a6a" font-size="9" font-style="italic">dense 时 ep_size=1 → ep 轴塌缩，整 mesh 退化（本篇核心）</text>
+  </g>
+
+  <!-- physical ranks shared by both meshes -->
+  <g>
+    <text x="20" y="158" fill="#9a9a9a" font-weight="600">同一批物理 NPU（两张 mesh 的 rank 是同一组卡）</text>
+    <g font-size="10" text-anchor="middle">
+      <rect x="60"  y="166" width="46" height="24" rx="3" fill="#1a1a1a" stroke="#3a3a44"/><text x="83"  y="182" fill="#9a9a9a">rank0</text>
+      <rect x="120" y="166" width="46" height="24" rx="3" fill="#1a1a1a" stroke="#3a3a44"/><text x="143" y="182" fill="#9a9a9a">rank1</text>
+      <rect x="180" y="166" width="46" height="24" rx="3" fill="#1a1a1a" stroke="#3a3a44"/><text x="203" y="182" fill="#9a9a9a">rank2</text>
+      <rect x="240" y="166" width="46" height="24" rx="3" fill="#1a1a1a" stroke="#3a3a44"/><text x="263" y="182" fill="#9a9a9a">rank3</text>
+      <rect x="300" y="166" width="46" height="24" rx="3" fill="#1a1a1a" stroke="#3a3a44"/><text x="323" y="182" fill="#9a9a9a">rank4</text>
+      <rect x="360" y="166" width="46" height="24" rx="3" fill="#1a1a1a" stroke="#3a3a44"/><text x="383" y="182" fill="#9a9a9a">rank5</text>
+      <rect x="420" y="166" width="46" height="24" rx="3" fill="#1a1a1a" stroke="#3a3a44"/><text x="443" y="182" fill="#9a9a9a">rank6</text>
+      <rect x="480" y="166" width="46" height="24" rx="3" fill="#1a1a1a" stroke="#3a3a44"/><text x="503" y="182" fill="#9a9a9a">rank7</text>
+    </g>
+    <text x="560" y="182" fill="#6a6a6a" font-size="9" font-style="italic">每卡：持共享参数 1/8 片 + 持 E/8 个 expert 整权重</text>
+  </g>
+
+  <!-- Expert forward 3-stage all-to-all -->
+  <g>
+    <text x="20" y="220" fill="#e88" font-weight="600">ep_dispatcher: eager 三段式专家前向（dispatcher.py，ep_size&gt;1 才走）</text>
+
+    <!-- stage 1: preprocess -->
+    <rect x="20" y="228" width="280" height="92" rx="5" fill="#2a0f10" stroke="#6e1a1c"/>
+    <text x="30" y="246" fill="#e88" font-size="10" font-weight="600">① dispatch_preprocess 行 54-77</text>
+    <text x="30" y="262" fill="#e8e8e8" font-size="9">bincount 数每 expert token 数 (行 62)</text>
+    <text x="30" y="276" fill="#e8e8e8" font-size="9">gather_along_first_dim 跨 EP 汇总 (行 64)</text>
+    <text x="30" y="290" fill="#e8e8e8" font-size="9">reshape [EP, local_E] → input_split/output_splits (行 71-74)</text>
+    <text x="30" y="306" fill="#6a6a6a" font-size="9" font-style="italic">输出：每卡要发/收多少 token 的 split size</text>
+    <line x1="300" y1="274" x2="324" y2="274" stroke="#6a6a6a" marker-end="url(#arr9)"/>
+
+    <!-- stage 2: dispatch+compute -->
+    <rect x="330" y="228" width="280" height="92" rx="5" fill="#2a0f10" stroke="#6e1a1c"/>
+    <text x="340" y="246" fill="#e88" font-size="10" font-weight="600">② alltoall_dispatch + compute 行 32-51</text>
+    <text x="340" y="262" fill="#e8e8e8" font-size="9">permute 按 expert 重排 (行 84)</text>
+    <text x="340" y="276" fill="#e8e8e8" font-size="9">all_to_all 派发到 expert 所在卡 (行 86)</text>
+    <text x="340" y="290" fill="#e8e8e8" font-size="9">permute 按 local_expert 重排 (行 87)</text>
+    <text x="340" y="304" fill="#e8e8e8" font-size="9">eager_grouped_matmul 算本卡 FFN (行 93-95)</text>
+    <line x1="610" y1="274" x2="634" y2="274" stroke="#6a6a6a" marker-end="url(#arr9)"/>
+
+    <!-- stage 3: combine -->
+    <rect x="640" y="228" width="280" height="92" rx="5" fill="#2a0f10" stroke="#6e1a1c"/>
+    <text x="650" y="246" fill="#e88" font-size="10" font-weight="600">③ alltoall_combine 行 50, 106-112</text>
+    <text x="650" y="262" fill="#e8e8e8" font-size="9">unpermute 按收到的序还原 (行 109)</text>
+    <text x="650" y="276" fill="#e8e8e8" font-size="9">all_to_all 收回原 rank (行 110)</text>
+    <text x="650" y="290" fill="#e8e8e8" font-size="9">unpermute 按原 token 序拼回 (行 111)</text>
+    <text x="650" y="304" fill="#6a6a6a" font-size="9" font-style="italic">× top_k_weights（路由权重相乘）</text>
+  </g>
+
+  <!-- dense short-circuit -->
+  <g>
+    <text x="20" y="346" fill="#7ab98a" font-weight="600">稠密 Qwen3-8B：ep_size=1 → 上面三段式全部短路</text>
+    <rect x="20" y="354" width="900" height="56" rx="5" fill="#14241a" stroke="#2e5a3a"/>
+    <text x="30" y="372" fill="#7ab98a" font-size="10">engine.apply_ep_modules 行 59: if expert_parallel_size &gt; 1: ← ep_size=1 不成立，跳过 expert_parallelize_modules</text>
+    <text x="30" y="388" fill="#7ab98a" font-size="10">engine.apply_ep_modules 行 63: if expert_fully_shard_parallel_size &gt; 1: ← ep_fsdp_size=1 不成立，跳过 expert_fully_shard_modules</text>
+    <text x="30" y="404" fill="#6a6a6a" font-size="9" font-style="italic">YAML 里虽写了 ep_modules/ep_fsdp_modules/ep_dispatcher: eager（A2 yaml 行 18-22），但 CLI --parallel.ep_size 1 覆盖后整条 EP 路径不触发</text>
+  </g>
+
+  <!-- expert weight distribution -->
+  <g>
+    <text x="20" y="436" fill="#9a9a9a" font-weight="600">专家权重如何落到 ep 轴：distribute_tensor(Shard(0)) 整块划分</text>
+    <rect x="20" y="444" width="900" height="64" rx="5" fill="#1a1a1a" stroke="#3a3a44"/>
+    <text x="30" y="462" fill="#e8e8e8" font-size="10">expert_parallel.distribute_expert_weight 行 111-114：</text>
+    <text x="30" y="478" fill="#e8e8e8" font-size="10">  dist_param = Parameter(distribute_tensor(param, ep_mesh, [Shard(0)]))  ← 按 dim0 切，每卡持 E/ep_size 个 expert 整块</text>
+    <text x="30" y="494" fill="#6a6a6a" font-size="9" font-style="italic">与 FSDP 的 fully_shard 区别：fully_shard 切后前向需 all-gather 拼回；EP 切后前向靠 all-to-all 派发 token（不拼回参数）</text>
+  </g>
+
+  <!-- legend -->
+  <g>
+    <text x="20" y="534" fill="#6a6a6a" font-size="9" font-style="italic">关键：两张 mesh 形状/维度名不同（行 66 vs 行 76），但底层 init_device_mesh 用同一 world_size 建出，物理 rank 重合。</text>
+    <text x="20" y="548" fill="#6a6a6a" font-size="9" font-style="italic">dense 模型 ep_size=1 时，专家 mesh_shape=(efsdp=1, ep=1) 退化为单卡、get_ep_device_mesh 取出的 group size=1 → all_to_all 无跨卡对象。</text>
+    <text x="20" y="572" fill="#6a6a6a" font-size="9" font-style="italic">（核实：ep_size&gt;1 的真实多卡 EP 联调日志本镜像未含，三段式时序以 dispatcher.py 源码为准）</text>
+  </g>
+</svg>
+      </div>
+      <p class="footnote">这张图的三个关键：① <b>"2D"是两张 mesh 不是一张二维 mesh</b>——<code>parallel_state.py:66</code> 建 <code>('dp','fsdp','tp')</code>，<code>:76</code> 另建 <code>('edp','efsdp','ep')</code>，两次独立 <code>init_device_mesh</code>、维度名互不重叠，靠的是同一 <code>world_size</code> 让物理 rank 重合；② <b>EP 的通信是 all-to-all 不是 all-gather</b>——三段式两次 <code>all_to_all</code>（dispatch 行 86 + combine 行 110）把 token 在卡间派发/收回，与 FSDP 的 all-gather/reduce_scatter 是两套原语；③ <b>dense 短路发生在 engine 的 guard</b>（行 59/63），不在 yaml——A2 yaml 明明写了 <code>ep_modules</code>，但 CLI <code>--parallel.ep_size 1</code> 让 <code>expert_parallel_size</code> 不大于 1，两个 <code>if</code> 都假，整条 EP 路径连 <code>expert_parallelize_modules</code> 都不调。</p>
+
+      <h2>源码下钻 <span class="sec">file:line</span></h2>
+      <p>本篇下钻六个文件，按"<b>YAML 声明 → factory 装 EPPlanConfig → ParallelState 建专家 mesh → engine guard 短路 → expert_parallel 切权重+换 forward → dispatcher 三段式 → expert_fully_shard 旁证</b>"的顺序。先贴 MoE 与 dense 两份 yaml 的 <code>ep_*</code> 段做对照，再贴 factory 装配、state 建第二张 mesh、engine 的 <code>&gt;1</code> guard，最后贴专家切权重/换 forward 与三段式 dispatcher，并以 <code>expert_fully_shard_parallel.py</code> 作 dense 路径看不到的 <code>fully_shard</code> 原语旁证（EP08 已点过）。</p>
+
+      <div class="figcap">MoE yaml：parallel 段的 ep_modules / ep_fsdp_modules / ep_dispatcher: eager 三行</div>
+<pre data-lang="yaml">parallel:
+  fsdp_modules:
+    - model.layers.{*}
+    - model.embed_tokens
+    - lm_head
+  ep_modules:
+    - model.layers.{*}.mlp.experts
+  ep_fsdp_modules:
+    - model.layers.{*}.mlp.experts
+  ep_dispatcher: eager
+  recompute: True
+  recompute_modules:
+    - model.layers.{*}
+  reduce_dtype: bf16
+  cp_size: 1
+  cp_type: ulysses</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3_moe/pretrain_qwen3_30b_4k_fsdp2_A3.yaml">../examples/fsdp2/qwen3_moe/pretrain_qwen3_30b_4k_fsdp2_A3.yaml</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3_moe/pretrain_qwen3_30b_4k_fsdp2_A3.yaml#L16">:16</a>（parallel 段起）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3_moe/pretrain_qwen3_30b_4k_fsdp2_A3.yaml#L21">:21</a>（ep_modules: model.layers.{*}.mlp.experts——匹配每层的 experts ModuleList）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3_moe/pretrain_qwen3_30b_4k_fsdp2_A3.yaml#L23">:23</a>（ep_fsdp_modules 同路径——专家参数再上 FSDP 切片）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3_moe/pretrain_qwen3_30b_4k_fsdp2_A3.yaml#L25">:25</a>（ep_dispatcher: eager——选 eager 三段式 all-to-all，另有 fused/mc2）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3_moe/pretrain_qwen3_30b_4k_fsdp2_A3.yaml#L30">:30</a>（cp_size: 1，CP 轴也塌缩）</div>
+      <p>这是 EP 的输入端。<code>ep_modules</code> 匹配的是 <code>Qwen3MoeExperts</code>（每层一个实例，包了所有 expert 的合并权重，见 qwen3_moe.py:174），<code>{*}</code> 通配展开到每一层。<code>ep_fsdp_modules</code> 与 <code>ep_modules</code> 路径相同——意味着专家参数在被 EP 整块划分<b>之后</b>，还要再上一次 FSDP（efsdp 轴）切成片，即"专家既按 expert 划分（ep）又按参数切片（efsdp）"的二维。注意这个 yaml <b>没有 <code>ep_size</code> 字段</b>——它不在 yaml，而在 .sh 以 CLI 覆盖给出（见下下段）。</p>
+
+      <div class="figcap">dense A2 yaml：parallel 段——注意 ep_* 三行与 MoE 完全相同（行 18-22）</div>
+<pre data-lang="yaml">parallel:
+  fsdp_modules:
+    - model.layers.{*}
+    - model.embed_tokens
+    - lm_head
+  ep_modules:
+    - model.layers.{*}.mlp.experts
+  ep_fsdp_modules:
+    - model.layers.{*}.mlp.experts
+  ep_dispatcher: eager
+  recompute: True
+  recompute_modules:
+    - model.layers.{*}</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml">../examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml#L13">:13</a>（parallel 段起）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml#L18">:18</a>（ep_modules——与 MoE 行 21 逐字相同！）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml#L20">:20</a>（ep_fsdp_modules——同样逐字相同）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml#L22">:22</a>（ep_dispatcher: eager——稠密模型竟也声明了 eager dispatcher）</div>
+      <p>这是本篇最反直觉的一处：<b>稠密 Qwen3-8B 的 yaml 与 MoE 的 yaml 在 ep_* 三行上逐字相同</b>。这不是笔误——稠密模型的 <code>Qwen3ForCausalLM</code>（qwen3.py:21）压根没有 <code>mlp.experts</code> 这个子模块（它用的是 transformers 原生 <code>Qwen3MLP</code>，单 FFN），所以这三行声明对稠密模型<b>匹配不到任何模块</b>。真正让 EP 不触发的不是 yaml（yaml 照写），而是 .sh 里 CLI <code>--parallel.ep_size 1</code> 让 <code>expert_parallel_size=1</code>，engine 的 guard 直接短路（见下下段）。换言之：这套 yaml 是<b>为整套 FSDP2 配置体系写的"模板默认值"</b>，ep_* 三行对所有 qwen3 系列模型都默认带，稠密模型靠 ep_size=1 + 模块匹配落空双保险不触发——设计上把"要不要开 EP"这个开关完全交给运行时的 ep_size，而非 yaml 的有无。</p>
+
+      <div class="figcap">MoE .sh：fsdp_size/ep_size/ep_fsdp_size 都以 CLI 给出（不在 yaml）</div>
+<pre data-lang="sh">source examples/fsdp2/env_config.sh
+NPUS_PER_NODE=16
+NNODES=1
+WORLD_SIZE=$(($NPUS_PER_NODE*$NNODES))
+# ...
+torchrun $DISTRIBUTED_ARGS train_fsdp2.py \
+     examples/fsdp2/qwen3_moe/pretrain_qwen3_30b_4k_fsdp2_A3.yaml \
+     --model.model_name_or_path ./model_weights/Qwen3-30B-A3B/ \
+     --parallel.fsdp_size 16 \
+     --parallel.ep_size 1 \
+     --parallel.ep_fsdp_size 1 \
+     --optimization.moe_grouped_gemm True</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3_moe/pretrain_qwen3_30b_4k_fsdp2_A3.sh">../examples/fsdp2/qwen3_moe/pretrain_qwen3_30b_4k_fsdp2_A3.sh</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3_moe/pretrain_qwen3_30b_4k_fsdp2_A3.sh#L4">:4</a>（NPUS_PER_NODE=16，单节点 16 卡）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3_moe/pretrain_qwen3_30b_4k_fsdp2_A3.sh#L9">:9</a>（WORLD_SIZE=16）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3_moe/pretrain_qwen3_30b_4k_fsdp2_A3.sh#L27">:27</a>（--parallel.fsdp_size 16）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3_moe/pretrain_qwen3_30b_4k_fsdp2_A3.sh#L28">:28</a>（--parallel.ep_size 1——见下核实）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3_moe/pretrain_qwen3_30b_4k_fsdp2_A3.sh#L29">:29</a>（--parallel.ep_fsdp_size 1）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3_moe/pretrain_qwen3_30b_4k_fsdp2_A3.sh#L35">:35</a>（--optimization.moe_grouped_gemm True，开 grouped matmul 算子）</div>
+      <p class="footnote"><b>核实（重要）</b>：即便这份 MoE 30B 示例脚本，<code>ep_size</code> 也传了 <b>1</b>（行 28）——即<b>本镜像随附的 MoE 示例出厂状态并未真正开多卡 EP</b>，而是用 fsdp_size=16 把整模型（含 expert）按 FSDP 单轴切。这意味着本篇讲的"专家走 EP 轴、共享走 FSDP 轴"的二维分工，是<b>代码能力</b>而非<b>该脚本的默认行为</b>。要真正触发 EP，需把 <code>ep_size</code> 改成 &gt;1 且保证 <code>ep_size * ep_fsdp_size * edp == world_size</code>（见下行 state 的 mesh 形状约束）。本镜像不含 ep_size&gt;1 的真实联调日志，二维分工的运行时行为以 <code>expert_parallel.py</code> + <code>dispatcher.py</code> 源码为准。</p>
+
+      <div class="figcap">dense A2 .sh：ep_size=1 / ep_fsdp_size=1（稠密模型无 expert）</div>
+<pre data-lang="sh">NPUS_PER_NODE=8
+NNODES=1
+WORLD_SIZE=$(($NPUS_PER_NODE*$NNODES))
+torchrun $DISTRIBUTED_ARGS train_fsdp2.py examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml \
+    --model.model_name_or_path /home/data/Qwen3-8B/ \
+    --parallel.fsdp_size 8 \
+    --parallel.ep_size 1 \
+    --parallel.ep_fsdp_size 1 \
+    --training.output_dir ./output</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh">../examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh#L3">:3</a>（NPUS_PER_NODE=8）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh#L8">:8</a>（WORLD_SIZE=8）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh#L23">:23</a>（--parallel.fsdp_size 8，=world_size，EP08 硬约束）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh#L24">:24</a>（--parallel.ep_size 1，稠密模型 EP 关闭）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh#L25">:25</a>（--parallel.ep_fsdp_size 1，专家 FSDP 也关闭）</div>
+      <p>对照就清楚了：dense 8B 走 fsdp_size=8 单轴、ep_size=1 关 EP；MoE 30B 走 fsdp_size=16 单轴、ep_size=1 同样关 EP（出厂态）。两者<b>当前都没有真正开二维</b>，但代码路径都齐备——把 ep_size 改大就能激活。这就是为何"稠密模型 ep_size=1"不是限制而是<b>语义正确</b>：稠密模型没有 expert，EP 轴对它无意义，强行开 ep_size&gt;1 只会把不存在的 expert 模块匹配落空、在 <code>get_ep_modules</code> 行 93 抛 <code>No module named</code>。</p>
+
+      <div class="figcap">model_factory：把 ep_modules 装成 EPPlanConfig（行 176-185）+ 组装进 ParallelEngineConfig（行 215-219）</div>
+<pre data-lang="py">        # --- 3. Expert Parallel Plan ---
+        # For Mixture-of-Experts (MoE) models
+        ep_size = parallel_args.ep_size
+        ep_fsdp_size = parallel_args.ep_fsdp_size
+
+        ep_plan = EPPlanConfig(
+            apply_modules=parallel_args.ep_modules,
+            apply_efsdp_modules=parallel_args.ep_fsdp_modules,
+            dispatcher=parallel_args.ep_dispatcher,
+        )
+
+        # ... later, assemble config ---
+        config = ParallelEngineConfig(
+            data_parallel_size=dp_size,
+            fully_shard_parallel_size=fsdp_size,
+            fsdp_plan=fsdp_plan,
+            tensor_parallel_size=tp_size,
+            tp_plan=tp_plan,
+            # Expert Parallelism
+            expert_parallel_size=ep_size,
+            expert_fully_shard_parallel_size=ep_fsdp_size,
+            expert_data_parallel_size=dp_size,
+            ep_plan=ep_plan,</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py">../mindspeed_llm/fsdp2/models/model_factory.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py#L176">:176</a>（# --- 3. Expert Parallel Plan 段起）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py#L178">:178</a>（ep_size = parallel_args.ep_size，取 CLI 值）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py#L179">:179</a>（ep_fsdp_size = parallel_args.ep_fsdp_size）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py#L181">:181</a>（ep_plan = EPPlanConfig(...) 装配）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py#L182">:182</a>（apply_modules=ep_modules）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py#L183">:183</a>（apply_efsdp_modules=ep_fsdp_modules）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py#L184">:184</a>（dispatcher=ep_dispatcher，即 'eager'）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py#L216">:216</a>（expert_parallel_size=ep_size，灌进 config）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py#L217">:217</a>（expert_fully_shard_parallel_size=ep_fsdp_size）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py#L218">:218</a>（expert_data_parallel_size=dp_size，注释"Usually matches global"）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/model_factory.py#L219">:219</a>（ep_plan=ep_plan）</div>
+      <p>这段与 EP08 的 fsdp plan 装配是平行结构。<code>EPPlanConfig</code>（parallel_engine_config.py:48-52）三个字段：<code>apply_modules</code>（list，匹配 experts 路径）、<code>dispatcher</code>（'eager'/'fused'/'mc2' 三选一或 callable）、<code>apply_efsdp_modules</code>（list，专家再上 FSDP 的路径）。注意 <code>expert_data_parallel_size=dp_size</code>（行 218）——专家数据并行直接复用稠密的 dp_size，注释明说"Usually EP data parallel size matches global"，即 edp 轴默认等于 dp 轴，不单独配。dense 场景 dp_size=1（EP07 硬约束），故 edp 也=1。</p>
+
+      <div class="figcap">parallel_engine_config.validate_ep：efsdp_modules 可由 ep_modules 自动派生（行 162-166）</div>
+<pre data-lang="py">    def validate_ep_config(self):
+        self.ep_plan = EPPlanConfig(apply_modules=[], dispatcher='eager') if self.ep_plan is None else self.ep_plan
+        self.ep_plan._gradient_divide_factor = (
+            self.expert_parallel_size * self.expert_fully_shard_parallel_size * self.expert_data_parallel_size
+        )
+        if self.ep_plan.apply_efsdp_modules is None:
+            self.ep_plan.apply_efsdp_modules = []
+            for ep_module in self.ep_plan.apply_modules:
+                if ep_module.endswith('.experts'):
+                    self.ep_plan.apply_efsdp_modules.append(ep_module.removesuffix('.experts'))</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_engine_config.py">../mindspeed_llm/fsdp2/distributed/parallel_engine_config.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_engine_config.py#L148">:148</a>（def validate_ep_config）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_engine_config.py#L158">:158</a>（ep_plan 为空时默认 apply_modules=[], dispatcher='eager'）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_engine_config.py#L159">:159</a>（_gradient_divide_factor = ep*efsdp*edp 三者乘积）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_engine_config.py#L162">:162</a>（if apply_efsdp_modules is None 自动派生）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_engine_config.py#L164">:164</a>（for ep_module in apply_modules）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_engine_config.py#L165">:165</a>（if endswith('.experts')）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_engine_config.py#L166">:166</a>（removesuffix('.experts') 把 experts 路径转成其父模块路径）</div>
+      <p>这是个"少写一行"的便利：<code>ep_fsdp_modules</code> 在 yaml 里其实可以不写——只要 <code>ep_modules</code> 以 <code>.experts</code> 结尾，<code>validate_ep_config</code> 会自动把去掉 <code>.experts</code> 后的路径塞进 <code>apply_efsdp_modules</code>。本镜像的 A2/A3/MoE yaml 都<b>显式</b>写了 <code>ep_fsdp_modules</code>（不触发自动派生），但这条派生逻辑说明：若你只想 EP 不想专家再 FSDP，把 <code>ep_fsdp_modules</code> 留空即可——<code>apply_efsdp_modules</code> 默认值是 <code>None</code> 触发派生，派生后仍含 experts 路径……（核实：派生逻辑对"只想 EP 不要 efsdp"的场景需显式传空 list 覆盖，当前派生只处理 None，以源码为准）。<code>_gradient_divide_factor</code>（行 159）是 EP 梯度除数——因为 EP 路由让梯度跨 ep*efsdp*edp 三轴叠加，反向时需把梯度除以三者乘积保持数值正确，这个 factor 后来在 <code>expert_fully_shard_parallel.py:38</code> 的 <code>set_gradient_divide_factor</code> 用到。</p>
+
+      <div class="figcap">parallel_state：建第二张专家 DeviceMesh（edp/efsdp/ep，行 75-80）</div>
+<pre data-lang="py">        # create DP/CP/Ulysses/TP groups
+        mesh_dim_names = ('dp', 'fsdp', 'tp')
+        mesh_shape = (
+            self.fully_shard_parallel_size,
+            self.tensor_parallel_size,
+        )
+        self.data_parallel_size = get_last_mesh_dim(mesh_shape)
+        mesh_shape = (self.data_parallel_size,) + mesh_shape
+        self.add_device_mesh_groups(mesh_dim_names, mesh_shape)
+
+        # create EP_DP/EP groups
+        mesh_dim_names = ('edp', 'efsdp', 'ep')
+        mesh_shape = (self.expert_fully_shard_parallel_size, self.expert_parallel_size,)
+        self.expert_data_parallel_size = get_last_mesh_dim(mesh_shape)
+        mesh_shape = (self.expert_data_parallel_size,) + mesh_shape
+        self.add_device_mesh_groups(mesh_dim_names, mesh_shape)</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_state.py">../mindspeed_llm/fsdp2/distributed/parallel_state.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_state.py#L65">:65</a>（# create DP/CP/Ulysses/TP groups 注释，建共享参数 mesh）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_state.py#L66">:66</a>（mesh_dim_names = ('dp','fsdp','tp')，共享 mesh 三维名）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_state.py#L67">:67</a>（mesh_shape = (fsdp_size, tp_size)）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_state.py#L71">:71</a>（data_parallel_size = get_last_mesh_dim 余项）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_state.py#L73">:73</a>（add_device_mesh_groups 建共享 mesh）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_state.py#L75">:75</a>（# create EP_DP/EP groups 注释，建专家 mesh）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_state.py#L76">:76</a>（mesh_dim_names = ('edp','efsdp','ep')，专家 mesh 三维名）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_state.py#L77">:77</a>（mesh_shape = (efsdp_size, ep_size)）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_state.py#L78">:78</a>（expert_data_parallel_size = get_last_mesh_dim 余项）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_state.py#L80">:80</a>（add_device_mesh_groups 建专家 mesh）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/parallel_state.py#L171">:171</a>（add_device_mesh_groups 内 reduce(a*b) != world_size 则抛——两张 mesh 都须铺满 world_size）</div>
+      <p>这是"2D"的硬出处。两次 <code>add_device_mesh_groups</code>（行 73 与 80）各调一次 <code>init_device_mesh</code>（行 175），各自建出一张 DeviceMesh 存进 <code>device_mesh_map</code>。第一张维度名 <code>dp/fsdp/tp</code>，shape 由 <code>(fsdp_size, tp_size)</code> 加 dp 余项拼成；第二张维度名 <code>edp/efsdp/ep</code>，shape 由 <code>(efsdp_size, ep_size)</code> 加 edp 余项拼成。两张 mesh 的<b>维度名集合完全不重合</b>（{dp,fsdp,tp} vs {edp,efsdp,ep}），所以 <code>get_fsdp_device_mesh()</code> 与 <code>get_ep_device_mesh()</code>（由行 184 的 <code>setattr</code> 动态挂上）取的是不同 mesh 对象、不同子组。dense 场景 <code>ep_size=1, efsdp_size=1</code> → 专家 mesh_shape=(1,1) → edp=world_size，这张 mesh 虽建出来但 ep/efsdp 轴都是单卡、<code>is_ep_enable</code> 返回 False。</p>
+
+      <div class="figcap">engine.apply_ep_modules：两个 &gt;1 guard 是 EP 短路的总闸（行 58-66）</div>
+<pre data-lang="py">    def apply_ep_modules(self):
+        if self.config.expert_parallel_size > 1:
+            self.model = expert_parallelize_modules(
+                self.model, self.parallel_state.get_ep_device_mesh(), self.config.ep_plan
+            )
+        if self.config.expert_fully_shard_parallel_size > 1:
+            self.model = expert_fully_shard_modules(
+                self.model, self.parallel_state.get_efsdp_device_mesh(), self.config.ep_plan
+            )</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/mindspeed_parallel_engine.py">../mindspeed_llm/fsdp2/distributed/mindspeed_parallel_engine.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/mindspeed_parallel_engine.py#L11">:11</a>（from ...expert_parallel import expert_parallelize_modules，导入 EP 主函数）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/mindspeed_parallel_engine.py#L12">:12</a>（from ...expert_fully_shard_parallel import expert_fully_shard_modules，导入专家 FSDP）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/mindspeed_parallel_engine.py#L38">:38</a>（apply_ep_modules() 调用点，位于六步 apply 的第三步、apply_fsdp 之前）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/mindspeed_parallel_engine.py#L48">:48</a>（def apply_ep_modules）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/mindspeed_parallel_engine.py#L59">:59</a>（if expert_parallel_size > 1——EP 总闸，dense ep_size=1 此处假）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/mindspeed_parallel_engine.py#L60">:60</a>（expert_parallelize_modules(model, get_ep_device_mesh(), ep_plan)——EP 落地入口）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/mindspeed_parallel_engine.py#L63">:63</a>（if expert_fully_shard_parallel_size > 1——efsdp 总闸）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/mindspeed_parallel_engine.py#L64">:64</a>（expert_fully_shard_modules(model, get_efsdp_device_mesh(), ep_plan)——专家 FSDP 落地）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/mindspeed_parallel_engine.py#L41">:41</a>（apply_fsdp_modules 最后包——EP 先于 FSDP，故 FSDP 的 ignored_modules 需排除已 EP 的 experts）</div>
+      <p>这就是 EP 短路的<b>总闸</b>。两个 <code>if ... > 1</code> 守卫（行 59、63）是 EP 唯一的开关——dense 的 <code>ep_size=1</code> 让两处都假，<code>expert_parallelize_modules</code> 与 <code>expert_fully_shard_modules</code> 都不调。注意 <code>apply_ep_modules</code> 在六步 apply 里排第三（engine:38），<b>先于</b> <code>apply_fsdp_modules</code>（engine:41）——这个顺序很关键：专家先被 EP 切走，然后 FSDP 再包其余部分；若 FSDP 先包会把 experts 也一并切片，破坏 EP 的整块划分语义。所以 <code>parallel_engine_config.validate_fsdp_config</code> 行 124-125 在 <code>ep_size>1</code> 时把 <code>ep_plan.apply_modules</code> 追加进 <code>fsdp_plan.ignored_modules</code>——让 FSDP 跳过已被 EP 接管的 experts，二者井水不犯河水。dense 时 ep_size=1 这段 ignored 追加也不触发，FSDP 照常全包。</p>
+
+      <div class="sidecap"><b class="llm">专家路径</b> 以下仅在 <code>ep_size&gt;1</code> 时执行（dense 短路）；源码以 <code>expert_parallel.py</code> + <code>dispatcher.py</code> 为准</div>
+      <div class="figcap">expert_parallel.expert_parallelize_modules：通配匹配 experts + apply_expert_parallel_forward（行 77-95）</div>
+<pre data-lang="py">def expert_parallelize_modules(modules: torch.nn.Module, ep_mesh: DeviceMesh, plan: EPPlanConfig):
+    ep_modules = get_ep_modules(modules, plan)
+    for module in ep_modules:
+        apply_expert_parallel_forward(module, ep_mesh, plan)
+    return modules
+
+
+def get_ep_modules(modules: torch.nn.Module, plan: EPPlanConfig):
+    ep_modules = []
+    for plan_name in plan.apply_modules:
+        for name, module in modules.named_modules():
+            if module_name_match(plan_name, name):
+                print_rank(logger.debug, f'[Expert Parallel]: Apply ep to module <{name}>')
+                ep_modules.append(module)
+    if len(ep_modules) == 0:
+        raise RuntimeError(f'[Expert Parallel] No module named {plan} or not be ModuleList')
+    return ep_modules</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py">../mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L77">:77</a>（def expert_parallelize_modules，EP 主入口）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L78">:78</a>（get_ep_modules 取匹配的 experts 列表）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L80">:80</a>（for module in ep_modules 逐个 apply）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L86">:86</a>（def get_ep_modules）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L88">:88</a>（for plan_name in plan.apply_modules，遍历 ep_modules 路径模式）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L89">:89</a>（for name, module in modules.named_modules() 逐模块取路径）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L90">:90</a>（if module_name_match(plan_name, name)——通配匹配，{*} 在此展开）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L93">:93</a>（if len==0 raise RuntimeError——dense 模型若误开 ep_size&gt;1 会在此抛 No module named）</div>
+      <p>结构与 EP08 的 <code>get_efsdp_modules</code> 同构——都是"遍历 apply_modules 路径模式 → 对 named_modules 做 <code>module_name_match</code> 通配匹配 → 收进列表"。<code>module_name_match</code> 同样来自外部 <code>mindspeed.fsdp.utils.str_match</code>（expert_parallel.py:12 导入），<code>{*}</code> 的展开就发生在这个判定里（EP08 已述，此处复用）。关键差异：<code>get_ep_modules</code> 行 93 的 <code>raise</code> 是 dense 模型的"最后一道防线"——若用户误给稠密 Qwen3-8B 传 <code>ep_size&gt;1</code>，<code>model.layers.{*}.mlp.experts</code> 在 <code>Qwen3ForCausalLM</code>（无 experts 子模块）里匹配不到任何模块，列表为空，这里直接抛错，不会静默跑错。这是<b>设计上的安全阀</b>：ep_size 与模型结构必须匹配，否则硬失败。</p>
+
+      <div class="figcap">apply_common_experts_forward：算 local expert id + 切权重 + 换 forward + 挂梯度除数 hook（行 40-68）</div>
+<pre data-lang="py">def apply_common_experts_forward(module: torch.nn.Module, ep_mesh: DeviceMesh, plan: EPPlanConfig):
+    ep_group = ep_mesh.get_group()
+    ep_rank = torch.distributed.get_rank(ep_group)
+    ep_size = torch.distributed.get_world_size(ep_group)
+
+    module.num_global_experts = len(module) if not hasattr(module, 'num_experts') else module.num_experts
+    if module.num_global_experts % ep_size != 0:
+        raise AssertionError(f'Number of experts({module.num_global_experts}) is not divisible by ep size({ep_size}).')
+    module.num_local_experts = module.num_global_experts // ep_size
+    local_expert_indices_offset = ep_rank * module.num_local_experts
+    module.local_expert_indices = [local_expert_indices_offset + i for i in range(module.num_local_experts)]
+
+    # distribute experts weights
+    distribute_experts_module(module, ep_mesh)
+
+    # replace forward with ep forward
+    experts_forward_fn = get_dispatcher_fn(plan.dispatcher, ep_group)
+    module.forward = types.MethodType(experts_forward_fn, module)
+
+    # apply ep parameter grad division, if efsdp is enabled, the hook will be overridden
+    apply_grad_division_hook(module, ep_size)</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py">../mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L40">:40</a>（def apply_common_experts_forward，EP 通用前向装配）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L46">:46</a>（num_global_experts = len(module)，从 ModuleList 长度取全局 expert 数）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L47">:47</a>（if num_global_experts % ep_size != 0 抛——E 必须被 ep 整除）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L49">:49</a>（num_local_experts = num_global // ep_size，每卡持多少 expert）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L50">:50</a>（local_expert_indices_offset = ep_rank * num_local）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L51">:51</a>（local_expert_indices = 本卡负责的 expert 下标列表）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L60">:60</a>（distribute_experts_module 切权重到 ep_mesh）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L63">:63</a>（get_dispatcher_fn(plan.dispatcher, ep_group) 取前向函数）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L64">:64</a>（module.forward = MethodType(experts_forward_fn, module)——原位替换前向）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L67">:67</a>（apply_grad_division_hook 挂梯度除数 hook，efsdp 开启时被覆盖）</div>
+      <p>这是 EP 的核心装配，四个动作一气呵成：<b>① 算 local expert id</b>（行 46-51）——<code>num_global_experts</code> 取自 ModuleList 长度，<code>num_local_experts</code> = 全局数 / ep_size，每卡的 <code>local_expert_indices</code> 是它负责的 expert 下标区间（rank*k 到 rank*k+k）。<b>② 切权重</b>（行 60）<code>distribute_experts_module</code> 调 <code>distribute_module</code> + <code>distribute_expert_weight</code>（行 111-114）把每个 expert 的参数 <code>distribute_tensor(param, ep_mesh, [Shard(0)])</code>——按 dim0 切，每卡持 E/ep_size 个 expert 的<b>整块</b>权重（不是参数片，是整个 expert 的完整权重）。<b>③ 换 forward</b>（行 63-64）<code>get_dispatcher_fn('eager', ep_group)</code> 取 eager 三段式前向函数、<code>types.MethodType</code> 原位绑到 module——从此这个 experts 模块的前向不再是稠密 <code>Qwen3MoeExperts.forward</code>（qwen3_moe.py:187），而是 all-to-all 三段式。<b>④ 挂梯度除数 hook</b>（行 67）<code>apply_grad_division_hook</code> 给每个参数的反向梯度乘 <code>1/ep_size</code>（行 149），抵消 EP 路由导致的梯度跨卡叠加——若 efsdp 也开启，这个 hook 会被 <code>set_gradient_divide_factor</code> 覆盖成更精细的 factor。</p>
+
+      <div class="figcap">distribute_expert_weight：专家权重按 Shard(0) 整块划分到 ep_mesh（行 111-126）</div>
+<pre data-lang="py">def distribute_expert_weight(module_name, module, ep_mesh):
+    for name, param in module.named_parameters(recurse=False):
+        dist_param = torch.nn.Parameter(distribute_tensor(param, ep_mesh, [Shard(0)]))
+        module.register_parameter(name, dist_param)
+
+    for name, children_module in module.named_children():
+        distribute_expert_weight(name, children_module, ep_mesh)
+
+
+def distribute_experts_module(module: torch.nn.Module, ep_mesh: DeviceMesh):
+    return distribute_module(
+        module=module,
+        device_mesh=ep_mesh,
+        partition_fn=distribute_expert_weight,
+    )</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py">../mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L111">:111</a>（def distribute_expert_weight）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L112">:112</a>（for name, param in named_parameters(recurse=False) 逐参数）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L113">:113</a>（dist_param = Parameter(distribute_tensor(param, ep_mesh, [Shard(0)]))——按 dim0 切，整 expert 划分）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L114">:114</a>（register_parameter 原位换成分片参数）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L116">:116</a>（for children_module 递归子模块）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L120">:120</a>（def distribute_experts_module）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L121">:121</a>（return distribute_module(...)——PyTorch 原生 distribute_module 委托）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py#L124">:124</a>（partition_fn=distribute_expert_weight，切分回调）</div>
+      <p>这里要紧盯 <code>Shard(0)</code>（行 113）——它和 FSDP 的 <code>fully_shard</code> 切法<b>形似神不似</b>。<code>fully_shard</code> 也是 <code>Shard</code>，但 FSDP 切的是<b>单个参数张量本身</b>（一个大矩阵切成 8 片 DTensor，前向 all-gather 拼回）；这里 <code>distribute_tensor(param, ep_mesh, [Shard(0)])</code> 切的是<b>把 E 个 expert 堆在 dim0 上的合并权重</b>（见 qwen3_moe.py:180 <code>gate_up_proj</code> shape 是 <code>(num_experts*hidden_dim, 2*intermediate)</code>，dim0 就是 expert 维），<code>Shard(0)</code> 按 expert 维切——每卡拿到 <code>E/ep_size</code> 个 expert 的<b>完整</b>权重块。所以前向时每卡只算自己那几个 expert，token 靠 all-to-all 路由过来——<b>不拼回参数，拼的是 token</b>。这是 EP 与 FSDP 在数学上的根本分野：FSDP 切参数拼参数，EP 切 expert 拼 token。</p>
+
+      <div class="figcap">dispatcher.get_experts_forward_fn + dispatch_mlp_combine：eager 三段式主轴（行 10-51）</div>
+<pre data-lang="py">def get_experts_forward_fn(ep_group, fused):
+    def experts_forward(self, hidden_states: torch.Tensor, top_k_index: torch.Tensor, top_k_weights: torch.Tensor):
+        hidden_states_shape = hidden_states.shape
+        hidden_states = hidden_states.view(-1, hidden_states_shape[-1])
+        weights = (self.gate_up_proj.to_local(), self.down_proj.to_local())
+        num_global_experts = self.num_global_experts
+        expert_ids_per_ep_rank = self.expert_ids_per_ep_rank
+        # ...
+        hidden_states = dispatch_mlp_combine(ep_group, fused, hidden_states, top_k_index, real_top_k_weights,
+                                             weights, act_fn, num_global_experts, expert_ids_per_ep_rank, expert_module=self)
+        return hidden_states.view(*hidden_states_shape)
+    return experts_forward
+
+
+def dispatch_mlp_combine(ep_group, fused, hidden_states, top_k_index, top_k_weights, weights, act_fn,
+                         num_global_experts, expert_ids_per_ep_rank, expert_module=None):
+    # MoE preprocess to get local/global indices and AllToAll split sizes
+    permute_indices, split_sizes = dispatch_preprocess(ep_group, top_k_index, num_global_experts, expert_ids_per_ep_rank)
+    # AllToAll dispatch --> MLP computation --> AllToAll combine
+    hidden_states, unpermute_indices = alltoall_dispatch(ep_group, hidden_states, top_k_index, permute_indices, split_sizes)
+    # ... experts_computation (eager_grouped_matmul or ep_forward) ...
+    hidden_states = alltoall_combine(ep_group, hidden_states, top_k_weights, unpermute_indices, split_sizes)
+    return hidden_states</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py">../mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L10">:10</a>（def get_experts_forward_fn，eager/fused 前向工厂）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L11">:11</a>（def experts_forward 闭包，被 MethodType 绑定成 module.forward）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L15">:15</a>（weights = (gate_up_proj.to_local(), down_proj.to_local())——取本地 expert 权重片）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L32">:32</a>（def dispatch_mlp_combine，三段式主轴）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L37">:37</a>（permute_indices, split_sizes = dispatch_preprocess 预处理）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L40">:40</a>（alltoall_dispatch 派发）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L43">:43</a>（if hasattr ep_forward 走 qwen3_moe.py:201 的 ep_forward，否则行 47 experts_computation）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L50">:50</a>（alltoall_combine 收回）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L6">:6</a>（from ...dist_ops import all_to_all, gather_along_first_dim_expert_parallel，all-to-all 原语来自 dist_ops）</div>
+      <p>这是 eager 三段式的总装。<code>get_experts_forward_fn</code>（行 10）返回一个闭包 <code>experts_forward</code>，被 <code>apply_common_experts_forward</code> 行 64 的 <code>MethodType</code> 绑成新 forward。闭包里 <code>self.gate_up_proj.to_local()</code>（行 15）很关键——专家权重已被 <code>distribute_tensor(Shard(0))</code> 切成 DTensor，<code>to_local()</code> 取本卡那 E/ep_size 个 expert 的本地块。然后调 <code>dispatch_mlp_combine</code>（行 32）走三段式：preprocess 算 split → all-to-all 派发 + grouped_matmul 算 → all-to-all 收回。注意行 43 的 <code>hasattr(ep_forward)</code> 分支——<code>Qwen3MoeExperts</code> 定义了 <code>ep_forward</code>（qwen3_moe.py:201），故实际走的是 NPU <code>Ops.gmm</code> 那条（行 207-211），而非行 47 的纯 <code>eager_grouped_matmul</code>。<code>all_to_all</code> 原语（行 6 导入自 <code>dist_ops</code>）是 EP 通信的底座，与 FSDP 的 all-gather/reduce_scatter 完全不同。</p>
+
+      <div class="figcap">dispatcher.dispatch_preprocess + alltoall_dispatch + alltoall_combine：两次 all-to-all 的细节（行 54-112）</div>
+<pre data-lang="py">def dispatch_preprocess(ep_group, top_k_index, num_global_experts, expert_ids_per_ep_rank):
+    ep_size = torch.distributed.get_world_size(ep_group)
+    ep_rank = torch.distributed.get_rank(ep_group)
+    num_local_experts = num_global_experts // ep_size
+    # [B*S, K] --> [E]
+    num_local_tokens_per_expert = torch.bincount(top_k_index.view(-1), minlength=num_global_experts)
+    # [E] --> [EP*E]
+    num_global_tokens_per_expert, _ = gather_along_first_dim_expert_parallel(num_local_tokens_per_expert, ep_group)
+    # ... derive input_split / output_splits ...
+    return (num_tokens_per_local_expert, global_indices), (input_split, output_splits)
+
+
+def alltoall_dispatch(ep_group, hidden_states, top_k_index, indices, split_sizes):
+    local_indices, global_indices = indices
+    input_split, output_splits = split_sizes
+    hidden_states, unpermute_indices1 = permute(hidden_states, top_k_index)
+    torch.accelerator.current_stream().synchronize()
+    hidden_states = all_to_all(ep_group, hidden_states, output_splits.numpy(), input_split.numpy())
+    hidden_states, unpermute_indices2 = permute(hidden_states, global_indices)
+    return hidden_states, (unpermute_indices1, unpermute_indices2)
+
+
+def alltoall_combine(ep_group, hidden_states, top_k_weights, unpermute_indices, split_sizes):
+    unpermute_indices1, unpermute_indices2 = unpermute_indices
+    input_split, output_splits = split_sizes
+    hidden_states = unpermute(hidden_states, unpermute_indices2)
+    hidden_states = all_to_all(ep_group, hidden_states, input_split.numpy(), output_splits.numpy())
+    hidden_states = unpermute(hidden_states, unpermute_indices1, top_k_weights)
+    return hidden_states</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py">../mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L54">:54</a>（def dispatch_preprocess）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L55">:55</a>（ep_size = get_world_size(ep_group)）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L62">:62</a>（torch.bincount 数每 expert token 数，[B*S,K]→[E]）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L64">:64</a>（gather_along_first_dim_expert_parallel 跨 EP 组汇总，[E]→[EP*E]）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L71">:71</a>（input_split = 每卡要发出的 token 数，[EP]）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L74">:74</a>（output_splits = 每卡要收的 token 数，[EP]）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L80">:80</a>（def alltoall_dispatch）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L84">:84</a>（permute 按 top_k_index 重排，来自 utils.py）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L86">:86</a>（all_to_all 派发——第一次 all-to-all）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L87">:87</a>（permute 按 global_indices 重排到本卡 local expert）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L106">:106</a>（def alltoall_combine）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L109">:109</a>（unpermute 还原 expert 序）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L110">:110</a>（all_to_all 收回——第二次 all-to-all）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py#L111">:111</a>（unpermute 还原 token 序 + 乘 top_k_weights 路由权重）</div>
+      <p>这是两次 all-to-all 的全部细节。<b>preprocess</b>（行 54-77）核心是 <code>bincount</code>（行 62）数每卡本地各 expert 收到多少 token，<code>gather_along_first_dim_expert_parallel</code>（行 64）跨 EP 组汇总成全局分布，再 <code>reshape [EP, local_E]</code> 算出每卡 input_split（发）和 output_splits（收）。<b>dispatch</b>（行 80-89）两次 <code>permute</code>（行 84 按 top_k_index 重排、行 87 按 global_indices 重排到本卡 local expert）夹一次 <code>all_to_all</code>（行 86）。<b>combine</b>（行 106-112）两次 <code>unpermute</code>（行 109、111）夹一次 <code>all_to_all</code>（行 110），最后 <code>unpermute</code> 带上 <code>top_k_weights</code> 把 k 个 expert 的输出按路由权重加权求和。<code>permute</code>/<code>unpermute</code> 实现在 <code>utils.py</code>（eager 走 <code>argsort</code>+<code>index_select</code>，fused 抛 NotImplementedError）。<code>torch.accelerator.current_stream().synchronize()</code>（行 85）在 all-to-all 前同步流——NPU 上 all-to-all 对流同步敏感（核实：HCCL all-to-all 的流同步语义以 dist_ops.all_to_all 实现为准，本镜像未含 dist_ops.py 源码）。</p>
+
+      <div class="sidecap"><b class="core">旁证</b> EP08 已点：本仓唯一可见 <code>fully_shard</code> 原语调用在专家 FSDP 路径（efsdp），此处补全其与 EP 的二维关系</div>
+      <div class="figcap">expert_fully_shard_parallel：专家参数在 EP 之后再上 FSDP 切片（行 28-43）</div>
+<pre data-lang="py">import torch
+from torch.distributed.fsdp import fully_shard, MixedPrecisionPolicy
+from torch.distributed.tensor import Shard
+from mindspeed_llm.fsdp2.distributed.parallel_engine_config import EPPlanConfig
+from mindspeed.fsdp.utils.str_match import module_name_match
+
+def expert_fully_shard_modules(model: torch.nn.Module, efsdp_mesh, plan: EPPlanConfig) -> torch.nn.Module:
+    efsdp_modules = get_efsdp_modules(model, plan)
+    config = {'mesh': efsdp_mesh,
+              'mp_policy': MixedPrecisionPolicy(param_dtype=torch.bfloat16, reduce_dtype=torch.float32),
+              'shard_placement_fn': get_shard_placement_fn()}
+
+    for experts in efsdp_modules:
+        if isinstance(experts, torch.nn.ModuleList):
+            for expert in experts:
+                fully_shard(expert, **config)
+                set_gradient_divide_factor(expert, plan._gradient_divide_factor)
+        else:
+            fully_shard(experts, **config)
+            set_gradient_divide_factor(experts, plan._gradient_divide_factor)
+    return model</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_fully_shard_parallel.py">../mindspeed_llm/fsdp2/distributed/expert_parallel/expert_fully_shard_parallel.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_fully_shard_parallel.py#L4">:4</a>（from torch.distributed.fsdp import fully_shard——本仓唯一可见 fully_shard 原语导入，EP08 已点）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_fully_shard_parallel.py#L5">:5</a>（from torch.distributed.tensor import Shard）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_fully_shard_parallel.py#L7">:7</a>（from ...parallel_engine_config import EPPlanConfig）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_fully_shard_parallel.py#L28">:28</a>（def expert_fully_shard_modules，专家 FSDP 入口）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_fully_shard_parallel.py#L30">:30</a>（config dict：mesh=efsdp_mesh，与 EP 的 ep_mesh 是不同 mesh）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_fully_shard_parallel.py#L34">:34</a>（for experts in efsdp_modules）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_fully_shard_parallel.py#L37">:37</a>（fully_shard(expert, **config)——专家参数再切，挂在 efsdp 轴）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_fully_shard_parallel.py#L38">:38</a>（set_gradient_divide_factor 覆盖 EP 的 grad division hook，用 ep*efsdp*edp 三者乘积 factor）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/expert_parallel/expert_fully_shard_parallel.py#L46">:46</a>（def get_efsdp_modules，通配匹配 ep_fsdp_modules 路径）</div>
+      <p>这段把"二维"的最后一维补全：专家参数在被 EP <code>distribute_tensor(Shard(0))</code> 按 expert 整块划分之后，<b>还可以</b>再被 <code>fully_shard</code> 沿 efsdp 轴切成参数片——即同一份专家权重，先按 expert 维划分（ep 轴），再按参数维切片（efsdp 轴），两个维度正交。<code>config['mesh']</code>（行 30）传的是 <code>efsdp_mesh</code>（engine 行 65 的 <code>get_efsdp_device_mesh()</code>），与 EP 用的 <code>ep_mesh</code>（engine 行 61）是<b>同一张专家 mesh 的不同轴</b>——这张 mesh 维度名 <code>('edp','efsdp','ep')</code>（parallel_state.py:76），<code>get_ep_device_mesh</code> 取 ep 轴子组、<code>get_efsdp_device_mesh</code> 取 efsdp 轴子组。<code>set_gradient_divide_factor</code>（行 38）用 <code>plan._gradient_divide_factor</code>（即 validate_ep_config 行 159 算的 ep*efsdp*edp 乘积）覆盖掉 EP 阶段挂的 <code>1/ep_size</code> 简单除数——因为二维都开后梯度跨 ep 和 efsdp 两轴叠加，必须用完整 factor。dense 时 efsdp_size=1，此函数不调（engine 行 63 guard），专家参数不二次切片。</p>
+
+      <div class="figcap">qwen3_moe 建模：MoE 专家模块与 ep_size&gt;1 分支（vs 稠密 qwen3 建模无 experts）</div>
+<pre data-lang="py">class Qwen3MoeExperts(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.num_experts = config.num_experts
+        self.hidden_dim = config.hidden_size
+        self.intermediate_size = config.moe_intermediate_size
+        self.gate_up_proj = torch.nn.Parameter(
+            torch.empty(self.num_experts * self.hidden_dim, 2 * self.intermediate_size)
+        )
+        self.down_proj = torch.nn.Parameter(torch.empty(self.num_experts * self.intermediate_size, self.hidden_dim))
+
+    def ep_forward(self, hidden_states, tokens_per_expert):
+        gate_up_proj = self.gate_up_proj.to_local().to(torch.bfloat16)
+        down_proj = self.down_proj.to_local().to(torch.bfloat16)
+        gate_up_proj = gate_up_proj.view(self.num_local_experts, self.hidden_dim, -1)
+        # ... Ops.gmm grouped matmul ...
+
+class Qwen3MoeSparseFusedMoeBlock(nn.Module):
+    def forward(self, hidden_states):
+        router_logits = self.gate(hidden_states)
+        routing_weights, selected_experts = torch.topk(routing_weights, self.top_k, dim=-1)
+        args = get_args()
+        if getattr(args, 'ep_size') > 1:
+            final_hidden_states = self.experts(hidden_states, selected_experts, routing_weights)
+        else:
+            final_hidden_states = self.experts(hidden_states, routing_weights=routing_weights, selected_experts=selected_experts)</pre>
+      <div class="filelink">见 <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py">../mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py</a>：<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L174">:174</a>（class Qwen3MoeExperts——MoE 专家模块，dense 无此类）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L177">:177</a>（self.num_experts = config.num_experts）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L180">:180</a>（gate_up_proj shape=(num_experts*hidden_dim, 2*intermediate)，dim0 是 expert 维，Shard(0) 即按 expert 切）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L184">:184</a>（down_proj shape=(num_experts*intermediate, hidden_dim)）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L201">:201</a>（def ep_forward，EP 前向，被 dispatcher.py:43 hasattr 分支调用）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L204">:204</a>（gate_up_proj.view(num_local_experts, hidden_dim, -1)——本卡只 view 自己那几个 expert）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L223">:223</a>（class Qwen3MoeSparseFusedMoeBlock，含 gate+experts）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L231">:231</a>（self.gate = nn.Linear(hidden, num_experts)，路由器，共享参数走 fsdp 轴）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L233">:233</a>（self.experts = Qwen3MoeExperts(config)）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L243">:243</a>（torch.topk 选 top-k expert）、<a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py#L250">:250</a>（if ep_size > 1 走 EP 路由前向，else 行 253 走稠密式全部 expert 算）</div>
+      <p>这是 MoE 与 dense 在<b>建模层</b>的分野，与 EP 在<b>并行层</b>的分野呼应。<code>Qwen3MoeExperts</code>（行 174）是 dense <code>Qwen3ForCausalLM</code>（qwen3.py:21，无此类）所没有的。<code>gate_up_proj</code>（行 180）的 shape 把 <code>num_experts</code> 乘在 dim0——这正是 <code>distribute_tensor(Shard(0))</code> 能按 expert 划分的原因：dim0 就是 expert 维。<code>ep_forward</code>（行 201）是 EP 专用的前向，<code>view(num_local_experts, ...)</code>（行 204）只取本卡那几个 expert。<code>Qwen3MoeSparseFusedMoeBlock.forward</code> 行 250 的 <code>if ep_size > 1</code> 是<b>建模层</b>的 EP 开关——与 engine 行 59 的<b>并行层</b>开关是两道独立的闸：并行层决定"专家参数怎么切/前向函数怎么换"，建模层决定"前向里调 experts 的哪个签名"。dense Qwen3-8B 用的是 <code>Qwen3ForCausalLM</code>，根本没有 <code>Qwen3MoeSparseFusedMoeBlock</code>，所以<b>建模层根本没有 ep_size&gt;1 这个分支可言</b>——又一道安全阀。<code>gate</code>（行 231，路由器）是<b>共享参数</b>（每个 token 都要走），走 fsdp 轴而非 ep 轴——二维分工在建模层就有体现：gate 与 experts 分属不同 mesh。</p>
+
+      <div class="gnpu">
+        <div class="g"><h4>GPU / 已知（一维 DDP/FSDP）</h4>
+          <div class="row"><span class="k">并行维度</span><span>单维：fsdp 轴一刀切参数</span></div>
+          <div class="row"><span class="k">Mesh</span><span>一张 DeviceMesh（dp/fsdp/tp）</span></div>
+          <div class="row"><span class="k">切法</span><span>fully_shard：参数本身切片</span></div>
+          <div class="row"><span class="k">通信</span><span>all-gather 拼 / reduce_scatter 散（NCCL）</span></div>
+          <div class="row"><span class="k">专家</span><span>稠密无 expert，ep_size 概念不适用</span></div>
+          <div class="row"><span class="k">路由</span><span>无 token 路由，所有参数全用</span></div>
+        </div>
+        <div class="n"><h4>NPU / 本项目（二维 FSDP×EP）</h4>
+          <div class="row"><span class="k">并行维度</span><span>二维：fsdp 轴切共享参数 + ep 轴切 expert</span></div>
+          <div class="row"><span class="k">Mesh</span><span>两张 DeviceMesh（dp/fsdp/tp 与 edp/efsdp/ep）共享物理 rank</span></div>
+          <div class="row"><span class="k">切法</span><span>共享 fully_shard 切片；expert distribute_tensor(Shard(0)) 整块划分</span></div>
+          <div class="row"><span class="k">通信</span><span>专家前向两次 all-to-all（HCCL）：dispatch + combine</span></div>
+          <div class="row"><span class="k">专家</span><span>MoE 才有；dense ep_size=1 让 EP 轴塌缩、整路径短路</span></div>
+          <div class="row"><span class="k">路由</span><span>top-k 路由 + all-to-all 把 token 派到 expert 所在卡</span></div>
+        </div>
+      </div>
+
+      <div class="sum">
+        <b>小结</b>　心智模型：EP 是<b>"对同一组卡建两张不同视角的 DeviceMesh，按参数类别分挂"</b>——共享参数（attention/embed/norm/gate）挂 fsdp 轴被切片、专家参数挂 ep 轴被整块划分，两张 mesh 维度名不重合（<code>('dp','fsdp','tp')</code> vs <code>('edp','efsdp','ep')</code>）但底层物理 rank 重合。专家前向是 all-to-all 三段式（preprocess→dispatch+compute→combine），通信原语是两次 all-to-all 而非 FSDP 的 all-gather/reduce_scatter——EP 切的是"不同 expert"不是"同一参数"。稠密 Qwen3-8B 无 expert，<code>ep_size=1</code> 让 engine 行 59/63 两个 guard 短路、专家 mesh 退化为单卡、整条 EP 代码路径连 <code>expert_parallelize_modules</code> 都不调——这不是限制而是语义正确，强行开 <code>ep_size&gt;1</code> 会在 <code>get_ep_modules</code> 行 93 因匹配不到 experts 抛错。
+        <div class="pit">常见误区：<b>① 8B 稠密 → ep_size=1，无需调 EP</b>——这不是"没开 EP"而是"不该开 EP"：稠密模型无 <code>mlp.experts</code> 子模块，<code>ep_modules: model.layers.{*}.mlp.experts</code> 匹配落空，<code>ep_size&gt;1</code> 会直接 <code>raise RuntimeError('No module named')</code>（expert_parallel.py:93）。<b>② 以为 dense 的 yaml 写了 ep_modules 就是配了 EP</b>——不是，A2 yaml 行 18-22 与 MoE 逐字相同，但 CLI <code>--parallel.ep_size 1</code> 让 <code>expert_parallel_size=1</code>，engine 行 59 guard 短路；ep_modules 是模板默认值，开关在 ep_size。<b>③ 以为"2D"是单张二维 mesh</b>——是两张独立 mesh（行 66 与 76 两次 <code>init_device_mesh</code>），维度名集合不重合，<code>get_fsdp_device_mesh</code> 与 <code>get_ep_device_mesh</code> 取不同对象。<b>④ 以为 EP 也用 all-gather 拼回参数</b>——不，EP 用 all-to-all 拼 token（dispatcher.py:86/110），参数切完不拼回，每卡只算自己那 E/ep_size 个 expert。<b>⑤ 以为 efsdp 与 ep 是同一回事</b>——ep 轴按 expert 整块划分（<code>distribute_tensor(Shard(0))</code>），efsdp 轴对切完的专家权重再按参数切片（<code>fully_shard</code>），二者正交，dense 时 efsdp_size=1 也关。<b>⑥ 以为随附 MoE 30B 示例默认开了 EP</b>——核实：pretrain_qwen3_30b_4k_fsdp2_A3.sh:28 也传 <code>ep_size 1</code>，出厂态走 fsdp_size=16 单轴，二维分工是代码能力非默认行为，要真开需改 ep_size&gt;1 且满足 <code>ep*efsdp*edp==world_size</code>（以源码与真实联调为准）。</div>
+      </div>
+
+      <div class="filelist"><b>本篇涉及文件</b><br>
+mindspeed_llm/fsdp2/distributed/expert_parallel/expert_parallel.py（expert_parallelize_modules / get_ep_modules / apply_common_experts_forward / distribute_expert_weight / get_dispatcher_fn）<br>
+mindspeed_llm/fsdp2/distributed/expert_parallel/dispatcher.py（get_experts_forward_fn / dispatch_mlp_combine / dispatch_preprocess / alltoall_dispatch / alltoall_combine）<br>
+mindspeed_llm/fsdp2/distributed/expert_parallel/expert_fully_shard_parallel.py（expert_fully_shard_modules：本仓唯一可见 fully_shard 原语 + efsdp 二维）<br>
+mindspeed_llm/fsdp2/distributed/expert_parallel/utils.py（permute/unpermute：eager 走 argsort+index_select，fused NotImplementedError）<br>
+mindspeed_llm/fsdp2/distributed/parallel_state.py（两张 DeviceMesh：dp/fsdp/tp 行 66 与 edp/efsdp/ep 行 76）<br>
+mindspeed_llm/fsdp2/distributed/parallel_engine_config.py（EPPlanConfig 行 48 / validate_ep 行 148 / validate_fsdp 的 ignored_modules 追加 行 124）<br>
+mindspeed_llm/fsdp2/distributed/mindspeed_parallel_engine.py（apply_ep_modules 的 &gt;1 guard 行 59/63）<br>
+mindspeed_llm/fsdp2/models/model_factory.py（EPPlanConfig 装配 行 181 / config 组装 行 216-219）<br>
+mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py（Qwen3MoeExperts 行 174 / ep_forward 行 201 / ep_size&gt;1 分支 行 250）<br>
+mindspeed_llm/fsdp2/models/qwen3/qwen3.py（Qwen3ForCausalLM dense，无 experts——对照）<br>
+examples/fsdp2/qwen3_moe/pretrain_qwen3_30b_4k_fsdp2_A3.yaml（ep_modules/ep_fsdp_modules/ep_dispatcher 行 21-25）<br>
+examples/fsdp2/qwen3_moe/pretrain_qwen3_30b_4k_fsdp2_A3.sh（fsdp_size 16 / ep_size 1 行 27-29）<br>
+examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml（dense 也有 ep_* 行 18-22，逐字同 MoE）<br>
+examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.sh（dense ep_size 1 / ep_fsdp_size 1 行 24-25）</div>
+    </main>
+  </div>
+</div>
+<script>
+// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre[data-lang]').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];if(!rules)return;
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      return '<span class="ln">'+(i+1)+'</span>'+tokLine(l,rules);
+    }).join('\n');
+  });
+})();
+</script>
+</body>
+</html>

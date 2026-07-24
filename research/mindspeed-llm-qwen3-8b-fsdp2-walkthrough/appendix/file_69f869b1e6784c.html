@@ -1,0 +1,355 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/checkpoint/conversion_mappings.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/checkpoint/conversion_mappings.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_9f726ca891ba1c.html">◀ checkpoint_manager.py</a> <a href="file_c2c662b9358535.html">merge_dcp_to_hf.py ▶</a></nav></div>
+<div class="wrap">
+<h1>conversion_mappings.py</h1><p class="goal">mindspeed_llm/fsdp2/checkpoint/conversion_mappings.py · 8550B · 254 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L25" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class ConversionOps</a><a href="#L34" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class FlattenExperts(ConversionOps)</a><a href="#L45" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, num_experts: Optional[int] </a><a href="#L49" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def convert(self, input_dict, source_patterns,</a><a href="#L58" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_target_pattern(input_dict, source_pat</a><a href="#L64" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def reverse_op(self)</a><a href="#L67" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __repr__(self)</a><a href="#L71" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class UnflattenExperts(ConversionOps)</a><a href="#L81" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, num_experts: Optional[int] </a><a href="#L85" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def convert(self, input_dict, source_patterns,</a><a href="#L104" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_target_pattern(input_dict, source_pat</a><a href="#L110" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def reverse_op(self)</a><a href="#L113" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __repr__(self)</a><a href="#L122" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class MappingRule(ABC)</a><a href="#L134" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def condition(self, model_type: str) -&gt; boo</a><a href="#L138" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply(self, conversions: list, model_type:</a><a href="#L142" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class MappingRuleRegistry</a><a href="#L153" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def register(cls, rule: MappingRule) -&gt; Non</a><a href="#L159" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def unregister(cls, name: str) -&gt; Optional[</a><a href="#L166" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply_all(cls, conversions: list, model_ty</a><a href="#L175" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def list_rules(cls) -&gt; List[str]</a><a href="#L179" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def clear(cls) -&gt; None</a><a href="#L199" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class GroupedGemmFlattenRule(MappingRule)</a><a href="#L219" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def condition(self, model_type: str) -&gt; boo</a><a href="#L222" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply(self, conversions: list, model_type:</a><a href="#L245" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def apply_custom_mappings(conversions: list, m</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep17.html">EP17</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p>Copyright (c) 2026, Huawei Technologies Co., Ltd. All rights reserved.</p><p class="mut">（自动提取自首行注释）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1"># Copyright (c) 2026, Huawei Technologies Co., Ltd. All rights reserved.
+&quot;&quot;&quot;
+Custom conversion mappings for MindSpeed-LLM.
+
+Defines model-specific conversion rules that extend transformers&#x27; native
+conversion_mapping. New rules can be added by subclassing ``MappingRule``
+and registering via ``MappingRuleRegistry.register()``.
+&quot;&quot;&quot;
+
+from abc import ABC, abstractmethod
+from importlib.metadata import version
+from typing import Optional, List
+
+import torch
+
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+from mindspeed_llm.fsdp2.utils.global_vars import get_args
+
+logger = get_logger(__name__)
+
+if version(&quot;transformers&quot;) &gt;= &quot;5.0.0&quot;:
+    from transformers.core_model_loading import ConversionOps
+else:
+
+    class ConversionOps:
+        pass
+
+
+# ==============================================================================
+# Conversion Ops
+# ==============================================================================
+
+
+class FlattenExperts(ConversionOps):
+    &quot;&quot;&quot;
+    Flatten a 3-D stacked-expert tensor into the 2-D merged layout expected
+    by MindSpeed-LLM&#x27;s fused expert modules.
+
+    Forward:  ``(N, d1, d2)  →  reshape  →  (N*d1, d2)``
+    Reverse:  ``(N*d1, d2)  →  reshape  →  (N, d1, d2)``  (requires *num_experts*)
+
+    Supports EP (Expert Parallel) sharding: works with both global and local expert counts.
+    &quot;&quot;&quot;
+
+    def __init__(self, num_experts: Optional[int] = None):
+        self.num_experts = num_experts
+
+    @torch.no_grad()
+    def convert(self, input_dict, source_patterns, target_patterns, **kwargs):
+        target_pattern = self._get_target_pattern(input_dict, source_patterns, target_patterns)
+        tensors = next(iter(input_dict.values()))
+        t = tensors[0] if isinstance(tensors, list) else tensors
+        if t.ndim == 3:
+            t = t.contiguous().view(-1, t.shape[2])
+        return {target_pattern: t}
+
+    @staticmethod
+    def _get_target_pattern(input_dict, source_patterns, target_patterns):
+        if len(target_patterns) &gt; 1:
+            return next(iter(input_dict.keys()))
+        return target_patterns[0]
+
+    @property
+    def reverse_op(self):
+        return UnflattenExperts(num_experts=self.num_experts)
+
+    def __repr__(self):
+        return &quot;FlattenExperts()&quot;
+
+
+class UnflattenExperts(ConversionOps):
+    &quot;&quot;&quot;
+    Reverse of :class:`FlattenExperts`.  Reshapes a 2-D merged tensor back to 3-D.
+
+    ``(N*d1, d2)  →  reshape  →  (N, d1, d2)``
+
+    Supports EP (Expert Parallel) sharding: automatically detects num_local_experts
+    when EP is enabled, falling back to num_experts for non-EP cases.
+    &quot;&quot;&quot;
+
+    def __init__(self, num_experts: Optional[int] = None):
+        self.num_experts = num_experts
+
+    @torch.no_grad()
+    def convert(self, input_dict, source_patterns, target_patterns, **kwargs):
+        n = self.num_experts
+        if n is None:
+            config = kwargs.get(&quot;config&quot;)
+            if config is None:
+                raise ValueError(&quot;UnflattenExperts requires num_experts or config&quot;)
+            n = getattr(config, &quot;num_local_experts&quot;, None) or getattr(config, &quot;num_experts&quot;, None)
+            if n is None:
+                raise ValueError(f&quot;Cannot infer num_experts from config: {config}&quot;)
+
+        target_pattern = self._get_target_pattern(input_dict, source_patterns, target_patterns)
+        tensors = next(iter(input_dict.values()))
+        t = tensors[0] if isinstance(tensors, list) else tensors
+        if t.ndim == 2:
+            d2 = t.shape[1]
+            t = t.contiguous().view(n, -1, d2)
+        return {target_pattern: t}
+
+    @staticmethod
+    def _get_target_pattern(input_dict, source_patterns, target_patterns):
+        if len(target_patterns) &gt; 1:
+            return next(iter(input_dict.keys()))
+        return target_patterns[0]
+
+    @property
+    def reverse_op(self):
+        return FlattenExperts(num_experts=self.num_experts)
+
+    def __repr__(self):
+        return f&quot;UnflattenExperts(num_experts={self.num_experts})&quot;
+
+
+# ==============================================================================
+# Mapping Rule Registry
+# ==============================================================================
+
+
+class MappingRule(ABC):
+    &quot;&quot;&quot;
+    Base class for custom conversion mapping rules.
+
+    Subclass and implement ``condition()`` and ``apply()`` to define new rules.
+    Register via ``MappingRuleRegistry.register(YourRule())``.
+    &quot;&quot;&quot;
+
+    name: str = &quot;&quot;
+    model_types: Optional[List[str]] = None
+
+    @abstractmethod
+    def condition(self, model_type: str) -&gt; bool:
+        &quot;&quot;&quot;Return True if this rule should be applied for the given model_type.&quot;&quot;&quot;
+
+    @abstractmethod
+    def apply(self, conversions: list, model_type: str) -&gt; None:
+        &quot;&quot;&quot;Mutate *conversions* in-place to inject custom operations.&quot;&quot;&quot;
+
+
+class MappingRuleRegistry:
+    &quot;&quot;&quot;
+    Global registry for ``MappingRule`` instances.
+
+    Rules are evaluated in registration order. Each rule whose ``condition()``
+    returns True will have its ``apply()`` called on the conversions list.
+    &quot;&quot;&quot;
+
+    _rules: List[MappingRule] = []
+
+    @classmethod
+    def register(cls, rule: MappingRule) -&gt; None:
+        if not isinstance(rule, MappingRule):
+            raise TypeError(f&quot;Expected MappingRule, got {type(rule)}&quot;)
+        cls._rules.append(rule)
+
+    @classmethod
+    def unregister(cls, name: str) -&gt; Optional[MappingRule]:
+        for i, rule in enumerate(cls._rules):
+            if rule.name == name:
+                return cls._rules.pop(i)
+        return None
+
+    @classmethod
+    def apply_all(cls, conversions: list, model_type: str) -&gt; None:
+        for rule in cls._rules:
+            if rule.model_types is not None and model_type not in rule.model_types:
+                continue
+            if rule.condition(model_type):
+                rule.apply(conversions, model_type)
+                logger.info_rank0(f&quot;&gt; Applied mapping rule &#x27;{rule.name}&#x27; for model_type={model_type}&quot;)
+
+    @classmethod
+    def list_rules(cls) -&gt; List[str]:
+        return [r.name for r in cls._rules]
+
+    @classmethod
+    def clear(cls) -&gt; None:
+        cls._rules.clear()
+
+
+# ==============================================================================
+# Built-in Rules
+# ==============================================================================
+
+_MODELS_WITH_2D_MERGED_EXPERTS = [
+    &quot;qwen2_moe&quot;,
+    &quot;qwen3_moe&quot;,
+    &quot;qwen3_next&quot;,
+    &quot;qwen3_5_moe&quot;,
+    &quot;qwen3_omni_moe&quot;,
+    &quot;qwen3_omni_moe_thinker&quot;,
+    &quot;minimax&quot;,
+    &quot;minimax_m2&quot;,
+]
+
+
+class GroupedGemmFlattenRule(MappingRule):
+    &quot;&quot;&quot;
+    When ``moe_grouped_gemm`` is enabled, append flatten operations to converters
+    containing ``MergeModulelist`` so that expert weights match the offline
+    conversion script layout (moe_hf_param_merge_experts.py).
+
+    Both gate_up_proj and down_proj need Transpose(1,2) before FlattenExperts:
+
+    gate_up_proj (multi-source: gate+up):
+        MergeModulelist → Concatenate → Transpose(1,2) → FlattenExperts
+        [E,I,H] → [E,2I,H] → [E,H,2I] → [E*H, 2I]
+
+    down_proj (single-source):
+        MergeModulelist → Transpose(1,2) → FlattenExperts
+        [E,I,H] → [E,H,I] → [E*H, I]
+    &quot;&quot;&quot;
+
+    name = &quot;grouped_gemm_flatten&quot;
+    model_types = _MODELS_WITH_2D_MERGED_EXPERTS
+
+    def condition(self, model_type: str) -&gt; bool:
+        return getattr(get_args(), &quot;moe_grouped_gemm&quot;, False)
+
+    def apply(self, conversions: list, model_type: str) -&gt; None:
+        from transformers.core_model_loading import MergeModulelist, Transpose
+
+        for entry in conversions:
+            if not hasattr(entry, &quot;operations&quot;):
+                continue
+            if not any(isinstance(op, MergeModulelist) for op in entry.operations):
+                continue
+            entry.operations.extend([Transpose(1, 2), FlattenExperts()])
+
+
+# ==============================================================================
+# Register built-in rules
+# ==============================================================================
+
+MappingRuleRegistry.register(GroupedGemmFlattenRule())
+
+
+# ==============================================================================
+# Public API
+# ==============================================================================
+
+
+def apply_custom_mappings(conversions: list, model_type: str) -&gt; None:
+    &quot;&quot;&quot;
+    Apply all registered MindSpeed-LLM custom conversion rules.
+
+    Args:
+        conversions: List of WeightConverter/WeightRenaming from transformers.
+        model_type: HuggingFace model_type identifier.
+    &quot;&quot;&quot;
+    MappingRuleRegistry.apply_all(conversions, model_type)
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

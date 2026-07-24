@@ -1,0 +1,486 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/data/converter.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/data/converter.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_3b4a1596c6b763.html">◀ collator.py</a> <a href="file_d76cd71b4235d0.html">data_factory.py ▶</a></nav></div>
+<div class="wrap">
+<h1>converter.py</h1><p class="goal">mindspeed_llm/fsdp2/data/converter.py · 15074B · 385 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L20" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class Role(str, Enum)</a><a href="#L29" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class DatasetConverter</a><a href="#L34" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __call__(self, example: dict[str, Any]) -&</a><a href="#L40" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class AlpacaDatasetConverter(DatasetConverter)</a><a href="#L41" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __call__(self, example: dict[str, Any]) -&</a><a href="#L91" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class SharegptDatasetConverter(DatasetConverte</a><a href="#L92" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __call__(self, example: dict[str, Any]) -&</a><a href="#L187" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class OpenAIDatasetConverter(DatasetConverter)</a><a href="#L188" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __call__(self, example: dict[str, Any]) -&</a><a href="#L332" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def register_dataset_converter(name: str, data</a><a href="#L340" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_dataset_converter(name: str, dataset_a</a><a href="#L348" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_local_rank()</a><a href="#L356" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def align_dataset</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep13.html">EP13</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p>Copyright 2025 the LlamaFactory team.</p><p class="mut">（自动提取自首行注释）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1"># Copyright 2025 the LlamaFactory team.
+
+import json
+import os
+from enum import Enum, unique
+from abc import abstractmethod
+from dataclasses import dataclass
+from typing import Any, Optional, Union
+import torch.distributed as dist
+from datasets import Dataset, IterableDataset
+from transformers import Seq2SeqTrainingArguments
+
+from ..utils.arguments import DataArguments
+from .parser import DatasetAttr
+
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+logger = get_logger(__name__)
+
+
+class Role(str, Enum):
+    USER = &quot;user&quot;
+    ASSISTANT = &quot;assistant&quot;
+    SYSTEM = &quot;system&quot;
+    FUNCTION = &quot;function&quot;
+    OBSERVATION = &quot;observation&quot;
+
+
+@dataclass
+class DatasetConverter:
+    dataset_attr: &quot;DatasetAttr&quot;
+    data_args: &quot;DataArguments&quot;
+
+    @abstractmethod
+    def __call__(self, example: dict[str, Any]) -&gt; dict[str, Any]:
+        r&quot;&quot;&quot;Convert a single example in the dataset to the standard format.&quot;&quot;&quot;
+        ...
+
+
+@dataclass
+class AlpacaDatasetConverter(DatasetConverter):
+    def __call__(self, example: dict[str, Any]) -&gt; dict[str, Any]:
+        prompt = []
+        if self.dataset_attr.history and isinstance(example[self.dataset_attr.history], list):
+            for old_prompt, old_response in example[self.dataset_attr.history]:
+                prompt.append({&quot;role&quot;: Role.USER.value, &quot;content&quot;: old_prompt})
+                prompt.append({&quot;role&quot;: Role.ASSISTANT.value, &quot;content&quot;: old_response})
+
+        query = []
+        if self.dataset_attr.prompt and example[self.dataset_attr.prompt]:
+            query.append(example[self.dataset_attr.prompt])
+
+        if self.dataset_attr.query and example[self.dataset_attr.query]:
+            query.append(example[self.dataset_attr.query])
+
+        prompt.append({&quot;role&quot;: Role.USER.value, &quot;content&quot;: &quot;\n&quot;.join(query)})
+
+        if self.dataset_attr.kto_tag and isinstance(example[self.dataset_attr.kto_tag], bool):
+            # kto example
+            response = [{&quot;role&quot;: Role.ASSISTANT.value, &quot;content&quot;: example[self.dataset_attr.response]}]
+            if example[self.dataset_attr.kto_tag]:
+                response = response + [{&quot;role&quot;: Role.ASSISTANT.value, &quot;content&quot;: &quot;&quot;}]
+            else:
+                response = [{&quot;role&quot;: Role.ASSISTANT.value, &quot;content&quot;: &quot;&quot;}] + response
+        elif (
+            self.dataset_attr.ranking
+            and isinstance(example[self.dataset_attr.chosen], str)
+            and isinstance(example[self.dataset_attr.rejected], str)
+        ):  
+            # pairwise example
+            response = [
+                {&quot;role&quot;: Role.ASSISTANT.value, &quot;content&quot;: example[self.dataset_attr.chosen]},
+                {&quot;role&quot;: Role.ASSISTANT.value, &quot;content&quot;: example[self.dataset_attr.rejected]},
+            ]
+        elif self.dataset_attr.response and isinstance(example[self.dataset_attr.response], str):
+            # normal example
+            response = [{&quot;role&quot;: Role.ASSISTANT.value, &quot;content&quot;: example[self.dataset_attr.response]}]
+        else:
+            # unsupervised
+            response = []
+
+        output = {
+            &quot;_prompt&quot;: prompt,
+            &quot;_response&quot;: response,
+            &quot;_system&quot;: example[self.dataset_attr.system] if self.dataset_attr.system else &quot;&quot;,
+            &quot;_tools&quot;: example[self.dataset_attr.tools] if self.dataset_attr.tools else &quot;&quot;,
+        }
+        return output
+
+
+@dataclass
+class SharegptDatasetConverter(DatasetConverter):
+    def __call__(self, example: dict[str, Any]) -&gt; dict[str, Any]:
+        tag_mapping = {
+            self.dataset_attr.user_tag: Role.USER.value,
+            self.dataset_attr.assistant_tag: Role.ASSISTANT.value,
+            self.dataset_attr.observation_tag: Role.OBSERVATION.value,
+            self.dataset_attr.function_tag: Role.FUNCTION.value,
+            self.dataset_attr.system_tag: Role.SYSTEM.value,
+        }
+        odd_tags = (self.dataset_attr.user_tag, self.dataset_attr.observation_tag)
+        even_tags = (self.dataset_attr.assistant_tag, self.dataset_attr.function_tag)
+        accept_tags = (odd_tags, even_tags)
+        messages = example[self.dataset_attr.messages]
+        if (
+            self.dataset_attr.system_tag
+            and len(messages) != 0
+            and messages[0][self.dataset_attr.role_tag] == self.dataset_attr.system_tag
+        ):
+            system = messages[0][self.dataset_attr.content_tag]
+            messages = messages[1:]
+        else:
+            system = example[self.dataset_attr.system] if self.dataset_attr.system else &quot;&quot;
+
+        aligned_messages = []
+        broken_data = False
+        for turn_idx, message in enumerate(messages):
+            if message[self.dataset_attr.role_tag] not in accept_tags[turn_idx % 2]:
+                logger.info_rank0(f&quot;Invalid role tag in {messages}.&quot;)
+                broken_data = True
+                break
+
+            aligned_messages.append(
+                {
+                    &quot;role&quot;: tag_mapping[message[self.dataset_attr.role_tag]],
+                    &quot;content&quot;: message[self.dataset_attr.content_tag],
+                }
+            )
+
+        if (not self.dataset_attr.ranking and len(aligned_messages) % 2 != 0) or (
+            self.dataset_attr.ranking and len(aligned_messages) % 2 == 0
+        ):
+            logger.info_rank0(f&quot;Invalid message count in {messages}.&quot;)
+            broken_data = True
+
+        if broken_data:
+            logger.info_rank0(&quot;Skipping this abnormal example.&quot;)
+            prompt, response = [], []
+        elif self.dataset_attr.kto_tag and isinstance(example[self.dataset_attr.kto_tag], bool):
+            # kto example
+            prompt = aligned_messages[:-1]
+            response = aligned_messages[-1:]
+            if example[self.dataset_attr.kto_tag]:
+                response = response + [{&quot;role&quot;: Role.ASSISTANT.value, &quot;content&quot;: &quot;&quot;}]
+            else:
+                response = [{&quot;role&quot;: Role.ASSISTANT.value, &quot;content&quot;: &quot;&quot;}] + response
+        elif (
+            self.dataset_attr.ranking
+            and isinstance(example[self.dataset_attr.chosen], dict)
+            and isinstance(example[self.dataset_attr.rejected], dict)
+        ):
+            # pairwise example
+            chosen = example[self.dataset_attr.chosen]
+            rejected = example[self.dataset_attr.rejected]
+            if (
+                chosen[self.dataset_attr.role_tag] not in accept_tags[-1]
+                or rejected[self.dataset_attr.role_tag] not in accept_tags[-1]
+            ):
+                logger.info_rank0(f&quot;Invalid role tag in {[chosen, rejected]}.&quot;)
+                broken_data = True
+
+            prompt = aligned_messages
+            response = [
+                {
+                    &quot;role&quot;: tag_mapping[chosen[self.dataset_attr.role_tag]],
+                    &quot;content&quot;: chosen[self.dataset_attr.content_tag],
+                },
+                {
+                    &quot;role&quot;: tag_mapping[rejected[self.dataset_attr.role_tag]],
+                    &quot;content&quot;: rejected[self.dataset_attr.content_tag],
+                },
+            ]
+        else:
+            # normal example
+            prompt = aligned_messages[:-1]
+            response = aligned_messages[-1:]
+
+        output = {
+            &quot;_prompt&quot;: prompt,
+            &quot;_response&quot;: response,
+            &quot;_system&quot;: system,
+            &quot;_tools&quot;: example[self.dataset_attr.tools] if self.dataset_attr.tools else &quot;&quot;,
+        }
+        return output
+
+
+@dataclass
+class OpenAIDatasetConverter(DatasetConverter):
+    def __call__(self, example: dict[str, Any]) -&gt; dict[str, Any]:
+        tag_mapping = {
+            self.dataset_attr.user_tag: Role.USER.value,
+            self.dataset_attr.assistant_tag: Role.ASSISTANT.value,
+            self.dataset_attr.observation_tag: Role.OBSERVATION.value,
+            self.dataset_attr.function_tag: Role.FUNCTION.value,
+            self.dataset_attr.system_tag: Role.SYSTEM.value,
+        }
+
+        messages = example[self.dataset_attr.messages]
+        if (
+            self.dataset_attr.system_tag
+            and len(messages) != 0
+            and messages[0][self.dataset_attr.role_tag] == self.dataset_attr.system_tag
+        ):
+            system = messages[0][self.dataset_attr.content_tag]
+            messages = messages[1:]
+        else:
+            system = example.get(self.dataset_attr.system, &quot;&quot;) if self.dataset_attr.system else &quot;&quot;
+
+        aligned_messages = []
+        tool_responses = []
+        broken_data = False
+        for turn_idx, message in enumerate(messages):
+            role = message[self.dataset_attr.role_tag]
+            content = message[self.dataset_attr.content_tag]
+
+            if role in [self.dataset_attr.assistant_tag, self.dataset_attr.function_tag]:
+                if &quot;tool_calls&quot; in message and len(message[&quot;tool_calls&quot;]) &gt; 0:
+                    tool_calls_list = [tool[&quot;function&quot;] for tool in message[&quot;tool_calls&quot;]]
+                    content = json.dumps(tool_calls_list, ensure_ascii=False)
+                    role = self.dataset_attr.function_tag
+
+            if role == self.dataset_attr.observation_tag:
+                tool_responses.append(content)
+                continue
+            elif len(tool_responses) &gt; 0:
+                _content = &quot;\n&lt;/tool_response&gt;\n&lt;tool_response&gt;\n&quot;.join(tool_responses)
+                aligned_messages.append(
+                    {
+                        &quot;role&quot;: Role.OBSERVATION.value,
+                        &quot;content&quot;: _content,
+                    }
+                )
+                tool_responses = []
+
+            aligned_messages.append(
+                {
+                    &quot;role&quot;: tag_mapping[role],
+                    &quot;content&quot;: content,
+                }
+            )
+
+        odd_tags = (Role.USER.value, Role.OBSERVATION.value)
+        even_tags = (Role.ASSISTANT.value, Role.FUNCTION.value)
+        accept_tags = (odd_tags, even_tags)
+        for turn_idx, message in enumerate(aligned_messages):
+            if message[&quot;role&quot;] not in accept_tags[turn_idx % 2]:
+                logger.info_rank0(f&quot;Invalid role tag in {messages}.&quot;)
+                broken_data = True
+                break
+
+        if (not self.dataset_attr.ranking and len(aligned_messages) % 2 != 0) or (
+            self.dataset_attr.ranking and len(aligned_messages) % 2 == 0
+        ):
+            logger.info_rank0(f&quot;Invalid message count in {messages}.&quot;)
+            broken_data = True
+
+        if broken_data:
+            logger.info_rank0(&quot;Skipping this abnormal example.&quot;)
+            prompt, response = [], []
+        elif self.dataset_attr.kto_tag and isinstance(example[self.dataset_attr.kto_tag], bool):
+            # kto example
+            prompt = aligned_messages[:-1]
+            response = aligned_messages[-1:]
+            if example[self.dataset_attr.kto_tag]:
+                response = response + [{&quot;role&quot;: Role.ASSISTANT.value, &quot;content&quot;: &quot;&quot;}]
+            else:
+                response = [{&quot;role&quot;: Role.ASSISTANT.value, &quot;content&quot;: &quot;&quot;}] + response
+        elif (
+            self.dataset_attr.ranking
+            and isinstance(example[self.dataset_attr.chosen], dict)
+            and isinstance(example[self.dataset_attr.rejected], dict)
+        ):
+            # pairwise example
+            chosen = example[self.dataset_attr.chosen]
+            rejected = example[self.dataset_attr.rejected]
+            if (
+                chosen[self.dataset_attr.role_tag] not in accept_tags[-1]
+                or rejected[self.dataset_attr.role_tag] not in accept_tags[-1]
+            ):
+                logger.info_rank0(f&quot;Invalid role tag in {[chosen, rejected]}.&quot;)
+                broken_data = True
+
+            prompt = aligned_messages
+            response = [
+                {
+                    &quot;role&quot;: tag_mapping[chosen[self.dataset_attr.role_tag]],
+                    &quot;content&quot;: chosen[self.dataset_attr.content_tag],
+                },
+                {
+                    &quot;role&quot;: tag_mapping[rejected[self.dataset_attr.role_tag]],
+                    &quot;content&quot;: rejected[self.dataset_attr.content_tag],
+                },
+            ]
+        else:
+            # normal example
+            prompt = aligned_messages[:-1]
+            response = aligned_messages[-1:]
+
+        tools = example.get(self.dataset_attr.tools, &quot;&quot;) if self.dataset_attr.tools else &quot;&quot;
+        if isinstance(tools, dict) or isinstance(tools, list):
+            tools = json.dumps(tools, ensure_ascii=False)
+
+        short_system_prompt = &quot;detailed thinking off&quot;
+        if not system:
+            if not tools:
+                system = short_system_prompt
+            else:
+                pass
+        else:
+            if not tools:
+                if &quot;detailed thinking on&quot; in system or &quot;detailed thinking off&quot; in system:
+                    pass
+                else:
+                    system += &quot;\n&quot; + short_system_prompt
+            else:
+                system += &quot;\n&quot;
+
+        output = {
+            &quot;_prompt&quot;: prompt,
+            &quot;_response&quot;: response,
+            &quot;_system&quot;: system,
+            &quot;_tools&quot;: tools,
+        }
+        return output
+
+
+DATASET_CONVERTERS = {
+    &quot;alpaca&quot;: AlpacaDatasetConverter,
+    &quot;sharegpt&quot;: SharegptDatasetConverter,
+    &quot;openai&quot;: OpenAIDatasetConverter,
+}
+
+def register_dataset_converter(name: str, dataset_converter: type[&quot;DatasetConverter&quot;]) -&gt; None:
+    r&quot;&quot;&quot;Register a new dataset converter.&quot;&quot;&quot;
+    if name in DATASET_CONVERTERS:
+        raise ValueError(f&quot;Dataset converter {name} already exists.&quot;)
+
+    DATASET_CONVERTERS[name] = dataset_converter
+
+
+def get_dataset_converter(name: str, dataset_attr: &quot;DatasetAttr&quot;, data_args: &quot;DataArguments&quot;) -&gt; &quot;DatasetConverter&quot;:
+    r&quot;&quot;&quot;Get a dataset converter.&quot;&quot;&quot;
+    if name not in DATASET_CONVERTERS:
+        raise ValueError(f&quot;Dataset converter {name} not found.&quot;)
+
+    return DATASET_CONVERTERS[name](dataset_attr, data_args)
+
+
+def get_local_rank():
+    rank = dist.get_rank() if dist.is_initialized() else 0
+    if &quot;LOCAL_RANK&quot; in os.environ:
+        local_rank = int(os.environ[&quot;LOCAL_RANK&quot;])
+    else:
+        local_rank = rank % max(1, (torch.cuda.device_count() if torch.cuda.is_available() else 1))
+
+
+def align_dataset(
+    dataset: Union[&quot;Dataset&quot;, &quot;IterableDataset&quot;],
+    dataset_attr: &quot;DatasetAttr&quot;,
+    data_args: &quot;DataArguments&quot;,
+    training_args: &quot;Seq2SeqTrainingArguments&quot;,
+) -&gt; Union[&quot;Dataset&quot;, &quot;IterableDataset&quot;]:
+    r&quot;&quot;&quot;Align the dataset to a specific format.
+
+    Aligned dataset:
+    _prompt: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;...&quot;}] * (2T - 1)
+    _response: [{&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: &quot;...&quot;}] * N (N &gt; 1 for ranking dataset)
+    _system: &quot;...&quot;
+    _tools: &quot;...&quot;
+    &quot;&quot;&quot;
+    column_names = list(next(iter(dataset)).keys())
+    kwargs = {}
+    if not data_args.streaming:
+        kwargs = dict(
+            num_proc=data_args.preprocessing_num_workers,
+            load_from_cache_file=(not data_args.overwrite_cache) or (get_local_rank() != 0),
+            desc=&quot;Converting format of dataset&quot;,
+        )
+        
+    dataset_converter = get_dataset_converter(dataset_attr.formatting, dataset_attr, data_args)
+    return dataset.map(
+        dataset_converter,
+        batched=False,
+        remove_columns=column_names,
+        **kwargs,
+    )</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

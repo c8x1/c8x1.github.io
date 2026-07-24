@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>重计算与显存策略 · 走读 EP11</title>
+<style>
+  :root{
+    --bg:#0f0f12; --bg2:#000; --side:#1a1a1a; --card:#16161c; --line:#2a2a33;
+    --txt:#e8e8e8; --mut:#9a9a9a; --mut2:#6a6a6a;
+    --serif:ui-serif,Georgia,"Times New Roman",Times,serif;
+    --sans:system-ui,-apple-system,"PingFang SC","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace;
+    --red:#C7000B; --red-bg:#2a0f10; --red-bd:#6e1a1c; --red-tx:#e88;
+    --grn:#788C5D; --grn-bg:#14241a; --grn-bd:#2e5a3a; --grn-tx:#7ab98a;
+    --acc:#C7000B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+  .page{max-width:1180px;margin:0 auto;padding:0}
+  .topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);
+    font-size:13px;color:var(--mut)}
+  .topbar .crumb{font-family:var(--serif);font-style:italic}
+  .topbar nav{margin-left:auto;display:flex;gap:8px}
+  .topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:4px 10px;border-radius:6px}
+  .topbar nav a:hover{color:#fff;border-color:var(--acc)}
+  .body{display:grid;grid-template-columns:160px 1fr;align-items:start}
+  .tree{background:var(--side);border-right:1px solid var(--line);padding:14px 8px;
+    font-family:var(--mono);font-size:11px;color:var(--mut2);min-height:80vh;position:sticky;top:0}
+  .tree .f{display:block;padding:2px 4px;white-space:pre}
+  .tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px}
+  .main{padding:22px 28px 80px}
+  h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:6px 0 2px;color:#fff}
+  .goal{font-family:var(--serif);font-style:italic;color:var(--mut);margin:0 0 4px}
+  .gain{font-size:13px;color:var(--mut);margin:0 0 20px}
+  .gain b{color:var(--red-tx)}
+  h2{font-family:var(--serif);font-weight:600;font-size:18px;color:#fff;margin:26px 0 6px;
+    border-bottom:1px solid var(--line);padding-bottom:3px}
+  h2 .sec{color:var(--mut2);font-style:italic;font-size:13px;margin-left:8px}
+  p{margin:8px 0}
+  .figcap{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);
+    margin:10px 0 2px}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--mut2);
+    padding:10px 12px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55}
+  pre .ln{display:inline-block;width:32px;color:var(--mut2);user-select:none}
+  .filelink{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--red-tx);margin:4px 0 14px}
+  .filelink a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--red-bd)}
+  .footnote{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--mut2);margin:4px 0 14px}
+  /* PyCharm Darcula 主题 token 配色 */
+  pre[data-lang]{color:#d4d4d4}
+  .tok-kw{color:#cc7832;font-weight:600}
+  .tok-bi{color:#9876aa;font-style:italic}
+  .tok-fn{color:#ffc66d}
+  .tok-cl{color:#a9b7c6;font-style:italic}
+  .tok-st{color:#6a8759}
+  .tok-cm{color:#808080;font-style:italic}
+  .tok-nm{color:#6897bb}
+  .tok-dc{color:#bbb33b}
+  .tok-key{color:#cc7832}
+  .tok-var{color:#9876aa}
+  .tree .f,.tree a.f{color:#6a6a6a;text-decoration:none;display:block;padding:2px 4px;white-space:pre;border-radius:3px}
+  .tree a.f:hover{background:#2a2a33;color:#d4d4d4}
+  .tree a.f.act,.tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px;font-weight:600}
+  .gnpu{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:14px 0}
+  .gnpu .g{background:var(--grn-bg);border-right:1px solid var(--line);padding:10px 14px}
+  .gnpu .n{background:var(--red-bg);padding:10px 14px}
+  .gnpu h4{margin:0 0 6px;font-family:var(--serif);font-size:13px}
+  .gnpu .g h4{color:var(--grn-tx)}.gnpu .n h4{color:var(--red-tx)}
+  .gnpu .row{display:grid;grid-template-columns:90px 1fr;gap:6px;font-size:12.5px;margin:4px 0}
+  .gnpu .row .k{color:var(--mut2)}
+  .diag{margin:10px 0 6px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:8px}
+  .sum{border-top:1px solid var(--line);margin-top:22px;padding-top:10px;font-size:13.5px}
+  .sum .pit{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12.5px;margin-top:6px}
+  .filelist{font-family:var(--mono);font-size:11px;color:var(--mut2);margin-top:22px;border-top:1px dashed var(--line);padding-top:10px}
+  .filelist b{color:var(--mut)}
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <span class="crumb">第三篇章 · 并行引擎 › EP11</span>
+    <span style="color:var(--mut2)">EP11</span>
+    <nav>
+      <a href="ep10.html">◀ 上一篇</a>
+      <a href="index.html">索引</a>
+      <a href="ep12.html">下一篇 ▶</a>
+    </nav>
+  </div>
+  <div class="body">
+    <aside class="tree">
+      <a class="f" href="appendix/index.html" target="_blank">📁 附录·项目文件走读</a>
+      <span class="f">MindSpeed-LLM/</span>
+      <a class="f" href="appendix/file_089411e68e5d5b.html" target="_blank">├ train_fsdp2.py</a>
+      <span class="f">├ examples/fsdp2/</span>
+      <a class="f" href="appendix/file_d04a217944c522.html" target="_blank">│  ├ env_config.sh</a>
+      <span class="f">│  └ qwen3/</span>
+      <span class="f">├ mindspeed_llm/fsdp2/</span>
+      <a class="f act" href="appendix/file_437e79f3b85550.html" target="_blank">features/async_offload.py</a>
+      <span class="f">└ ...</span>
+    </aside>
+    <main class="main">
+      <h1>重计算与显存策略</h1>
+      <p class="goal">目标：讲清四本显存账与 recompute/offload 的取舍。前置：EP10 通信与计算掩盖。</p>
+      <p class="gain">你将获得：<b>①</b> 看懂显存=参数+梯度+优化器状态+激活四本账，FSDP2 砍前三、recompute 砍第四 <b>②</b> 能据卡数在 A2(recompute True) 与 A3(recompute False) 之间做吞吐/显存取舍，并定位 async_offload/chunkloss 两个进阶开关</p>
+
+      <h2>你已经熟悉的情况 <span class="sec">桥接开场</span></h2>
+      <p>你在 PyTorch 单卡或 DDP 下训练时省显存的第一招就是 <code>torch.utils.checkpoint</code>（gradient checkpointing / activation recompute）：前向只留少量边界张量，反向时重跑一遍前向把激活重新算回来，用一次额外前向换掉整段激活显存。这一招的核心 trade-off 你很熟——它省的是激活这本账（随序列长 × 层数线性涨，长序列下动辄几个 G），代价是多算一遍前向，吞吐掉一截。换句话说，checkpoint 不是"白省"，而是"用计算换显存"：显存够时就该关，显存不够时才开。</p>
+      <p>在 MindSpeed-LLM 的 fsdp2 backend 里这同一招同样存在，但形态变了：它不再是你手写 <code>use_checkpoint=True</code> 的零散调用，而是<b>声明式</b>的——你在 yaml 里写 <code>recompute: True</code> 和 <code>recompute_modules: [model.layers.{*}]</code>，引擎在挂并行时按这份"清单"对模型自动包一层重计算。声明式的好处是：清单可以用通配符 <code>{*}</code> 表达"所有 decoder 层"，不必逐层写；关掉也只需把总开关置 False，清单留不留都无所谓。更关键的是：FSDP2 本身已经把"参数/梯度/优化器状态"这三本账砍掉了大半（分片到各卡，all_gather 时才拼回），所以 recompute 在这里<b>专门用来砍第四本账——激活</b>，和分片策略是正交关系，可以独立开关。这和你在 DDP 下的直觉一脉相承，只是分片把前三本账的压力接走了，recompute 只需专心对付激活。</p>
+      <p>此外，NPU 侧的显存语义也和 CUDA 不太一样：它有自己的内存池配置开关（<code>PYTORCH_NPU_ALLOC_CONF=expandable_segments</code>，控制缓存分配器按需扩段而非整块预留，缓解碎片化）、自己的多流复用开关（<code>MULTI_STREAM_MEMORY_REUSE</code>，让旁路 stream 与主流共享池内存）。比 recompute 更激进的两招也只在这套环境里跑得起来：一是"把激活异步换页到 CPU 锁页内存"的 <code>async_offload</code>（借助 torch 原生的 <code>saved_tensors_hooks</code> 在不改模型代码的前提下拦截激活），二是"把 loss 沿序列维切块算以压 logits 峰值"的 <code>chunkloss</code>（大 vocab 下 logits 瞬时显存是另一只显存怪兽）。本篇就把这四本账和这几把刀一次性理清。</p>
+
+      <h2>本项目怎么做 <span class="sec">原理</span></h2>
+      <p>把训练显存拆成四本账：<b>参数</b>(weights，模型本体)、<b>梯度</b>(grads，与参数等量)、<b>优化器状态</b>(optimizer states，Adam 的 m/v 通常是参数量的 2 倍)、<b>激活</b>(activations，随 batch×序列长×层数线性涨)。DDP 下这四本账全部每卡一份，最先爆的就是激活（尤其长序列，激活可以远超前三账之和）；FSDP2 把前三本账按 <code>world_size</code> 分片，每卡只留 1/N，all_gather 时才临时拼回做计算、用完再丢。但激活那本账 FSDP2 <b>不动</b>——它由序列长度 × 层数决定，和参数分片无关。recompute 就专门收拾这本账：把每层中间激活丢掉，反向时重算。所以 FSDP2 和 recompute 各管一半：前者砍 P/G/O 三账，后者砍 A 一账，互不重叠。下面这张柱状图把 DDP vs FSDP2(关 recompute) vs FSDP2(开 recompute) 三种配置的四本账高度摆在一起。</p>
+
+      <div class="diag">
+        <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace,monospace" font-size="11">
+          <!-- axes -->
+          <line x1="60" y1="260" x2="740" y2="260" stroke="#3a3a44"/>
+          <line x1="60" y1="40" x2="60" y2="260" stroke="#3a3a44"/>
+          <!-- y ticks -->
+          <g fill="#6a6a6a">
+            <text x="54" y="264" text-anchor="end">0</text>
+            <text x="54" y="210" text-anchor="end">low</text>
+            <text x="54" y="60" text-anchor="end">high</text>
+            <line x1="56" y1="60" x2="60" y2="60" stroke="#3a3a44"/>
+            <line x1="56" y1="130" x2="60" y2="130" stroke="#3a3a44"/>
+            <line x1="56" y1="200" x2="60" y2="200" stroke="#3a3a44"/>
+          </g>
+          <text x="14" y="150" fill="#9a9a9a" transform="rotate(-90 14 150)">单卡显存占用（相对）</text>
+
+          <!-- ===== group 1: DDP ===== x 90..250 -->
+          <!-- params -->
+          <rect x="95" y="150" width="28" height="110" fill="#C7000B" opacity="0.9"/>
+          <!-- grads -->
+          <rect x="127" y="160" width="28" height="100" fill="#C7000B" opacity="0.65"/>
+          <!-- optim states (2x params) -->
+          <rect x="159" y="80" width="28" height="180" fill="#C7000B" opacity="0.45"/>
+          <!-- activations -->
+          <rect x="191" y="55" width="28" height="205" fill="#788C5D" opacity="0.9"/>
+          <text x="150" y="278" fill="#9a9a9a" text-anchor="middle">DDP</text>
+
+          <!-- ===== group 2: FSDP2 (recompute off) ===== x 290..450 -->
+          <rect x="295" y="225" width="28" height="35" fill="#C7000B" opacity="0.9"/>
+          <rect x="327" y="230" width="28" height="30" fill="#C7000B" opacity="0.65"/>
+          <rect x="359" y="200" width="28" height="60" fill="#C7000B" opacity="0.45"/>
+          <rect x="391" y="55" width="28" height="205" fill="#788C5D" opacity="0.9"/>
+          <text x="352" y="278" fill="#9a9a9a" text-anchor="middle">FSDP2</text>
+          <text x="352" y="292" fill="#6a6a6a" text-anchor="middle" font-style="italic">recompute: False</text>
+
+          <!-- ===== group 3: FSDP2 (recompute on) ===== x 490..650 -->
+          <rect x="495" y="225" width="28" height="35" fill="#C7000B" opacity="0.9"/>
+          <rect x="527" y="230" width="28" height="30" fill="#C7000B" opacity="0.65"/>
+          <rect x="559" y="200" width="28" height="60" fill="#C7000B" opacity="0.45"/>
+          <!-- activations shrunk -->
+          <rect x="591" y="215" width="28" height="45" fill="#788C5D" opacity="0.9"/>
+          <text x="552" y="278" fill="#9a9a9a" text-anchor="middle">FSDP2</text>
+          <text x="552" y="292" fill="#6a6a6a" text-anchor="middle" font-style="italic">recompute: True</text>
+
+          <!-- legend -->
+          <g font-size="10">
+            <rect x="610" y="44" width="10" height="10" fill="#C7000B" opacity="0.9"/><text x="624" y="53" fill="#9a9a9a">参数 P</text>
+            <rect x="610" y="58" width="10" height="10" fill="#C7000B" opacity="0.65"/><text x="624" y="67" fill="#9a9a9a">梯度 G</text>
+            <rect x="610" y="72" width="10" height="10" fill="#C7000B" opacity="0.45"/><text x="624" y="81" fill="#9a9a9a">优化器状态 O</text>
+            <rect x="610" y="86" width="10" height="10" fill="#788C5D" opacity="0.9"/><text x="624" y="95" fill="#9a9a9a">激活 A</text>
+          </g>
+
+          <!-- annotation arrows: FSDP cuts first 3 -->
+          <text x="352" y="30" fill="#7ab98a" text-anchor="middle">↑ FSDP2 砍前三账（P/G/O 分片到 1/N）</text>
+          <text x="605" y="208" fill="#e88" text-anchor="end">↑ recompute 砍第四账 A</text>
+        </svg>
+      </div>
+      <div class="footnote">柱高为相对示意，非真实比例；优化器状态在 Adam 下约为参数量的 2 倍，激活在长序列下可超过前三账之和。</div>
+
+      <p>有了这张图，取舍就清楚了：FSDP2 把 P/G/O 三本账压到 1/N 后，剩下唯一的显存大头就是激活 A。如果你卡数够、序列长但层数适中，关掉 recompute（A3 路线）能省掉那一遍重算前向、直接拿吞吐——因为 A 账的峰值已经装得下，没必要再花一次计算把它换掉；如果卡少、序列极长，A 账逼近上限甚至 OOM，就开 recompute（A2 路线）把 A 压下去再谈吞吐——显存是硬约束，吞吐可以之后再找补。A2 与 A3 的差异，本质就是"显存够不够"这一个变量的两个取值：卡数 ↑ → 单卡分到的参数/梯度/优化器状态 ↓ → 留给激活的余量 ↑ → 关掉 recompute 换吞吐。同理，A3 还顺手把专家并行（ep_modules）也去了——卡多到连 MoE 的专家分片都不需要，纯 FSDP 拉满。所以 A2 是"小卡 + MoE + recompute"的省显存组合，A3 是"大卡 + 纯 FSDP + 关 recompute"的吞吐组合，读这两份 yaml 的差异就读出了项目的显存哲学。</p>
+      <p>把 recompute、async_offload、chunkloss 三招排成一个"省显存阶梯"会更清楚：第一阶 recompute——激活丢掉、反向重算，代价是 NPU 算力，最便宜也最先用；第二阶 async_offload——激活留住但迁去 CPU 锁页内存并预取，代价是 PCIe 带宽和 CPU 内存，比 recompute 温和（不用重算）但需要 prefetch 掩好否则反吃吞吐；第三阶 chunkloss——专治 logits 峰值（大 vocab 下 logits 那一刻的显存可比激活还高），沿序列切块逐块算梯度，代价是多次小 kernel 启动。三者并非互斥：recompute 砍激活、chunkloss 砍 logits 峰值，砍的是不同账本可以同开；async_offload 和 recompute 都砍激活账、代价不同（算 vs 搬），通常二选一按瓶颈定。NPU 侧的 expandable_segments 不在这阶梯里——它是基础设施层的池策略，给上面三招分配显存时少一些碎片化阻力，不改任何账本总额。</p>
+
+      <h2>源码下钻 <span class="sec">file:line</span></h2>
+
+      <div class="figcap">A2 配置：开 recompute，声明式挂在 model.layers.{*} 上</div>
+      <pre data-lang="yaml">parallel:
+  fsdp_modules:
+    - model.layers.{*}
+    - model.embed_tokens
+    - lm_head
+  ep_modules:
+    - model.layers.{*}.mlp.experts
+  ep_fsdp_modules:
+    - model.layers.{*}.mlp.experts
+  ep_dispatcher: eager
+  recompute: True
+  recompute_modules:
+    - model.layers.{*}</pre>
+      <div class="filelink">→ <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml">examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml:23-25</a>（recompute: True / recompute_modules 声明）</div>
+
+      <div class="figcap">A3 配置：关 recompute 换吞吐，且不带 EP（卡多到不需要专家并行）</div>
+      <pre data-lang="yaml">parallel:
+  fsdp_modules:
+    - model.layers.{*}
+    - model.embed_tokens
+    - lm_head
+  recompute: False
+  recompute_modules:
+    - model.layers.{*}</pre>
+      <div class="filelink">→ <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.yaml">examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.yaml:18-20</a>（recompute: False，且无 ep_modules 段）</div>
+      <div class="footnote">对照可见：A3 比 A2 删掉了 ep_modules/ep_fsdp_modules/ep_dispatcher 三行——A3 是纯 FSDP 大卡配置，连专家并行都不开；recompute_modules 字段两份都留着（声明清单），只是 A3 把 recompute 总开关置 False，清单不生效。这个对照也顺带印证了上一段的心智模型：A2 是"卡少"路线（要 EP 分专家 + recompute 省激活），A3 是"卡多"路线（专家分片都免了 + recompute 也关了）。两份 yaml 的其余训练参数（lr/optimizer/scheduler）大体一致，差异集中在 parallel 段——读这一段就够判断你的硬件该用哪份。注意 recompute_modules 的默认值在 arguments.py 里就是 <code>['model.layers.{*}']</code>，所以即使 yaml 不写，开 recompute 也默认包所有 decoder 层；显式写出来是为了可读性和可裁剪（比如只想包后几层）。</div>
+
+      <div class="figcap">声明清单的字段定义：默认就是 model.layers.{*}</div>
+      <pre data-lang="py">recompute_modules: List[str] = field(
+    default_factory=lambda: ['model.layers.{*}'],
+    metadata={"help": "Model structure of layers with Gradient Checkpointing (Activation Recomputation)."},
+)</pre>
+      <div class="filelink">→ <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/utils/arguments.py">mindspeed_llm/fsdp2/utils/arguments.py:432-435</a>（recompute_modules 字段，help 文本即"Activation Recomputation"）</div>
+
+      <div class="figcap">引擎按清单自动包重计算：recompute=False 直接 return，True 才调 recompute_modules()</div>
+      <pre data-lang="py">def apply_recompute_modules(self):
+    if not self.config.recompute:
+        return
+    self.model = recompute_modules(self.model, self.config.recompute_plan)</pre>
+      <div class="filelink">→ <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/distributed/mindspeed_parallel_engine.py">mindspeed_llm/fsdp2/distributed/mindspeed_parallel_engine.py:80-83</a>（声明式 recompute 的真正落点）</div>
+      <div class="footnote">recompute_plan 在 model_factory.py:191 由 <code>parallel_args.recompute_modules if parallel_args.recompute else []</code> 生成——recompute=False 时 plan 为空列表，即使后续误调也无可包对象；recompute_modules 实现本身在 <code>fsdp_turbo.memory.recompute</code>（仓外，未臆造）。</div>
+
+      <div class="figcap">NPU 显存池：expandable_segments 让分配器按需扩段而非整块预留</div>
+      <pre data-lang="sh">export MULTI_STREAM_MEMORY_REUSE=2
+export PYTORCH_NPU_ALLOC_CONF=expandable_segments:True</pre>
+      <div class="filelink">→ <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/env_config.sh">examples/fsdp2/env_config.sh:6-7</a>（expandable_segments + 多流内存复用）</div>
+      <div class="footnote">expandable_segments:True 让 NPU 缓存分配器把显存切成可扩展段，按需扩段而非整块预留，缓解碎片化（对应 CUDA 侧的 caching allocator + PYTORCH_CUDA_ALLOC_CONF 同族思想）；MULTI_STREAM_MEMORY_REUSE=2 是同进程多流间复用池内存——async_offload 走的就是旁路 stream（offload_stream），若每流各开一池显存立刻翻倍，必须复用。HCCL_CONNECT_TIMEOUT=1800（:3）给跨卡建连留足窗口；CUBLAS_WORKSPACE_CONFIG=:4096:8（:9）给矩阵乘固定一块工作区避免反复 malloc；PYTHONPATH 追加当前目录（:10）让训练脚本能 import 到仓内模块。env_config.sh 全部 9 条见 filelist，本篇只聚焦与显存直接相关的 6/7 两行。</div>
+
+      <div class="figcap">async_offload：用 saved_tensors_hooks 把激活 D2H 到 pin_memory 的 CPU 段，反向 H2D 取回</div>
+      <pre data-lang="py">class SwapTensor:
+    def __init__(self, tensor, key):
+        self.tensor = tensor
+        self.size = tensor.size()
+        self.storage_size = tensor.storage().size()
+        self.tensor_cpu = torch.empty(tensor.shape, dtype=tensor.dtype, pin_memory=True, device='cpu')
+        ...
+    # device to host
+    def launch_d2h(self, stream):
+        if self.stat != "device":
+            return
+        ...
+        with torch_npu.npu.stream(stream):
+            stream.wait_event(forward_event)
+            if self.is_slice_tensor:
+                self.tensor_cpu.copy_(self.tensor, non_blocking=True)
+            else:
+                self.tensor_cpu.storage().copy_(self.tensor.storage(), non_blocking=True)
+            self.stat = "host"</pre>
+      <div class="filelink">→ <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/features/async_offload.py">mindspeed_llm/fsdp2/features/async_offload.py:53-80</a>（SwapTensor：CPU 暂存段 + D2H 非阻塞拷贝）</div>
+      <div class="footnote">关键在于 <code>pin_memory=True</code>（:58）开锁页内存以支持 non_blocking 拷贝——锁页内存让 PCIe DMA 不经操作系统分页中断，否则 non_blocking 退化为阻塞，offload 就没意义了。launch_d2h 把 NPU 激活迁到 CPU 后，<code>self.tensor.storage().resize_(0)</code>（:89）把 NPU 段缩成 0 字节，腾出显存——这一步才是真正"省下显存"的动作，光迁过去不释放等于没省；反向时 launch_h2d 再 resize 回原 storage_size（:99）拷回。is_slice_tensor（:60，storage 大小 ≠ numel）走 storage 级 copy、否则走张量级 copy，区分切片视图与连续张量。SwapTensor 用 NPU Event（:64 h2d_event）做流间同步，确保 H2D 完成后主流才读。</div>
+
+      <div class="figcap">异步机制：pack 时 D2H、unpack 时 H2D + 预取下一 block</div>
+      <pre data-lang="py">class async_save_on_cpu(saved_tensors_hooks):
+    def __init__(self, h2d_stream, d2h_stream, block_idx, depth, custom_check_fn=None, prefetch=True):
+        def _pack_to_cpu(tensor):
+            ...
+            swap_tensor = SwapTensor(tensor, key)
+            if block_idx < depth - 1:
+                working_stream = torch_npu.npu.current_stream()
+                d2h_stream.wait_stream(working_stream)
+                swap_tensor.launch_d2h(d2h_stream)
+            OffloadManager().put(key, swap_tensor)
+            return swap_tensor
+        def _unpack_from_cpu(swap_tensor) -> torch.Tensor:
+            ...
+            swap_tensor.launch_h2d(h2d_stream, True, working_stream)
+            if prefetch:
+                block_idx, tensor_idx = swap_tensor.key.split("_")
+                OffloadManager().prefetch_get(int(block_idx), int(tensor_idx), h2d_stream, d2h_stream)
+            return swap_tensor.tensor
+        super().__init__(_pack_to_cpu, _unpack_from_cpu)</pre>
+      <div class="filelink">→ <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/features/async_offload.py">mindspeed_llm/fsdp2/features/async_offload.py:261-310</a>（基于 torch.autograd.graph.saved_tensors_hooks 的 pack/unpack）</div>
+      <div class="footnote">这是 torch 原生的"被 autograd 保存的张量"拦截接口：前向保存激活时改走 pack_to_cpu（迁 CPU），反向取回时走 unpack_from_cpu（迁回 NPU），从而在不改模型代码的前提下把激活换页到 CPU。它的妙处在于——你只要 <code>with async_save_on_cpu(...):</code> 包一段前向，框架就自动把这段前向里 autograd 决定要"留到反向"的张量拦截下来转存 CPU，反向时再迁回。比手写 offload 优雅得多，和 recompute 的"丢掉重算"是两种思路：recompute 是"省掉激活、用时重算"（费 NPU 算力），async_offload 是"留住激活、迁去 CPU"（省 NPU 显存、费 PCIe 带宽 + CPU 内存）。<code>prefetch_get</code>（:227）按 block/tensor 索引提前把下一层的激活 H2D 拉回，掩盖拷贝延迟——和 EP10 的 prefetch 同一思路：让数据搬运与计算重叠，否则 offload 就退化成纯串行换页，吞吐掉得比 recompute 还狠。这也是为什么 OffloadManager 是单例（:173 metaclass=SingletonMeta）——跨层共享换页表，预取才能跨层算对索引。</div>
+
+      <div class="figcap">调用点：qwen3_moe 在每层 decoder 外包 async_save_on_cpu</div>
+      <pre data-lang="py">offload_stream = torch.npu.Stream()
+for layer_id, decoder_layer in enumerate(self.layers[: self.config.num_hidden_layers]):
+    if self.training:
+        with async_save_on_cpu(
+            h2d_stream=offload_stream,
+            d2h_stream=offload_stream,
+            block_idx=int(layer_id),
+            depth=len(self.layers),
+            custom_check_fn=lambda x: x.data_ptr() == hidden_states.data_ptr(),
+        ):
+            hidden_states = decoder_layer(...)</pre>
+      <div class="filelink">→ <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py">mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py:306-317</a>（MoE 模型按层启用 offload）</div>
+      <div class="footnote">注意 block_idx=layer_id、depth=num_hidden_layers——每层一个 block，pack 时只对非末层迁出（:286 < depth-1）。custom_check_fn 排掉 hidden_states 本身（不 offload 主流张量）。该路径仅在 qwen3_moe 模型里直接挂载；dense 路径是否挂载（核实：仓内未直接见到 dense 侧的同等调用，以源码为准）。</div>
+
+      <div class="figcap">chunkloss：把 lm_loss 沿序列维切块，逐块 grad_and_value 累计，省 logits 峰值显存</div>
+      <pre data-lang="py">class ChunkLoss(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, hidden_states, head_weight, head_bias, loss_forward, loss_kwargs_chunks, chunk_size):
+        ...
+        accumulated_loss = torch.tensor(0.0, device=device)
+        grad_inputs = torch.empty_like(hidden_states)
+        grad_weight = torch.zeros_like(head_weight)
+        grad_inputs_chunks = torch.split(grad_inputs, chunk_size, dim=1)
+        hidden_states_chunks = torch.split(hidden_states, chunk_size, dim=1)
+        for hidden_states_chunk, grad_inputs_chunk, loss_kwargs in zip(
+                hidden_states_chunks, grad_inputs_chunks, loss_kwargs_chunks):
+            (chunk_grad_input, chunk_grad_weight), (per_chunk_loss, _) = torch.func.grad_and_value(
+                loss_forward, argnums=(0, 1), has_aux=True
+            )(hidden_states_chunk, head_weight, None, **loss_kwargs)
+            accumulated_loss.add_(per_chunk_loss)
+            grad_inputs_chunk.copy_(chunk_grad_input)
+            grad_weight.add_(chunk_grad_weight)
+        ctx.save_for_backward(grad_inputs, grad_weight)
+        return accumulated_loss</pre>
+      <div class="filelink">→ <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/features/chunkloss.py">mindspeed_llm/fsdp2/features/chunkloss.py:48-75</a>（ChunkLoss.forward：切块 + grad_and_value 逐块累计）</div>
+      <div class="footnote">省的不是激活，而是<b>输出头 logits 的峰值显存</b>：vocab 通常数万维（Qwen3 约 15 万），整段 logits（bs×seq×vocab×fp32）会瞬时撑爆显存，比激活还凶——它在 loss 计算那一刻才 materialize，算完就丢，但峰值顶在那。这里沿 dim=1（序列维）按 chunk_size 切，每块只 materialize 一次 logits，算完梯度立刻丢；<code>torch.func.grad_and_value(has_aux=True)</code>（:64）一次拿到 (chunk 梯度, chunk loss)，loss 累加（accumulated_loss.add_ 行 69）、grad 拷回预分配的 grad_inputs（行 70-71）——梯度容器在循环前一次性 <code>torch.empty_like</code> 预分配，循环内只 copy_ 不新建，杜绝峰值反复出现。backward（:77-95）只回放已算好的 grad，不在 loss 侧重算。这种"前向就算好梯度、反向只回放"的写法相当于把 loss 的反向也前移进了 forward，省掉一次反传图。head_bias 显式不支持（:45 抛 NotImplementedError，因为切块后 bias 的归约语义难定义）。chunk_loss_size 开关见 arguments.py:699-701，设 >0 才启用。</div>
+
+      <div class="gnpu">
+        <div class="g"><h4>GPU / 已知（CUDA + torch）</h4>
+          <div class="row"><span class="k">内存池</span><span>caching allocator（cudaMalloc）+ PYTORCH_CUDA_ALLOC_CONF</span></div>
+          <div class="row"><span class="k">激活省显存</span><span>torch.utils.checkpoint(use_checkpoint=True)，手写散落调用</span></div>
+          <div class="row"><span class="k">CPU 卸载</span><span>无原生 saved_tensors_hooks 旁路 offload，需手写或第三方库</span></div>
+          <div class="row"><span class="k">loss 大头</span><span>大 vocab 时 logits 峰值靠交叉熵 fused kernel 或增大显存</span></div>
+          <div class="row"><span class="k">四本账</span><span>DDP 全量一份；FSDP1 分片但 recompute 仍手写</span></div>
+        </div>
+        <div class="n"><h4>NPU / 本项目（声明式 + 异步换页）</h4>
+          <div class="row"><span class="k">内存池</span><span>NPU allocator + PYTORCH_NPU_ALLOC_CONF=expandable_segments:True（env_config.sh:7）</span></div>
+          <div class="row"><span class="k">激活省显存</span><span>recompute: True + recompute_modules 声明式清单（A2.yaml:23-25）</span></div>
+          <div class="row"><span class="k">CPU 卸载</span><span>async_save_on_cpu 基于 saved_tensors_hooks，D2H/H2D + prefetch（async_offload.py:261-310）</span></div>
+          <div class="row"><span class="k">loss 大头</span><span>ChunkLoss 沿序列维切块 grad_and_value 累计（chunkloss.py:48-75）</span></div>
+          <div class="row"><span class="k">多流复用</span><span>MULTI_STREAM_MEMORY_REUSE=2（env_config.sh:6）配合 offload 旁路 stream</span></div>
+        </div>
+      </div>
+
+      <div class="sum">
+        <b>小结</b>　心智模型：显存=参数/梯度/优化器状态/激活四本账。FSDP2 把前三本账分片到 1/N（all_gather 时拼回、用完即丢），剩下激活这本账由 recompute 兜底——A2(开)用一次重算前向换激活显存，A3(关)用足卡显存换吞吐；取舍变量只有一个：显存够不够。进阶两招各有专攻：async_offload 用 saved_tensors_hooks 把激活异步换页到 pin_memory CPU 段并预取（和 recompute 是"留 vs 算"的两条路），chunkloss 把 lm loss 沿序列维切块以压 logits 峰值（大 vocab 下的另一只显存怪兽）。NPU 侧另配 expandable_segments 池（缓解碎片化、不改总额）与多流内存复用（配合 offload 旁路 stream）。读 A2 vs A3 的 yaml 差异，就读出了这套显存哲学：卡少+MoE+recompute 省显存，卡多+纯 FSDP+关 recompute 换吞吐。
+        <div class="pit">常见误区：①以为 recompute"总是省"——它省的是激活显存，<b>代价是一次额外前向的计算开销</b>，吞吐会掉；卡数够时应关掉换吞吐（A3），不是越省越好。②以为 async_offload=CPU offload 参数/梯度——它 offload 的是<b>激活</b>（saved_tensors_hooks 拦的就是 autograd 保存的中间张量），参数/梯度/优化器状态仍由 FSDP2 分片管，CPU 只暂存激活副本。③把 recompute 当成 recompute_modules 的同义词——recompute 是总开关(bool)，recompute_modules 是清单(List[str]，默认 model.layers.{*})，开关关了清单就不生效；A3 两份都写了清单但开关 False，清单只是不触发的摆设。④以为 expandable_segments 省总显存——它只让分配器按需扩段、缓解碎片化，总额上限不变，不会凭空多出显存。⑤把 async_offload 和 recompute 同时当"省激活"的等价手段叠加——两者目标重叠但代价不同（一个费 PCIe+CPU 内存、一个费 NPU 算力），叠加前先想清瓶颈是显存还是带宽还是算力，否则可能两边开销都吃。⑥以为 chunkloss 省的是激活——它省的是 logits 峰值，和 recompute 砍的不是同一本账，二者可共存但动机不同。</div>
+      </div>
+
+      <div class="filelist"><b>本篇涉及文件</b><br>
+mindspeed_llm/fsdp2/features/async_offload.py（SwapTensor 行 53-110 / launch_d2h 行 67 / resize_(0) 行 89 / launch_h2d 行 93 / prefetch_launch_h2d 行 113 / OffloadManager 行 173 / async_save_on_cpu 行 261-310 / _pack_to_cpu 行 272 / _unpack_from_cpu 行 294 / prefetch_get 行 227）<br>
+mindspeed_llm/fsdp2/features/chunkloss.py（ChunkLoss 行 6 / forward 切块 行 48-75 / grad_and_value 行 64 / save_for_backward 行 74 / backward 行 77-95 / fixed_cross_entropy 行 98 / calculate_lm_loss 行 153 / chunk_loss 行 231）<br>
+examples/fsdp2/env_config.sh（TRAINING_BACKEND 行 2 / TASK_QUEUE_ENABLE 行 4 / MULTI_STREAM_MEMORY_REUSE 行 6 / PYTORCH_NPU_ALLOC_CONF 行 7 / CUBLAS_WORKSPACE_CONFIG 行 9）<br>
+examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A2.yaml（recompute:True 行 23 / recompute_modules 行 24-25 / ep_modules 行 18-19）<br>
+examples/fsdp2/qwen3/pretrain_qwen3_8b_4k_fsdp2_A3.yaml（recompute:False 行 18 / recompute_modules 行 19-20 / 无 ep_modules）<br>
+mindspeed_llm/fsdp2/utils/arguments.py（recompute_modules 字段 行 432-435 / chunk_loss_size 行 699-701）<br>
+mindspeed_llm/fsdp2/distributed/mindspeed_parallel_engine.py（apply_recompute_modules 行 80-83 / recompute_modules import 行 7）<br>
+mindspeed_llm/fsdp2/models/model_factory.py（recompute_plan 生成 行 191）<br>
+mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py（async_save_on_cpu 调用 行 306-317）</div>
+    </main>
+  </div>
+</div>
+<script>
+// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre[data-lang]').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];if(!rules)return;
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      return '<span class="ln">'+(i+1)+'</span>'+tokLine(l,rules);
+    }).join('\n');
+  });
+})();
+</script>
+</body>
+</html>

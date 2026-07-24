@@ -1,0 +1,264 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>convert_ckpt_v2.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">convert_ckpt_v2.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_49717e76cbc455.html">◀ convert_ckpt.py</a> <a href="file_d04a217944c522.html">env_config.sh ▶</a></nav></div>
+<div class="wrap">
+<h1>convert_ckpt_v2.py</h1><p class="goal">convert_ckpt_v2.py · 6952B · 163 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L13" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_args()</a><a href="#L139" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def main()</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep17.html">EP17</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p>Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.</p><p class="mut">（自动提取自首行注释）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1">#  Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
+import argparse
+import logging as logger
+import time
+from mindspeed_llm.tasks.checkpoint.convert_hf2mg import Hf2MgConvert
+from mindspeed_llm.tasks.checkpoint.convert_mg2hf import Mg2HfConvert
+from mindspeed_llm.tasks.checkpoint.convert_ckpt_mamba2 import MambaConverter
+from mindspeed_llm.tasks.checkpoint.convert_ckpt_longcat import LongCatConverter
+from mindspeed_llm.tasks.checkpoint.convert_ckpt_deepseek4 import DeepSeek4Converter
+from mindspeed_llm.training.utils import auto_coverage
+
+
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        &#x27;--load-model-type&#x27;,
+        type=str,
+        nargs=&#x27;?&#x27;,
+        default=&#x27;hf&#x27;,
+        const=None,
+        choices=[&#x27;hf&#x27;, &#x27;mg&#x27;],
+        help=&#x27;Type of the converter&#x27;,
+    )
+    parser.add_argument(&#x27;--save-model-type&#x27;, type=str, default=&#x27;mg&#x27;, choices=[&#x27;mg&#x27;, &#x27;hf&#x27;], help=&#x27;Save model type&#x27;)
+    parser.add_argument(&#x27;--load-dir&#x27;, type=str, required=True, help=&#x27;Directory to load model checkpoint from&#x27;)
+    parser.add_argument(&#x27;--save-dir&#x27;, type=str, required=True, help=&#x27;Directory to save model checkpoint to&#x27;)
+    parser.add_argument(
+        &#x27;--model-type-hf&#x27;,
+        type=str,
+        default=&quot;qwen3&quot;,
+        choices=[
+            &#x27;qwen3&#x27;,
+            &#x27;qwen3-moe&#x27;,
+            &#x27;deepseek2&#x27;,
+            &#x27;deepseek3&#x27;,
+            &#x27;deepseek4&#x27;,
+            &#x27;gemma2&#x27;,
+            &#x27;glm45-air&#x27;,
+            &#x27;glm45&#x27;,
+            &#x27;llama2&#x27;,
+            &#x27;qwen25&#x27;,
+            &#x27;bailing_mini&#x27;,
+            &#x27;qwen3-next&#x27;,
+            &#x27;qwen2-moe&#x27;,
+            &#x27;seed-oss&#x27;,
+            &#x27;deepseek32&#x27;,
+            &#x27;magistral&#x27;,
+            &#x27;deepseek2-lite&#x27;,
+            &#x27;phi3.5&#x27;,
+            &#x27;phi3.5-moe&#x27;,
+            &#x27;plm&#x27;,
+            &#x27;mamba2&#x27;,
+            &#x27;longcat&#x27;,
+            &#x27;glm5&#x27;,
+            &#x27;deepseek4_base&#x27;,
+        ],
+        help=&#x27;model type of huggingface&#x27;,
+    )
+    parser.add_argument(
+        &#x27;--target-tensor-parallel-size&#x27;, type=int, default=1, help=&#x27;Target tensor model parallel size, defaults to 1.&#x27;
+    )
+    parser.add_argument(
+        &#x27;--target-pipeline-parallel-size&#x27;,
+        type=int,
+        default=1,
+        help=&#x27;Target pipeline model parallel size, defaults to 1.&#x27;,
+    )
+    parser.add_argument(
+        &#x27;--target-expert-parallel-size&#x27;, type=int, default=1, help=&#x27;Target expert model parallel size, defaults to 1.&#x27;
+    )
+    parser.add_argument(
+        &#x27;--expert-tensor-parallel-size&#x27;,
+        type=int,
+        default=None,
+        help=&#x27;Degree of expert model parallelism, Currentley it is support to be set to 1 or None. Default is None, which will be set to the value of --target-tensor-parallel-size&#x27;,
+    )
+    parser.add_argument(
+        &#x27;--num-layers-per-virtual-pipeline-stage&#x27;,
+        type=int,
+        default=None,
+        help=&#x27;Number of layers per virtual pipeline stage&#x27;,
+    )
+    parser.add_argument(&#x27;--moe-grouped-gemm&#x27;, action=&#x27;store_true&#x27;, help=&#x27;Use moe grouped gemm.&#x27;)
+    parser.add_argument(&quot;--noop-layers&quot;, type=str, default=None, help=&#x27;Specity the noop layers.&#x27;)
+    parser.add_argument(&#x27;--mtp-num-layers&#x27;, type=int, default=0, help=&#x27;Multi-Token prediction layer num&#x27;)
+    parser.add_argument(
+        &#x27;--num-layer-list&#x27;, type=str, help=&#x27;a list of number of layers, separated by comma; e.g., 4,4,4,4&#x27;
+    )
+    parser.add_argument(
+        &quot;--moe-tp-extend-ep&quot;,
+        action=&#x27;store_true&#x27;,
+        help=&quot;use tp group to extend experts parallism instead of sharding weight tensor of experts in tp group&quot;,
+    )
+    parser.add_argument(
+        &#x27;--mla-mm-split&#x27;, action=&#x27;store_true&#x27;, default=False, help=&#x27;Split 2 up-proj matmul into 4 in MLA&#x27;
+    )
+    parser.add_argument(
+        &#x27;--schedules-method&#x27;,
+        type=str,
+        default=None,
+        choices=[&#x27;dualpipev&#x27;],
+        help=&#x27;An innovative bidirectional pipeline parallelism algorithm.&#x27;,
+    )
+    parser.add_argument(
+        &#x27;--first-k-dense-replace&#x27;, type=int, default=None, help=&#x27;Customizing the number of dense layers.&#x27;
+    )
+    parser.add_argument(&#x27;--num-layers&#x27;, type=int, default=None, help=&#x27;Specify the number of transformer layers to use.&#x27;)
+    parser.add_argument(
+        &#x27;--transformer-impl&#x27;,
+        default=&#x27;local&#x27;,
+        choices=[&#x27;local&#x27;, &#x27;transformer_engine&#x27;],
+        help=&#x27;Which Transformer implementation to use.&#x27;,
+    )
+    parser.add_argument(&#x27;--hf-cfg-dir&#x27;, type=str, default=None, help=&#x27;Directory to load hugging face config files&#x27;)
+    parser.add_argument(&#x27;--input-tp-rank&#x27;, type=int, help=&#x27;Tensor Parallel rank of the input model shard&#x27;)
+    parser.add_argument(&#x27;--input-pp-rank&#x27;, type=int, help=&#x27;Pipeline Parallel rank of the input model shard&#x27;)
+    parser.add_argument(&#x27;--hidden-size&#x27;, type=int, default=4096, help=&#x27;Model dimension (hidden size)&#x27;)
+    parser.add_argument(&#x27;--mamba-state-dim&#x27;, type=int, default=128, help=&#x27;State dimension used in the Mamba model&#x27;)
+    parser.add_argument(&#x27;--mamba-num-groups&#x27;, type=int, default=8, help=&#x27;Number of groups in Mamba v2 model&#x27;)
+    parser.add_argument(&#x27;--mamba-head-dim&#x27;, type=int, default=64, help=&#x27;Head dimension in Mamba v2 model&#x27;)
+    parser.add_argument(
+        &#x27;--save-layer-by-layer&#x27;,
+        action=&#x27;store_true&#x27;,
+        default=False,
+        help=&#x27;Enable layer-by-layer saving to avoid OOM when the product of TP and EP is high&#x27;,
+    )
+    parser.add_argument(&#x27;--lora-load&#x27;, type=str, default=None, help=&#x27;Directory containing the lora model checkpoint.&#x27;)
+    parser.add_argument(&#x27;--lora-r&#x27;, type=int, default=None, help=&#x27;Lora r.&#x27;)
+    parser.add_argument(&#x27;--lora-alpha&#x27;, type=int, default=None, help=&#x27;Lora alpha.&#x27;)
+    parser.add_argument(&#x27;--lora-target-modules&#x27;, nargs=&#x27;+&#x27;, type=str, default=[], help=&#x27;Lora target modules.&#x27;)
+    parser.add_argument(&#x27;--save-lora-to-hf&#x27;, action=&#x27;store_true&#x27;, help=&#x27;only save lora ckpt to hf.&#x27;)
+    args, unknown = parser.parse_known_args()
+    if unknown:
+        raise ValueError(f&quot;Unrecognized argument : {&#x27; &#x27;.join(unknown)}&quot;)
+    return args
+
+
+@auto_coverage
+def main():
+    args = get_args()
+    logger.info(f&quot;Arguments: {args}&quot;)
+    if args.model_type_hf == &#x27;mamba2&#x27;:
+        converter = MambaConverter(args)
+    elif args.model_type_hf == &#x27;longcat&#x27;:
+        converter = LongCatConverter(args)
+    elif args.model_type_hf in (&#x27;deepseek4&#x27;, &#x27;deepseek4_base&#x27;):
+        converter = DeepSeek4Converter(args)
+    elif args.load_model_type == &#x27;hf&#x27; and args.save_model_type == &#x27;mg&#x27;:
+        converter = Hf2MgConvert(args)
+    elif args.load_model_type == &#x27;mg&#x27; and args.save_model_type == &#x27;hf&#x27;:
+        converter = Mg2HfConvert(args)
+    else:
+        raise Exception(&quot;This conversion scheme is not supported&quot;)
+
+    start_time = time.time()
+    converter.run()
+    end_time = time.time()
+    logger.info(&quot;time-consuming： {:.2f}s&quot;.format(end_time - start_time))
+
+
+if __name__ == &#x27;__main__&#x27;:
+    main()
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

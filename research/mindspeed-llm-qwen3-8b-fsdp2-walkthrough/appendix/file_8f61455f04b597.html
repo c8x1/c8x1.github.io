@@ -1,0 +1,638 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/data/data_utils.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/data/data_utils.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_d76cd71b4235d0.html">◀ data_factory.py</a> <a href="file_7771b635660e44.html">formatter.py ▶</a></nav></div>
+<div class="wrap">
+<h1>data_utils.py</h1><p class="goal">mindspeed_llm/fsdp2/data/data_utils.py · 21529B · 537 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L46" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class DatasetModule(TypedDict)</a><a href="#L51" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def merge_dataset</a><a href="#L79" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def split_dataset</a><a href="#L118" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_dataset_module(dataset: Union[&quot;Da</a><a href="#L142" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def setup_fs(path: str, anon: bool = False) -&</a><a href="#L158" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _read_json_with_fs(fs: &quot;fsspec.Abstra</a><a href="#L167" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def read_cloud_json(cloud_path: str) -&gt; lis</a><a href="#L192" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def has_tokenized_data(path: &quot;os.PathLike</a><a href="#L197" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def check_version(requirement: str, mandatory:</a><a href="#L216" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _load_single_dataset</a><a href="#L331" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_merged_dataset</a><a href="#L356" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_dataset_processor</a><a href="#L371" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, data, **kwargs)</a><a href="#L390" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_preprocessed_dataset</a><a href="#L435" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def main_process_first(local=True, desc=&quot;</a><a href="#L474" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_dataset</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep13.html">EP13</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p>Copyright 2025 the LlamaFactory team.</p><p class="mut">（自动提取自首行注释）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1"># Copyright 2025 the LlamaFactory team.
+
+import os
+import contextlib
+import json
+import fsspec
+import numpy as np
+from functools import partial
+from typing import Any, Optional, Literal, TypedDict, Union
+
+import torch
+import torch.distributed as dist
+from transformers import PreTrainedTokenizer
+
+from datasets import DatasetDict, concatenate_datasets, interleave_datasets
+from datasets import Dataset, IterableDataset
+from datasets import load_dataset, load_from_disk
+
+from ..utils.arguments import DataArguments, ModelArguments, TrainingArguments
+from .converter import get_local_rank, align_dataset
+from .parser import DatasetAttr
+from .parser import get_dataset_list
+from .template import Template
+from .processor import (
+    DatasetProcessor,
+    PackedSFTDatasetProcessor,
+    PretrainDatasetProcessor,
+    SFTDatasetProcessor
+)
+
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+from mindspeed_llm.fsdp2.distributed.parallel_state import ParallelState
+logger = get_logger(__name__)
+
+
+FILEEXT2TYPE = {
+    &quot;arrow&quot;: &quot;arrow&quot;,
+    &quot;csv&quot;: &quot;csv&quot;,
+    &quot;json&quot;: &quot;json&quot;,
+    &quot;jsonl&quot;: &quot;json&quot;,
+    &quot;parquet&quot;: &quot;parquet&quot;,
+    &quot;txt&quot;: &quot;text&quot;,
+}
+
+
+class DatasetModule(TypedDict):
+    train_dataset: Optional[Union[&quot;Dataset&quot;, &quot;IterableDataset&quot;]]
+    eval_dataset: Optional[Union[&quot;Dataset&quot;, &quot;IterableDataset&quot;, dict[str, &quot;Dataset&quot;]]]
+
+
+def merge_dataset(
+    all_datasets: list[Union[&quot;Dataset&quot;, &quot;IterableDataset&quot;]], data_args: &quot;DataArguments&quot;, seed: int
+) -&gt; Union[&quot;Dataset&quot;, &quot;IterableDataset&quot;]:
+    r&quot;&quot;&quot;Merge multiple datasets to a unified dataset.&quot;&quot;&quot;
+    if len(all_datasets) == 1:
+        return all_datasets[0]
+
+    elif data_args.mix_strategy == &quot;concat&quot;:
+        if data_args.streaming:
+            logger.info_rank0(&quot;The samples between different datasets will not be mixed in streaming mode.&quot;)
+
+        return concatenate_datasets(all_datasets)
+
+    elif data_args.mix_strategy.startswith(&quot;interleave&quot;):
+        if not data_args.streaming:
+            logger.info_rank0(&quot;We recommend using `mix_strategy=concat` in non-streaming mode.&quot;)
+
+        return interleave_datasets(
+            datasets=all_datasets,
+            probabilities=data_args.interleave_probs,
+            seed=seed,
+            stopping_strategy=&quot;first_exhausted&quot; if data_args.mix_strategy.endswith(&quot;under&quot;) else &quot;all_exhausted&quot;,
+        )
+
+    else:
+        raise ValueError(f&quot;Unknown mixing strategy: {data_args.mix_strategy}.&quot;)
+
+
+def split_dataset(
+    dataset: Optional[Union[&quot;Dataset&quot;, &quot;IterableDataset&quot;]],
+    eval_dataset: Optional[Union[&quot;Dataset&quot;, &quot;IterableDataset&quot;, dict[str, &quot;Dataset&quot;]]],
+    data_args: &quot;DataArguments&quot;,
+    seed: int,
+) -&gt; &quot;DatasetDict&quot;:
+    r&quot;&quot;&quot; Split the dataset and returns a dataset dict containing train set and validation set. Support both map dataset and iterable dataset.&quot;&quot;&quot;
+    if eval_dataset is not None and data_args.val_size &gt; 1e-6:
+        raise ValueError(&quot;Cannot specify `val_size` if `eval_dataset` is not None.&quot;)
+
+    dataset_dict = {}
+    if dataset is not None:
+        if data_args.streaming:
+            dataset = dataset.shuffle(buffer_size=data_args.buffer_size, seed=seed)
+
+        if data_args.val_size &gt; 1e-6:
+            if data_args.streaming:
+                dataset_dict[&quot;validation&quot;] = dataset.take(int(data_args.val_size))
+                dataset_dict[&quot;train&quot;] = dataset.skip(int(data_args.val_size))
+            else:
+                val_size = int(data_args.val_size) if data_args.val_size &gt; 1 else data_args.val_size
+                dataset_dict = dataset.train_test_split(test_size=val_size, seed=seed)
+                dataset = dataset.train_test_split(test_size=val_size, seed=seed)
+                dataset_dict = {&quot;train&quot;: dataset[&quot;train&quot;], &quot;validation&quot;: dataset[&quot;test&quot;]}
+        else:
+            dataset_dict[&quot;train&quot;] = dataset
+
+    if eval_dataset is not None:
+        if isinstance(eval_dataset, dict):
+            dataset_dict.update({f&quot;validation_{name}&quot;: data for name, data in eval_dataset.items()})
+        else:
+            if data_args.streaming:
+                eval_dataset = eval_dataset.shuffle(buffer_size=data_args.buffer_size, seed=seed)
+
+            dataset_dict[&quot;validation&quot;] = eval_dataset
+
+    return DatasetDict(dataset_dict)
+
+
+def get_dataset_module(dataset: Union[&quot;Dataset&quot;, &quot;DatasetDict&quot;]) -&gt; &quot;DatasetModule&quot;:
+    r&quot;&quot;&quot;Convert dataset or dataset dict to dataset module.&quot;&quot;&quot;
+    dataset_module: DatasetModule = {}
+    if isinstance(dataset, DatasetDict):  # dataset dict
+        if &quot;train&quot; in dataset:
+            dataset_module[&quot;train_dataset&quot;] = dataset[&quot;train&quot;]
+
+        if &quot;validation&quot; in dataset:
+            dataset_module[&quot;eval_dataset&quot;] = dataset[&quot;validation&quot;]
+        else:
+            eval_dataset = {}
+            for key in dataset.keys():
+                if key.startswith(&quot;validation_&quot;):
+                    eval_dataset[key[len(&quot;validation_&quot;) :]] = dataset[key]
+
+            if len(eval_dataset):
+                dataset_module[&quot;eval_dataset&quot;] = eval_dataset
+
+    else:  # single dataset
+        dataset_module[&quot;train_dataset&quot;] = dataset
+
+    return dataset_module
+
+
+def setup_fs(path: str, anon: bool = False) -&gt; &quot;fsspec.AbstractFileSystem&quot;:
+    r&quot;&quot;&quot;Set up a filesystem object based on the path protocol.&quot;&quot;&quot;
+    storage_options = {&quot;anon&quot;: anon} if anon else {}
+    if path.startswith(&quot;s3://&quot;):
+        fs = fsspec.filesystem(&quot;s3&quot;, **storage_options)
+    elif path.startswith((&quot;gs://&quot;, &quot;gcs://&quot;)):
+        fs = fsspec.filesystem(&quot;gcs&quot;, **storage_options)
+    else:
+        raise ValueError(f&quot;Unsupported protocol in path: {path}. Use &#x27;s3://&#x27; or &#x27;gs://&#x27;.&quot;)
+
+    if not fs.exists(path):
+        raise ValueError(f&quot;Path does not exist: {path}.&quot;)
+
+    return fs
+
+
+def _read_json_with_fs(fs: &quot;fsspec.AbstractFileSystem&quot;, path: str) -&gt; list[Any]:
+    r&quot;&quot;&quot;Helper function to read JSON/JSONL files using fsspec.&quot;&quot;&quot;
+    with fs.open(path, &quot;r&quot;) as f:
+        if path.endswith(&quot;.jsonl&quot;):
+            return [json.loads(line) for line in f if line.strip()]
+        else:
+            return json.load(f)
+
+
+def read_cloud_json(cloud_path: str) -&gt; list[Any]:
+    r&quot;&quot;&quot;Read a JSON/JSONL file from cloud storage (S3 or GCS).
+
+    Args:
+        cloud_path: str
+            Cloud path in the format:
+            - &#x27;s3://bucket-name/file.json&#x27; for AWS S3
+            - &#x27;gs://bucket-name/file.jsonl&#x27; or &#x27;gcs://bucket-name/file.jsonl&#x27; for Google Cloud Storage
+    &quot;&quot;&quot;
+    try:
+        # try with anonymous access first
+        fs = setup_fs(cloud_path, anon=True)
+    except Exception:
+        # try again with credentials
+        fs = setup_fs(cloud_path)
+
+    # filter out non-JSON files
+    files = [x[&quot;Key&quot;] for x in fs.listdir(cloud_path)] if fs.isdir(cloud_path) else [cloud_path]
+    files = filter(lambda file: file.endswith(&quot;.json&quot;) or file.endswith(&quot;.jsonl&quot;), files)
+    if not files:
+        raise ValueError(f&quot;No JSON/JSONL files found in the specified path: {cloud_path}.&quot;)
+
+    return sum([_read_json_with_fs(fs, file) for file in files], [])
+
+
+def has_tokenized_data(path: &quot;os.PathLike&quot;) -&gt; bool:
+    r&quot;&quot;&quot;Check if the path has a tokenized dataset.&quot;&quot;&quot;
+    return os.path.isdir(path) and len(os.listdir(path)) &gt; 0
+
+
+def check_version(requirement: str, mandatory: bool = False) -&gt; None:
+    r&quot;&quot;&quot;Optionally check the package version.&quot;&quot;&quot;
+    if is_env_enabled(&quot;DISABLE_VERSION_CHECK&quot;) and not mandatory:
+        logger.warning_rank0_once(&quot;Version checking has been disabled, may lead to unexpected behaviors.&quot;)
+        return
+
+    if &quot;gptmodel&quot; in requirement or &quot;autoawq&quot; in requirement:
+        pip_command = f&quot;pip install {requirement} --no-build-isolation&quot;
+    else:
+        pip_command = f&quot;pip install {requirement}&quot;
+
+    if mandatory:
+        hint = f&quot;To fix: run `{pip_command}`.&quot;
+    else:
+        hint = f&quot;To fix: run `{pip_command}` or set `DISABLE_VERSION_CHECK=1` to skip this check.&quot;
+
+    require_version(requirement, hint)
+
+
+def _load_single_dataset(
+    dataset_attr: &quot;DatasetAttr&quot;,
+    model_args: &quot;ModelArguments&quot;,
+    data_args: &quot;DataArguments&quot;,
+    training_args: &quot;TrainingArguments&quot;,
+) -&gt; Union[&quot;Dataset&quot;, &quot;IterableDataset&quot;]:
+    r&quot;&quot;&quot;Load a single dataset and aligns it to the standard format.&quot;&quot;&quot;
+    logger.info_rank0(f&quot;Loading dataset {dataset_attr}...&quot;)
+    data_path, data_name, data_dir, data_files = None, None, None, None
+    if dataset_attr.load_from in [&quot;hf_hub&quot;, &quot;ms_hub&quot;, &quot;om_hub&quot;]:
+        data_path = dataset_attr.dataset_name
+        data_name = dataset_attr.subset
+        data_dir = dataset_attr.folder
+
+    elif dataset_attr.load_from == &quot;script&quot;:
+        data_path = os.path.join(data_args.dataset_dir, dataset_attr.dataset_name)
+        data_name = dataset_attr.subset
+        data_dir = dataset_attr.folder
+
+    elif dataset_attr.load_from == &quot;cloud_file&quot;:
+        data_path = dataset_attr.dataset_name
+
+    elif dataset_attr.load_from == &quot;file&quot;:
+        data_files = []
+        local_path = os.path.join(data_args.dataset_dir, dataset_attr.dataset_name)
+        if os.path.isdir(local_path):
+            for file_name in os.listdir(local_path):
+                data_files.append(os.path.join(local_path, file_name))
+        elif os.path.isfile(local_path):
+            data_files.append(local_path)
+        else:
+            raise ValueError(f&quot;File {local_path} not found.&quot;)
+
+        data_path = FILEEXT2TYPE.get(os.path.splitext(data_files[0])[-1][1:], None)
+        if data_path is None:
+            raise ValueError(&quot;Allowed file types: {}.&quot;.format(&quot;,&quot;.join(FILEEXT2TYPE.keys())))
+
+        if any(data_path != FILEEXT2TYPE.get(os.path.splitext(data_file)[-1][1:], None) for data_file in data_files):
+            raise ValueError(&quot;File types should be identical.&quot;)
+    else:
+        raise NotImplementedError(f&quot;Unknown load type: {dataset_attr.load_from}.&quot;)
+
+    if dataset_attr.load_from == &quot;ms_hub&quot;:
+        check_version(&quot;modelscope&gt;=1.14.0&quot;, mandatory=True)
+        from modelscope import MsDataset
+        from modelscope.utils.config_ds import MS_DATASETS_CACHE
+
+        cache_dir = model_args.cache_dir or MS_DATASETS_CACHE
+        dataset = MsDataset.load(
+            dataset_name=data_path,
+            subset_name=data_name,
+            data_dir=data_dir,
+            data_files=data_files,
+            split=dataset_attr.split,
+            cache_dir=cache_dir,
+            token=model_args.ms_hub_token,
+            use_streaming=data_args.streaming,
+        )
+        if isinstance(dataset, MsDataset):
+            dataset = dataset.to_hf_dataset()
+
+    elif dataset_attr.load_from == &quot;om_hub&quot;:
+        check_version(&quot;openmind&gt;=0.8.0&quot;, mandatory=True)
+        from openmind import OmDataset
+        from openmind.utils.hub import OM_DATASETS_CACHE
+
+        cache_dir = model_args.cache_dir or OM_DATASETS_CACHE
+        dataset = OmDataset.load_dataset(
+            path=data_path,
+            name=data_name,
+            data_dir=data_dir,
+            data_files=data_files,
+            split=dataset_attr.split,
+            cache_dir=cache_dir,
+            token=model_args.om_hub_token,
+            streaming=data_args.streaming,
+        )
+    elif dataset_attr.load_from == &quot;cloud_file&quot;:
+        dataset = Dataset.from_list(read_cloud_json(data_path), split=dataset_attr.split)
+    else:
+        dataset = load_dataset(
+            path=data_path,
+            name=data_name,
+            data_dir=data_dir,
+            data_files=data_files,
+            split=dataset_attr.split,
+            cache_dir=model_args.cache_dir,
+            token=model_args.hf_hub_token,
+            num_proc=data_args.preprocessing_num_workers,
+            streaming=data_args.streaming and dataset_attr.load_from != &quot;file&quot;,
+        )
+        if data_args.streaming and dataset_attr.load_from == &quot;file&quot;:
+            dataset = dataset.to_iterable_dataset(num_shards=training_args.dataloader_num_workers)
+
+    if dataset_attr.num_samples is not None and not data_args.streaming:
+        target_num = dataset_attr.num_samples
+        # all samples should be included
+        indexes = np.random.permutation(len(dataset))[:target_num]
+        target_num -= len(indexes)
+        if target_num &gt; 0:
+            expand_indexes = np.random.choice(len(dataset), target_num)
+            indexes = np.concatenate((indexes, expand_indexes), axis=0)
+
+        assert len(indexes) == dataset_attr.num_samples, &quot;Sample num mismatched.&quot;
+        dataset = dataset.select(indexes)
+        logger.info_rank0(f&quot;Sampled {dataset_attr.num_samples} examples from dataset {dataset_attr}.&quot;)
+
+    if data_args.max_samples is not None:
+        # truncate dataset
+        max_samples = min(data_args.max_samples, len(dataset))
+        dataset = dataset.select(range(max_samples))
+
+    return align_dataset(dataset, dataset_attr, data_args, training_args)
+
+
+def _get_merged_dataset(
+    dataset_names: Optional[list[str]],
+    model_args: &quot;ModelArguments&quot;,
+    data_args: &quot;DataArguments&quot;,
+    training_args: &quot;TrainingArguments&quot;,
+    stage: Literal[&quot;pt&quot;, &quot;sft&quot;, &quot;rm&quot;, &quot;ppo&quot;, &quot;kto&quot;],
+    return_dict: bool = False,
+) -&gt; Optional[Union[&quot;Dataset&quot;, &quot;IterableDataset&quot;, dict[str, &quot;Dataset&quot;]]]:
+    r&quot;&quot;&quot;Return the merged datasets in the standard format.&quot;&quot;&quot;
+    if dataset_names is None:
+        return None
+
+    datasets = {}
+    for dataset_name, dataset_attr in zip(dataset_names, get_dataset_list(dataset_names, data_args.dataset_dir)):
+        if (stage == &quot;rm&quot; and dataset_attr.ranking is False) or (stage != &quot;rm&quot; and dataset_attr.ranking is True):
+            raise ValueError(&quot;The dataset is not applicable in the current training stage.&quot;)
+
+        datasets[dataset_name] = _load_single_dataset(dataset_attr, model_args, data_args, training_args)
+
+    if return_dict:
+        return datasets
+    else:
+        return merge_dataset(list(datasets.values()), data_args, seed=training_args.seed)
+
+
+def _get_dataset_processor(
+    data_args: &quot;DataArguments&quot;,
+    stage: Literal[&quot;pt&quot;, &quot;sft&quot;],
+    template: &quot;Template&quot;,
+    tokenizer: &quot;PreTrainedTokenizer&quot;,
+    do_generate: bool = False,
+) -&gt; &quot;DatasetProcessor&quot;:
+    r&quot;&quot;&quot;Return the corresponding dataset processor.&quot;&quot;&quot;
+    if stage == &quot;pt&quot;:
+        dataset_processor_class = PretrainDatasetProcessor
+    elif stage == &quot;sft&quot; and not do_generate:
+        if data_args.packing:
+            if data_args.neat_packing:
+                # hack datasets to have int32 attention mask
+                from datasets.arrow_writer import OptimizedTypedSequence, TypedSequence
+                def __init__(self, data, **kwargs):
+                    return TypedSequence.__init__(
+                        self,
+                        data,
+                        type=kwargs.pop(&quot;type&quot;, None),
+                        try_type=kwargs.pop(&quot;try_type&quot;, None),
+                        optimized_int_type=kwargs.pop(&quot;optimized_int_type&quot;, None),
+                    )
+                OptimizedTypedSequence.__init__ = __init__
+            dataset_processor_class = PackedSFTDatasetProcessor
+        else:
+            dataset_processor_class = SFTDatasetProcessor
+
+    else:
+        raise RuntimeError(f&quot;The stage parameter currently is only supported to be set as &#x27;pt&#x27; or &#x27;sft&#x27;, please check it&quot;)
+
+    return dataset_processor_class(template=template, tokenizer=tokenizer, data_args=data_args)
+
+
+def _get_preprocessed_dataset(
+    dataset: Optional[Union[&quot;Dataset&quot;, &quot;IterableDataset&quot;]],
+    data_args: &quot;DataArguments&quot;,
+    training_args: &quot;TrainingArguments&quot;,
+    stage: Literal[&quot;pt&quot;, &quot;sft&quot;, &quot;rm&quot;, &quot;ppo&quot;, &quot;kto&quot;],
+    template: &quot;Template&quot;,
+    tokenizer: &quot;PreTrainedTokenizer&quot;,
+    is_eval: bool = False,
+) -&gt; Optional[Union[&quot;Dataset&quot;, &quot;IterableDataset&quot;]]:
+    r&quot;&quot;&quot;Preprocesses the dataset, including format checking and tokenization.&quot;&quot;&quot;
+    if dataset is None:
+        return None
+    
+    dataset_processor = _get_dataset_processor(data_args, stage, template, tokenizer, do_generate=is_eval)
+    column_names = list(next(iter(dataset)).keys())
+    kwargs = {}
+    if not data_args.streaming:
+        kwargs = dict(
+            num_proc=data_args.preprocessing_num_workers,
+            load_from_cache_file=(not data_args.overwrite_cache) or (get_local_rank() != 0),
+            desc=&quot;Running tokenizer on dataset&quot;,
+        )
+
+    dataset = dataset.map(
+        dataset_processor.preprocess_dataset,
+        batched=True,
+        batch_size=data_args.preprocessing_batch_size,
+        remove_columns=column_names,
+        **kwargs,
+    )
+
+    if dist.get_rank() == 0:
+        try:
+            print(&quot;eval example:&quot; if is_eval else &quot;training example:&quot;)
+            dataset_processor.print_data_example(next(iter(dataset)))
+        except StopIteration:
+            if stage == &quot;pt&quot;:
+                raise RuntimeError(&quot;Cannot find sufficient samples, consider increasing dataset size.&quot;)
+            else:
+                raise RuntimeError(&quot;Cannot find valid samples, check `data/README.md` for the data format.&quot;)
+
+    return dataset
+
+
+@contextlib.contextmanager
+def main_process_first(local=True, desc=&quot;work&quot;):
+    r&quot;&quot;&quot;
+    A context manager for torch distributed environment where on needs to do something on the main process, while
+    blocking replicas, and when it&#x27;s finished releasing the replicas.
+
+    One such use is for `datasets`&#x27;s `map` feature which to be efficient should be run once on the main process,
+    which upon completion saves a cached version of results and which then automatically gets loaded by the
+    replicas.
+
+    Args:
+        local (`bool`, *optional*, defaults to `True`):
+            if `True` first means process of rank 0 of each node if `False` first means process of rank 0 of node
+            rank 0 In multi-node environment with a shared filesystem you most likely will want to use
+            `local=False` so that only the main process of the first node will do the processing. If however, the
+            filesystem is not shared, then the main process of each node will need to do the processing, which is
+            the default behavior.
+        desc (`str`, *optional*, defaults to `&quot;work&quot;`):
+            a work description to be used in debug logs
+
+    &quot;&quot;&quot;
+    if dist.get_world_size() &gt; 1:
+        main_process_desc = &quot;main local process&quot; if local else &quot;main process&quot;
+        is_main_process = (get_local_rank() == 0) if local else (dist.get_rank() == 0)
+        ps = ParallelState()
+        try:
+            if not is_main_process:
+                # tell all replicas to wait
+                print(f&quot;waiting for the {main_process_desc} to perform {desc}&quot;)
+                dist.barrier(group = ps.get_group(&#x27;dp_fsdp&#x27;))
+            yield
+        finally:
+            if is_main_process:
+                # the wait is over
+                print(f&quot;{main_process_desc} completed {desc}, releasing all replicas&quot;)
+                dist.barrier(group = ps.get_group(&#x27;dp_fsdp&#x27;))
+    else:
+        yield
+
+
+def get_dataset(
+    template: &quot;Template&quot;,
+    model_args: &quot;ModelArguments&quot;,
+    data_args: &quot;DataArguments&quot;,
+    training_args: &quot;TrainingArguments&quot;,
+    stage: Literal[&quot;pt&quot;, &quot;sft&quot;, &quot;rm&quot;, &quot;ppo&quot;, &quot;kto&quot;],
+    tokenizer: &quot;PreTrainedTokenizer&quot;
+) -&gt; &quot;DatasetModule&quot;:
+    r&quot;&quot;&quot;Get the train dataset and optionally gets the evaluation dataset.&quot;&quot;&quot;
+    # Load tokenized dataset if path exists
+    if data_args.tokenized_path is not None:
+        if has_tokenized_data(data_args.tokenized_path):
+            logger.info_rank0(&quot;Loading dataset from disk will ignore other data arguments.&quot;)
+            tokenized_data = load_from_disk(data_args.tokenized_path)
+            dataset_module = get_dataset_module(tokenized_data)
+            if data_args.streaming:
+                dataset_module[&quot;train_dataset&quot;] = dataset_module[&quot;train_dataset&quot;].to_iterable_dataset()
+
+            logger.info_rank0(f&quot;Loaded tokenized dataset from {data_args.tokenized_path}.&quot;)
+            return dataset_module
+
+        if data_args.streaming:
+            raise ValueError(&quot;Turn off `streaming` when saving dataset to disk.&quot;)
+    # Load the origin dataset
+    with main_process_first(desc=&quot;load dataset&quot;, local=(not data_args.data_shared_file_system)):
+        dataset = _get_merged_dataset(
+            data_args.dataset,
+            model_args,
+            data_args,
+            training_args,
+            stage
+        )
+        eval_dataset = _get_merged_dataset(
+            data_args.eval_dataset,
+            model_args,
+            data_args,
+            training_args,
+            stage,
+            return_dict=data_args.eval_on_each_dataset,
+        )
+
+    # preprocess the dataset
+    with main_process_first(desc=&quot;pre-process dataset&quot;, local=(not data_args.data_shared_file_system)):
+        dataset = _get_preprocessed_dataset(
+            dataset, data_args, training_args, stage, template, tokenizer, is_eval=False
+        )
+        if isinstance(eval_dataset, dict):
+            for eval_name, eval_data in eval_dataset.items():
+                eval_dataset[eval_name] = _get_preprocessed_dataset(
+                    eval_data, data_args, training_args, stage, template, tokenizer, is_eval=True
+                )
+        else:
+            eval_dataset = _get_preprocessed_dataset(
+                eval_dataset, data_args, training_args, stage, template, tokenizer, is_eval=True
+            )
+
+        dataset_dict = split_dataset(dataset, eval_dataset, data_args, seed=training_args.seed)
+        if data_args.tokenized_path is not None:
+            # save tokenized dataset to disk
+            dataset_dict.save_to_disk(data_args.tokenized_path)
+            logger.info_rank0(f&quot;Tokenized dataset is saved at {data_args.tokenized_path}.&quot;)
+            logger.info_rank0(f&quot;Please launch the training with `tokenized_path: {data_args.tokenized_path}`.&quot;)
+
+        return get_dataset_module(dataset_dict)</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

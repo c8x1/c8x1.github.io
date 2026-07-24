@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>硬件与运行时：GPU vs NPU(910B) · 走读 EP02</title>
+<style>
+  :root{
+    --bg:#0f0f12; --bg2:#000; --side:#1a1a1a; --card:#16161c; --line:#2a2a33;
+    --txt:#e8e8e8; --mut:#9a9a9a; --mut2:#6a6a6a;
+    --serif:ui-serif,Georgia,"Times New Roman",Times,serif;
+    --sans:system-ui,-apple-system,"PingFang SC","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace;
+    --red:#C7000B; --red-bg:#2a0f10; --red-bd:#6e1a1c; --red-tx:#e88;
+    --grn:#788C5D; --grn-bg:#14241a; --grn-bd:#2e5a3a; --grn-tx:#7ab98a;
+    --acc:#C7000B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+  .page{max-width:1180px;margin:0 auto;padding:0}
+  /* breadcrumb + nav */
+  .topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);
+    font-size:13px;color:var(--mut)}
+  .topbar .crumb{font-family:var(--serif);font-style:italic}
+  .topbar nav{margin-left:auto;display:flex;gap:8px}
+  .topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:4px 10px;border-radius:6px}
+  .topbar nav a:hover{color:#fff;border-color:var(--acc)}
+  /* layout: tree + main */
+  .body{display:grid;grid-template-columns:160px 1fr;align-items:start}
+  .tree{background:var(--side);border-right:1px solid var(--line);padding:14px 8px;
+    font-family:var(--mono);font-size:11px;color:var(--mut2);min-height:80vh;position:sticky;top:0}
+  .tree .f{display:block;padding:2px 4px;white-space:pre}
+  .tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px}
+  .main{padding:22px 28px 80px}
+  /* headings */
+  h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:6px 0 2px;color:#fff}
+  .goal{font-family:var(--serif);font-style:italic;color:var(--mut);margin:0 0 4px}
+  .gain{font-size:13px;color:var(--mut);margin:0 0 20px}
+  .gain b{color:var(--red-tx)}
+  h2{font-family:var(--serif);font-weight:600;font-size:18px;color:#fff;margin:26px 0 6px;
+    border-bottom:1px solid var(--line);padding-bottom:3px}
+  h2 .sec{color:var(--mut2);font-style:italic;font-size:13px;margin-left:8px}
+  p{margin:8px 0}
+  /* code as numbered figure */
+  .figcap{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);
+    margin:10px 0 2px}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--mut2);
+    padding:10px 12px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55}
+  pre .ln{display:inline-block;width:32px;color:var(--mut2);user-select:none}
+  .filelink{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--red-tx);margin:4px 0 14px}
+  .filelink a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--red-bd)}
+  .footnote{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--mut2);margin:4px 0 14px}
+  /* highlight tints */
+  /* PyCharm Darcula 主题 token 配色 */
+  pre[data-lang]{color:#d4d4d4}
+  .tok-kw{color:#cc7832;font-weight:600}
+  .tok-bi{color:#9876aa;font-style:italic}
+  .tok-fn{color:#ffc66d}
+  .tok-cl{color:#a9b7c6;font-style:italic}
+  .tok-st{color:#6a8759}
+  .tok-cm{color:#808080;font-style:italic}
+  .tok-nm{color:#6897bb}
+  .tok-dc{color:#bbb33b}
+  .tok-key{color:#cc7832}
+  .tok-var{color:#9876aa}
+  .tree .f,.tree a.f{color:#6a6a6a;text-decoration:none;display:block;padding:2px 4px;white-space:pre;border-radius:3px}
+  .tree a.f:hover{background:#2a2a33;color:#d4d4d4}
+  .tree a.f.act,.tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px;font-weight:600}
+  /* gnpu split card */
+  .gnpu{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:14px 0}
+  .gnpu .g{background:var(--grn-bg);border-right:1px solid var(--line);padding:10px 14px}
+  .gnpu .n{background:var(--red-bg);padding:10px 14px}
+  .gnpu h4{margin:0 0 6px;font-family:var(--serif);font-size:13px}
+  .gnpu .g h4{color:var(--grn-tx)}.gnpu .n h4{color:var(--red-tx)}
+  .gnpu .row{display:grid;grid-template-columns:90px 1fr;gap:6px;font-size:12.5px;margin:4px 0}
+  .gnpu .row .k{color:var(--mut2)}
+  /* inline svg */
+  .diag{margin:10px 0 6px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:8px}
+  .diag svg{display:block;width:100%;height:auto}
+  .diagcap{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:6px 0 2px}
+  /* summary */
+  .sum{border-top:1px solid var(--line);margin-top:22px;padding-top:10px;font-size:13.5px}
+  .sum .pit{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12.5px;margin-top:6px}
+  /* file list at end */
+  .filelist{font-family:var(--mono);font-size:11px;color:var(--mut2);margin-top:22px;border-top:1px dashed var(--line);padding-top:10px}
+  .filelist b{color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <span class="crumb">第一篇章 · 地基与心智桥 › EP02</span>
+    <span style="color:var(--mut2)">EP02</span>
+    <nav>
+      <a href="ep01.html">◀ 上一篇</a>
+      <a href="index.html">索引</a>
+      <a href="ep03.html">下一篇 ▶</a>
+    </nav>
+  </div>
+  <div class="body">
+    <aside class="tree">
+      <a class="f" href="appendix/index.html" target="_blank">📁 附录·项目文件走读</a>
+      <span class="f">MindSpeed-LLM/</span>
+      <a class="f" href="appendix/file_089411e68e5d5b.html" target="_blank">├ train_fsdp2.py</a>
+      <span class="f">├ examples/fsdp2/</span>
+      <a class="f" href="appendix/file_d04a217944c522.html" target="_blank">│  ├ env_config.sh</a>
+      <span class="f">│  └ qwen3/</span>
+      <span class="f">├ docs/zh/pytorch/</span>
+      <span class="f">│  ├ models/supported_models.md</span>
+      <span class="f">│  └ training/install_guide.md</span>
+      <span class="f">├ docker/</span>
+      <span class="f">│  └ OVERVIEW.zh.md</span>
+      <!-- 本篇相关文件高亮 .act，按篇替换 -->
+      <a class="f act" href="appendix/file_d04a217944c522.html" target="_blank">examples/fsdp2/env_config.sh</a>
+      <span class="f">└ ...</span>
+    </aside>
+    <main class="main">
+      <h1>硬件与运行时：GPU vs NPU(910B)</h1>
+      <p class="goal">目标：建立 CUDA 栈↔CANN/NPU 栈的分层对照。前置：EP01 系列导览。</p>
+      <p class="gain">你将获得：<b>①</b> 一张把 GPU 四层栈逐层映到 NPU(910B) 四层栈的分层对照图 <b>②</b> <code style="font-family:var(--mono);color:var(--mut)">env_config.sh</code> 每个环境变量在 NPU 侧的真实语义（含哪些是 GPU 遗留名、需核实）</p>
+
+      <h2>你已经熟悉的情况 <span class="sec">桥接开场</span></h2>
+      <p>在 GPU 世界里，你的运行时栈大约是四层：最底是 <b>驱动</b>（NVIDIA driver + 固件），之上是 <b>CUDA Runtime/cuBLAS/cuDNN</b>（计算库），通信走 <b>NCCL</b>，框架层 <b>PyTorch</b> 通过 <code style="font-family:var(--mono);color:var(--mut)">torch.cuda</code> 调度——混合精度用 <code style="font-family:var(--mono);color:var(--mut)">torch.cuda.amp</code>，显存用 <code style="font-family:var(--mono);color:var(--mut)">cudaMalloc</code>，调试靠 <code style="font-family:var(--mono);color:var(--mut)">CUDA_LAUNCH_BLOCKING</code>。这套心智高度自洽，以至于你几乎意识不到它"分层"。</p>
+      <p>本篇要做的，是把这四层逐一映到 Ascend 910B 那一侧：驱动→Ascend driver/固件，CUDA/cuDNN→<b>CANN</b>（含 Ascend 算子库），NCCL→<b>HCCL</b>，PyTorch→<b>torch_npu</b>（一个让 <code style="font-family:var(--mono);color:var(--mut)">torch.cuda</code> 的调用落到 NPU 的适配层）。关键认知：NPU 不是"换了张显卡"，而是<b>另一套同构但不同源的栈</b>——同一个 PyTorch 算子在两侧可能由完全不同的库实现，环境变量名也常常是 GPU 遗留名被 NPU 侧"沿用或忽略"。EP01 的桥②"torch.cuda → torch.npu"，本篇就把它走到底。</p>
+
+      <h2>本项目怎么做 <span class="sec">原理</span></h2>
+      <p>把两张栈并排画出来，按"驱动 / 计算 / 通信 / 框架"四层对齐。左列是你熟的 GPU 栈，右列是本项目 910B 上的 NPU 栈；中间一列箭头标"对应关系"，注意对应不等于"同一套东西换个名字"——而是"承担同等职责、但实现与命名都换了"。</p>
+
+      <div class="diag">
+        <svg viewBox="0 0 880 470" role="img" aria-label="GPU 栈 vs NPU 栈 分层对照图">
+          <!-- 顶部标注 -->
+          <text x="150" y="24" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-style="italic" font-size="14" fill="#9a9a9a">GPU 栈（你熟悉）</text>
+          <text x="730" y="24" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-style="italic" font-size="14" fill="#9a9a9a">NPU 栈（本项目 · 910B）</text>
+          <text x="440" y="24" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-style="italic" font-size="12" fill="#6a6a6a">对应（非同名）</text>
+          <line x1="30" y1="34" x2="850" y2="34" stroke="#2a2a33" stroke-width="1"/>
+
+          <!-- 第 1 层：框架 -->
+          <text x="30" y="58" font-family="ui-serif,Georgia,serif" font-size="12" fill="#6a6a6a">框架层</text>
+          <rect x="50" y="64" width="220" height="50" rx="6" fill="#14241a" stroke="#2e5a3a"/>
+          <text x="160" y="84" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#7ab98a">PyTorch</text>
+          <text x="160" y="103" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="10.5" fill="#9a9a9a">torch.cuda · torch.cuda.amp</text>
+          <rect x="610" y="64" width="220" height="50" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="720" y="84" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#e88">torch_npu</text>
+          <text x="720" y="103" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="10.5" fill="#9a9a9a">torch.npu · transfer_to_npu</text>
+          <path d="M270,89 C400,89 480,89 610,89" fill="none" stroke="#6e1a1c" stroke-width="1.5" marker-end="url(#ar)"/>
+          <line x1="30" y1="122" x2="850" y2="122" stroke="#2a2a33" stroke-width="1" stroke-dasharray="3 4"/>
+
+          <!-- 第 2 层：通信 -->
+          <text x="30" y="146" font-family="ui-serif,Georgia,serif" font-size="12" fill="#6a6a6a">通信层</text>
+          <rect x="50" y="152" width="220" height="50" rx="6" fill="#14241a" stroke="#2e5a3a"/>
+          <text x="160" y="172" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#7ab98a">NCCL</text>
+          <text x="160" y="191" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="10.5" fill="#9a9a9a">AllReduce / AllGather ...</text>
+          <rect x="610" y="152" width="220" height="50" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="720" y="172" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#e88">HCCL</text>
+          <text x="720" y="191" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="10.5" fill="#9a9a9a">HCCL_CONNECT_TIMEOUT=1800</text>
+          <path d="M270,177 C400,177 480,177 610,177" fill="none" stroke="#6e1a1c" stroke-width="1.5" marker-end="url(#ar)"/>
+          <line x1="30" y1="210" x2="850" y2="210" stroke="#2a2a33" stroke-width="1" stroke-dasharray="3 4"/>
+
+          <!-- 第 3 层：计算/算子库 -->
+          <text x="30" y="234" font-family="ui-serif,Georgia,serif" font-size="12" fill="#6a6a6a">计算/算子</text>
+          <rect x="50" y="240" width="220" height="50" rx="6" fill="#14241a" stroke="#2e5a3a"/>
+          <text x="160" y="260" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#7ab98a">CUDA · cuDNN · cuBLAS</text>
+          <text x="160" y="279" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="10.5" fill="#9a9a9a">CUBLAS_WORKSPACE_CONFIG</text>
+          <rect x="610" y="240" width="220" height="50" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="720" y="260" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#e88">CANN · Ascend 算子</text>
+          <text x="720" y="279" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="10.5" fill="#9a9a9a">TASK_QUEUE / 算子库</text>
+          <path d="M270,265 C400,265 480,265 610,265" fill="none" stroke="#6e1a1c" stroke-width="1.5" marker-end="url(#ar)"/>
+          <line x1="30" y1="298" x2="850" y2="298" stroke="#2a2a33" stroke-width="1" stroke-dasharray="3 4"/>
+
+          <!-- 第 4 层：驱动 -->
+          <text x="30" y="322" font-family="ui-serif,Georgia,serif" font-size="12" fill="#6a6a6a">驱动/固件</text>
+          <rect x="50" y="328" width="220" height="50" rx="6" fill="#14241a" stroke="#2e5a3a"/>
+          <text x="160" y="348" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#7ab98a">NVIDIA driver</text>
+          <text x="160" y="367" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="10.5" fill="#9a9a9a">/dev/nvidia* · nvidia-smi</text>
+          <rect x="610" y="328" width="220" height="50" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="720" y="348" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#e88">Ascend driver · 固件</text>
+          <text x="720" y="367" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="10.5" fill="#9a9a9a">/dev/davinci* · npu-smi</text>
+          <path d="M270,353 C400,353 480,353 610,353" fill="none" stroke="#6e1a1c" stroke-width="1.5" marker-end="url(#ar)"/>
+          <line x1="30" y1="386" x2="850" y2="386" stroke="#2a2a33" stroke-width="1"/>
+
+          <!-- 底部备注条 -->
+          <text x="440" y="412" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-style="italic" font-size="12" fill="#9a9a9a">同一 PyTorch 训练脚本，左侧栈 → 右侧栈：算子库 / 通信库 / 调试变量全部换源</text>
+          <text x="440" y="432" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-style="italic" font-size="11" fill="#6a6a6a">绿色＝GPU 已知　·　红色＝NPU 本项目　·　箭头＝职责对应而非同名</text>
+
+          <!-- 箭头 marker 定义 -->
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#6e1a1c"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      <div class="diagcap">图 2.1　GPU 栈 vs NPU 栈 分层对照：框架（PyTorch↔torch_npu）、通信（NCCL↔HCCL）、计算/算子（CUDA/cuDNN/cuBLAS↔CANN/Ascend 算子）、驱动（NVIDIA driver↔Ascend driver）。箭头表示职责对应，不表示同名同源——很多 GPU 环境变量名在 NPU 侧只是"沿用外壳"。</div>
+      <p>这张图把 EP01 桥②的右岸拆成了四块砖。本系列后续每一篇遇到"某算子/某通信/某显存操作"时，都可以回到这里问一句"它落在哪一层、对应 GPU 哪个东西"。下面进入源码，看一个具体文件把这四层栈的旋钮都摆在哪。</p>
+
+      <h2>源码下钻 <span class="sec">file:line</span></h2>
+      <p>本篇主要走读 <code style="font-family:var(--mono);color:var(--mut)">examples/fsdp2/env_config.sh</code>——这是 FSDP2 后端的公共环境变量文件，每个变量都是某层栈的一个旋钮。整份文件就 9 行，逐个看。</p>
+
+      <p class="figcap">examples/fsdp2/env_config.sh 全文——FSDP2 后端的公共环境变量旋钮</p>
+      <pre data-lang="sh">
+export TRAINING_BACKEND=mindspeed_fsdp
+export HCCL_CONNECT_TIMEOUT=1800
+export TASK_QUEUE_ENABLE=2
+export CPU_AFFINITY_CONF=1
+export MULTI_STREAM_MEMORY_REUSE=2
+export PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+export TORCH_COMPILE_DEBUG=0
+export CUBLAS_WORKSPACE_CONFIG=:4096:8</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/env_config.sh">examples/fsdp2/env_config.sh:1</a>（全文见 :2–:9）</p>
+
+      <p class="figcap">逐行：① 后端选择——本项目走 mindspeed 的 FSDP2 实现，而非 torch 原生 fully_shard</p>
+      <pre data-lang="sh">
+export TRAINING_BACKEND=mindspeed_fsdp   # FSDP2 后端在 MindSpeed 侧的实现标识</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/env_config.sh">examples/fsdp2/env_config.sh:2</a></p>
+      <p class="footnote"><code style="font-family:var(--mono);color:var(--mut)">TRAINING_BACKEND=mindspeed_fsdp</code> 是栈<b>框架层</b>的旋钮：它告诉训练脚本用 MindSpeed 提供的 FSDP2 后端（与 EP01 提到的 <code style="font-family:var(--mono);color:var(--mut)">train_fsdp2.py</code> 配套），而非 PyTorch 上游裸跑的 fully_shard。对应到栈图，这一行的"作用点"在 torch_npu 与 MindSpeed 加速库之间（install_guide.md:196–205 安装 MindSpeed 加速库）。</p>
+
+      <p class="figcap">逐行：② 通信层——HCCL 建链超时拉到 1800 秒</p>
+      <pre data-lang="sh">
+export HCCL_CONNECT_TIMEOUT=1800   # HCCL（NPU 的 NCCL）建链超时</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/env_config.sh">examples/fsdp2/env_config.sh:3</a></p>
+      <p class="footnote">这是栈<b>通信层</b>的旋钮，也是图 2.1 第二行"NCCL↔HCCL"的一个具体落点：<code style="font-family:var(--mono);color:var(--mut)">HCCL_*</code> 前缀就是 NPU 侧对应 NCCL 调优变量的命名族。1800 秒（30 分钟）建链超时，是为大规模多机拓扑下首帧建链留足余量——GPU 侧你更熟悉的是 <code style="font-family:var(--mono);color:var(--mut)">NCCL_*_TIMEOUT</code>。</p>
+
+      <p class="figcap">逐行：③④⑤⑥ NPU 侧 CANN/显存/调度的四把旋钮（均为 torch_npu/CANN 专有前缀）</p>
+      <pre data-lang="sh">
+export TASK_QUEUE_ENABLE=2                  # CANN 任务队列调度
+export CPU_AFFINITY_CONF=1                  # NPU 侧 CPU 亲和性绑定
+export MULTI_STREAM_MEMORY_REUSE=2          # 多流显存复用
+export PYTORCH_NPU_ALLOC_CONF=expandable_segments:True   # NPU 显存分配策略</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/env_config.sh">examples/fsdp2/env_config.sh:4</a>（续 :5 :6 :7）</p>
+      <p class="footnote">这四行是栈<b>计算层 + 显存语义</b>的旋钮。<code style="font-family:var(--mono);color:var(--mut)">TASK_QUEUE_*</code>、<code style="font-family:var(--mono);color:var(--mut)">MULTI_STREAM_*</code> 是 CANN/Ascend 侧的概念（任务队列、多流复用），GPU 侧无直接同名对应；<code style="font-family:var(--mono);color:var(--mut)">PYTORCH_NPU_ALLOC_CONF</code> 的命名则直接对应 GPU 侧的 <code style="font-family:var(--mono);color:var(--mut)">PYTORCH_CUDA_ALLOC_CONF</code>——这是 NPU 借用 GPU 显存分配器接口语义的典型：把 <code style="font-family:var(--mono);color:var(--mut)">cudaMalloc</code> 那套"缓存分配 + 段扩展"照搬过来，<code style="font-family:var(--mono);color:var(--mut)">expandable_segments:True</code> 即启用可扩展段分配以缓解显存碎片（语义与 CUDA 侧同名选项一致）。</p>
+
+      <p class="figcap">逐行：⑦ 编译调试——关掉 torch.compile 调试输出</p>
+      <pre data-lang="sh">
+export TORCH_COMPILE_DEBUG=0   # torch.compile 调试日志关闭</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/env_config.sh">examples/fsdp2/env_config.sh:8</a></p>
+      <p class="footnote">这一行<b>不是</b> NPU 专有：<code style="font-family:var(--mono);color:var(--mut)">TORCH_COMPILE_DEBUG</code> 是 PyTorch 上游变量，两侧通用，对应栈框架层（torch.compile 在 NPU 侧后端是 Triton-Ascend，见 install_guide.md:182–190）。</p>
+
+      <p class="figcap">逐行：⑧ 一个"GPU 遗留名"变量——需核实其在 NPU 侧是否仍被读取</p>
+      <pre data-lang="sh">
+export CUBLAS_WORKSPACE_CONFIG=:4096:8   # GPU cuBLAS 工作区配置（遗留变量名）</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/examples/fsdp2/env_config.sh">examples/fsdp2/env_config.sh:9</a></p>
+      <p class="footnote"><b>（核实：NPU 侧是否仍读此变量，最终以 CANN 文档/源码为准）</b>　<code style="font-family:var(--mono);color:var(--mut)">CUBLAS_WORKSPACE_CONFIG</code> 是 GPU cuBLAS 的工作区配置变量，变量名带 <code style="font-family:var(--mono);color:var(--mut)">CUBLAS_</code> 前缀，理论上属于图 2.1 第三行左列（CUDA/cuBLAS）。它出现在 NPU 训练脚本里，有两种可能：一是 torch_npu/CANN 兼容性地读取同名变量以配 NPU 侧 BLAS 工作区；二是脚本从 GPU 模板沿用、NPU 侧实际忽略。本篇不臆断其 NPU 效果，留作核实项。凡 NPU 侧出现 GPU 命名前缀（<code style="font-family:var(--mono);color:var(--mut)">CUBLAS_</code> / <code style="font-family:var(--mono);color:var(--mut)">CUDA_*</code> 等）的变量，均按此处理。</p>
+
+      <p class="figcap">docs/zh/pytorch/training/install_guide.md 硬件支持表——910B 即 Atlas A2 训练系列</p>
+      <pre data-lang="sh">
+| Atlas A2 训练系列产品 | √ |   # 910b
+| Ascend 950 系列产品   | √ |   # a5（待搭建）</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/training/install_guide.md">docs/zh/pytorch/training/install_guide.md:11</a>（同表见 :12 :14）</p>
+      <p class="footnote">这张表把"910B"这个本系列反复出现的代号钉死：<b>910B ＝ Atlas A2 训练系列产品</b>（install_guide.md:14）。镜像侧佐证：docker/OVERVIEW.zh.md:77 明确"当前的 NPU 类型为 <code style="font-family:var(--mono);color:var(--mut)">910b</code>（Atlas A2 训练系列产品）和 <code style="font-family:var(--mono);color:var(--mut)">a3</code>（Atlas A3 训练系列产品），<code style="font-family:var(--mono);color:var(--mut)">a5</code>（Ascend 950 训练系列产品）待搭建"。即"910B"是镜像 Tag 里的芯片小写名，背后是 Atlas A2。本系列走读目标机即 910B。</p>
+
+      <p class="figcap">docs/zh/pytorch/models/supported_models.md 硬件要求——单 NPU 片上内存 ≥ 64GB</p>
+      <pre data-lang="sh">
+仓库支持 Ascend 950、Atlas A3、Atlas A2 训练系列产品 ... 要求单 NPU 的片上内存为 64GB 及以上</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/models/supported_models.md">docs/zh/pytorch/models/supported_models.md:21</a></p>
+      <p class="footnote">这是 NPU 侧<b>显存语义</b>的硬约束：不是"装得下模型权重"那么简单——FSDP2 分片后的参数、梯度、优化器状态、激活、通信 buffer 都要落在<b>单卡 64GB</b> 这块片上内存里（与 GPU 侧 HBM 同概念，但叫法与边界不同）。Qwen3-8B 在 FSDP2 下走 1x16 拓扑（supported_models.md:777–778，<code style="font-family:var(--mono);color:var(--mut)">【Test】</code>），恰好把 8B 模型分摊到 16 张卡，单卡显存压力才落进 64GB 预算。</p>
+
+      <p class="figcap">docker/OVERVIEW.zh.md 软件栈表——CANN 9.0.0 / PyTorch 2.7.1 / TorchNPU 2.7.1 的固定基线</p>
+      <pre data-lang="sh">
+| CANN      | 9.0.0 |
+| PyTorch   | 2.7.1 |
+| TorchNPU  | 2.7.1 |</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docker/OVERVIEW.zh.md">docker/OVERVIEW.zh.md:197</a>（同表见 :200 :201；默认基础镜像见 :207）</p>
+      <p class="footnote">这是栈<b>计算层 + 框架层</b>基线的事实落点：CANN 9.0.0（对应图 2.1 第三行"CANN · Ascend 算子"）、PyTorch 2.7.1、TorchNPU 2.7.1 三者版本被镜像固定。镜像 Tag 模板 <code style="font-family:var(--mono);color:var(--mut)">{版本}-cann{CANN}-torch_npu{TorchNPU}-{芯片}-{OS}-py{Python}-{架构}</code>（OVERVIEW.zh.md:15）也把这套栈写进了名字里，例如 <code style="font-family:var(--mono);color:var(--mut)">v26.0.0-cann9.0.0-torch_npu2.7.1-910b-openeuler24.03-py3.11-aarch64</code>（OVERVIEW.zh.md:31）。install_guide.md:54 进一步注明配套镜像预装"CANN 9.1.0 软件及 TorchNPU 26.0.0 插件"——注意这是 26.1.0 分支的新镜像，与 26.0.0 镜像的 CANN 9.0.0 是两条版本线，别混。</p>
+
+      <p class="figcap">docs/zh/pytorch/training/install_guide.md 源码安装——torch_npu whl 与 CANN 环境脚本</p>
+      <pre data-lang="sh">
+pip3 install torch-2.7.1-cp310-cp310-manylinux_2_28_aarch64.whl
+pip3 install torch_npu-2.7.1rc1-cp310-cp310-manylinux_2_28_aarch64.whl</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/training/install_guide.md">docs/zh/pytorch/training/install_guide.md:174</a>（续 :175；CANN set_env 见 :159）</p>
+      <p class="footnote">这一段把"框架层 PyTorch→torch_npu"的桥②落到了安装动作：<code style="font-family:var(--mono);color:var(--mut)">torch_npu-2.7.1rc1</code> 就是图 2.1 右列"torch_npu"那块砖的来源；CANN 环境（:147–161 的 <code style="font-family:var(--mono);color:var(--mut)">set_env.sh</code>）则是"计算层 CANN/Ascend 算子"那块砖被加载进运行时的方式——GPU 侧你不需要这一步，因为 CUDA runtime 跟驱动一起装好了；NPU 侧必须 <code style="font-family:var(--mono);color:var(--mut)">source set_env.sh</code>，否则"业务代码将无法执行"（install_guide.md:149）。这是两套栈最直观的运行时差异之一。</p>
+
+      <p>把这八行变量和三段安装事实叠到图 2.1 上：框架层有 <code style="font-family:var(--mono);color:var(--mut)">TRAINING_BACKEND</code> / <code style="font-family:var(--mono);color:var(--mut)">TORCH_COMPILE_DEBUG</code> / torch_npu whl；通信层有 <code style="font-family:var(--mono);color:var(--mut)">HCCL_CONNECT_TIMEOUT</code>；计算层有 CANN <code style="font-family:var(--mono);color:var(--mut)">set_env.sh</code> + <code style="font-family:var(--mono);color:var(--mut)">TASK_QUEUE_*</code> / <code style="font-family:var(--mono);color:var(--mut)">MULTI_STREAM_*</code>（以及存疑的 <code style="font-family:var(--mono);color:var(--mut)">CUBLAS_WORKSPACE_CONFIG</code>）；显存语义有 <code style="font-family:var(--mono);color:var(--mut)">PYTORCH_NPU_ALLOC_CONF</code> 与单卡 64GB 硬约束。同一个文件的九行，正好把四层栈的旋钮都点了一遍——这就是 EP01 桥②的"可落地处"。</p>
+
+      <div class="gnpu">
+        <div class="g"><h4>GPU / 已知</h4>
+          <div class="row"><span class="k">通信库</span><span>NCCL（AllReduce/AllGather，<code style="font-family:var(--mono);color:var(--mut2)">NCCL_*_TIMEOUT</code> 调优族）</span></div>
+          <div class="row"><span class="k">显存语义</span><span><code style="font-family:var(--mono);color:var(--mut2)">cudaMalloc</code> 缓存分配 + <code style="font-family:var(--mono);color:var(--mut2)">PYTORCH_CUDA_ALLOC_CONF=expandable_segments</code></span></div>
+          <div class="row"><span class="k">算子库</span><span>CUDA Runtime · cuDNN · cuBLAS（<code style="font-family:var(--mono);color:var(--mut2)">CUBLAS_WORKSPACE_CONFIG</code>）</span></div>
+          <div class="row"><span class="k">混合精度</span><span><code style="font-family:var(--mono);color:var(--mut2)">torch.cuda.amp</code> · autocast（fp16/bf16）</span></div>
+          <div class="row"><span class="k">调试变量</span><span><code style="font-family:var(--mono);color:var(--mut2)">CUDA_LAUNCH_BLOCKING=1</code>（同步发射定位内核错）</span></div>
+          <div class="row"><span class="k">设备/工具</span><span><code style="font-family:var(--mono);color:var(--mut2)">/dev/nvidia*</code> · nvidia-smi · driver</span></div>
+        </div>
+        <div class="n"><h4>NPU / 本项目</h4>
+          <div class="row"><span class="k">通信库</span><span>HCCL（<code style="font-family:var(--mono);color:var(--mut)">HCCL_CONNECT_TIMEOUT=1800</code>，env_config.sh:3）</span></div>
+          <div class="row"><span class="k">显存语义</span><span><code style="font-family:var(--mono);color:var(--mut)">PYTORCH_NPU_ALLOC_CONF=expandable_segments:True</code>（env_config.sh:7）+ 单卡 64GB HBM 硬约束（supported_models.md:21）</span></div>
+          <div class="row"><span class="k">算子库</span><span>CANN 9.0.0 · Ascend 算子（<code style="font-family:var(--mono);color:var(--mut)">TASK_QUEUE_ENABLE=2</code> / <code style="font-family:var(--mono);color:var(--mut)">MULTI_STREAM_MEMORY_REUSE=2</code>，env_config.sh:4 :6）；CUBLAS_* 系 GPU 遗留名（核实：NPU 侧是否仍读，以源码为准）</span></div>
+          <div class="row"><span class="k">混合精度</span><span>torch_npu 侧 MixedPrecisionPolicy（bf16 为主，与 GPU AMP 职责对应、接口不同源）</span></div>
+          <div class="row"><span class="k">调试变量</span><span>NPU 侧对应调试变量（核实：对应 CUDA_LAUNCH_BLOCKING 的 NPU 变量名，以 CANN/torch_npu 文档为准）</span></div>
+          <div class="row"><span class="k">设备/工具</span><span><code style="font-family:var(--mono);color:var(--mut)">/dev/davinci*</code> · npu-smi · Ascend driver（OVERVIEW.zh.md:77 / install_guide.md:82–95）</span></div>
+        </div>
+      </div>
+
+      <div class="sum">
+        <b>小结</b>　心智模型：NPU 不是"换了张显卡"，是<b>另一套同构但不同源的栈</b>。把 GPU 四层栈（驱动 / CUDA+cuDNN+cuBLAS / NCCL / PyTorch）逐层映到 NPU 四层栈（Ascend driver / CANN+Ascend 算子 / HCCL / torch_npu），就完成了 EP01 桥②的过桥。关键在于"职责对应"而非"同名同源"：同一个 PyTorch 算子在两侧由不同库实现、同一个环境变量名可能只是 GPU 遗留外壳（如 <code style="font-family:var(--mono);color:var(--mut)">CUBLAS_WORKSPACE_CONFIG</code>），而 NPU 专有旋钮（<code style="font-family:var(--mono);color:var(--mut)">HCCL_*</code> / <code style="font-family:var(--mono);color:var(--mut)">PYTORCH_NPU_ALLOC_CONF</code> / <code style="font-family:var(--mono);color:var(--mut)">TASK_QUEUE_*</code>）才是真正在拧 910B 那侧的螺丝。环境配置这一层如此，算子与通信原语层只会更彻底。
+        <div class="pit">常见误区：以为"拿一份 GPU 上跑通的 PyTorch 训练脚本，换上 torch_npu 就能直接跑"。实际上：(1) 必须先 <code style="font-family:var(--mono);color:var(--mut)">source</code> CANN <code style="font-family:var(--mono);color:var(--mut)">set_env.sh</code>，否则算子库根本没加载（install_guide.md:149）；(2) <code style="font-family:var(--mono);color:var(--mut)">torch.cuda.*</code> 的调用需经 torch_npu 适配（EP01 已见 <code style="font-family:var(--mono);color:var(--mut)">transfer_to_npu</code>），并非零成本；(3) GPU 遗留变量名（<code style="font-family:var(--mono);color:var(--mut)">CUBLAS_*</code> 等）在 NPU 侧的实际效果未经核实，不能照搬 GPU 的语义断言。</div>
+      </div>
+
+      <div class="filelist"><b>本篇涉及文件</b><br>
+examples/fsdp2/env_config.sh（9 行环境变量逐行解读 :2–:9）<br>
+docker/OVERVIEW.zh.md（镜像 Tag 模板 :15 / 910b 示例 :31 / 芯片类型 :77 / 软件栈表 :197 :200 :201 / 默认基础镜像 :207）<br>
+docs/zh/pytorch/models/supported_models.md（硬件要求 :21 / Qwen3-32B FSDP2 拓扑 :775–:781）<br>
+docs/zh/pytorch/training/install_guide.md（硬件支持表 :11–:14 / 配套镜像 :54 / A2·A3 镜像 :62–:64 / CANN set_env :147–:161 / torch_npu whl :174–:175）</div>
+    </main>
+  </div>
+</div>
+<script>
+// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre[data-lang]').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];if(!rules)return;
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      return '<span class="ln">'+(i+1)+'</span>'+tokLine(l,rules);
+    }).join('\n');
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>并行范式：DDP → FSDP1 → FSDP2 · 走读 EP03</title>
+<style>
+  :root{
+    --bg:#0f0f12; --bg2:#000; --side:#1a1a1a; --card:#16161c; --line:#2a2a33;
+    --txt:#e8e8e8; --mut:#9a9a9a; --mut2:#6a6a6a;
+    --serif:ui-serif,Georgia,"Times New Roman",Times,serif;
+    --sans:system-ui,-apple-system,"PingFang SC","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace;
+    --red:#C7000B; --red-bg:#2a0f10; --red-bd:#6e1a1c; --red-tx:#e88;
+    --grn:#788C5D; --grn-bg:#14241a; --grn-bd:#2e5a3a; --grn-tx:#7ab98a;
+    --acc:#C7000B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+  .page{max-width:1180px;margin:0 auto;padding:0}
+  /* breadcrumb + nav */
+  .topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);
+    font-size:13px;color:var(--mut)}
+  .topbar .crumb{font-family:var(--serif);font-style:italic}
+  .topbar nav{margin-left:auto;display:flex;gap:8px}
+  .topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:4px 10px;border-radius:6px}
+  .topbar nav a:hover{color:#fff;border-color:var(--acc)}
+  /* layout: tree + main */
+  .body{display:grid;grid-template-columns:160px 1fr;align-items:start}
+  .tree{background:var(--side);border-right:1px solid var(--line);padding:14px 8px;
+    font-family:var(--mono);font-size:11px;color:var(--mut2);min-height:80vh;position:sticky;top:0}
+  .tree .f{display:block;padding:2px 4px;white-space:pre}
+  .tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px}
+  .main{padding:22px 28px 80px}
+  /* headings */
+  h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:6px 0 2px;color:#fff}
+  .goal{font-family:var(--serif);font-style:italic;color:var(--mut);margin:0 0 4px}
+  .gain{font-size:13px;color:var(--mut);margin:0 0 20px}
+  .gain b{color:var(--red-tx)}
+  h2{font-family:var(--serif);font-weight:600;font-size:18px;color:#fff;margin:26px 0 6px;
+    border-bottom:1px solid var(--line);padding-bottom:3px}
+  h2 .sec{color:var(--mut2);font-style:italic;font-size:13px;margin-left:8px}
+  p{margin:8px 0}
+  /* code as numbered figure */
+  .figcap{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);
+    margin:10px 0 2px}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--mut2);
+    padding:10px 12px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55}
+  pre .ln{display:inline-block;width:32px;color:var(--mut2);user-select:none}
+  .filelink{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--red-tx);margin:4px 0 14px}
+  .filelink a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--red-bd)}
+  .footnote{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--mut2);margin:4px 0 14px}
+  /* highlight tints */
+  /* PyCharm Darcula 主题 token 配色 */
+  pre[data-lang]{color:#d4d4d4}
+  .tok-kw{color:#cc7832;font-weight:600}
+  .tok-bi{color:#9876aa;font-style:italic}
+  .tok-fn{color:#ffc66d}
+  .tok-cl{color:#a9b7c6;font-style:italic}
+  .tok-st{color:#6a8759}
+  .tok-cm{color:#808080;font-style:italic}
+  .tok-nm{color:#6897bb}
+  .tok-dc{color:#bbb33b}
+  .tok-key{color:#cc7832}
+  .tok-var{color:#9876aa}
+  .tree .f,.tree a.f{color:#6a6a6a;text-decoration:none;display:block;padding:2px 4px;white-space:pre;border-radius:3px}
+  .tree a.f:hover{background:#2a2a33;color:#d4d4d4}
+  .tree a.f.act,.tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px;font-weight:600}
+  /* gnpu split card */
+  .gnpu{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:14px 0}
+  .gnpu .g{background:var(--grn-bg);border-right:1px solid var(--line);padding:10px 14px}
+  .gnpu .n{background:var(--red-bg);padding:10px 14px}
+  .gnpu h4{margin:0 0 6px;font-family:var(--serif);font-size:13px}
+  .gnpu .g h4{color:var(--grn-tx)}.gnpu .n h4{color:var(--red-tx)}
+  .gnpu .row{display:grid;grid-template-columns:90px 1fr;gap:6px;font-size:12.5px;margin:4px 0}
+  .gnpu .row .k{color:var(--mut2)}
+  /* inline svg */
+  .diag{margin:10px 0 6px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:8px}
+  .diag svg{display:block;width:100%;height:auto}
+  .diagcap{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:6px 0 2px}
+  /* summary */
+  .sum{border-top:1px solid var(--line);margin-top:22px;padding-top:10px;font-size:13.5px}
+  .sum .pit{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12.5px;margin-top:6px}
+  /* file list at end */
+  .filelist{font-family:var(--mono);font-size:11px;color:var(--mut2);margin-top:22px;border-top:1px dashed var(--line);padding-top:10px}
+  .filelist b{color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <span class="crumb">第一篇章 · 地基与心智桥 › EP03</span>
+    <span style="color:var(--mut2)">EP03</span>
+    <nav>
+      <a href="ep02.html">◀ 上一篇</a>
+      <a href="index.html">索引</a>
+      <a href="ep04.html">下一篇 ▶</a>
+    </nav>
+  </div>
+  <div class="body">
+    <aside class="tree">
+      <a class="f" href="appendix/index.html" target="_blank">📁 附录·项目文件走读</a>
+      <span class="f">MindSpeed-LLM/</span>
+      <a class="f" href="appendix/file_089411e68e5d5b.html" target="_blank">├ train_fsdp2.py</a>
+      <span class="f">├ examples/fsdp2/</span>
+      <a class="f" href="appendix/file_d04a217944c522.html" target="_blank">│  ├ env_config.sh</a>
+      <span class="f">│  └ qwen3/</span>
+      <span class="f">├ mindspeed_llm/fsdp2/</span>
+      <span class="f">├ docs/zh/pytorch/</span>
+      <span class="f">│  └ features/fsdp2/</span>
+      <!-- 本篇相关文件高亮 .act，按篇替换 -->
+      <span class="f act">fsdp2_basic_features.md</span>
+      <span class="f">└ ...</span>
+    </aside>
+    <main class="main">
+      <h1>并行范式：DDP → FSDP1 → FSDP2</h1>
+      <p class="goal">目标：把 AllReduce 拆成 ReduceScatter + AllGather。前置：EP02 硬件与运行时。</p>
+      <p class="gain">你将获得：<b>①</b> 一张 DDP AllReduce 与 FSDP2 RS+AG 的对照小图，看清"一次 AllReduce 被拆成两半"的物理含义 <b>②</b> FSDP2 参数的 5 态生命周期（Fully Sharded → AllGather → Compute → ReduceScatter → Update）+ DTensor/DeviceMesh/MixedPrecisionPolicy/Prefetch 四块基石的定位</p>
+
+      <h2>你已经熟悉的情况 <span class="sec">桥接开场</span></h2>
+      <p>在 DDP（<code style="font-family:var(--mono);color:var(--mut)">DistributedDataParallel</code>）的世界里，每张卡都端着一个<b>完整的模型副本</b>，各吃一个独立的数据 Batch，前向各算各的；反向算完梯度后，所有卡通过一次 <b>AllReduce</b> 把梯度同步成一致，再各自就地更新。心智很简洁：每卡全量副本 + 梯度 AllReduce，显存账单里"参数 / 梯度 / 优化器状态"三项都按"完整模型大小 ×1"计。模型一大，单卡 HBM（EP02 已见 NPU 侧 64GB 硬约束）就装不下了。</p>
+      <p>FSDP（Fully Sharded Data Parallel）就是来填这个坑的：既然三项显存大头都"每卡一份完整副本"，那就把它们<b>切片（Sharding）</b>，每张卡只存 <code style="font-family:var(--mono);color:var(--mut)">1/N</code>——用一次额外的通信，把"装不下"换成了"装得下"。本篇要讲清楚的核心一句话：<b>把 DDP 那一次 AllReduce，拆成 ReduceScatter + AllGather 两段</b>。这就是从 DDP 跨到 FSDP2 的过桥点。</p>
+
+      <h2>本项目怎么做 <span class="sec">原理</span></h2>
+      <p>先看"通信被拆成两半"长什么样。下图左列是你熟的 DDP：反向算完整梯度 → 一次 AllReduce（每张卡拿到完整且一致的梯度）→ 各自更新完整参数。右列是 FSDP2：反向算出的完整梯度立刻 <b>ReduceScatter</b>（归约并切片，每卡只留 <code style="font-family:var(--mono);color:var(--mut)">1/N</code> 的梯度片）→ 优化器只用切片梯度更新切片参数 → 下次前向前再 <b>AllGather</b> 把切片参数拼回完整参数用于计算。AllReduce = ReduceScatter + AllGather 的和，FSDP2 只是把它掰开，并在两段之间塞进了"切片存储 + 切片更新"。</p>
+
+      <div class="diag">
+        <svg viewBox="0 0 880 360" role="img" aria-label="DDP AllReduce vs FSDP2 ReduceScatter+AllGather 对照图">
+          <text x="150" y="24" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-style="italic" font-size="14" fill="#9a9a9a">DDP（你熟悉）</text>
+          <text x="730" y="24" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-style="italic" font-size="14" fill="#9a9a9a">FSDP2（本项目）</text>
+          <text x="440" y="24" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-style="italic" font-size="12" fill="#6a6a6a">AllReduce = RS + AG</text>
+          <line x1="30" y1="34" x2="850" y2="34" stroke="#2a2a33" stroke-width="1"/>
+
+          <!-- DDP 列 -->
+          <text x="30" y="58" font-family="ui-serif,Georgia,serif" font-size="12" fill="#6a6a6a">反向后</text>
+          <rect x="40" y="64" width="220" height="40" rx="6" fill="#14241a" stroke="#2e5a3a"/>
+          <text x="150" y="89" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="12.5" fill="#7ab98a">完整梯度 ∇W（每卡各一份）</text>
+          <text x="30" y="128" font-family="ui-serif,Georgia,serif" font-size="12" fill="#6a6a6a">同步</text>
+          <rect x="40" y="134" width="220" height="40" rx="6" fill="#14241a" stroke="#2e5a3a"/>
+          <text x="150" y="159" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#7ab98a">AllReduce</text>
+          <text x="30" y="198" font-family="ui-serif,Georgia,serif" font-size="12" fill="#6a6a6a">更新</text>
+          <rect x="40" y="204" width="220" height="40" rx="6" fill="#14241a" stroke="#2e5a3a"/>
+          <text x="150" y="229" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="12.5" fill="#7ab98a">更新完整参数 W（每卡全量副本）</text>
+          <path d="M150,104 L150,134" fill="none" stroke="#2e5a3a" stroke-width="1.5" marker-end="url(#ar3)"/>
+          <path d="M150,174 L150,204" fill="none" stroke="#2e5a3a" stroke-width="1.5" marker-end="url(#ar3)"/>
+
+          <!-- 中间等号 -->
+          <text x="440" y="160" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-size="22" fill="#9a9a9a">⇄</text>
+          <text x="440" y="182" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-style="italic" font-size="11" fill="#6a6a6a">拆成两段</text>
+
+          <!-- FSDP2 列 -->
+          <text x="610" y="58" font-family="ui-serif,Georgia,serif" font-size="12" fill="#6a6a6a">反向后</text>
+          <rect x="620" y="64" width="220" height="40" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="730" y="89" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="12.5" fill="#e88">完整梯度 ∇W（瞬时）</text>
+          <text x="610" y="128" font-family="ui-serif,Georgia,serif" font-size="12" fill="#6a6a6a">同步①</text>
+          <rect x="620" y="134" width="220" height="40" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="730" y="159" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#e88">ReduceScatter</text>
+          <text x="610" y="198" font-family="ui-serif,Georgia,serif" font-size="12" fill="#6a6a6a">更新</text>
+          <rect x="620" y="204" width="220" height="40" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="730" y="229" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="12.5" fill="#e88">更新切片参数 W/N（仅 1/N）</text>
+          <text x="610" y="268" font-family="ui-serif,Georgia,serif" font-size="12" fill="#6a6a6a">同步②</text>
+          <rect x="620" y="274" width="220" height="40" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="730" y="299" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#e88">AllGather（下次前向前）</text>
+          <path d="M730,104 L730,134" fill="none" stroke="#6e1a1c" stroke-width="1.5" marker-end="url(#ar3r)"/>
+          <path d="M730,174 L730,204" fill="none" stroke="#6e1a1c" stroke-width="1.5" marker-end="url(#ar3r)"/>
+          <path d="M730,244 L730,274" fill="none" stroke="#6e1a1c" stroke-width="1.5" marker-end="url(#ar3r)"/>
+
+          <text x="440" y="338" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-style="italic" font-size="11" fill="#6a6a6a">左：一次 AllReduce 出完整梯度，每卡存全量　·　右：RS 出切片梯度、更新切片参数，AG 仅在用前拼回</text>
+
+          <defs>
+            <marker id="ar3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#2e5a3a"/>
+            </marker>
+            <marker id="ar3r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#6e1a1c"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      <div class="diagcap">图 3.1　DDP AllReduce vs FSDP2 ReduceScatter+AllGather：DDP 用一次 AllReduce 让每卡拿到完整梯度、保留全量参数；FSDP2 把这次 AllReduce 拆成 ReduceScatter（出切片梯度、更新切片参数）与 AllGather（用前拼回完整参数）两段，参数/梯度/优化器状态在静止态只占 1/N。</div>
+
+      <p>拆完通信，参数本身也得被切。FSDP2 把一个参数的<b>生命周期</b>分成 5 个状态，循环往复：</p>
+
+      <div class="diag">
+        <svg viewBox="0 0 880 240" role="img" aria-label="FSDP2 参数 5 态生命周期">
+          <line x1="30" y1="34" x2="850" y2="34" stroke="#2a2a33" stroke-width="1"/>
+          <text x="440" y="24" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-style="italic" font-size="13" fill="#9a9a9a">FSDP2 参数生命周期（一个 step 内循环一次）</text>
+
+          <!-- 5 个状态圆角框 -->
+          <g font-family="ui-monospace,Menlo,monospace" font-size="11.5" text-anchor="middle">
+            <rect x="20"  y="60" width="150" height="56" rx="8" fill="#2a0f10" stroke="#6e1a1c"/>
+            <text x="95"  y="84" fill="#e88" font-size="12">① Fully Sharded</text>
+            <text x="95"  y="104" fill="#9a9a9a" font-size="10">静止态·只存 1/N</text>
+
+            <rect x="200" y="60" width="150" height="56" rx="8" fill="#2a0f10" stroke="#6e1a1c"/>
+            <text x="275" y="84" fill="#e88" font-size="12">② AllGather</text>
+            <text x="275" y="104" fill="#9a9a9a" font-size="10">准备态·拼回完整</text>
+
+            <rect x="380" y="60" width="150" height="56" rx="8" fill="#2a0f10" stroke="#6e1a1c"/>
+            <text x="455" y="84" fill="#e88" font-size="12">③ Compute</text>
+            <text x="455" y="104" fill="#9a9a9a" font-size="10">计算态·用完整参数</text>
+
+            <rect x="560" y="60" width="150" height="56" rx="8" fill="#2a0f10" stroke="#6e1a1c"/>
+            <text x="635" y="84" fill="#e88" font-size="12">④ ReduceScatter</text>
+            <text x="635" y="104" fill="#9a9a9a" font-size="10">同步态·归约切片</text>
+
+            <rect x="740" y="60" width="130" height="56" rx="8" fill="#2a0f10" stroke="#6e1a1c"/>
+            <text x="805" y="84" fill="#e88" font-size="12">⑤ Update</text>
+            <text x="805" y="104" fill="#9a9a9a" font-size="10">更新态·切片更新</text>
+          </g>
+
+          <!-- 箭头串起来 -->
+          <path d="M170,88 L200,88" fill="none" stroke="#6e1a1c" stroke-width="1.5" marker-end="url(#ar3r)"/>
+          <path d="M350,88 L380,88" fill="none" stroke="#6e1a1c" stroke-width="1.5" marker-end="url(#ar3r)"/>
+          <path d="M530,88 L560,88" fill="none" stroke="#6e1a1c" stroke-width="1.5" marker-end="url(#ar3r)"/>
+          <path d="M710,88 L740,88" fill="none" stroke="#6e1a1c" stroke-width="1.5" marker-end="url(#ar3r)"/>
+          <!-- 回到 ① 的弧 -->
+          <path d="M805,116 C805,170 95,170 95,116" fill="none" stroke="#6e1a1c" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#ar3r)"/>
+          <text x="440" y="166" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-style="italic" font-size="11" fill="#6a6a6a">下一 step：⑤ 更新完切片参数 → 回到 ① 静止态（再次只存 1/N），等待下次 AllGather</text>
+
+          <text x="440" y="200" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-style="italic" font-size="11.5" fill="#9a9a9a">关键：参数在「计算时完整、静止时切片」之间来回切；通信发生在 ②④ 两端，计算在 ③，更新在 ⑤</text>
+          <text x="440" y="220" text-anchor="middle" font-family="ui-serif,Georgia,serif" font-style="italic" font-size="10.5" fill="#6a6a6a">这就是把 DDP 的 AllReduce 拆成 RS+AG 后，参数不得不走的循环</text>
+        </svg>
+      </div>
+      <div class="diagcap">图 3.2　FSDP2 参数 5 态生命周期：Fully Sharded（静止·1/N）→ AllGather（拼回）→ Compute（用完整参数）→ ReduceScatter（归约切片）→ Update（切片更新）→ 回到 Fully Sharded。①②④ 是显存省下来的关键（静止态只占 1/N），③ 是计算态。</div>
+
+      <p>这五态不是凭空设计，是"通信被拆成两段"的直接后果：既然 AllGather 只在前向前拼回、ReduceScatter 只在反向内切片，那么参数就必然经历"切片静止 → 拼回 → 计算 → 切片归约 → 切片更新 → 再切片静止"的循环。剩下四块基石各管一件：DTensor 管"切片后还能当成完整 Tensor 用"的逻辑/物理分离，DeviceMesh 管"切到哪些设备上"，MixedPrecisionPolicy 管"存什么精度、算什么精度、通信什么精度"，Prefetch 管"通信和计算怎么掩盖起来"。</p>
+
+      <h2>源码下钻 <span class="sec">file:line</span></h2>
+      <p>本篇走读 <code style="font-family:var(--mono);color:var(--mut)">docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md</code>——这是仓库自带的 FSDP2 后端特性介绍文档（非仓库源码文件，是文档），把上面四块基石的概念都摆在了明面上。注意：它是<b>概念文档</b>，不是实现源码；EP07–EP11 才会下钻到 <code style="font-family:var(--mono);color:var(--mut)">mindspeed_llm/fsdp2/</code> 真实代码。本篇的锚点都指向这份文档。</p>
+
+      <p class="figcap">① FSDP1 vs FSDP2——从 FlatParameter 到 Per-Parameter Sharding</p>
+      <pre data-lang="md">
+FSDP1（Legacy）：将层内的所有参数拉平拼接，切分这个巨大的 1D 向量。破坏了原始模型参数结构。
+FSDP2（New）：保持模型原始参数结构不变。每个参数（nn.Parameter）被单独切分并管理。
+  → 极高组合性，可与 Tensor Parallel (TP) 或 Checkpointing 结合</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md">docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md:9</a>（FSDP1 详见 :11，FSDP2 详见 :12）</p>
+      <p class="footnote">这一段把 FSDP1/FSDP2 的分水岭钉死：<b>FSDP1 把参数打平成一个 <code style="font-family:var(--mono);color:var(--mut)">FlatParameter</code> 1D 向量再切</b>，破坏了原始参数结构，自定义初始化、特定层微调都难做；<b>FSDP2 逐参数（Per-Parameter）切分</b>，结构不变，组合性高（与 TP/Checkpointing 可叠加）。本系列后续走读的 <code style="font-family:var(--mono);color:var(--mut)">mindspeed_llm/fsdp2/</code> 走的是 FSDP2 这一支。注意：FSDP2 通过 <code style="font-family:var(--mono);color:var(--mut)">torch.distributed.fsdp.fully_shard</code> 做<b>原位（In-place）</b>并行化，不再像 FSDP1 那样用 Python 类包装模型（见文档 :3）。</p>
+
+      <p class="figcap">② 工作原理——把 DDP 的 AllReduce 分解为 Reduce-Scatter + All-Gather</p>
+      <pre data-lang="md">
+DDP：每个 Rank 拥有完整模型副本，处理独立 Batch，最后 All-Reduce 同步梯度。
+FSDP：对参数、梯度、优化器状态进行切片(Sharding)，显著降低显存占用。
+FSDP 将 DDP 的 All-Reduce 操作分解为 Reduce-Scatter 和 All-Gather。</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md">docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md:16</a>（DDP 详见 :16，FSDP 切片 :18，分解句 :22）</p>
+      <p class="footnote">这就是图 3.1 的文字来源：<b>"FSDP 将 DDP 的 All-Reduce 操作分解为 Reduce-Scatter 和 All-Gather"（:22）</b>——本篇标题"把 AllReduce 拆成 ReduceScatter + AllGather"即出自此句。DDP 每卡全量副本 + AllReduce（:16）；FSDP 通过切片参数/梯度/优化器状态降显存（:18）。一句关键认知：<b>FSDP2 里已没有 AllReduce 这一通信原语</b>，取而代之的是 RS（反向内）+ AG（前向前）。</p>
+
+      <p class="figcap">③ FSDP 参数生命周期 5 态——静止/准备/计算/同步/更新</p>
+      <pre data-lang="md">
+1. Fully Sharded（静止态）：Forward/Backward 之外，参数完全切分（每卡只存 1/N）
+2. AllGather（准备态）：Forward/Backward 开始前，切片参数被聚合为完整参数
+3. Compute（计算态）：使用完整参数进行计算
+4. ReduceScatter（同步态）：Backward 内，完整梯度被归约并切分为切片梯度
+5. Update（更新态）：优化器用切片梯度更新切片参数，优化器状态也是切分的</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md">docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md:28</a>（:28 :29 :30 :31 :32 五态逐条）</p>
+      <p class="footnote">这就是图 3.2 的文字来源。五态逐条对应文档 :28–:32：① Fully Sharded 每卡 1/N（:28）；② AllGather 前向/反向开始前拼回（:29）；③ Compute 用完整参数算（:30）；④ ReduceScatter 反向内归约切片（:31）；⑤ Update 切片梯度更新切片参数、优化器状态也切分（:32）。注意第 5 态的附带效果：<b>优化器状态天然也是切分的</b>——这也是 FSDP 省显存的大头之一（DDP 里 AdamW 的两份状态量是每卡全量）。</p>
+
+      <p class="figcap">④ DTensor——逻辑视图与物理视图分离（底层基石）</p>
+      <pre data-lang="md">
+逻辑上：参数看起来仍是完整 Tensor（如 [4096, 4096]），保持单卡一致的编程体验
+物理上：参数被切分并分布在 DeviceMesh 定义的设备组中（每卡只持 [512, 4096] Local Tensor）
+DeviceMesh：描述设备拓扑，天然支持多维并行（2D FSDP，或 FSDP + TP）</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md">docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md:40</a>（逻辑视图 :40，物理视图 :42，DeviceMesh :44）</p>
+      <p class="footnote">DTensor（<code style="font-family:var(--mono);color:var(--mut)">torch.distributed.tensor.DTensor</code>，见 :36）是 FSDP2 的底层基石。它的核心是<b>逻辑/物理分离</b>：你的代码仍把它当完整 Tensor <code style="font-family:var(--mono);color:var(--mut)">[4096, 4096]</code> 操作（:40），物理上却已切片分布在 <code style="font-family:var(--mono);color:var(--mut)">DeviceMesh</code> 定义的设备组里，每卡只有 <code style="font-family:var(--mono);color:var(--mut)">[512, 4096]</code> 的 Local Tensor（:42）。DeviceMesh（:44）描述拓扑，使得 FSDP2 天然支持多维并行——同一张 Mesh 换个维度就是 TP，叠加就是 FSDP+TP（这呼应了 :12 的"组合性"）。这是 EP07 并行状态引擎、EP08 分片落地要深入的地方。</p>
+
+      <p class="figcap">⑤ MixedPrecisionPolicy——存储/计算/通信三精度分离（代码示例）</p>
+      <pre data-lang="py">
+import torch
+from torch.distributed.fsdp import MixedPrecisionPolicy
+
+# FSDP2 混合精度转换流程
+mp_policy = MixedPrecisionPolicy(param_dtype=torch.bfloat16, reduce_dtype=torch.float32)
+# Forward: Parameters (FP32 storage) -> Cast to BF16 -> Compute
+# Backward: Gradients (BF16) -> Cast to FP32 -> AllReduce</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md">docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md:59</a>（MixedPrecisionPolicy 三精度释义见 :48–:52）</p>
+      <p class="footnote"><code style="font-family:var(--mono);color:var(--mut)">MixedPrecisionPolicy</code>（:48）把<b>存储精度 / 计算精度 / 通信精度</b>三者分开拧：<code style="font-family:var(--mono);color:var(--mut)">param_dtype</code> 管计算——前向/反向前把参数 cast 成 <code style="font-family:var(--mono);color:var(--mut)">bfloat16</code>（:50）；<code style="font-family:var(--mono);color:var(--mut)">reduce_dtype</code> 管通信——梯度同步（ReduceScatter）阶段 cast 成 <code style="font-family:var(--mono);color:var(--mut)">float32</code> 保数值稳定（:51）；<code style="font-family:var(--mono);color:var(--mut)">buffer_dtype</code> 独立管 Buffer（如 BatchNorm 统计量）精度防溢出（:52）。代码示例（:59）正是 <code style="font-family:var(--mono);color:var(--mut)">MixedPrecisionPolicy(param_dtype=torch.bfloat16, reduce_dtype=torch.float32)</code>。<b>注意 :61 注释仍写 AllReduce</b>——这是上游文档措辞遗留，按本篇图 3.1，FSDP2 实际走的是 RS（reduce_dtype 生效处）+ AG，已无 AllReduce 原语。</p>
+
+      <p class="figcap">⑥ 通信与计算掩盖——Prefetching</p>
+      <pre data-lang="md">
+为实现极致训练效率，FSDP2 实现了高度优化的通信计算掩盖(Overlap)机制，即 Prefetching。
+（图：prefetch.png —— 在计算当前层的同时，预取下一层的参数切片）</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md">docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md:66</a>（prefetch 配图见 :68–:70）</p>
+      <p class="footnote">Prefetch（:66）是 FSDP2 把通信塞进计算间隙的关键机制：<b>在计算当前层的同时，提前发起下一层的 AllGather</b>，让通信时间被计算时间"盖住"。这正是图 3.1 右列"② AllGather"和图 3.2 第 ② 态能不拖慢训练的原因。EP10 通信掩盖会专门下钻到 NPU 侧 HCCL + 多流 + Prefetch 的实现细节，本篇只立概念。另注文档 :72：本文示例基于 PyTorch 2.7 及以上版本；FSDP2 自 PyTorch 2.4 起以技术预览形式引入——与 EP02 钉死的镜像基线 PyTorch 2.7.1（docker/OVERVIEW.zh.md:200）对齐。</p>
+
+      <p>把六段叠起来：② 拆 AllReduce 为 RS+AG 是本篇的"过桥点"，③ 五态是被拆后参数不得不走的循环，④ DTensor/DeviceMesh 给切片提供了"仍当完整 Tensor 用"的抽象与多维拓扑，⑤ MixedPrecisionPolicy 把存/算/通信三精度分开拧，⑥ Prefetch 把通信塞进计算间隙。这五块基石共同回答了"FSDP2 怎么用通信换显存、又不被通信拖死"。真实代码（<code style="font-family:var(--mono);color:var(--mut)">mindspeed_llm/fsdp2/</code>）留到 EP07–EP11。</p>
+
+      <div class="gnpu">
+        <div class="g"><h4>GPU / 已知</h4>
+          <div class="row"><span class="k">梯度同步</span><span>NCCL <code style="font-family:var(--mono);color:var(--mut2)">all_reduce</code>（DDP：一次 AllReduce 出完整梯度，每卡存全量）</span></div>
+          <div class="row"><span class="k">混合精度存储</span><span><code style="font-family:var(--mono);color:var(--mut2)">torch.cuda.amp</code> autocast（fp16/bf16），存/算/通信不显式分三档</span></div>
+          <div class="row"><span class="k">通信掩盖</span><span>NCCL 独立 stream + 计算流；FSDP1 也有 prefetch 但受 FlatParameter 限制</span></div>
+        </div>
+        <div class="n"><h4>NPU / 本项目</h4>
+          <div class="row"><span class="k">梯度同步</span><span>HCCL <code style="font-family:var(--mono);color:var(--mut)">reduce_scatter</code> + <code style="font-family:var(--mono);color:var(--mut)">all_gather</code>（FSDP2：无 AllReduce，每卡只存 1/N，basic_features.md:22 :31 :32）</span></div>
+          <div class="row"><span class="k">混合精度存储</span><span><code style="font-family:var(--mono);color:var(--mut)">MixedPrecisionPolicy(param_dtype=bf16, reduce_dtype=fp32)</code>——存 fp32 / 算 bf16 / 通信 fp32 三档分离（basic_features.md:50 :51 :59）</span></div>
+          <div class="row"><span class="k">通信掩盖</span><span>HCCL + NPU 多流（<code style="font-family:var(--mono);color:var(--mut)">MULTI_STREAM_MEMORY_REUSE=2</code>，env_config.sh:6）+ FSDP2 Prefetch（basic_features.md:66），EP10 下钻</span></div>
+        </div>
+      </div>
+
+      <div class="sum">
+        <b>小结</b>　心智模型：FSDP2 ＝ DDP 的"参数也切片"版——<b>用一次额外的通信，把每卡全量副本换成 1/N 切片</b>。核心是把 DDP 那一次 AllReduce 拆成 ReduceScatter（反向内、出切片梯度）+ AllGather（前向前、拼回完整参数）两段，于是参数不得不走 Fully Sharded → AllGather → Compute → ReduceScatter → Update 五态循环，静止态只占 1/N；DTensor/DeviceMesh 给切片提供了"逻辑完整、物理切片"的抽象与多维拓扑，MixedPrecisionPolicy 把存/算/通信三精度分开拧，Prefetch 把通信塞进计算间隙。一句话：FSDP2 用通信换显存，用 Prefetch 换回被吃掉的时间。
+        <div class="pit">常见误区：(1) <b>以为 FSDP2 里还有 AllReduce</b>——已无，梯度同步走的是 ReduceScatter + AllGather（basic_features.md:22），文档 :61 注释里的"AllReduce"是上游措辞遗留，别被它带回去；(2) <b>以为 fsdp_size 可以随便挑（比如设成 2、留一半卡做别的）</b>——<b>fsdp_size 须等于 world_size</b>：FSDP 的切片粒度就是全部参与训练的卡，分片数 N＝world_size，每卡存 1/N；若想"一部分卡切片、一部分卡干别的"，那不是调 fsdp_size，而是上 2D Mesh（FSDP+TP，见 :44）这种多维并行（示意，最终以源码为准），EP07/EP08 再下钻。</div>
+      </div>
+
+      <div class="filelist"><b>本篇涉及文件</b><br>
+docs/zh/pytorch/features/fsdp2/fsdp2_basic_features.md（FSDP1 vs FSDP2 :9–:12 / 工作原理 :16–:22 / 5 态生命周期 :28–:32 / DTensor+DeviceMesh :36–:44 / MixedPrecisionPolicy :48–:52 代码 :54–:62 / Prefetch :66–:70 / 版本基线 :72）<br>
+examples/fsdp2/env_config.sh（NPU 多流旋钮 MULTI_STREAM_MEMORY_REUSE=:6，EP02 已解）<br>
+docker/OVERVIEW.zh.md（PyTorch 2.7.1 基线 :200，EP02 已解）</div>
+    </main>
+  </div>
+</div>
+<script>
+// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre[data-lang]').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];if(!rules)return;
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      return '<span class="ln">'+(i+1)+'</span>'+tokLine(l,rules);
+    }).join('\n');
+  });
+})();
+</script>
+</body>
+</html>

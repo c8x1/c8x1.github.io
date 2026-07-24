@@ -1,0 +1,348 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/models/qwen3/qwen3.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/models/qwen3/qwen3.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_da3047958158b3.html">◀ modules.py</a> <a href="file_2c494e7d192c0a.html">qwen3_moe.py ▶</a></nav></div>
+<div class="wrap">
+<h1>qwen3.py</h1><p class="goal">mindspeed_llm/fsdp2/models/qwen3/qwen3.py · 4871B · 116 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L21" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class Qwen3ForCausalLM(transformers.Qwen3PreTr</a><a href="#L26" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, config)</a><a href="#L37" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def forward</a><a href="#L106" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def register_patches(config)</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep09.html">EP09</a><a href="../ep12.html">EP12</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="annot"><div class="seg"><p class="seglab">行 1-19 · 文件头与依赖：torch_npu 软导入 + 复用 HF backbone</p><pre data-lang="py" data-start="1" data-idprefix="A"># Copyright (c) 2025, HUAWEI CORPORATION.  All rights reserved.
+# Copyright 2025 The Qwen team, Alibaba Group and the HuggingFace Inc. team. All rights reserved.
+from typing import Optional, Union
+
+import torch
+try:
+    import torch_npu
+except ImportError:
+    pass
+import transformers
+from transformers.cache_utils import Cache
+from transformers.modeling_outputs import BaseModelOutputWithPast, CausalLMOutputWithPast
+from transformers.utils import can_return_tuple
+
+from mindspeed.patch_utils import MindSpeedPatchesManager as pm
+from mindspeed_llm.fsdp2.models.common.fusions import apply_rotary_pos_emb, \
+    fused_rmsnorm_forward
+from mindspeed_llm.fsdp2.models.common.modules import LMHead
+</pre><div class="exp"><p>第 :6-9 行是整个 MindSpeed-LLM FSDP2 适配的关键开关：<code>import torch_npu</code> 用 <code>try/except ImportError: pass</code> 包住，即在不装 torch_npu 的纯 GPU 环境<strong>不报错</strong>也能 import 本模块——但真正跑 NPU 融合算子时会在运行期 <code>torch_npu.npu_*</code> 处炸 AttributeError。这正是 EP12 场景下“跨厂商可读、运行期分叉”的常见写法。</p><p>第 :15 行 <code>from mindspeed.patch_utils import MindSpeedPatchesManager as pm</code> 是<strong>打补丁管理器</strong>，后续 :105-115 的 <code>register_patches</code> 用它把 HF 原版 forward 替换为 NPU 融合实现——不是 fork 整个 modeling_qwen3.py，而是<strong>运行期 monkey-patch</strong>，保留 HF 主干可升级。</p><p>第 :16-18 行从本仓 common 子包引入两件东西：<code>apply_rotary_pos_emb / fused_rmsnorm_forward</code>（融合算子 wrapper，定义在 common/fusions.py，内部直接调 <code>torch_npu.npu_rms_norm / npu_rotary_mul</code>）和 <code>LMHead</code>（DTensor-aware 的头，见 :31）。注意<strong>没有</strong> import 任何 flash-attn 或 attention 融合算子——注意力走的是 HF config-load 路由，不是这里 patch。</p></div></div><div class="seg"><p class="seglab">行 21-35 · 类声明与 __init__：复用 Qwen3Model + DTensor-aware LMHead</p><pre data-lang="py" data-start="21" data-idprefix="A">class Qwen3ForCausalLM(transformers.Qwen3PreTrainedModel):
+    _tied_weights_keys = [&quot;lm_head.weight&quot;]
+    _tp_plan = {&quot;lm_head&quot;: &quot;colwise_rep&quot;}
+    _pp_plan = {&quot;lm_head&quot;: ([&quot;hidden_states&quot;], [&quot;logits&quot;])}
+
+    def __init__(self, config):
+        super().__init__(config)
+        self.config = config
+        self.model = transformers.Qwen3Model(config)
+        self.vocab_size = config.vocab_size
+        self.lm_head = LMHead(config.hidden_size, config.vocab_size, bias=False)
+
+        # Initialize weights and apply final processing
+        self.post_init()
+</pre><div class="exp"><p>第 :21 行 <code>class Qwen3ForCausalLM(transformers.Qwen3PreTrainedModel)</code> 直接继承 HF 的 PreTrained 基类，拿到 config 加载、权重加载、tied weights 等全部能力。这里<strong>不是</strong>拷贝 HF 的 modeling_qwen3.py，而是“薄壳”：自己的子模块里只重写<strong>需要接 FSDP2 / NPU</strong>的那几个点。</p><p>第 :29 行 <code>self.model = transformers.Qwen3Model(config)</code>——主干（embed + N 层 Qwen3DecoderLayer + final norm）<strong>整段复用 HF</strong>。HF 的 Qwen3Model 在 config load 时会按 <code>attn_implementation</code> 选 attention 后端（eager / sdpa / flash_attention），MindSpeed 侧通过传 <code>attn_implementation="fused_attention"</code> 之类路由到 NPU flash kernel。本文件本身不做 attention patch。</p><p>第 :31 行 <code>self.lm_head = LMHead(...)</code> 是<strong>本仓自己实现的头</strong>而非 HF 的 <code>Qwen3LMHead</code>，原因在 modules.py：它的 forward 会在 weight 是 DTensor 时调 <code>.to_local()</code>，并支持 <code>loss_ctx</code> 委托——这是为接 <code>fully_shard</code>（参数按 DTensor 分片）和显存高效 loss 准备的改写点。这是“非直接拷 HF”的第一个证据。</p><p>第 :22-24 行的 <code>_tied_weights_keys</code> / <code>_tp_plan</code> / <code>_pp_plan</code> 是 HF 4.x 的 plan 元数据，标记 lm_head 与 embed 是否 tie、以及 TP/PP 切分计划；FSDP2 下 lm_head 会被 fully_shard 独立 wrap。</p></div></div><div class="seg"><p class="seglab">行 36-82 · forward 主体（上）：委托 HF backbone 前向</p><pre data-lang="py" data-start="36" data-idprefix="A">    @can_return_tuple
+    def forward(
+            self,
+            input_ids: Optional[torch.LongTensor] = None,
+            attention_mask: Optional[torch.Tensor] = None,
+            position_ids: Optional[torch.LongTensor] = None,
+            past_key_values: Optional[Cache] = None,
+            inputs_embeds: Optional[torch.FloatTensor] = None,
+            labels: Optional[torch.LongTensor] = None,
+            use_cache: Optional[bool] = None,
+            cache_position: Optional[torch.LongTensor] = None,
+            logits_to_keep: Union[int, torch.Tensor] = 0,
+            loss_ctx: Optional[callable] = None,
+            **kwargs,
+    ) -&gt; CausalLMOutputWithPast:
+        r&quot;&quot;&quot;
+        labels (`torch.LongTensor` of shape `(batch_size, sequence_length)`, *optional*):
+            Labels for computing the masked language modeling loss. Indices should either be in `[0, ...,
+            config.vocab_size]` or -100 (see `input_ids` docstring). Tokens with indices set to `-100` are ignored
+            (masked), the loss is only computed for the tokens with labels in `[0, ..., config.vocab_size]`.
+
+        Example:
+
+        ```python
+        &gt;&gt;&gt; from transformers import AutoTokenizer, Qwen3ForCausalLM
+
+        &gt;&gt;&gt; model = Qwen3ForCausalLM.from_pretrained(&quot;Qwen/Qwen3-8B&quot;)
+        &gt;&gt;&gt; tokenizer = AutoTokenizer.from_pretrained(&quot;Qwen/Qwen3-8B&quot;)
+
+        &gt;&gt;&gt; prompt = &quot;Hey, are you conscious? Can you talk to me?&quot;
+        &gt;&gt;&gt; inputs = tokenizer(prompt, return_tensors=&quot;pt&quot;)
+
+        &gt;&gt;&gt; # Generate
+        &gt;&gt;&gt; generate_ids = model.generate(inputs.input_ids, max_length=30)
+        &gt;&gt;&gt; tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
+        &quot;Hey, are you conscious? Can you talk to me?\nI&#x27;m not conscious, but I can talk to you.&quot;
+        ```&quot;&quot;&quot;
+        outputs: BaseModelOutputWithPast = self.model(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            position_ids=position_ids,
+            past_key_values=past_key_values,
+            inputs_embeds=inputs_embeds,
+            use_cache=use_cache,
+            cache_position=cache_position,
+            **kwargs,
+        )</pre><div class="exp"><p>第 :36 行 <code>@can_return_tuple</code> 装饰器（来自 <code>transformers.utils</code>）允许 forward 返回 namedtuple 或普通 tuple，HF 4.x 的兼容性胶水。</p><p>第 :37-50 行 forward 签名与 HF 原版 Qwen3ForCausalLM.forward <strong>几乎逐字一致</strong>，但多了第 :48 行 <code>loss_ctx: Optional[callable] = None</code>——这是本仓加的钩子，配合上面 :31 的 DTensor-aware LMHead，把 loss 计算委托给外部 context（典型用于 chunked/cross-entropy 显存优化，避免 logits 全量物化）。对 EP12 场景：长序列 + 大词表的 CE loss 显存压力，靠这个钩子卸掉。</p><p>第 :73-82 行 <code>outputs = self.model(...)</code> 把所有前向参数透传给 HF 的 Qwen3Model，本文件<strong>不重写 backbone</strong>——RMSNorm / RoPE 的 NPU 融合是通过 :105-115 的 patch 在运行期替换 Qwen3Model 内部调用的，所以这里写法干净、与 HF 上游 diff 最小。第 :84 行取 <code>last_hidden_state</code> 交给后面的 lm_head。</p></div></div><div class="seg"><p class="seglab">行 84-103 · forward 主体（下）：logits_to_keep 切片 + loss_ctx 分叉</p><pre data-lang="py" data-start="84" data-idprefix="A">        hidden_states = outputs.last_hidden_state
+        # Only compute necessary logits, and do not upcast them to float if we are not computing the loss
+        slice_indices = slice(-logits_to_keep, None) if isinstance(logits_to_keep, int) else logits_to_keep
+
+        if loss_ctx:
+            logits, loss = self.lm_head(hidden_states[:, slice_indices, :], loss_ctx=loss_ctx)
+        else:
+            logits, loss = self.lm_head(hidden_states[:, slice_indices, :])
+
+            loss = None
+            if labels is not None:
+                loss = self.loss_function(logits=logits, labels=labels, vocab_size=self.config.vocab_size, **kwargs)
+
+        return CausalLMOutputWithPast(
+            loss=loss,
+            logits=logits,
+            past_key_values=outputs.past_key_values,
+            hidden_states=outputs.hidden_states,
+            attentions=outputs.attentions,
+        )</pre><div class="exp"><p>第 :86 行 <code>slice_indices = slice(-logits_to_keep, None) ...</code> 是 HF 的 logits 裁剪技巧：只在需要保留最后 N 个 token 的 logits 时算，省显存——和 GPU 上一致，无 NPU 特化。</p><p>第 :88-95 行是<strong>两条分叉</strong>：(1) <code>loss_ctx</code> 非 None 时，把 hidden 切片交给 <code>self.lm_head(hidden, loss_ctx=loss_ctx)</code>，返回 <code>(None, loss)</code>——即 lm_head 不物化 logits，而是把 hidden_states + 局部权重 + bias 交给 loss_ctx，在 loss 内部 fused 算 logits+CE，避免 [B, T, vocab] 的巨量中间张量。这是为 NPU / 大词表显存优化的关键路径。(2) 没有 loss_ctx 时走标准 <code>F.linear</code>，并在有 labels 时用 <code>self.loss_function(...)</code>（HF 提供的 shift+CE）。</p><p>第 :97-103 行组装 <code>CausalLMOutputWithPast</code> 返回，字段与 HF 原版完全对齐，保证推理框架（vLLM/MindIE 等）和训练 loop 拿到的输出契约不变。结论：本 forward 对 HF 上游的 diff 仅 <code>loss_ctx</code> 一处——这是“尽量复用 HF，只改必要点”的体现。</p></div></div><div class="seg"><p class="seglab">行 105-115 · register_patches：只 patch RMSNorm 与 RoPE 两处（无 flash-attn 分支）</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :105-:115）</h5><pre data-lang="py" data-start="105" data-idprefix="A">    @staticmethod
+    def register_patches(config):
+        &quot;&quot;&quot;patching the transformers model.&quot;&quot;&quot;
+        if getattr(config, &quot;use_fused_rmsnorm&quot;, False):
+            pm.register_patch(&quot;transformers.models.qwen3.modeling_qwen3.Qwen3RMSNorm.forward&quot;,
+                              fused_rmsnorm_forward)
+        if getattr(config, &quot;use_fused_rotary_pos_emb&quot;, False):
+            pm.register_patch(&quot;transformers.models.qwen3.modeling_qwen3.apply_rotary_pos_emb&quot;,
+                              apply_rotary_pos_emb)
+
+        pm.apply_patches()</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">class Qwen3RMSNorm(nn.Module):
+    def forward(self, hidden_states):
+        input_dtype = hidden_states.dtype
+        hidden_states = hidden_states.to(torch.float32)
+        variance = hidden_states.pow(2).mean(-1, keepdim=True)
+        hidden_states = hidden_states * torch.rsqrt(variance + self.variance_epsilon)
+        return self.weight * hidden_states.to(input_dtype)
+
+def apply_rotary_pos_emb(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
+    cos = cos.unsqueeze(unsqueeze_dim)
+    sin = sin.unsqueeze(unsqueeze_dim)
+    q_embed = (q * cos) + (rotate_half(q) * sin)
+    k_embed = (k * cos) + (rotate_half(k) * sin)
+    return q_embed, k_embed</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>左侧为 HF 上游 Qwen3RMSNorm.forward 与 apply_rotary_pos_emb 的<strong>标准 GPU 实现</strong>：RMSNorm 用 Python-level 的 <code>pow(2).mean().rsqrt()</code> 三步 + 末尾 upcast/downcast，多次中间张量；RoPE 用 <code>(q*cos)+(rotate_half(q)*sin)</code> 的逐元素乘加，<code>rotate_half</code> 还要做 concat-flip。</p><p>右侧 patch 后：<code>npu_rms_norm</code> 把整个 RMSNorm 融成<strong>一个 NPU CANN 算子</strong>（一次 kernel launch、无中间 fp32 物化、权重乘法内置），<code>npu_rotary_mul</code> 把 cos/sin 乘加 + rotate_half 融成单个算子。<strong>差异本质</strong>：不是数值改动（数学等价），而是 kernel 融合省访存、省 launch；DDP/GPU 侧若要在 N 卡上跑同模型做对照，走的是左侧标准实现（PyTorch eager 或 fused kernel via torch.compile），不会调 torch_npu。这也解释了为何 patch 受 <code>use_fused_*</code> 开关保护——关掉即回到左侧等价但更慢的路径，便于跨厂商数值对拍。</p></div></div><div class="seg"><p class="seglab">行 105-116 · 与 fully_shard 的衔接：三座桥总览</p><pre data-lang="py" data-start="105" data-idprefix="A">    @staticmethod
+    def register_patches(config):
+        &quot;&quot;&quot;patching the transformers model.&quot;&quot;&quot;
+        if getattr(config, &quot;use_fused_rmsnorm&quot;, False):
+            pm.register_patch(&quot;transformers.models.qwen3.modeling_qwen3.Qwen3RMSNorm.forward&quot;,
+                              fused_rmsnorm_forward)
+        if getattr(config, &quot;use_fused_rotary_pos_emb&quot;, False):
+            pm.register_patch(&quot;transformers.models.qwen3.modeling_qwen3.apply_rotary_pos_emb&quot;,
+                              apply_rotary_pos_emb)
+
+        pm.apply_patches()
+</pre><div class="exp"><p>最后把本文件放回 FSDP2 + NPU 适配的大图，回答“为什么不能直接拷 HF”：</p><p><strong>第一座桥（HF backbone 复用）</strong>：:29 整段 <code>transformers.Qwen3Model(config)</code>——主干算子不重写，靠 patch + attn_implementation 路由接 NPU kernel。这样 HF 升级 Qwen3 时本壳自动跟进。</p><p><strong>第二座桥（DTensor-aware 改写）</strong>：:31 自定义 <code>LMHead</code>（modules.py 里 <code>.to_local()</code>）+ :48 <code>loss_ctx</code> 钩子。FSDP2 的 <code>fully_shard</code> 会把 lm_head.weight 包成 DTensor（Shard(0) colwise），forward 时必须 <code>to_local()</code> 取本 rank 分片再算；HF 原版 Qwen3LMHead 假设 weight 是普通 Tensor，直接 <code>F.linear</code> 会拿不到分片语义。这是<strong>为接 fully_shard 必须改写</strong>的点，不能照搬 HF。</p><p><strong>第三座桥（NPU 融合算子）</strong>：:105-115 只 patch RMSNorm/RoPE 两个无 HF NPU 等价的算子，kernel 实现在 torch_npu（本仓 common/fusions.py 是薄 wrapper）。Attention 不 patch，走 config 的 attn_implementation 路由。</p><p>EP12 场景下（8 卡 NPU、8B 模型 FSDP2 全分片）三桥同时生效：fully_shard 切参数、LMHead.to_local() 取本分片算 logits、loss_ctx 省 [B,T,vocab] 显存、npu_rms_norm/npu_rotary_mul 省 backbone 访存。本文件是三桥的<strong>组装点</strong>，而非任一桥的实现细节。</p></div></div></div>
+<details class="src"><summary>📜 完整源码（116 行）— 大纲点跳行</summary><pre data-lang="py" data-start="1"># Copyright (c) 2025, HUAWEI CORPORATION.  All rights reserved.
+# Copyright 2025 The Qwen team, Alibaba Group and the HuggingFace Inc. team. All rights reserved.
+from typing import Optional, Union
+
+import torch
+try:
+    import torch_npu
+except ImportError:
+    pass
+import transformers
+from transformers.cache_utils import Cache
+from transformers.modeling_outputs import BaseModelOutputWithPast, CausalLMOutputWithPast
+from transformers.utils import can_return_tuple
+
+from mindspeed.patch_utils import MindSpeedPatchesManager as pm
+from mindspeed_llm.fsdp2.models.common.fusions import apply_rotary_pos_emb, \
+    fused_rmsnorm_forward
+from mindspeed_llm.fsdp2.models.common.modules import LMHead
+
+
+class Qwen3ForCausalLM(transformers.Qwen3PreTrainedModel):
+    _tied_weights_keys = [&quot;lm_head.weight&quot;]
+    _tp_plan = {&quot;lm_head&quot;: &quot;colwise_rep&quot;}
+    _pp_plan = {&quot;lm_head&quot;: ([&quot;hidden_states&quot;], [&quot;logits&quot;])}
+
+    def __init__(self, config):
+        super().__init__(config)
+        self.config = config
+        self.model = transformers.Qwen3Model(config)
+        self.vocab_size = config.vocab_size
+        self.lm_head = LMHead(config.hidden_size, config.vocab_size, bias=False)
+
+        # Initialize weights and apply final processing
+        self.post_init()
+
+    @can_return_tuple
+    def forward(
+            self,
+            input_ids: Optional[torch.LongTensor] = None,
+            attention_mask: Optional[torch.Tensor] = None,
+            position_ids: Optional[torch.LongTensor] = None,
+            past_key_values: Optional[Cache] = None,
+            inputs_embeds: Optional[torch.FloatTensor] = None,
+            labels: Optional[torch.LongTensor] = None,
+            use_cache: Optional[bool] = None,
+            cache_position: Optional[torch.LongTensor] = None,
+            logits_to_keep: Union[int, torch.Tensor] = 0,
+            loss_ctx: Optional[callable] = None,
+            **kwargs,
+    ) -&gt; CausalLMOutputWithPast:
+        r&quot;&quot;&quot;
+        labels (`torch.LongTensor` of shape `(batch_size, sequence_length)`, *optional*):
+            Labels for computing the masked language modeling loss. Indices should either be in `[0, ...,
+            config.vocab_size]` or -100 (see `input_ids` docstring). Tokens with indices set to `-100` are ignored
+            (masked), the loss is only computed for the tokens with labels in `[0, ..., config.vocab_size]`.
+
+        Example:
+
+        ```python
+        &gt;&gt;&gt; from transformers import AutoTokenizer, Qwen3ForCausalLM
+
+        &gt;&gt;&gt; model = Qwen3ForCausalLM.from_pretrained(&quot;Qwen/Qwen3-8B&quot;)
+        &gt;&gt;&gt; tokenizer = AutoTokenizer.from_pretrained(&quot;Qwen/Qwen3-8B&quot;)
+
+        &gt;&gt;&gt; prompt = &quot;Hey, are you conscious? Can you talk to me?&quot;
+        &gt;&gt;&gt; inputs = tokenizer(prompt, return_tensors=&quot;pt&quot;)
+
+        &gt;&gt;&gt; # Generate
+        &gt;&gt;&gt; generate_ids = model.generate(inputs.input_ids, max_length=30)
+        &gt;&gt;&gt; tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
+        &quot;Hey, are you conscious? Can you talk to me?\nI&#x27;m not conscious, but I can talk to you.&quot;
+        ```&quot;&quot;&quot;
+        outputs: BaseModelOutputWithPast = self.model(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            position_ids=position_ids,
+            past_key_values=past_key_values,
+            inputs_embeds=inputs_embeds,
+            use_cache=use_cache,
+            cache_position=cache_position,
+            **kwargs,
+        )
+
+        hidden_states = outputs.last_hidden_state
+        # Only compute necessary logits, and do not upcast them to float if we are not computing the loss
+        slice_indices = slice(-logits_to_keep, None) if isinstance(logits_to_keep, int) else logits_to_keep
+
+        if loss_ctx:
+            logits, loss = self.lm_head(hidden_states[:, slice_indices, :], loss_ctx=loss_ctx)
+        else:
+            logits, loss = self.lm_head(hidden_states[:, slice_indices, :])
+
+            loss = None
+            if labels is not None:
+                loss = self.loss_function(logits=logits, labels=labels, vocab_size=self.config.vocab_size, **kwargs)
+
+        return CausalLMOutputWithPast(
+            loss=loss,
+            logits=logits,
+            past_key_values=outputs.past_key_values,
+            hidden_states=outputs.hidden_states,
+            attentions=outputs.attentions,
+        )
+
+    @staticmethod
+    def register_patches(config):
+        &quot;&quot;&quot;patching the transformers model.&quot;&quot;&quot;
+        if getattr(config, &quot;use_fused_rmsnorm&quot;, False):
+            pm.register_patch(&quot;transformers.models.qwen3.modeling_qwen3.Qwen3RMSNorm.forward&quot;,
+                              fused_rmsnorm_forward)
+        if getattr(config, &quot;use_fused_rotary_pos_emb&quot;, False):
+            pm.register_patch(&quot;transformers.models.qwen3.modeling_qwen3.apply_rotary_pos_emb&quot;,
+                              apply_rotary_pos_emb)
+
+        pm.apply_patches()
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

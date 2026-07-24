@@ -1,0 +1,2209 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/utils/arguments.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/utils/arguments.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_7081f2a3f5db15.html">◀ __init__.py</a> <a href="file_8e634a18185eaf.html">coverage.py ▶</a></nav></div>
+<div class="wrap">
+<h1>arguments.py</h1><p class="goal">mindspeed_llm/fsdp2/utils/arguments.py · 45867B · 1069 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L23" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class ModelArguments</a><a href="#L163" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __post_init__(self)</a><a href="#L174" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class DataArguments</a><a href="#L310" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __post_init__(self)</a><a href="#L311" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def split_arg(arg)</a><a href="#L366" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def to_dict(self) -&gt; dict[str, Any]</a><a href="#L371" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class ParallelArguments</a><a href="#L458" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __post_init__(self)</a><a href="#L470" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class TrainingArguments</a><a href="#L624" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __post_init__(self): # Path parameter vali</a><a href="#L635" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class InferenceArguments</a><a href="#L652" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __post_init__(self)</a><a href="#L658" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class OptimizationArguments</a><a href="#L710" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __post_init__(self)</a><a href="#L715" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _string_to_bool(value: Union[bool, str]) -</a><a href="#L728" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _convert_str_dict(input_dict: Dict[str, An</a><a href="#L744" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _make_choice_type_function(choices: List[A</a><a href="#L750" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _validate_cross_args(args)</a><a href="#L787" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def fsdp2_parse_args(rootclass: TypeVar) -&gt;</a><a href="#L826" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _create_argument_parser(rootclass)</a><a href="#L886" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _resolve_optional_type(attr_type, origin_t</a><a href="#L906" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _handle_literal_or_enum(parser_kwargs, eff</a><a href="#L917" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _handle_bool(parser_kwargs, attr)</a><a href="#L929" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _handle_list_of_dict(parser_kwargs, base, </a><a href="#L942" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _handle_list_of_scalar(parser_kwargs, item</a><a href="#L954" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _handle_dict(parser_kwargs, base, attr_nam</a><a href="#L967" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _handle_scalar(parser_kwargs, effective_ty</a><a href="#L981" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _load_yaml_if_provided(cmd_args)</a><a href="#L993" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _merge_yaml_into_cmd_args(cmd_args, yaml_c</a><a href="#L1022" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _postprocess_json_fields(args, dict_fields</a><a href="#L1060" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _build_dataclass_instances(rootclass, pars</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep06.html">EP06</a><a href="../ep10.html">EP10</a><a href="../ep11.html">EP11</a><a href="../ep12.html">EP12</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="annot"><div class="seg"><p class="seglab">行 1-19 · 文件头部与导入：dataclass 驱动的参数体系</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :1-:19）</h5><pre data-lang="py" data-start="1" data-idprefix="A">&quot;&quot;&quot;
+Includes ModelArguments/DataArguments/ParallelArguments/TrainingArguments classes and parses the argument class using the command line inputs and yaml configuration.
+&quot;&quot;&quot;
+
+import argparse
+from collections import defaultdict
+from dataclasses import MISSING, dataclass, field, fields, asdict
+from enum import Enum
+import json
+import os
+import sys
+import types
+from typing import Optional, List, Union, Any, Callable, Dict, Literal, TypeVar, get_type_hints, get_origin, get_args
+import yaml
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+import transformers
+from packaging import version
+
+logger = get_logger(__name__)</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">argparse.ArgumentParser().add_argument(&#x27;--tensor-model-parallel-size&#x27;, type=int, default=1)
+args = parser.parse_args()  # Namespace, 扁平结构</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>NVIDIA GPU + Megatron-Core 路线的参数是<strong>扁平 Namespace</strong>：一个 parser、一堆平铺 flag，<code>args.tensor_model_parallel_size</code> 直接点取。而本文件（:826-883）是<strong>嵌套 dataclass</strong>：根类 <code>rootclass</code> 的每个字段本身又是一个 dataclass，CLI flag 被渲染成 <code>--{base}.{attr_name}</code>（如 <code>--parallel.tp_size</code>）。访问路径变成 <code>args.parallel.tp_size</code>。差异本质：mcore 是「一个扁平命名空间」，FSDP2 是「dataclass 树」，所以两套参数名/结构不通用。</p></div></div><div class="seg"><p class="seglab">行 22-62 · ModelArguments（一）：模型路径与模型类型</p><pre data-lang="py" data-start="22" data-idprefix="A">@dataclass
+class ModelArguments:
+    &quot;&quot;&quot;
+    Model-related parameters: path, initialization method, etc.
+    &quot;&quot;&quot;
+
+    model_name_or_path: str = field(
+        metadata={&quot;help&quot;: &quot;Path to pretrained model or model identifier from huggingface.co/models&quot;}
+    )
+    model_id: Optional[
+        Literal[
+            &quot;gpt_oss&quot;,
+            &quot;qwen3&quot;,
+            &quot;qwen3_moe&quot;,
+            &quot;qwen3_next&quot;,
+            &quot;step35&quot;,
+            &quot;mamba3&quot;,
+            &quot;minimax_m27&quot;,
+            &quot;longcat_flash&quot;,
+            &quot;glm52&quot;,
+            &quot;deepseek_v4&quot;,
+        ]
+    ] = field(
+        default=None,
+        metadata={
+            &quot;help&quot;: &quot;Model type. New model needs to be registered in the class ModelRegistry of mindspeed_llm/fsdp2/models/model_registry.py&quot;
+        },
+    )
+    init_model_with_meta_device: bool = field(
+        default=False, metadata={&quot;help&quot;: &quot;Whether or not to initialize the model using the meta device.&quot;}
+    )
+    trust_remote_code: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether or not to allow for custom models defined on the Hub in their own modeling files.&quot;},
+    )
+    train_from_scratch: bool = field(
+        default=False,
+        metadata={
+            &quot;help&quot;: &quot;If True, initialize the model from config (random weights) instead of loading pretrained weights.&quot;
+        },
+    )</pre><div class="exp"><p><code>ModelArguments</code> 是五段 dataclass 之一，封装<strong>模型加载与初始化</strong>。:28-30 的 <code>model_name_or_path</code> 是<strong>无默认值必填</strong>字段（没有 <code>default=</code>），对应解析时会被标记为 <code>required=True</code>（见后面 <code>_handle_scalar</code> :970-975）。</p><p>:31-49 的 <code>model_id</code> 用 <code>Literal[...]</code> 限定模型类型枚举——这非常关键：<code>qwen3 / qwen3_moe / qwen3_next / glm52 / deepseek_v4</code> 等是本仓库支持的白名单，新增模型需在 <code>mindspeed_llm/fsdp2/models/model_registry.py</code> 的 <code>ModelRegistry</code> 注册（见 help 文本 :47）。<code>Literal</code> 在 :861 会被转成 argparse 的 <code>choices</code> + 自定义 <code>type</code> 函数，非法值直接被 argparse 拒绝。</p><p>:50-52 <code>init_model_with_meta_device</code> 是 FSDP2 的重要开关：用 meta device 初始化模型，延迟实际显存分配，配合 FSDP 分片加载权重，<strong>避免先整份物化再分片的双倍显存峰值</strong>——这是 FSDP2 相对朴素 DDP 的核心显存优化点之一。:57-62 <code>train_from_scratch</code> 控制是否用随机权重从 config 初始化（预训练阶段用），而非加载预训练权重。</p><p>:163-170 的 <code>__post_init__</code> 做实例级校验：<code>model_name_or_path</code> 缺失即抛错（与解析期 required 双保险）；:166 还做了<strong>跨库版本门禁</strong>——<code>deepseek_v4</code> 要求 transformers ≥ 5.8.1。注意这种 <code>__post_init__</code> 是 dataclass 标准钩子，<strong>不是</strong> mcore 的 <code>validate_args</code> 机制。</p></div></div><div class="seg"><p class="seglab">行 63-128 · ModelArguments（二）：tokenizer 与多 Hub 令牌</p><pre data-lang="py" data-start="63" data-idprefix="A">    # Specify tokenizer path if different from model path
+    tokenizer_name_or_path: Optional[str] = field(
+        default=None, metadata={&quot;help&quot;: &quot;Pretrained tokenizer name or path if not the same as model_name&quot;}
+    )
+    cache_dir: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Where to store the pre-trained models downloaded from huggingface.co or modelscope.cn.&quot;},
+    )
+    use_fast_tokenizer: bool = field(
+        default=True,
+        metadata={&quot;help&quot;: &quot;Whether or not to use one of the fast tokenizer (backed by the tokenizers library).&quot;},
+    )
+    resize_vocab: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether or not to resize the tokenizer vocab and the embedding layers.&quot;},
+    )
+    split_special_tokens: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether or not the special tokens should be split during the tokenization process.&quot;},
+    )
+    add_tokens: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Non-special tokens to be added into the tokenizer. Use commas to separate multiple tokens.&quot;},
+    )
+    add_special_tokens: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Special tokens to be added into the tokenizer. Use commas to separate multiple tokens.&quot;},
+    )
+    new_special_tokens_config: Optional[str] = field(
+        default=None,
+        metadata={
+            &quot;help&quot;: (
+                &quot;Path to YAML config with special token descriptions for semantic initialization. &quot;
+                &quot;If set, this takes precedence over add_special_tokens. &quot;
+                &quot;YAML format: {&#x27;&lt;token&gt;&#x27;: &#x27;description text&#x27;, ...}&quot;
+            )
+        },
+    )
+    init_special_tokens: Literal[&quot;noise_init&quot;, &quot;desc_init&quot;, &quot;desc_init_w_noise&quot;] = field(
+        default=&quot;noise_init&quot;,
+        metadata={
+            &quot;help&quot;: (
+                &quot;Initialization method for new special tokens: &quot;
+                &quot;&#x27;noise_init&#x27; (default, random noise around mean), &quot;
+                &quot;&#x27;desc_init&#x27; (semantic initialization from descriptions), &quot;
+                &quot;&#x27;desc_init_w_noise&#x27; (semantic + random noise). &quot;
+                &quot;Note: &#x27;desc_init&#x27; methods require new_special_tokens_config.&quot;
+            )
+        },
+    )
+    model_revision: str = field(
+        default=&quot;main&quot;,
+        metadata={&quot;help&quot;: &quot;The specific model version to use (can be a branch name, tag name or commit id).&quot;},
+    )
+    hf_hub_token: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Auth token to log in with Hugging Face Hub.&quot;},
+    )
+    ms_hub_token: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Auth token to log in with ModelScope Hub.&quot;},
+    )
+    om_hub_token: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Auth token to log in with Modelers Hub.&quot;},
+    )</pre><div class="exp"><p>这段是 tokenizer 与多源下载相关。:64-66 <code>tokenizer_name_or_path</code> 允许 tokenizer 与模型分路径。:67-70 <code>cache_dir</code> 统一缓存位置（HF/ModelScope/Modelers 都落到这里）。:71-74 <code>use_fast_tokenizer</code> 默认 True，走 tokenizers 库的 fast 实现。</p><p>:75-90 是<strong>词表扩展</strong>三件套：<code>resize_vocab</code>（是否重算 embedding）、<code>add_tokens</code>（普通 token）、<code>add_special_tokens</code>（特殊 token）。:91-100 <code>new_special_tokens_config</code> 更进一步——指向一个 YAML，里面是 <code>{token: 描述文本}</code>，用于<strong>语义初始化</strong>特殊 token。:101-112 <code>init_special_tokens</code> 用 <code>Literal["noise_init", "desc_init", "desc_init_w_noise"]</code> 选初始化法：<code>desc_init</code> 类需要上面那个 config，把描述文本当 embedding 初始化向量（让特殊 token 有先验语义）。这是本仓库相对 HF Trainer 的扩展点。</p><p>:113-128 三个 Hub token：<code>hf_hub_token / ms_hub_token / om_hub_token</code>。注意 <code>ms_hub_token</code>（ModelScope）和 <code>om_hub_token</code>（Modelers）是国内镜像源，反映「国产 Ascend 训练常连国内 Hub」的现实——NVIDIA GPU 生态里通常只见 <code>hf_hub_token</code>。</p></div></div><div class="seg"><p class="seglab">行 129-161 · ModelArguments（三）：MXFP8 量化与 FSDP 低精度 all-gather</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :129-:161）</h5><pre data-lang="py" data-start="129" data-idprefix="A">    quant_recipe_name: Literal[&quot;mxfp8&quot;] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Quantization recipe name&quot;},
+    )
+    quant_apply_modules: List[str] = field(
+        default_factory=lambda: [&#x27;model.layers.{*}&#x27;],
+        metadata={
+            &quot;help&quot;: &quot;List of model module patterns to apply MXFP8 quantization.&quot;
+            &quot;Example: &#x27;model.layers.{*}&#x27;applies quantization to all transformer layers.&quot;
+        },
+    )
+    quant_ignored_modules: List[str] = field(
+        default_factory=lambda: [&#x27;*lm_head&#x27;, &#x27;*gate&#x27;],
+        metadata={&quot;help&quot;: &quot;List of module patterns to exclude from MXFP8 quantization. &quot;},
+    )
+    quant_converters: List[str] = field(
+        default_factory=lambda: [&quot;quantize.linear.mx&quot;],
+        metadata={
+            &quot;help&quot;: &quot;This field specifies the quantization converters to use. &quot;
+            &quot;It&#x27;s a list of strings where each string represents a specific quantization implementation.&quot;
+            &quot;Default uses &#x27;quantize.linear.mx&#x27; for mxfp8 quantization.&quot;
+        },
+    )
+    # FSDP low precision settings
+    enable_fsdp_low_precision_all_gather: bool = field(
+        default=True, metadata={&quot;help&quot;: &quot;Enable FSDP low precision activation gradients for memory efficiency.&quot;}
+    )
+    fsdp_low_precision_all_gather_mode: Literal[&quot;on-demand&quot;, &quot;all&quot;] = field(
+        default=&quot;on-demand&quot;,
+        metadata={
+            &quot;help&quot;: &quot;FSDP low precision all gather mode. &#x27;on-demand&#x27; for on-demand all gather fwd or bwd weights, &#x27;all&#x27; for all gather both fwd and bwd weights.&quot;
+        },
+    )</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># PyTorch FSDP1 (NVIDIA)
+from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+# 无低精度 all-gather 开关；sharding_strategy=FShardPolicy.SHARD_FULL_GRAD
+# 通信 dtype 需通过 mixed_precision.params_dtype 间接控制</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异：FSDP1（NVIDIA 主战场）没有「低精度 all-gather 模式」这种显式 on-demand/all 旋钮，低精度走的是 <code>mixed_precision</code> 配置项里的 <code>param_dtype/param_reduce_dtype</code>，粒度较粗。本文件 :153-161 的 on-demand 模式允许<strong>仅在前向</strong>按需低精度聚合权重，反向仍高精度——在带宽受限的 Ascend 集群上是更细的调优点。迁移 FSDP1 脚本时这个能力没有直接对应，要意识到这是 Ascend/FSDP2 的增量。</p></div></div><div class="seg"><p class="seglab">行 173-286 · DataArguments（一）：模板、数据集与流式混合</p><pre data-lang="py" data-start="173" data-idprefix="A">@dataclass
+class DataArguments:
+    &quot;&quot;&quot;
+    Arguments pertaining to what data we are going to input our model for training and evaluation.
+    &quot;&quot;&quot;
+
+    template: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Which template to use for constructing prompts in training and inference.&quot;},
+    )
+    dataset: Optional[Union[Dict[str, Any], str]] = field(
+        default=None, metadata={&quot;help&quot;: &quot;Train dataset: config dict or comma-separated dataset names.&quot;}
+    )
+    eval_dataset: Optional[Union[Dict[str, Any], str]] = field(
+        default=None, metadata={&quot;help&quot;: &quot;Eval dataset: config dict or comma-separated eval dataset names.&quot;}
+    )
+    dataset_dir: str = field(
+        default=&quot;./configs/fsdp2/data&quot;,
+        metadata={&quot;help&quot;: &quot;Path to the folder containing the datasets.&quot;},
+    )
+    cutoff_len: int = field(
+        default=2048,
+        metadata={&quot;help&quot;: &quot;The cutoff length of the tokenized inputs in the dataset.&quot;},
+    )
+    train_on_prompt: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether or not to disable the mask on the prompt.&quot;},
+    )
+    mask_history: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether or not to mask the history and train on the last turn only.&quot;},
+    )
+    streaming: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Enable dataset streaming.&quot;},
+    )
+    buffer_size: int = field(
+        default=16384,
+        metadata={&quot;help&quot;: &quot;Size of the buffer to randomly sample examples from in dataset streaming.&quot;},
+    )
+    mix_strategy: Literal[&quot;concat&quot;, &quot;interleave_under&quot;, &quot;interleave_over&quot;] = field(
+        default=&quot;concat&quot;,
+        metadata={&quot;help&quot;: &quot;Strategy to use in dataset mixing (concat/interleave) (undersampling/oversampling).&quot;},
+    )
+    interleave_probs: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Probabilities to sample data from datasets. Use commas to separate multiple datasets.&quot;},
+    )
+    overwrite_cache: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Overwrite the cached training and evaluation sets.&quot;},
+    )
+    preprocessing_batch_size: int = field(
+        default=1000,
+        metadata={&quot;help&quot;: &quot;The number of examples in one group in pre-processing.&quot;},
+    )
+    preprocessing_num_workers: Optional[int] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;The number of processes to use for the pre-processing.&quot;},
+    )
+    max_samples: Optional[int] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;For debugging purposes, truncate the number of examples for each dataset.&quot;},
+    )
+    eval_num_beams: Optional[int] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Number of beams to use for evaluation. This argument will be passed to `model.generate`&quot;},
+    )
+    ignore_pad_token_for_loss: bool = field(
+        default=True,
+        metadata={&quot;help&quot;: &quot;Whether or not to ignore the tokens corresponding to the pad label in loss computation.&quot;},
+    )
+    val_size: float = field(
+        default=0.0,
+        metadata={&quot;help&quot;: &quot;Size of the validation set, should be an integer or a float in range `[0,1)`.&quot;},
+    )
+    eval_on_each_dataset: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether or not to evaluate on each dataset separately.&quot;},
+    )
+    packing: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Enable sequences packing in training.&quot;},
+    )
+    neat_packing: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Enable sequence packing without cross-attention.&quot;},
+    )
+    tool_format: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Tool format to use for constructing function calling examples.&quot;},
+    )
+    default_system: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Override the default system message in the template.&quot;},
+    )
+    enable_thinking: Optional[bool] = field(
+        default=True,
+        metadata={&quot;help&quot;: &quot;Whether or not to enable thinking mode for reasoning models.&quot;},
+    )
+    tokenized_path: Optional[str] = field(
+        default=None,
+        metadata={
+            &quot;help&quot;: (
+                &quot;Path to save or load the tokenized datasets. &quot;
+                &quot;If tokenized_path not exists, it will save the tokenized datasets. &quot;
+                &quot;If tokenized_path exists, it will load the tokenized datasets.&quot;
+            )
+        },
+    )
+    data_shared_file_system: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether or not to use a shared file system for the datasets.&quot;},
+    )</pre><div class="exp"><p><code>DataArguments</code> 封装<strong>训练/评估数据供给</strong>。:179-182 <code>template</code> 选 prompt 模板（对应 LLaMA-Factory 风格的对话模板）。:183-188 <code>dataset/eval_dataset</code> 类型是 <code>Optional[Union[Dict[str, Any], str]]</code>——既可以是 config 字典也可以是逗号分隔字符串，这种 <strong>Union[Dict, str]</strong> 正是后面 :853-860 要特殊处理的「多类型 Union」分支（会走 <code>_handle_dict</code> + JSON 后处理）。</p><p>:189-192 <code>dataset_dir</code> 默认 <code>./configs/fsdp2/data</code>。:193-196 <code>cutoff_len</code> 默认 2048。:197-208 <code>train_on_prompt</code>（是否对 prompt 算 loss）、<code>mask_history</code>（只训最后一轮）是 SFT 常用开关。:205-212 <code>streaming + buffer_size</code> 是流式数据加载——超大数据集走 <code>IterableDataset</code> + 缓冲采样。</p><p>:213-219 <code>mix_strategy</code> 用 <code>Literal["concat", "interleave_under", "interleave_over"]</code> 选多数据集混合策略（拼接 / 欠采样交织 / 过采样交织），<code>interleave_probs</code> 给各数据集采样概率。:253-260 <code>packing / neat_packing</code> 是序列打包（多个短样本拼一条提升 MFU）。:269-272 <code>enable_thinking</code> 给推理类模型开 thinking 模式。:273-282 <code>tokenized_path</code> 支持预处理结果缓存落盘/复用——:283-286 <code>data_shared_file_system</code> 标记是否共享文件系统（影响多 rank 是否各自预处理）。</p></div></div><div class="seg"><p class="seglab">行 287-367 · DataArguments（二）：megatron 数据参数与 __post_init__ 联动校验</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :287-:367）</h5><pre data-lang="py" data-start="287" data-idprefix="A">
+    data_manager_type: Literal[&quot;lf&quot;, &quot;mg&quot;] = field(
+        default=&quot;lf&quot;,
+        metadata={&quot;help&quot;: &quot;Data Manager type for building the different data manager&quot;},
+    )
+    # megatron dataset args
+    split: str = field(
+        default=&quot;100,0,0&quot;,
+        metadata={&quot;help&quot;: &quot;Comma-separated list of proportions for training, validation, and test split.&quot;},
+    )
+    create_attention_mask_in_dataloader: Optional[bool] = field(
+        default=False, metadata={&quot;help&quot;: &quot;If set, do create attention_masks in dataloader.&quot;}
+    )
+    no_shared_storage: Optional[bool] = field(default=False, metadata={&quot;help&quot;: &quot;if no shared storage, set it.&quot;})
+    dataloader_type: Literal[&quot;single&quot;] = field(
+        default=&quot;single&quot;,
+        metadata={&quot;help&quot;: (&quot;Single pass vs multiple pass data loader&quot;)},
+    )
+    reset_attention_mask: Optional[bool] = field(
+        default=False, metadata={&quot;help&quot;: &quot;If set, do reset attention masks in dataloader and generate actual_seq_len.&quot;}
+    )
+    append_eod: Optional[bool] = field(default=False, metadata={&quot;help&quot;: &quot;Append eod token when process data&quot;})
+
+    def __post_init__(self):
+        def split_arg(arg):
+            if isinstance(arg, str):
+                return [item.strip() for item in arg.split(&quot;,&quot;)]
+            return arg
+
+        if isinstance(self.dataset, dict) and not self.dataset:
+            self.dataset = None
+        if isinstance(self.eval_dataset, dict) and not self.eval_dataset:
+            self.eval_dataset = None
+
+        if self.dataset is None and self.val_size &gt; 1e-6:
+            raise ValueError(f&quot;val_size={self.val_size} but dataset=None (dataset must be specified when val_size&gt;0).&quot;)
+
+        if self.eval_dataset is not None and self.val_size &gt; 1e-6:
+            raise ValueError(f&quot;val_size={self.val_size} and eval_dataset={self.eval_dataset} cannot be set together.&quot;)
+
+        if self.interleave_probs is not None:
+            if self.mix_strategy == &quot;concat&quot;:
+                raise ValueError(
+                    f&quot;interleave_probs={self.interleave_probs} is not supported for mix_strategy={self.mix_strategy}.&quot;
+                )
+
+            self.interleave_probs = list(map(float, split_arg(self.interleave_probs)))
+            if self.dataset is not None and len(self.dataset) != len(self.interleave_probs):
+                raise ValueError(
+                    f&quot;len(dataset)={len(self.dataset)} != len(interleave_probs)={len(self.interleave_probs)}.&quot;
+                )
+
+            if self.eval_dataset is not None and len(self.eval_dataset) != len(self.interleave_probs):
+                raise ValueError(
+                    f&quot;len(eval_dataset)={len(self.eval_dataset)} != len(interleave_probs)={len(self.interleave_probs)}.&quot;
+                )
+
+        if self.streaming and self.val_size &gt; 1e-6 and self.val_size &lt; 1:
+            raise ValueError(f&quot;val_size={self.val_size} must be integer when streaming=True.&quot;)
+
+        if self.streaming and self.max_samples is not None:
+            raise ValueError(f&quot;streaming=True and max_samples={self.max_samples} are incompatible.&quot;)
+
+        if self.mask_history and self.train_on_prompt:
+            raise ValueError(
+                f&quot;mask_history={self.mask_history} and train_on_prompt={self.train_on_prompt} cannot be True together.&quot;
+            )
+
+        if self.neat_packing:
+            self.packing = True
+        if self.reset_attention_mask and not self.append_eod:
+            raise ValueError(
+                &quot;reset_attention_mask requires append_eod to be True. &quot;
+                &quot;Please set append_eod=True when using reset_attention_mask.&quot;
+            )
+
+        if self.packing:
+            self.cutoff_len -= 1  # avoid pad_to_multiple_of, needs improve
+
+    def to_dict(self) -&gt; dict[str, Any]:
+        return asdict(self)</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">def validate_args(args, defaults):
+    # Megatron-Core: 独立的全局校验函数
+    assert args.data_path is not None
+    if args.tensor_model_parallel_size ...: raise</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异：mcore 把跨字段校验集中在 <code>validate_args(args, defaults)</code> 一个大函数里，操作的是扁平 Namespace。本文件把校验<strong>分散到每个 dataclass 的 <code>__post_init__</code></strong>（DataArguments:310、ParallelArguments:458、TrainingArguments:624 等），各自只管自己分段的约束；跨分段的约束（如 reset_attention_mask × batch_size、qwen3_next × cp_type）才放到独立的 <code>_validate_cross_args</code>（:750-784）。这是 dataclass 树式架构带来的天然分工——分段内自校验，跨段才上提。</p></div></div><div class="seg"><p class="seglab">行 370-467 · ParallelArguments：FSDP/TP/EP/CP 切分与 fsdp_modules 通配 DSL</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :370-:467）</h5><pre data-lang="py" data-start="370" data-idprefix="A">@dataclass
+class ParallelArguments:
+    &quot;&quot;&quot;
+    MindSpeed FSDP backend parallel strategy parameters (FSDP2, TP, EP)
+    &quot;&quot;&quot;
+
+    tp_size: int = field(default=1, metadata={&quot;help&quot;: &quot;Tensor Parallel size. (Cols/Rows splitting)&quot;})
+    fsdp_size: int = field(default=1, metadata={&quot;help&quot;: &quot;Fully Sharded Data Parallel size. (Sharding parameters)&quot;})
+    recompute: bool = field(
+        default=False, metadata={&quot;help&quot;: &quot;Whether to enable Gradient Checkpointing (Activation Recomputation).&quot;}
+    )
+    # Expert Parallel (MoE)
+    ep_size: int = field(default=1, metadata={&quot;help&quot;: &quot;Expert Parallel size for MoE models.&quot;})
+    ep_fsdp_size: int = field(default=1, metadata={&quot;help&quot;: &quot;FSDP size inside Expert Parallel groups.&quot;})
+    cp_size: int = field(default=1, metadata={&quot;help&quot;: &quot;context parallel size.&quot;})
+    cp_type: Literal[&quot;ulysses&quot;, &quot;ring&quot;] = field(
+        default=&quot;ulysses&quot;,
+        metadata={&quot;help&quot;: &quot;Use context parallel algo.&quot;},
+    )
+    fsdp_modules: List[str] = field(
+        default_factory=lambda: [&#x27;model.layers.{*}&#x27;, &#x27;model.embed_tokens&#x27;, &#x27;lm_head&#x27;],
+        metadata={&quot;help&quot;: &quot;Model structure of layers with Fully Sharded Data Parallel.&quot;},
+    )
+    ignored_modules: List[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Model structure of layers with not Fully Sharded Data Parallel.&quot;},
+    )
+    reshard_after_forward: bool = field(
+        default=True,
+        metadata={&quot;help&quot;: &quot;Whether to reshard parameters after forward pass (for main FSDP module)&quot;},
+    )
+    shard_placement_fn: Optional[str] = field(
+        default=None, metadata={&quot;help&quot;: &quot;Custom shard placement function for main FSDP module&quot;}
+    )
+    efsdp_shard_placement_fn: Optional[str] = field(
+        default=&#x27;shard_by_dim_1&#x27;, metadata={&quot;help&quot;: &quot;Custom shard placement function for main ep-FSDP module&quot;}
+    )
+    tp_colwise: List[str] = field(
+        default_factory=lambda: [&#x27;*.q_proj&#x27;, &#x27;*.k_proj&#x27;, &#x27;*.v_proj&#x27;, &#x27;*.gate_proj&#x27;, &#x27;*.up_proj&#x27;],
+        metadata={&quot;help&quot;: &quot;Model structure of layers with Tensor Parallel(Cols splitting).&quot;},
+    )
+    tp_rowwise: List[str] = field(
+        default_factory=lambda: [&#x27;*.o_proj&#x27;, &#x27;*.down_proj&#x27;],
+        metadata={&quot;help&quot;: &quot;Model structure of layers with Tensor Parallel(Rows splitting).&quot;},
+    )
+    ep_modules: List[str] = field(
+        default_factory=lambda: [&#x27;model.layers.{*}.mlp.experts&#x27;],
+        metadata={&quot;help&quot;: &quot;Model structure of layers with Expert Parallel.&quot;},
+    )
+    ep_fsdp_modules: List[str] = field(
+        default_factory=lambda: [&#x27;model.layers.{*}.mlp.experts&#x27;],
+        metadata={&quot;help&quot;: &quot;Model structure of layers with FSDP inside Expert Parallel groups.&quot;},
+    )
+    ep_dispatcher: Literal[&quot;eager&quot;, &quot;fused&quot;, &quot;mc2&quot;] = field(
+        default=&quot;eager&quot;,
+        metadata={
+            &quot;help&quot;: &quot;Dispatcher strategy for Expert Parallel (MoE). &quot;
+            &quot;Options: &#x27;eager&#x27; (immediate token dispatch to experts, default), &quot;
+            &quot;&#x27;fused&#x27; (fused routing &amp; expert computation for higher throughput), &quot;
+            &quot;&#x27;mc2&#x27; (mixed compression dispatch to reduce cross-card communication cost). Defaults to &#x27;eager&#x27;.&quot;
+        },
+    )
+    recompute_modules: List[str] = field(
+        default_factory=lambda: [&#x27;model.layers.{*}&#x27;],
+        metadata={&quot;help&quot;: &quot;Model structure of layers with Gradient Checkpointing (Activation Recomputation).&quot;},
+    )
+    param_dtype: Literal[&quot;bf16&quot;, &quot;fp16&quot;, &quot;fp32&quot;] = field(
+        default=&quot;bf16&quot;, metadata={&quot;help&quot;: &quot;Data type for FSDP parameter storage. Defaults to &#x27;bf16&#x27;&quot;}
+    )
+    reduce_dtype: Literal[&quot;bf16&quot;, &quot;fp16&quot;, &quot;fp32&quot;] = field(
+        default=&quot;fp32&quot;,
+        metadata={
+            &quot;help&quot;: &quot;Data type for FSDP gradient reduction . Using &#x27;fp32&#x27; ensures numerical stability. Defaults to &#x27;fp32&#x27;.&quot;
+        },
+    )
+    num_to_forward_prefetch: int = field(
+        default=1,
+        metadata={
+            &quot;help&quot;: &quot;Number of modules to prefetch during FSDP forward pass (optimizes pipeline efficiency). Defaults to 1.&quot;
+        },
+    )
+    num_to_backward_prefetch: int = field(
+        default=1,
+        metadata={
+            &quot;help&quot;: &quot;Number of modules to prefetch during FSDP backward pass (optimizes pipeline efficiency). Defaults to 1.&quot;
+        },
+    )
+
+    def __post_init__(self):
+        if self.fsdp_modules is None:
+            raise ValueError(
+                &quot;Parameter &#x27;fsdp_modules&#x27; cannot be None! Please provide a non-empty list of module paths (e.g. [&#x27;model.layers.{*}&#x27;]).&quot;
+            )
+        if len(self.fsdp_modules) == 0:
+            raise ValueError(
+                &quot;Parameter &#x27;fsdp_modules&#x27; cannot be an empty list! Please provide at least one module path (e.g. [&#x27;model.layers.{*}&#x27;]).&quot;
+            )
+</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+model = FSDP(model, sharding_strategy=SHARD_FULL_GRAD,
+            mixed_precision=MixedPrecision(param_dtype=bf16, reduce_dtype=fp32))
+# FSDP1: 整模型包裹，分片粒度=整个 flat param</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异（FSDP1 vs FSDP2，这也是 NVIDIA GPU 用户最需要重认知的点）：</p><ul><li><strong>分片粒度</strong>：FSDP1 用 <code>FSDP(model, ...)</code> 包裹整模块，产生一个 flat param；本文件 :389 的 <code>fsdp_modules=['model.layers.{*}', ...]</code> 是 FSDP2 的<strong>按模块逐个分片</strong>，每个 transformer 层独立 flat handle，配合 <code>{*}</code> 通配遍历所有层。</li><li><strong>TP 共存</strong>：FSDP1 + TP 在 NVIDIA 上需要 FSDP 内部 special handling；本文件 :407-414 用 <code>tp_colwise/tp_rowwise</code> 模块通配列表显式声明哪些子模块做列切/行切，FSDP2 把 TP 当模块级切分组合进来。</li><li><strong>低精度</strong>：FSDP1 的 <code>param_dtype/reduce_dtype</code> 在 <code>MixedPrecision</code> 里；本文件 :436-444 同名字段在 dataclass 里，语义一致但位置不同（dataclass 字段而非 MP 对象）。</li><li><strong>新增能力</strong>：:397 <code>reshard_after_forward</code>、:153 低精度 all-gather 模式、:423 MoE mc2 分派——都是 FSDP1 没有的增量。</li></ul></div></div><div class="seg"><p class="seglab">行 469-622 · TrainingArguments：优化器、调度、循环控制与 dataloader</p><pre data-lang="py" data-start="469" data-idprefix="A">@dataclass
+class TrainingArguments:
+    &quot;&quot;&quot;
+    Training hyperparameters: corresponding to requirements of Trainer and Optimizer/Scheduler Factory
+    &quot;&quot;&quot;
+
+    output_dir: str = field(
+        metadata={&quot;help&quot;: &quot;The output directory where the model predictions and checkpoints will be written.&quot;}
+    )
+    # --- Optimization ---
+    optimizer: Literal[&quot;adamw&quot;, &quot;muon&quot;] = field(
+        default=&quot;adamw&quot;,
+        metadata={&quot;help&quot;: &quot;Optimizer. Default to adamw.&quot;},
+    )
+    lr: float = field(default=1e-5, metadata={&quot;help&quot;: &quot;The initial learning rate.&quot;})
+    weight_decay: float = field(default=0.01, metadata={&quot;help&quot;: &quot;Weight decay if we apply some.&quot;})
+    adam_beta1: float = field(default=0.9, metadata={&quot;help&quot;: &quot;Beta1 for AdamW optimizer&quot;})
+    adam_beta2: float = field(default=0.95, metadata={&quot;help&quot;: &quot;Beta2 for AdamW optimizer&quot;})
+    adam_epsilon: float = field(default=1e-8, metadata={&quot;help&quot;: &quot;Epsilon for AdamW optimizer.&quot;})
+    max_grad_norm: float = field(default=1.0, metadata={&quot;help&quot;: &quot;Max gradient norm for clipping.&quot;})
+
+    # --- Scheduling ---
+    lr_scheduler_type: Literal[&quot;cosine&quot;, &quot;linear&quot;, &quot;constant&quot;] = field(
+        default=&quot;cosine&quot;, metadata={&quot;help&quot;: &quot;The scheduler type to use. (cosine, linear, constant)&quot;}
+    )
+    warmup_ratio: float = field(
+        default=0.03, metadata={&quot;help&quot;: &quot;Linear warmup over warmup_ratio fraction of total steps.&quot;}
+    )
+    min_lr: float = field(default=1e-6, metadata={&quot;help&quot;: &quot;Minimum learning rate for cosine scheduler.&quot;})
+
+    # --- Training Loop Control ---
+    num_train_epochs: float = field(default=3.0, metadata={&quot;help&quot;: &quot;Total number of training epochs to perform.&quot;})
+    max_steps: int = field(
+        default=-1,
+        metadata={&quot;help&quot;: &quot;If &gt; 0: set total number of training steps to perform. Overrides num_train_epochs.&quot;},
+    )
+    gradient_accumulation_steps: int = field(
+        default=1, metadata={&quot;help&quot;: &quot;Number of updates steps to accumulate before performing a backward/update pass.&quot;}
+    )
+    disable_shuffling: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether or not to disable the shuffling of the training set.&quot;},
+    )
+    seed: int = field(default=42, metadata={&quot;help&quot;: &quot;Random seed that will be set at the beginning of training.&quot;})
+
+    # --- IO &amp; Logging ---
+    save_steps: int = field(default=500, metadata={&quot;help&quot;: &quot;Save checkpoint every X updates steps.&quot;})
+    save_total_limit: Optional[int] = field(
+        default=3, metadata={&quot;help&quot;: &quot;Limit the total amount of checkpoints. Deletes the older checkpoints.&quot;}
+    )
+    resume_from_checkpoint: Optional[str] = field(
+        default=None, metadata={&quot;help&quot;: &quot;The path to a folder with a valid checkpoint for your model.&quot;}
+    )
+    logging_steps: int = field(default=1, metadata={&quot;help&quot;: &quot;Log every X updates steps.&quot;})
+    log_throughput: bool = field(
+        default=False,
+        metadata={
+            &quot;help&quot;: &quot;Whether to enable real-time logging of key throughput metrics, including tokens per second (tokens/s) and model FLOPs utilization (MFU) to quantify training/inference efficiency.&quot;
+        },
+    )
+    log_cpu_memory: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether to enable logging of memory utilization statistics for CPU devices.&quot;},
+    )
+    mtp_loss_scaling_factor: float = field(
+        default=0.3, metadata={&quot;help&quot;: &quot;MTP(Multi Token Prediction) loss scaling factor.&quot;}
+    )
+    stage: Literal[&quot;pt&quot;, &quot;sft&quot;] = field(
+        default=&quot;sft&quot;,
+        metadata={&quot;help&quot;: &quot;Which stage will be performed in training.&quot;},
+    )
+    # megatron train args
+    calculate_per_token_loss: bool = field(
+        default=False,
+        metadata={
+            &quot;help&quot;: &quot;Scale cross entropy loss by the number of non-padded tokens in the global batch, versus the default behavior of assuming all tokens are non-padded&quot;
+        },
+    )
+    dataloader_num_workers: int = field(
+        default=0,
+        metadata={
+            &quot;help&quot;: (
+                &quot;Number of subprocesses to use for data loading (PyTorch only). 0 means that the data will be loaded&quot;
+                &quot; in the main process.&quot;
+            )
+        },
+    )
+
+    dataloader_prefetch_factor: Optional[int] = field(
+        default=None,
+        metadata={
+            &quot;help&quot;: (
+                &quot;Number of batches loaded in advance by each worker. &quot;
+                &quot;2 means there will be a total of 2 * num_workers batches prefetched across all workers. &quot;
+            )
+        },
+    )
+
+    dataloader_pin_memory: bool = field(default=True, metadata={&quot;help&quot;: &quot;Whether or not to pin memory for DataLoader.&quot;})
+
+    dataloader_persistent_workers: bool = field(
+        default=False,
+        metadata={
+            &quot;help&quot;: &quot;If True, the data loader will not shut down the worker processes after a dataset has been consumed once. This allows to maintain the workers Dataset instances alive. Can potentially speed up training, but will increase RAM usage.&quot;
+        },
+    )
+    dataloader_drop_last: bool = field(
+        default=False, metadata={&quot;help&quot;: &quot;Drop the last incomplete batch if it is not divisible by the batch size.&quot;}
+    )
+    per_device_train_batch_size: int = field(
+        default=8, metadata={&quot;help&quot;: &quot;Batch size per device accelerator core/CPU for training.&quot;}
+    )
+    save_only_model: bool = field(
+        default=False,
+        metadata={
+            &quot;help&quot;: &quot;When checkpointing, whether to only save the model, or also the optimizer, scheduler &amp; rng state.&quot;
+        },
+    )
+    save_async: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether to save checkpoint asynchronously.&quot;},
+    )
+    save_epochs: int = field(
+        default=1,
+        metadata={&quot;help&quot;: &quot;Number of epochs between two checkpoint saves.&quot;},
+    )
+    save_hf_weights: bool = field(
+        default=True,
+        metadata={&quot;help&quot;: &quot;Save the huggingface format weights to the last checkpoint dir.&quot;},
+    )
+    # --- Profiling (NPU) ---
+    profile: bool = field(default=False, metadata={&quot;help&quot;: &quot;Enable NPU profiling using torch_npu.profiler.&quot;})
+    profile_step_start: int = field(default=0, metadata={&quot;help&quot;: &quot;Start profiling at this global step (inclusive).&quot;})
+    profile_step_end: int = field(
+        default=-1, metadata={&quot;help&quot;: &quot;Stop profiling before this global step (exclusive). If -1, profile until end.&quot;}
+    )
+    profile_ranks: List[int] = field(
+        default_factory=lambda: [-1],
+        metadata={&quot;help&quot;: &quot;List of ranks to enable profiling on. Use [-1] to profile all ranks.&quot;},
+    )
+    profile_level: str = field(
+        default=&quot;level0&quot;, metadata={&quot;help&quot;: &quot;Profiling level: &#x27;level_none&#x27;, &#x27;level0&#x27;, &#x27;level1&#x27;, &#x27;level2&#x27;.&quot;}
+    )
+    profile_export_type: str = field(default=&quot;text&quot;, metadata={&quot;help&quot;: &quot;Export type: &#x27;text&#x27; or &#x27;db&#x27;.&quot;})
+    profile_data_simplification: bool = field(
+        default=False, metadata={&quot;help&quot;: &quot;Use data simplification mode in profiler.&quot;}
+    )
+    profile_with_cpu: bool = field(default=False, metadata={&quot;help&quot;: &quot;Record CPU activities in profiler.&quot;})
+    profile_with_stack: bool = field(default=False, metadata={&quot;help&quot;: &quot;Record call stack in profiler.&quot;})
+    profile_with_memory: bool = field(default=False, metadata={&quot;help&quot;: &quot;Profile memory allocation and usage.&quot;})
+    profile_record_shapes: bool = field(default=False, metadata={&quot;help&quot;: &quot;Record tensor shapes in profiler.&quot;})
+    profile_save_path: str = field(
+        default=&quot;./profile&quot;, metadata={&quot;help&quot;: &quot;Directory to save profiling traces (TensorBoard format).&quot;}
+    )</pre><div class="exp"><p><code>TrainingArguments</code> 是<strong>训练超参主体</strong>。:475-477 <code>output_dir</code> 必填。:478-482 <code>optimizer</code> 用 <code>Literal["adamw", "muon"]</code>——<code>muon</code> 是新优化器选项（Muon，基于矩阵正交化的二阶近似），NVIDIA HF Trainer 默认无此选项。:483-488 是 AdamW 标准超参（lr=1e-5, wd=0.01, beta1=0.9, beta2=<strong>0.95</strong>, eps=1e-8, max_grad_norm=1.0）——注意 <code>adam_beta2=0.95</code> 而非常见的 0.999，这是大模型训练常用配置。</p><p>:491-497 调度：<code>lr_scheduler_type=cosine</code>，<code>warmup_ratio=0.03</code>，<code>min_lr=1e-6</code>（cosine 退火下限）。:500-507 循环控制：<code>num_train_epochs=3.0</code>、<code>max_steps=-1</code>（>0 时覆盖 epochs）、<code>gradient_accumulation_steps=1</code>。:508-512 <code>disable_shuffling / seed=42</code>。</p><p>:515-528 IO 与日志：<code>save_steps=500</code>、<code>save_total_limit=3</code>、<code>resume_from_checkpoint</code>、<code>logging_steps=1</code>、<code>log_throughput</code>（实时 tokens/s 与 MFU）、<code>log_cpu_memory</code>。:533-535 <code>mtp_loss_scaling_factor=0.3</code> 是<strong>多 token 预测 (MTP)</strong> 损失系数——DeepSeek 风格的辅助损失，HF Trainer 无此字段。:536-539 <code>stage</code> 用 <code>Literal["pt", "sft"]</code> 区分预训练/监督微调。</p><p>:541-577 兼容 megatron 训练参数：<code>calculate_per_token_loss</code>、<code>dataloader_num_workers/prefetch_factor/pin_memory/persistent_workers/drop_last</code>。:578-580 <code>per_device_train_batch_size=8</code>。<strong>关键联动</strong>：:758-764 的 <code>_validate_cross_args</code> 会校验 <code>reset_attention_mask=True</code> 时 batch_size 必须 =1——这是跨 data/training 两段的约束。</p><p>:581-598 checkpoint 选项：<code>save_only_model / save_async / save_epochs / save_hf_weights</code>。:599-622 是<strong>NPU 性能分析</strong>一整组（<code>profile / profile_step_start/end / profile_ranks / profile_level / profile_with_cpu/stack/memory / profile_save_path</code>）——这是 Ascend NPU 专属，用 <code>torch_npu.profiler</code>，NVIDIA 用户对应的是 <code>torch.profiler</code>，字段名/level 体系不同。</p></div></div><div class="seg"><p class="seglab">行 624-654 · TrainingArguments __post_init__ + InferenceArguments</p><pre data-lang="py" data-start="624" data-idprefix="A">    def __post_init__(self):  # Path parameter validation
+        if self.output_dir is None:
+            raise ValueError(&quot;`output_dir` must be specified.&quot;)
+        if self.profile:
+            if self.profile_step_start &lt; 0:
+                raise ValueError(&quot;`profile_step_start` must be &gt;= 0&quot;)
+            if self.profile_step_end != -1 and self.profile_step_end &lt;= self.profile_step_start:
+                raise ValueError(&quot;`profile_step_end` must be &gt; profile_step_start or -1&quot;)
+
+
+@dataclass
+class InferenceArguments:
+    &quot;&quot;&quot;
+    Inference hyperparameters: corresponding to requirements of the inference engine and generation config
+    &quot;&quot;&quot;
+
+    # --- Generation Config ---
+    infer_backend: Literal[&quot;huggingface&quot;] = field(
+        default=&quot;huggingface&quot;, metadata={&quot;help&quot;: &quot;The inference engine backend to use.&quot;}
+    )
+    max_new_tokens: int = field(
+        default=512,
+        metadata={&quot;help&quot;: &quot;The maximum numbers of tokens to generate, ignoring the number of tokens in the prompt.&quot;},
+    )
+    do_sample: bool = field(
+        default=False, metadata={&quot;help&quot;: &quot;Whether or not to use sampling; use greedy decoding otherwise.&quot;}
+    )
+
+    def __post_init__(self):
+        if self.max_new_tokens &lt;= 0:
+            raise ValueError(&quot;`max_new_tokens` must be strictly positive (&gt; 0).&quot;)</pre><div class="exp"><p>:624-631 <code>__post_init__</code> 校验 <code>output_dir</code> 必填，以及 profile 窗口合法性：<code>profile_step_start &gt;= 0</code>，<code>profile_step_end</code> 若非 -1 必须 &gt; start。这是实例级防御。</p><p>:634-654 <code>InferenceArguments</code> 是第六个 dataclass（较小），封装推理引擎与生成配置：<code>infer_backend=Literal["huggingface"]</code>（目前只支持 HF 后端）、<code>max_new_tokens=512</code>、<code>do_sample=False</code>（默认贪心）。:652-654 校验 <code>max_new_tokens &gt; 0</code>。注意推理场景<strong>不配 DataArguments</strong>，这一点在 :752-753 的 <code>_validate_cross_args</code> 里用 <code>getattr(args, "data", None)</code> 防御性取值体现——推理时 data 段为空，跨段校验要跳过。</p></div></div><div class="seg"><p class="seglab">行 657-712 · OptimizationArguments：融合算子与 DSA/稀疏注意力开关</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :657-:712）</h5><pre data-lang="py" data-start="657" data-idprefix="A">@dataclass
+class OptimizationArguments:
+    &quot;&quot;&quot;
+    Inference hyperparameters: corresponding to requirements of the inference engine and generation config
+    &quot;&quot;&quot;
+
+    use_fused_rmsnorm: bool = field(default=False, metadata={&quot;help&quot;: &quot;Use fused rmsnorm.&quot;})
+    moe_grouped_gemm: bool = field(
+        default=False,
+        metadata={
+            &quot;help&quot;: &quot;When there are multiple experts per rank, launch multiple local GEMM kernels in multiple streams to improve the utilization and performance with GroupedLinear in TransformerEngine.&quot;
+        },
+    )
+    use_fused_rotary_pos_emb: bool = field(default=False, metadata={&quot;help&quot;: &quot;Use fused rotary-pos-emb.&quot;})
+    use_flash_attn: bool = field(default=False, metadata={&quot;help&quot;: &quot;use FlashAttention implementation of attention.&quot;})
+    use_sparse_flash_attn: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Use NPU sparse flash attention for DSA attention.&quot;},
+    )
+    use_fused_lightning_indexer: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Use NPU lightning indexer to select DSA sparse attention indices.&quot;},
+    )
+    use_fused_lightning_indexer_loss: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Use fused NPU sparse lightning indexer KL loss.&quot;},
+    )
+    indexer_loss_coeff: float = field(
+        default=1.0,
+        metadata={&quot;help&quot;: &quot;Loss coefficient for DSA indexer KL loss.&quot;},
+    )
+    pre_tokens: int = field(
+        default=1048576,
+        metadata={&quot;help&quot;: &quot;Previous-token window passed to attention.&quot;},
+    )
+    next_tokens: int = field(
+        default=0,
+        metadata={&quot;help&quot;: &quot;Next-token window passed to attention.&quot;},
+    )
+    use_triton_gdn: bool = field(default=False, metadata={&quot;help&quot;: &quot;Use triton kernel accelerate training.&quot;})
+    use_flash_gdn: bool = field(default=False, metadata={&quot;help&quot;: &quot;Use flash kernel accelerate training.&quot;})
+    gdn_chunk_size: int = field(default=64, metadata={&quot;help&quot;: &quot;Matrix blocking size of Gated DeltaNet.&quot;})
+    chunk_loss_size: int = field(
+        default=None, metadata={&quot;help&quot;: &quot;Chunk loss size: set to &gt; 0 to enable chunk loss calculation&quot;}
+    )
+    use_triton_rmsnormgated: bool = field(default=False, metadata={&quot;help&quot;: &quot;Use triton rmsnorm.&quot;})
+    fix_router: bool = field(
+        default=False,
+        metadata={
+            &quot;help&quot;: &quot;Replace topk routing with round-robin for balanced expert load. For performance tuning only, not for production training.&quot;
+        },
+    )
+
+    def __post_init__(self):
+        if self.use_flash_gdn and self.use_triton_gdn:
+            raise ValueError(&quot;`use_flash_gdn` and `use_triton_gdn` cannot be True at the same time.&quot;)</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># NVIDIA 生态对应：flash-attn + TransformerEngine fused
+import flash_attn  # use_flash_attn 对应
+# DSA / lightning indexer 在 NVIDIA 上无直接对应，需自行实现稀疏注意力</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异：:672-687 的 DSA/lightning indexer 这一组是<strong> Ascend NPU 独有</strong>，NVIDIA GPU 上稀疏注意力要走 flash-attn 的变体或自研 kernel，字段名/实现路径完全不同。<code>moe_grouped_gemm</code> 依赖 TransformerEngine（NVIDIA 也有 TE，但 GroupedLinear 在 Ascend 上是 NPU 适配版）。迁移时这些开关不能直接照搬到 NVIDIA 脚本——这是「参数与硬件生态绑定」的典型，也再次印证参数体系不通用不只是结构差异，还有硬件能力差异。</p></div></div><div class="seg"><p class="seglab">行 715-784 · 辅助函数：bool/dict 转换、Literal 映射与跨段校验</p><pre data-lang="py" data-start="715" data-idprefix="A">def _string_to_bool(value: Union[bool, str]) -&gt; bool:
+    &quot;&quot;&quot;Convert string to boolean value&quot;&quot;&quot;
+    if isinstance(value, bool):
+        return value
+    if value.lower() in (&quot;yes&quot;, &quot;true&quot;, &quot;t&quot;, &quot;y&quot;, &quot;1&quot;):
+        return True
+    if value.lower() in (&quot;no&quot;, &quot;false&quot;, &quot;f&quot;, &quot;n&quot;, &quot;0&quot;):
+        return False
+    raise argparse.ArgumentTypeError(
+        f&quot;Truthy value expected: got {value} but expected one of yes/no, true/false, t/f, y/n, 1/0 (case insensitive).&quot;
+    )
+
+
+def _convert_str_dict(input_dict: Dict[str, Any]) -&gt; Dict[str, Any]:
+    &quot;&quot;&quot;Recursively convert string values in dictionary&quot;&quot;&quot;
+    for key, value in input_dict.items():
+        if isinstance(value, dict):
+            input_dict[key] = _convert_str_dict(value)
+        elif isinstance(value, str):
+            if value.lower() in (&quot;true&quot;, &quot;false&quot;):  # check for bool
+                input_dict[key] = value.lower() == &quot;true&quot;
+            elif value.isdigit():  # check for digit
+                input_dict[key] = int(value)
+            elif value.replace(&quot;.&quot;, &quot;&quot;, 1).isdigit():
+                input_dict[key] = float(value)
+
+    return input_dict
+
+
+def _make_choice_type_function(choices: List[Any]) -&gt; Callable[[str], Any]:
+    &quot;&quot;&quot;Build mapping from string to choices&quot;&quot;&quot;
+    str_to_choice = {str(choice): choice for choice in choices}
+    return lambda arg: str_to_choice.get(arg, arg)
+
+
+def _validate_cross_args(args):
+    &quot;&quot;&quot;Validate constraints that span multiple argument dataclasses.&quot;&quot;&quot;
+    # Inference does not configure data arguments, so access them defensively to skip training-only validation.
+    data_args = getattr(args, &quot;data&quot;, None)
+    training_args = getattr(args, &quot;training&quot;, None)
+    if (
+        data_args is not None
+        and training_args is not None
+        and data_args.reset_attention_mask
+        and training_args.per_device_train_batch_size &gt; 1
+    ):
+        raise ValueError(
+            &quot;When reset_attention_mask=True, per_device_train_batch_size must be 1, &quot;
+            f&quot;but got {training_args.per_device_train_batch_size}.&quot;
+        )
+
+    if args.model.model_id == &quot;qwen3_next&quot; and args.parallel.cp_size &gt; 1 and args.parallel.cp_type != &quot;ulysses&quot;:
+        raise ValueError(
+            f&quot;qwen3_next only supports &#x27;ulysses&#x27; context parallel type when cp_size &gt; 1, &quot;
+            f&quot;but got cp_type=&#x27;{args.parallel.cp_type}&#x27;.&quot;
+        )
+
+    dsa_fusion_args = (
+        &quot;use_sparse_flash_attn&quot;,
+        &quot;use_fused_lightning_indexer&quot;,
+        &quot;use_fused_lightning_indexer_loss&quot;,
+    )
+    enabled_dsa_fusions = [name for name in dsa_fusion_args if getattr(args.optimization, name)]
+    model_id = args.model.model_id or &quot;&quot;
+    supports_dsa_fusions = model_id in {&quot;dsv32&quot;, &quot;deepseek_v32&quot;} or model_id.startswith(&quot;glm5&quot;)
+    if enabled_dsa_fusions and not supports_dsa_fusions:
+        raise ValueError(
+            f&quot;{&#x27;, &#x27;.join(enabled_dsa_fusions)} only support DeepSeek-V3.2 and GLM-5 series models, &quot;
+            f&quot;but got model_id=&#x27;{model_id or None}&#x27;.&quot;
+        )</pre><div class="exp"><p>这段是解析管线的基础设施。</p><p>:715-725 <code>_string_to_bool</code> 把 CLI 传入的 yes/no/true/false/t/f/y/n/1/0 转布尔——这是 bool 字段的 <code>type</code> 函数（在 :919 被 <code>_handle_bool</code> 设定）。:728-741 <code>_convert_str_dict</code> 递归把 dict 里的字符串值按 true/false/digit/float 还原成对应类型——给 YAML 合并前的值做类型清洗。</p><p>:744-747 <code>_make_choice_type_function</code> 为 <code>Literal</code> / Enum 字段造一个 <code>str -&gt; choice</code> 映射的 type 函数——:861 的 Literal 分支和 :906-910 的 <code>_handle_literal_or_enum</code> 都靠它把 CLI 字符串还原成枚举原值。</p><p>:750-784 <code>_validate_cross_args</code> 是<strong>跨分段校验</strong>的核心，值得逐条读：</p><ul><li>:753-764：防御性取 data/training 段（推理时无 data 段，跳过）；当 <code>reset_attention_mask=True</code> 且 <code>per_device_train_batch_size&gt;1</code> 报错——因为 reset 模式要生成 actual_seq_len，batch&gt;1 会破坏变长对齐。</li><li>:766-770：<code>qwen3_next</code> 模型在 <code>cp_size&gt;1</code> 时强制 <code>cp_type="ulysses"</code>——qwen3_next 不支持 ring CP。</li><li>:772-784：DSA 融合三项（<code>use_sparse_flash_attn / use_fused_lightning_indexer / use_fused_lightning_indexer_loss</code>）只允许 DeepSeek-V3.2（<code>dsv32/deepseek_v32</code>）或 GLM-5 系列（<code>model_id.startswith("glm5")</code>）开——其他模型开了直接报错。</li></ul><p>注意 :779 的 <code>supports_dsa_fusions</code> 写的是 <code>{"dsv32", "deepseek_v32"}</code>，但 :42 的 <code>model_id</code> Literal 里其实没有 <code>dsv32</code>/<code>deepseek_v32</code>——这是<strong>潜在的字面量漂移</strong>：校验集合与枚举定义不完全一致，需留意（可能是为未来模型预留）。</p></div></div><div class="seg"><p class="seglab">行 787-820 · fsdp2_parse_args：八步解析管线主流程</p><pre data-lang="py" data-start="787" data-idprefix="A">def fsdp2_parse_args(rootclass: TypeVar) -&gt; TypeVar:
+    &quot;&quot;&quot;
+    Parses the root argument class from CLI or YAML input.
+    Supports complex types like List[Dict] and Dict via JSON serialization.
+    &quot;&quot;&quot;
+    # 1: Create ArgumentParser and register all fields
+    parser = _create_argument_parser(rootclass)
+
+    # 2: Parse command-line args
+    cmd_args = sys.argv[1:]
+    if not cmd_args:
+        raise ValueError(&quot;No arguments provided.&quot;)
+
+    # 3: Load YAML config if the first arg is a .yaml/.yml file
+    yaml_config = _load_yaml_if_provided(cmd_args)
+
+    # 4: Merge YAML into CLI args (CLI has higher priority)
+    final_cmd_args = _merge_yaml_into_cmd_args(cmd_args, yaml_config)
+
+    # 5: Parse arguments
+    args, remaining_args = parser.parse_known_args(final_cmd_args)
+    if remaining_args:
+        logger.info_rank0(f&quot;Some specified arguments are not used by the ArgumentParser: {remaining_args}&quot;)
+
+    # 6: Post-process fields that require JSON deserialization
+    parse_result = _postprocess_json_fields(args, parser.dict_fields)
+
+    # 7: Build dataclass instances
+    result = _build_dataclass_instances(rootclass, parse_result)
+
+    # 8: Cross-dataclass validation
+    _validate_cross_args(result)
+
+    return result</pre><div class="exp"><p><code>fsdp2_parse_args</code>（:787-820）是<strong>对外入口</strong>，把 rootclass（一个聚合了 model/data/parallel/training/optimization 五个子 dataclass 的根 dataclass）解析成实例树。流程是清晰的八步：</p><ol><li>:793 <code>_create_argument_parser(rootclass)</code>——动态把 dataclass 字段注册成 <code>--base.attr</code> 形式 flag。</li><li>:796-798 取 <code>sys.argv[1:]</code>，无参则报错（强制至少传一个 yaml 或 flag）。</li><li>:801 <code>_load_yaml_if_provided(cmd_args)</code>——若首参是 .yaml/.yml 则加载。</li><li>:804 <code>_merge_yaml_into_cmd_args(cmd_args, yaml_config)</code>——<strong>把 YAML 合并进 CLI，CLI 优先</strong>。</li><li>:807 <code>parser.parse_known_args(final_cmd_args)</code>——解析，未知参打 info 不报错（:808-809）。</li><li>:812 <code>_postprocess_json_fields(args, parser.dict_fields)</code>——把 Dict/List[Dict] 字段的 JSON 字符串还原。</li><li>:815 <code>_build_dataclass_instances(rootclass, parse_result)</code>——按分段构造子 dataclass 实例并组装成根实例（此处触发各 <code>__post_init__</code>）。</li><li>:818 <code>_validate_cross_args(result)</code>——跨段约束校验。</li></ol><p>返回 :820 的 <code>result</code>，是一棵 dataclass 实例树，形如 <code>result.parallel.tp_size</code>。</p><p>设计要点：解析期（argparse）只产扁平 Namespace + JSON 字符串，到 :815 才重组为 dataclass 树——这样 <code>__post_init__</code> 校验只在实例化时跑一次，argparse 层不重复语义校验。CLI 与 YAML 优先级的<strong>显式证据</strong>在 :804 调用的 <code>_merge_yaml_into_cmd_args</code>（见 :1005-1006）。</p></div></div><div class="seg"><p class="seglab">行 826-975 · _create_argument_parser：dataclass 字段→argparse flag 的动态映射</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :826-:975）</h5><pre data-lang="py" data-start="826" data-idprefix="A">def _create_argument_parser(rootclass):
+    &quot;&quot;&quot;Dynamically creates an ArgumentParser based on the dataclass schema.&quot;&quot;&quot;
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.dict_fields = set()  # Tracks fields needing JSON deserialization
+
+    for subclass in fields(rootclass):
+        base = subclass.name
+        subclass_type = subclass.default_factory
+
+        try:
+            type_hints = get_type_hints(subclass_type)
+        except Exception as e:
+            raise RuntimeError(f&quot;Type resolution failed for {subclass_type}: {e}&quot;) from e
+
+        for attr in fields(subclass_type):
+            if not attr.init:
+                continue
+
+            attr_name = attr.name
+            attr_type = type_hints[attr_name]
+            origin_type = get_origin(attr_type)
+            parser_kwargs = attr.metadata.copy()
+
+            # Resolve Optional[T] → T
+            effective_type, effective_origin = _resolve_optional_type(attr_type, origin_type)
+
+            # Dispatch by type
+            if effective_origin is Union or (
+                hasattr(types, &quot;UnionType&quot;) and isinstance(effective_origin, types.UnionType)
+            ):
+                # For Union[Dict, str], we treat it as a dict field (since str is simple)
+                # But actually, we&#x27;ll handle it in post-processing
+                _handle_dict(parser_kwargs, base, attr_name, attr, parser)
+                parser.add_argument(f&quot;--{base}.{attr_name}&quot;, **parser_kwargs)
+                continue
+            if effective_origin is Literal or (isinstance(effective_type, type) and issubclass(effective_type, Enum)):
+                _handle_literal_or_enum(parser_kwargs, effective_type, effective_origin, attr)
+
+            elif effective_type is bool or (effective_origin is Union and bool in get_args(effective_type)):
+                _handle_bool(parser_kwargs, attr)
+
+            elif effective_origin is list:
+                item_type = get_args(effective_type)[0]
+                item_origin = get_origin(item_type)
+                if item_origin is dict or item_type is dict:
+                    _handle_list_of_dict(parser_kwargs, base, attr_name, attr, parser)
+                else:
+                    _handle_list_of_scalar(parser_kwargs, item_type, attr)
+
+            elif effective_origin is dict or effective_type is dict:
+                _handle_dict(parser_kwargs, base, attr_name, attr, parser)
+
+            else:
+                _handle_scalar(parser_kwargs, effective_type, attr)
+
+            parser.add_argument(f&quot;--{base}.{attr_name}&quot;, **parser_kwargs)
+
+    return parser
+
+
+def _resolve_optional_type(attr_type, origin_type):
+    &quot;&quot;&quot;Extract inner type(s) from Union types, handling Optional[Union[A, B]].&quot;&quot;&quot;
+    if origin_type is Union or (hasattr(types, &quot;UnionType&quot;) and isinstance(origin_type, types.UnionType)):
+        args = get_args(attr_type)
+        non_none_types = [t for t in args if t is not type(None)]  # pylint: disable=unidiomatic-typecheck
+
+        if len(non_none_types) == 0:
+            raise RuntimeError(f&quot;Union type contains only None: {attr_type}&quot;)
+        elif len(non_none_types) == 1:
+            # Standard Optional[T]
+            effective_type = non_none_types[0]
+            effective_origin = get_origin(effective_type)
+            return effective_type, effective_origin
+        else:
+            # Multi-type Union like Union[Dict, str]
+            # Return the original union as effective_type
+            return attr_type, origin_type
+    return attr_type, origin_type
+
+
+def _handle_literal_or_enum(parser_kwargs, effective_type, effective_origin, attr):
+    &quot;&quot;&quot;Configure parser for Literal or Enum types.&quot;&quot;&quot;
+    choices = effective_type.__args__ if effective_origin is Literal else [x.value for x in effective_type]
+    parser_kwargs[&quot;choices&quot;] = choices
+    parser_kwargs[&quot;type&quot;] = _make_choice_type_function(choices)
+    if attr.default is not MISSING:
+        parser_kwargs[&quot;default&quot;] = attr.default
+    else:
+        parser_kwargs[&quot;required&quot;] = True
+
+
+def _handle_bool(parser_kwargs, attr):
+    &quot;&quot;&quot;Configure parser for bool or Optional[bool].&quot;&quot;&quot;
+    parser_kwargs[&quot;type&quot;] = _string_to_bool
+    if attr.default is not MISSING and attr.default is not None:
+        parser_kwargs[&quot;default&quot;] = attr.default
+        parser_kwargs[&quot;nargs&quot;] = &quot;?&quot;
+        parser_kwargs[&quot;const&quot;] = True
+    else:
+        parser_kwargs[&quot;default&quot;] = False
+        parser_kwargs[&quot;nargs&quot;] = &quot;?&quot;
+
+
+def _handle_list_of_dict(parser_kwargs, base, attr_name, attr, parser):
+    &quot;&quot;&quot;Handle List[Dict]: each item is passed as a JSON string.&quot;&quot;&quot;
+    parser_kwargs[&quot;type&quot;] = str
+    parser_kwargs[&quot;nargs&quot;] = &quot;+&quot;
+    parser.dict_fields.add(f&quot;{base}.{attr_name}&quot;)
+    if attr.default is not MISSING:
+        parser_kwargs[&quot;default&quot;] = [] if attr.default is None else attr.default
+    elif attr.default_factory is not MISSING:
+        parser_kwargs[&quot;default&quot;] = attr.default_factory()
+    else:
+        parser_kwargs[&quot;required&quot;] = True
+
+
+def _handle_list_of_scalar(parser_kwargs, item_type, attr):
+    &quot;&quot;&quot;Handle List[str], List[int], etc.&quot;&quot;&quot;
+    parser_kwargs[&quot;type&quot;] = item_type
+    parser_kwargs[&quot;nargs&quot;] = &quot;+&quot;
+    if attr.default_factory is not MISSING:
+        parser_kwargs[&quot;default&quot;] = attr.default_factory()
+    elif attr.default is not MISSING:
+        parser_kwargs[&quot;default&quot;] = attr.default
+    else:
+        parser_kwargs[&quot;required&quot;] = True
+
+
+def _handle_dict(parser_kwargs, base, attr_name, attr, parser):
+    &quot;&quot;&quot;Handle Dict: passed as a single JSON string.&quot;&quot;&quot;
+    parser_kwargs[&quot;type&quot;] = str
+    parser_kwargs[&quot;nargs&quot;] = None
+    parser.dict_fields.add(f&quot;{base}.{attr_name}&quot;)
+    if attr.default_factory is not MISSING:
+        parser_kwargs[&quot;default&quot;] = str(attr.default_factory())
+    elif attr.default is not MISSING:
+        parser_kwargs[&quot;default&quot;] = str(attr.default) if attr.default is not None else &quot;{}&quot;
+    else:
+        parser_kwargs[&quot;required&quot;] = True
+
+
+def _handle_scalar(parser_kwargs, effective_type, attr):
+    &quot;&quot;&quot;Handle scalar types: int, float, str, etc.&quot;&quot;&quot;
+    parser_kwargs[&quot;type&quot;] = effective_type
+    if attr.default is not MISSING:
+        parser_kwargs[&quot;default&quot;] = attr.default
+    elif attr.default_factory is not MISSING:
+        parser_kwargs[&quot;default&quot;] = attr.default_factory()
+    else:
+        parser_kwargs[&quot;required&quot;] = True</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># HfArgumentParser (HuggingFace Trainer, NVIDIA 生态常走这条)
+from transformers import HfArgumentParser
+parser = HfArgumentParser((ModelArguments, DataArguments, TrainingArguments))
+model_args, data_args, training_args = parser.parse_args_into_dataclasses()</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异（与 HfArgumentParser 对照，这是 NVIDIA GPU 用户最熟悉的范式）：</p><ul><li><strong>flag 形式</strong>：HfArgumentParser 把 <code>ModelArguments.model_name_or_path</code> 渲染成 <code>--model_name_or_path</code>（扁平，不带 base 前缀）；本文件 :881 渲染成 <code>--model.model_name_or_path</code>（带 base 前缀，强命名空间隔离）。</li><li><strong>多类聚合</strong>：HfArgumentParser 用 <code>parse_args_into_dataclasses</code> 一次返回多个实例元组；本文件用 rootclass 聚合（:868 <code>rootclass(**data_classes)</code>），返回<strong>一棵树</strong>而非元组。</li><li><strong>类型支持</strong>：HfArgumentParser 对 Union[Dict, str]、List[Dict] 的支持较弱；本文件 :853-879 手写了五分支派发 + JSON 后处理（:812），专门处理这些复杂类型——这是自造 parser 的动机。</li><li><strong>YAML 合并</strong>：HfArgumentParser 无内置 YAML 首参合并；本文件 :801-804 内建 YAML 合并且 CLI 优先。</li></ul><p>结论：这套自造机制是为了同时支持「嵌套点号 flag + YAML 首参 + 复杂 Union/List[Dict] 类型」三者，HfArgumentParser 满足不了，所以才自建。但代价是<strong>与 HF Trainer / mcore 两套生态的参数名都不通用</strong>。</p></div></div><div class="seg"><p class="seglab">行 981-1068 · YAML 加载/合并、JSON 后处理与 dataclass 实例组装</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :981-:1068）</h5><pre data-lang="py" data-start="981" data-idprefix="A">def _load_yaml_if_provided(cmd_args):
+    &quot;&quot;&quot;Load YAML config if the first argument is a .yaml or .yml file.&quot;&quot;&quot;
+    if cmd_args and (cmd_args[0].endswith(&quot;.yaml&quot;) or cmd_args[0].endswith(&quot;.yml&quot;)):
+        input_path = cmd_args[0]
+        with open(os.path.abspath(input_path), encoding=&quot;utf-8&quot;) as f:
+            return yaml.safe_load(f) or {}
+    return {}
+
+
+# =============================================================================
+#  Merge YAML into CLI args
+# =============================================================================
+def _merge_yaml_into_cmd_args(cmd_args, yaml_config):
+    &quot;&quot;&quot;Convert YAML config to CLI-style arguments (lower priority than explicit CLI).&quot;&quot;&quot;
+    working_args = cmd_args[1:] if yaml_config else cmd_args[:]
+    cmd_args_string = &quot;=&quot;.join(working_args)
+    result = working_args[:]
+
+    for base, arg_dict in yaml_config.items():
+        if not isinstance(arg_dict, dict):
+            continue
+        for arg_name, arg_value in arg_dict.items():
+            if arg_value is None:
+                continue
+            if f&quot;--{base}.{arg_name}=&quot; in cmd_args_string:
+                continue  # Skip if overridden by CLI
+
+            result.append(f&quot;--{base}.{arg_name}&quot;)
+            if isinstance(arg_value, list):
+                result.extend(str(item) for item in arg_value)
+            elif isinstance(arg_value, dict):
+                result.append(json.dumps(arg_value, ensure_ascii=False))
+            else:
+                result.append(str(arg_value))
+
+    return result
+
+
+# =============================================================================
+#  Post-process JSON fields
+# =============================================================================
+def _postprocess_json_fields(args, dict_fields):
+    &quot;&quot;&quot;Deserialize JSON strings back to dict/list for marked fields.&quot;&quot;&quot;
+    parse_result = defaultdict(dict)
+    for key, value in vars(args).items():
+        base, name = key.split(&quot;.&quot;, maxsplit=1)
+        full_key = f&quot;{base}.{name}&quot;
+
+        if full_key in dict_fields:
+            if value is None:
+                parsed_value = None
+            elif isinstance(value, list):
+                try:
+                    parsed_value = [json.loads(item) for item in value]
+                except json.JSONDecodeError as e:
+                    raise ValueError(f&quot;Failed to parse list of dict for {full_key}: {e}&quot;) from e
+            elif isinstance(value, str):
+                stripped = value.strip()
+                if stripped == &quot;&quot;:
+                    parsed_value = {}
+                elif stripped.startswith(&quot;{&quot;) and stripped.endswith(&quot;}&quot;):
+                    try:
+                        parsed_value = json.loads(stripped)
+                    except json.JSONDecodeError as e:
+                        raise ValueError(f&quot;Invalid JSON for dict field {full_key}: {value}, error: {e}&quot;) from e
+                else:
+                    parsed_value = value
+            else:
+                raise ValueError(f&quot;Unexpected type for dict field {full_key}: {type(value)}&quot;)
+            parse_result[base][name] = parsed_value
+        else:
+            parse_result[base][name] = value
+
+    return parse_result
+
+
+# =============================================================================
+#  Build dataclass instances
+# =============================================================================
+def _build_dataclass_instances(rootclass, parse_result):
+    &quot;&quot;&quot;Construct dataclass instances from parsed arguments.&quot;&quot;&quot;
+    data_classes = {}
+    for subclass in fields(rootclass):
+        base = subclass.name
+        subclass_type = subclass.default_factory
+        data_classes[base] = subclass_type(**parse_result.get(base, {}))
+
+    return rootclass(**data_classes)</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py"># HfArgumentParser + 单独 yaml 加载的常见写法
+with open(&#x27;config.yaml&#x27;) as f: cfg = yaml.safe_load(f)
+cli = HfArgumentParser(...).parse_args_into_dataclasses()
+# 需要手动做 cli 覆盖 yaml 的合并逻辑，无内置优先级保证</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>差异：本文件 :993-1016 把「CLI &gt; YAML」做成了<strong>内建且有显式证据</strong>的合并（:1005-1006 的 continue 跳过），且 YAML 作为首参位置约定。HF 生态通常要用户自己写 cli 覆盖 yaml 的合并，或用 <code>--config_file</code> 风格的库（如 OmegaConf），没有这种「首参 yaml + 自动合并 + CLI 胜」的内置约定。迁移 mcore/HF 脚本时，原本的配置合并逻辑要替换成依赖本文件的 :803 合并约定——别在外层再叠一层合并，否则会与 :1005 的跳过逻辑打架。</p></div></div></div>
+<details class="src"><summary>📜 完整源码（1069 行）— 大纲点跳行</summary><pre data-lang="py" data-start="1">&quot;&quot;&quot;
+Includes ModelArguments/DataArguments/ParallelArguments/TrainingArguments classes and parses the argument class using the command line inputs and yaml configuration.
+&quot;&quot;&quot;
+
+import argparse
+from collections import defaultdict
+from dataclasses import MISSING, dataclass, field, fields, asdict
+from enum import Enum
+import json
+import os
+import sys
+import types
+from typing import Optional, List, Union, Any, Callable, Dict, Literal, TypeVar, get_type_hints, get_origin, get_args
+import yaml
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+import transformers
+from packaging import version
+
+logger = get_logger(__name__)
+
+
+@dataclass
+class ModelArguments:
+    &quot;&quot;&quot;
+    Model-related parameters: path, initialization method, etc.
+    &quot;&quot;&quot;
+
+    model_name_or_path: str = field(
+        metadata={&quot;help&quot;: &quot;Path to pretrained model or model identifier from huggingface.co/models&quot;}
+    )
+    model_id: Optional[
+        Literal[
+            &quot;gpt_oss&quot;,
+            &quot;qwen3&quot;,
+            &quot;qwen3_moe&quot;,
+            &quot;qwen3_next&quot;,
+            &quot;step35&quot;,
+            &quot;mamba3&quot;,
+            &quot;minimax_m27&quot;,
+            &quot;longcat_flash&quot;,
+            &quot;glm52&quot;,
+            &quot;deepseek_v4&quot;,
+        ]
+    ] = field(
+        default=None,
+        metadata={
+            &quot;help&quot;: &quot;Model type. New model needs to be registered in the class ModelRegistry of mindspeed_llm/fsdp2/models/model_registry.py&quot;
+        },
+    )
+    init_model_with_meta_device: bool = field(
+        default=False, metadata={&quot;help&quot;: &quot;Whether or not to initialize the model using the meta device.&quot;}
+    )
+    trust_remote_code: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether or not to allow for custom models defined on the Hub in their own modeling files.&quot;},
+    )
+    train_from_scratch: bool = field(
+        default=False,
+        metadata={
+            &quot;help&quot;: &quot;If True, initialize the model from config (random weights) instead of loading pretrained weights.&quot;
+        },
+    )
+    # Specify tokenizer path if different from model path
+    tokenizer_name_or_path: Optional[str] = field(
+        default=None, metadata={&quot;help&quot;: &quot;Pretrained tokenizer name or path if not the same as model_name&quot;}
+    )
+    cache_dir: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Where to store the pre-trained models downloaded from huggingface.co or modelscope.cn.&quot;},
+    )
+    use_fast_tokenizer: bool = field(
+        default=True,
+        metadata={&quot;help&quot;: &quot;Whether or not to use one of the fast tokenizer (backed by the tokenizers library).&quot;},
+    )
+    resize_vocab: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether or not to resize the tokenizer vocab and the embedding layers.&quot;},
+    )
+    split_special_tokens: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether or not the special tokens should be split during the tokenization process.&quot;},
+    )
+    add_tokens: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Non-special tokens to be added into the tokenizer. Use commas to separate multiple tokens.&quot;},
+    )
+    add_special_tokens: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Special tokens to be added into the tokenizer. Use commas to separate multiple tokens.&quot;},
+    )
+    new_special_tokens_config: Optional[str] = field(
+        default=None,
+        metadata={
+            &quot;help&quot;: (
+                &quot;Path to YAML config with special token descriptions for semantic initialization. &quot;
+                &quot;If set, this takes precedence over add_special_tokens. &quot;
+                &quot;YAML format: {&#x27;&lt;token&gt;&#x27;: &#x27;description text&#x27;, ...}&quot;
+            )
+        },
+    )
+    init_special_tokens: Literal[&quot;noise_init&quot;, &quot;desc_init&quot;, &quot;desc_init_w_noise&quot;] = field(
+        default=&quot;noise_init&quot;,
+        metadata={
+            &quot;help&quot;: (
+                &quot;Initialization method for new special tokens: &quot;
+                &quot;&#x27;noise_init&#x27; (default, random noise around mean), &quot;
+                &quot;&#x27;desc_init&#x27; (semantic initialization from descriptions), &quot;
+                &quot;&#x27;desc_init_w_noise&#x27; (semantic + random noise). &quot;
+                &quot;Note: &#x27;desc_init&#x27; methods require new_special_tokens_config.&quot;
+            )
+        },
+    )
+    model_revision: str = field(
+        default=&quot;main&quot;,
+        metadata={&quot;help&quot;: &quot;The specific model version to use (can be a branch name, tag name or commit id).&quot;},
+    )
+    hf_hub_token: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Auth token to log in with Hugging Face Hub.&quot;},
+    )
+    ms_hub_token: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Auth token to log in with ModelScope Hub.&quot;},
+    )
+    om_hub_token: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Auth token to log in with Modelers Hub.&quot;},
+    )
+    quant_recipe_name: Literal[&quot;mxfp8&quot;] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Quantization recipe name&quot;},
+    )
+    quant_apply_modules: List[str] = field(
+        default_factory=lambda: [&#x27;model.layers.{*}&#x27;],
+        metadata={
+            &quot;help&quot;: &quot;List of model module patterns to apply MXFP8 quantization.&quot;
+            &quot;Example: &#x27;model.layers.{*}&#x27;applies quantization to all transformer layers.&quot;
+        },
+    )
+    quant_ignored_modules: List[str] = field(
+        default_factory=lambda: [&#x27;*lm_head&#x27;, &#x27;*gate&#x27;],
+        metadata={&quot;help&quot;: &quot;List of module patterns to exclude from MXFP8 quantization. &quot;},
+    )
+    quant_converters: List[str] = field(
+        default_factory=lambda: [&quot;quantize.linear.mx&quot;],
+        metadata={
+            &quot;help&quot;: &quot;This field specifies the quantization converters to use. &quot;
+            &quot;It&#x27;s a list of strings where each string represents a specific quantization implementation.&quot;
+            &quot;Default uses &#x27;quantize.linear.mx&#x27; for mxfp8 quantization.&quot;
+        },
+    )
+    # FSDP low precision settings
+    enable_fsdp_low_precision_all_gather: bool = field(
+        default=True, metadata={&quot;help&quot;: &quot;Enable FSDP low precision activation gradients for memory efficiency.&quot;}
+    )
+    fsdp_low_precision_all_gather_mode: Literal[&quot;on-demand&quot;, &quot;all&quot;] = field(
+        default=&quot;on-demand&quot;,
+        metadata={
+            &quot;help&quot;: &quot;FSDP low precision all gather mode. &#x27;on-demand&#x27; for on-demand all gather fwd or bwd weights, &#x27;all&#x27; for all gather both fwd and bwd weights.&quot;
+        },
+    )
+
+    def __post_init__(self):
+        if self.model_name_or_path is None:
+            raise ValueError(&quot;`model_name_or_path` must be specified.&quot;)
+        if self.model_id == &quot;deepseek_v4&quot; and version.parse(transformers.__version__) &lt; version.parse(&quot;5.8.1&quot;):
+            raise EnvironmentError(
+                f&quot;Detected model_id = deepseek_v4, current transformers version {transformers.__version__} is too low. &quot;
+                &quot;Please upgrade transformers to at least 5.8.1.&quot;
+            )
+
+
+@dataclass
+class DataArguments:
+    &quot;&quot;&quot;
+    Arguments pertaining to what data we are going to input our model for training and evaluation.
+    &quot;&quot;&quot;
+
+    template: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Which template to use for constructing prompts in training and inference.&quot;},
+    )
+    dataset: Optional[Union[Dict[str, Any], str]] = field(
+        default=None, metadata={&quot;help&quot;: &quot;Train dataset: config dict or comma-separated dataset names.&quot;}
+    )
+    eval_dataset: Optional[Union[Dict[str, Any], str]] = field(
+        default=None, metadata={&quot;help&quot;: &quot;Eval dataset: config dict or comma-separated eval dataset names.&quot;}
+    )
+    dataset_dir: str = field(
+        default=&quot;./configs/fsdp2/data&quot;,
+        metadata={&quot;help&quot;: &quot;Path to the folder containing the datasets.&quot;},
+    )
+    cutoff_len: int = field(
+        default=2048,
+        metadata={&quot;help&quot;: &quot;The cutoff length of the tokenized inputs in the dataset.&quot;},
+    )
+    train_on_prompt: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether or not to disable the mask on the prompt.&quot;},
+    )
+    mask_history: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether or not to mask the history and train on the last turn only.&quot;},
+    )
+    streaming: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Enable dataset streaming.&quot;},
+    )
+    buffer_size: int = field(
+        default=16384,
+        metadata={&quot;help&quot;: &quot;Size of the buffer to randomly sample examples from in dataset streaming.&quot;},
+    )
+    mix_strategy: Literal[&quot;concat&quot;, &quot;interleave_under&quot;, &quot;interleave_over&quot;] = field(
+        default=&quot;concat&quot;,
+        metadata={&quot;help&quot;: &quot;Strategy to use in dataset mixing (concat/interleave) (undersampling/oversampling).&quot;},
+    )
+    interleave_probs: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Probabilities to sample data from datasets. Use commas to separate multiple datasets.&quot;},
+    )
+    overwrite_cache: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Overwrite the cached training and evaluation sets.&quot;},
+    )
+    preprocessing_batch_size: int = field(
+        default=1000,
+        metadata={&quot;help&quot;: &quot;The number of examples in one group in pre-processing.&quot;},
+    )
+    preprocessing_num_workers: Optional[int] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;The number of processes to use for the pre-processing.&quot;},
+    )
+    max_samples: Optional[int] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;For debugging purposes, truncate the number of examples for each dataset.&quot;},
+    )
+    eval_num_beams: Optional[int] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Number of beams to use for evaluation. This argument will be passed to `model.generate`&quot;},
+    )
+    ignore_pad_token_for_loss: bool = field(
+        default=True,
+        metadata={&quot;help&quot;: &quot;Whether or not to ignore the tokens corresponding to the pad label in loss computation.&quot;},
+    )
+    val_size: float = field(
+        default=0.0,
+        metadata={&quot;help&quot;: &quot;Size of the validation set, should be an integer or a float in range `[0,1)`.&quot;},
+    )
+    eval_on_each_dataset: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether or not to evaluate on each dataset separately.&quot;},
+    )
+    packing: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Enable sequences packing in training.&quot;},
+    )
+    neat_packing: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Enable sequence packing without cross-attention.&quot;},
+    )
+    tool_format: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Tool format to use for constructing function calling examples.&quot;},
+    )
+    default_system: Optional[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Override the default system message in the template.&quot;},
+    )
+    enable_thinking: Optional[bool] = field(
+        default=True,
+        metadata={&quot;help&quot;: &quot;Whether or not to enable thinking mode for reasoning models.&quot;},
+    )
+    tokenized_path: Optional[str] = field(
+        default=None,
+        metadata={
+            &quot;help&quot;: (
+                &quot;Path to save or load the tokenized datasets. &quot;
+                &quot;If tokenized_path not exists, it will save the tokenized datasets. &quot;
+                &quot;If tokenized_path exists, it will load the tokenized datasets.&quot;
+            )
+        },
+    )
+    data_shared_file_system: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether or not to use a shared file system for the datasets.&quot;},
+    )
+
+    data_manager_type: Literal[&quot;lf&quot;, &quot;mg&quot;] = field(
+        default=&quot;lf&quot;,
+        metadata={&quot;help&quot;: &quot;Data Manager type for building the different data manager&quot;},
+    )
+    # megatron dataset args
+    split: str = field(
+        default=&quot;100,0,0&quot;,
+        metadata={&quot;help&quot;: &quot;Comma-separated list of proportions for training, validation, and test split.&quot;},
+    )
+    create_attention_mask_in_dataloader: Optional[bool] = field(
+        default=False, metadata={&quot;help&quot;: &quot;If set, do create attention_masks in dataloader.&quot;}
+    )
+    no_shared_storage: Optional[bool] = field(default=False, metadata={&quot;help&quot;: &quot;if no shared storage, set it.&quot;})
+    dataloader_type: Literal[&quot;single&quot;] = field(
+        default=&quot;single&quot;,
+        metadata={&quot;help&quot;: (&quot;Single pass vs multiple pass data loader&quot;)},
+    )
+    reset_attention_mask: Optional[bool] = field(
+        default=False, metadata={&quot;help&quot;: &quot;If set, do reset attention masks in dataloader and generate actual_seq_len.&quot;}
+    )
+    append_eod: Optional[bool] = field(default=False, metadata={&quot;help&quot;: &quot;Append eod token when process data&quot;})
+
+    def __post_init__(self):
+        def split_arg(arg):
+            if isinstance(arg, str):
+                return [item.strip() for item in arg.split(&quot;,&quot;)]
+            return arg
+
+        if isinstance(self.dataset, dict) and not self.dataset:
+            self.dataset = None
+        if isinstance(self.eval_dataset, dict) and not self.eval_dataset:
+            self.eval_dataset = None
+
+        if self.dataset is None and self.val_size &gt; 1e-6:
+            raise ValueError(f&quot;val_size={self.val_size} but dataset=None (dataset must be specified when val_size&gt;0).&quot;)
+
+        if self.eval_dataset is not None and self.val_size &gt; 1e-6:
+            raise ValueError(f&quot;val_size={self.val_size} and eval_dataset={self.eval_dataset} cannot be set together.&quot;)
+
+        if self.interleave_probs is not None:
+            if self.mix_strategy == &quot;concat&quot;:
+                raise ValueError(
+                    f&quot;interleave_probs={self.interleave_probs} is not supported for mix_strategy={self.mix_strategy}.&quot;
+                )
+
+            self.interleave_probs = list(map(float, split_arg(self.interleave_probs)))
+            if self.dataset is not None and len(self.dataset) != len(self.interleave_probs):
+                raise ValueError(
+                    f&quot;len(dataset)={len(self.dataset)} != len(interleave_probs)={len(self.interleave_probs)}.&quot;
+                )
+
+            if self.eval_dataset is not None and len(self.eval_dataset) != len(self.interleave_probs):
+                raise ValueError(
+                    f&quot;len(eval_dataset)={len(self.eval_dataset)} != len(interleave_probs)={len(self.interleave_probs)}.&quot;
+                )
+
+        if self.streaming and self.val_size &gt; 1e-6 and self.val_size &lt; 1:
+            raise ValueError(f&quot;val_size={self.val_size} must be integer when streaming=True.&quot;)
+
+        if self.streaming and self.max_samples is not None:
+            raise ValueError(f&quot;streaming=True and max_samples={self.max_samples} are incompatible.&quot;)
+
+        if self.mask_history and self.train_on_prompt:
+            raise ValueError(
+                f&quot;mask_history={self.mask_history} and train_on_prompt={self.train_on_prompt} cannot be True together.&quot;
+            )
+
+        if self.neat_packing:
+            self.packing = True
+        if self.reset_attention_mask and not self.append_eod:
+            raise ValueError(
+                &quot;reset_attention_mask requires append_eod to be True. &quot;
+                &quot;Please set append_eod=True when using reset_attention_mask.&quot;
+            )
+
+        if self.packing:
+            self.cutoff_len -= 1  # avoid pad_to_multiple_of, needs improve
+
+    def to_dict(self) -&gt; dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class ParallelArguments:
+    &quot;&quot;&quot;
+    MindSpeed FSDP backend parallel strategy parameters (FSDP2, TP, EP)
+    &quot;&quot;&quot;
+
+    tp_size: int = field(default=1, metadata={&quot;help&quot;: &quot;Tensor Parallel size. (Cols/Rows splitting)&quot;})
+    fsdp_size: int = field(default=1, metadata={&quot;help&quot;: &quot;Fully Sharded Data Parallel size. (Sharding parameters)&quot;})
+    recompute: bool = field(
+        default=False, metadata={&quot;help&quot;: &quot;Whether to enable Gradient Checkpointing (Activation Recomputation).&quot;}
+    )
+    # Expert Parallel (MoE)
+    ep_size: int = field(default=1, metadata={&quot;help&quot;: &quot;Expert Parallel size for MoE models.&quot;})
+    ep_fsdp_size: int = field(default=1, metadata={&quot;help&quot;: &quot;FSDP size inside Expert Parallel groups.&quot;})
+    cp_size: int = field(default=1, metadata={&quot;help&quot;: &quot;context parallel size.&quot;})
+    cp_type: Literal[&quot;ulysses&quot;, &quot;ring&quot;] = field(
+        default=&quot;ulysses&quot;,
+        metadata={&quot;help&quot;: &quot;Use context parallel algo.&quot;},
+    )
+    fsdp_modules: List[str] = field(
+        default_factory=lambda: [&#x27;model.layers.{*}&#x27;, &#x27;model.embed_tokens&#x27;, &#x27;lm_head&#x27;],
+        metadata={&quot;help&quot;: &quot;Model structure of layers with Fully Sharded Data Parallel.&quot;},
+    )
+    ignored_modules: List[str] = field(
+        default=None,
+        metadata={&quot;help&quot;: &quot;Model structure of layers with not Fully Sharded Data Parallel.&quot;},
+    )
+    reshard_after_forward: bool = field(
+        default=True,
+        metadata={&quot;help&quot;: &quot;Whether to reshard parameters after forward pass (for main FSDP module)&quot;},
+    )
+    shard_placement_fn: Optional[str] = field(
+        default=None, metadata={&quot;help&quot;: &quot;Custom shard placement function for main FSDP module&quot;}
+    )
+    efsdp_shard_placement_fn: Optional[str] = field(
+        default=&#x27;shard_by_dim_1&#x27;, metadata={&quot;help&quot;: &quot;Custom shard placement function for main ep-FSDP module&quot;}
+    )
+    tp_colwise: List[str] = field(
+        default_factory=lambda: [&#x27;*.q_proj&#x27;, &#x27;*.k_proj&#x27;, &#x27;*.v_proj&#x27;, &#x27;*.gate_proj&#x27;, &#x27;*.up_proj&#x27;],
+        metadata={&quot;help&quot;: &quot;Model structure of layers with Tensor Parallel(Cols splitting).&quot;},
+    )
+    tp_rowwise: List[str] = field(
+        default_factory=lambda: [&#x27;*.o_proj&#x27;, &#x27;*.down_proj&#x27;],
+        metadata={&quot;help&quot;: &quot;Model structure of layers with Tensor Parallel(Rows splitting).&quot;},
+    )
+    ep_modules: List[str] = field(
+        default_factory=lambda: [&#x27;model.layers.{*}.mlp.experts&#x27;],
+        metadata={&quot;help&quot;: &quot;Model structure of layers with Expert Parallel.&quot;},
+    )
+    ep_fsdp_modules: List[str] = field(
+        default_factory=lambda: [&#x27;model.layers.{*}.mlp.experts&#x27;],
+        metadata={&quot;help&quot;: &quot;Model structure of layers with FSDP inside Expert Parallel groups.&quot;},
+    )
+    ep_dispatcher: Literal[&quot;eager&quot;, &quot;fused&quot;, &quot;mc2&quot;] = field(
+        default=&quot;eager&quot;,
+        metadata={
+            &quot;help&quot;: &quot;Dispatcher strategy for Expert Parallel (MoE). &quot;
+            &quot;Options: &#x27;eager&#x27; (immediate token dispatch to experts, default), &quot;
+            &quot;&#x27;fused&#x27; (fused routing &amp; expert computation for higher throughput), &quot;
+            &quot;&#x27;mc2&#x27; (mixed compression dispatch to reduce cross-card communication cost). Defaults to &#x27;eager&#x27;.&quot;
+        },
+    )
+    recompute_modules: List[str] = field(
+        default_factory=lambda: [&#x27;model.layers.{*}&#x27;],
+        metadata={&quot;help&quot;: &quot;Model structure of layers with Gradient Checkpointing (Activation Recomputation).&quot;},
+    )
+    param_dtype: Literal[&quot;bf16&quot;, &quot;fp16&quot;, &quot;fp32&quot;] = field(
+        default=&quot;bf16&quot;, metadata={&quot;help&quot;: &quot;Data type for FSDP parameter storage. Defaults to &#x27;bf16&#x27;&quot;}
+    )
+    reduce_dtype: Literal[&quot;bf16&quot;, &quot;fp16&quot;, &quot;fp32&quot;] = field(
+        default=&quot;fp32&quot;,
+        metadata={
+            &quot;help&quot;: &quot;Data type for FSDP gradient reduction . Using &#x27;fp32&#x27; ensures numerical stability. Defaults to &#x27;fp32&#x27;.&quot;
+        },
+    )
+    num_to_forward_prefetch: int = field(
+        default=1,
+        metadata={
+            &quot;help&quot;: &quot;Number of modules to prefetch during FSDP forward pass (optimizes pipeline efficiency). Defaults to 1.&quot;
+        },
+    )
+    num_to_backward_prefetch: int = field(
+        default=1,
+        metadata={
+            &quot;help&quot;: &quot;Number of modules to prefetch during FSDP backward pass (optimizes pipeline efficiency). Defaults to 1.&quot;
+        },
+    )
+
+    def __post_init__(self):
+        if self.fsdp_modules is None:
+            raise ValueError(
+                &quot;Parameter &#x27;fsdp_modules&#x27; cannot be None! Please provide a non-empty list of module paths (e.g. [&#x27;model.layers.{*}&#x27;]).&quot;
+            )
+        if len(self.fsdp_modules) == 0:
+            raise ValueError(
+                &quot;Parameter &#x27;fsdp_modules&#x27; cannot be an empty list! Please provide at least one module path (e.g. [&#x27;model.layers.{*}&#x27;]).&quot;
+            )
+
+
+@dataclass
+class TrainingArguments:
+    &quot;&quot;&quot;
+    Training hyperparameters: corresponding to requirements of Trainer and Optimizer/Scheduler Factory
+    &quot;&quot;&quot;
+
+    output_dir: str = field(
+        metadata={&quot;help&quot;: &quot;The output directory where the model predictions and checkpoints will be written.&quot;}
+    )
+    # --- Optimization ---
+    optimizer: Literal[&quot;adamw&quot;, &quot;muon&quot;] = field(
+        default=&quot;adamw&quot;,
+        metadata={&quot;help&quot;: &quot;Optimizer. Default to adamw.&quot;},
+    )
+    lr: float = field(default=1e-5, metadata={&quot;help&quot;: &quot;The initial learning rate.&quot;})
+    weight_decay: float = field(default=0.01, metadata={&quot;help&quot;: &quot;Weight decay if we apply some.&quot;})
+    adam_beta1: float = field(default=0.9, metadata={&quot;help&quot;: &quot;Beta1 for AdamW optimizer&quot;})
+    adam_beta2: float = field(default=0.95, metadata={&quot;help&quot;: &quot;Beta2 for AdamW optimizer&quot;})
+    adam_epsilon: float = field(default=1e-8, metadata={&quot;help&quot;: &quot;Epsilon for AdamW optimizer.&quot;})
+    max_grad_norm: float = field(default=1.0, metadata={&quot;help&quot;: &quot;Max gradient norm for clipping.&quot;})
+
+    # --- Scheduling ---
+    lr_scheduler_type: Literal[&quot;cosine&quot;, &quot;linear&quot;, &quot;constant&quot;] = field(
+        default=&quot;cosine&quot;, metadata={&quot;help&quot;: &quot;The scheduler type to use. (cosine, linear, constant)&quot;}
+    )
+    warmup_ratio: float = field(
+        default=0.03, metadata={&quot;help&quot;: &quot;Linear warmup over warmup_ratio fraction of total steps.&quot;}
+    )
+    min_lr: float = field(default=1e-6, metadata={&quot;help&quot;: &quot;Minimum learning rate for cosine scheduler.&quot;})
+
+    # --- Training Loop Control ---
+    num_train_epochs: float = field(default=3.0, metadata={&quot;help&quot;: &quot;Total number of training epochs to perform.&quot;})
+    max_steps: int = field(
+        default=-1,
+        metadata={&quot;help&quot;: &quot;If &gt; 0: set total number of training steps to perform. Overrides num_train_epochs.&quot;},
+    )
+    gradient_accumulation_steps: int = field(
+        default=1, metadata={&quot;help&quot;: &quot;Number of updates steps to accumulate before performing a backward/update pass.&quot;}
+    )
+    disable_shuffling: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether or not to disable the shuffling of the training set.&quot;},
+    )
+    seed: int = field(default=42, metadata={&quot;help&quot;: &quot;Random seed that will be set at the beginning of training.&quot;})
+
+    # --- IO &amp; Logging ---
+    save_steps: int = field(default=500, metadata={&quot;help&quot;: &quot;Save checkpoint every X updates steps.&quot;})
+    save_total_limit: Optional[int] = field(
+        default=3, metadata={&quot;help&quot;: &quot;Limit the total amount of checkpoints. Deletes the older checkpoints.&quot;}
+    )
+    resume_from_checkpoint: Optional[str] = field(
+        default=None, metadata={&quot;help&quot;: &quot;The path to a folder with a valid checkpoint for your model.&quot;}
+    )
+    logging_steps: int = field(default=1, metadata={&quot;help&quot;: &quot;Log every X updates steps.&quot;})
+    log_throughput: bool = field(
+        default=False,
+        metadata={
+            &quot;help&quot;: &quot;Whether to enable real-time logging of key throughput metrics, including tokens per second (tokens/s) and model FLOPs utilization (MFU) to quantify training/inference efficiency.&quot;
+        },
+    )
+    log_cpu_memory: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether to enable logging of memory utilization statistics for CPU devices.&quot;},
+    )
+    mtp_loss_scaling_factor: float = field(
+        default=0.3, metadata={&quot;help&quot;: &quot;MTP(Multi Token Prediction) loss scaling factor.&quot;}
+    )
+    stage: Literal[&quot;pt&quot;, &quot;sft&quot;] = field(
+        default=&quot;sft&quot;,
+        metadata={&quot;help&quot;: &quot;Which stage will be performed in training.&quot;},
+    )
+    # megatron train args
+    calculate_per_token_loss: bool = field(
+        default=False,
+        metadata={
+            &quot;help&quot;: &quot;Scale cross entropy loss by the number of non-padded tokens in the global batch, versus the default behavior of assuming all tokens are non-padded&quot;
+        },
+    )
+    dataloader_num_workers: int = field(
+        default=0,
+        metadata={
+            &quot;help&quot;: (
+                &quot;Number of subprocesses to use for data loading (PyTorch only). 0 means that the data will be loaded&quot;
+                &quot; in the main process.&quot;
+            )
+        },
+    )
+
+    dataloader_prefetch_factor: Optional[int] = field(
+        default=None,
+        metadata={
+            &quot;help&quot;: (
+                &quot;Number of batches loaded in advance by each worker. &quot;
+                &quot;2 means there will be a total of 2 * num_workers batches prefetched across all workers. &quot;
+            )
+        },
+    )
+
+    dataloader_pin_memory: bool = field(default=True, metadata={&quot;help&quot;: &quot;Whether or not to pin memory for DataLoader.&quot;})
+
+    dataloader_persistent_workers: bool = field(
+        default=False,
+        metadata={
+            &quot;help&quot;: &quot;If True, the data loader will not shut down the worker processes after a dataset has been consumed once. This allows to maintain the workers Dataset instances alive. Can potentially speed up training, but will increase RAM usage.&quot;
+        },
+    )
+    dataloader_drop_last: bool = field(
+        default=False, metadata={&quot;help&quot;: &quot;Drop the last incomplete batch if it is not divisible by the batch size.&quot;}
+    )
+    per_device_train_batch_size: int = field(
+        default=8, metadata={&quot;help&quot;: &quot;Batch size per device accelerator core/CPU for training.&quot;}
+    )
+    save_only_model: bool = field(
+        default=False,
+        metadata={
+            &quot;help&quot;: &quot;When checkpointing, whether to only save the model, or also the optimizer, scheduler &amp; rng state.&quot;
+        },
+    )
+    save_async: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Whether to save checkpoint asynchronously.&quot;},
+    )
+    save_epochs: int = field(
+        default=1,
+        metadata={&quot;help&quot;: &quot;Number of epochs between two checkpoint saves.&quot;},
+    )
+    save_hf_weights: bool = field(
+        default=True,
+        metadata={&quot;help&quot;: &quot;Save the huggingface format weights to the last checkpoint dir.&quot;},
+    )
+    # --- Profiling (NPU) ---
+    profile: bool = field(default=False, metadata={&quot;help&quot;: &quot;Enable NPU profiling using torch_npu.profiler.&quot;})
+    profile_step_start: int = field(default=0, metadata={&quot;help&quot;: &quot;Start profiling at this global step (inclusive).&quot;})
+    profile_step_end: int = field(
+        default=-1, metadata={&quot;help&quot;: &quot;Stop profiling before this global step (exclusive). If -1, profile until end.&quot;}
+    )
+    profile_ranks: List[int] = field(
+        default_factory=lambda: [-1],
+        metadata={&quot;help&quot;: &quot;List of ranks to enable profiling on. Use [-1] to profile all ranks.&quot;},
+    )
+    profile_level: str = field(
+        default=&quot;level0&quot;, metadata={&quot;help&quot;: &quot;Profiling level: &#x27;level_none&#x27;, &#x27;level0&#x27;, &#x27;level1&#x27;, &#x27;level2&#x27;.&quot;}
+    )
+    profile_export_type: str = field(default=&quot;text&quot;, metadata={&quot;help&quot;: &quot;Export type: &#x27;text&#x27; or &#x27;db&#x27;.&quot;})
+    profile_data_simplification: bool = field(
+        default=False, metadata={&quot;help&quot;: &quot;Use data simplification mode in profiler.&quot;}
+    )
+    profile_with_cpu: bool = field(default=False, metadata={&quot;help&quot;: &quot;Record CPU activities in profiler.&quot;})
+    profile_with_stack: bool = field(default=False, metadata={&quot;help&quot;: &quot;Record call stack in profiler.&quot;})
+    profile_with_memory: bool = field(default=False, metadata={&quot;help&quot;: &quot;Profile memory allocation and usage.&quot;})
+    profile_record_shapes: bool = field(default=False, metadata={&quot;help&quot;: &quot;Record tensor shapes in profiler.&quot;})
+    profile_save_path: str = field(
+        default=&quot;./profile&quot;, metadata={&quot;help&quot;: &quot;Directory to save profiling traces (TensorBoard format).&quot;}
+    )
+
+    def __post_init__(self):  # Path parameter validation
+        if self.output_dir is None:
+            raise ValueError(&quot;`output_dir` must be specified.&quot;)
+        if self.profile:
+            if self.profile_step_start &lt; 0:
+                raise ValueError(&quot;`profile_step_start` must be &gt;= 0&quot;)
+            if self.profile_step_end != -1 and self.profile_step_end &lt;= self.profile_step_start:
+                raise ValueError(&quot;`profile_step_end` must be &gt; profile_step_start or -1&quot;)
+
+
+@dataclass
+class InferenceArguments:
+    &quot;&quot;&quot;
+    Inference hyperparameters: corresponding to requirements of the inference engine and generation config
+    &quot;&quot;&quot;
+
+    # --- Generation Config ---
+    infer_backend: Literal[&quot;huggingface&quot;] = field(
+        default=&quot;huggingface&quot;, metadata={&quot;help&quot;: &quot;The inference engine backend to use.&quot;}
+    )
+    max_new_tokens: int = field(
+        default=512,
+        metadata={&quot;help&quot;: &quot;The maximum numbers of tokens to generate, ignoring the number of tokens in the prompt.&quot;},
+    )
+    do_sample: bool = field(
+        default=False, metadata={&quot;help&quot;: &quot;Whether or not to use sampling; use greedy decoding otherwise.&quot;}
+    )
+
+    def __post_init__(self):
+        if self.max_new_tokens &lt;= 0:
+            raise ValueError(&quot;`max_new_tokens` must be strictly positive (&gt; 0).&quot;)
+
+
+@dataclass
+class OptimizationArguments:
+    &quot;&quot;&quot;
+    Inference hyperparameters: corresponding to requirements of the inference engine and generation config
+    &quot;&quot;&quot;
+
+    use_fused_rmsnorm: bool = field(default=False, metadata={&quot;help&quot;: &quot;Use fused rmsnorm.&quot;})
+    moe_grouped_gemm: bool = field(
+        default=False,
+        metadata={
+            &quot;help&quot;: &quot;When there are multiple experts per rank, launch multiple local GEMM kernels in multiple streams to improve the utilization and performance with GroupedLinear in TransformerEngine.&quot;
+        },
+    )
+    use_fused_rotary_pos_emb: bool = field(default=False, metadata={&quot;help&quot;: &quot;Use fused rotary-pos-emb.&quot;})
+    use_flash_attn: bool = field(default=False, metadata={&quot;help&quot;: &quot;use FlashAttention implementation of attention.&quot;})
+    use_sparse_flash_attn: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Use NPU sparse flash attention for DSA attention.&quot;},
+    )
+    use_fused_lightning_indexer: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Use NPU lightning indexer to select DSA sparse attention indices.&quot;},
+    )
+    use_fused_lightning_indexer_loss: bool = field(
+        default=False,
+        metadata={&quot;help&quot;: &quot;Use fused NPU sparse lightning indexer KL loss.&quot;},
+    )
+    indexer_loss_coeff: float = field(
+        default=1.0,
+        metadata={&quot;help&quot;: &quot;Loss coefficient for DSA indexer KL loss.&quot;},
+    )
+    pre_tokens: int = field(
+        default=1048576,
+        metadata={&quot;help&quot;: &quot;Previous-token window passed to attention.&quot;},
+    )
+    next_tokens: int = field(
+        default=0,
+        metadata={&quot;help&quot;: &quot;Next-token window passed to attention.&quot;},
+    )
+    use_triton_gdn: bool = field(default=False, metadata={&quot;help&quot;: &quot;Use triton kernel accelerate training.&quot;})
+    use_flash_gdn: bool = field(default=False, metadata={&quot;help&quot;: &quot;Use flash kernel accelerate training.&quot;})
+    gdn_chunk_size: int = field(default=64, metadata={&quot;help&quot;: &quot;Matrix blocking size of Gated DeltaNet.&quot;})
+    chunk_loss_size: int = field(
+        default=None, metadata={&quot;help&quot;: &quot;Chunk loss size: set to &gt; 0 to enable chunk loss calculation&quot;}
+    )
+    use_triton_rmsnormgated: bool = field(default=False, metadata={&quot;help&quot;: &quot;Use triton rmsnorm.&quot;})
+    fix_router: bool = field(
+        default=False,
+        metadata={
+            &quot;help&quot;: &quot;Replace topk routing with round-robin for balanced expert load. For performance tuning only, not for production training.&quot;
+        },
+    )
+
+    def __post_init__(self):
+        if self.use_flash_gdn and self.use_triton_gdn:
+            raise ValueError(&quot;`use_flash_gdn` and `use_triton_gdn` cannot be True at the same time.&quot;)
+
+
+def _string_to_bool(value: Union[bool, str]) -&gt; bool:
+    &quot;&quot;&quot;Convert string to boolean value&quot;&quot;&quot;
+    if isinstance(value, bool):
+        return value
+    if value.lower() in (&quot;yes&quot;, &quot;true&quot;, &quot;t&quot;, &quot;y&quot;, &quot;1&quot;):
+        return True
+    if value.lower() in (&quot;no&quot;, &quot;false&quot;, &quot;f&quot;, &quot;n&quot;, &quot;0&quot;):
+        return False
+    raise argparse.ArgumentTypeError(
+        f&quot;Truthy value expected: got {value} but expected one of yes/no, true/false, t/f, y/n, 1/0 (case insensitive).&quot;
+    )
+
+
+def _convert_str_dict(input_dict: Dict[str, Any]) -&gt; Dict[str, Any]:
+    &quot;&quot;&quot;Recursively convert string values in dictionary&quot;&quot;&quot;
+    for key, value in input_dict.items():
+        if isinstance(value, dict):
+            input_dict[key] = _convert_str_dict(value)
+        elif isinstance(value, str):
+            if value.lower() in (&quot;true&quot;, &quot;false&quot;):  # check for bool
+                input_dict[key] = value.lower() == &quot;true&quot;
+            elif value.isdigit():  # check for digit
+                input_dict[key] = int(value)
+            elif value.replace(&quot;.&quot;, &quot;&quot;, 1).isdigit():
+                input_dict[key] = float(value)
+
+    return input_dict
+
+
+def _make_choice_type_function(choices: List[Any]) -&gt; Callable[[str], Any]:
+    &quot;&quot;&quot;Build mapping from string to choices&quot;&quot;&quot;
+    str_to_choice = {str(choice): choice for choice in choices}
+    return lambda arg: str_to_choice.get(arg, arg)
+
+
+def _validate_cross_args(args):
+    &quot;&quot;&quot;Validate constraints that span multiple argument dataclasses.&quot;&quot;&quot;
+    # Inference does not configure data arguments, so access them defensively to skip training-only validation.
+    data_args = getattr(args, &quot;data&quot;, None)
+    training_args = getattr(args, &quot;training&quot;, None)
+    if (
+        data_args is not None
+        and training_args is not None
+        and data_args.reset_attention_mask
+        and training_args.per_device_train_batch_size &gt; 1
+    ):
+        raise ValueError(
+            &quot;When reset_attention_mask=True, per_device_train_batch_size must be 1, &quot;
+            f&quot;but got {training_args.per_device_train_batch_size}.&quot;
+        )
+
+    if args.model.model_id == &quot;qwen3_next&quot; and args.parallel.cp_size &gt; 1 and args.parallel.cp_type != &quot;ulysses&quot;:
+        raise ValueError(
+            f&quot;qwen3_next only supports &#x27;ulysses&#x27; context parallel type when cp_size &gt; 1, &quot;
+            f&quot;but got cp_type=&#x27;{args.parallel.cp_type}&#x27;.&quot;
+        )
+
+    dsa_fusion_args = (
+        &quot;use_sparse_flash_attn&quot;,
+        &quot;use_fused_lightning_indexer&quot;,
+        &quot;use_fused_lightning_indexer_loss&quot;,
+    )
+    enabled_dsa_fusions = [name for name in dsa_fusion_args if getattr(args.optimization, name)]
+    model_id = args.model.model_id or &quot;&quot;
+    supports_dsa_fusions = model_id in {&quot;dsv32&quot;, &quot;deepseek_v32&quot;} or model_id.startswith(&quot;glm5&quot;)
+    if enabled_dsa_fusions and not supports_dsa_fusions:
+        raise ValueError(
+            f&quot;{&#x27;, &#x27;.join(enabled_dsa_fusions)} only support DeepSeek-V3.2 and GLM-5 series models, &quot;
+            f&quot;but got model_id=&#x27;{model_id or None}&#x27;.&quot;
+        )
+
+
+def fsdp2_parse_args(rootclass: TypeVar) -&gt; TypeVar:
+    &quot;&quot;&quot;
+    Parses the root argument class from CLI or YAML input.
+    Supports complex types like List[Dict] and Dict via JSON serialization.
+    &quot;&quot;&quot;
+    # 1: Create ArgumentParser and register all fields
+    parser = _create_argument_parser(rootclass)
+
+    # 2: Parse command-line args
+    cmd_args = sys.argv[1:]
+    if not cmd_args:
+        raise ValueError(&quot;No arguments provided.&quot;)
+
+    # 3: Load YAML config if the first arg is a .yaml/.yml file
+    yaml_config = _load_yaml_if_provided(cmd_args)
+
+    # 4: Merge YAML into CLI args (CLI has higher priority)
+    final_cmd_args = _merge_yaml_into_cmd_args(cmd_args, yaml_config)
+
+    # 5: Parse arguments
+    args, remaining_args = parser.parse_known_args(final_cmd_args)
+    if remaining_args:
+        logger.info_rank0(f&quot;Some specified arguments are not used by the ArgumentParser: {remaining_args}&quot;)
+
+    # 6: Post-process fields that require JSON deserialization
+    parse_result = _postprocess_json_fields(args, parser.dict_fields)
+
+    # 7: Build dataclass instances
+    result = _build_dataclass_instances(rootclass, parse_result)
+
+    # 8: Cross-dataclass validation
+    _validate_cross_args(result)
+
+    return result
+
+
+# =============================================================================
+#  Create ArgumentParser from dataclass structure
+# =============================================================================
+def _create_argument_parser(rootclass):
+    &quot;&quot;&quot;Dynamically creates an ArgumentParser based on the dataclass schema.&quot;&quot;&quot;
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.dict_fields = set()  # Tracks fields needing JSON deserialization
+
+    for subclass in fields(rootclass):
+        base = subclass.name
+        subclass_type = subclass.default_factory
+
+        try:
+            type_hints = get_type_hints(subclass_type)
+        except Exception as e:
+            raise RuntimeError(f&quot;Type resolution failed for {subclass_type}: {e}&quot;) from e
+
+        for attr in fields(subclass_type):
+            if not attr.init:
+                continue
+
+            attr_name = attr.name
+            attr_type = type_hints[attr_name]
+            origin_type = get_origin(attr_type)
+            parser_kwargs = attr.metadata.copy()
+
+            # Resolve Optional[T] → T
+            effective_type, effective_origin = _resolve_optional_type(attr_type, origin_type)
+
+            # Dispatch by type
+            if effective_origin is Union or (
+                hasattr(types, &quot;UnionType&quot;) and isinstance(effective_origin, types.UnionType)
+            ):
+                # For Union[Dict, str], we treat it as a dict field (since str is simple)
+                # But actually, we&#x27;ll handle it in post-processing
+                _handle_dict(parser_kwargs, base, attr_name, attr, parser)
+                parser.add_argument(f&quot;--{base}.{attr_name}&quot;, **parser_kwargs)
+                continue
+            if effective_origin is Literal or (isinstance(effective_type, type) and issubclass(effective_type, Enum)):
+                _handle_literal_or_enum(parser_kwargs, effective_type, effective_origin, attr)
+
+            elif effective_type is bool or (effective_origin is Union and bool in get_args(effective_type)):
+                _handle_bool(parser_kwargs, attr)
+
+            elif effective_origin is list:
+                item_type = get_args(effective_type)[0]
+                item_origin = get_origin(item_type)
+                if item_origin is dict or item_type is dict:
+                    _handle_list_of_dict(parser_kwargs, base, attr_name, attr, parser)
+                else:
+                    _handle_list_of_scalar(parser_kwargs, item_type, attr)
+
+            elif effective_origin is dict or effective_type is dict:
+                _handle_dict(parser_kwargs, base, attr_name, attr, parser)
+
+            else:
+                _handle_scalar(parser_kwargs, effective_type, attr)
+
+            parser.add_argument(f&quot;--{base}.{attr_name}&quot;, **parser_kwargs)
+
+    return parser
+
+
+def _resolve_optional_type(attr_type, origin_type):
+    &quot;&quot;&quot;Extract inner type(s) from Union types, handling Optional[Union[A, B]].&quot;&quot;&quot;
+    if origin_type is Union or (hasattr(types, &quot;UnionType&quot;) and isinstance(origin_type, types.UnionType)):
+        args = get_args(attr_type)
+        non_none_types = [t for t in args if t is not type(None)]  # pylint: disable=unidiomatic-typecheck
+
+        if len(non_none_types) == 0:
+            raise RuntimeError(f&quot;Union type contains only None: {attr_type}&quot;)
+        elif len(non_none_types) == 1:
+            # Standard Optional[T]
+            effective_type = non_none_types[0]
+            effective_origin = get_origin(effective_type)
+            return effective_type, effective_origin
+        else:
+            # Multi-type Union like Union[Dict, str]
+            # Return the original union as effective_type
+            return attr_type, origin_type
+    return attr_type, origin_type
+
+
+def _handle_literal_or_enum(parser_kwargs, effective_type, effective_origin, attr):
+    &quot;&quot;&quot;Configure parser for Literal or Enum types.&quot;&quot;&quot;
+    choices = effective_type.__args__ if effective_origin is Literal else [x.value for x in effective_type]
+    parser_kwargs[&quot;choices&quot;] = choices
+    parser_kwargs[&quot;type&quot;] = _make_choice_type_function(choices)
+    if attr.default is not MISSING:
+        parser_kwargs[&quot;default&quot;] = attr.default
+    else:
+        parser_kwargs[&quot;required&quot;] = True
+
+
+def _handle_bool(parser_kwargs, attr):
+    &quot;&quot;&quot;Configure parser for bool or Optional[bool].&quot;&quot;&quot;
+    parser_kwargs[&quot;type&quot;] = _string_to_bool
+    if attr.default is not MISSING and attr.default is not None:
+        parser_kwargs[&quot;default&quot;] = attr.default
+        parser_kwargs[&quot;nargs&quot;] = &quot;?&quot;
+        parser_kwargs[&quot;const&quot;] = True
+    else:
+        parser_kwargs[&quot;default&quot;] = False
+        parser_kwargs[&quot;nargs&quot;] = &quot;?&quot;
+
+
+def _handle_list_of_dict(parser_kwargs, base, attr_name, attr, parser):
+    &quot;&quot;&quot;Handle List[Dict]: each item is passed as a JSON string.&quot;&quot;&quot;
+    parser_kwargs[&quot;type&quot;] = str
+    parser_kwargs[&quot;nargs&quot;] = &quot;+&quot;
+    parser.dict_fields.add(f&quot;{base}.{attr_name}&quot;)
+    if attr.default is not MISSING:
+        parser_kwargs[&quot;default&quot;] = [] if attr.default is None else attr.default
+    elif attr.default_factory is not MISSING:
+        parser_kwargs[&quot;default&quot;] = attr.default_factory()
+    else:
+        parser_kwargs[&quot;required&quot;] = True
+
+
+def _handle_list_of_scalar(parser_kwargs, item_type, attr):
+    &quot;&quot;&quot;Handle List[str], List[int], etc.&quot;&quot;&quot;
+    parser_kwargs[&quot;type&quot;] = item_type
+    parser_kwargs[&quot;nargs&quot;] = &quot;+&quot;
+    if attr.default_factory is not MISSING:
+        parser_kwargs[&quot;default&quot;] = attr.default_factory()
+    elif attr.default is not MISSING:
+        parser_kwargs[&quot;default&quot;] = attr.default
+    else:
+        parser_kwargs[&quot;required&quot;] = True
+
+
+def _handle_dict(parser_kwargs, base, attr_name, attr, parser):
+    &quot;&quot;&quot;Handle Dict: passed as a single JSON string.&quot;&quot;&quot;
+    parser_kwargs[&quot;type&quot;] = str
+    parser_kwargs[&quot;nargs&quot;] = None
+    parser.dict_fields.add(f&quot;{base}.{attr_name}&quot;)
+    if attr.default_factory is not MISSING:
+        parser_kwargs[&quot;default&quot;] = str(attr.default_factory())
+    elif attr.default is not MISSING:
+        parser_kwargs[&quot;default&quot;] = str(attr.default) if attr.default is not None else &quot;{}&quot;
+    else:
+        parser_kwargs[&quot;required&quot;] = True
+
+
+def _handle_scalar(parser_kwargs, effective_type, attr):
+    &quot;&quot;&quot;Handle scalar types: int, float, str, etc.&quot;&quot;&quot;
+    parser_kwargs[&quot;type&quot;] = effective_type
+    if attr.default is not MISSING:
+        parser_kwargs[&quot;default&quot;] = attr.default
+    elif attr.default_factory is not MISSING:
+        parser_kwargs[&quot;default&quot;] = attr.default_factory()
+    else:
+        parser_kwargs[&quot;required&quot;] = True
+
+
+# =============================================================================
+#  Load YAML config
+# =============================================================================
+def _load_yaml_if_provided(cmd_args):
+    &quot;&quot;&quot;Load YAML config if the first argument is a .yaml or .yml file.&quot;&quot;&quot;
+    if cmd_args and (cmd_args[0].endswith(&quot;.yaml&quot;) or cmd_args[0].endswith(&quot;.yml&quot;)):
+        input_path = cmd_args[0]
+        with open(os.path.abspath(input_path), encoding=&quot;utf-8&quot;) as f:
+            return yaml.safe_load(f) or {}
+    return {}
+
+
+# =============================================================================
+#  Merge YAML into CLI args
+# =============================================================================
+def _merge_yaml_into_cmd_args(cmd_args, yaml_config):
+    &quot;&quot;&quot;Convert YAML config to CLI-style arguments (lower priority than explicit CLI).&quot;&quot;&quot;
+    working_args = cmd_args[1:] if yaml_config else cmd_args[:]
+    cmd_args_string = &quot;=&quot;.join(working_args)
+    result = working_args[:]
+
+    for base, arg_dict in yaml_config.items():
+        if not isinstance(arg_dict, dict):
+            continue
+        for arg_name, arg_value in arg_dict.items():
+            if arg_value is None:
+                continue
+            if f&quot;--{base}.{arg_name}=&quot; in cmd_args_string:
+                continue  # Skip if overridden by CLI
+
+            result.append(f&quot;--{base}.{arg_name}&quot;)
+            if isinstance(arg_value, list):
+                result.extend(str(item) for item in arg_value)
+            elif isinstance(arg_value, dict):
+                result.append(json.dumps(arg_value, ensure_ascii=False))
+            else:
+                result.append(str(arg_value))
+
+    return result
+
+
+# =============================================================================
+#  Post-process JSON fields
+# =============================================================================
+def _postprocess_json_fields(args, dict_fields):
+    &quot;&quot;&quot;Deserialize JSON strings back to dict/list for marked fields.&quot;&quot;&quot;
+    parse_result = defaultdict(dict)
+    for key, value in vars(args).items():
+        base, name = key.split(&quot;.&quot;, maxsplit=1)
+        full_key = f&quot;{base}.{name}&quot;
+
+        if full_key in dict_fields:
+            if value is None:
+                parsed_value = None
+            elif isinstance(value, list):
+                try:
+                    parsed_value = [json.loads(item) for item in value]
+                except json.JSONDecodeError as e:
+                    raise ValueError(f&quot;Failed to parse list of dict for {full_key}: {e}&quot;) from e
+            elif isinstance(value, str):
+                stripped = value.strip()
+                if stripped == &quot;&quot;:
+                    parsed_value = {}
+                elif stripped.startswith(&quot;{&quot;) and stripped.endswith(&quot;}&quot;):
+                    try:
+                        parsed_value = json.loads(stripped)
+                    except json.JSONDecodeError as e:
+                        raise ValueError(f&quot;Invalid JSON for dict field {full_key}: {value}, error: {e}&quot;) from e
+                else:
+                    parsed_value = value
+            else:
+                raise ValueError(f&quot;Unexpected type for dict field {full_key}: {type(value)}&quot;)
+            parse_result[base][name] = parsed_value
+        else:
+            parse_result[base][name] = value
+
+    return parse_result
+
+
+# =============================================================================
+#  Build dataclass instances
+# =============================================================================
+def _build_dataclass_instances(rootclass, parse_result):
+    &quot;&quot;&quot;Construct dataclass instances from parsed arguments.&quot;&quot;&quot;
+    data_classes = {}
+    for subclass in fields(rootclass):
+        base = subclass.name
+        subclass_type = subclass.default_factory
+        data_classes[base] = subclass_type(**parse_result.get(base, {}))
+
+    return rootclass(**data_classes)
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

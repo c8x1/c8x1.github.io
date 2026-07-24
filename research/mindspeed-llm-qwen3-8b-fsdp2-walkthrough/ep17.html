@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkpoint 与权重转换 · 走读 EP17</title>
+<style>
+  :root{
+    --bg:#0f0f12; --bg2:#000; --side:#1a1a1a; --card:#16161c; --line:#2a2a33;
+    --txt:#e8e8e8; --mut:#9a9a9a; --mut2:#6a6a6a;
+    --serif:ui-serif,Georgia,"Times New Roman",Times,serif;
+    --sans:system-ui,-apple-system,"PingFang SC","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Monaco,Consolas,monospace;
+    --red:#C7000B; --red-bg:#2a0f10; --red-bd:#6e1a1c; --red-tx:#e88;
+    --grn:#788C5D; --grn-bg:#14241a; --grn-bd:#2e5a3a; --grn-tx:#7ab98a;
+    --acc:#C7000B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+  .page{max-width:1180px;margin:0 auto;padding:0}
+  .topbar{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);
+    font-size:13px;color:var(--mut)}
+  .topbar .crumb{font-family:var(--serif);font-style:italic}
+  .topbar nav{margin-left:auto;display:flex;gap:8px}
+  .topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:4px 10px;border-radius:6px}
+  .topbar nav a:hover{color:#fff;border-color:var(--acc)}
+  .body{display:grid;grid-template-columns:160px 1fr;align-items:start}
+  .tree{background:var(--side);border-right:1px solid var(--line);padding:14px 8px;
+    font-family:var(--mono);font-size:11px;color:var(--mut2);min-height:80vh;position:sticky;top:0}
+  .tree .f{display:block;padding:2px 4px;white-space:pre}
+  .tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px}
+  .main{padding:22px 28px 80px}
+  h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:6px 0 2px;color:#fff}
+  .goal{font-family:var(--serif);font-style:italic;color:var(--mut);margin:0 0 4px}
+  .gain{font-size:13px;color:var(--mut);margin:0 0 20px}
+  .gain b{color:var(--red-tx)}
+  h2{font-family:var(--serif);font-weight:600;font-size:18px;color:#fff;margin:26px 0 6px;
+    border-bottom:1px solid var(--line);padding-bottom:3px}
+  h2 .sec{color:var(--mut2);font-style:italic;font-size:13px;margin-left:8px}
+  p{margin:8px 0}
+  .figcap{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);
+    margin:10px 0 2px}
+  pre{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--mut2);
+    padding:10px 12px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55}
+  pre .ln{display:inline-block;width:32px;color:var(--mut2);user-select:none}
+  .filelink{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--red-tx);margin:4px 0 14px}
+  .filelink a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--red-bd)}
+  .footnote{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--mut2);margin:4px 0 14px}
+  /* PyCharm Darcula 主题 token 配色 */
+  pre[data-lang]{color:#d4d4d4}
+  .tok-kw{color:#cc7832;font-weight:600}
+  .tok-bi{color:#9876aa;font-style:italic}
+  .tok-fn{color:#ffc66d}
+  .tok-cl{color:#a9b7c6;font-style:italic}
+  .tok-st{color:#6a8759}
+  .tok-cm{color:#808080;font-style:italic}
+  .tok-nm{color:#6897bb}
+  .tok-dc{color:#bbb33b}
+  .tok-key{color:#cc7832}
+  .tok-var{color:#9876aa}
+  .tree .f,.tree a.f{color:#6a6a6a;text-decoration:none;display:block;padding:2px 4px;white-space:pre;border-radius:3px}
+  .tree a.f:hover{background:#2a2a33;color:#d4d4d4}
+  .tree a.f.act,.tree .f.act{color:var(--red-tx);border-left:2px solid var(--acc);padding-left:6px;font-weight:600}
+  .gnpu{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:14px 0}
+  .gnpu .g{background:var(--grn-bg);border-right:1px solid var(--line);padding:10px 14px}
+  .gnpu .n{background:var(--red-bg);padding:10px 14px}
+  .gnpu h4{margin:0 0 6px;font-family:var(--serif);font-size:13px}
+  .gnpu .g h4{color:var(--grn-tx)}.gnpu .n h4{color:var(--red-tx)}
+  .gnpu .row{display:grid;grid-template-columns:110px 1fr;gap:6px;font-size:12.5px;margin:4px 0}
+  .gnpu .row .k{color:var(--mut2)}
+  .diag{margin:10px 0 6px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:8px}
+  .sum{border-top:1px solid var(--line);margin-top:22px;padding-top:10px;font-size:13.5px}
+  .sum .pit{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12.5px;margin-top:6px}
+  .filelist{font-family:var(--mono);font-size:11px;color:var(--mut2);margin-top:22px;border-top:1px dashed var(--line);padding-top:10px}
+  .filelist b{color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <span class="crumb">第六篇章 · 权重与产物 › EP17</span>
+    <span style="color:var(--mut2)">EP17</span>
+    <nav>
+      <a href="ep16.html">◀ 上一篇</a>
+      <a href="index.html">索引</a>
+      <a href="ep18.html">下一篇 ▶</a>
+    </nav>
+  </div>
+  <div class="body">
+    <aside class="tree">
+      <a class="f" href="appendix/index.html" target="_blank">📁 附录·项目文件走读</a>
+      <span class="f">MindSpeed-LLM/</span>
+      <a class="f" href="appendix/file_089411e68e5d5b.html" target="_blank">├ train_fsdp2.py</a>
+      <span class="f">├ examples/fsdp2/</span>
+      <a class="f" href="appendix/file_d04a217944c522.html" target="_blank">│  ├ env_config.sh</a>
+      <span class="f">│  └ qwen3/</span>
+      <span class="f">├ mindspeed_llm/fsdp2/</span>
+      <a class="f act" href="appendix/file_9f726ca891ba1c.html" target="_blank">├ checkpoint/checkpoint_manager.py</a>
+      <a class="f act" href="appendix/file_d7ee270afef1f9.html" target="_blank">├ checkpoint/weight_conv_adapter.py</a>
+      <a class="f act" href="appendix/file_c2c662b9358535.html" target="_blank">├ checkpoint/merge_dcp_to_hf.py</a>
+      <span class="f">└ ...</span>
+    </aside>
+    <main class="main">
+      <h1>Checkpoint 与权重转换</h1>
+      <p class="goal">目标：讲清 dcp 分片 ckpt 与 HF 中转。前置：EP16 优化器与调度。</p>
+      <p class="gain">你将获得：<b>①</b> 三类文件的逐段精读——<code>checkpoint_manager.py</code> 如何用 <code>torch.distributed.checkpoint</code> 把<b>分片</b>模型/优化器状态落盘与 resume（<code>save</code>/<code>load</code>/<code>execute_save</code> 三入口）、<code>weight_conv_adapter.py</code> 如何在加载时把 HF 键名按 transformers 的 <code>conversion_mapping</code> 改写成模型侧键、<code>merge_dcp_to_hf.py</code> 如何<b>只读 DCP metadata</b> 分片合并出 HF safetensors，每段贴真实 file:line <b>②</b> 一个反直觉点——<b>FSDP2 的 dcp 分片 ckpt 不能被 <code>transformers</code> 直接 <code>from_pretrained</code> 加载</b>：dcp 存的是每 rank 的本地分片 + DTensor 布局元信息，必须经 <code>merge_dcp_to_hf</code> 把分片重新拼回全量再写成 HF safetensors 才能用；而 HF 这个"全量 safetensors"格式同时是训练前的<b>入料</b>和训练后的<b>产物</b>，是 NPU↔GPU、训练↔推理之间的中立中转格式。</p>
+
+      <h2>你已经熟悉的情况 <span class="sec">桥接开场</span></h2>
+      <p>你写过 <code>torch.save(model.state_dict(), "model.pt")</code> / <code>model.load_state_dict(torch.load("model.pt"))</code>。单卡世界里 <code>state_dict()</code> 返回一个 <code>OrderedDict[str, torch.Tensor]</code>——键是参数全名（<code>model.layers.0.self_attn.q_proj.weight</code>），值是<b>全量</b>张量；<code>torch.save</code> 把整个 dict pickle 到一个文件，<code>torch.load</code> 整份读回。HuggingFace 这边则是 <code>model.save_pretrained("dir/")</code> 写出 <code>model.safetensors</code>（或 <code>model-0000X-of-0000Y.safetensors</code> + <code>model.safetensors.index.json</code>），<code>from_pretrained("dir/")</code> 读回——safetensors 比 pickle 安全（无代码执行）、加载快、支持 mmap。<b>这套全量 ckpt 的世界观你很熟</b>：一个文件（或一组分片文件）= 整个模型的所有参数，每张卡都加载完整副本。</p>
+      <p>多卡 DDP 下你大概率还是用 <code>torch.save</code>——但通常只在 rank0 存一次 <code>model.module.state_dict()</code>（DDP 包的是副本，每卡都有完整模型），<code>torch.save</code> 出来仍是全量。问题来了：<b>FSDP2 下没有任何一张卡持有完整模型</b>。参数被 <code>fully_shard</code> 切成 N 片（EP08 讲过），每卡只有 1/N 的物理数据（<code>DTensor</code> 的 local shard），优化器状态 m/v 也只跟本地这片同形（EP16 讲过）。这时候 <code>model.state_dict()</code> 返回的是<b>分片张量</b>，<code>torch.save</code> 直接存会丢失"这张是全量的哪一片、布局是什么"的元信息，换一个并行度（比如 8 卡训完要迁到 4 卡推理）根本拼不回去。所以 FSDP2 不能再裸用 <code>torch.save</code>——它改用 <b>PyTorch 官方的 Distributed Checkpoint（dcp）</b>，<code>torch.distributed.checkpoint</code> 这个<b>torch 自带</b>（非外部）模块负责把每卡分片按 rank 写成一组文件 + 一份 metadata，加载时按当前拓扑 reshape。</p>
+      <p>这一篇要厘清的关键认知是：<b>dcp 是"训练期分片 ckpt"，HF safetensors 是"交换期全量 ckpt"</b>——两者不是一回事，也不是同一层。训练里 save/resume 走 dcp（分片、跨拓扑可恢复），但训练完要把权重拿去推理（GPU 上的 <code>transformers</code>、或 vLLM、或别的卡数），就必须把 dcp 的分片<b>合并</b>回 HF 全量 safetensors——这就是 <code>merge_dcp_to_hf.py</code> 存在的理由。HF 在这里扮演<b>中立中转格式</b>：训练前从 HF 入料（<code>weight_conv_adapter</code> 改键名加载），训练后产出 HF（<code>merge_dcp_to_hf</code> 合并写出），跨硬件迁移（GPU ckpt 不能直用）也得绕 HF 中转。下面把这三类文件 + 根目录两个入口脚本 + 官方文档逐段拆开读。</p>
+
+      <h2>本项目怎么做 <span class="sec">原理</span></h2>
+      <p>核心原理一句话：<b>dcp 不存"全量权重"，存"每 rank 的本地分片 + 一份描述谁是谁的 metadata"</b>。save 时，每个 rank 把自己负责的那 1/N 参数 + 1/N 优化器状态写成一个（或一组）文件，dcp 另写一份 metadata 记录每个张量键→(shape, dtype, 分片布局)；load 时，各 rank 读 metadata 知道"我要的这部分在哪些文件里"，按当前拓扑（rank 数、mesh 维度）reshape 后填进自己的本地分片。所以 dcp 的最大特性是<b>拓扑无关</b>——8 卡存的 ckpt 能在 4 卡上 resume（dcp 内部按当前 rank 数重新分片），这是裸 <code>torch.save</code> 做不到的。</p>
+      <p>HF 那边则是<b>全量</b>的 safetensors——一个（或几个）文件装下整份模型，键名是 HF 标准命名（<code>model.layers.0.self_attn.q_proj.weight</code>）。<code>transformers.from_pretrained</code> 直接 mmap 读、按需切。HF 全量 ckpt 的好处是<b>通用</b>——任何推理框架、任何卡数都能加载；坏处是<b>大</b>且<b>不含训练状态</b>（只有参数，没有优化器 m/v、step、lr）。所以训练内部 save/resume 不用 HF（太大、丢训练状态），训练产出给推理用才转 HF。<code>merge_dcp_to_hf.py</code> 做的就是"读 dcp metadata → 估算每张张量大小 → 按目标 shard_size 分组 → 逐组 load 分片 + <code>full_tensor()</code> 拼全量 → 写 safetensors"，全程<b>只按需物化一个 shard</b>，内存峰值 = 一个 shard 大小（不是整个模型），这是它能处理 8B+ 的关键。下图把整条权重流转摊开。</p>
+      <div class="diag">
+        <svg viewBox="0 0 940 360" xmlns="http://www.w3.org/2000/svg" font-family="ui-monospace,monospace" font-size="11">
+          <text x="470" y="18" text-anchor="middle" fill="#9a9a9a" font-style="italic">权重流转图：HF safetensors（入料）→ 训练 dcp 分片 → merge_dcp_to_hf → HF safetensors（产物）</text>
+          <!-- stage 1: HF input -->
+          <rect x="20" y="36" width="200" height="120" rx="6" fill="#000" stroke="#2a2a33"/>
+          <text x="120" y="54" text-anchor="middle" fill="#7ab98a">① HF 入料（全量）</text>
+          <text x="30" y="74" fill="#9a9a9a">model.safetensors</text>
+          <text x="30" y="90" fill="#9a9a9a">model.safetensors.index.json</text>
+          <text x="30" y="108" fill="#9a9a9a">config.json / tokenizer</text>
+          <rect x="30" y="118" width="180" height="26" fill="#0a1a10" stroke="#2e5a3a"/>
+          <text x="120" y="135" text-anchor="middle" fill="#7ab98a" font-size="10">全量张量 + HF 键名</text>
+          <!-- arrow 1: weight_conv_adapter -->
+          <line x1="225" y1="96" x2="285" y2="96" stroke="#6a6a6a" marker-end="url(#b)"/>
+          <text x="255" y="88" text-anchor="middle" fill="#6a6a6a" font-size="10">weight_conv</text>
+          <text x="255" y="100" text-anchor="middle" fill="#6a6a6a" font-size="10">改键名加载</text>
+          <!-- stage 2: training dcp -->
+          <rect x="290" y="36" width="260" height="120" rx="6" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="420" y="54" text-anchor="middle" fill="#e88">② 训练期 dcp 分片 ckpt</text>
+          <text x="300" y="74" fill="#9a9a9a">rank0: __0_0.distcp  (1/N 参数 + m/v)</text>
+          <text x="300" y="90" fill="#9a9a9a">rank1: __1_0.distcp  (1/N 参数 + m/v)</text>
+          <text x="300" y="106" fill="#9a9a9a">...</text>
+          <text x="300" y="122" fill="#9a9a9a">.metadata  (shape/dtype/布局)</text>
+          <rect x="300" y="130" width="240" height="20" fill="#2a0f10" stroke="#6e1a1c"/>
+          <text x="420" y="144" text-anchor="middle" fill="#e88" font-size="10">每 rank 一份分片，含训练状态</text>
+          <!-- arrow 2: train resume -->
+          <line x1="555" y1="78" x2="600" y2="78" stroke="#6a6a6a" marker-end="url(#b)"/>
+          <text x="578" y="72" text-anchor="middle" fill="#6a6a6a" font-size="10">save/resume</text>
+          <text x="578" y="84" text-anchor="middle" fill="#6a6a6a" font-size="10">拓扑无关</text>
+          <!-- stage 3: resume to training (loop back) -->
+          <rect x="605" y="36" width="160" height="60" rx="6" fill="#000" stroke="#2a2a33"/>
+          <text x="685" y="56" text-anchor="middle" fill="#9a9a9a">训练循环</text>
+          <text x="685" y="72" text-anchor="middle" fill="#9a9a9a" font-size="10">CheckpointManager</text>
+          <text x="685" y="86" text-anchor="middle" fill="#9a9a9a" font-size="10">save()/load()</text>
+          <!-- arrow 3: merge_dcp_to_hf -->
+          <line x1="420" y1="160" x2="420" y2="195" stroke="#6a6a6a" marker-end="url(#b)"/>
+          <text x="440" y="182" fill="#6a6a6a" font-size="10">merge_dcp_to_hf.py</text>
+          <text x="440" y="194" fill="#6a6a6a" font-size="10">（只读 metadata 分片合并）</text>
+          <!-- stage 4: HF output -->
+          <rect x="290" y="205" width="260" height="110" rx="6" fill="#0a1a10" stroke="#2e5a3a"/>
+          <text x="420" y="223" text-anchor="middle" fill="#7ab98a">③ HF 产物（全量，推理用）</text>
+          <text x="300" y="241" fill="#9a9a9a">model-00001-of-00005.safetensors</text>
+          <text x="300" y="257" fill="#9a9a9a">...</text>
+          <text x="300" y="273" fill="#9a9a9a">model.safetensors.index.json</text>
+          <text x="300" y="289" fill="#9a9a9a">config.json / tokenizer（--model-configs 拷贝）</text>
+          <!-- arrow to cross-hardware -->
+          <line x1="555" y1="260" x2="615" y2="260" stroke="#6a6a6a" marker-end="url(#b)"/>
+          <text x="585" y="254" text-anchor="middle" fill="#6a6a6a" font-size="10">跨硬件迁移</text>
+          <!-- stage 5: cross hardware -->
+          <rect x="620" y="205" width="180" height="110" rx="6" fill="#000" stroke="#2a2a33"/>
+          <text x="710" y="223" text-anchor="middle" fill="#9a9a9a">④ 下游消费</text>
+          <text x="630" y="241" fill="#9a9a9a">transformers.from_pretrained</text>
+          <text x="630" y="257" fill="#9a9a9a">vLLM / 推理框架</text>
+          <text x="630" y="273" fill="#9a9a9a">不同卡数 / 不同硬件</text>
+          <text x="630" y="295" fill="#6a6a6a" font-style="italic" font-size="10">GPU ckpt 不能直用，需 HF 中转</text>
+          <!-- legend -->
+          <rect x="20" y="326" width="14" height="10" fill="#000" stroke="#2a2a33"/><text x="40" y="335" fill="#9a9a9a">全量 HF safetensors（入料/产物）</text>
+          <rect x="250" y="326" width="14" height="10" fill="#2a0f10" stroke="#6e1a1c"/><text x="270" y="335" fill="#9a9a9a">dcp 分片 ckpt（训练期，含训练状态，拓扑无关）</text>
+          <rect x="600" y="326" width="14" height="10" fill="#0a1a10" stroke="#2e5a3a"/><text x="620" y="335" fill="#9a9a9a">merge 后 HF 产物 / 下游消费</text>
+          <defs><marker id="b" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="#6a6a6a"/></marker></defs>
+        </svg>
+      </div>
+
+      <h2>源码下钻 <span class="sec">file:line</span></h2>
+
+      <p class="figcap">mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py —— import 段：dcp 原语来自 torch 自带，不是外部库</p>
+      <pre data-lang="py">import torch.distributed as dist
+import torch.distributed.checkpoint as dcp
+from torch.distributed._tensor import DTensor
+from torch.distributed.checkpoint import FileSystemReader, FileSystemWriter
+from torch.distributed.checkpoint.state_dict import (
+    get_model_state_dict,
+    get_optimizer_state_dict,
+    set_model_state_dict,
+    set_optimizer_state_dict,
+)
+from torch.distributed.checkpoint.stateful import Stateful</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L14">mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py:14</a>（import torch.distributed as dist） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L15">:15</a>（import torch.distributed.checkpoint as dcp —— dcp 原语别名） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L16">:16</a>（from torch.distributed._tensor import DTensor） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L17">:17</a>（FileSystemReader / FileSystemWriter —— dcp 文件后端读写器） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L18">:18</a>（get/set_model_state_dict / get/set_optimizer_state_dict —— 分片状态出入接口） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L24">:24</a>（from ...stateful import Stateful —— Stateful 协议基类）</p>
+      <p class="footnote">这一段首先要厘清一个事实：和 EP08/EP10/EP15/EP16 反复出现的"dense 分片逻辑在外部 fsdp_turbo"<b>不同</b>，<code>checkpoint</code> 这一摊代码是<b>真正在仓库内</b>的——因为 dcp 的 save/load 原语 <code>torch.distributed.checkpoint.save/load</code>、<code>FileSystemReader/Writer</code>、<code>get/set_*_state_dict</code> 全是 <b>torch 自带</b>（:15-24，torch.distributed.checkpoint 是 PyTorch 标准库模块，非外部依赖）。仓库要做的只是把它们<b>组织</b>成 <code>CheckpointManager</code>——包一层 <code>Stateful</code> 适配器（<code>ModelState</code>/<code>OptimizerState</code>）、决定 save_only_model、处理 extra_state、走同步还是异步。所以本篇锚点比 EP16 更"实"——大部分逻辑能在仓库里指到行，少量 EP 维度（restore_ep_dim/drop_ep_dim）调 utils.py 的工具，也是仓库内的。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py —— CheckpointManager.save()：训练期 dcp 存盘入口；先存 extra_state 再拼 DCP state 再 execute_save</p>
+      <pre data-lang="py">@classmethod
+def save(
+    cls,
+    path: str,
+    state: Dict[str, Any],
+    save_async: bool = False,
+    save_only_model: bool = False,
+    global_steps: int = None,
+    storage_writer: Optional[FileSystemWriter] = None,
+) -> None:
+    if "model" not in state:
+        raise ValueError("Model must be provided to save a distributed checkpoint.")
+
+    checkpoint_dir = path
+    cls._create_checkpoint_dir(checkpoint_dir)
+
+    # Save extra_state first to guarantee consistency
+    if not save_only_model:
+        cls._save_extra_state(checkpoint_dir, state)
+
+    # Build DCP-compatible state
+    save_state = {"model": ModelState(state["model"])}
+    if "optimizer" in state and not save_only_model:
+        save_state["optimizer"] = OptimizerState(
+            model=state["model"],
+            optimizer=state["optimizer"],
+        )
+
+    if storage_writer is None:
+        storage_writer = cls._create_storage_writer(checkpoint_dir)
+
+    cls.execute_save(save_state, storage_writer, save_async)
+    logger.info_rank0(f"Saved checkpoint to {checkpoint_dir}")</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L304">mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py:304</a>（@classmethod def save —— 存盘入口） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L307">:307</a>（path: str —— dcp 目录） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L309">:309</a>（save_async=False 默认同步） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L310">:310</a>（save_only_model=False 默认也存优化器） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L325">:325</a>（if "model" not in state: raise —— model 必填） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L329">:329</a>（_create_checkpoint_dir 建目录） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L332">:332</a>（if not save_only_model: _save_extra_state 先存 extra_state） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L336">:336</a>（save_state = {"model": ModelState(state["model"])} —— 包 Stateful 适配器） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L337">:337</a>（if "optimizer" and not save_only_model） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L338">:338</a>（OptimizerState(model, optimizer) 包优化器） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L343">:343</a>（if storage_writer is None: _create_storage_writer） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L346">:346</a>（execute_save 真正落盘） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L347">:347</a>（logger.info_rank0 "Saved checkpoint to"）</p>
+      <p class="footnote"><code>save</code>（:304）是训练循环里 EP15 见过的 <code>save_steps</code> 触发的存盘入口。它做四件事：① <b>校验 + 建目录</b>（:325-329，<code>model</code> 必填，否则 <code>raise ValueError</code>）；② <b>先存 extra_state</b>（:332-333，<code>extra_state</code> 是训练 step/lr/dataloader 位置等非模型非优化器的"杂项"，用 <code>torch.save</code> 单独存到 <code>extra_state/extra_state_rank_{N}.pt</code>，:580-588 见后文）——注释说"first to guarantee consistency"，即先把这些非关键状态落盘以免后面 dcp 出问题丢；③ <b>拼 DCP state</b>（:336-341）——把 raw model/optimizer 包成 <code>ModelState</code>/<code>OptimizerState</code>（Stateful 适配器，见下下段），存进一个 dict <code>{"model": ..., "optimizer": ...}</code>，<code>save_only_model=True</code> 时跳过 optimizer（省一半空间，推理前最后一存常用）；④ <b>execute_save</b>（:346）真正调 dcp。注意 <code>storage_writer</code>（:312）可外部传入，否则用 :566-572 的默认 <code>FileSystemWriter(thread_count=16, single_file_per_rank=True, sync_files=False)</code>——<code>single_file_per_rank=True</code> 正是"每 rank 一个 .distcp 文件"的由来。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py —— CheckpointManager.load()：dcp 恢复入口；先探 metadata 看存了哪些 key，再 dcp.load + 回填 extra_state</p>
+      <pre data-lang="py">@classmethod
+def load(
+    cls,
+    path: str,
+    state: Dict[str, Any],
+    process_group=None,
+    storage_reader: Optional[FileSystemReader] = None,
+) -> Dict[str, Any]:
+    if state is None or "model" not in state:
+        raise ValueError("State with model must be provided for loading.")
+
+    checkpoint_dir = path
+    load_state = {"model": ModelState(state["model"])}
+
+    # Determine which components exist in checkpoint
+    saved_keys = cls._get_saved_keys(checkpoint_dir)
+    if "optimizer" in state and "optimizer" in saved_keys:
+        load_state["optimizer"] = OptimizerState(
+            model=state["model"],
+            optimizer=state["optimizer"],
+        )
+
+    if storage_reader is None:
+        storage_reader = cls._create_storage_reader(checkpoint_dir)
+
+    # Perform DCP load
+    dcp.load(
+        state_dict=load_state,
+        storage_reader=storage_reader,
+        process_group=process_group,
+    )
+
+    # Load extra_state if present
+    if "optimizer" in saved_keys:
+        cls._load_extra_state(checkpoint_dir, state)
+
+    logger.info_rank0(f"Loaded checkpoint from {checkpoint_dir}")
+    return state</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L352">mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py:352</a>（@classmethod def load —— 恢复入口） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L357">:357</a>（process_group=None —— 可指定加载的进程组） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L372">:372</a>（if state is None or "model" not in state: raise） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L376">:376</a>（load_state = {"model": ModelState(...)} —— 同样包 Stateful） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L379">:379</a>（_get_saved_keys 探 metadata） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L380">:380</a>（if "optimizer" in state and in saved_keys —— 只在 ckpt 和当前都含 optimizer 时恢复优化器） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L387">:387</a>（if storage_reader is None: _create_storage_reader） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L390">:390</a>（dcp.load —— 真正的 dcp 恢复原语，torch 自带） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L391">:391</a>（state_dict=load_state） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L392">:392</a>（storage_reader=storage_reader） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L393">:393</a>（process_group=process_group） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L397">:397</a>（if "optimizer" in saved_keys: _load_extra_state） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L400">:400</a>（logger.info_rank0 "Loaded checkpoint from"） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L401">:401</a>（return state）</p>
+      <p class="footnote"><code>load</code>（:352）和 <code>save</code> 镜像对称，但多一步"先探 ckpt 存了什么"：<code>_get_saved_keys</code>（:379，实现在 :604-616）读 dcp 的 <code>.metadata</code> 文件，把里面所有 FQN 取 top-level key（<code>fqn.split(".")[0]</code>，:614）——比如 metadata 里只有 <code>model.*</code> 说明当年是 <code>save_only_model=True</code> 存的，恢复时 :380 的 <code>if "optimizer" in saved_keys</code> 就不命中、不碰优化器，避免 <code>save_only_model</code> 的 ckpt 被 resume 时试图恢复根本没存的优化器而报错。这是 dcp"按需恢复"的体现：metadata 是真相，load 只取当年存过的部分。:390 的 <code>dcp.load</code>（:15 import）才是 torch 自带的真正原语——它读 metadata、按当前 <code>process_group</code>（:393）的 rank 数 reshape 分片、填进 <code>load_state</code>（也是 Stateful，<code>ModelState.load_state_dict</code> 会把读到的张量 <code>copy_</code> 进模型）。<b>跨拓扑恢复</b>就是这一行实现的：8 卡存的 dcp，4 卡 <code>dcp.load</code> 时 dcp 内部重新切分。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py —— execute_save()：真正调 dcp.save / dcp.async_save；含 EP-aware 的 extra_state 用 torch.save</p>
+      <pre data-lang="py">@classmethod
+def execute_save(
+    cls,
+    save_state: Dict[str, Any],
+    storage_writer: FileSystemWriter,
+    save_async: bool,
+) -> None:
+    if cls._metadata_process_group is None:
+        cls._metadata_process_group = dist.new_group(backend="gloo")
+    if save_async:
+        # Ensure previous async save is finished
+        if cls.dcp_save_future is not None:
+            cls.dcp_save_future.result()
+            cls.dcp_save_future = None
+            dist.barrier()
+
+        cls.dcp_save_future = dcp.async_save(
+            state_dict=save_state,
+            storage_writer=storage_writer,
+            process_group=cls._metadata_process_group,
+        )
+    else:
+        dcp.save(
+            state_dict=save_state,
+            storage_writer=storage_writer,
+            process_group=cls._metadata_process_group,
+        )
+        if dist.is_initialized():
+            dist.barrier()
+
+        # Explicit memory cleanup
+        gc.collect()
+        empty_cache()
+        synchronize()</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L406">mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py:406</a>（@classmethod def execute_save） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L421">:421</a>（if _metadata_process_group is None: dist.new_group(backend="gloo") —— 建独立 metadata 进程组） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L423">:423</a>（if save_async: 异步分支） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L425">:425</a>（if dcp_save_future is not None: result() 等上一次异步存完） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L430">:430</a>（dcp.async_save —— torch 自带异步存原语） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L436">:436</a>（dcp.save —— torch 自带同步存原语） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L439">:439</a>（if dist.is_initialized(): dist.barrier —— 存完同步） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L442">:442</a>（gc.collect 显存清理） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L443">:443</a>（empty_cache） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L444">:444</a>（synchronize）</p>
+      <p class="footnote">这是"真正写盘"的那段。:421 先建一个 <code>backend="gloo"</code> 的独立进程组——gloo 是 CPU 后端，dcp 用它做 metadata 协调（不占 HCCL/NCCL 的 GPU 通信带宽）。然后两条路：① <b>异步</b>（:423，<code>save_async=True</code>）——先 <code>.result()</code> 等上一次异步存完（:425-428，避免两次 async 撞车），再 <code>dcp.async_save</code>（:430，torch 自带）拿一个 future 挂着，训练可以继续往下走，存盘在后台完成——这对大模型存盘动辄几十秒的延迟很关键；② <b>同步</b>（:435-447，默认）——<code>dcp.save</code>（:436，torch 自带）阻塞存完，再 <code>dist.barrier</code>（:439）等所有 rank，然后 <code>gc.collect()</code> + <code>empty_cache</code>（:442-443，utils.py 的 <code>empty_cache</code>，:37 import）+ <code>synchronize</code>（:444）做显存清理。注意 <b>extra_state（step/lr/dataloader 位置等）不在 dcp 里</b>——它在 <code>_save_extra_state</code>（:574-588）里用 <b><code>torch.save</code></b>（:582）存成 <code>extra_state/extra_state_rank_{N}.pt</code>，每 rank 一份；加载用 <code>torch.load(path, weights_only=False)</code>（:601）。所以一个完整 dcp 目录 = <code>__{rank}_{shard}.distcp</code> × N + <code>.metadata</code> + <code>extra_state/extra_state_rank_*.pt</code> × N。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py —— ModelState / OptimizerState：Stateful 适配器；把 dcp 分片张量按 EP 维度 restore/drop</p>
+      <pre data-lang="py">class ModelState(Stateful):
+    @torch.no_grad()
+    def state_dict(self):
+        model_state_dict = get_model_state_dict(model=self.model)
+
+        if self.should_ep_aware:
+            if dist.get_rank() == 0:
+                logger.info("ModelState: Restoring EP dimension for Expert modules")
+            for name, tensor in model_state_dict.items():
+                if name in self.ep_fqn2spec_info and torch.is_tensor(tensor) and tensor.ndim > 0:
+                    model_state_dict[name] = restore_ep_dim(tensor, self.ep_fqn2spec_info[name].ep_fsdp_mesh)
+        return model_state_dict
+
+class OptimizerState(Stateful):
+    @torch.no_grad()
+    def state_dict(self):
+        if self.should_ep_aware:
+            # EP -> MultiOptimizer, which produces a merged flattened dict
+            optim_sd = self.optimizer.state_dict()
+            for name in list(optim_sd.keys()):
+                ep_fqn = self._find_ep_fqn(name)
+                if ep_fqn is None:
+                    continue
+                tensor = optim_sd[name]
+                if torch.is_tensor(tensor) and tensor.ndim > 0:
+                    optim_sd[name] = restore_ep_dim(tensor, self.ep_fqn2spec_info[ep_fqn].ep_fsdp_mesh)
+            return optim_sd
+        # Non-EP -> single optimizer
+        return get_optimizer_state_dict(model=self.model, optimizers=self.optimizer)</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L69">mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py:69</a>（class ModelState(Stateful)） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L93">:93</a>（@torch.no_grad def state_dict） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L101">:101</a>（get_model_state_dict —— torch 自带，取分片 model state） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L103">:103</a>（if self.should_ep_aware EP 分支） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L109">:109</a>（restore_ep_dim 给专家张量补回 EP 维） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L113">:113</a>（def load_state_dict） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L140">:140</a>（drop_ep_dim load 时反向去 EP 维） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L149">:149</a>（loaded_tensor.to_local() if isinstance(loaded_tensor, DTensor)） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L159">:159</a>（target_tensor.copy_(local_tensor) —— 真正写入模型参数） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L162">:162</a>（class OptimizerState(Stateful)） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L193">:193</a>（def state_dict 优化器） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L205">:205</a>（self.optimizer.state_dict() EP 走 MultiOptimizer flatten） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L213">:213</a>（restore_ep_dim 优化器状态同样补 EP 维） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L218">:218</a>（get_optimizer_state_dict 非 EP 单优化器路径）</p>
+      <p class="footnote"><code>Stateful</code>（:24 import，torch.distributed.checkpoint.stateful）是 dcp 的协议——dcp 只认实现了 <code>state_dict()</code>/<code>load_state_dict()</code> 的对象。<code>ModelState</code>（:69）和 <code>OptimizerState</code>（:162）就是仓库给 model/optimizer 包的 Stateful 适配器。核心逻辑是<b>EP 维度的 restore/drop</b>（EP09 讲过的专家并行）：save 时 <code>get_model_state_dict</code>（:101，torch 自带，返回的是 DTensor 分片）拿到的是<b>不含 EP 维</b>的本地分片，但 dcp 要存的是"完整逻辑 shape"，所以 :109 <code>restore_ep_dim</code>（utils.py）按 <code>ep_fsdp_mesh</code> 把专家张量补回 EP 维；load 时反向 :140 <code>drop_ep_dim</code> 去掉 EP 维匹配当前模型布局，再 :149 <code>to_local()</code>（DTensor→本地物理张量），:159 <code>copy_</code> 进模型。<code>OptimizerState</code> 同理（:193-218），EP 时走 EP16 讲过的 <code>MultiOptimizer.state_dict()</code>（已 flatten），非 EP 走 <code>get_optimizer_state_dict</code>（:218，torch 自带）。<b>非 EP 路径（A2 的 Qwen3-8B dense）几乎是纯透传</b>——<code>get/set_*_state_dict</code> 直接调 torch，仓库只加了 EP 分支，所以 dcp 在 dense 模型上几乎"零自研"。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py —— save_model_weights()：训练期"顺带导一份 HF"的路径；DTensor.full_tensor() 物化全量后按 shard_size 切片写 safetensors</p>
+      <pre data-lang="py">@classmethod
+def save_model_weights(
+    cls,
+    output_dir: Union[str, os.PathLike],
+    state_dict: Dict[str, torch.Tensor],
+    global_rank: Optional[int] = None,
+    save_dtype: Optional[Union[str, torch.dtype]] = "bfloat16",
+    shard_size: int = 5_000_000_000,
+    safe_serialization: bool = True,
+    model_configs: Sequence[ModelConfigs] = None,
+) -> None:
+    os.makedirs(output_dir, exist_ok=True)
+    is_sharded, total_size, weight_map = get_shard_info(state_dict, save_dtype, shard_size, safe_serialization)
+    full_state_dict = OrderedDict()
+    prev_file_name = None
+    for name, tensor in state_dict.items():
+        # Materialize DTensor if needed
+        if hasattr(tensor.data, "full_tensor"):
+            tensor = tensor.data.full_tensor()
+        else:
+            tensor = tensor.data
+        if save_dtype:
+            tensor = tensor.to(dtype=getattr(torch, save_dtype) if isinstance(save_dtype, str) else save_dtype)
+        ...
+        if global_rank is None or global_rank == 0:
+            full_state_dict[name] = tensor.detach().cpu()</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L452">mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py:452</a>（@classmethod def save_model_weights —— 训练期导 HF 入口） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L458">:458</a>（save_dtype 默认 bfloat16） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L459">:459</a>（shard_size 默认 5_000_000_000 = 5GB） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L460">:460</a>（safe_serialization 默认 True 用 safetensors） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L472">:472</a>（get_shard_info 算分片信息，utils.py:84） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L479">:479</a>（if hasattr(tensor.data, "full_tensor") —— DTensor 物化全量） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L480">:480</a>（tensor.data.full_tensor() —— 把分片拼回全量） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L484">:484</a>（tensor.to(dtype=...) 转 bf16） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L503">:503</a>（full_state_dict[name] = tensor.detach().cpu() —— 落 CPU） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L517">:517</a>（if is_sharded 写 index.json） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L522">:522</a>（SAFE_WEIGHTS_INDEX_NAME / WEIGHTS_INDEX_NAME） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py#L526">:526</a>（save_config —— 顺带存 HF config/tokenizer）</p>
+      <p class="footnote">这是<b>训练期</b>导 HF 的路径（区别于 <code>merge_dcp_to_hf.py</code> 的<b>离线</b>导 HF）。<code>save_model_weights</code>（:452）在训练循环里直接把当前模型的 DTensor 分片 <code>full_tensor()</code>（:480，torch DTensor 自带，gather 全量）物化成全量、转 bf16（:484）、落 CPU（:503），再用 <code>get_shard_info</code>（utils.py:84）算出的 weight_map 按 <code>shard_size=5GB</code> 切片写 safetensors——产物和 HF <code>save_pretrained</code> 完全同构（:517-524 写 <code>model.safetensors.index.json</code>）。<b>区别于 merge_dcp_to_hf</b>：这条路径需要<b>在线 gather 全量到单卡</b>（:503 only rank0，<code>full_tensor()</code> 触发跨卡 all_gather），内存峰值 = 整个模型；而 <code>merge_dcp_to_hf</code> 是离线、只读 dcp 文件、按 shard 逐块 gather，内存峰值 = 一个 shard。所以训练完要导 HF，<b>首选 merge_dcp_to_hf</b>（省内存），<code>save_model_weights</code> 更像训练中途"顺带存一份能直接推理的"轻量导出。两者产物格式一致，都是 HF safetensors。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/checkpoint/weight_conv_adapter.py —— WeightConvAdapter：HF→模型键名改写的薄适配器，转发 transformers 的 conversion_mapping</p>
+      <pre data-lang="py">class WeightConvAdapter:
+    """Thin wrapper over transformers.conversion_mapping."""
+
+    def __init__(self, model_type: Optional[str] = None):
+        self.renamings: list = []
+        self.converters: list = []
+        if not model_type:
+            return
+        if version("transformers") < "5.0.0":
+            logger.info_rank0(f"> Online weight conversion requires transformers >= 5.0.0 ... Skipping.")
+            return
+        from transformers.conversion_mapping import get_checkpoint_conversion_mapping
+        from transformers.core_model_loading import WeightConverter, WeightRenaming
+        from mindspeed_llm.fsdp2.checkpoint.conversion_mappings import apply_custom_mappings
+        conversions = get_checkpoint_conversion_mapping(model_type)
+        if not conversions:
+            return
+        apply_custom_mappings(conversions, model_type)
+        for entry in conversions:
+            if isinstance(entry, WeightRenaming):
+                self.renamings.append(entry)
+            elif isinstance(entry, WeightConverter):
+                self.converters.append(entry)</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/weight_conv_adapter.py#L22">mindspeed_llm/fsdp2/checkpoint/weight_conv_adapter.py:22</a>（class WeightConvAdapter） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/weight_conv_adapter.py#L30">:30</a>（def __init__(self, model_type=None)） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/weight_conv_adapter.py#L41">:41</a>（if version("transformers") < "5.0.0": 跳过 —— 需 transformers 5.0+） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/weight_conv_adapter.py#L48">:48</a>（from transformers.conversion_mapping import get_checkpoint_conversion_mapping） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/weight_conv_adapter.py#L50">:50</a>（from .conversion_mappings import apply_custom_mappings —— 仓库自研 mapping 补丁） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/weight_conv_adapter.py#L52">:52</a>（get_checkpoint_conversion_mapping(model_type) 取 transformers 原生 mapping） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/weight_conv_adapter.py#L56">:56</a>（apply_custom_mappings 注入仓库自研补丁） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/weight_conv_adapter.py#L59">:59</a>（if isinstance(entry, WeightRenaming): 改名规则） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/weight_conv_adapter.py#L61">:61</a>（elif isinstance(entry, WeightConverter): 张量变换规则） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/weight_conv_adapter.py#L74">:74</a>（def rename_key(key) -> (renamed, pattern)） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/weight_conv_adapter.py#L83">:83</a>（return rename_source_key(key, self.renamings, self.converters) —— 转发 transformers）</p>
+      <p class="footnote">这个文件是个<b>薄适配器</b>——它自己<b>不实现</b>键名映射规则，只把 transformers（≥5.0.0，:41 校验）的 <code>get_checkpoint_conversion_mapping(model_type)</code>（:52）取来的原生规则，加上仓库 <code>conversion_mappings.py</code> 的 <code>apply_custom_mappings</code>（:50/:56）补丁，分成两类：<code>WeightRenaming</code>（:59，纯改名，如 <code>transformer.h.0.attn.q.weight</code> → <code>model.layers.0.self_attn.q_proj.weight</code>）和 <code>WeightConverter</code>（:61，需要张量变换，如 merge gate/up、reshape）。真正的改名/变换实现在 transformers 和 <code>conversion_mappings.py</code> 里，<code>rename_key</code>（:74）只是转发给 <code>rename_source_key</code>（:83，transformers 自带）。<b>这是"HF 入料"侧的关键</b>：HF 下载来的权重键名是 HF 风格，模型侧（Megatron/MindSpeed）键名不同，加载时要先过这一层改名/变换才能对上模型参数。<code>model_type</code>（:30）决定取哪套 mapping（如 <code>qwen3</code>）。<code>dispatch_converted</code>（:93）还处理 MoE 专家跨 safetensors 文件按 expert index 排序（:109-116）的边角，但 A2 的 dense Qwen3 不走专家，不展开。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py —— _get_sharding_plan()：只读 DCP metadata 估算分片，不加载张量</p>
+      <pre data-lang="py">def _get_sharding_plan(checkpoint_path, shard_size, save_dtype):
+    reader = FileSystemReader(checkpoint_path)
+    metadata = reader.read_metadata()
+    if not isinstance(metadata, Metadata):
+        raise ValueError(f"Invalid metadata format in {checkpoint_path}")
+
+    tensor_infos = []
+    all_dcp_keys = []
+    for key, tensor_meta in metadata.state_dict_metadata.items():
+        hf_key = _normalize_key(key)
+        if hf_key is None:
+            continue
+        # Resolve dtype for size estimation
+        if save_dtype:
+            dtype = getattr(torch, save_dtype) if isinstance(save_dtype, str) else save_dtype
+        else:
+            if not hasattr(tensor_meta.properties, "dtype"):
+                raise ValueError(f"Missing dtype info for tensor '{key}'")
+            dtype = tensor_meta.properties.dtype
+        numel = 1
+        for dim in tensor_meta.size:
+            numel *= dim
+        byte_size = numel * get_dtype_size(dtype)
+        tensor_infos.append({"dcp_key": key, "hf_key": hf_key, "size": byte_size, "metadata": tensor_meta})
+        all_dcp_keys.append(key)
+    # Deterministic ordering + greedy bin-packing into shards
+    tensor_infos.sort(key=lambda x: x["hf_key"])
+    shards = []; current_shard = {}; current_size = 0; total_size = 0
+    for info in tensor_infos:
+        size = info["size"]; total_size += size
+        if current_shard and current_size + size > shard_size:
+            shards.append(current_shard); current_shard = {}; current_size = 0
+        current_shard[info["hf_key"]] = info["dcp_key"]; current_size += size
+    if current_shard:
+        shards.append(current_shard)
+    return shards, total_size, all_dcp_keys</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L104">mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py:104</a>（def _get_sharding_plan） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L140">:140</a>（reader = FileSystemReader(checkpoint_path) —— dcp 读元数据） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L141">:141</a>（metadata = reader.read_metadata() —— 只读 metadata 不读张量） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L149">:149</a>（for key, tensor_meta in metadata.state_dict_metadata.items()） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L150">:150</a>（hf_key = _normalize_key(key) —— dcp key 改 HF key） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L167">:167</a>（byte_size = numel * get_dtype_size(dtype) —— 估算张量大小） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L180">:180</a>（tensor_infos.sort 按 hf_key 确定性排序） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L191">:191</a>（if current_size + size > shard_size: 切新 shard —— 贪心装箱） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L202">:202</a>（return shards, total_size, all_dcp_keys）</p>
+      <p class="footnote">这是 <code>merge_dcp_to_hf</code> 省<b>内存</b>的第一道关键：:141 <code>read_metadata()</code> 只读 dcp 的 <code>.metadata</code> 文件（几 KB），拿到每个张量的 <code>(size, dtype)</code> 但<b>不读张量数据</b>。:150 <code>_normalize_key</code>（:70-101）把 dcp 键名（如 <code>model.model.layers.0...weight</code>）改成 HF 键名（<code>model.layers.0...weight</code>，:92-95 strip 前缀；非 <code>model.</code> 前缀的 optimizer 等键 :89 返回 None 跳过）。:167 用 metadata 里的 <code>size × get_dtype_size(dtype)</code>（:40-67）算每张张量字节数，:180 按 hf_key 排序（确定性，:180），:187-200 <b>贪心装箱</b>——累计大小超 <code>shard_size</code>（默认 5GB，:444）就切一个新 shard。结果 <code>shards</code> 是 <code>List[Dict[hf_key -> dcp_key]]</code>，每个 dict 是一个将要写的 safetensors 文件。这步全程不碰张量数据，所以 8B 模型也能在普通机器上规划。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py —— _process_shard()：逐 shard load + full_tensor() + 写 safetensors；内存峰值 = 单 shard</p>
+      <pre data-lang="py">def _process_shard(shard_idx, num_shards, shard_keys, checkpoint_path, output_dir, save_dtype, safe_serialization):
+    weights_name = SAFE_WEIGHTS_NAME if safe_serialization else WEIGHTS_NAME
+    if num_shards == 1:
+        filename = weights_name
+    else:
+        prefix, extension = weights_name.rsplit(".", 1)
+        filename = f"{prefix}-{shard_idx + 1:05d}-of-{num_shards:05d}.{extension}"
+    save_path = os.path.join(output_dir, filename)
+
+    reader = FileSystemReader(checkpoint_path)
+    metadata = reader.read_metadata()
+    # Allocate placeholder tensors
+    state_dict = OrderedDict()
+    for dcp_key in shard_keys.values():
+        tensor_meta = metadata.state_dict_metadata[dcp_key]
+        state_dict[dcp_key] = torch.empty(tensor_meta.size, dtype=tensor_meta.properties.dtype)
+
+    # Load tensors from DCP
+    load(state_dict, checkpoint_id=checkpoint_path, storage_reader=reader, no_dist=True)
+
+    processed_dict = OrderedDict()
+    target_dtype = getattr(torch, save_dtype) if isinstance(save_dtype, str) else save_dtype
+    for hf_key, dcp_key in shard_keys.items():
+        tensor = state_dict[dcp_key]
+        if hasattr(tensor, "full_tensor"):
+            tensor = tensor.full_tensor()
+        if target_dtype:
+            tensor = tensor.to(dtype=target_dtype)
+        processed_dict[hf_key] = tensor.cpu().detach().clone()
+        del tensor
+    # Memory cleanup
+    del state_dict, metadata, reader
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    # Save shard
+    if safe_serialization:
+        save_file(processed_dict, save_path, metadata={"format": "pt"})
+    else:
+        torch.save(processed_dict, save_path)</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L205">mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py:205</a>（def _process_shard） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L237">:237</a>（weights_name = SAFE_WEIGHTS_NAME —— safetensors 文件名） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L243">:243</a>（filename = prefix-{idx:05d}-of-{num:05d}.ext —— 分片命名） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L248">:248</a>（reader = FileSystemReader —— 复用 reader） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L254">:254</a>（for dcp_key: torch.empty 占位张量，按 metadata size 分配） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L261">:261</a>（load(state_dict, ..., no_dist=True) —— dcp.load 单进程模式加载本 shard） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L265">:265</a>（no_dist=True —— 关键：不开分布式，单进程读分片） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L276">:276</a>（if hasattr(tensor, "full_tensor"): tensor = tensor.full_tensor() —— DTensor 物化全量） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L279">:279</a>（tensor.to(target_dtype) —— 转 bf16） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L282">:282</a>（tensor.cpu().detach().clone() —— 落 CPU） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L286">:286</a>（del state_dict + gc.collect + empty_cache —— 逐 shard 清显存） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L293">:293</a>（save_file(processed_dict, save_path, metadata={"format": "pt"}) —— safetensors 写盘）</p>
+      <p class="footnote">这是省内存的第二道关键：:265 <code>no_dist=True</code> 是<b>核心</b>——它让 <code>dcp.load</code>（:14 import，torch 自带）在<b>单进程、不开 dist</b> 的情况下读 dcp 文件。因为离线合并时通常只有一台机器、一个进程，没有 rank 拓扑；<code>no_dist=True</code> 让 dcp 把所有分片读全、在 <code>full_tensor()</code>（:276）时拼回全量。:254 先用 metadata 的 <code>size</code>/<code>dtype</code> <code>torch.empty</code> 占位（不预先填值），:261 dcp.load 只填本 shard 涉及的 dcp_key。:276 <code>full_tensor()</code> 把可能仍是 DTensor 的张量物化成全量（离线时通常已是全量，但保险起见）。:279 转 <code>save_dtype</code>（默认 bf16），:282 落 CPU，:286 <b>立即</b> <code>del + gc.collect + empty_cache</code> 清显存——这就是"内存峰值 = 单 shard"的由来：处理完一个 shard 就释放，再读下一个。:293 <code>save_file</code>（safetensors，:13 import）写成标准 HF 分片文件 <code>model-0000X-of-0000Y.safetensors</code>（:243 命名）。最后 :361-370 在 :360 的循环里汇总 <code>weight_map</code> 写 <code>model.safetensors.index.json</code>。</p>
+
+      <p class="figcap">mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py —— main() CLI：--load-dir/--save-dir/--model-configs/--shard-size 四参</p>
+      <pre data-lang="py">def main():
+    parser = argparse.ArgumentParser(
+        description="Merge DCP checkpoint to HuggingFace format",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--load-dir", type=str, required=True)
+    parser.add_argument("--save-dir", type=str, default=None)
+    parser.add_argument("--model-configs", type=str, default=None)
+    parser.add_argument("--shard-size", type=int, default=5_000_000_000)
+
+    args = parser.parse_args()
+
+    save_dir = args.save_dir or os.path.join(args.load_dir, "hf_ckpt")
+    merge_to_hf_pt(
+        args.load_dir,
+        save_dir,
+        args.model_configs,
+        shard_size=args.shard_size,
+    )</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L433">mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py:433</a>（def main —— CLI 入口） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L441">:441</a>（--load-dir required=True —— dcp 目录必填） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L442">:442</a>（--save-dir default=None —— 不指定则落 load-dir/hf_ckpt） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L443">:443</a>（--model-configs default=None —— HF config/tokenizer 目录） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L444">:444</a>（--shard-size default=5_000_000_000 —— 5GB 分片） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L448">:448</a>（save_dir = args.save_dir or load-dir/hf_ckpt —— 默认输出子目录） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L449">:449</a>（merge_to_hf_pt(load_dir, save_dir, model_configs, shard_size)） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L383">:383</a>（def merge_to_hf_pt —— 高层入口，准备 assets + 调 save_model_weights） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L411">:411</a>（AutoConfig.from_pretrained(model_configs) —— 读 HF config） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L416">:416</a>（AutoProcessor.from_pretrained —— 读 tokenizer/processor） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py#L425">:425</a>（save_model_weights —— 真正合并入口，:306 定义）</p>
+      <p class="footnote"><code>merge_dcp_to_hf.py</code> 的 CLI 极简——四个参数（:441-444）：① <code>--load-dir</code>（必填，dcp 目录）；② <code>--save-dir</code>（可选，默认 <code>&lt;load-dir&gt;/hf_ckpt</code>，:448）；③ <code>--model-configs</code>（可选，HF 模型目录，用来把 config.json/tokenizer.json 一并拷到产物目录——<b>不传则产物没有 config，<code>from_pretrained</code> 无法直接加载</b>，这是官方文档反复强调的点）；④ <code>--shard-size</code>（默认 5GB，:444）。:449 调 <code>merge_to_hf_pt</code>（:383），后者 :408-420 用 <code>AutoConfig.from_pretrained</code>/<code>AutoProcessor.from_pretrained</code> 读 HF assets（容错：try/except 失败只 warning），:425 调 :306 的 <code>save_model_weights</code>（注意：这个 <code>save_model_weights</code> 是 <b>merge_dcp_to_hf.py 自己的 :306</b>，不是 checkpoint_manager.py:452 那个——两者同名但实现不同：merge 版是离线只读 dcp，manager 版是在线 gather DTensor）。</p>
+
+      <p class="figcap">convert_ckpt.py —— 根目录入口（v1，即将废弃）：Megatron↔HF 转换的 plugin 式 CLI</p>
+      <pre data-lang="py">def main():
+    logger.warning(
+        "This version of weight conversion tool is approaching end-of-life. "
+        "It will be officially deprecated in the Q4 new release. "
+        "Please look forward to the Weight Conversion V2 version!"
+    )
+    version_utils.verify_transformers_version(max_version=(4, 57))
+
+    parser = argparse.ArgumentParser(
+        description="Megatron Checkpoint Utility Arguments", allow_abbrev=False, conflict_handler='resolve'
+    )
+    parser.add_argument('--model-type', type=str, required=True, choices=['GPT', 'BERT'], help='Type of the model')
+    parser.add_argument('--load-model-type', type=str, nargs='?', default=None, const=None,
+        choices=['hf', 'mg'], help='Module name to load checkpoint, should be on python path')
+    parser.add_argument('--saver', type=str, default='megatron', help='Module name to save checkpoint')
+    parser.add_argument('--load-dir', type=str, required=True, help='Directory to load model checkpoint from')
+    parser.add_argument('--save-dir', type=str, required=True, help='Directory to save model checkpoint to')
+    parser.add_argument('--model-type-hf', type=str, default="llama2",
+        choices=['baichuan','llama2','qwen3','glm4',...], help='model type of huggingface')
+    parser.add_argument('--ckpt-format', default='torch', choices=['torch', 'torch_dist', 'zarr'], help='Checkpoint format to use.')</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt.py#L42">convert_ckpt.py:42</a>（@auto_coverage def main） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt.py#L43">:43</a>（logger.warning "approaching end-of-life ... deprecated in the Q4 new release" —— v1 即将废弃警告） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt.py#L48">:48</a>（verify_transformers_version(max_version=(4,57)) —— 钉 transformers≤4.57） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt.py#L50">:50</a>（argparse.ArgumentParser Megatron Checkpoint Utility） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt.py#L54">:54</a>（--model-type required choices=['GPT','BERT']） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt.py#L59">:59</a>（--load-model-type choices=['hf','mg'] —— 方向：从 HF 读还是从 MG 读） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt.py#L68">:68</a>（--saver default='megatron'） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt.py#L70">:70</a>（--load-dir required） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt.py#L71">:71</a>（--save-dir required） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt.py#L88">:88</a>（--model-type-hf default="llama2" choices 含 'qwen3'） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt.py#L134">:134</a>（--ckpt-format default='torch' choices=['torch','torch_dist','zarr'] —— torch_dist 即 dcp） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt.py#L138">:138</a>（known_args = parser.parse_known_args） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt.py#L157">:157</a>（saver_proc = mp.Process(target=saver.save_model_checkpoint) —— 多进程 saver） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt.py#L161">:161</a>（loader.load_checkpoint —— loader 驱动）</p>
+      <p class="footnote"><code>convert_ckpt.py</code> 是仓库根目录的<b>老版</b>权重转换入口（v1）。:43-46 一上来就 warning 说"approaching end-of-life, deprecated in Q4 new release"——<b>官方建议改用 V2</b>。它用 plugin 式架构（:18 <code>load_plugin</code> 按 <code>--loader</code>/<code>--saver</code> 名字动态 import <code>mindspeed_llm.tasks.checkpoint.{loader/saver}_{name}</code> 模块），通过 <code>--load-model-type</code>（:59，<code>hf</code>/<code>mg</code>）决定方向：HF→MG 还是 MG→HF。<code>--model-type-hf</code>（:88）支持 qwen3 等。:134 <code>--ckpt-format</code> 的 <code>torch_dist</code> 选项就是 dcp（torch distributed），<code>torch</code> 是全量 pickle。架构上用 <code>mp.Process</code>（:157）起独立 saver 进程 + <code>mp.Queue</code>（:153）传张量，loader（:161）驱动读、saver 异步写。这版<b>钉 transformers ≤ 4.57</b>（:48），所以新版 transformers 上跑不了——这也是它被废弃的原因之一。</p>
+
+      <p class="figcap">convert_ckpt_v2.py —— 根目录入口（v2，推荐）：按 model_type_hf 选 converter 类的统一 CLI</p>
+      <pre data-lang="py">def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--load-model-type', type=str, nargs='?', default='hf', const=None,
+        choices=['hf', 'mg'], help='Type of the converter')
+    parser.add_argument('--save-model-type', type=str, default='mg', choices=['mg', 'hf'], help='Save model type')
+    parser.add_argument('--load-dir', type=str, required=True, help='Directory to load model checkpoint from')
+    parser.add_argument('--save-dir', type=str, required=True, help='Directory to save model checkpoint to')
+    parser.add_argument('--model-type-hf', type=str, default="qwen3",
+        choices=['qwen3','qwen3-moe','deepseek3','deepseek4','glm5','qwen3-next',...], help='model type of huggingface')
+    parser.add_argument('--target-tensor-parallel-size', type=int, default=1)
+    parser.add_argument('--target-pipeline-parallel-size', type=int, default=1)
+    parser.add_argument('--target-expert-parallel-size', type=int, default=1)
+    ...
+
+@auto_coverage
+def main():
+    args = get_args()
+    if args.model_type_hf == 'mamba2':
+        converter = MambaConverter(args)
+    elif args.model_type_hf == 'longcat':
+        converter = LongCatConverter(args)
+    elif args.model_type_hf in ('deepseek4', 'deepseek4_base'):
+        converter = DeepSeek4Converter(args)
+    elif args.load_model_type == 'hf' and args.save_model_type == 'mg':
+        converter = Hf2MgConvert(args)
+    elif args.load_model_type == 'mg' and args.save_model_type == 'hf':
+        converter = Mg2HfConvert(args)
+    else:
+        raise Exception("This conversion scheme is not supported")
+    converter.run()</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt_v2.py#L13">convert_ckpt_v2.py:13</a>（def get_args） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt_v2.py#L16">:16</a>（--load-model-type default='hf' choices=['hf','mg']） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt_v2.py#L24">:24</a>（--save-model-type default='mg' choices=['mg','hf'] —— hf↔mg 双向） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt_v2.py#L25">:25</a>（--load-dir required） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt_v2.py#L26">:26</a>（--save-dir required） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt_v2.py#L28">:28</a>（--model-type-hf default="qwen3" —— V2 默认 qwen3） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt_v2.py#L31">:31</a>（choices 含 'qwen3','qwen3-moe','deepseek3','deepseek4','glm5','qwen3-next'） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt_v2.py#L60">:60</a>（--target-tensor-parallel-size default=1 —— 目标 TP） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt_v2.py#L63">:63</a>（--target-pipeline-parallel-size default=1 —— 目标 PP） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt_v2.py#L68">:68</a>（--target-expert-parallel-size default=1 —— 目标 EP） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt_v2.py#L122">:122</a>（--save-layer-by-layer —— 高 TP×EP 防 OOM 逐层存） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt_v2.py#L138">:138</a>（@auto_coverage def main） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt_v2.py#L142">:142</a>（if model_type_hf == 'mamba2': MambaConverter） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt_v2.py#L148">:148</a>（elif hf→mg: Hf2MgConvert） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt_v2.py#L150">:150</a>（elif mg→hf: Mg2HfConvert） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt_v2.py#L153">:153</a>（else: raise "This conversion scheme is not supported"） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/convert_ckpt_v2.py#L156">:156</a>（converter.run() —— 执行转换）</p>
+      <p class="footnote"><code>convert_ckpt_v2.py</code> 是 v1 提到的"V2 版"——官方推荐入口。它不再用 plugin 动态 import，而是 :142-153 用 if-elif 按 <code>model_type_hf</code> + 方向选 converter 类（<code>Hf2MgConvert</code>/:148 HF→MG、<code>Mg2HfConvert</code>/:150 MG→HF、还有 Mamba/LongCat/DeepSeek4 等专用 converter）。<code>--model-type-hf</code>（:28）默认 <code>qwen3</code>（V2 把默认从 llama2 改成 qwen3，:31 choices 含 qwen3/qwen3-moe/deepseek3/deepseek4/glm5/qwen3-next 等新模型）。:60-68 的 <code>--target-{tensor,pipeline,expert}-parallel-size</code> 是<b>目标并行度</b>——V2 能把 MG 分片 ckpt 重切到不同 TP/PP/EP（这正是 dcp"拓扑无关"在 MG 这侧的体现）。:122 <code>--save-layer-by-layer</code> 在高 TP×EP 防 OOM。注意：<b>V2 处理的是 Megatron 格式（mg）与 HF 之间的转换</b>，而 FSDP2 的 dcp↔HF 走的是 <code>merge_dcp_to_hf.py</code>——<b>两套体系</b>。FSDP2 用户用 merge_dcp_to_hf；想用老 Megatron 体系或 MG↔HF 才用 convert_ckpt_v2。这点容易混，下面 gnpu 卡会标。</p>
+
+      <p class="figcap">docs/zh/pytorch/tools/checkpoint_convert_hf_dcp.md —— 官方使用指南：merge_dcp_to_hf 命令行用法</p>
+      <pre data-lang="sh"># 最简用法：只给 --load-dir，产物落 load-dir/hf_ckpt
+python mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py \
+        --load-dir &lt;DCP权重路径&gt;
+
+# 指定输出目录
+python mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py \
+        --load-dir checkpoints/my_model/dcp_checkpoint \
+        --save-dir hf_models/my_model
+
+# 同时拷贝模型配置文件（让 from_pretrained 能直接加载）
+python mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py \
+        --load-dir checkpoints/my_model/dcp_checkpoint \
+        --save-dir hf_models/my_model \
+        --model-configs pretrained_models/qwen3-8b</pre>
+      <p class="filelink"><a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/tools/checkpoint_convert_hf_dcp.md#L1">docs/zh/pytorch/tools/checkpoint_convert_hf_dcp.md:1</a>（# MindSpeed LLM FSDP2后端DCP权重转换工具使用指南 —— 标题） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/tools/checkpoint_convert_hf_dcp.md#L10">:10</a>（merge_dcp_to_hf.py 采用分片逐步合并，最大限度降低内存占用 —— 省 memory 卖点） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/tools/checkpoint_convert_hf_dcp.md#L18">:18</a>（--load-dir 必填，DCP 权重所在目录） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/tools/checkpoint_convert_hf_dcp.md#L19">:19</a>（--save-dir 默认 load-dir/hf_ckpt） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/tools/checkpoint_convert_hf_dcp.md#L20">:20</a>（--model-configs 模型配置文件目录） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/tools/checkpoint_convert_hf_dcp.md#L21">:21</a>（--shard-size 默认 5GB） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/tools/checkpoint_convert_hf_dcp.md#L28">:28</a>（基本转换示例命令） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/tools/checkpoint_convert_hf_dcp.md#L49">:49</a>（--model-configs pretrained_models/qwen3-8b 示例） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/tools/checkpoint_convert_hf_dcp.md#L71">:71</a>（总大小不超 shard-size 输出单文件 model.safetensors） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/tools/checkpoint_convert_hf_dcp.md#L80">:80</a>（超 shard-size 输出分片 model-0000X-of-0000Y.safetensors + index.json） · <a href="https://gitcode.com/Ascend/MindSpeed-LLM/blob/master/docs/zh/pytorch/tools/checkpoint_convert_hf_dcp.md#L97">:97</a>（注意事项：脚本不会自动生成模型配置文件，需显式 --model-configs）</p>
+      <p class="footnote">官方文档把 <code>merge_dcp_to_hf.py</code> 的用法讲得很直白：:10 卖点是"分片逐步合并、降低内存占用"——正是 :265 <code>no_dist=True</code> + :286 逐 shard 清显存带来的。:18-21 四参数表与代码 :441-444 一一对应。:28/:39/:49 三条示例命令对应"最简 / 指定输出 / 带 config"三种场景。:71-92 的输出说明：模型不超 <code>shard-size</code> 出单文件 <code>model.safetensors</code>，超了出分片 <code>model-0000X-of-0000Y.safetensors</code> + <code>model.safetensors.index.json</code>——这与代码 :237-243 的命名逻辑一致。:97 <b>反复强调</b>"脚本不会自动生成模型配置文件，需显式 <code>--model-configs</code>"——也就是<b>不传 config 产物没法直接 from_pretrained</b>，这是新手最常踩的坑。</p>
+
+      <div class="gnpu">
+        <div class="g"><h4>torch.save 全量 / 单卡 DDP（已知）</h4>
+          <div class="row"><span class="k">存盘原语</span><span><code>torch.save(model.state_dict(), "model.pt")</code> —— pickle 全量 dict 到单文件</span></div>
+          <div class="row"><span class="k">state_dict</span><span><code>OrderedDict[str, Tensor]</code>，值是<b>全量</b>张量，每卡各一份完整副本</span></div>
+          <div class="row"><span class="k">跨硬件</span><span>同构 GPU 间可直读 .pt；但 <b>GPU 训的 ckpt NPU 不能直用</b>（设备张量 + pickle 依赖）</span></div>
+          <div class="row"><span class="k">恢复拓扑</span><span>必须同 rank 数同布局，换卡数存着的全量 .pt 拼不回去分片</span></div>
+          <div class="row"><span class="k">推理加载</span><span>HF <code>from_pretrained</code> 读 safetensors；裸 .pt 需手写 load_state_dict</span></div>
+          <div class="row"><span class="k">训练状态</span><span>state_dict 只含参数；优化器 m/v 需另存（<code>optimizer.state_dict()</code>）</span></div>
+        </div>
+        <div class="n"><h4>dcp 分片 / FSDP2 NPU（本项目）</h4>
+          <div class="row"><span class="k">存盘原语</span><span><code>torch.distributed.checkpoint.save/load</code>（<b>torch 自带</b>，checkpoint_manager.py:436/:390）—— 每 rank 一个 .distcp + .metadata</span></div>
+          <div class="row"><span class="k">state_dict</span><span>值是 <b>DTensor 的 local shard</b>（1/N），经 <code>get_model_state_dict</code>（:101）取分片；全量从不物化</span></div>
+          <div class="row"><span class="k">跨硬件</span><span><b>GPU 的 dcp ckpt NPU 不能直用</b>——dcp 含设备/布局元信息且依赖 dist 环境；<b>必须先 merge_dcp_to_hf 回 HF 全量 safetensors 中转</b></span></div>
+          <div class="row"><span class="k">恢复拓扑</span><span><b>拓扑无关</b>：8 卡存的 dcp 可在 4 卡 <code>dcp.load</code>（:390）按当前 rank 数重切——这是 dcp 相对 torch.save 的核心优势</span></div>
+          <div class="row"><span class="k">推理加载</span><span><b>dcp 不能被 transformers 直接加载</b>——需 <code>merge_dcp_to_hf.py</code> 合并回 HF safetensors 才能 <code>from_pretrained</code></span></div>
+          <div class="row"><span class="k">训练状态</span><span>model + optimizer + extra_state（step/lr/dataloader 位置）一起存进 dcp 目录，resume 可恢复训练</span></div>
+        </div>
+      </div>
+
+      <div class="sum">
+        <b>小结</b>　心智模型：FSDP2 的 ckpt 体系 = <b>dcp = 分片 ckpt</b>（每 rank 一份 .distcp + 一份 .metadata，<code>torch.distributed.checkpoint</code> 这个<b>torch 自带</b>模块的原语 <code>dcp.save/load</code> 落地，<code>CheckpointManager</code>（checkpoint_manager.py:285）只做组织——包 <code>Stateful</code> 适配器 <code>ModelState</code>/<code>OptimizerState</code>（:69/:162）、处理 extra_state、分流 sync/async、加 EP 维度 restore/drop）+ <b>HF safetensors = 全量中转格式</b>（训练前入料经 <code>WeightConvAdapter</code> 改键名加载，训练后产物经 <code>merge_dcp_to_hf.py</code> 离线合并写出，跨硬件迁移也得绕 HF 中转）。dcp 拓扑无关（8 卡存 4 卡可 resume），HF 通用但只含参数不含训练状态；两套各管一段，<b>HF 是它们之间的中立桥梁</b>。根目录 <code>convert_ckpt_v2.py</code>（推荐）/<code>convert_ckpt.py</code>（v1 即将废弃）则是<b>另一套</b> Megatron 格式与 HF 之间的转换入口，与 FSDP2 dcp 体系并行。
+        <div class="pit">常见误区：① <b>以为 FSDP2 的 dcp ckpt 能被 transformers 直接 <code>from_pretrained</code> 加载——不能，必须先 <code>merge_dcp_to_hf</code> 合并回 HF safetensors</b>。dcp 存的是每 rank 分片 + DTensor 布局元信息，<code>transformers</code> 不认这个格式；merge_dcp_to_hf.py（:265 <code>no_dist=True</code> + :276 <code>full_tensor()</code>）才把分片拼回全量写成标准 safetensors。② 以为 dcp 和 <code>torch.save</code> 一样是单文件全量——dcp 是每 rank 一个 <code>.distcp</code> + 一份 <code>.metadata</code>（checkpoint_manager.py:570 <code>single_file_per_rank=True</code>），存的是 1/N 分片不是全量。③ 以为 dcp 恢复必须同卡数——dcp <b>拓扑无关</b>，<code>dcp.load</code>（:390）按当前 <code>process_group</code> 的 rank 数 reshape 分片，8 卡存的 4 卡可 resume。④ 以为 <code>merge_dcp_to_hf</code> 要把整个模型加载进内存——它<b>只读 metadata 规划分片</b>（:141 <code>read_metadata()</code> 不读张量），逐 shard load + 立即清显存（:286），内存峰值 = 单 shard 不是整个模型。⑤ 以为 <code>merge_dcp_to_hf</code> 不传 <code>--model-configs</code> 也能直接 <code>from_pretrained</code>——不能，产物只有权重没有 config.json/tokenizer.json（官方文档 :97 反复强调），必须显式传 <code>--model-configs</code> 拷贝。⑥ 以为 <code>convert_ckpt_v2.py</code> 和 <code>merge_dcp_to_hf.py</code> 是同一套——不是，V2 处理 Megatron 格式↔HF（:148 Hf2MgConvert / :150 Mg2HfConvert，含 TP/PP/EP 重切），merge_dcp_to_hf 处理 FSDP2 dcp→HF；FSDP2 用户走 merge_dcp_to_hf。⑦ 以为 checkpoint 这摊代码也像 EP08/EP10 那样主体在外部 fsdp_turbo——<b>不是</b>，dcp 原语是 torch 自带（:15-24 import），<code>CheckpointManager</code> 主体在仓库内，只有少量 EP 工具（restore_ep_dim/drop_ep_dim，utils.py）是仓库自研但也在 checkpoint/ 目录下。</div>
+      </div>
+
+      <div class="filelist"><b>本篇涉及文件</b><br>
+mindspeed_llm/fsdp2/checkpoint/checkpoint_manager.py<br>
+mindspeed_llm/fsdp2/checkpoint/weight_conv_adapter.py<br>
+mindspeed_llm/fsdp2/checkpoint/merge_dcp_to_hf.py<br>
+mindspeed_llm/fsdp2/checkpoint/utils.py<br>
+mindspeed_llm/fsdp2/checkpoint/conversion_mappings.py<br>
+convert_ckpt.py<br>
+convert_ckpt_v2.py<br>
+docs/zh/pytorch/tools/checkpoint_convert_hf_dcp.md</div>
+    </main>
+  </div>
+</div>
+<script>
+// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre[data-lang]').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];if(!rules)return;
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      return '<span class="ln">'+(i+1)+'</span>'+tokLine(l,rules);
+    }).join('\n');
+  });
+})();
+</script>
+</body>
+</html>

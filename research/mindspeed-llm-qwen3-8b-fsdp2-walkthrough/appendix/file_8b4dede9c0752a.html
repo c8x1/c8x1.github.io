@@ -1,0 +1,257 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>_deps_mindspeed_core/mindspeed/fsdp/parallel_engine_config.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">_deps_mindspeed_core/mindspeed/fsdp/parallel_engine_config.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_ca9bcce50a8c57.html">◀ mindspeed_parallel_engine.py</a> <a href="file_636e6908c9b757.html">device.py ▶</a></nav></div>
+<div class="wrap">
+<h1>parallel_engine_config.py</h1><p class="goal">_deps_mindspeed_core/mindspeed/fsdp/parallel_engine_config.py · 5526B · 156 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L9" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class FSDPPlanConfig</a><a href="#L25" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class TPPlanConfig</a><a href="#L32" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class CPPlanConfig</a><a href="#L37" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class EPPlanConfig</a><a href="#L45" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class QuantizeConfig</a><a href="#L55" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def recipe(self)</a><a href="#L64" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_key_dtype(self, key: str) -&gt; torch.</a><a href="#L69" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class ParallelEngineConfig</a><a href="#L91" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __post_init__(self)</a><a href="#L98" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def validate_fsdp_config(self)</a><a href="#L118" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def validate_tp_config(self)</a><a href="#L133" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def validate_ep_config(self)</a><a href="#L151" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def validate_recompute_config(self)</a><a href="#L154" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def validate_quantization_config(self)</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<span class="mut">（未被正文 EP 引用）</span>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p>Copyright (c) 2025, Huawei Technologies Co., Ltd. All rights reserved.</p><p class="mut">（自动提取自首行注释）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1"># Copyright (c) 2025, Huawei Technologies Co., Ltd. All rights reserved.
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Callable, Literal, Union, Optional
+
+import torch
+
+
+@dataclass
+class FSDPPlanConfig:
+    ignored_modules: List[str] = None
+    apply_modules: Dict[str, Any] = None
+
+    # mp_policy settings
+    param_dtype: Optional[torch.dtype] = None
+    reduce_dtype: Optional[torch.dtype] = None
+    output_dtype: Optional[torch.dtype] = None
+    cast_forward_inputs: bool = True
+
+    # prefetch settings
+    num_to_forward_prefetch: Optional[int] = 0
+    num_to_backward_prefetch: Optional[int] = 0
+
+
+@dataclass
+class TPPlanConfig:
+    colwise_parallel: List[str] = None
+    rowwise_parallel: List[str] = None
+    sequence_parallel: List[str] = None
+
+
+@dataclass
+class CPPlanConfig:
+    pass
+
+
+@dataclass
+class EPPlanConfig:
+    apply_modules: List[str] = None
+    dispatcher: Union[Literal[&quot;eager&quot;, &quot;fused&quot;, &quot;mc2&quot;], Callable] = None
+    apply_efsdp_modules: List[str] = None
+    _gradient_divide_factor: float = None
+
+
+@dataclass
+class QuantizeConfig:
+    recipe_name: str = None
+    apply_modules: list[str] = field(default_factory=list)
+    ignored_modules: list[str] = field(default_factory=list)
+    quant_converters: list[str] = field(default_factory=list)
+    extra_args: dict[str, Any] = field(default_factory=dict)  # for future extensibility
+    enable_fsdp_low_precision_all_gather: bool = True
+    fsdp_low_precision_all_gather_mode: Literal[&quot;on-demand&quot;, &quot;all&quot;] = &quot;on-demand&quot;
+
+    @property
+    def recipe(self):
+        if hasattr(self, &#x27;_recipe&#x27;):
+            return self._recipe
+
+        from mindspeed.fsdp.quantization.config import QuantRecipe
+
+        self._recipe = QuantRecipe.from_recipe_name(self.recipe_name)
+        return self._recipe
+
+    def get_key_dtype(self, key: str) -&gt; torch.dtype:
+        return self.recipe().get_key_dtype(key)
+
+
+@dataclass
+class ParallelEngineConfig:
+    data_parallel_size: int = 1
+
+    fully_shard_parallel_size: int = 1
+    fsdp_plan: FSDPPlanConfig = None
+
+    tensor_parallel_size: int = 1
+    tp_plan: TPPlanConfig = None
+
+    context_parallel_size: int = 1
+    ulysses_parallel_size: int = 1
+
+    expert_parallel_size: int = 1
+    expert_fully_shard_parallel_size: int = 1
+    expert_data_parallel_size: int = 1
+    ep_plan: EPPlanConfig = None
+
+    recompute: bool = False
+    recompute_plan: List[str] = None
+
+    quantization_plan: Optional[QuantizeConfig] = None
+
+    def __post_init__(self):
+        self.validate_tp_config()
+        self.validate_ep_config()
+        self.validate_recompute_config()
+        self.validate_quantization_config()
+        self.validate_fsdp_config()
+
+    def validate_fsdp_config(self):
+        &#x27;&#x27;&#x27; fully shard plan
+        config = ParallelEngineConfig(
+            fsdp_plan=FSDPPlanConfig(
+                &#x27;ignored_modules&#x27;:[&#x27;*mlp.experts*&#x27;],
+                &#x27;apply_modules&#x27;: {
+                    &#x27;model.layers.*&#x27;: {reshard_after_forward=None, shard_placement_fn=None}
+                }
+            )
+        )
+        &#x27;&#x27;&#x27;
+        self.fsdp_plan = FSDPPlanConfig() if self.fsdp_plan is None else self.fsdp_plan
+        if self.fully_shard_parallel_size &gt; 1:
+            if self.expert_parallel_size &gt; 1:
+                self.fsdp_plan.ignored_modules.extend(self.ep_plan.apply_modules)
+            if self.tensor_parallel_size &gt; 1:
+                self.fsdp_plan.ignored_modules.extend(self.tp_plan.colwise_parallel)
+                self.fsdp_plan.ignored_modules.extend(self.tp_plan.rowwise_parallel)
+            self.fsdp_plan.ignored_modules = list(set(self.fsdp_plan.ignored_modules))  # remove duplicates
+
+    def validate_tp_config(self):
+        &#x27;&#x27;&#x27; tensor parallelize plan
+
+        config = ParallelEngineConfig(
+            tp_plan=TPPlanConfig(
+                colwise_parallel=[&#x27;*.q_proj&#x27;, &#x27;*.k_proj&#x27;, &#x27;*.v_proj&#x27;],
+                rowwise_parallel=[&#x27;*.o_proj&#x27;]
+            )
+        )
+        &#x27;&#x27;&#x27;
+        self.tp_plan = TPPlanConfig() if self.tp_plan is None else self.tp_plan
+        self.tp_plan.colwise_parallel = [] if self.tp_plan.colwise_parallel is None else self.tp_plan.colwise_parallel
+        self.tp_plan.rowwise_parallel = [] if self.tp_plan.rowwise_parallel is None else self.tp_plan.rowwise_parallel
+        self.tp_plan.sequence_parallel = [] if self.tp_plan.sequence_parallel is None else self.tp_plan.sequence_parallel
+
+    def validate_ep_config(self):
+        &#x27;&#x27;&#x27; expert parallelize plan
+
+        config = ParallelEngineConfig(
+            ep_plan=EPPlanConfig(
+                apply_modules: [&#x27;*mlp.experts*&#x27;],
+                dispatcher: &#x27;eager&#x27;, &#x27;fused&#x27;, &#x27;mc2&#x27;
+            )
+        )
+        &#x27;&#x27;&#x27;
+        self.ep_plan = EPPlanConfig(apply_modules=[], dispatcher=&#x27;eager&#x27;) if self.ep_plan is None else self.ep_plan
+        self.ep_plan._gradient_divide_factor = self.expert_parallel_size * self.expert_fully_shard_parallel_size * self.expert_data_parallel_size
+        if self.ep_plan.apply_efsdp_modules is None:
+            self.ep_plan.apply_efsdp_modules = []
+            for ep_module in self.ep_plan.apply_modules:
+                if ep_module.endswith(&#x27;.experts&#x27;):
+                    self.ep_plan.apply_efsdp_modules.append(ep_module.removesuffix(&#x27;.experts&#x27;))
+
+    def validate_recompute_config(self):
+        self.recompute_plan = [] if self.recompute_plan is None else self.recompute_plan
+
+    def validate_quantization_config(self):
+        self.quantization_plan = QuantizeConfig() if self.quantization_plan is None else self.quantization_plan
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

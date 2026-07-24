@@ -1,0 +1,434 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/distributed/context_parallel/ring_context_parallel/utils.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/distributed/context_parallel/ring_context_parallel/utils.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_aaac41385bc862.html">◀ ring_cp_attention.py</a> <a href="file_6988d50d8db7c0.html">dsa_attention.py ▶</a></nav></div>
+<div class="wrap">
+<h1>utils.py</h1><p class="goal">mindspeed_llm/fsdp2/distributed/context_parallel/ring_context_parallel/utils.py · 17097B · 333 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L16" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_selection_indices_for_tnd_softmax_upda</a><a href="#L31" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def flatten_softmax(x, sub_seq_len)</a><a href="#L40" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def unflatten_softmax(x, sub_seq_len)</a><a href="#L51" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def forward_update_without_fused(prev_attn_out</a><a href="#L96" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class RingP2P</a><a href="#L97" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, ring_global_ranks, group, g</a><a href="#L114" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def async_send_recv(self, orig_send_tensor, or</a><a href="#L173" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def wait(self)</a><a href="#L183" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def forward_update(prev_attn_out, prev_softmax</a><a href="#L220" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def accumulate_list(input_list)</a><a href="#L237" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def tnd_out_update(q_block_id, kv_block_id, cu</a><a href="#L273" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def causal_out_update(q_block_id, kv_block_id,</a><a href="#L316" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def general_out_update(q_block_id, kv_block_id</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<span class="mut">（未被正文 EP 引用）</span>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p>Copyright (c) 2022-2024, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</p><p class="mut">（自动提取自首行注释）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1"># Copyright (c) 2022-2024, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.
+# Copyright (c) 2024, Huawei Technologies Co., Ltd.  All rights reserved.
+
+from functools import lru_cache
+
+import torch
+import torch_npu
+import torch.distributed as dist
+import numpy as np
+from einops import rearrange
+
+from mindspeed.ops.npu_ring_attention_update import npu_ring_attention_update
+
+
+@lru_cache(maxsize=8)
+def get_selection_indices_for_tnd_softmax_update(t, n, sub_seq_len):
+    full_indices = list(range(t * n))
+    cur_seq_start_idx = 0
+    indices = []
+    seq_start = 0
+    for seq_len in sub_seq_len:
+        for i in range(n):
+            start = seq_start + seq_len * 2 * i + seq_len
+            end = seq_start + seq_len * 2 * (i + 1)
+            indices.extend(full_indices[start:end])
+        seq_start += seq_len * n * 2
+
+    return torch.tensor(indices)
+
+
+def flatten_softmax(x, sub_seq_len):
+    orig_shape = x.shape
+    section_len = [s * orig_shape[1] for s in sub_seq_len]
+    splits = x.view(-1, orig_shape[-1]).split(section_len, dim=0)
+    merged = [item.view(orig_shape[1], -1, orig_shape[-1]).transpose(0, 1) for item in splits]
+    merged = torch.cat(merged, dim=0)
+    return merged
+
+
+def unflatten_softmax(x, sub_seq_len):
+    orig_shape = x.shape
+    section_len = [s * orig_shape[1] for s in sub_seq_len]
+    splits = x.view(-1, orig_shape[-1]).split(section_len, dim=0)
+    # Modification: The reshape function below replaces the original view in core to avoid contiguous error
+    merged = [item.view(-1, orig_shape[1], orig_shape[-1]).transpose(0, 1) \
+                  .reshape(-1, orig_shape[-1]) for item in splits]
+    merged = torch.cat(merged, dim=0)
+    return merged.view(*orig_shape)
+
+
+def forward_update_without_fused(prev_attn_out, prev_softmax_max, prev_softmax_sum,
+                                 cur_attn_out, cur_softmax_max, cur_softmax_sum, actual_seq_qlen=None, layout=&#x27;SBH&#x27;):
+    if layout == &#x27;TND&#x27;:
+        cur_softmax_max = flatten_softmax(cur_softmax_max, actual_seq_qlen)
+        cur_softmax_sum = flatten_softmax(cur_softmax_sum, actual_seq_qlen)
+        prev_softmax_max = flatten_softmax(prev_softmax_max, actual_seq_qlen)
+        prev_softmax_sum = flatten_softmax(prev_softmax_sum, actual_seq_qlen)
+    # update softmax_max
+    origin_dtype = prev_attn_out.dtype
+    softmax_max = torch.maximum(prev_softmax_max, cur_softmax_max)
+    prev_scale = torch.exp(prev_softmax_max - softmax_max)
+    cur_scale = torch.exp(cur_softmax_max - softmax_max)
+
+    # update softmax_sum
+    prev_softmax_sum_scaled = prev_softmax_sum * prev_scale
+    cur_softmax_sum_scaled = cur_softmax_sum * cur_scale
+    softmax_sum = prev_softmax_sum_scaled + cur_softmax_sum_scaled
+
+    # out updating scale
+    prev_out_scale = prev_softmax_sum_scaled / softmax_sum
+    cur_out_scale = cur_softmax_sum_scaled / softmax_sum
+
+    # [b, n, s, 8] -&gt; [s, b, h]
+    if layout == &#x27;SBH&#x27;:
+        n = prev_out_scale.shape[1]
+        h = prev_attn_out.shape[-1]
+        d = h // n
+        prev_out_scale = prev_out_scale[..., 0].unsqueeze(3).repeat(1, 1, 1, d)
+        prev_out_scale = rearrange(prev_out_scale, &#x27;b n s d -&gt; s b (n d)&#x27;).contiguous()
+        cur_out_scale = cur_out_scale[..., 0].unsqueeze(3).repeat(1, 1, 1, d)
+        cur_out_scale = rearrange(cur_out_scale, &#x27;b n s d -&gt; s b (n d)&#x27;).contiguous()
+    elif layout == &#x27;TND&#x27;:
+        d = prev_attn_out.shape[-1]
+        prev_out_scale = prev_out_scale[..., 0].unsqueeze(2).repeat(1, 1, d)
+        cur_out_scale = cur_out_scale[..., 0].unsqueeze(2).repeat(1, 1, d)
+
+    # update output
+    attn_out = prev_attn_out * prev_out_scale + cur_attn_out * cur_out_scale
+    attn_out = attn_out.to(origin_dtype)
+    if layout == &#x27;TND&#x27;:
+        softmax_max = unflatten_softmax(softmax_max, actual_seq_qlen)
+        softmax_sum = unflatten_softmax(softmax_sum, actual_seq_qlen)
+    return attn_out, softmax_max, softmax_sum
+
+
+class RingP2P:
+    def __init__(self, ring_global_ranks, group, group_for_send_recv_overlap=None, is_backward=False) -&gt; None:
+        self.group = group
+        self.group_for_send_recv_overlap = group
+        if group_for_send_recv_overlap is not None:
+            self.group_for_send_recv_overlap = group_for_send_recv_overlap
+
+        global_rank = dist.get_rank()
+        ring_rank = ring_global_ranks.index(global_rank)
+        ring_size = len(ring_global_ranks)
+        self.next = ring_global_ranks[(ring_rank + 1) % ring_size]
+        self.prev = ring_global_ranks[(ring_rank + ring_size - 1) % ring_size]
+        self.ring_rank = ring_rank
+        if is_backward:
+            self.next, self.prev = self.prev, self.next
+
+        self.send_recv_ops = []
+
+    def async_send_recv(self, orig_send_tensor, orig_recv_tensor, shapes=None):
+        send_tensor, recv_tensor = orig_send_tensor, orig_recv_tensor
+
+        enable_mla = isinstance(orig_send_tensor, (list, tuple))
+        if enable_mla:
+            if shapes is not None:
+                raise ValueError(&quot;MLA context parallel does not support uneven shapes yet.&quot;)
+            if len(orig_send_tensor) != 2 or len(orig_recv_tensor) != 2:
+                raise ValueError(
+                    f&quot;Expected tensors of length 2 (k,v), got lengths: &quot;
+                    f&quot;send={len(orig_send_tensor)}, recv={len(orig_recv_tensor)}&quot;
+                )
+            k_send, v_send = orig_send_tensor
+            k_recv, v_recv = orig_recv_tensor
+            if k_send.shape != k_recv.shape or v_send.shape != v_recv.shape:
+                raise ValueError(
+                    &quot;Shape mismatch in KV tensors:\n&quot;
+                    f&quot;  k_send: {k_send.shape} vs k_recv: {k_recv.shape}\n&quot;
+                    f&quot;  v_send: {v_send.shape} vs v_recv: {v_recv.shape}&quot;
+                )
+            k_shape, v_shape = k_send.shape, v_send.shape
+            k_numel = k_send.numel()
+            send_tensor = torch.cat((k_send.view(-1), v_send.view(-1)), dim=-1)
+            recv_tensor = torch.cat((k_recv.view(-1), v_recv.view(-1)), dim=-1)
+
+        if self.ring_rank % 2 == 0:
+            if shapes is not None:
+                send_tensor_shape_list = list(send_tensor.shape)
+                send_tensor_shape_list[-3] = shapes[0]
+                send_tensor.resize_(send_tensor_shape_list)
+            send_op = dist.isend(send_tensor, self.next, self.group)
+            if shapes is not None:
+                recv_tensor_shape_list = list(recv_tensor.shape)
+                recv_tensor_shape_list[-3] = shapes[1]
+                recv_tensor.resize_(recv_tensor_shape_list)
+            recv_op = dist.irecv(recv_tensor, self.prev, self.group_for_send_recv_overlap)
+            self.send_recv_ops.append(send_op)
+            self.send_recv_ops.append(recv_op)
+        else:
+            if shapes is not None:
+                recv_tensor_shape_list = list(recv_tensor.shape)
+                recv_tensor_shape_list[-3] = shapes[1]
+                recv_tensor.resize_(recv_tensor_shape_list)
+            recv_op = dist.irecv(recv_tensor, self.prev, self.group)
+            if shapes is not None:
+                send_tensor_shape_list = list(send_tensor.shape)
+                send_tensor_shape_list[-3] = shapes[0]
+                send_tensor.resize_(send_tensor_shape_list)
+            send_op = dist.isend(send_tensor, self.next, self.group_for_send_recv_overlap)
+            self.send_recv_ops.append(recv_op)
+            self.send_recv_ops.append(send_op)
+
+        if enable_mla:
+            # Important: The original k/v tensors are views into recv_tensor&#x27;s memory.
+            # Must synchronize async P2P operations before using these views
+            # to prevent data races or corrupted memory.
+            orig_recv_tensor[0] = recv_tensor[:k_numel].view(*k_shape)  # [k_numel] -&gt; k_shape
+            orig_recv_tensor[1] = recv_tensor[k_numel:].view(*v_shape)  # [v_numel] -&gt; v_shape
+
+    def wait(self):
+        if len(self.send_recv_ops) &gt; 0:
+            for op in self.send_recv_ops:
+                op.wait()
+            self.send_recv_ops = []
+            return 1
+        else:
+            return 0
+
+
+def forward_update(prev_attn_out, prev_softmax_max, prev_softmax_sum,
+                   cur_attn_out, cur_softmax_max, cur_softmax_sum, actual_seq_qlen=None, layout=&#x27;SBH&#x27;):
+    &quot;&quot;&quot;
+    Updates the attention output and softmax statistics for the ring attention mechanism,
+    with added parameters for enhanced flexibility and extensibility.
+
+    This function is designed to update the attention output and related softmax statistics
+    for a given sequence length in a ring attention mechanism. It handles the merging of
+    previous and current attention outputs and their corresponding softmax statistics.
+    The introduction of `actual_seq_qlen` and `layout` parameters allows for greater flexibility
+    in handling variable sequence lengths and different tensor layouts, respectively.
+
+    Parameters:
+    - prev_attn_out (Tensor): The attention output from the previous process.
+    - prev_softmax_max (Tensor): The maximum value of the softmax distribution from the previous process.
+    - prev_softmax_sum (Tensor): The sum of the softmax distribution from the previous process.
+    - cur_attn_out (Tensor): The attention output from the current process.
+    - cur_softmax_max (Tensor): The maximum value of the softmax distribution from the current process.
+    - cur_softmax_sum (Tensor): The sum of the softmax distribution from the current process.
+    - actual_seq_qlen (Tensor, optional): The actual sequence length for the query. This parameter
+                                      is crucial for handling variable-length sequences and ensuring
+                                      that the attention mechanism operates correctly under such conditions.
+                                      If not provided, it defaults to the length of the current attention output.
+    - layout (str, optional): The layout format of the input tensors. This parameter allows for the specification
+                              of different tensor layouts, enhancing the function&#x27;s versatility across various
+                              model architectures. Default is &#x27;SBH&#x27;, where:
+        - S: Sequence length
+        - B: Batch size
+        - H: Hidden size (number of attention heads)
+
+    Returns:
+    - updated_attn_out (Tensor): The updated attention output after merging previous and current process.
+    - updated_softmax_max (Tensor): The updated maximum value of the softmax distribution.
+    - updated_softmax_sum (Tensor): The updated sum of the softmax distribution.
+    &quot;&quot;&quot;
+    # Modification: The fused op&#x27;s TND format requires D axis to be a multiple of 64
+    if layout == &quot;TND&quot; and cur_attn_out.shape[-1] % 64 == 0 or layout != &quot;TND&quot;:
+        def accumulate_list(input_list):
+            &quot;&quot;&quot;
+            Convert list to numpy array for element accumulation, then convert back to list and prepend 0.
+            &quot;&quot;&quot;
+            np_array = np.array(input_list)
+            cumsum_result = np.cumsum(np_array)
+            return torch.tensor([0] + list(cumsum_result), dtype=torch.int64).to(prev_attn_out.device)
+
+        if layout == &quot;TND&quot;:
+            actual_seq_qlen = accumulate_list(actual_seq_qlen)
+        return npu_ring_attention_update(prev_attn_out, prev_softmax_max, prev_softmax_sum, cur_attn_out,
+                                         cur_softmax_max, cur_softmax_sum, actual_seq_qlen, layout)
+
+    return forward_update_without_fused(prev_attn_out, prev_softmax_max, prev_softmax_sum, cur_attn_out,
+                                        cur_softmax_max, cur_softmax_sum, actual_seq_qlen, layout)
+
+
+def tnd_out_update(q_block_id, kv_block_id, cur_attn_outs, global_attn_outs, q_index, softmax_indices, cur_sub_out_seq_len):
+    cur_attn_out, cur_softmax_max, cur_softmax_sum = cur_attn_outs[0], cur_attn_outs[1], cur_attn_outs[2]
+    attn_out, softmax_max, softmax_sum, rng_states = global_attn_outs
+
+    layout = &#x27;TND&#x27;
+
+    if len(cur_attn_outs) &gt; 3:
+        rng_states[kv_block_id] = (cur_attn_outs[4], cur_attn_outs[5], cur_attn_outs[6])
+
+    if q_block_id == kv_block_id:
+        attn_out = cur_attn_out
+        softmax_max = cur_softmax_max
+        softmax_sum = cur_softmax_sum
+    elif kv_block_id &lt;= q_block_id:
+        attn_out_updated, softmax_max_updated, softmax_sum_updated = forward_update(
+            attn_out, softmax_max, softmax_sum,
+            cur_attn_out, cur_softmax_max, cur_softmax_sum, actual_seq_qlen=cur_sub_out_seq_len, layout=layout
+        )
+        attn_out, softmax_max, softmax_sum = attn_out_updated, softmax_max_updated, softmax_sum_updated
+    else:
+        n = attn_out.shape[1]
+        t = attn_out.shape[0]
+        prev_softmax_max = softmax_max.view(-1, 8)[softmax_indices].view(-1, n, 8)
+        prev_softmax_sum = softmax_sum.view(-1, 8)[softmax_indices].view(-1, n, 8)
+
+        attn_out_updated, softmax_max_updated, softmax_sum_updated = forward_update(
+            torch.index_select(attn_out, 0, q_index), prev_softmax_max, prev_softmax_sum,
+            cur_attn_out, cur_softmax_max, cur_softmax_sum, actual_seq_qlen=cur_sub_out_seq_len, layout=layout
+        )
+        attn_out.index_copy_(0, q_index, attn_out_updated)
+        softmax_max = softmax_max.view(-1, 8).index_copy(0, softmax_indices, softmax_max_updated.view(-1, 8)).view(-1, n, 8)
+        softmax_sum = softmax_sum.view(-1, 8).index_copy(0, softmax_indices, softmax_sum_updated.view(-1, 8)).view(-1, n, 8)
+
+    return [attn_out, softmax_max, softmax_sum, rng_states]
+
+
+def causal_out_update(q_block_id, kv_block_id, cur_attn_outs, global_attn_outs):
+    cur_attn_out, cur_softmax_max, cur_softmax_sum = cur_attn_outs[0], cur_attn_outs[1], cur_attn_outs[2]
+    attn_out, softmax_max, softmax_sum, rng_states = global_attn_outs
+    layout = &#x27;SBH&#x27;
+    if len(cur_attn_outs) &gt; 3:
+        rng_states[kv_block_id] = (cur_attn_outs[4], cur_attn_outs[5], cur_attn_outs[6])
+
+    if q_block_id == kv_block_id:
+        attn_out = cur_attn_out
+        softmax_max = cur_softmax_max
+        softmax_sum = cur_softmax_sum
+    elif kv_block_id &lt;= q_block_id:
+        attn_out_updated, softmax_max_updated, softmax_sum_updated = forward_update(
+            attn_out, softmax_max, softmax_sum,
+            cur_attn_out, cur_softmax_max, cur_softmax_sum, actual_seq_qlen=None, layout=layout
+        )
+        attn_out, softmax_max, softmax_sum = attn_out_updated, softmax_max_updated, softmax_sum_updated
+    else:
+        # [2s, b, h] -&gt; [2, s, b, h]
+        attn_out = attn_out.view(2, attn_out.shape[0] // 2, *attn_out.shape[1:])
+        # [b, n, 2s, 8] -&gt; [b, n, 2, s, 8]
+        softmax_max = softmax_max.view(softmax_max.shape[0], softmax_max.shape[1],
+                                       2, softmax_max.shape[2] // 2, softmax_max.shape[-1])
+        softmax_sum = softmax_sum.view(softmax_sum.shape[0], softmax_sum.shape[1],
+                                       2, softmax_sum.shape[2] // 2, softmax_sum.shape[-1])
+        attn_out_updated, softmax_max_updated, softmax_sum_updated = forward_update(
+            attn_out[1], softmax_max[:, :, 1, :, :], softmax_sum[:, :, 1, :, :],
+            cur_attn_out, cur_softmax_max, cur_softmax_sum, actual_seq_qlen=None, layout=layout
+        )
+        attn_out[1].copy_(attn_out_updated)
+        softmax_max[:, :, 1, :, :].copy_(softmax_max_updated)
+        softmax_sum[:, :, 1, :, :].copy_(softmax_sum_updated)
+        # [2, s, b, h] -&gt; [2s, b, h]
+        attn_out = attn_out.view(-1, *attn_out.shape[2:])
+        # [b, n, 2, s, 8] -&gt; [b, n, 2s, 8]
+        softmax_max = softmax_max.view(softmax_max.shape[0], softmax_max.shape[1], -1,
+                                       softmax_max.shape[-1])
+        softmax_sum = softmax_sum.view(softmax_sum.shape[0], softmax_sum.shape[1], -1,
+                                       softmax_sum.shape[-1])
+
+    return [attn_out, softmax_max, softmax_sum, rng_states]
+
+
+def general_out_update(q_block_id, kv_block_id, cur_attn_outs, global_attn_outs):
+    cur_attn_out, cur_softmax_max, cur_softmax_sum = cur_attn_outs[0], cur_attn_outs[1], cur_attn_outs[2]
+    attn_out, softmax_max, softmax_sum, rng_states = global_attn_outs
+    layout = &#x27;SBH&#x27;
+    rng_states[kv_block_id] = (cur_attn_outs[4], cur_attn_outs[5], cur_attn_outs[6])
+    if q_block_id == kv_block_id:
+        attn_out = cur_attn_out
+        softmax_max = cur_softmax_max
+        softmax_sum = cur_softmax_sum
+    else:
+        attn_out_updated, softmax_max_updated, softmax_sum_updated = forward_update(
+            attn_out, softmax_max, softmax_sum,
+            cur_attn_out, cur_softmax_max, cur_softmax_sum, layout=layout
+        )
+        attn_out, softmax_max, softmax_sum = attn_out_updated, softmax_max_updated, softmax_sum_updated
+
+    return [attn_out, softmax_max, softmax_sum, rng_states]
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

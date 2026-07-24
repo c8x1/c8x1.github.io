@@ -1,0 +1,493 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/optim/scheduler.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/optim/scheduler.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_9334776bbcaff9.html">◀ optimizer.py</a> <a href="file_12f1425e7d19aa.html">__init__.py ▶</a></nav></div>
+<div class="wrap">
+<h1>scheduler.py</h1><p class="goal">mindspeed_llm/fsdp2/optim/scheduler.py · 7526B · 206 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L14" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class MultiLRScheduler(dict)</a><a href="#L19" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def step(self) -&gt; None</a><a href="#L24" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def state_dict(self) -&gt; Dict[str, any]</a><a href="#L28" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def load_state_dict(self, state_dict: Dict[str</a><a href="#L34" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def get_last_lr(self)</a><a href="#L41" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class SchedulerFactory</a><a href="#L47" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def create</a><a href="#L99" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _create_single_scheduler(optimizer, train_</a><a href="#L144" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_constant_schedule_with_warmup(optimiz</a><a href="#L149" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def lr_lambda(current_step: int)</a><a href="#L157" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_linear_schedule_with_warmup(optimizer</a><a href="#L162" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def lr_lambda(current_step: int)</a><a href="#L173" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _get_cosine_schedule_with_warmup</a><a href="#L187" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def lr_lambda(current_step: int)</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep16.html">EP16</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="annot"><div class="seg"><p class="seglab">行 1-12 · 模块定位：纯 torch LambdaLR 的学习率调度工厂</p><pre data-lang="py" data-start="1" data-idprefix="A">&quot;&quot;&quot;
+Learning rate scheduler factory for unified construction of single scheduler and multi-scheduler, support constant, linear and cosine.
+&quot;&quot;&quot;
+import math
+import torch
+from typing import Dict, Union
+from torch.optim.lr_scheduler import LambdaLR
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+
+
+logger = get_logger(__name__)
+</pre><div class="exp"><p>开篇注释 (:1-3) 一句话点明本文件职责：统一构造<b>单调度器</b>与<b>多调度器</b>，支持 constant/linear/cosine 三种衰减风格。看 :4-8 的导入：<code>math</code> (:4)、<code>torch</code> (:5)、<code>Dict/Union</code> (:6)、<code>torch.optim.lr_scheduler.LambdaLR</code> (:7)、<code>get_logger</code> (:8)。这里有个关键事实要先挑明：<b>本文件全程只用了 stdlib 的 <code>LambdaLR</code></b>，没有任何 Ascend/NPU 专有的 lr scheduler 原语，也没有调 <code>torch_npu</code> 任何东西。</p><p>这意味着——<b>硬件维度弱</b>。学习率调度本质上是<b>纯数学</b>：每步算一个乘法因子 <code>lr_lambda(step)</code>，乘到 base_lr 上，全在 CPU host 侧的标量运算完成，不碰 GPU/NPU 上的张量。所以无论 FSDP2 把参数切成多少片、无论 EP 把 expert 参数铺到多少 mesh 上，lr scheduler 都“看不见”这些——它只对 optimizer 持有的 param group 上的 <code>lr</code> 属性做标量更新。FSDP2/EP 影响的是“哪些参数被哪个 optimizer 管几张片”，不影响“lr 怎么衰减”。三座桥里，硬件桥在此文件<b>几乎不出现</b>，只有并行桥（MultiOptimizer 多优化器递归）和配置桥（yaml 字段对接）两个维度实打实。</p></div></div><div class="seg"><p class="seglab">行 14-22 · MultiLRScheduler.step：dict 递归 step，与 MultiOptimizer 镜像</p><pre data-lang="py" data-start="14" data-idprefix="A">class MultiLRScheduler(dict):
+
+    _is_multi_lr_scheduler: bool = True
+
+    # Execute step method of all sub-schedulers to update learning rate
+    def step(self) -&gt; None:
+        for sched in self.values():
+            sched.step()
+</pre><div class="exp"><p>:14 <code>MultiLRScheduler(dict)</code>——它<b>继承自 dict</b>，不是 <code>LRScheduler</code>。这是个刻意的鸭子类型设计：当一个 dict 里有若干子调度器时，本类给这个 dict 装上 <code>step/state_dict/load_state_dict/get_last_lr</code> 这套接口，让它<b>长得像一个普通调度器</b>，从而上层训练循环 (:308 <code>self.lr_scheduler.step()</code>) 不用区分单/多调度器，统一调 <code>step()</code> 即可。</p><p>:16 <code>_is_multi_lr_scheduler = True</code> 是个标记位，和 <code>MultiOptimizer._is_multi_optimizer</code> (optimizer.py:29) 是<b>同一套鸭子判别模式</b>——下游用 <code>hasattr(x, "_is_multi_optimizer")</code> 判多优化器，这里将来也可能用类似方式判多调度器。</p><p>:19-21 <code>step()</code> 遍历 <code>self.values()</code>（dict 的所有子调度器）逐个 <code>sched.step()</code>——这就是<b>递归 step</b>：MultiLRScheduler.step → 每个子 scheduler.step → 每个子 scheduler 内部再更新对应子 optimizer 的 lr。EP16 场景下若 optimizer 是 MultiOptimizer（expert/dense 分开成多个子 optimizer），这里就对应建一个 MultiLRScheduler，每个子 optimizer 配一个独立 cosine，step 时一起推进一步。</p></div></div><div class="seg"><p class="seglab">行 23-39 · state_dict/load/get_last_lr：检查点存取与日志一致性的细节</p><pre data-lang="py" data-start="23" data-idprefix="A">    # Get state dictionaries of all sub-schedulers for saving training checkpoints
+    def state_dict(self) -&gt; Dict[str, any]:
+        return {name: sched.state_dict() for name, sched in self.items()}
+
+    # Load state dictionaries to corresponding sub-schedulers for resuming training
+    def load_state_dict(self, state_dict: Dict[str, any]) -&gt; None:
+        for name, sched in self.items():
+            if name in state_dict:
+                sched.load_state_dict(state_dict[name])
+
+    # Return the latest learning rate of the first sub-scheduler to ensure consistency in log printing
+    def get_last_lr(self):
+        if not self:
+            return [0.0]
+        first = next(iter(self.values()))
+        return first.get_last_lr()
+</pre><div class="exp"><p>:24-25 <code>state_dict()</code>：对每个子调度器调 <code>sched.state_dict()</code>，按 <code>name</code> 收集成 dict 返回——检查点保存时这样结构化，每个子调度器的 last_epoch 等内部状态分开存。:28-31 <code>load_state_dict</code> 是镜像：按 name 取回，<code>:30 if name in state_dict</code> 还做了<b>防御性存在性检查</code>——存盘里没有这个 name 的就跳过，不报错。这对应 checkpoint_manager 里“按 metadata 决定加载哪些组件”的谨慎风格。</p><p>:34-38 <code>get_last_lr()</code> 有个微妙的取舍：它<b>只返回第一个子调度器的 lr</b>（<code>next(iter(self.values()))</code>），:35-36 空 dict 时返回 <code>[0.0]</code>。为什么只取第一个？因为<b>日志打印</b>只需要一个代表性的 lr 值（多个子调度器 lr 通常同步，都跑同一条 cosine），打印多个会刷屏。代价是：如果不同子 optimizer 故意配不同 lr 曲线，日志只能看到第一个——但本工厂 <code>create</code> 是对<b>所有子 optimizer 用同一套 lr/warmup_ratio/min_lr 参数</b>（见 :73-80 递归调用传的是同一份参数），所以现实中多子调度器曲线完全一致，取第一个无信息损失。</p></div></div><div class="seg"><p class="seglab">行 41-95 · SchedulerFactory.create：单/多优化器分流 + 递归构造</p><pre data-lang="py" data-start="41" data-idprefix="A">class SchedulerFactory:
+    &quot;&quot;&quot;
+    Learning rate scheduler factory.
+    &quot;&quot;&quot;
+
+    @staticmethod
+    def create(
+            optimizer: torch.optim.Optimizer,
+            train_steps: int,
+            lr: float,
+            lr_decay_style: str = &quot;cosine&quot;,
+            lr_warmup_ratio: float = 0.03,
+            lr_min: float = 1e-6,
+    ) -&gt; Union[torch.optim.lr_scheduler.LRScheduler, MultiLRScheduler]:
+        &quot;&quot;&quot;
+        Build Scheduler.
+
+        Args:
+            optimizer: Optimizer instance
+            train_steps: Total training steps (max_steps)
+            lr: Initial maximum learning rate
+            lr_decay_style: &quot;cosine&quot;, &quot;linear&quot;, &quot;constant&quot;
+            lr_warmup_ratio: Warmup ratio
+            lr_min: Minimum learning rate to decay to (effective in Cosine mode)
+        &quot;&quot;&quot;
+        # Multi-optimizer processing
+        # Determine if it is a multi-optimizer (MultiOptimizer or dict-type optimizer)
+        if hasattr(optimizer, &quot;_is_multi_optimizer&quot;) or isinstance(optimizer, dict):
+            schedulers = {}
+            # Iterate through all sub-optimizer names of the multi-optimizer
+            for key_name in optimizer.key_names:
+                # Recursively create scheduler for each sub-optimizer
+                sub_scheduler = SchedulerFactory.create(
+                    optimizer=optimizer.optimizers_dict[key_name],
+                    train_steps=train_steps,
+                    lr=lr,
+                    lr_decay_style=lr_decay_style,
+                    lr_warmup_ratio=lr_warmup_ratio,
+                    lr_min=lr_min,
+                )
+                schedulers[key_name] = sub_scheduler
+            multi_scheduler = MultiLRScheduler(schedulers)
+            logger.debug_rank0(f&quot;Created MultiLRScheduler with {len(schedulers)} sub-schedulers: {list(schedulers.keys())}&quot;)
+            return multi_scheduler
+
+        # Single optimizer processing
+        single_scheduler = SchedulerFactory._create_single_scheduler(
+            optimizer=optimizer,
+            train_steps=train_steps,
+            lr=lr,
+            lr_decay_style=lr_decay_style,
+            lr_warmup_ratio=lr_warmup_ratio,
+            lr_min=lr_min,
+        )
+        return single_scheduler</pre><div class="exp"><p>:46-54 <code>create</code> 是对外入口，签名里 <code>lr_decay_style="cosine"</code> (:51, 默认 cosine)、<code>lr_warmup_ratio=0.03</code> (:52)、<code>lr_min=1e-6</code> (:53) 这三个默认值就是 yaml 配置缺省时落到的值。:56-64 的 docstring 把每个参数对齐说清楚，其中 <code>train_steps</code> 注释写明是 <code>max_steps</code>——这正好对接 yaml 里的 <code>max_steps: 2000</code>（pretrain_qwen3_8b_4k_fsdp2_A2.yaml:43），<code>lr</code> 对接 <code>lr: 1e-05</code> (yaml:33)、<code>lr_warmup_ratio</code> 对接 <code>warmup_ratio: 0.0</code> (yaml:40)、<code>lr_min</code> 对接 <code>min_lr: 1e-06</code> (yaml:41)。注意命名小不一致：yaml 写 <code>warmup_ratio/min_lr</code>，函数参数是 <code>lr_warmup_ratio/lr_min</code>，中间层做了重命名映射。</p><p>:68 判多优化器：<code>hasattr(optimizer, "_is_multi_optimizer") or isinstance(optimizer, dict)</code>——前者正中 <code>MultiOptimizer._is_multi_optimizer=True</code> (optimizer.py:29)，后者兜底处理裸 dict 型 optimizer。:71 遍历 <code>optimizer.key_names</code>（MultiOptimizer 的子优化器名表，optimizer.py:30），:73-80 <b>递归调用自己</b>给每个子 optimizer 建调度器——注意这里传的是<b>同一套 lr 参数</b>，所以所有子调度器曲线相同。:82 收成 <code>MultiLRScheduler(schedulers)</code>，:83 <code>logger.debug_rank0</code> 只在 rank0 打（避免多 rank 重复打印）。:87-95 非多优化器走单调度器路径。</p><p>EP16 场景：expert 参数多、dense 参数少，常拆成多个子 optimizer（EP 维度独立配组），这里就递归出多个子 scheduler，但<b>共用一条 cosine</b>——这是务实选择，没给不同参数组配不同 lr curve。</p></div></div><div class="seg"><p class="seglab">行 98-137 · _create_single_scheduler：ratio→steps 转换 + 三风格分派</p><pre data-lang="py" data-start="98" data-idprefix="A">    @staticmethod
+    def _create_single_scheduler(optimizer, train_steps, lr, lr_decay_style, lr_warmup_ratio, lr_min):
+        &quot;&quot;&quot;
+        Create LR scheduler for single optimizer.
+        &quot;&quot;&quot;
+        # 1. Calculate Warmup Steps
+        # Convert ratio to specific steps if ratio is passed in
+        lr_warmup_steps = int(train_steps * lr_warmup_ratio)
+
+        logger.info_rank0(
+            f&quot;Creating &#x27;{lr_decay_style}&#x27; scheduler: &quot;
+            f&quot;lr={lr}, min_lr={lr_min}, &quot;
+            f&quot;warmup_steps={lr_warmup_steps}, total_steps={train_steps}&quot;
+        )
+
+        # 2. Dispatch build logic according to type
+        if lr_decay_style == &quot;constant&quot;:
+            return SchedulerFactory._get_constant_schedule_with_warmup(
+                optimizer, num_warmup_steps=lr_warmup_steps
+            )
+
+        elif lr_decay_style == &quot;linear&quot;:
+            return SchedulerFactory._get_linear_schedule_with_warmup(
+                optimizer,
+                num_warmup_steps=lr_warmup_steps,
+                num_training_steps=train_steps
+            )
+
+        elif lr_decay_style == &quot;cosine&quot;:
+            return SchedulerFactory._get_cosine_schedule_with_warmup(
+                optimizer,
+                num_warmup_steps=lr_warmup_steps,
+                num_training_steps=train_steps,
+                num_cycles=0.5,
+                min_lr=lr_min,
+                base_lr=lr
+            )
+
+        else:
+            raise ValueError(f&quot;Unknown lr_scheduler_type: {lr_decay_style}&quot;)</pre><div class="exp"><p>:99 <code>_create_single_scheduler</code> 是单优化器路径。:105 <code>lr_warmup_steps = int(train_steps * lr_warmup_ratio)</code>——把<b>比例</b>换算成<b>具体步数</b>。这是设计取舍：用户在 yaml 填的是 <code>warmup_ratio: 0.0</code>（比例）而非绝对步数，好处是改 train_steps 不用同步改 warmup_steps，warmup 自适应总步长。代价是 <code>int()</code> 截断可能丢 1 步精度（小步长时）。yaml:40 的 <code>0.0</code> 意味着 Qwen3-8B 这个配置<b>不做 warmup</b>（finetune 场景常见，预训练一般给非零 ratio）。</p><p>:107-111 <code>logger.info_rank0</code> 打一条人读的构造信息（lr/min_lr/warmup_steps/total_steps），rank0 only。:114-137 按 <code>lr_decay_style</code> 三分派：constant (:115-117)、linear (:120-124)、cosine (:127-134)。cosine 分支多传了 <code>num_cycles=0.5</code>、<code>min_lr=lr_min</code>、<code>base_lr=lr</code>——<code>num_cycles=0.5</code> 是<b>标准 HF cosine 写法</b>（半个周期即单调下降，不回升），<code>base_lr</code> 是为后面算 <code>min_lr_ratio</code> 用的。:136-137 未知风格直接 <code>raise ValueError</code>，不静默 fallback。</p><p>对照 yaml：<code>lr_decay_style</code> 默认 <code>cosine</code>，A2 yaml 没显式写则走 cosine 分支 (:127)。</p></div></div><div class="seg"><p class="seglab">行 143-154 · constant 策略：warmup 线性升到 1.0 后保持</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :143-:154）</h5><pre data-lang="py" data-start="143" data-idprefix="A">    @staticmethod
+    def _get_constant_schedule_with_warmup(optimizer, num_warmup_steps):
+        &quot;&quot;&quot;
+        Keep constant LR after Warmup.
+        &quot;&quot;&quot;
+
+        def lr_lambda(current_step: int):
+            if current_step &lt; num_warmup_steps:
+                return float(current_step) / float(max(1, num_warmup_steps))
+            return 1.0
+
+        return LambdaLR(optimizer, lr_lambda)</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">torch.optim.lr_scheduler.ConstantLR / LambdaLR(optim, lambda s: 1.0)</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>GPU/标准 PyTorch 习惯：直接用 <code>ConstantLR</code> 或 <code>LambdaLR(optim, lambda s: 1.0)</code>。本文件没选 <code>ConstantLR</code> 而是手写 lambda——好处是三种风格共用一套 <code>LambdaLR</code> 壳，warmup 段逻辑统一在闭包里写，分派只换闭包不换类。NPU/Ascend 侧 <code>torch_npu.optim</code> 有自己的 RAdam 等调度器，但本文件<b>没碰</b>——硬件无关地落在 stdlib <code>LambdaLR</code> 上。差异点：本厂多了一层“warmup 线性升”的逻辑常驻在 lambda 里，而 stdlib <code>ConstantLR</code> 的 factor 是固定乘子不带 warmup。</p></div></div><div class="seg"><p class="seglab">行 156-170 · linear 策略：warmup 后线性衰减到 0</p><pre data-lang="py" data-start="156" data-idprefix="A">    @staticmethod
+    def _get_linear_schedule_with_warmup(optimizer, num_warmup_steps, num_training_steps):
+        &quot;&quot;&quot;
+        Linearly decay to 0 after Warmup.
+        &quot;&quot;&quot;
+
+        def lr_lambda(current_step: int):
+            if current_step &lt; num_warmup_steps:
+                return float(current_step) / float(max(1, num_warmup_steps))
+
+            # Linear decay
+            progress = float(current_step - num_warmup_steps) / float(max(1, num_training_steps - num_warmup_steps))
+            return max(0.0, 1.0 - progress)
+
+        return LambdaLR(optimizer, lr_lambda)</pre><div class="exp"><p>:157-170 <code>_get_linear_schedule_with_warmup</code>。:162-168 的 lambda：warmup 段 (:163-164) 与 constant 完全相同（线性升到 1.0），:167-168 是衰减段 <code>progress = (step - warmup)/(total - warmup)</code>，返回 <code>max(0.0, 1.0 - progress)</code>——线性从 1.0 降到 0.0，:168 的 <code>max(0.0, ...)</code> 防止 progress>1 时返回负数（即过训练段 lr 保持 0）。</p><p>注意这里没有 <code>min_lr</code> 参数——linear 衰减终点是<b>硬 0</b>，不像 cosine 可以衰减到 <code>min_lr</code>。这是本文件的语义设计：只有 cosine 尊重 <code>min_lr</code>（docstring :64 也写明“effective in Cosine mode”）。linear 走到底就归零。</p></div></div><div class="seg"><p class="seglab">行 172-205 · cosine 策略：min_lr_ratio + 过训练保护 + 半周期映射</p><div class="cmp"><div><h5>NPU / FSDP2（本项目 :172-:205）</h5><pre data-lang="py" data-start="172" data-idprefix="A">    @staticmethod
+    def _get_cosine_schedule_with_warmup(
+            optimizer, num_warmup_steps, num_training_steps, num_cycles=0.5, min_lr=0.0, base_lr=1.0
+    ):
+        &quot;&quot;&quot;
+        Decay to min_lr according to Cosine curve after Warmup.
+        Note: base_lr is the max_lr passed in create, used to calculate min_lr_ratio.
+        &quot;&quot;&quot;
+
+        # Calculate minimum LR ratio
+        if base_lr &lt;= 0:
+            min_lr_ratio = 0.0
+        else:
+            min_lr_ratio = min_lr / base_lr
+
+        def lr_lambda(current_step: int):
+            # 1. Warmup Phase
+            if current_step &lt; num_warmup_steps:
+                return float(current_step) / float(max(1, num_warmup_steps))
+
+            # 2. Post-Training Phase (Over-train protection)
+            if current_step &gt; num_training_steps:
+                return min_lr_ratio
+
+            # 3. Decay Phase (Cosine)
+            progress = float(current_step - num_warmup_steps) / float(max(1, num_training_steps - num_warmup_steps))
+
+            # cos(0) = 1, cos(pi) = -1 -&gt; mapped to [1, 0]
+            cosine_decay = 0.5 * (1.0 + math.cos(math.pi * float(num_cycles) * 2.0 * progress))
+
+            # Scaled by (1 - min_ratio) + min_ratio
+            return cosine_decay * (1.0 - min_lr_ratio) + min_lr_ratio
+
+        return LambdaLR(optimizer, lr_lambda)</pre></div><div><h5>GPU / DDP（你熟悉）</h5><pre data-lang="py">transformers.get_cosine_schedule_with_warmup / torch.optim.lr_scheduler.CosineAnnealingLR</pre></div></div><div class="exp"><span class="lab">差异讲解</span><br><p>GPU/标准生态习惯：要么用 HuggingFace <code>transformers.get_cosine_schedule_with_warmup</code>，要么用 <code>torch.optim.lr_scheduler.CosineAnnealingLR</code>。本文件<b>没有</b>用这两个，而是手写 lambda 喂给裸 <code>LambdaLR</code>。差异有三：(1) stdlib <code>CosineAnnealingLR</code> 用 T_max/eta_min 参数，HF 版用 num_training_steps，本厂用 ratio（warmup）+ 绝对 min_lr + base_lr 内部算 ratio——接口风格更贴 yaml；(2) 本厂的“过训练保护” (:193-194) 在 HF 版里通常没有，HF 版超出 steps 后 cosine 会因周期性回升，本厂硬钳在 min_lr；(3) NPU 侧没有等价的原语可用，但<b>也用不上</b>——LambdaLR 是纯 host 标量，NPU/GPU 都走 PyTorch 同一份实现，硬件维度在此完全摊平。EP16 的多 expert 子 optimizer 走 MultiLRScheduler 递归 step，但每个子 scheduler 仍是这条同一 cosine，曲线不分叉。</p></div></div></div>
+<details class="src"><summary>📜 完整源码（206 行）— 大纲点跳行</summary><pre data-lang="py" data-start="1">&quot;&quot;&quot;
+Learning rate scheduler factory for unified construction of single scheduler and multi-scheduler, support constant, linear and cosine.
+&quot;&quot;&quot;
+import math
+import torch
+from typing import Dict, Union
+from torch.optim.lr_scheduler import LambdaLR
+from mindspeed_llm.fsdp2.utils.logging import get_logger
+
+
+logger = get_logger(__name__)
+
+
+class MultiLRScheduler(dict):
+
+    _is_multi_lr_scheduler: bool = True
+
+    # Execute step method of all sub-schedulers to update learning rate
+    def step(self) -&gt; None:
+        for sched in self.values():
+            sched.step()
+
+    # Get state dictionaries of all sub-schedulers for saving training checkpoints
+    def state_dict(self) -&gt; Dict[str, any]:
+        return {name: sched.state_dict() for name, sched in self.items()}
+
+    # Load state dictionaries to corresponding sub-schedulers for resuming training
+    def load_state_dict(self, state_dict: Dict[str, any]) -&gt; None:
+        for name, sched in self.items():
+            if name in state_dict:
+                sched.load_state_dict(state_dict[name])
+
+    # Return the latest learning rate of the first sub-scheduler to ensure consistency in log printing
+    def get_last_lr(self):
+        if not self:
+            return [0.0]
+        first = next(iter(self.values()))
+        return first.get_last_lr()
+
+
+class SchedulerFactory:
+    &quot;&quot;&quot;
+    Learning rate scheduler factory.
+    &quot;&quot;&quot;
+
+    @staticmethod
+    def create(
+            optimizer: torch.optim.Optimizer,
+            train_steps: int,
+            lr: float,
+            lr_decay_style: str = &quot;cosine&quot;,
+            lr_warmup_ratio: float = 0.03,
+            lr_min: float = 1e-6,
+    ) -&gt; Union[torch.optim.lr_scheduler.LRScheduler, MultiLRScheduler]:
+        &quot;&quot;&quot;
+        Build Scheduler.
+
+        Args:
+            optimizer: Optimizer instance
+            train_steps: Total training steps (max_steps)
+            lr: Initial maximum learning rate
+            lr_decay_style: &quot;cosine&quot;, &quot;linear&quot;, &quot;constant&quot;
+            lr_warmup_ratio: Warmup ratio
+            lr_min: Minimum learning rate to decay to (effective in Cosine mode)
+        &quot;&quot;&quot;
+        # Multi-optimizer processing
+        # Determine if it is a multi-optimizer (MultiOptimizer or dict-type optimizer)
+        if hasattr(optimizer, &quot;_is_multi_optimizer&quot;) or isinstance(optimizer, dict):
+            schedulers = {}
+            # Iterate through all sub-optimizer names of the multi-optimizer
+            for key_name in optimizer.key_names:
+                # Recursively create scheduler for each sub-optimizer
+                sub_scheduler = SchedulerFactory.create(
+                    optimizer=optimizer.optimizers_dict[key_name],
+                    train_steps=train_steps,
+                    lr=lr,
+                    lr_decay_style=lr_decay_style,
+                    lr_warmup_ratio=lr_warmup_ratio,
+                    lr_min=lr_min,
+                )
+                schedulers[key_name] = sub_scheduler
+            multi_scheduler = MultiLRScheduler(schedulers)
+            logger.debug_rank0(f&quot;Created MultiLRScheduler with {len(schedulers)} sub-schedulers: {list(schedulers.keys())}&quot;)
+            return multi_scheduler
+
+        # Single optimizer processing
+        single_scheduler = SchedulerFactory._create_single_scheduler(
+            optimizer=optimizer,
+            train_steps=train_steps,
+            lr=lr,
+            lr_decay_style=lr_decay_style,
+            lr_warmup_ratio=lr_warmup_ratio,
+            lr_min=lr_min,
+        )
+        return single_scheduler
+
+
+    @staticmethod
+    def _create_single_scheduler(optimizer, train_steps, lr, lr_decay_style, lr_warmup_ratio, lr_min):
+        &quot;&quot;&quot;
+        Create LR scheduler for single optimizer.
+        &quot;&quot;&quot;
+        # 1. Calculate Warmup Steps
+        # Convert ratio to specific steps if ratio is passed in
+        lr_warmup_steps = int(train_steps * lr_warmup_ratio)
+
+        logger.info_rank0(
+            f&quot;Creating &#x27;{lr_decay_style}&#x27; scheduler: &quot;
+            f&quot;lr={lr}, min_lr={lr_min}, &quot;
+            f&quot;warmup_steps={lr_warmup_steps}, total_steps={train_steps}&quot;
+        )
+
+        # 2. Dispatch build logic according to type
+        if lr_decay_style == &quot;constant&quot;:
+            return SchedulerFactory._get_constant_schedule_with_warmup(
+                optimizer, num_warmup_steps=lr_warmup_steps
+            )
+
+        elif lr_decay_style == &quot;linear&quot;:
+            return SchedulerFactory._get_linear_schedule_with_warmup(
+                optimizer,
+                num_warmup_steps=lr_warmup_steps,
+                num_training_steps=train_steps
+            )
+
+        elif lr_decay_style == &quot;cosine&quot;:
+            return SchedulerFactory._get_cosine_schedule_with_warmup(
+                optimizer,
+                num_warmup_steps=lr_warmup_steps,
+                num_training_steps=train_steps,
+                num_cycles=0.5,
+                min_lr=lr_min,
+                base_lr=lr
+            )
+
+        else:
+            raise ValueError(f&quot;Unknown lr_scheduler_type: {lr_decay_style}&quot;)
+
+    # =========================================================================
+    # Internal Strategy Implementations (Based on LambdaLR)
+    # =========================================================================
+
+    @staticmethod
+    def _get_constant_schedule_with_warmup(optimizer, num_warmup_steps):
+        &quot;&quot;&quot;
+        Keep constant LR after Warmup.
+        &quot;&quot;&quot;
+
+        def lr_lambda(current_step: int):
+            if current_step &lt; num_warmup_steps:
+                return float(current_step) / float(max(1, num_warmup_steps))
+            return 1.0
+
+        return LambdaLR(optimizer, lr_lambda)
+
+    @staticmethod
+    def _get_linear_schedule_with_warmup(optimizer, num_warmup_steps, num_training_steps):
+        &quot;&quot;&quot;
+        Linearly decay to 0 after Warmup.
+        &quot;&quot;&quot;
+
+        def lr_lambda(current_step: int):
+            if current_step &lt; num_warmup_steps:
+                return float(current_step) / float(max(1, num_warmup_steps))
+
+            # Linear decay
+            progress = float(current_step - num_warmup_steps) / float(max(1, num_training_steps - num_warmup_steps))
+            return max(0.0, 1.0 - progress)
+
+        return LambdaLR(optimizer, lr_lambda)
+
+    @staticmethod
+    def _get_cosine_schedule_with_warmup(
+            optimizer, num_warmup_steps, num_training_steps, num_cycles=0.5, min_lr=0.0, base_lr=1.0
+    ):
+        &quot;&quot;&quot;
+        Decay to min_lr according to Cosine curve after Warmup.
+        Note: base_lr is the max_lr passed in create, used to calculate min_lr_ratio.
+        &quot;&quot;&quot;
+
+        # Calculate minimum LR ratio
+        if base_lr &lt;= 0:
+            min_lr_ratio = 0.0
+        else:
+            min_lr_ratio = min_lr / base_lr
+
+        def lr_lambda(current_step: int):
+            # 1. Warmup Phase
+            if current_step &lt; num_warmup_steps:
+                return float(current_step) / float(max(1, num_warmup_steps))
+
+            # 2. Post-Training Phase (Over-train protection)
+            if current_step &gt; num_training_steps:
+                return min_lr_ratio
+
+            # 3. Decay Phase (Cosine)
+            progress = float(current_step - num_warmup_steps) / float(max(1, num_training_steps - num_warmup_steps))
+
+            # cos(0) = 1, cos(pi) = -1 -&gt; mapped to [1, 0]
+            cosine_decay = 0.5 * (1.0 + math.cos(math.pi * float(num_cycles) * 2.0 * progress))
+
+            # Scaled by (1 - min_ratio) + min_ratio
+            return cosine_decay * (1.0 - min_lr_ratio) + min_lr_ratio
+
+        return LambdaLR(optimizer, lr_lambda)
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>

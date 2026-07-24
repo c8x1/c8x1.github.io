@@ -1,0 +1,446 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py · 附录</title><style>
+:root{--bg:#0f0f12;--bg2:#000;--side:#1a1a1a;--line:#2a2a33;--txt:#e8e8e8;--mut:#9a9a9a;--mut2:#6a6a6a;
+--serif:ui-serif,Georgia,serif;--sans:system-ui,-apple-system,"PingFang SC",sans-serif;--mono:ui-monospace,Menlo,monospace;--red-tx:#e88;--acc:#C7000B;--grn-tx:#7ab98a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.65}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;color:var(--mut);position:sticky;top:0;background:var(--bg);z-index:5}
+.topbar .crumb{font-family:var(--serif);font-style:italic}.topbar nav{margin-left:auto;display:flex;gap:6px}
+.topbar nav a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:3px 9px;border-radius:6px}
+.topbar nav a:hover{color:#fff;border-color:var(--acc)}
+.wrap{padding:16px 32px 80px;max-width:none;margin:0}
+h1{font-family:var(--serif);font-size:22px;margin:4px 0 2px;color:#fff}
+.goal{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px;margin:0 0 14px;word-break:break-all}
+.refbar{font-size:12px;color:var(--mut2);margin:10px 0;border-top:1px dashed var(--line);padding-top:8px}
+.refbar a{display:inline-block;color:var(--red-tx);text-decoration:none;border:1px solid var(--line);padding:1px 8px;border-radius:4px;margin:0 4px 4px 0}
+.mut{color:var(--mut2);font-size:12px;font-style:italic}
+/* interleaved annotation */
+.annot h3{font-family:var(--serif);color:#fff;border-bottom:1px solid var(--line);padding-bottom:3px;margin:24px 0 8px;font-size:16px}
+.seg{margin:12px 0}
+.seg pre,.cmp pre{margin:0;border:1px solid var(--line);border-radius:6px;max-height:none}
+.seg .seglab{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--mut);margin:0 0 3px}
+.exp{font-size:13.5px;line-height:1.7;margin:6px 0 14px;padding:9px 13px;background:#16161c;border-left:3px solid var(--acc);border-radius:4px}
+.exp ul{margin:6px 0 6px 20px}.exp li{margin:3px 0}.exp .lab{font-family:var(--serif);font-style:italic;color:var(--mut);font-size:12px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:10px 0}
+.cmp>div{min-width:0;overflow:auto}.cmp>div:first-child{border-right:1px solid var(--line)}
+.cmp h5{margin:0;padding:5px 10px;font-family:var(--serif);font-size:12px;background:#16161c;border-bottom:1px solid var(--line)}
+.cmp>div:first-child h5{color:var(--red-tx)}.cmp>div:last-child h5{color:var(--grn-tx)}
+.cmp pre{border:0;border-radius:0;max-height:360px}
+details.src{margin:14px 0 0;border:1px solid var(--line);border-radius:6px;background:var(--bg2)}
+details.src summary{cursor:pointer;padding:8px 12px;font-family:var(--serif);font-style:italic;color:var(--mut);font-size:13px}
+details.src summary:hover{color:#fff}
+pre[data-lang]{margin:0;padding:8px 0;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;color:#d4d4d4}
+pre .line{display:block;white-space:pre}
+pre .line:target{background:#2a2020;box-shadow:inset 3px 0 0 var(--acc)}
+pre .ln{display:inline-block;width:44px;color:var(--mut2);user-select:none;padding-right:8px;text-align:right}
+pre:not([data-lang]) .line{padding-left:52px}pre:not([data-lang]) .ln{display:none}
+.tok-kw{color:#cc7832;font-weight:600}.tok-bi{color:#9876aa;font-style:italic}.tok-fn{color:#ffc66d}
+.tok-cl{color:#a9b7c6;font-style:italic}.tok-st{color:#6a8759}.tok-cm{color:#808080;font-style:italic}
+.tok-nm{color:#6897bb}.tok-dc{color:#bbb33b}.tok-key{color:#cc7832}.tok-var{color:#9876aa}
+</style></head><body>
+<div class="topbar"><span class="crumb">附录 · 项目文件走读</span><span style="color:var(--mut2)">mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py</span>
+<nav><a href="index.html" target="_top">📁 文件树</a> <a href="file_483d36e3f5db66.html">◀ qwen3.py</a> <a href="file_06e10cd4636949.html">npu_lightning_indexer.py ▶</a></nav></div>
+<div class="wrap">
+<h1>qwen3_moe.py</h1><p class="goal">mindspeed_llm/fsdp2/models/qwen3/qwen3_moe.py · 14447B · 345 行 · py</p>
+<div class="refbar"><b>结构大纲（点跳行 → 完整源码）</b>　<a href="#L38" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class Qwen3MoEForCausalLM(transformers.Qwen3Mo</a><a href="#L43" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, config)</a><a href="#L57" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def forward</a><a href="#L148" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def register_patches(config)</a><a href="#L174" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class Qwen3MoeExperts(nn.Module)</a><a href="#L175" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, config)</a><a href="#L187" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def forward(self, hidden_states, routing_weigh</a><a href="#L201" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def ep_forward(self, hidden_states, tokens_per</a><a href="#L214" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def _view_experts_weight(self)</a><a href="#L223" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">class Qwen3MoeSparseFusedMoeBlock(nn.Module)</a><a href="#L224" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def __init__(self, config)</a><a href="#L235" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def forward(self, hidden_states: torch.Tensor)</a><a href="#L263" style="display:inline-block;color:var(--mut);text-decoration:none;font-family:var(--mono);font-size:11px;padding:1px 8px">def qwen3_moe_model_forward</a></div>
+<div class="refbar"><b>被正文 EP 引用</b>　<a href="../ep09.html">EP09</a><a href="../ep11.html">EP11</a><a href="../ep12.html">EP12</a>　<span class="mut">— EP 讲场景脉络，本页按代码模块逐段讲细节</span></div>
+<div class="exp"><p>Copyright (c) 2025, HUAWEI CORPORATION.  All rights reserved.</p><p class="mut">（自动提取自首行注释）</p></div>
+<details class="src" open><summary>📜 源码</summary><pre data-lang="py" data-start="1"># Copyright (c) 2025, HUAWEI CORPORATION.  All rights reserved.
+# Copyright 2025 The Qwen team, Alibaba Group and the HuggingFace Inc. team. All rights reserved.
+from typing import Optional, Union
+from importlib.metadata import version
+
+import torch
+import torch.nn.functional as F
+
+try:
+    import torch_npu
+except ImportError:
+    pass
+import transformers
+from torch import nn
+from torch.distributed.tensor import DTensor
+from transformers.activations import ACT2FN
+from transformers.cache_utils import Cache, DynamicCache
+from transformers.masking_utils import create_causal_mask, create_sliding_window_causal_mask
+from transformers.modeling_outputs import MoeCausalLMOutputWithPast, MoeModelOutputWithPast
+from transformers.models.qwen3_moe.modeling_qwen3_moe import load_balancing_loss_func
+from transformers.utils import can_return_tuple
+
+from mindspeed.core.fusions.grouped_matmul import Ops
+from mindspeed.patch_utils import MindSpeedPatchesManager as pm
+
+try:
+    from mindspeed.ops.npu_moe_token_permute import npu_moe_token_permute
+    from mindspeed.ops.npu_moe_token_unpermute import npu_moe_token_unpermute
+except ImportError:
+    pass
+
+from mindspeed_llm.fsdp2.features.async_offload import async_save_on_cpu
+from mindspeed_llm.fsdp2.models.common.fusions import fused_rmsnorm_forward, apply_rotary_pos_emb
+from mindspeed_llm.fsdp2.models.common.modules import LMHead
+from mindspeed_llm.fsdp2.utils.global_vars import get_args
+
+
+class Qwen3MoEForCausalLM(transformers.Qwen3MoePreTrainedModel):
+    _tied_weights_keys = [&quot;lm_head.weight&quot;]
+    _tp_plan = {&quot;lm_head&quot;: &quot;colwise_rep&quot;}
+    _pp_plan = {&quot;lm_head&quot;: ([&quot;hidden_states&quot;], [&quot;logits&quot;])}
+
+    def __init__(self, config):
+        super().__init__(config)
+        self.config = config
+        self.model = transformers.Qwen3MoeModel(config)
+        self.vocab_size = config.vocab_size
+        self.lm_head = LMHead(config.hidden_size, config.vocab_size, bias=False)
+        self.router_aux_loss_coef = config.router_aux_loss_coef
+        self.num_experts = config.num_experts
+        self.num_experts_per_tok = config.num_experts_per_tok
+
+        # Initialize weights and apply final processing
+        self.post_init()
+
+    @can_return_tuple
+    def forward(
+        self,
+        input_ids: Optional[torch.LongTensor] = None,
+        attention_mask: Optional[torch.Tensor] = None,
+        position_ids: Optional[torch.LongTensor] = None,
+        past_key_values: Optional[Cache] = None,
+        inputs_embeds: Optional[torch.FloatTensor] = None,
+        labels: Optional[torch.LongTensor] = None,
+        use_cache: Optional[bool] = None,
+        output_router_logits: Optional[bool] = None,
+        cache_position: Optional[torch.LongTensor] = None,
+        logits_to_keep: Union[int, torch.Tensor] = 0,
+        loss_ctx: Optional[callable] = None,
+        **kwargs,
+    ) -&gt; MoeCausalLMOutputWithPast:
+        r&quot;&quot;&quot;
+        labels (`torch.LongTensor` of shape `(batch_size, sequence_length)`, *optional*):
+            Labels for computing the masked language modeling loss. Indices should either be in `[0, ...,
+            config.vocab_size]` or -100 (see `input_ids` docstring). Tokens with indices set to `-100` are ignored
+            (masked), the loss is only computed for the tokens with labels in `[0, ..., config.vocab_size]`.
+
+        Example:
+
+        ```python
+        &gt;&gt;&gt; from transformers import AutoTokenizer, Qwen3MoeForCausalLM
+
+        &gt;&gt;&gt; model = Qwen3MoeForCausalLM.from_pretrained(&quot;Qwen/Qwen3-MoE-15B-A2B&quot;)
+        &gt;&gt;&gt; tokenizer = AutoTokenizer.from_pretrained(&quot;Qwen/Qwen3-MoE-15B-A2B&quot;)
+
+        &gt;&gt;&gt; prompt = &quot;Hey, are you conscious? Can you talk to me?&quot;
+        &gt;&gt;&gt; inputs = tokenizer(prompt, return_tensors=&quot;pt&quot;)
+
+        &gt;&gt;&gt; # Generate
+        &gt;&gt;&gt; generate_ids = model.generate(inputs.input_ids, max_length=30)
+        &gt;&gt;&gt; tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
+        &quot;Hey, are you conscious? Can you talk to me?\nI&#x27;m not conscious, but I can talk to you.&quot;
+        ```
+        &quot;&quot;&quot;
+
+        output_router_logits = (
+            output_router_logits if output_router_logits is not None else self.config.output_router_logits
+        )
+
+        # decoder outputs consists of (dec_features, layer_state, dec_hidden, dec_attn)
+        outputs: MoeModelOutputWithPast = self.model(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            position_ids=position_ids,
+            past_key_values=past_key_values,
+            inputs_embeds=inputs_embeds,
+            use_cache=use_cache,
+            output_router_logits=output_router_logits,
+            cache_position=cache_position,
+            **kwargs,
+        )
+
+        hidden_states = outputs.last_hidden_state
+        # Only compute necessary logits, and do not upcast them to float if we are not computing the loss
+        slice_indices = slice(-logits_to_keep, None) if isinstance(logits_to_keep, int) else logits_to_keep
+
+        if loss_ctx:
+            logits, loss = self.lm_head(hidden_states[:, slice_indices, :], loss_ctx=loss_ctx)
+        else:
+            logits, loss = self.lm_head(hidden_states[:, slice_indices, :])
+
+            loss = None
+            if labels is not None:
+                loss = self.loss_function(logits=logits, labels=labels, vocab_size=self.config.vocab_size, **kwargs)
+
+        aux_loss = None
+        if output_router_logits:
+            aux_loss = load_balancing_loss_func(
+                outputs.router_logits,
+                self.num_experts,
+                self.num_experts_per_tok,
+                attention_mask,
+            )
+            if labels is not None:
+                loss += self.router_aux_loss_coef * aux_loss.to(loss.device)  # make sure to reside in the same device
+
+        return MoeCausalLMOutputWithPast(
+            loss=loss,
+            aux_loss=aux_loss,
+            logits=logits,
+            past_key_values=outputs.past_key_values,
+            hidden_states=outputs.hidden_states,
+            attentions=outputs.attentions,
+            router_logits=outputs.router_logits,
+        )
+
+    @staticmethod
+    def register_patches(config):
+        &quot;&quot;&quot;patching the transformers model.&quot;&quot;&quot;
+        args = get_args()
+        if getattr(args, &quot;moe_grouped_gemm&quot;, False):
+            pm.register_patch(
+                &quot;transformers.models.qwen3_moe.modeling_qwen3_moe.Qwen3MoeSparseMoeBlock&quot;, Qwen3MoeSparseFusedMoeBlock
+            )
+
+        if getattr(args, &quot;activation_offload&quot;, False):
+            pm.register_patch(
+                &quot;transformers.models.qwen3_moe.modeling_qwen3_moe.Qwen3MoeModel.forward&quot;, qwen3_moe_model_forward
+            )
+
+        if getattr(args, &quot;use_fused_rmsnorm&quot;, False):
+            pm.register_patch(
+                &quot;transformers.models.qwen3_moe.modeling_qwen3_moe.Qwen3MoeRMSNorm.forward&quot;, fused_rmsnorm_forward
+            )
+
+        if getattr(args, &quot;use_fused_rotary_pos_emb&quot;, False):
+            pm.register_patch(
+                &quot;transformers.models.qwen3_moe.modeling_qwen3_moe.apply_rotary_pos_emb&quot;, apply_rotary_pos_emb
+            )
+
+        pm.apply_patches()
+
+
+class Qwen3MoeExperts(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.num_experts = config.num_experts
+        self.hidden_dim = config.hidden_size
+        self.intermediate_size = config.moe_intermediate_size
+        self.gate_up_proj = torch.nn.Parameter(
+            torch.empty(self.num_experts * self.hidden_dim, 2 * self.intermediate_size)
+        )
+
+        self.down_proj = torch.nn.Parameter(torch.empty(self.num_experts * self.intermediate_size, self.hidden_dim))
+        self.act_fn = ACT2FN[config.hidden_act]
+
+    def forward(self, hidden_states, routing_weights=None, selected_experts=None):
+        gate_up_proj, down_proj = self._view_experts_weight()
+        # permute
+        permuted_hidden_states, row_ids_map = npu_moe_token_permute(hidden_states, selected_experts.to(torch.int32))
+        tokens_per_expert = torch.histc(selected_experts, bins=self.num_experts, min=0, max=self.num_experts)
+
+        fc1_output = Ops.gmm(permuted_hidden_states, gate_up_proj, tokens_per_expert, trans_b=False)
+        fc1_activation = torch_npu.npu_swiglu(fc1_output, dim=-1)
+        fc2_out = Ops.gmm(fc1_activation, down_proj, tokens_per_expert, trans_b=False)
+
+        # unpermute
+        output = npu_moe_token_unpermute(fc2_out, row_ids_map, probs=routing_weights)
+        return output
+
+    def ep_forward(self, hidden_states, tokens_per_expert):
+        gate_up_proj = self.gate_up_proj.to_local().to(torch.bfloat16)
+        down_proj = self.down_proj.to_local().to(torch.bfloat16)
+        gate_up_proj = gate_up_proj.view(self.num_local_experts, self.hidden_dim, -1)
+        down_proj = down_proj.view(self.num_local_experts, -1, self.hidden_dim)
+
+        fc1_output = Ops.gmm(hidden_states, gate_up_proj, tokens_per_expert, trans_b=False)
+
+        fc1_activation = torch_npu.npu_swiglu(fc1_output, dim=-1)
+
+        fc2_out = Ops.gmm(fc1_activation, down_proj, tokens_per_expert, trans_b=False)
+        return fc2_out
+
+    def _view_experts_weight(self):
+        gate_up_proj = self.gate_up_proj.to_local() if isinstance(self.gate_up_proj, DTensor) else self.gate_up_proj
+        gate_up_proj = gate_up_proj.view(self.num_experts, self.hidden_dim, -1)
+
+        down_proj = self.down_proj.to_local() if isinstance(self.down_proj, DTensor) else self.down_proj
+        down_proj = down_proj.view(self.num_experts, -1, self.hidden_dim)
+        return gate_up_proj, down_proj
+
+
+class Qwen3MoeSparseFusedMoeBlock(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.num_experts = config.num_experts
+        self.top_k = config.num_experts_per_tok
+        self.norm_topk_prob = config.norm_topk_prob
+
+        # gating
+        self.gate = nn.Linear(config.hidden_size, config.num_experts, bias=False)
+
+        self.experts = Qwen3MoeExperts(config)
+
+    def forward(self, hidden_states: torch.Tensor) -&gt; torch.Tensor:
+        &quot;&quot;&quot; &quot;&quot;&quot;
+        batch_size, sequence_length, hidden_dim = hidden_states.shape
+        hidden_states = hidden_states.view(-1, hidden_dim)
+        # router_logits: (batch * sequence_length, n_experts)
+        router_logits = self.gate(hidden_states)
+
+        routing_weights = F.softmax(router_logits, dim=1, dtype=torch.float)
+        routing_weights, selected_experts = torch.topk(routing_weights, self.top_k, dim=-1)
+        if self.norm_topk_prob:
+            routing_weights /= routing_weights.sum(dim=-1, keepdim=True)
+        # we cast back to the input dtype
+        routing_weights = routing_weights.to(hidden_states.dtype)
+
+        args = get_args()
+        if getattr(args, &#x27;ep_size&#x27;) &gt; 1:
+            final_hidden_states = self.experts(hidden_states, selected_experts, routing_weights)
+        else:
+            final_hidden_states = self.experts(
+                hidden_states, routing_weights=routing_weights, selected_experts=selected_experts
+            )
+
+        final_hidden_states = final_hidden_states.reshape(batch_size, sequence_length, hidden_dim)
+        if version(&quot;transformers&quot;) &lt; &quot;5.0.0&quot;:
+            return final_hidden_states, router_logits
+        return final_hidden_states
+
+
+def qwen3_moe_model_forward(
+    self,
+    input_ids: Optional[torch.LongTensor] = None,
+    attention_mask: Optional[torch.Tensor] = None,
+    position_ids: Optional[torch.LongTensor] = None,
+    past_key_values: Optional[Cache] = None,
+    inputs_embeds: Optional[torch.FloatTensor] = None,
+    use_cache: Optional[bool] = None,
+    cache_position: Optional[torch.LongTensor] = None,
+    **kwargs,
+) -&gt; MoeModelOutputWithPast:
+    if (input_ids is None) ^ (inputs_embeds is not None):
+        raise ValueError(&quot;You must specify exactly one of input_ids or inputs_embeds&quot;)
+
+    if use_cache and past_key_values is None:
+        past_key_values = DynamicCache(config=self.config)
+
+    if inputs_embeds is None:
+        inputs_embeds = self.embed_tokens(input_ids)
+
+    if cache_position is None:
+        past_seen_tokens = past_key_values.get_seq_length() if past_key_values is not None else 0
+        cache_position = torch.arange(
+            past_seen_tokens, past_seen_tokens + inputs_embeds.shape[1], device=inputs_embeds.device
+        )
+    if position_ids is None:
+        position_ids = cache_position.unsqueeze(0)
+
+    mask_function = create_causal_mask if self.config.sliding_window is None else create_sliding_window_causal_mask
+    causal_mask = mask_function(
+        config=self.config,
+        input_embeds=inputs_embeds,
+        attention_mask=attention_mask,
+        cache_position=cache_position,
+        past_key_values=past_key_values,
+        position_ids=position_ids,
+    )
+
+    hidden_states = inputs_embeds
+
+    # create position embeddings to be shared across the decoder layers
+    position_embeddings = self.rotary_emb(hidden_states, position_ids)
+
+    offload_stream = torch.npu.Stream()
+
+    for layer_id, decoder_layer in enumerate(self.layers[: self.config.num_hidden_layers]):
+        if self.training:
+            with async_save_on_cpu(
+                h2d_stream=offload_stream,
+                d2h_stream=offload_stream,
+                block_idx=int(layer_id),
+                depth=len(self.layers),
+                custom_check_fn=lambda x: x.data_ptr() == hidden_states.data_ptr(),  # pylint: disable=W0640
+            ):
+                hidden_states = decoder_layer(
+                    hidden_states,
+                    position_embeddings=position_embeddings,
+                    attention_mask=causal_mask,
+                    position_ids=position_ids,
+                    past_key_values=past_key_values,
+                    use_cache=use_cache,
+                    cache_position=cache_position,
+                    **kwargs,
+                )
+        else:
+            hidden_states = decoder_layer(
+                hidden_states,
+                position_embeddings=position_embeddings,
+                attention_mask=causal_mask,
+                position_ids=position_ids,
+                past_key_values=past_key_values,
+                use_cache=use_cache,
+                cache_position=cache_position,
+                **kwargs,
+            )
+
+    hidden_states = self.norm(hidden_states)
+
+    return MoeModelOutputWithPast(  # only diff with Mistral is the output type, we need MoE
+        last_hidden_state=hidden_states,
+        past_key_values=past_key_values,
+    )
+</pre></details>
+</div><script>// PyCharm Darcula 多色高亮：sticky 逐规则优先匹配，注释/字符串优先，无 group 编号依赖
+(function(){
+  var RULES={
+    py:[[/#.*$/,'cm'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/,'st'],
+      [/@\w+/,'dc'],
+      [/\b\d[\w.]*\b/,'nm'],
+      [/\b(?:def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|in|is|not|and|or|lambda|yield|pass|async|await|global|nonlocal|del|assert|break|continue)\b/,'kw'],
+      [/\b(?:None|True|False)\b/,'bi'],
+      [/\b(?:self|cls)\b/,'bi'],
+      [/\b[A-Z]\w*\b/,'cl'],
+      [/[a-zA-Z_]\w*(?=\s*\()/,'fn']],
+    yaml:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/^[ \t]*[\w.-]+:/,'key']],
+    sh:[[/#.*/,'cm'],
+      [/"(?:\\.|[^"])*"|'[^']*'/,'st'],
+      [/\b(?:export|for|do|done|if|then|fi|elif|while|case|esac|function|return|local|in)\b/,'kw'],
+      [/\$\w+|\$\{[^}]+\}/,'var']],
+    ini:[[/^[ \t]*[;#].*/,'cm'],
+      [/^\[[^\]]+\]/,'cl'],
+      [/^[ \t]*[\w.-]+=/,'key']]
+  };
+  var COMPILED={};
+  Object.keys(RULES).forEach(function(k){
+    COMPILED[k]=RULES[k].map(function(r){return {re:new RegExp(r[0].source,'y'),cls:r[1]};});
+  });
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokLine(line,rules){
+    var pos=0,out='',plain='';
+    function flush(){if(plain){out+=esc(plain);plain='';}}
+    while(pos<line.length){
+      var hit=null;
+      for(var i=0;i<rules.length;i++){
+        rules[i].re.lastIndex=pos;
+        var m=rules[i].re.exec(line);
+        if(m){hit={cls:rules[i].cls,txt:m[0],end:rules[i].re.lastIndex};break;}
+      }
+      if(hit){flush();out+='<span class="tok-'+hit.cls+'">'+esc(hit.txt)+'</span>';pos=hit.end;}
+      else{plain+=line[pos];pos++;}
+    }
+    flush();return out;
+  }
+  document.querySelectorAll('pre').forEach(function(p){
+    var lang=p.getAttribute('data-lang');var rules=COMPILED[lang];
+    var start=parseInt(p.getAttribute('data-start')||'1',10);
+    var pfx=p.getAttribute('data-idprefix')||'L';
+    var src=p.textContent;
+    p.innerHTML=src.split('\n').map(function(l,i){
+      var ln=start+i;var inner=rules?tokLine(l,rules):esc(l);
+      return '<span class="line" id="'+pfx+ln+'"><span class="ln">'+ln+'</span>'+inner+'</span>';
+    }).join('');
+  });
+})();
+</script></body></html>
