@@ -244,7 +244,7 @@ Agent({ model: "opus", description: "Ground concept [concept_cn]",
 }` })
 ```
 
-3. **选视角（perspective rotation，新增）**——Read `$SITE_DIR/parable-queue.json` 的 `perspectiveCursor`（整数，默认 0）。视角池：
+3. **选视角（perspective rotation）+ 取近期母题（motif registry）**——Read `$SITE_DIR/parable-queue.json` 的 `perspectiveCursor`（整数，默认 0）。视角池：
 
 ```
 ["全知旁观", "第一人称亲历", "对话体", "倒叙揭示"]
@@ -252,7 +252,9 @@ Agent({ model: "opus", description: "Ground concept [concept_cn]",
 
 两篇寓言分别取 `pool[cursor % 4]` 与 `pool[(cursor+1) % 4]`，写回 `cursor = (cursor+2) % 4`，避免连续两篇同视角。
 
-4. **生成寓言**——对 2 个概念各跑一次 opus Agent（**与翻译 Agent 并行**，寓言臂内部串行：调研→写作→验证），把下面 prompt 里 `N` 分别替换为 `1` 和 `2`，`[PERSPECTIVE]` 替换为上一步选定的视角，`{BRIEF_JSON}` 替换为该概念的 brief JSON：
+同时读 `parable-queue.json` 的 `motifs` 数组（近期已用意象/数字母题/场景容器/人物原型，FIFO 上限 60），拼成分号分隔的 `{RECENT_MOTIFS}` 字符串，供第 4 步 writer prompt 与第 5 步 V12 使用。
+
+4. **生成寓言**——对 2 个概念各跑一次 opus Agent（**与翻译 Agent 并行**，寓言臂内部串行：调研→写作→验证），把下面 prompt 里 `N` 分别替换为 `1` 和 `2`，`[PERSPECTIVE]` 替换为上一步选定的视角，`{BRIEF_JSON}` 替换为该概念的 brief JSON，`{RECENT_MOTIFS}` 替换为第 3 步拼好的近期母题串：
 
 ```
 Agent({ model: "opus", description: "Generate parable N for [concept_cn]",
@@ -266,9 +268,14 @@ BRIEF:
 2. 赌注/两难: 必须有角色面临真实代价或两难抉择，不得是过程的平铺直叙。
 3. 视角: 本次用 [PERSPECTIVE]。
 4. 概念名不得在故事正文出现，只在末尾「注解」中给出。
-5. 结尾格式（强制）: 故事讲完后另起一段，以「注解：」开头，1-2 句日常语言点明概念名(CN+EN)与核心机制（与 brief.key_relations 一致）。此段是作者注解，坦白跳出寓言，不得伪装成故事，禁止用「这则故事揭示了…的本质」这类伪叙事。
+5. 结尾格式（强制）: 故事讲完后另起一段，以「注解：」开头，1-2 句日常语言点明概念名(CN+EN)与核心机制（与 brief.key_relations 一致）。若映射有已知边界（寓言未覆盖的部分，参考 brief.common_misconceptions），可再加半句边界说明（如「能跨世代传递的标记只是少数」）——注解应是诚实的边界，不是谜底复印。此段是作者注解，坦白跳出寓言，不得伪装成故事，禁止用「这则故事揭示了…的本质」这类伪叙事。
 6. 体例: 译名 中文（English）全角括号；全角标点 ，。；：「」。
 7. 标题: 英文标题，不提概念名；标题核心名词/意象必须在中译文正文出现 ≥1 次。
+8. 意象自足: 正文不得用技术/数学术语标注意象（禁止写「扰动」「幂集」「乘积」「副产物」这类点破隐喻的词）——命名权全部留给注解段，谜底不得印在谜面上。
+9. 赌注兑现: 正文立起的每一个具体赌注（生死、期限、邀请函、危机、赌局）必须在结尾前得到交代；无法兑现就不要立。
+10. 句式纪律: 「不是A，而是B」/「并非A——是B」句式全篇 ≤1 次；三连排比列举（三位长老/三个理由/三任导演）全篇 ≤1 次；每段破折号插入语 ≤2 处；同一论点正文只许陈述一次，结尾不得预告注解内容。
+11. 跨篇去重: 以下是近期已用的意象/母题/场景/人物原型，禁止逐字或近义复用: {RECENT_MOTIFS}。永久黑名单（已过度使用）: 「手心全是汗 / palms slick with sweat」。
+12. 对话体特别约束: 若 [PERSPECTIVE] 为对话体，知晓者必须付出真实代价、或提问者必须拒绝/反抗/付出代价——禁止纯问答讲义（无知提问者 × 全知长者的苏格拉底模板近期已用 4 次）。「权威下达不可能要求」开局（国王敕令/院长赌局/委员会指令）近期已用 3 次，本次禁用；「知晓规则的老者」导师原型本次禁用。
 
 输出 JSON（用 Write 写入 /tmp/parable_article_N.json）:
 { "title_en": "...", "title_cn": "...", "paragraphs": [{"en":"...","cn":"..."}, ...] }
@@ -286,6 +293,7 @@ Agent({ model: "opus", description: "Verify parable N",
 BRIEF: {BRIEF_JSON}
 PARABLE: {PARABLE_JSON}
 最近5篇寓言主角名: {RECENT_NAMES}
+近期已用意象/母题: {RECENT_MOTIFS}
 
 逐项 pass/fail + 一句理由:
 V1 概念名(CN或EN)在末两段(含注解)出现
@@ -296,9 +304,21 @@ V5 标点: cn 段全角标点(，。；：「」)，无半角逗号/句号
 V6 译名格式: 统一 中文（English）全角括号
 V7 距离: 故事设定未落在 brief.literal_domain_to_avoid 或概念字面领域
 V8 软目的论: 若 brief.core_mechanism 为非意愿过程，故事是否给它塞了意愿/品德/耐心
+V9 赌注兑现: 正文立起的每个具体赌注/钩子（生死、期限、邀请函、危机）结尾前有交代；立而未收即 fail
+V10 中英一致: 数字、代数、年数、人名、注解标签 CN/EN 逐项一致；EN 段无中文残留；EN 对白用双引号；注解标签 CN「注解：」/ EN "Note:"
+V11 句式密度: 「不是A而是B」≤1、三连排比 ≤1、正文无技术/数学术语标注意象（扰动/幂集/乘积类词不得出现在故事段）
+V12 跨篇重复: 与 {RECENT_MOTIFS} 无逐字或近义重复（意象、数字母题、场景容器、人物原型）；时间线内部自洽（年数与代数算术对得上）
 
 输出 ONLY JSON: 任一 fail → {"reject":true,"failed":["V3"],"reasons":["..."]}；全 pass → {"reject":false}。` })
 ```
+
+5.5. **机械校对（proofread pass）**——验证通过后、构建 article 对象前，对两个 JSON 跑校对脚本：
+
+```bash
+cd $SITE_DIR && node scripts/proofread-parable.js /tmp/parable_article_1.json /tmp/parable_article_2.json
+```
+
+脚本自动修复机械项（Annotation:→Note:、EN em-dash 间距、EN 中文夹注删除）并写回文件；对不可自动修复项（单引号对白、黑名单短语、CN 半角标点、句式超密）输出 WARN 并以退出码 1 返回。有 WARN 时：把 WARN 列表回灌 writer prompt 重生成一次（与 V1-V12 的重生成合并计次，仍不过则当天跳过该篇）。
 
 6. 验证通过后，构建寓言 article 对象：
 
@@ -329,6 +349,8 @@ V8 软目的论: 若 brief.core_mechanism 为非意愿过程，故事是否给�
 - source 固定为 `"每日精选"`
 - originalUrl 为空字符串（非抓取文章）
 - summary 只取故事正文第一段，不含注解段
+
+**母题登记（motif registry 回写）**：每篇入库后，从该篇提炼 2-4 个短母题串（核心意象如「铜牌嵌进基石」、数字母题如「四十年」、场景容器如「剧院/图书馆/沙漠」、人物原型如「老药师」），append 到 `parable-queue.json` 的 `motifs` 数组；数组超 60 条时从头部裁剪（FIFO）。与第 1 步的 `used` 概念回写合并为一次 Write。
 
 ### 归档第四步：构建 article 对象并追加到 articles.json
 
