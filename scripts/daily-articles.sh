@@ -25,6 +25,12 @@ CLAUDE="$HOME/.nvm/versions/node/v24.14.1/bin/claude"
 : "${https_proxy:=http://127.0.0.1:7897}"
 : "${http_proxy:=$https_proxy}"
 
+# 防止 cron 运行时系统入睡（Mac 频繁 DarkWake/Sleep，会掐断网络、导致 API 中途断连）。
+# -i 阻止 idle sleep；-w $$ 在当前 pid 退出时自动结束 caffeinate。
+caffeinate -i -w $$ &>/dev/null &
+CAFFEINATE_PID=$!
+trap 'kill $CAFFEINATE_PID 2>/dev/null' EXIT
+
 # ── 执行归档 ──
 
 LOG_DIR="$PROJECT_DIR/logs"
@@ -56,14 +62,35 @@ git stash pop -q 2>/dev/null || true
 # 使用 claude -p 非交互模式执行归档
 # --allowedTools: 预授权所需工具，避免交互确认
 # --model opus: 最高质量，确保寓言严格遵循概念揭示格式
-echo "运行 /translate-articles archive 执行每日文章归档。完成后报告结果。" \
-  | "$CLAUDE" -p \
-    --model opus \
-    --allowedTools "Bash,Read,Write,Edit,Agent,WebSearch,mcp__web_reader__webReader" \
-  2>&1 | tee -a "$LOG_FILE"
+# 重试: 早起网络抖动/API 中途断连是间歇性的，重试几次往往就能成功。
+# 注意: 脚本开启 set -e，claude 失败会让管道返回非零并直接杀掉脚本，
+#       所以必须用 if 包住 claude 调用，让 set -e 不触发，才能走到重试逻辑。
+MAX_RETRIES=3
+CLAUDE_EXIT=0
+for attempt in $(seq 1 $MAX_RETRIES); do
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] 第 ${attempt}/${MAX_RETRIES} 次调用 claude..." | tee -a "$LOG_FILE"
+  if echo "运行 /translate-articles archive 执行每日文章归档。完成后报告结果。" \
+    | "$CLAUDE" -p \
+      --model opus \
+      --allowedTools "Bash,Read,Write,Edit,Agent,WebSearch,mcp__web_reader__webReader" \
+    2>&1 | tee -a "$LOG_FILE"; then
+    CLAUDE_EXIT=0
+  else
+    # 管道是 echo | claude | tee 三段，claude 的退出码在 PIPESTATUS[1]（[0] 是 echo，恒为 0）。
+    # 必须先复制数组，否则后续命令会覆盖 PIPESTATUS。
+    PIPE_STATUS=( "${PIPESTATUS[@]}" )
+    CLAUDE_EXIT=${PIPE_STATUS[1]}
+  fi
 
-# 用 PIPESTATUS 获取管道中 claude 的退出码（tee 会掩盖 claude 的错误）
-CLAUDE_EXIT=${PIPESTATUS[0]}
+  if [ $CLAUDE_EXIT -eq 0 ]; then
+    break
+  fi
+  if [ $CLAUDE_EXIT -ne 0 ] && [ $attempt -lt $MAX_RETRIES ]; then
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] claude 执行失败 (exit code: $CLAUDE_EXIT)，60s 后重试..." | tee -a "$LOG_FILE"
+    sleep 60
+  fi
+done
+
 if [ $CLAUDE_EXIT -ne 0 ]; then
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] claude 执行失败 (exit code: $CLAUDE_EXIT)" | tee -a "$LOG_FILE"
   exit $CLAUDE_EXIT
