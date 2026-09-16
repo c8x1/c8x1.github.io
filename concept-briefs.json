@@ -839,6 +839,58 @@
       "is_process_type": true,
       "canonical_sentence_cn": "粒子的位置与动量不能同时被精确确定，位置不确定度越小则动量不确定度越大，反之亦然，其乘积满足 σ_x·σ_p ≥ ℏ/2。",
       "canonical_sentence_en": "The more precisely the position is determined, the less precisely the momentum is known, and vice versa; their standard deviations satisfy σ_x·σ_p ≥ ℏ/2."
+    },
+    "Noether's theorem": {
+      "concept": "Noether's theorem",
+      "concept_cn": "诺特定理",
+      "definition_cn": "诺特定理指出：物理系统作用量的每一个连续可微对称性，都对应一个守恒量（守恒定律）；由数学家埃米·诺特于1918年发表。",
+      "definition_en": "Noether's theorem states that every continuous differentiable symmetry of the action of a physical system (with conservative forces) has a corresponding conservation law, published by mathematician Emmy Noether in 1918.",
+      "core_mechanism": "若系统的作用量（拉格朗日量的时间积分）在某连续变换群下保持不变，则通过变分法/欧拉-拉格朗日方程可机械地（deterministic、纯逻辑演绎）导出一个不随时间变化的守恒量（诺特荷）及其守恒流（诺特流）；这是确定性数学定理，不是 selection-driven 或随机过程，也无任何意愿主体。",
+      "key_relations": [
+        "时间平移对称性（物理定律不随时间改变）→ 能量守恒",
+        "空间平移对称性（物理定律不随位置改变）→ 线动量守恒",
+        "旋转对称性（物理定律不随空间取向改变）→ 角动量守恒",
+        "洛伦兹变换不变性（所有惯性参考系等价）→ 质心定理：孤立系统质心匀速运动",
+        "量子场论中带电粒子场相位/规范不变性 → 电荷守恒（Ward–Takahashi 恒等式）",
+        "守恒量称为诺特荷、其流称为诺特流；诺特荷还被用于计算稳态黑洞的熵"
+      ],
+      "common_misconceptions": [
+        "误以为守恒定律是独立于对称性的经验公理：实际上守恒是对称性的推论——如中文维基所举，若重力强度逐日变化（时间平移对称破缺），人可在重力弱时举起重物、重力强时放下而凭空获得能量，能量守恒即失效",
+        "误以为系统或物体本身必须对称：一凹凸不平、翻滚着的小行星尽管形状不对称仍守恒角动量——对称的是运动定律（拉格朗日量），不是物体",
+        "误以为任何对称性都给出守恒律：定理只适用于连续、可微的对称性（一维李群变换下的协变性），镜像反射这类离散对称不在其列",
+        "误以为定理适用于一切物理系统：不能仅用拉格朗日量建模的耗散系统（如含 Rayleigh 耗散函数、摩擦生热的系统）即使具有连续对称性，也未必有对应的守恒律"
+      ],
+      "literal_domain_to_avoid": null,
+      "is_process_type": false,
+      "canonical_sentence_cn": "物理系统作用量的每一个连续可微对称性，都有一个相应的守恒定律。",
+      "canonical_sentence_en": "Every continuous symmetry of the action of a physical system has a corresponding conservation law."
+    },
+    "the Byzantine generals problem": {
+      "concept": "the Byzantine generals problem",
+      "concept_cn": "拜占庭将军问题",
+      "definition_cn": "分布式共识问题：一组分驻围城四方、只能靠信使传信的将军，须就'全体进攻或全体撤退'达成完全一致，而其中叛徒可能向不同人发送相互矛盾的命令，问题是如何让忠诚将军在此情况下仍达成并执行同一决定。",
+      "definition_en": "A distributed consensus problem in which a group of generals, physically separated around a besieged city and communicating only via messengers, must all agree on a single plan (all attack or all retreat), while traitorous generals may send contradictory messages to different recipients; the challenge is for the loyal generals to still reach and act on one common decision.",
+      "core_mechanism": "非自然过程（is_process_type=false）：它是数学形式化的共识问题及其不可能性/下界定理——故障模型为'任意故障'（对错误行为不做任何限制，是最一般、最难的故障类别，叛徒只是其拟人化），可解性是确定性数学结论（口头消息下 n>3t 且需同步通信；带不可伪造签名下 n>F+1）；其中的'机制'是算法协议（口头消息算法、签名消息算法、后来的 PBFT 等），而非选择驱动或自然发生的无意愿过程。",
+      "key_relations": [
+        "叛徒的行为是'任意'的：不仅可投糟糕的票，还可选择性发送——对主张进攻的将军称自己投进攻、对主张撤退的将军称自己投撤退，使两派各自看到'多数'而分裂行动（经典例：9 位将军，忠诚者 4 攻 4 撤僵持，第 9 位叛徒两边发不同投票，结果一边看到 5 攻、另一边看到 5 撤）",
+        "忠诚将军的目标不是'选出最优策略'而是'全体一致'：少数人的半心半意进攻会沦为溃败（rout），比协同进攻或协同撤退都更糟——共识本身就是正确性条件",
+        "口头消息（无签名）下有解当且仅当叛徒数 t 严格小于总数的 1/3（即容 f 个叛徒需至少 3f+1 位将军）且通信同步（延迟有界）；完整要求为 3F+1 个成员、2F+1 条独立通信路径、F+1 轮通信",
+        "带不可伪造签名的消息可容忍任意数量的叛徒，只需 n > F+1，因为叛徒无法冒充他人；但在物理电子系统中签名不能单独解决问题——错误电压等故障可穿透加密过程，使不同接收者对同一消息看到不同的有效性与内容",
+        "问题可归约为'司令与副官'问题，最小不可解反例是 3 人 1 叛徒：叛徒司令分别命令两名副官一攻一撤，两副官互相转述后仍无法判定谁在说谎（因为副官也可能伪造转述），故口头消息下 3 人无法容 1 个叛徒",
+        "信使（信道）同样不可靠：可能丢信、被截杀或被替换伪造，因此不能靠'保证人员可靠与通讯可靠'来回避问题；缺失的消息以预设默认值（如撤退或 null）计票",
+        "术语区分：拜占庭将军问题 = 共识问题本身（1982 年 Lamport/Shostak/Pease 同名论文提出，源自 1978 年 SRI 为 NASA SIFT 项目形式化的 interactive consistency problem；寓言原为阿尔巴尼亚军队将军，后改称'拜占庭'以避免冒犯）；拜占庭容错 BFT = 解决方案与系统韧性（口头/签名算法，1999 年 Castro-Liskov 的 PBFT 为实用化里程碑）"
+      ],
+      "common_misconceptions": [
+        "误以为拜占庭故障 = 恶意黑客攻击：维基明确指出拜占庭故障未必是涉及人类敌意干扰的安全问题，可以纯粹由物理或软件故障引起——'叛徒'只是任意故障模型的拟人化隐喻",
+        "误以为简单多数表决即可解决：多数决无法抵御'对不同人发不同消息'与'伪造他人消息'；口头消息下须叛徒少于 1/3（n>3t）且通信同步才可能有解，叛徒达到 1/3 时数学上无解",
+        "误以为拜占庭容错保证'决策正确'：BFT 只保证广播一致性（所有成员收到同一个值），不保证该值本身正确——一个始终向所有人一致发送同一个错误值的节点不会被 BFT 识破",
+        "混淆问题与解：'拜占庭将军问题'是共识问题本身，'拜占庭容错（BFT）'是解决方案/系统属性，两者常被混为一谈",
+        "误以为区块链等现代系统满足经典 BFT 下界：维基指出许多自称 BFT 的系统（如区块链）并不满足 3F+1 等最低要求，它们并不保证一致，而是用资源密集型机制（如工作量证明）使分歧难以维持"
+      ],
+      "literal_domain_to_avoid": "两个字面领域均须避开：① 古代/中世纪军事场景——拜占庭、将军、围城、军队、进攻/撤退投票、传令兵/信使（寓言原生场景）；② 分布式计算场景——计算机、服务器机房、网络节点、协议、区块链/比特币（其标准技术映射）。写作应另选结构等价域：一组远距离散、只能间接传信的成员，须全组一致行动否则全败，且存在向不同成员发送矛盾信息者。",
+      "is_process_type": false,
+      "canonical_sentence_cn": "若干分驻围城四方、只能靠信使通信的将军须一致决定'全体进攻或全体撤退'，而叛徒可能向不同将军发送互相矛盾的命令——让忠诚将军在这种情况下仍达成同一决定，就是拜占庭将军问题；理论上，无签名的口头消息只在将军总数超过叛徒数三倍（n>3t）且通信同步时才可求解。",
+      "canonical_sentence_en": "Several generals, camped around a besieged city and communicating only by messengers, must agree on a single plan—attack or retreat—even though traitors may send contradictory orders to different generals; with unsigned oral messages, agreement is achievable only if the total number of generals exceeds three times the number of traitors (n > 3t) and communication is synchronous."
     }
   }
 }
