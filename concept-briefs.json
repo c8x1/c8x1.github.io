@@ -1144,6 +1144,62 @@
       "is_process_type": false,
       "canonical_sentence_cn": "一个自相似的物体在整体上与其自身的某一部分完全或近似相似——把整体缩小即得到与局部同构的形态，该性质跨尺度重复出现，是分形的典型特征；数学分形在任意放大下保持这种相似，而自然界的自相似只是有限尺度范围内的统计近似。",
       "canonical_sentence_en": "A self-similar object is exactly or approximately similar to a part of itself — the whole has the same shape as one or more of its parts — and this property repeats across scales as a typical feature of fractals; mathematical fractals remain self-similar under arbitrary magnification, whereas self-similarity in nature is only a statistical approximation over a finite range of scales."
+    },
+    "the P vs NP problem": {
+      "concept": "the P vs NP problem",
+      "concept_cn": "P 对 NP 问题",
+      "definition_cn": "理论计算机科学中最重要的未解问题：如果一个问题的解可以在多项式时间内被快速验证，那么该问题是否也能在多项式时间内被快速求解。",
+      "definition_en": "A major unsolved problem in theoretical computer science asking whether every decision problem whose proposed positive answer can be quickly (polynomial-time) verified can also be quickly solved.",
+      "core_mechanism": "机制核心是『验证一个候选解』与『从零找出解』之间的计算代价不对称：P 定义为可被确定性顺序机器在多项式时间内求解的判定问题类，NP 定义为给定候选解后可在多项式时间内验证的判定问题类，已知 P ⊆ NP，反向是否成立（P=NP?）是定义在经典确定性图灵机模型上的纯数学判定问题——deterministic / mechanical / 形式化，绝非 selection-driven 的自然过程，且至今悬而未决。",
+      "key_relations": [
+        "快速验证解 与 快速找到解 的不对称：验证属 NP 的定义，求解属 P 的定义，两者是否重合即本问题；若如学界普遍猜想 P≠NP，则存在解极易验证却无法在多项式时间内求解的问题",
+        "千禧年大奖难题之一（克雷数学研究所悬赏 100 万美元）；1971 年 Stephen Cook 在论文《定理证明程序的复杂性》中首次严格陈述，1973 年 Leonid Levin 独立提出；更早有 1955 年 Nash 致 NSA、1956 年哥德尔致冯·诺伊曼的信件预感",
+        "NP 完全问题与归约：任一 NP 问题都能在多项式时间内归约为任一 NP 完全问题（Cook–Levin 定理：布尔可满足性问题 SAT 是第一个被证明的 NP 完全问题）；只要任何一个 NP 完全问题属于 P，即可推出 P=NP",
+        "主流猜想 P≠NP：Gasarch 三次民调中相信 P≠NP 者从 61%（2001）升至 88%（2018），限专家时 2018 年达 99%；关键理由是 3000 多个已知重要 NP 完全问题历经数十年研究无一找到多项式时间算法",
+        "后果链条：若 P=NP 且证明给出高效构造性算法，公钥密码、AES 等对称加密、密码散列（区块链/比特币）将大面积失效；运筹学（旅行商、整数规划）、蛋白质结构预测、乃至寻找数学定理证明都可被机械化加速——Aaronson：若 P=NP，『创造性飞跃』将不再有特殊价值，解题与识别答案之间不再有根本鸿沟",
+        "Ladner 定理：若 P≠NP，则 NP 中存在既不属于 P 也不是 NP 完全的中间问题；图同构、离散对数、整数分解被猜想属此类",
+        "标准示例是广义数独（n²×n² 盘面）：验证一张填好的盘面很容易，但是否存在多项式时间求解算法未知；而固定尺寸的 9×9 数独因组合有限、可查表求解，反而属于 P"
+      ],
+      "common_misconceptions": [
+        "『NP 意思是非多项式（non-polynomial）时间』——错：NP 指『非确定性多项式时间』，且 P ⊆ NP；维基明确注记『非确定性不是随机性』（Nondeterminism is not randomness）",
+        "『NP 完全问题在现实中一定解不动』——错：SAT、旅行商、背包等 NP 完全问题的许多真实世界实例可被现有算法在合理时间内求到最优；线性规划单纯形法最坏情形指数复杂度，实践中却与最好的多项式算法表现相当",
+        "『一旦证明 P=NP，密码立刻全部被破』——过度简化：证明可能非构造性，或多项式阶数与常数大到无法实用；Knuth 即因预期证明几乎必然非构造性而怀疑其实际价值",
+        "『属于 P 就等于现实容易，不属于 P 就等于现实困难』——Cobham 论题有例外：理论多项式算法可能有超指数级巨大的常数（如图子式判定），实际完全不可行",
+        "『某某已攻克 P vs NP』——至今未解：Woeginger 汇总 1986–2016 年间 116 份自称证明（61 份证 P=NP、49 份证 P≠NP、6 份其他），均未获承认",
+        "『日常 9×9 数独就是 NP 完全难题的例子』——固定盘面只有有限组合、查表即解，属于 P；相关结论只对规模可任意增长的广义数独成立",
+        "『量子计算已绕过或解决了 P vs NP』——P 与 NP 定义在经典确定性/非确定性图灵机上，量子与随机算法（如 Shor 算法）属于另一类计算模型，不改变该问题的经典归属"
+      ],
+      "literal_domain_to_avoid": "计算复杂性理论/理论计算机科学/算法与编程/密码学与网络安全/数独或谜题求解/数学定理证明/大学或研究所课堂——故事不得字面出现计算机、算法、程序、密码、密钥、验证器、图灵机、数独盘面等元素",
+      "is_process_type": false,
+      "canonical_sentence_cn": "如果一个问题的解可以在多项式时间内被验证，那么该问题是否也能在多项式时间内被求解？",
+      "canonical_sentence_en": "If the solution to a problem can be verified in polynomial time, must the problem be solvable in polynomial time?"
+    },
+    "model collapse": {
+      "concept": "model collapse",
+      "concept_cn": "模型崩溃",
+      "definition_cn": "机器学习模型在以未经筛选的合成数据、或其他模型（如自身先前版本）的输出作为训练数据时发生的逐步退化。",
+      "definition_en": "The degradation of machine learning models caused by training on uncurated synthetic data or on the outputs of another model, such as prior versions of themselves.",
+      "core_mechanism": "非意愿的机械性误差累积过程（mechanical，非有意的 selection-driven 筛选，也非单步确定性事件）：函数逼近误差、采样误差与学习误差在递归训练中逐代复合，每一代都相当于模型参数随机游走的一步——采样不成比例地取自高概率中心，分布尾部与少数数据最先丢失，方差逐代收缩，最终退化为集中于少数高概率输出的窄分布；在多维纯合成数据情形下可严格证明必然发生。",
+      "key_relations": [
+        "递归自我消耗训练：模型以未经筛选的合成数据（尤其是自身或另一模型先前版本的输出）作为训练数据——「把某物喂给它自己」是其被类比为疯牛病的根本成因",
+        "分布尾部最先丢失：早期崩溃先丢失分布尾部信息、主要伤害少数数据；重训时采样不成比例地集中于高概率中心，罕见词与罕见句法最先消失",
+        "退化的隐蔽性：早期崩溃难以察觉——整体表现可能看似还在改善，而模型在少数数据上的表现已经恶化",
+        "晚期崩溃：性能显著丧失、概念相互混淆、失去大部分方差，概率质量集中于少数最可预期的续写，极限下分布近似退化为 δ 函数",
+        "真实数据的锚定作用：合成数据若与人类产生的数据一同累积即可避免崩溃；要使与原始分布的距离保持有界，每代采样量须超线性（约平方级）增长，只有每步无限采样才能使距离真正归零",
+        "三类误差源：函数逼近误差、采样误差、学习误差；即使在最简单的模型中（并非三类误差齐备）也会发生，复杂模型中误差复合、崩溃更快",
+        "与 mode collapse（模式崩溃）的区分：GAN 失败或 RLHF 对齐导致的输出收窄有时被称作 mode collapse，与递归式模型崩溃相关但机制不同——前者不需要合成数据进入训练集"
+      ],
+      "common_misconceptions": [
+        "与 GAN 的 mode collapse（模式崩溃）或 RLHF 对齐导致的输出收窄混为一谈——条目开头即声明「勿与 Mode collapse 或 Modal collapse 混淆」，两者机制不同",
+        "认为只要用了合成数据就必然崩溃、现实影响必然灾难性——有研究表明合成数据与真实数据共同累积时可避免崩溃，现实影响未必如担忧般严重",
+        "认为崩溃一旦发生就会立即被察觉——早期崩溃恰恰难以发现，总体指标可能看似改善，退化发生在少数数据上",
+        "认为它是瞬间故障、黑客攻击或有意的筛选选择——它是非意愿的机械性误差累积，逐代渐进（每代近似随机游走的一步）",
+        "认为只有复杂大模型才会崩溃——最简单的一维高斯模型同样会发生，且不需要三类误差源同时在场"
+      ],
+      "literal_domain_to_avoid": "机器学习/AI 模型/神经网络/大语言模型/训练数据/合成数据/互联网爬取等一切字面人工智能与计算领域",
+      "is_process_type": true,
+      "canonical_sentence_cn": "当模型反复以未经筛选的合成数据——例如自身先前版本的输出——进行训练时，会发生模型崩溃：先丢失分布尾部与少数数据，且早期整体表现看似仍在改善；晚期则丧失大部分方差、混淆不同概念，概率质量集中于少数最可预期的输出。",
+      "canonical_sentence_en": "When models are recursively trained on uncurated synthetic data, such as the outputs of prior versions of themselves, they progressively degrade: they first lose the tails of the distribution and minority data while overall performance may even appear to improve, and in the late stage they lose most of their variance, confuse concepts with one another, and concentrate probability on a narrow set of highly predictable outputs."
     }
   }
 }
