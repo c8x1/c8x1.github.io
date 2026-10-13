@@ -1200,6 +1200,85 @@
       "is_process_type": true,
       "canonical_sentence_cn": "当模型反复以未经筛选的合成数据——例如自身先前版本的输出——进行训练时，会发生模型崩溃：先丢失分布尾部与少数数据，且早期整体表现看似仍在改善；晚期则丧失大部分方差、混淆不同概念，概率质量集中于少数最可预期的输出。",
       "canonical_sentence_en": "When models are recursively trained on uncurated synthetic data, such as the outputs of prior versions of themselves, they progressively degrade: they first lose the tails of the distribution and minority data while overall performance may even appear to improve, and in the late stage they lose most of their variance, confuse concepts with one another, and concentrate probability on a narrow set of highly predictable outputs."
+    },
+    "the CAP theorem": {
+      "concept": "the CAP theorem",
+      "concept_cn": "CAP 定理",
+      "definition_cn": "CAP 定理（又称布鲁尔定理）指出：一个分布式数据存储系统最多只能同时提供一致性、可用性、分区容错性三项保证中的两项；一旦发生网络分区，就必须在一致性与可用性之间做出取舍。",
+      "definition_en": "The CAP theorem (Brewer's theorem) states that a distributed data store can provide at most two of the three guarantees—consistency, availability, and partition tolerance—so when a network partition occurs, the system must choose between consistency and availability.",
+      "core_mechanism": "机制是一条被形式化证明的逻辑必然：网络分区切断节点间通信后，系统要么取消/拒绝请求以保住一致性（牺牲可用性），要么照常响应但可能返回旧数据以保住可用性（牺牲一致性）。它不是选择驱动或演化式的非意愿过程，而是一条确定性（deterministic）的数学不可能性结果，刻画的是被迫的取舍空间，本身不随时间展开。",
+      "key_relations": [
+        "三个字母的含义：C=一致性，所有节点同一时刻看到同一份数据，每次读都能得到最近一次写（或报错），数据写入必须同步复制到所有节点才算成功；A=可用性，非故障节点收到的每个请求都必须得到非错误的响应，但不保证数据是最新的；P=分区容错，网络在节点间任意丢弃或延迟消息时系统仍继续运行。",
+        "分区发生时 C 与 A 只能二选一：选一致性则返回错误或超时（取消操作、降低可用性），选可用性则继续处理请求但可能给出过期数据。",
+        "P 不是可选项：没有任何分布式系统能免于网络故障，分区容错是必须接受的前提，因此真实的选择从来只在 C 与 A 之间；CA 只在无分区的理想情形下成立。",
+        "无分区时 C 与 A 可同时满足：正常运行期间三者可以兼得，取舍只在分区窗口内显现；PACELC 定理（2010，Daniel Abadi）进一步指出，无分区时还存在延迟（L）与一致性（C）之间的另一重取舍。",
+        "经典例子：传统 ACID 关系数据库（RDBMS）倾向保 C 弃 A，BASE 哲学（NoSQL 运动）倾向保 A 弃 C；Cassandra、CouchDB、ScyllaDB 常被归为 AP 型，MongoDB、Redis 在分区时保 C 弃 A，而没有一个 NoSQL 数据库可归为 CA。"
+      ],
+      "common_misconceptions": [
+        "「三选二」误读：并非系统可以任选两项、放弃第三项——Brewer 本人在 2012 年澄清这种说法有误导性，因为只需在分区发生时牺牲 C 或 A，且分区管理与恢复技术可以缓解影响。",
+        "把 P 当成可以放弃的选项：分布式系统无法避免网络故障，P 是被迫接受的前提，而非设计菜单上可勾选的一项。",
+        "混淆 CAP 的一致性与 ACID 的一致性：CAP 的 C 指所有客户端同一时刻看到同一数据，与数据库事务 ACID 中的 C 是不同概念；CAP 的可用性也不同于软件架构中所说的高可用。",
+        "以为 CAP 禁止系统同时接近高一致与高可用：分区恢复技术进步后，设计者可在分区前后动态调整策略，使两者都能维持较高水平（Brewer 2012）。",
+        "以为定理内容就等于 Brewer 2000 年的原始猜想：2002 年 MIT 的 Gilbert 与 Lynch 给出的形式化证明比原始猜想更狭义（针对到达互不连通的两个节点的冲突请求），而类似的取舍关系 Birman 与 Friedman 在 1996 年已发表。"
+      ],
+      "literal_domain_to_avoid": "分布式系统/数据库/网络/机房",
+      "is_process_type": false,
+      "canonical_sentence_cn": "CAP 定理指出：一个分布式数据存储系统不可能同时满足一致性、可用性与分区容错性三项保证；当网络分区发生时，系统只能在一致性与可用性之间择其一。",
+      "canonical_sentence_en": "The CAP theorem states that a distributed data store cannot simultaneously satisfy consistency, availability, and partition tolerance; when a network partition occurs, the system must choose between consistency and availability."
+    },
+    "Conway's Game of Life": {
+      "concept": "Conway's Game of Life",
+      "concept_cn": "康威生命游戏",
+      "definition_cn": "英国数学家约翰·何顿·康威于1970年发明的零玩家细胞自动机：无限方格网上每个细胞的生死由其八个邻居中活细胞的数量依固定规则同步决定，初始图案设定后无需任何后续输入。",
+      "definition_en": "A zero-player cellular automaton devised by the British mathematician John Horton Conway in 1970, in which cells on an infinite two-dimensional square grid live or die each generation under fixed rules based on their eight neighbours, so that the initial pattern alone determines all subsequent evolution.",
+      "core_mechanism": "每个细胞依据相邻八格（Moore邻域）中活细胞的数量，按固定规则（活细胞邻居少于2个死于人口不足、2或3个存活、超过3个死于人口过剩；死细胞恰有3个活邻居时新生，即 B3/S23）逐代同步更新；全部生死更新同时发生，每一代是上一代的纯函数——完全确定性、机械性的规则驱动过程（mechanical/deterministic，非 selection-driven：无变异、无选择压力、无意图参与，规则一经设定永不变动）。",
+      "key_relations": [
+        "局部简单规则→全局复杂图案：三条邻居计数规则在无限网格上涌现出静物（still lifes，不变）、振荡器（oscillators，周期回归）、飞船（spaceships，如glider，平移移动）等结构，是涌现（emergence）与自组织（self-organization）的经典例证",
+        "决定论演化：零玩家游戏，演化完全由初始图案（种子）决定，无需后续输入、无获胜条件；每代是上一代的纯函数，规则固定——同样的初始图案必然演化出同样的历史",
+        "图案分类谱系：多数初始图案最终'熄灭'为静物、永远振荡的图案或逃逸的飞船；长期演化后才稳定的图案称'玛土撒拉'（R-pentomino 需1103代才稳定并放出6个glider，Acorn 需5206代生成633个细胞含13个逃逸glider）",
+        "图灵完备与不可判定性：利用glider碰撞可构造逻辑门（AND/OR/NOT）与计数器，生命游戏与通用图灵机计算能力等价，理论上可执行任意计算（甚至有人在其中实现过Tetris）；但依停机问题，给定初始图案与目标图案，目标是否会出现是不可判定的",
+        "信息传播上限：因为规则只依赖最近邻，任何信息在网格中的传播速度不能超过每单位时间1格，此速度被称为元胞自动机的'光速'（记作c）",
+        "无限增长的反例：Conway 曾猜想任何有限图案的种群不能无限增长并悬赏50美元，1970年11月被 MIT 的 Bill Gosper 团队以'Gosper glider gun'推翻——该图案每30代无限发射一个新glider",
+        "对称性自发增强：无初始对称的小型孤立图案趋于变得对称，且对称性一旦获得只能增加不能丢失（除非被邻近图案扰动）；Conway 刻意选择规则使演化'有趣且不可预测'——简单初始图案应长时间生长变化后才归于静止或循环"
+      ],
+      "common_misconceptions": [
+        "误以为是可玩、可赢的'游戏'：它虽名为游戏，实为零玩家游戏——初始图案设定后无人参与、无任何输入、也没有获胜条件，人只能设定初始状态并观察",
+        "误以为它模拟真实的生物演化或自然选择：'繁殖''死于人口不足/过剩'只是类比性措辞（英文原文即 'as if by'）；规则固定、演化完全确定，没有变异、没有选择、没有适应度——它与生物演化机制无关，Gardner 仅因'类似生物群体社会的兴衰更替'而将其归入模拟游戏",
+        "误以为细胞逐个依次更新：所有出生与死亡必须同时发生（每格清点邻居时用更新前的旧状态）；若按阅读顺序逐格更新，得到的是另一个不同的自动机（NaiveLife），这是初学者最常见的编程错误",
+        "误以为生命游戏的宇宙是一块有限棋盘：理论宇宙是无限的二维正交网格，有限数组只是计算机实现的内存局限所致的近似（可用环形拼接等策略缓解）",
+        "误以为复杂有序的图案需要设计者：维基百科明确指出它正是'设计与组织可以在没有设计者的情况下自发涌现'这一反直觉观念的教学类比（哲学家丹内特曾用它说明意识与自由意志可从简单的确定性物理定律中演化而来）",
+        "误以为图案通常会无限生长：Conway 本人最初也如此猜想，但反例（glider gun）很快被发现；恰恰相反，多数初始图案最终归于静物、振荡或灰飞烟灭，无限增长是罕见的例外"
+      ],
+      "literal_domain_to_avoid": "故事不得设在：网格/方格世界/棋盘（含围棋盘——Conway 当年即用围棋盘手动追踪）、细胞及其生死状态、元胞自动机、计算机模拟/编程/屏幕演化、'数邻居决定生死'的直白照搬设定，以及 glider/滑翔机枪/静物/振荡器/飞船/B3-S23 等术语的直用",
+      "is_process_type": true,
+      "canonical_sentence_cn": "康威生命游戏是约翰·康威于1970年发明的零玩家细胞自动机：在无限方格网上，每个细胞按'活邻居少于2个或超过3个则死、恰为2或3个则活，死细胞恰有3个活邻居则新生'的固定规则逐代同步更新，初始图案完全决定其后的一切演化，并从中自发涌现出稳定结构、振荡图案与移动的飞船。",
+      "canonical_sentence_en": "The Game of Life is a zero-player cellular automaton devised by John Horton Conway in 1970, in which cells on an infinite square grid are born and die simultaneously each generation according to fixed rules based on their eight neighbours (a live cell survives with two or three live neighbours and dies otherwise; a dead cell with exactly three live neighbours is born), so that the initial pattern alone determines a fully deterministic evolution that spontaneously gives rise to still lifes, oscillators, and spaceships."
+    },
+    "horizontal gene transfer": {
+      "concept": "horizontal gene transfer",
+      "concept_cn": "水平基因转移",
+      "definition_cn": "水平基因转移指遗传物质不经过亲代到子代的生殖传递，而在同一世代、亲缘极远甚至毫无亲缘的生物个体之间横向移动并被受体基因组接纳的过程（又称侧向基因转移、横向基因转移）。",
+      "definition_en": "Horizontal gene transfer is the movement of genetic material between organisms by any route other than the vertical transmission of DNA from parent to offspring through reproduction.",
+      "core_mechanism": "外源基因借质粒、温和噬菌体、转座子等移动载体或裸露DNA，经转化（受体细胞摄取并重组外来DNA，须先进入「感受态」）、转导（噬菌体把供体DNA打包搬进另一细菌）、接合（细胞直接接触、经质粒与IV型分泌系统递送DNA）等机械生化通道进入受体基因组——这是非意愿、非目的性的过程（mechanical、非任何一方的主动选择；站在移动元件一侧是selection-driven：转座子跨基因组扩散被解读为逃离宿主清除的策略），由物理接触与环境条件（高细胞密度、营养匮乏、UV与DNA损伤均可诱导摄取和细胞聚集）确定性地触发，结果对受体可利可害。",
+      "key_relations": [
+        "与垂直传递相对：垂直传递是生殖中亲代→子代的DNA传递；水平转移绕开生殖，在无亲缘谱系之间搬运基因，可跨越物种乃至细菌—古菌—真核生物的域界（如农杆菌把基因送进植物、鲱鱼把抗冻蛋白基因送进胡瓜鱼、真菌把胡萝卜素合成基因送进豌豆蚜）",
+        "三大经典机制为转化、转导、接合：转化是受体摄取外源裸DNA并重组（Griffith 1928年肺炎链球菌实验最早暗示：R型可转化为有毒S型）；转导是噬菌体搬运供体DNA（如志贺毒素基因经转导进入大肠杆菌）；接合是细胞间接触、经质粒与性菌毛传递（抗药性质粒可在菌群中接力扩散，收到质粒的细菌还能再传给别的细菌）；另有基因转移剂（GTA）与水平转座子转移（HTT）等途径",
+        "抗生素抗性扩散的首要机制：一种细菌的抗性基因经HGT（常由质粒与温和噬菌体携带）进入另一种细菌，使整个菌群迅速获得抗药性；污水中非抗生素药物（布洛芬、萘普生等）、重金属（铜、银、铬、锌）与染料类化合物都能显著提高接合转移频率",
+        "毒力与适应的演化引擎：1951年西雅图论文证明一个病毒基因转入白喉棒杆菌即可把无毒株变成剧毒株；外毒素、胞外酶等毒力因子经HGT在细菌间扩散，HGT还让细菌演化出降解人造农药等新化合物的能力",
+        "挑战「生命之树」：基因的历史与物种的家系史因HGT而分道扬镳，用单一基因建树会「串线」；Gogarten主张用「马赛克」与「网」的隐喻取代「树」，Syvanen推测显著的侧向转移自生命之始即存在并参与塑造全部演化史；HGT也被认为促进了生化体系与遗传密码的普适性",
+        "受体一侧存在屏障与代价：原核生物的限制—修饰系统对HGT提供免疫；多细胞真核生物靠分隔的生殖细胞系等机制抑制HGT；转入的转座子可能致突变、扰乱基因组组织，横向获得对受体并非总是礼物",
+        "真核生物中也相当常见（曾以为罕见）：蛭形轮虫约8%的基因来自细菌（动物界纪录）；粉虱从植物获得解毒基因；内共生体Wolbachia是昆虫基因的重要外源；叶绿体与线粒体向细胞核的「混杂DNA」转移（NUMT／NUPT）普遍存在，与内共生理论相衔接"
+      ],
+      "common_misconceptions": [
+        "「HGT只是细菌的事」——错：虽在原核生物中最活跃、对细菌演化至关重要，但真菌、植物、动物中证据日增，真核生物中也能发生并影响对新环境的适应",
+        "「水熊17.5%基因来自HGT、海蛞蝓偷来藻类基因」——著名误报：水熊的17.5%后来被证明是细菌污染造成的假象；绿叶海天牛的藻类基因转移经基因组测序也未发现痕迹，现被认为是假象（中文维基仍把两者列为正面案例，写作时须避开这两个例子）",
+        "「人类基因组约100个基因来自细菌」——有研究如此宣称，但多位研究者质疑，认为更可能是基因丢失叠加演化速率差异造成的假象",
+        "「HGT是受体主动求取的互利交换」——错：机制是机械／生化过程（裸DNA摄取、噬菌体包装、细胞接触），供受双方皆无意图；转入片段可致突变有害，宿主反而演化出限制—修饰系统、分隔生殖系等防御；HGT也不是有性繁殖——它不产生后代，只是向既有基因组横向插入外源序列"
+      ],
+      "literal_domain_to_avoid": "细菌、微生物、病毒／噬菌体、质粒、DNA、基因、细胞等一切生物学直白场景，以及实验室与基因工程、医院与抗生素耐药、演化树与生命之树（含早期海洋／生命起源场景）",
+      "is_process_type": true,
+      "canonical_sentence_cn": "水平基因转移是遗传物质不经生殖的亲代→子代垂直传递，而在同一世代、亲缘极远甚至毫无亲缘的生物个体之间横向移动的演化过程。",
+      "canonical_sentence_en": "Horizontal gene transfer is the movement of genetic material between organisms other than by the vertical transmission of DNA from parent to offspring through reproduction."
     }
   }
 }
