@@ -1334,6 +1334,34 @@
       "is_process_type": true,
       "canonical_sentence_cn": "碳原子的2s轨道与三条2p轨道可以数学重组为四条完全等价的sp³杂化轨道，分别指向正四面体的四个顶点（互成约109.5°），由此解释了甲烷四个C–H键的完全等同——杂化是描述这一结果的数学手段，而非真实的电子跃迁事件。",
       "canonical_sentence_en": "A carbon atom's 2s and three 2p orbitals can be mathematically recombined into four equivalent sp³ hybrid orbitals directed toward the corners of a tetrahedron (mutual angles of ~109.5°), which explains the complete equivalence of methane's four C–H bonds — hybridisation being a mathematical device for describing this outcome, not an actual electron-transition event."
+    },
+    "scaling laws": {
+      "concept": "scaling laws",
+      "concept_cn": "缩放定律",
+      "definition_cn": "缩放定律（神经缩放定律）是机器学习中的一类经验统计规律：神经网络的性能（如测试损失）随参数量、训练数据量与训练算力等关键因素的放大或缩小，按幂律平滑且可预测地变化。",
+      "definition_en": "A neural scaling law is an empirical scaling law describing how neural network performance changes—smoothly and predictably, typically as a power law—as key factors such as parameter count, dataset size, and training compute are scaled up or down.",
+      "core_mechanism": "幂律是从大量不同规模的训练实验中统计拟合出的经验规律，不是任何人的设计或意愿（statistical / empirical，非意愿过程）：损失由规模本身驱动，平滑下降并渐近逼近不可再降的下限 L0；改善的快慢（幂指数）由任务决定，架构与优化器等细节只改变前置系数，不改变指数。",
+      "key_relations": [
+        "幂律+不可约下限：测试损失 L = A/N^α + B/D^β + L0（Chinchilla 形式；Kaplan 形式为 L = L0 + (x0/x)^α）——损失随参数量 N、数据量 D、算力 C 的增大按幂律平滑下降，但渐近逼近不可约损失 L0，永不归零",
+        "算力≈参数×数据：训练算力 C ≈ 6·N·D（每参数每 token 约 6 FLOPs，因为训练含前向+反向传播），所以放大算力必须在『更多参数』与『更多数据』之间分配",
+        "compute-optimal（Hoffmann et al. 2022, Chinchilla）：固定算力预算下要损失最小，参数量与数据量应同比例放大（N_opt ∝ C^0.5，D_opt ∝ C^0.5；按文章给的拟合 N_opt=0.1·C^0.5、D_opt=1.7·C^0.5，即每参数约 17 个 token）——数据不足时把算力堆进更大的模型反而吃亏",
+        "Kaplan(2020) 与 Chinchilla(2022) 的矛盾：Kaplan 拟合得 N_opt ∝ C^0.73、D_opt ∝ C^0.27（偏重大模型、少数据）；差异后被归因于 Kaplan 未计嵌入层参数、所测模型更小、学习率预热过长、超参未调满等测量方法问题——同一现象可因实验方法不同得出不同的『定律』",
+        "指数由任务决定（Hestness et al. 2017）：换架构、优化器、正则、损失函数只改变比例常数，幂指数 α 只随任务改变；实测 α∈[0.07,0.35]，远小于早期理论预言的 0.5~2——即真实改善比理论直觉慢得多",
+        "有界指标呈 S 型：取值在 [0,1] 的性能指标（如准确率）随成本常呈 sigmoid 曲线——同一条幂律损失换一种度量就呈现不同形状（这也是『涌现』争议的根源）",
+        "缩放延伸到推理阶段：增加测试时算力（如 AlphaGo 的搜索时间、思维链推理）也能近似按幂律/对数线性提升性能（AlphaGo Zero 提升 120 Elo 需要 2 倍模型与训练，或仅 2 倍搜索时间；2024 年 OpenAI o1 随训练算力与测试时算力均持续提升）",
+        "平滑折断的幂律（BNSL, 2022）：log-log 图上的直线可能在某些规模 d_i 处平滑拐折（斜率改变而非突变）；该形式横跨视觉、语言、音频、强化学习、涌现能力、double descent 等数十种场景与几乎所有主流架构"
+      ],
+      "common_misconceptions": [
+        "误以为规模扩大→能力平滑线性提升：实为幂律且指数很小（常在 0.05~0.35），边际收益递减，并渐近于不可约下限 L0，损失永不归零",
+        "误以为堆参数就行（Kaplan 式直觉）：固定算力下参数与数据必须同比例放大；数据不够时，大模型会输给『小模型+充足数据』（Chinchilla 核心结论，推翻了此前业内偏向大模型的直觉）",
+        "误以为涌现能力是突然的相变、不可预测：有研究在 log-log 图上观察到斜率突变的『断点』（例如 2022 年研究发现思维链提示只在 ≥62B 参数的模型上提升表现），但 Schaeffer 等反驳：底层改进仍遵循平滑幂律，『突变』可能只是不连续度量方式造成的错觉——争议至今未决",
+        "误以为定律可无限外推：Chinchilla 的拟合范围仅为 N∈[7×10^7, 1.6×10^10]、D∈[5×10^9, 5×10^11]；最大模型所需数据量已逼近互联网可用文本总量（多 epoch、数据过滤、合成数据是应对之道）；BNSL 表明曲线可能在未观测的更大规模处平滑拐折",
+        "误以为幂律是设计出来的：它是事后从实验数据拟合出的经验统计规律，无人能直接『设计』指数；人们能做的只是间接微调（如数据清洗可增大指数，即『超越 Chinchilla』），且训练最优≠部署最优（LLaMA 故意过训练以换取推理便宜，但极端过训练会加剧量化损失）"
+      ],
+      "literal_domain_to_avoid": "故事不得设在机器学习/大模型训练的字面领域：不得出现模型、参数量、训练数据、GPU、损失曲线、benchmark 等术语，也不得出现 token、算力、神经网络、预训练等 ML 词汇；应把『投入规模按比例放大→产出按幂律递减式改善且有下限』映射到其他领域的经验规律（如藏书、农田、酿造、学徒制、城市扩张等类比）。",
+      "is_process_type": true,
+      "canonical_sentence_cn": "神经网络的测试损失随参数量 N、数据量 D 与算力 C 的增大按幂律平滑且可预测地下降，并渐近逼近不可约损失下限 L0；在固定算力预算下，参数与数据应同比例放大（compute-optimal）。",
+      "canonical_sentence_en": "A neural network's test loss falls smoothly and predictably as a power law in parameters N, data D, and compute C, asymptoting toward an irreducible loss floor L0; under a fixed compute budget, parameters and data should be scaled in equal proportions (compute-optimal training)."
     }
   }
 }
