@@ -1362,6 +1362,37 @@
       "is_process_type": true,
       "canonical_sentence_cn": "神经网络的测试损失随参数量 N、数据量 D 与算力 C 的增大按幂律平滑且可预测地下降，并渐近逼近不可约损失下限 L0；在固定算力预算下，参数与数据应同比例放大（compute-optimal）。",
       "canonical_sentence_en": "A neural network's test loss falls smoothly and predictably as a power law in parameters N, data D, and compute C, asymptoting toward an irreducible loss floor L0; under a fixed compute budget, parameters and data should be scaled in equal proportions (compute-optimal training)."
+    },
+    "adversarial examples": {
+      "concept": "adversarial examples",
+      "concept_cn": "对抗样本",
+      "definition_cn": "在正常输入上叠加精心构造、人类几乎无法察觉的微小扰动后所形成的输入，它能使机器学习模型以高置信度给出错误输出。",
+      "definition_en": "An adversarial example is an input formed by adding a small, carefully crafted, typically human-imperceptible perturbation to a normal input, causing a machine-learning model to misclassify it with high confidence.",
+      "core_mechanism": "本质是机械/统计过程，而非任何主体意图的产物：高维模型在单个输入附近近似线性（常用激活函数如 ReLU 具分段线性性质），沿损失梯度方向的微小扰动在数千乃至数百万维上逐项线性累积，把贴近决策边界的样本推过边界，翻转输出类别并抬高错误置信度；攻击者的“精心构造”只是有意识地利用这一本就存在的统计脆弱性——即便无人构造，真实图像也能自然触发同类错误。",
+      "key_relations": [
+        "微小且常不可察觉的扰动可翻转类别并抬高置信度：经典演示中 ImageNet 上的 GoogLeNet 以 57.7% 置信度把一张图像识别为熊猫，叠加 ε=0.007（每个像素至多约 0.7% 的改动）的扰动后，以 99.3% 的置信度改判为长臂猿",
+        "扰动具有方向性而非随机：与幅度相近的随机噪声相比，沿损失梯度方向构造的对抗扰动更容易使模型出错——这一差别正是对抗样本定义的核心；此外 ε 越大越容易骗过模型，但扰动也越容易被人察觉，攻击强度与隐蔽性此消彼长",
+        "迁移性：为一个模型精心构造的对抗样本，往往能以可观成功率欺骗结构与训练数据都不同的其他模型，这使黑盒攻击成为可能；特征视角把迁移性归因于不同模型从数据中学到了相似的“非鲁棒特征”",
+        "高维线性解释（线性假说）：深度网络整体高度非线性，但分段线性的激活函数使其在单个输入附近可近似为一阶线性响应；每个分量都低于感知阈限的微小改动在高维输入中逐项线性累积，总和足以改变模型输出——成因被视为高维点积性质的结果，而非深层非线性带来的过拟合",
+        "几何视角：自然样本离决策边界的距离远小于类别间的表观差距；即使模型以高置信度给出正确分类，样本也可能只距边界一个微小扰动之遥",
+        "对抗训练是最可靠的实证防御路线之一：把对抗样本纳入训练数据（FGSM 生成或 min–max 形式下的 PGD）能显著提升鲁棒性，但训练成本更高、依赖对威胁模型的正确假设，且鲁棒性与准确率存在此消彼长的权衡，并不能根除脆弱性",
+        "防御与攻击呈军备竞赛：防御性蒸馏发表时显著降低攻击成功率，随后被 Carlini–Wagner 优化式攻击完全击破；ICLR 2018 的 9 个防御中 7 个依赖“混淆梯度”，其中 6 个被完全绕过、1 个部分绕过",
+        "并非深度网络独有：线性分类器、支持向量机、梯度提升树与随机森林同样可被系统性规避；2004 年起垃圾邮件发送者只需修改少量词语即可绕过线性分类器，是对抗样本更早的前身",
+        "通用对抗扰动：针对一组数据优化得到的单一扰动，叠加到大量互不相同的图像上都能明显提高误分类率",
+        "对抗样本可进入物理世界：打印后翻拍的图像、3D 打印的乌龟（从多个视角被识别为步枪）、停车标志上的贴纸（被持续识别为限速标志）、印有扰动图案的眼镜框都能在现实条件下误导视觉系统；同时未经专门设计的对抗图像在旋转、光照变化等物理变换下也可能失效，需用变换期望（EOT）类方法保持有效性"
+      ],
+      "common_misconceptions": [
+        "把对抗样本等同于黑客蓄意欺骗的同义词：刻意构造并不是误分类的必要条件——ImageNet-A 数据集完全由未加修改的真实图像组成，许多图像人类可以轻松识别，却能让从未参与训练的多种模型以高置信度出错（DenseNet-121 在其上的准确率仅约 2%）",
+        "以为随便加随机噪声就能破坏模型：同幅度的随机噪声远不如对抗扰动容易触发误分类，扰动需要与梯度方向对齐才高效；“比随机噪声更易致错”恰是这一概念定义上的核心差别",
+        "以为是深度神经网络独有的缺陷：线性分类器、支持向量机、树集成等非深度模型同样存在系统性规避攻击；线性假说反而把成因归于高维线性响应而非深层非线性",
+        "以为模型输出高置信度就等于可靠、远离边界：几何视角下，以高置信度正确分类的样本也可能只距决策边界一个微小扰动之遥",
+        "以为存在一劳永逸的根治防御：许多已发表防御随后被更强的攻击击破（防御性蒸馏、混淆梯度类防御），对抗训练也只是提高攻击门槛而非根除，且鲁棒性提升往往以准确率为代价",
+        "以为扰动必须微小且不可察觉：对抗贴片等攻击故意放弃不可察觉性，把一块可打印张贴的图案放在画面中即可使分类器输出指定类别"
+      ],
+      "literal_domain_to_avoid": "机器学习/神经网络/分类器/图像识别/语音识别/人脸识别/模型训练/自动驾驶/交通标志识别/垃圾邮件过滤等字面领域",
+      "is_process_type": false,
+      "canonical_sentence_cn": "给输入叠加人类几乎察觉不到的微小扰动，机器学习模型就会以极高的置信度把它错判成另一个类别——这一脆弱性源于高维模型的近似线性响应，并且能在不同的模型之间迁移。",
+      "canonical_sentence_en": "Adding a tiny, human-imperceptible perturbation to an input can make a machine-learning model misclassify it with high confidence — a fragility rooted in the near-linear behavior of high-dimensional models that also transfers across models."
     }
   }
 }
