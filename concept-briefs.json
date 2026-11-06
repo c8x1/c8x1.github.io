@@ -1393,6 +1393,35 @@
       "is_process_type": false,
       "canonical_sentence_cn": "给输入叠加人类几乎察觉不到的微小扰动，机器学习模型就会以极高的置信度把它错判成另一个类别——这一脆弱性源于高维模型的近似线性响应，并且能在不同的模型之间迁移。",
       "canonical_sentence_en": "Adding a tiny, human-imperceptible perturbation to an input can make a machine-learning model misclassify it with high confidence — a fragility rooted in the near-linear behavior of high-dimensional models that also transfers across models."
+    },
+    "the Byzantine fault tolerance": {
+      "concept": "the Byzantine fault tolerance",
+      "concept_cn": "拜占庭容错",
+      "definition_cn": "拜占庭容错是分布式系统的一类性质：当部分节点任意失效——向不同节点报告相互矛盾的信息、发送错误消息甚至串通作恶——时，系统整体仍能达成一致并继续给出正确结果。",
+      "definition_en": "Byzantine fault tolerance is the property of a distributed system that lets it keep reaching correct, system-wide agreement even when some of its components fail arbitrarily—sending conflicting or false messages to different observers, or even colluding.",
+      "core_mechanism": "每个节点把收到的消息原样转发（重述）给其余节点，使所有人能交叉核对彼此到底收到了什么，再以多数诚实节点的一致证词压倒少数矛盾证词（缺席消息按预设默认值计票）；这是协议驱动的非意愿过程（mechanical／protocol-driven），一致性由机械执行的规则涌现，不依赖任何节点的善意、也不依赖某个权威的裁决。",
+      "key_relations": [
+        "3f+1 冗余关系：要容忍 f 个拜占庭节点，系统至少需要 3f+1 个节点，即叛徒少于总数三分之一（n > 3f），且通信同步（延迟有界）——这是被证明的必要且充分条件；若叛徒达到或超过三分之一，对质将无法分清真伪",
+        "多数诚实节点的交叉核对：因为每个节点都重述收到的消息，撒谎者对不同人说的不同话会被摆到一起比对，诚实多数的相同证词在投票中压倒谎言，系统因此仍收敛到同一个决定",
+        "不可伪造签名的杠杆：若消息带可验证的不可伪造签名，叛徒无法冒充他人，容忍力大幅提升——只要 n > f+1 即可容忍任意数量的叛徒；但签名单独不能解决物理层的拜占庭故障（如错误电压可穿透加密过程，使不同接收者看到不同内容）",
+        "缺席默认值：未收到的消息（票）取预设默认值（如弃权或缺省策略），使沉默与消息丢失不能被叛徒利用来制造不确定",
+        "与简单失效（crash／fail-stop）容错的区别：崩溃节点只是停止工作、症状一致且可被察觉；拜占庭节点没有任何限制——可生成任意数据，甚至让一部分节点觉得它完全正常，因此被视为最一般、最困难的失效类别",
+        "完整需求配比：容忍 F 个拜占庭失效需要 3F+1 个相互独立的故障隔离单元（节点）、2F+1 条相互独立的通信路径、F+1 轮消息交换",
+        "只保证广播一致性、不保证内容正确：一个把同一个错误值一致地发给所有人的作恶节点不会被 BFT 机制识破——机制保证的是大家收敛到同一个值，而不是该值本身为真",
+        "社会学同构：要求超过三分之二超级多数才能通过的表决制度（立法机构、评审团式的议事体），与 BFT 是同构的共识设计；简单多数制则容易被拜占庭式行为（选择性传话）破坏"
+      ],
+      "common_misconceptions": [
+        "把拜占庭容错等同于拜占庭将军问题：后者是 Lamport、Shostak、Pease 在 1982 年构造的思想实验（一个寓言式的问题描述），前者是系统性质与协议族——本概念是后者",
+        "认为拜占庭失效必然出自恶意或敌方破坏：它不一定是安全问题，可以纯粹由物理或软件故障引起",
+        "认为简单多数决（2f+1）就足以压倒 f 个叛徒：无签名时必须 3f+1，因为叛徒可对不同观察者说不同的话，把多数决本身分裂掉",
+        "认为密码学签名单独即可根治：在电子系统里故障可穿透加密过程，同一故障可让一部分接收者看到有效签名、另一部分看到无效签名、第三部分看到不同内容",
+        "认为 BFT 保证『正确』：它只保证一致（所有人收敛到同一个值），不校验该值本身是否正确",
+        "把 BFT 与区块链画等号：区块链等声称 BFT 的系统并未满足 3f+1 等最小要求，只是用资源密集机制让分歧难以维持，并非原始意义上保证一致"
+      ],
+      "literal_domain_to_avoid": "故事不得设在：军队传令、将军与叛徒围城、计算机网络／服务器节点与协议投票等字面领域，也不得复用维基原寓言的拜占庭城邦与信使设定",
+      "is_process_type": true,
+      "canonical_sentence_cn": "拜占庭容错指分布式系统在至多 f 个节点任意失效（对不同节点撒谎、发送矛盾消息、甚至串通）的情况下，只要总节点数不少于 3f+1、诚实节点仍占多数并相互转发与核对消息，就能通过多数一致让整体达成并执行同一个正确决定。",
+      "canonical_sentence_en": "Byzantine fault tolerance is the property by which a distributed system, even when up to f of its nodes fail arbitrarily—lying to different nodes, sending contradictory messages, or colluding—still reaches and executes one correct collective decision, provided the total number of nodes is at least 3f+1 so that the honest majority's cross-checked agreement outvotes the lies."
     }
   }
 }
