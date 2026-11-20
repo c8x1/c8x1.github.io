@@ -127,6 +127,14 @@ header .links a:hover { color:var(--text); }
   <!-- Pool -->
   <div class="section">
     <h3>概念池 <span class="badge" id="pool-stats"></span></h3>
+    <div class="add-row" style="margin-bottom:.75rem;">
+      <select id="domain-filter" onchange="renderPool()" style="padding:.45rem .7rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.82rem;">
+        <option value="all">全部学科</option>
+      </select>
+      <label style="display:flex;align-items:center;gap:.35rem;font-size:.82rem;color:var(--text-s);cursor:pointer;">
+        <input type="checkbox" id="unused-only" checked onchange="renderPool()"> 仅看未写过 (0次)
+      </label>
+    </div>
     <div class="pool-grid" id="pool-grid"></div>
   </div>
 
@@ -142,32 +150,59 @@ header .links a:hover { color:var(--text); }
 <script>
 const REPO = 'c8x1/c8x1.github.io';
 const FILE = 'parable-queue.json';
-const CONCEPTS = [
-  {en:'the alignment problem',cn:'AI对齐'},
-  {en:'Nash equilibrium',cn:'纳什均衡'},
-  {en:'tragedy of the commons',cn:'公地悲剧'},
-  {en:'the butterfly effect',cn:'蝴蝶效应'},
-  {en:'the Chinese room argument',cn:'中文房间论证'},
-  {en:"Gödel's incompleteness theorem",cn:'哥德尔不完备定理'},
-  {en:'the trolley problem',cn:'电车难题'},
-  {en:'emergence',cn:'涌现'},
-  {en:'the experience machine',cn:'体验机器'},
-  {en:'philosophical zombies',cn:'哲学僵尸'},
-  {en:"Pascal's wager",cn:'帕斯卡赌注'},
-  {en:'the Ship of Theseus',cn:'忒修斯之船'},
-  {en:'the Veil of Ignorance',cn:'无知之幕'},
-  {en:'information asymmetry',cn:'信息不对称'},
-  {en:'the halting problem',cn:'停机问题'},
-  {en:'natural selection',cn:'自然选择'},
-  {en:"the Prisoner's Dilemma",cn:'囚徒困境'},
-  {en:'qualia',cn:'感受质'},
-  {en:'the Sorites paradox',cn:'谷堆悖论'},
-  {en:'the simulation hypothesis',cn:'模拟假说'}
-];
+let CONCEPTS = [];
+let DOMAINS = {};
+let USAGE_COUNTS = {};
 
 let token = localStorage.getItem('gh_pat') || '';
 let data = { queue: [], used: [] };
 let sha = '';
+
+function decodeBase64Utf8(b64) {
+  const bin = atob(b64.replace(/\n/g, ''));
+  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+  return new TextDecoder('utf-8').decode(bytes);
+}
+
+function normConcept(s) {
+  return String(s || '').trim().toLowerCase().replace(/^the\s+/i, '').replace(/[’']/g, "'").replace(/\s+/g, ' ');
+}
+
+async function loadPoolAndHistory() {
+  try {
+    const [poolRes, idxRes] = await Promise.all([
+      fetch('concept-pool.json?ts=' + Date.now(), { cache: 'no-store' }),
+      fetch('articles-index.json?ts=' + Date.now(), { cache: 'no-store' })
+    ]);
+    if (poolRes.ok) {
+      const pool = await poolRes.json();
+      CONCEPTS = (pool.concepts || []).map(c => ({ en: c.concept, cn: c.concept_cn, domain: c.domain, aliases: c.aliases || [] }));
+      DOMAINS = pool.domains || {};
+      const sel = document.getElementById('domain-filter');
+      sel.innerHTML = '<option value="all">全部学科 (' + CONCEPTS.length + ')</option>' +
+        Object.entries(DOMAINS).map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join('');
+    }
+    USAGE_COUNTS = {};
+    if (idxRes.ok) {
+      const idx = await idxRes.json();
+      const aliasMap = new Map();
+      CONCEPTS.forEach(c => {
+        [c.en, c.cn, ...(c.aliases || [])].forEach(k => { if (k) aliasMap.set(normConcept(k), c.en); });
+      });
+      (idx.articles || []).forEach(a => {
+        if (!Array.isArray(a.category) || !a.category.includes('寓言故事')) return;
+        const matched = new Set();
+        (a.tags || []).forEach(t => {
+          const canon = aliasMap.get(normConcept(t));
+          if (canon) matched.add(canon);
+        });
+        matched.forEach(c => { USAGE_COUNTS[c] = (USAGE_COUNTS[c] || 0) + 1; });
+      });
+    }
+  } catch (e) {
+    console.warn('Failed to load concept-pool.json:', e);
+  }
+}
 
 // Auth
 async function unlock() {
@@ -185,7 +220,8 @@ async function unlock() {
     document.getElementById('app').style.display = 'block';
     const json = await r.json();
     sha = json.sha;
-    data = JSON.parse(atob(json.content));
+    data = JSON.parse(decodeBase64Utf8(json.content));
+    await loadPoolAndHistory();
     render();
   } catch(e) {
     document.getElementById('gate-error').style.display = 'block';
@@ -208,9 +244,10 @@ function logout() {
     if (!r.ok) { token = ''; localStorage.removeItem('gh_pat'); return; }
     const json = await r.json();
     sha = json.sha;
-    data = JSON.parse(atob(json.content));
+    data = JSON.parse(decodeBase64Utf8(json.content));
     document.getElementById('gate').style.display = 'none';
     document.getElementById('app').style.display = 'block';
+    await loadPoolAndHistory();
     render();
   } catch(e) {}
 })();
@@ -249,19 +286,27 @@ function renderQueue() {
 
 function renderPool() {
   const grid = document.getElementById('pool-grid');
-  const usedSet = new Set(data.used.map(u => u.toLowerCase()));
-  const available = CONCEPTS.length - CONCEPTS.filter(c => usedSet.has(c.en.toLowerCase())).length;
-  document.getElementById('pool-stats').textContent = `${available}/${CONCEPTS.length} 可用`;
-  grid.innerHTML = CONCEPTS.map(c => {
-    const isUsed = usedSet.has(c.en.toLowerCase());
+  const domainFilter = document.getElementById('domain-filter').value;
+  const unusedOnly = document.getElementById('unused-only').checked;
+  const unusedTotal = CONCEPTS.filter(c => !(USAGE_COUNTS[c.en] > 0)).length;
+  document.getElementById('pool-stats').textContent = `${unusedTotal} 未写 / ${CONCEPTS.length} 总计`;
+  const list = CONCEPTS.filter(c => {
+    if (domainFilter !== 'all' && c.domain !== domainFilter) return false;
+    if (unusedOnly && (USAGE_COUNTS[c.en] || 0) > 0) return false;
+    return true;
+  });
+  grid.innerHTML = list.map(c => {
+    const cnt = USAGE_COUNTS[c.en] || 0;
+    const isUsed = cnt > 0;
+    const domCn = DOMAINS[c.domain] || c.domain;
     return `
       <div class="pool-item${isUsed ? ' used' : ''}">
         <span class="dot"></span>
         <div class="name">
           ${esc(c.en)}
-          <div class="cn">${esc(c.cn)}</div>
+          <div class="cn">${esc(c.cn)} · ${esc(domCn)}${isUsed ? ` · 已写${cnt}次` : ''}</div>
         </div>
-        ${!isUsed ? `<button class="add-btn" data-en="${esc(c.en)}" data-cn="${esc(c.cn)}">+</button>` : ''}
+        <button class="add-btn" data-en="${esc(c.en)}" data-cn="${esc(c.cn)}" title="加入待生成队列">+</button>
       </div>`;
   }).join('');
 }

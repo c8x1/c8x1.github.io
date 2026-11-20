@@ -1,6 +1,6 @@
 ---
 name: translate-articles
-description: "Translate and align bilingual CN/EN paragraphs for blog articles. Use 'archive' keyword for non-interactive daily pipeline: fetch 1 English philosophy/classics article + generate 2 AI parables (Amanda Askell prompt technique), translate to Chinese, generate bilingual pages, update homepage, and git push. Also use for fixing paragraph alignment, re-translating, or any bilingual content work on c8x1.github.io."
+description: "Translate and align bilingual CN/EN paragraphs for blog articles. Use 'archive' keyword for non-interactive daily pipeline (Track 1 / Claude Opus): fetch 1 English philosophy/classics article + generate 1 Claude Opus AI parable via scripts/parable-ctl.js & concept-pool.json, build bilingual pages, and git push. (The 2nd daily parable is generated independently by Gemini via Antigravity automation.) Also use for fixing paragraph alignment, re-translating, or any bilingual content work on c8x1.github.io."
 argument-hint: "[archive] [scan] [article indices] — e.g. 'archive' or '0,2,4'"
 allowed-tools:
   - WebSearch
@@ -33,11 +33,12 @@ user-invocable: true
 
 ## 归档模式
 
-归档模式是**非交互式**的：不需要用户确认，自动完成搜索 → 翻译 → 生成 → 推送全流程。
+归档模式是**非交互式**的：不需要用户确认，自动完成搜索 → 翻译 → 寓言生成 → 校对入库 → 推送全流程。
 
-目标：每天获取 1 篇英文哲学/经典文章 + 生成 2 篇 AI 寓言 → 翻译为中文 → 生成双语页面 → git push。
-
-每天共 3 篇新文章：1 篇翻译 + 2 篇寓言。
+**双模型每日分工（重构版）**：
+- **轨道 1（本 skill / `07:20` crontab `daily-articles.sh` / Claude Opus）**：每天产 **1 篇英文哲学/经典翻译 + 1 篇 Claude Opus 寓言**（共 2 篇）。
+- **轨道 2（`07:55` Antigravity 定时自动化 / Gemini）**：独立产当天 **第 2 篇 Gemini 寓言**（见 `scripts/GEMINI-PARABLE-GUIDE.md`）。
+- 两条轨道共用 **`concept-pool.json`**（277+ 跨学科大池）、**`scripts/parable-ctl.js`**（确定性选词/防撞/入库脚本）和 **`concept-briefs.json`**，保证同日不同概念、不同学科、不同视角，并统一署名。
 
 ### 归档第一步：搜索英文文章
 
@@ -113,251 +114,133 @@ Agent({ model: "opus", description: "Translate 1 article EN->CN",
 translations 数组长度必须与输入段落数完全一致。仔细数。` })
 ```
 
-### 归档第三步半：生成 AI 寓言（第 2、3 篇文章）
+### 归档第三步半：生成 1 篇 Claude Opus 寓言（第 2 篇文章）
 
-与翻译 Agent **并行**执行：1 个翻译 Agent + 2 条寓言链（每条内部串行：调研→写作→验证）。两条寓言链用**不同概念**，各自独立写入 `/tmp/parable_article_1.json` 和 `/tmp/parable_article_2.json`。
+与翻译 Agent **并行**执行：1 个翻译 Agent + 1 条 Claude Opus 寓言链（内部串行：选概念 → 调研 → 写作 → 验证 → 校对入库）。寓言草稿写入 `/tmp/parable_article_claude.json`。
 
-使用 Amanda Askell 的寓言提示技巧，用 opus Agent 生成 2 篇原创寓言文章：
+1. **通过 `scripts/parable-ctl.js` 确定性选概念（不再手工扫描 `articles.json` 或硬编码概念池）**：
 
-1. **选择概念**（队列优先，LLM 语义判断兜底）— **本次需选 2 个不同概念，对每个概念独立执行下面的流程**：
-
-   **先读 `$SITE_DIR/parable-queue.json`**：
-   - 如果 `queue` 数组非空 → 取第一个元素作为本次概念（`concept` + `concept_cn`）
-   - 用完后从 `queue` 中移除该元素，将 `concept` 追加到 `used` 数组
-   - 用 Write 写回 `parable-queue.json`
-   - **跳过下面的 LLM 判断逻辑，直接用队列概念进入第 2 步**
-   - **选第 2 个概念时重复本流程**（若 queue 还有元素就再取一个；否则走下面的 LLM 判断，且必须与第 1 个不同）
-
-   **如果 `queue` 为空** → 用 **LLM 语义判断**选新概念（不要靠字符串匹配，中英文别名要等价对待）：
-
-   **第一步：建立权威「已用」集合**
-   - Read `$SITE_DIR/articles.json`
-   - 筛出所有 `category` 含「寓言故事」的文章
-   - 收集它们的 `tags`（去掉 `Amanda Askell` 和 `寓言故事`）→ 这是权威已用集合
-   - 同时合并 `parable-queue.json` 的 `used` 数组
-   - 注意中英文等价：`道德运气` = `moral luck`，`自然选择` = `natural selection`，等
-
-   **第二步：LLM 判断选新概念**
-   - 你（opus）本身就是判断 LLM。对照下面的科学概念池，**逐一语义比对**已用集合：
-     - 若池中某概念的中文或英文名与任一已用 tag **语义相同**（含同义词、中英对照、变体），视为已用
-     - 从**语义上未用过**的概念里随机选一个
-   - 推理过程要显式写出：列出已用集合 → 逐个排除池中已用项 → 从剩余里选
-   - 若池中所有概念都已用过：把 `parable-queue.json` 的 `used` 数组清空（原内容移到 `archived` 字段），然后从全池重选
-   - 选中后，将概念英文名追加到 `parable-queue.json` 的 `used` 数组并 Write 回写
-
-```
-概念池（基础科学 · 物理/数学/生物/化学，大学本科级别）：
-
-物理：
-1. entropy (熵)
-2. the Heisenberg uncertainty principle (海森堡不确定性原理)
-3. Brownian motion (布朗运动)
-4. wave-particle duality (波粒二象性)
-5. time dilation (时间膨胀)
-6. Maxwell's demon (麦克斯韦妖)
-7. the equivalence principle (等效原理)
-8. Noether's theorem (诺特定理)
-9. quantum tunneling (量子隧穿)
-10. spontaneous symmetry breaking (自发对称性破缺)
-11. the event horizon (事件视界)
-12. the Bose-Einstein condensate (玻色-爱因斯坦凝聚)
-
-数学：
-13. Bayes' theorem (贝叶斯定理)
-14. the central limit theorem (中心极限定理)
-15. fractal self-similarity (分形自相似)
-16. the Monty Hall problem (蒙提霍尔问题)
-17. Euler paths (欧拉路径)
-18. Cantor's diagonal argument (康托尔对角线论证)
-19. Russell's paradox (罗素悖论)
-20. the Mandelbrot set (曼德博集合)
-21. Conway's Game of Life (康威生命游戏)
-22. the four-color theorem (四色定理)
-
-生物（已移除难寓言的过程类：trophic cascade / Red Queen / endosymbiosis / fitness landscape / central dogma；保留的若为过程类，brief 会标 is_process_type=true，由 V7/V8 严格校验）：
-23. keystone species (关键物种)
-24. apoptosis (细胞凋亡)
-25. genetic drift (遗传漂变)
-26. horizontal gene transfer (水平基因转移)
-27. convergent evolution (趋同进化)
-28. epigenetics (表观遗传)
-
-化学：
-34. Le Chatelier's principle (勒夏特列原理)
-35. chirality (手性)
-36. the hydrophobic effect (疏水效应)
-37. Gibbs free energy (吉布斯自由能)
-38. transition state theory (过渡态理论)
-39. molecular self-assembly (分子自组装)
-40. orbital hybridization (轨道杂化)
-
-计算机科学：
-41. the P vs NP problem (P 对 NP 问题)
-42. the Byzantine generals problem (拜占庭将军问题)
-43. the CAP theorem (CAP 定理)
-44. deadlocks (死锁)
-45. information entropy (信息熵)
-46. Kolmogorov complexity (柯尔莫哥洛夫复杂性)
-47. Amdahl's law (阿姆达尔定律)
-48. the Byzantine fault tolerance (拜占庭容错)
-
-AI / 机器学习（具时效性）：
-49. overfitting (过拟合)
-50. the bias-variance tradeoff (偏差-方差权衡)
-51. gradient descent (梯度下降)
-52. attention (注意力机制)
-53. scaling laws (缩放定律)
-54. RLHF (基于人类反馈的强化学习)
-55. model collapse (模型崩溃)
-56. adversarial examples (对抗样本)
-57. double descent (双重下降)
-58. the lottery ticket hypothesis (彩票假设)
+```bash
+cd ~/Workspace/trySth/c8x1.github.io && node scripts/parable-ctl.js pick --model claude
 ```
 
+脚本会直接输出精简 JSON 任务包（< 4 KB）：
+- 若 `status === "already_done"`：今天 Claude Opus 已经发过寓言，**跳过寓言步骤**（仅处理英文翻译篇即可）。
+- 若 `status === "ready"`，任务包已自动完成：
+  - 优先消耗 `parable-queue.json` 手工插队队列，否则从 `concept-pool.json` 优先选取 **历史使用 0 次（最少使用）+ 与同日 Gemini 篇及近 2 天不同学科** 的概念；
+  - 自动轮换并防撞分配 `perspective`（4 视角之一）；
+  - 返回 `concept`、`concept_cn`、`domain_cn`、`cached_brief`（命中则直接复用，未命中为 `null`）、`recent_names`（最近 8 篇及同日另一篇主角名）、`recent_motifs`（近 60 条母题）、`pool_stats`。
+- **自动补池**：若 `pool_stats.needs_refill === true`（未用概念 < 20 个），在本轮完成后顺手用 opus 提名 30 个全新、具强结构张力的跨学科概念写成 JSON 数组 `/tmp/refill_concepts.json`（格式 `[{"concept":"...","concept_cn":"...","domain":"physics|math|biology|chemistry|cs|ai|economics|psychology|systems|philosophy"}]`），执行 `node scripts/parable-ctl.js refill --file /tmp/refill_concepts.json` 去重入池。
 
-
-2. **概念调研（grounding，新增）**——对每个选定的概念，先产出一份 brief 作为写作与校验的唯一事实基准，**不得凭记忆编造**。概念理解必须 grounded 于外部权威源。
-
-   主循环：先 Read `$SITE_DIR/concept-briefs.json`（形如 `{"briefs": {"Noether's theorem": {...}}}`）；概念命中则复用；未命中跑下面的调研 Agent，append 写回。
+2. **概念调研（grounding）**——若任务包中 `cached_brief` 非空，直接复用；若为 `null`，跑调研 Agent 产出 brief 并保存：
 
 ```
 Agent({ model: "opus", description: "Ground concept [concept_cn]",
-  prompt: `为科学概念 [concept]（[concept_cn]）做调研，产出 brief，作为寓言写作与校验的唯一事实基准。不得凭记忆编造。
+  prompt: `为跨学科概念 [concept]（[concept_cn]）做调研，产出 brief，作为寓言写作与校验的唯一事实基准。不得凭记忆编造。
 
 步骤:
-1. 用 Bash curl 抓 Wikipedia（走代理 https_proxy=http://127.0.0.1:7897）。先 https://en.wikipedia.org/wiki/[concept_下划线小写]，再 https://zh.wikipedia.org/wiki/[concept_cn]。WebSearch 兜底（本环境常不可靠，仅作 fallback）。
+1. 用 Bash curl 抓 Wikipedia（走代理 https_proxy=http://127.0.0.1:7897）。先 https://en.wikipedia.org/wiki/[concept_下划线]，再 https://zh.wikipedia.org/wiki/[concept_cn]。WebSearch 兜底。
 2. 从正文提炼，不照搬。
 
-输出 JSON（用 Write 写入 /tmp/concept_brief_N.json 并返回）:
+输出 JSON（用 Write 写入 /tmp/concept_brief_claude.json 并返回）:
 {
-  "concept": "英文概念名",
+  "concept": "英文概念名（与任务包 concept 严格一致）",
   "concept_cn": "中文概念名",
   "definition_cn": "一句话定义",
   "definition_en": "one-sentence definition",
   "core_mechanism": "核心机制一句话，注明是否非意愿过程（selection-driven / mechanical / deterministic 等）",
-  "key_relations": ["如诺特: 时间平移对称→能量守恒", "空间平移对称→动量守恒"],
-  "common_misconceptions": ["..."],
-  "literal_domain_to_avoid": "故事不得设在此领域，如内共生→早期海洋/细胞/细菌；定理类填 null",
+  "key_relations": ["核心关系1", "核心关系2"],
+  "common_misconceptions": ["常见误区1", "..."],
+  "literal_domain_to_avoid": "故事不得设在此字面领域；定理/抽象原则类按需填写或填 null",
   "is_process_type": true/false,
   "canonical_sentence_cn": "标准一句话陈述",
   "canonical_sentence_en": "..."
 }` })
 ```
 
-3. **选视角（perspective rotation）+ 取近期母题（motif registry）**——Read `$SITE_DIR/parable-queue.json` 的 `perspectiveCursor`（整数，默认 0）。视角池：
+调研完成后立即入库缓存：
+```bash
+cd ~/Workspace/trySth/c8x1.github.io && node scripts/parable-ctl.js save-brief --file /tmp/concept_brief_claude.json
+```
+
+3. **生成寓言**——把任务包里的 `concept`、`concept_cn`、`perspective`、`brief`、`recent_motifs` 填入下面 prompt，写入 `/tmp/parable_article_claude.json`：
 
 ```
-["全知旁观", "第一人称亲历", "对话体", "倒叙揭示"]
-```
-
-两篇寓言分别取 `pool[cursor % 4]` 与 `pool[(cursor+1) % 4]`，写回 `cursor = (cursor+2) % 4`，避免连续两篇同视角。
-
-同时读 `parable-queue.json` 的 `motifs` 数组（近期已用意象/数字母题/场景容器/人物原型，FIFO 上限 60），拼成分号分隔的 `{RECENT_MOTIFS}` 字符串，供第 4 步 writer prompt 与第 5 步 V12 使用。
-
-4. **生成寓言**——对 2 个概念各跑一次 opus Agent（**与翻译 Agent 并行**，寓言臂内部串行：调研→写作→验证），把下面 prompt 里 `N` 分别替换为 `1` 和 `2`，`[PERSPECTIVE]` 替换为上一步选定的视角，`{BRIEF_JSON}` 替换为该概念的 brief JSON，`{RECENT_MOTIFS}` 替换为第 3 步拼好的近期母题串：
-
-```
-Agent({ model: "opus", description: "Generate parable N for [concept_cn]",
-  prompt: `写一则寓言，揭示科学概念 [concept_cn]（[concept]）。你拿到的不是裸概念名，而是下面这份 brief，它是你唯一的事实源——所有科学声明必须与 brief 一致，不得凭记忆编造。
+Agent({ model: "opus", description: "Generate Claude Opus parable for [concept_cn]",
+  prompt: `写一则寓言，揭示概念 [concept_cn]（[concept]）。下面这份 brief 是你唯一的事实源——所有声明必须与 brief 一致，不得凭记忆编造。
 
 BRIEF:
 {BRIEF_JSON}
 
 硬约束:
-1. 隐喻距离: 故事世界不得设在 brief.literal_domain_to_avoid 或概念字面科学领域。找一个 disparate 的人/日常/社会境况，其结构（角色关系、张力、抉择）镜像 brief.core_mechanism 与 key_relations。映射必须结构性（关系同构），不得词法改名（禁止 cell→host、ATP→fire 这类换皮）。
+1. 隐喻距离: 故事世界不得设在 brief.literal_domain_to_avoid 或概念字面领域。找一个 disparate 的人/日常/社会境况，其结构（角色关系、张力、抉择）镜像 brief.core_mechanism 与 key_relations。映射必须结构性（关系同构），不得词法改名换皮。
 2. 赌注/两难: 必须有角色面临真实代价或两难抉择，不得是过程的平铺直叙。
 3. 视角: 本次用 [PERSPECTIVE]。
 4. 概念名不得在故事正文出现，只在末尾「注解」中给出。
-5. 结尾格式（强制）: 故事讲完后另起一段，以「注解：」开头，1-2 句日常语言点明概念名(CN+EN)与核心机制（与 brief.key_relations 一致）。若映射有已知边界（寓言未覆盖的部分，参考 brief.common_misconceptions），可再加半句边界说明（如「能跨世代传递的标记只是少数」）——注解应是诚实的边界，不是谜底复印。此段是作者注解，坦白跳出寓言，不得伪装成故事，禁止用「这则故事揭示了…的本质」这类伪叙事。
-6. 体例: 译名 中文（English）全角括号；全角标点 ，。；：「」。
+5. 结尾格式（强制）: 故事讲完后另起一段，以「注解：」开头（英文段以 "Note:" 开头），1-2 句日常语言点明概念名(CN+EN)与核心机制（与 brief.key_relations 一致），可再加半句诚实边界说明。此段是作者注解，坦白跳出寓言，禁止用「这则故事揭示了…的本质」这类伪叙事。末段末尾加上落款：CN 末尾加「（本文由 Claude Opus 创作）」，EN 末尾加 " (Written by Claude Opus)"。
+6. 体例: 译名 中文（English）全角括号；全角标点 ，。；：「」。EN 对白统一用双引号 ""。
 7. 标题: 英文标题，不提概念名；标题核心名词/意象必须在中译文正文出现 ≥1 次。
-8. 意象自足: 正文不得用技术/数学术语标注意象（禁止写「扰动」「幂集」「乘积」「副产物」这类点破隐喻的词）——命名权全部留给注解段，谜底不得印在谜面上。
-9. 赌注兑现: 正文立起的每一个具体赌注（生死、期限、邀请函、危机、赌局）必须在结尾前得到交代；无法兑现就不要立。
-10. 句式纪律: 「不是A，而是B」/「并非A——是B」句式全篇 ≤1 次；三连排比列举（三位长老/三个理由/三任导演）全篇 ≤1 次；每段破折号插入语 ≤2 处；同一论点正文只许陈述一次，结尾不得预告注解内容。
-11. 跨篇去重: 以下是近期已用的意象/母题/场景/人物原型，禁止逐字或近义复用: {RECENT_MOTIFS}。永久黑名单（已过度使用）: 「手心全是汗 / palms slick with sweat」。
-12. 对话体特别约束: 若 [PERSPECTIVE] 为对话体，知晓者必须付出真实代价、或提问者必须拒绝/反抗/付出代价——禁止纯问答讲义（无知提问者 × 全知长者的苏格拉底模板近期已用 4 次）。「权威下达不可能要求」开局（国王敕令/院长赌局/委员会指令）近期已用 3 次，本次禁用；「知晓规则的老者」导师原型本次禁用。
+8. 意象自足: 正文不得用技术/数学/学科术语标注意象——命名权全部留给注解段。
+9. 赌注兑现: 正文立起的每一个具体赌注（生死、期限、危机、赌局）必须在结尾前得到交代；无法兑现就不要立。
+10. 句式纪律: 「不是A，而是B」/「并非A——是B」句式全篇 ≤1 次；三连排比列举全篇 ≤1 次；每段破折号插入语 ≤2 处；同一论点正文只许陈述一次，结尾不得预告注解内容。
+11. 跨篇去重: 近期已用母题禁止逐字或近义复用: {RECENT_MOTIFS}。近期已用主角名禁止撞名: {RECENT_NAMES}。永久黑名单: 「手心全是汗 / palms slick with sweat」、「并非跳过 / not skip it」。
+12. 对话体特别约束: 若 [PERSPECTIVE] 为对话体，知晓者必须付出真实代价、或提问者必须拒绝/反抗/付出代价——禁止纯苏格拉底问答讲义与「权威下达不可能要求」开局。
 
-输出 JSON（用 Write 写入 /tmp/parable_article_N.json）:
+输出 JSON（用 Write 写入 /tmp/parable_article_claude.json）:
 { "title_en": "...", "title_cn": "...", "paragraphs": [{"en":"...","cn":"..."}, ...] }
 段落数 5-8。注解段作为最后一个 paragraph。EN/CN 段数完全一致。` })
 ```
 
-5. **验证（V1-V8，替换原「验证概念揭示」）**——对每个寓言（N=1,2）读取 `/tmp/parable_article_N.json`，跑验证 Agent，brief 为基准。任一 fail 则重生成一次（把 `failed` 列表与 `reasons` 回灌 writer prompt 再跑），再不过则当天跳过该概念并在日志记 `skip: concept (reason)`，不影响另一篇与翻译篇。
-
-   `recent_names`：主循环从 `articles.json` 末 5 篇寓言 `paragraphs[0].cn` 中抽取人名（取 `（...）` 括号前的中文 token，或括号内的 Capitalized token），去重为数组传入。
+4. **验证（V1-V12）**——读取 `/tmp/parable_article_claude.json`，跑验证 Agent，brief 为基准。任一 fail 则把 `failed` 与 `reasons` 回灌 writer prompt 重生成一次，再不过则当天跳过该寓言并在日志记 `skip: concept (reason)`，不影响英文翻译篇。
 
 ```
-Agent({ model: "opus", description: "Verify parable N",
+Agent({ model: "opus", description: "Verify Claude Opus parable",
   prompt: `校验寓言是否合格。概念 brief 为事实基准。
 
 BRIEF: {BRIEF_JSON}
 PARABLE: {PARABLE_JSON}
-最近5篇寓言主角名: {RECENT_NAMES}
+近期已用主角名: {RECENT_NAMES}
 近期已用意象/母题: {RECENT_MOTIFS}
 
 逐项 pass/fail + 一句理由:
 V1 概念名(CN或EN)在末两段(含注解)出现
 V2 标题核心意象在正文 cn 出现 ≥1 次
 V3 科学准确: 注解段及正文声明是否与 brief.key_relations/core_mechanism 矛盾
-V4 命名: 主角名与最近5篇不撞
+V4 命名: 主角名与近期已用主角名不撞
 V5 标点: cn 段全角标点(，。；：「」)，无半角逗号/句号
 V6 译名格式: 统一 中文（English）全角括号
 V7 距离: 故事设定未落在 brief.literal_domain_to_avoid 或概念字面领域
 V8 软目的论: 若 brief.core_mechanism 为非意愿过程，故事是否给它塞了意愿/品德/耐心
-V9 赌注兑现: 正文立起的每个具体赌注/钩子（生死、期限、邀请函、危机）结尾前有交代；立而未收即 fail
+V9 赌注兑现: 正文立起的每个具体赌注/钩子结尾前有交代；立而未收即 fail
 V10 中英一致: 数字、代数、年数、人名、注解标签 CN/EN 逐项一致；EN 段无中文残留；EN 对白用双引号；注解标签 CN「注解：」/ EN "Note:"
-V11 句式密度: 「不是A而是B」≤1、三连排比 ≤1、正文无技术/数学术语标注意象（扰动/幂集/乘积类词不得出现在故事段）
-V12 跨篇重复: 与 {RECENT_MOTIFS} 无逐字或近义重复（意象、数字母题、场景容器、人物原型）；时间线内部自洽（年数与代数算术对得上）
+V11 句式密度: 「不是A而是B」≤1、三连排比 ≤1、正文无技术/数学术语标注意象
+V12 跨篇重复: 与 {RECENT_MOTIFS} 无逐字或近义重复；时间线内部自洽
 
 输出 ONLY JSON: 任一 fail → {"reject":true,"failed":["V3"],"reasons":["..."]}；全 pass → {"reject":false}。` })
 ```
 
-5.5. **机械校对（proofread pass）**——验证通过后、构建 article 对象前，对两个 JSON 跑校对脚本：
+5. **机械校对 + 署名规范化 + 原子入库（一条命令完成）**：
+
+提炼本篇 3-4 个短母题串（用 `|` 分隔），调用 `parable-ctl.js ingest`（内部会自动运行 `scripts/proofread-parable.js`、自动统一写入 `subtitle: "寓言故事 · Claude Opus"`、`author: "Claude Opus · AI Parable"`、`tags` 与末段落款、写入 `articles.json` 与 `parable-queue.json`）：
 
 ```bash
-cd $SITE_DIR && node scripts/proofread-parable.js /tmp/parable_article_1.json /tmp/parable_article_2.json
+cd ~/Workspace/trySth/c8x1.github.io && node scripts/parable-ctl.js ingest \
+  --file /tmp/parable_article_claude.json \
+  --model claude \
+  --concept "[concept]" \
+  --motifs "母题1|母题2|母题3" \
+  --skip-build
 ```
 
-脚本自动修复机械项（Annotation:→Note:、EN em-dash 间距、EN 中文夹注删除）并写回文件；对不可自动修复项（单引号对白、黑名单短语、CN 半角标点、句式超密）输出 WARN 并以退出码 1 返回。有 WARN 时：把 WARN 列表回灌 writer prompt 重生成一次（与 V1-V12 的重生成合并计次，仍不过则当天跳过该篇）。
+若 `proofread-parable.js` 返回 WARN（exit code 1），将 WARN 列表回灌 writer prompt 重生成一次（与 V1-V12 重生成合并计次），仍不过则当天跳过寓言。
 
-6. 验证通过后，构建寓言 article 对象：
-
-```json
-{
-  "id": "slug-from-en-title",
-  "title": "中文标题",
-  "subtitle": "",
-  "author": "AI Parable (inspired by Amanda Askell)",
-  "source": "每日精选",
-  "date": "YYYY-MM-DD",
-  "category": ["寓言故事"],
-  "tags": ["概念英文名 或 中文概念名", "Amanda Askell"],
-  "summary": "中文摘要（取第一段翻译前150字，不含注解段）",
-  "file": "articles/YYYY/MM/YYYY-MM-DD-slug.html",
-  "originalUrl": "",
-  "stats": { "wordCount": EN字数, "readTime": Math.max(1, EN字数/300) },
-  "content_cn": "...",
-  "content_en": "...",
-  "paragraphs": [{"cn": "...", "en": "..."}, ...]
-}
-```
-
-注意事项：
-- 注解段作为最后一个 paragraph 保留（不再有 `---` 分隔行或 `Plain Explanation` 标记需要过滤）
-- category 固定为 `["寓言故事"]`
-- author 固定为 `"AI Parable (inspired by Amanda Askell)"`
-- source 固定为 `"每日精选"`
-- originalUrl 为空字符串（非抓取文章）
-- summary 只取故事正文第一段，不含注解段
-
-**母题登记（motif registry 回写）**：每篇入库后，从该篇提炼 2-4 个短母题串（核心意象如「铜牌嵌进基石」、数字母题如「四十年」、场景容器如「剧院/图书馆/沙漠」、人物原型如「老药师」），append 到 `parable-queue.json` 的 `motifs` 数组；数组超 60 条时从头部裁剪（FIFO）。与第 1 步的 `used` 概念回写合并为一次 Write。
-
-### 归档第四步：构建 article 对象并追加到 articles.json
+### 归档第四步：将翻译文章追加到 articles.json
 
 定义 **`SITE_DIR`** = `~/Workspace/trySth/c8x1.github.io`
 
-1. Read `$SITE_DIR/articles.json`
-2. 为每篇新文章构建对象：
+（寓言已由上一步 `parable-ctl.js ingest` 写入 `articles.json`，本步只需追加第 1 篇英文翻译文章。）
+
+1. 用 Node.js 脚本读取 `$SITE_DIR/articles.json`，追加翻译文章对象（避免全量 Read 14MB JSON）：
 
 ```json
 {
@@ -382,12 +265,7 @@ cd $SITE_DIR && node scripts/proofread-parable.js /tmp/parable_article_1.json /t
 }
 ```
 
-slug 生成规则：取英文标题，去掉特殊字符，空格转连字符，截断 60 字符。
-
-3. 追加 3 篇新文章（1 篇翻译 + 2 篇寓言）到 `data.articles` 数组末尾
-4. 更新 `data.meta.totalArticles` += 3
-5. 更新 `data.meta.updated` = 当天日期
-6. 用 Write 写回 articles.json
+slug 生成规则：取英文标题，去掉特殊字符，空格转连字符，截断 60 字符。更新 `data.meta.totalArticles = data.articles.length` 与 `data.meta.updated = 当天日期` 后写回 `articles.json`。
 
 ### 归档第五步：生成页面
 
@@ -396,28 +274,26 @@ cd ~/Workspace/trySth/c8x1.github.io && node build-all.js
 ```
 
 build-all.js 会自动：
-- 为所有文章生成 HTML 页面（含新增的 3 篇）
-- 更新 feed.xml 和 sitemap.xml
+- 为所有文章生成 HTML 页面（含新增的翻译篇与 Claude Opus 寓言篇）
+- 更新 feed.xml、sitemap.xml 和 articles-index.json
 - 首页和归档页无需修改（客户端 JS 已按日期降序排序，新文章自动出现在最前面）
 
 ### 归档第六步：Git 提交并推送
 
 ```bash
 cd ~/Workspace/trySth/c8x1.github.io
-# articles/ 按年/月组织（articles/YYYY/MM/），-u 暂存 build-all.js 重新生成的旧页面
-git add articles.json articles-index.json articles/ feed.xml sitemap.xml parable-queue.json
+git add articles.json articles-index.json articles/ feed.xml sitemap.xml parable-queue.json concept-briefs.json concept-pool.json
 git add -u '*.html'
-git commit -m "archive: YYYY-MM-DD +3 articles (category1, 寓言故事, 寓言故事)"
-# 先同步远端（trending cron 可能已推送 data/ 改动）
+git commit -m "archive: YYYY-MM-DD +2 articles (category1, 寓言故事·Claude Opus)"
 git stash -q || true
 git pull --rebase origin master
 git stash pop -q 2>/dev/null || true
 git push origin master
 ```
 
-如果推送失败，使用代理重试：
+如果推送失败，使用代理重试（SSH 经 Clash SOCKS5）：
 ```bash
-cd ~/Workspace/trySth/c8x1.github.io && https_proxy=http://127.0.0.1:7897 http_proxy=http://127.0.0.1:7897 git push origin master
+cd ~/Workspace/trySth/c8x1.github.io && GIT_SSH_COMMAND="ssh -o HostName=ssh.github.com -o Port=443 -o ProxyCommand='nc -X 5 -x 127.0.0.1:7897 %h %p'" git push origin master
 ```
 
 ### 归档模式 — 输出摘要
@@ -428,22 +304,14 @@ cd ~/Workspace/trySth/c8x1.github.io && https_proxy=http://127.0.0.1:7897 http_p
 [归档完成]
 
 日期: YYYY-MM-DD
-新增: 3 articles (1 翻译 + 2 寓言)
+新增: 2 articles (1 翻译 + 1 寓言·Claude Opus)
 总计: N articles
 
 文章:
   1. 中文标题1 (哲学) — Aeon
-  2. 寓言标题1 (寓言故事) — AI Parable
-  3. 寓言标题2 (寓言故事) — AI Parable
+  2. 寓言标题1 (寓言故事 · Claude Opus) — [concept_cn]
 
-文件:
-  articles.json ✓
-  articles/YYYY-MM-DD-slug1.html ✓
-  articles/YYYY-MM-DD-slug2.html ✓
-  articles/YYYY-MM-DD-slug3.html ✓
-  feed.xml ✓
-  sitemap.xml ✓
-
+概念池余量: X 未写 / Y 总计
 Git: 已提交并推送到 origin/master
 ```
 

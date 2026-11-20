@@ -1,6 +1,7 @@
 #!/bin/bash
-# 每日文章归档脚本
+# 每日文章归档脚本（轨道 1：1 篇英文翻译 + 1 篇 Claude Opus 寓言）
 # 通过系统 crontab 调用 claude -p 执行 translate-articles skill 的 archive 模式
+# 当天第 2 篇寓言由 Antigravity 定时自动化（07:55, Gemini）独立产出，共用 scripts/parable-ctl.js 与 concept-pool.json
 #
 # 用法:
 #   ./daily-articles.sh          # 手动执行
@@ -20,10 +21,12 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 export PATH="$HOME/.nvm/versions/node/v24.14.1/bin:$HOME/.bun/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin"
 CLAUDE="$HOME/.nvm/versions/node/v24.14.1/bin/claude"
 
-# 代理（可选）：读取环境变量或使用默认值
-# 如果不需要代理，设置 NO_PROXY=1 或注释掉下面一行
-: "${https_proxy:=http://127.0.0.1:7897}"
-: "${http_proxy:=$https_proxy}"
+# 代理（可选）：读取环境变量或使用默认值，并显式 export 传递给子进程
+# 如果不需要代理，设置 NO_PROXY=1 或注释掉下面两行
+if [ -z "${NO_PROXY:-}" ]; then
+  export https_proxy="${https_proxy:-http://127.0.0.1:7897}"
+  export http_proxy="${http_proxy:-$https_proxy}"
+fi
 
 # 防止 cron 运行时系统入睡（Mac 频繁 DarkWake/Sleep，会掐断网络、导致 API 中途断连）。
 # -i 阻止 idle sleep；-w $$ 在当前 pid 退出时自动结束 caffeinate。
@@ -104,14 +107,17 @@ LOCAL=$(git rev-parse HEAD)
 REMOTE=$(git rev-parse origin/master 2>/dev/null || echo "none")
 
 if [ "$LOCAL" != "$REMOTE" ]; then
-  echo "[$(date '+%Y-%m-%d %H:%M:%S')] 检测到未推送的提交, 尝试 push..." | tee -a "$LOG_FILE"
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] 检测到未推送的提交, 先同步远端再尝试 push..." | tee -a "$LOG_FILE"
+  git pull --rebase origin master 2>&1 | tee -a "$LOG_FILE" || true
+  PUSH_EXIT=0
   # 主 push：~/.ssh/config 已把 github.com 映射到 ssh.github.com:443 直连
-  git push origin master 2>&1 | tee -a "$LOG_FILE" || {
+  if ! git push origin master 2>&1 | tee -a "$LOG_FILE"; then
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] 直连 push 失败, 经 Clash SOCKS5 (ssh.github.com:443) 重试..." | tee -a "$LOG_FILE"
-    GIT_SSH_COMMAND="ssh -o HostName=ssh.github.com -o Port=443 -o ProxyCommand='nc -X 5 -x 127.0.0.1:7897 %h %p'" \
-      git push origin master 2>&1 | tee -a "$LOG_FILE"
-  }
-  PUSH_EXIT=$?
+    if ! GIT_SSH_COMMAND="ssh -o HostName=ssh.github.com -o Port=443 -o ProxyCommand='nc -X 5 -x 127.0.0.1:7897 %h %p'" \
+      git push origin master 2>&1 | tee -a "$LOG_FILE"; then
+      PUSH_EXIT=1
+    fi
+  fi
   if [ $PUSH_EXIT -ne 0 ]; then
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] git push 最终失败 (exit code: $PUSH_EXIT)" | tee -a "$LOG_FILE"
     exit $PUSH_EXIT
