@@ -1471,6 +1471,32 @@
       "is_process_type": true,
       "canonical_sentence_cn": "美国经济学家威廉·鲍莫尔（William J. Baumol）与威廉·鲍温（William G. Bowen）在 1965/1966 年研究表演艺术时提出：演奏一首舒伯特弦乐四重奏今天所需的乐手人数与两百年前完全一样，但由于其他部门的生产率增长不断推高整个经济的工资，这个行业必须同步加薪，其相对成本便必然持续、无上限地上升——这就是鲍莫尔成本病。",
       "canonical_sentence_en": "As William Baumol and William Bowen observed in their 1965/1966 study of the performing arts, it takes exactly as many musicians to perform a Schubert string quartet today as it did two centuries ago, yet because productivity growth elsewhere in the economy keeps raising wages overall, this stagnant sector must match those wages while its output per man-hour stays fixed, so its relative costs must inevitably rise cumulatively and without limit — that is Baumol's cost disease."
+    },
+    "the no free lunch theorem": {
+      "concept": "the no free lunch theorem",
+      "concept_cn": "没有免费午餐定理",
+      "definition_cn": "把性能在全部可能问题上取平均，任何两个搜索、优化或学习算法都彼此等价，因此不存在对所有问题普遍更优的算法——任何优势必然以别处的劣势为代价。",
+      "definition_en": "Averaged over all possible problems, any two search, optimization, or learning algorithms are equivalent, so no algorithm is universally superior: every advantage is paid for elsewhere.",
+      "core_mechanism": "纯数学记账恒等式，非意愿、非选择驱动、非物理过程（mechanical / deterministic）：当问题（目标函数）的分布对解空间的任意置换不变（均匀分布是特例）时，任何算法产生的观测值序列服从完全相同的分布，算法在部分问题上的收益被在其余问题上的亏损精确抵消——性能像守恒量一样此消彼长。",
+      "key_relations": [
+        "性能守恒/零和对称：适当加权下，算法A胜过算法B的问题（环境）数目与B胜过A的问题数目严格相等——这正是Wolpert与Macready使用均匀分布作为工具要证明的（Schaffer 1994年'泛化性能守恒定律'独立给出等价表述；Wolpert-Macready 1997年正式定理）",
+        "成立条件即边界：NFL成立当且仅当目标函数分布对解空间置换不变（Igel & Toussaint 2004、English 2004）；现实问题分布有结构、可压缩、非均匀，NFL并不精确适用于实践，'（几乎）NFL'定理只说它近似成立",
+        "先验知识/归纳偏置是唯一出路：性能提升依赖用先验信息把算法与问题匹配；若无任何先验假设，任何元算法（包括科学方法式的交叉验证）都不比随机选择或'反交叉验证'更优——反之，若低柯氏复杂度的问题确实更可能（奥卡姆剃刀），交叉验证在实践问题上平均胜出，与现实观察一致",
+        "领域映射：几乎所有可能的函数是柯尔莫哥洛夫随机的（无规律可利用，只能当查找表），NFL正是在这一'几乎所有'的集合上成立的极限陈述；而在共进化/自博弈优化中Wolpert与Macready（2005）证明了确实存在'免费午餐'",
+        "可验证的离散锚点：三候选例子——候选a,b,c各有0/1两种好坏，共8个问题实例；按a,b,c顺序求值的算法与按c,b,a的算法，都在5个问题上花1次评估、2个问题上花2次、1个问题上花3次，平均代价完全相同；双日玩具宇宙例子——晴/云四种历史，任何预测策略命中率都是0.5"
+      ],
+      "common_misconceptions": [
+        "误以为NFL是说'现实中所有算法一样好、挑算法没有意义'——它只约束'在所有可能问题上取平均'，且要求问题分布对解空间置换不变；现实问题有可利用的结构（可微、可压缩、有闭式解），牛顿法等方法能真正胜过盲目搜索",
+        "误以为NFL对单个具体问题也成立——NFL对每个具体问题实例不作任何断言，具体问题上算法差异可以巨大；它谈的是全集上的总账，不谈个案",
+        "误以为'不满足NFL条件=找到了免费午餐=存在万能算法'——NFL是程度问题而非全有全无；not-NFL只意味着在某性能度量上算法整体不等价，不保证任何算法全面胜出",
+        "误以为NFL否定了科学方法、交叉验证或机器学习泛化的有效性——'科学方法与反科学方法同样多胜场'只在'所有目标函数等可能'这一非现实先验下成立；若奥卡姆剃刀近似成立，实践问题中交叉验证平均优于随机选择",
+        "误以为NFL是工程缺陷或经验规律——它是纯数学恒等式（在置换不变分布下的必然结果），与算法设计水平无关；且广为流传的民俗版表述客观上弱于Wolpert与Macready实际证明的定理",
+        "误把它当经济学俗语的学术复述——名字确实借自'天下没有免费午餐'（TANSTAAFL）的谚语，但本体是形式定理：Wolpert与Macready 1995年（搜索版SFI报告）与1997年（优化版，IEEE Trans. Evol. Comput.），机器学习版为Wolpert 1996年，Schaffer 1994年独立证得受限版本"
+      ],
+      "literal_domain_to_avoid": "计算机算法字面领域：搜索与优化算法、机器学习模型、跑基准测试/刷分、调参竞赛、AI训练等场景（定理的直接论证对象）；另注：'餐馆—菜单—午餐盘'的洗牌比喻是Wolpert-Macready的标准阐释意象，寓言不宜直接照搬该隐喻或'免费午餐'字面餐饮经济学语境",
+      "is_process_type": false,
+      "canonical_sentence_cn": "当性能在所有可能问题上取平均时，任何两个算法都彼此等价；一个算法若在某类问题上表现更好，就必然以在其余所有问题上的更差表现为代价。",
+      "canonical_sentence_en": "Any two optimization algorithms are equivalent when their performance is averaged across all possible problems (Wolpert and Macready); if an algorithm performs well on a certain class of problems, it necessarily pays for that with degraded performance on the set of all remaining problems."
     }
   }
 }
