@@ -1497,6 +1497,29 @@
       "is_process_type": false,
       "canonical_sentence_cn": "当性能在所有可能问题上取平均时，任何两个算法都彼此等价；一个算法若在某类问题上表现更好，就必然以在其余所有问题上的更差表现为代价。",
       "canonical_sentence_en": "Any two optimization algorithms are equivalent when their performance is averaged across all possible problems (Wolpert and Macready); if an algorithm performs well on a certain class of problems, it necessarily pays for that with degraded performance on the set of all remaining problems."
+    },
+    "the Dining Philosophers problem": {
+      "concept": "the Dining Philosophers problem",
+      "concept_cn": "哲学家就餐问题",
+      "definition_cn": "并发与同步领域的经典问题：五位围坐圆桌的哲学家交替思考与进餐，相邻两人之间各有一把餐叉，进餐必须同时持有左右两把餐叉；问题是如何设计规则使所有人持续进餐而不陷入死锁、活锁或饥饿。",
+      "definition_en": "A classic concurrency and synchronization problem in which five philosophers sit around a table alternating between thinking and eating, with one fork between each adjacent pair and both neighboring forks required to eat; the challenge is to design a protocol that avoids deadlock, livelock, and starvation.",
+      "core_mechanism": "非自然过程（is_process_type=false）：它是由互斥、占有且等待、不可抢占与循环等待四个条件共同触发的并发同步困境，解法本质是确定性协议设计（如通过全局资源编号打破对称性消除循环等待，或通过分布式的干净/脏标记协议保证公平与无饥饿）。",
+      "key_relations": [
+        "朴素对称策略（每人先拿左叉再等右叉）会在所有人同时伸手时形成循环等待，导致死锁（deadlock）",
+        "若改为拿不到右叉就放下左叉再重试，所有参与者同步拿起又放下会导致活锁（livelock）——不断动作却零进展",
+        "资源分层法（Dijkstra 编号法）：给共享资源赋予全局偏序编号，规定每人必须先取较小编号、再取较大编号，打破环状对称从而消除循环等待、杜绝死锁",
+        "无死锁不等于无饥饿（starvation）：即使系统不会整体卡死，如果某人的左右邻居交替占住餐叉，中间个体仍可能无限期等待",
+        "Chandy-Misra 分布式解法：给餐叉引入干净/脏状态，用完变脏，收到邻居请求时交出脏叉并擦净，从而在无中心调度下同时避免死锁与饥饿"
+      ],
+      "common_misconceptions": [
+        "误以为只要规定『拿不到第二把就放下第一把』就能彻底解决——同步退让与重试会制造活锁，系统不停空转但无人能完成",
+        "误以为解决了死锁（如资源编号法）就自动保证公平——基本资源分层法只消除循环等待，未必阻止个别节点因邻居交替占用而遭遇饥饿",
+        "误以为必须引入一个全知中心调度员（服务员）才能解决——Chandy-Misra 算法证明只需局部通信与干净/脏状态即可在完全分布式条件下无死锁、无饥饿求解"
+      ],
+      "literal_domain_to_avoid": "两个字面领域均须避开：① 原生寓言场景——哲学家、圆桌、意大利面、餐叉/筷子、吃饭与思考；② 计算机科学字面场景——进程、线程、CPU、互斥锁、磁带机、操作系统调度。",
+      "is_process_type": false,
+      "canonical_sentence_cn": "哲学家就餐问题揭示了多方共享有限排他资源时的并发困境：完全对称的局部取用规则会诱发死锁或活锁，必须通过打破对称性（如全局资源编号）或引入公平礼让协议才能防止系统停摆与个体饥饿。",
+      "canonical_sentence_en": "The Dining Philosophers problem illustrates concurrency hazards when multiple agents compete for shared exclusive resources: symmetric local rules can trigger deadlock or livelock, requiring symmetry-breaking (such as a global resource hierarchy) or fairness protocols to prevent halt and starvation."
     }
   }
 }
